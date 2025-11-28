@@ -37,16 +37,13 @@ async def root():
 async def health_check():
     return {"status": "healthy"}
 
-# Import routes (to be created)
-# from services.digital_twin import router as twin_router
-# from services.simulation_engine import router as simulation_router
-# from services.cv_analyzer import router as cv_router
-# from services.interview_coach import router as interview_router
+# Import routes
+from routes import digital_twin, simulation, cv_analysis, interview
 
-# app.include_router(twin_router, prefix="/api/twin", tags=["Digital Twin"])
-# app.include_router(simulation_router, prefix="/api/simulation", tags=["Simulation"])
-# app.include_router(cv_router, prefix="/api/cv", tags=["CV Analysis"])
-# app.include_router(interview_router, prefix="/api/interview", tags=["Interview Coach"])
+app.include_router(digital_twin.router, prefix="/api/twin", tags=["Digital Twin"])
+app.include_router(simulation.router, prefix="/api/simulation", tags=["Simulation"])
+app.include_router(cv_analysis.router, prefix="/api/cv", tags=["CV Analysis"])
+app.include_router(interview.router, prefix="/api/interview", tags=["Interview Coach"])
 
 if __name__ == "__main__":
     import uvicorn
