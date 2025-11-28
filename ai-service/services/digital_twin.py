@@ -29,12 +29,25 @@ class DigitalTwinGenerator:
         Generate skill vector from user data using AI
         Returns normalized vector [0-1] for each skill category
         """
-        skills = user_data.get('skills', [])
-        experience = user_data.get('experience', '')
-        education = user_data.get('education', '')
+        # Get values safely, handling None cases
+        skills_raw = user_data.get('skills')
+        experience_raw = user_data.get('experience')
+        education_raw = user_data.get('education')
         
-        # Combine all text for skill extraction
-        skill_text = ' '.join(skills) + ' ' + experience + ' ' + education
+        # Convert to safe types
+        if skills_raw is None:
+            skills = []
+        elif isinstance(skills_raw, list):
+            skills = [str(s) for s in skills_raw if s is not None]
+        else:
+            skills = []
+        
+        experience = str(experience_raw) if experience_raw is not None else ''
+        education = str(education_raw) if education_raw is not None else ''
+        
+        # Combine all text for skill extraction (ensure skills is a list)
+        skills_list = skills if isinstance(skills, list) else []
+        skill_text = ' '.join(str(s) for s in skills_list) + ' ' + experience + ' ' + education
         
         # Use AI to extract and categorize skills
         if skill_text.strip() and self.ai_client:
@@ -119,8 +132,12 @@ class DigitalTwinGenerator:
         user_data: Dict[str, Any]
     ) -> List[str]:
         """Generate AI-powered path recommendations"""
-        technical_score = skill_vector[0]
-        communication_score = skill_vector[1]
+        # Ensure skill_vector is valid
+        if not skill_vector or len(skill_vector) < 2:
+            return ["learnership", "short_course", "freelancing"]
+        
+        technical_score = skill_vector[0] if skill_vector[0] is not None else 0.0
+        communication_score = skill_vector[1] if skill_vector[1] is not None else 0.0
         
         recommended = []
         

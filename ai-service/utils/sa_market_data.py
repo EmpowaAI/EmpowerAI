@@ -19,31 +19,37 @@ PROVINCE_MULTIPLIERS = {
 # Base salaries by path (in ZAR per month)
 PATH_BASE_SALARIES = {
     "learnership": {
+        "name": "Learnership Program",
         "base": 3500,
         "growth_rate": 0.15,
         "description": "Structured learnership program with stipend"
     },
     "freelancing": {
+        "name": "Freelancing",
         "base": 2500,
         "growth_rate": 0.25,
         "description": "Freelance work (gig economy)"
     },
     "short_course": {
+        "name": "Short Course + Job",
         "base": 4000,
         "growth_rate": 0.20,
         "description": "Short course completion leading to entry-level role"
     },
     "entry_tech": {
+        "name": "Entry-Level Tech Role",
         "base": 6000,
         "growth_rate": 0.18,
         "description": "Entry-level tech position"
     },
     "internship": {
+        "name": "Internship",
         "base": 3000,
         "growth_rate": 0.22,
         "description": "Paid internship program"
     },
     "graduate_program": {
+        "name": "Graduate Program",
         "base": 8000,
         "growth_rate": 0.16,
         "description": "Graduate development program"

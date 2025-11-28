@@ -43,6 +43,9 @@ class PathProjections(BaseModel):
     threeMonth: Optional[SimulationResult] = None
     sixMonth: Optional[SimulationResult] = None
     twelveMonth: Optional[SimulationResult] = None
+    
+    class Config:
+        from_attributes = True
 
 class PathSimulationResponse(BaseModel):
     pathId: str
