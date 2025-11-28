@@ -7,13 +7,34 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
+from datetime import datetime
+from utils.logger import logger
 
 load_dotenv()
 
+logger.info("Starting EmpowerAI AI Service...")
+
 app = FastAPI(
     title="EmpowerAI AI Service",
-    description="AI Engine for Digital Twin, Simulations, and Analysis",
-    version="1.0.0"
+    description="""
+    AI Engine for Digital Twin, Simulations, and Analysis.
+    
+    ## Features
+    
+    * **Digital Twin Generation** - Create AI-powered economic twins for users
+    * **Path Simulation** - Simulate career paths with income projections
+    * **CV Analysis** - Extract skills and provide improvement suggestions
+    * **Interview Coach** - AI-powered interview practice and feedback
+    
+    ## Quick Start
+    
+    All endpoints are under `/api/` prefix.
+    
+    Visit `/docs` for interactive API documentation.
+    """,
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc"
 )
 
 # CORS middleware
@@ -27,15 +48,23 @@ app.add_middleware(
 
 @app.get("/")
 async def root():
+    logger.info("Root endpoint accessed")
     return {
         "status": "ok",
         "message": "EmpowerAI AI Service is running",
-        "version": "1.0.0"
+        "version": "1.0.0",
+        "docs": "/docs",
+        "health": "/health"
     }
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy"}
+    """Health check endpoint"""
+    return {
+        "status": "healthy",
+        "service": "EmpowerAI AI Service",
+        "timestamp": datetime.now().isoformat()
+    }
 
 # Import routes
 from routes import digital_twin, simulation, cv_analysis, interview
