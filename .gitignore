@@ -14,6 +14,7 @@ ENV/
 .next/
 out/
 dist/
+dist-ssr
 build/
 *.egg-info/
 
@@ -24,14 +25,21 @@ build/
 .env.test.local
 .env.production.local
 .env*.local
+*.local
 
 # IDE
-.vscode/
+.vscode/*
+!.vscode/extensions.json
 .idea/
 *.swp
 *.swo
 *~
 .DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
 # Logs
 logs/
@@ -40,6 +48,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+lerna-debug.log*
 
 # Testing
 coverage/
