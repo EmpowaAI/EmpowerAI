@@ -4,7 +4,11 @@ import LoginPage from "./pages/LoginPage"
 import SignupPage from "./pages/SignupPage"
 import DashboardLayout from "./pages/DashboardLayout"
 import Dashboard from "./pages/Dashboard"
-
+import TwinBuilder from "./pages/TwinBuilder"
+import Simulations from "./pages/Simulations"
+import Opportunities from "./pages/Opportunities"
+import CVAnalyzer from "./pages/CVAnalyzer"
+import InterviewCoach from "./pages/InterviewCoach"
 
 export default function App() {
   return (
@@ -14,8 +18,13 @@ export default function App() {
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/dashboard" element={<DashboardLayout />}>
         <Route index element={<Dashboard />} />
-        
+        <Route path="twin" element={<TwinBuilder />} />
+        <Route path="simulations" element={<Simulations />} />
+        <Route path="opportunities" element={<Opportunities />} />
+        <Route path="cv-analyzer" element={<CVAnalyzer />} />
+        <Route path="interview" element={<InterviewCoach />} />
       </Route>
     </Routes>
   )
 }
+
