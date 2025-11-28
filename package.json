@@ -8,9 +8,10 @@
     "backend"
   ],
   "scripts": {
+    "dev": "npm run dev:ai",
     "dev:frontend": "cd frontend && npm run dev",
     "dev:backend": "cd backend && npm run dev",
-    "dev:ai": "cd ai-service && python -m uvicorn main:app --reload --port 8000",
+    "dev:ai": "cd ai-service && .\\venv\\Scripts\\python.exe -m uvicorn main:app --reload --port 8000",
     "dev:all": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\" \"npm run dev:ai\"",
     "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install",
     "build:frontend": "cd frontend && npm run build",
