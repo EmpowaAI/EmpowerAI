@@ -29,11 +29,11 @@ class SimulationEngine:
         """
         path_config = get_path_data(path_id)
         skill_vector = twin_data.get('skillVector', [0.5] * 6)
-        province = twin_data.get('province', 'Gauteng')
+        province = twin_data.get('province') or 'Gauteng'  # Handle None case
         
-        base_income = path_config['base']
-        growth_rate = path_config['growth_rate']
-        description = path_config['description']
+        base_income = path_config.get('base', 3500)
+        growth_rate = path_config.get('growth_rate', 0.15)
+        description = path_config.get('description') or ''
         
         # Adjust base income for skills and province
         adjusted_base = calculate_adjusted_income(base_income, province, skill_vector)
@@ -63,16 +63,24 @@ class SimulationEngine:
                     'milestones': milestones
                 }
         
+        # Get path name safely
+        path_name = path_config.get('name')
+        if not path_name:
+            path_name = path_id.replace('_', ' ').title()
+        
         return {
             'pathId': path_id,
-            'pathName': path_config.get('name', path_id.replace('_', ' ').title()),
-            'description': description,
+            'pathName': path_name,
+            'description': description or '',
             'projections': projections
         }
     
     def _generate_milestones(self, path_id: str, months: int, province: str) -> List[str]:
         """Generate realistic milestones for a path"""
         milestones = []
+        
+        # Ensure province is a string
+        province = province or 'Gauteng'
         
         if path_id == 'learnership':
             if months >= 3:
