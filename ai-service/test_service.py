@@ -52,16 +52,25 @@ def test_simulation():
         "education": "Matric"
     }
     
+    request_data = {
+        "user_data": user_data,
+        "path_ids": None  # Simulate all paths
+    }
+    
     response = requests.post(
         f"{BASE_URL}/api/simulation/paths",
-        json=user_data
+        json=request_data
     )
     print(f"Status: {response.status_code}")
     if response.status_code == 200:
         paths = response.json()
         print(f"Simulated {len(paths)} paths:")
         for path in paths[:2]:  # Show first 2
-            print(f"  - {path['pathName']}: R{path['projections']['twelveMonth']['income']}/month at 12 months")
+            path_name = path.get('pathName', 'Unknown')
+            projections = path.get('projections', {})
+            twelve_month = projections.get('twelveMonth', {}) if projections else {}
+            income = twelve_month.get('income', 0) if twelve_month else 0
+            print(f"  - {path_name}: R{income}/month at 12 months")
         print()
     else:
         print(f"Error: {response.text}\n")
