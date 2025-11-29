@@ -11,8 +11,7 @@ exports.analyzeCV = async (req, res, next) => {
       });
     }
 
-    // Call Python AI service to analyze CV
-    const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
+    const serviceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
     
     // Convert jobRequirements to array if it's a string
     let jobRequirementsArray = null;
@@ -25,7 +24,7 @@ exports.analyzeCV = async (req, res, next) => {
       }
     }
     
-    const aiResponse = await axios.post(`${aiServiceUrl}/api/cv/analyze`, {
+    const response = await axios.post(`${serviceUrl}/api/cv/analyze`, {
       cvText,
       jobRequirements: jobRequirementsArray
     });
@@ -33,7 +32,7 @@ exports.analyzeCV = async (req, res, next) => {
     res.status(200).json({
       status: 'success',
       data: {
-        analysis: aiResponse.data
+        analysis: response.data
       }
     });
   } catch (error) {

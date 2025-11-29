@@ -7,21 +7,21 @@ Melsoft Academy Hackathon 2025 | Team: Nicolette (Lead), Lunga, Eva, Siyanda, Li
 
 ---
 
-## 🎯 Project Overview
+## Project Overview
 
-EmpowerAI introduces an innovative, first-of-its-kind AI Digital Economic Twin: a predictive simulation model that allows youth to visualize their future earning potential based on their skills, background, education, and chosen career path.
+EmpowerAI introduces an innovative Digital Economic Twin: a predictive simulation model that allows youth to visualize their future earning potential based on their skills, background, education, and chosen career path.
 
 ### Key Features
-- 🎭 **Digital Economic Twin** - Personalized AI model of the user
-- 📊 **Path Simulation Engine** - 3, 6, and 12-month income projections
-- 🗺️ **Economic Roadmap** - Visual journey to achieve goals
-- 📄 **AI CV Analyzer** - Extract skills and improve CVs
-- 🎯 **AI Job Fit Analyzer** - Match users to SA opportunities
-- 🎤 **AI Interview Coach** - Simulate interviews with feedback
+- **Digital Economic Twin** - Personalized model of the user
+- **Path Simulation Engine** - 3, 6, and 12-month income projections
+- **Economic Roadmap** - Visual journey to achieve goals
+- **CV Analyzer** - Extract skills and improve CVs
+- **Job Fit Analyzer** - Match users to SA opportunities
+- **Interview Coach** - Practice interviews with feedback
 
 ---
 
-## 🏗️ Project Structure
+## Project Structure
 
 ```
 EmpowerAI/
@@ -34,7 +34,7 @@ EmpowerAI/
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Node.js 18+ and npm
@@ -84,7 +84,7 @@ uvicorn main:app --reload
 
 ---
 
-## 👥 Team Roles & Development Workflow
+## Team Roles & Development Workflow
 
 ### Nicolette (Team Lead / AI Developer)
 - **Focus:** AI service, simulation engine, digital twin logic
@@ -116,7 +116,7 @@ uvicorn main:app --reload
 
 ---
 
-## 📁 Detailed Structure
+## Detailed Structure
 
 ### Frontend (`frontend/`)
 ```
@@ -170,7 +170,7 @@ ai-service/
 
 ---
 
-## 🔧 Development Guidelines
+## Development Guidelines
 
 ### Code Style
 - **Frontend:** ESLint + Prettier (configured)
@@ -189,7 +189,7 @@ ai-service/
 
 ---
 
-## 📊 Architecture Flow
+## Architecture Flow
 
 ```
 User → React Frontend (Next.js) → Node.js Backend (Express) → Python AI Service (FastAPI)
@@ -199,7 +199,7 @@ User → React Frontend (Next.js) → Node.js Backend (Express) → Python AI Se
 
 ---
 
-## 🎯 36-Hour Timeline Reference
+## Timeline Reference
 
 - **Hours 1-3:** Planning & Setup ✅
 - **Hours 3-8:** Backend + Frontend Scaffolding
@@ -212,13 +212,13 @@ User → React Frontend (Next.js) → Node.js Backend (Express) → Python AI Se
 
 ---
 
-## 📝 Environment Variables
+## Environment Variables
 
 See `.env.example` files in each service directory for required variables.
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 1. Assign yourself to a task
 2. Create a feature branch
@@ -228,12 +228,12 @@ See `.env.example` files in each service directory for required variables.
 
 ---
 
-## 📞 Contact
+## Contact
 
 **Team Lead:** Nicolette
 
 ---
 
-## 📄 License
+## License
 
 MIT License - Melsoft Academy Hackathon 2025

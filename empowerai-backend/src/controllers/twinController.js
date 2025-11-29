@@ -16,7 +16,16 @@ exports.createEconomicTwin = async (req, res, next) => {
       });
     }
 
-    // Prepare data for AI service (matching AI service schema)
+    // Convert experience to string if needed
+    let experienceStr = null;
+    if (experience) {
+      if (typeof experience === 'object') {
+        experienceStr = experience.description || JSON.stringify(experience);
+      } else {
+        experienceStr = experience;
+      }
+    }
+    
     const userData = {
       name: user.name,
       age: user.age || 22, // Default age if not set
@@ -24,20 +33,18 @@ exports.createEconomicTwin = async (req, res, next) => {
       skills: skills || user.skills || [],
       education: education || user.education || 'Matric',
       interests: interests || user.interests || [],
-      experience: experience || null
+      experience: experienceStr
     };
 
-    // Call Python AI service to generate twin
-    const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
-    const aiResponse = await axios.post(`${aiServiceUrl}/api/twin/generate`, userData);
+    const serviceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
+    const response = await axios.post(`${serviceUrl}/api/twin/generate`, userData);
 
-    // Save twin to database
     const economicTwin = await EconomicTwin.create({
       userId,
-      skillVector: aiResponse.data.skillVector,
-      incomeProjections: aiResponse.data.incomeProjection, // Note: AI service uses 'incomeProjection' not 'incomeProjections'
-      empowermentScore: aiResponse.data.empowermentScore,
-      recommendedPaths: aiResponse.data.growthModel.recommendedPaths
+      skillVector: response.data.skillVector,
+      incomeProjections: response.data.incomeProjection,
+      empowermentScore: response.data.empowermentScore,
+      recommendedPaths: response.data.growthModel.recommendedPaths
     });
 
     res.status(201).json({
@@ -93,7 +100,6 @@ exports.runSimulation = async (req, res, next) => {
       });
     }
 
-    // Prepare user data for simulation
     const userData = {
       name: user.name,
       age: user.age || 22,
@@ -104,19 +110,16 @@ exports.runSimulation = async (req, res, next) => {
       experience: null
     };
 
-    // If twin exists, use its skill vector
     if (existingTwin && existingTwin.skillVector) {
       userData.skillVector = existingTwin.skillVector;
     }
 
-    // Call Python simulation engine
-    const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
-    const simulationResponse = await axios.post(`${aiServiceUrl}/api/simulation/paths`, {
+    const serviceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
+    const simulationResponse = await axios.post(`${serviceUrl}/api/simulation/paths`, {
       user_data: userData,
-      path_ids: pathIds || null // If null, simulates all paths
+      path_ids: pathIds || null
     });
 
-    // Save simulation to history
     if (existingTwin) {
       await EconomicTwin.findOneAndUpdate(
         { userId },
