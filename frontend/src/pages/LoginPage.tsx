@@ -4,17 +4,39 @@ import type React from "react"
 
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { Zap, Eye, EyeOff } from "lucide-react"
+import { Zap, Eye, EyeOff, Loader2 } from "lucide-react"
+import { authAPI } from "../lib/api"
+import { useUser } from "../lib/user-context"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [error, setError] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
+  const { setUser } = useUser()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    navigate("/dashboard")
+    setError("")
+    setIsLoading(true)
+
+    try {
+      const response = await authAPI.login(email, password)
+      if (response.status === 'success' && response.data?.user) {
+        setUser({
+          name: response.data.user.name,
+          email: response.data.user.email,
+          id: response.data.user.id || response.data.user._id
+        })
+        navigate("/dashboard")
+      }
+    } catch (err: any) {
+      setError(err.message || "Login failed. Please check your credentials.")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -98,11 +120,25 @@ export default function LoginPage() {
               </a>
             </div>
 
+            {error && (
+              <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-sm text-destructive">
+                {error}
+              </div>
+            )}
+
             <button
               type="submit"
-              className="w-full py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors"
+              disabled={isLoading}
+              className="w-full py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              Sign in
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Signing in...
+                </>
+              ) : (
+                "Sign in"
+              )}
             </button>
           </form>
         </div>

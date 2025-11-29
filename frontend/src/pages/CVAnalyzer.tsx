@@ -3,20 +3,23 @@ import type React from "react"
 import { useState, useCallback } from "react"
 import { Upload, FileText, CheckCircle, AlertCircle, Sparkles, Loader2 } from "lucide-react"
 import { cn } from "../lib/utils"
+import { cvAPI } from "../lib/api"
 
 interface AnalysisResult {
-  score: number
-  strengths: string[]
-  weaknesses: string[]
-  suggestions: string[]
-  keywords: string[]
+  extractedSkills?: string[]
+  missingSkills?: string[]
+  suggestions?: string[]
+  improvedVersion?: string
 }
 
 export default function CVAnalyzer() {
   const [file, setFile] = useState<File | null>(null)
+  const [cvText, setCvText] = useState("")
+  const [jobRequirements, setJobRequirements] = useState("")
   const [isDragging, setIsDragging] = useState(false)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [result, setResult] = useState<AnalysisResult | null>(null)
+  const [error, setError] = useState("")
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -35,29 +38,25 @@ export default function CVAnalyzer() {
   }
 
   const analyzeCV = async () => {
-    setIsAnalyzing(true)
-    // Simulate AI analysis
-    await new Promise((resolve) => setTimeout(resolve, 2500))
+    if (!cvText.trim()) {
+      setError("Please enter CV text or upload a file")
+      return
+    }
 
-    setResult({
-      score: 72,
-      strengths: [
-        "Clear contact information",
-        "Good education section",
-        "Relevant work experience listed",
-        "Professional formatting",
-      ],
-      weaknesses: [
-        "Missing quantifiable achievements",
-        "No skills section visible",
-        "Summary could be more impactful",
-        "Lacking industry keywords",
-      ],
-      suggestions: [
-        "Add specific metrics to your achievements (e.g., 'Increased sales by 20%')",
-        "Include a dedicated skills section with both technical and soft skills",
-        "Tailor your summary to match the job description",
-        "Add relevant certifications or courses",
+    setError("")
+    setIsAnalyzing(true)
+
+    try {
+      const response = await cvAPI.analyze(cvText, jobRequirements || undefined)
+      if (response.status === 'success' && response.data?.analysis) {
+        setResult(response.data.analysis)
+      }
+    } catch (err: any) {
+      setError(err.message || "Failed to analyze CV. Please try again.")
+      setResult(null)
+    } finally {
+      setIsAnalyzing(false)
+    }
         "Include your LinkedIn profile URL",
       ],
       keywords: ["Communication", "Problem-solving", "Microsoft Office", "Customer Service", "Data Analysis"],
@@ -80,7 +79,39 @@ export default function CVAnalyzer() {
 
       {!result ? (
         <div className="max-w-2xl mx-auto space-y-6">
-          {/* Upload Area */}
+          {/* CV Text Input */}
+          <div className="bg-card border border-border rounded-xl p-6">
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Paste your CV text here
+            </label>
+            <textarea
+              value={cvText}
+              onChange={(e) => setCvText(e.target.value)}
+              placeholder="Paste your CV content here..."
+              className="w-full h-40 px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+            />
+          </div>
+
+          {/* Job Requirements (Optional) */}
+          <div className="bg-card border border-border rounded-xl p-6">
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Job Requirements (Optional)
+            </label>
+            <textarea
+              value={jobRequirements}
+              onChange={(e) => setJobRequirements(e.target.value)}
+              placeholder="Paste job requirements to get tailored feedback..."
+              className="w-full h-32 px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+            />
+          </div>
+
+          {error && (
+            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-sm text-destructive">
+              {error}
+            </div>
+          )}
+
+          {/* Upload Area (Alternative) */}
           <div
             onDrop={handleDrop}
             onDragOver={(e) => {
@@ -127,74 +158,87 @@ export default function CVAnalyzer() {
           </div>
 
           {/* Analyze Button */}
-          {file && (
-            <button
-              onClick={analyzeCV}
-              disabled={isAnalyzing}
-              className="w-full flex items-center justify-center gap-2 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors"
-            >
-              {isAnalyzing ? (
-                <>
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  Analyzing your CV...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-5 w-5" />
-                  Analyze CV
-                </>
-              )}
-            </button>
-          )}
+          <button
+            onClick={analyzeCV}
+            disabled={isAnalyzing || !cvText.trim()}
+            className="w-full flex items-center justify-center gap-2 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {isAnalyzing ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Analyzing your CV...
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-5 w-5" />
+                Analyze CV
+              </>
+            )}
+          </button>
         </div>
       ) : (
         <div className="space-y-6">
-          {/* Score */}
-          <div className="bg-gradient-to-r from-primary/10 to-secondary/10 border border-border rounded-xl p-8 text-center">
-            <p className="text-sm text-muted-foreground mb-2">Your CV Score</p>
-            <p className="text-5xl font-bold text-foreground mb-2">
-              {result.score}
-              <span className="text-2xl">/100</span>
-            </p>
-            <p className="text-secondary font-medium">
-              {result.score >= 80 ? "Excellent!" : result.score >= 60 ? "Good, but room for improvement" : "Needs work"}
-            </p>
-          </div>
-
-          {/* Analysis Grid */}
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Strengths */}
+          {/* Extracted Skills */}
+          {result.extractedSkills && result.extractedSkills.length > 0 && (
             <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
               <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
                 <CheckCircle className="h-5 w-5 text-accent" />
-                Strengths
+                Skills Found
               </h3>
-              <ul className="space-y-2">
-                {result.strengths.map((item, i) => (
-                  <li key={i} className="flex items-start gap-2 text-muted-foreground">
-                    <CheckCircle className="h-4 w-4 text-accent mt-0.5 flex-shrink-0" />
-                    {item}
-                  </li>
+              <div className="flex flex-wrap gap-2">
+                {result.extractedSkills.map((skill, i) => (
+                  <span key={i} className="px-3 py-1 bg-accent/20 text-accent rounded-lg text-sm">
+                    {skill}
+                  </span>
                 ))}
-              </ul>
+              </div>
             </div>
+          )}
 
-            {/* Weaknesses */}
+          {/* Missing Skills */}
+          {result.missingSkills && result.missingSkills.length > 0 && (
             <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
               <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
                 <AlertCircle className="h-5 w-5 text-warning" />
-                Areas to Improve
+                Missing Skills
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {result.missingSkills.map((skill, i) => (
+                  <span key={i} className="px-3 py-1 bg-warning/20 text-warning rounded-lg text-sm">
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Suggestions */}
+          {result.suggestions && result.suggestions.length > 0 && (
+            <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+              <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                Suggestions
               </h3>
               <ul className="space-y-2">
-                {result.weaknesses.map((item, i) => (
+                {result.suggestions.map((item, i) => (
                   <li key={i} className="flex items-start gap-2 text-muted-foreground">
-                    <AlertCircle className="h-4 w-4 text-warning mt-0.5 flex-shrink-0" />
+                    <CheckCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                     {item}
                   </li>
                 ))}
               </ul>
             </div>
-          </div>
+          )}
+
+          {/* Improved Version */}
+          {result.improvedVersion && (
+            <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+              <h3 className="font-semibold text-foreground mb-4">Improved CV Version</h3>
+              <div className="bg-background border border-border rounded-lg p-4">
+                <p className="text-muted-foreground whitespace-pre-wrap">{result.improvedVersion}</p>
+              </div>
+            </div>
+          )}
 
           {/* Suggestions */}
           <div className="bg-card border border-border rounded-xl p-6 shadow-sm">

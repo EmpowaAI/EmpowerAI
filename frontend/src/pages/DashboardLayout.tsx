@@ -15,6 +15,7 @@ import {
 } from "lucide-react"
 import { cn } from "../lib/utils"
 import { useUser } from "../lib/user-context"
+import { authAPI } from "../lib/api"
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },

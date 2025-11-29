@@ -1,7 +1,8 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts"
-import { TrendingUp, Zap, Target, ArrowRight } from "lucide-react"
+import { TrendingUp, Zap, Target, ArrowRight, Loader2 } from "lucide-react"
 import { cn } from "../lib/utils"
+import { twinAPI } from "../lib/api"
 
 const incomeData = [
   { month: "Jan", freelance: 1500, learnership: 2000, course: 0, tech: 0 },
@@ -34,10 +35,44 @@ const paths = [
 ]
 
 export default function Simulations() {
-  const [selectedPaths, setSelectedPaths] = useState(["freelance", "learnership"])
+  const [selectedPaths, setSelectedPaths] = useState<string[]>([])
+  const [simulations, setSimulations] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [empowermentScore, setEmpowermentScore] = useState<number | null>(null)
+
+  useEffect(() => {
+    // Fetch twin data to get empowerment score
+    const fetchTwin = async () => {
+      try {
+        const response = await twinAPI.get()
+        if (response.status === 'success' && response.data?.twin) {
+          setEmpowermentScore(response.data.twin.empowermentScore)
+        }
+      } catch (error) {
+        console.log("No twin found")
+      }
+    }
+    fetchTwin()
+  }, [])
 
   const togglePath = (id: string) => {
     setSelectedPaths((prev) => (prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]))
+  }
+
+  const runSimulation = async () => {
+    if (selectedPaths.length === 0) return
+    
+    setIsLoading(true)
+    try {
+      const response = await twinAPI.simulate(selectedPaths)
+      if (response.status === 'success' && response.data?.simulations) {
+        setSimulations(response.data.simulations)
+      }
+    } catch (error: any) {
+      console.error("Simulation error:", error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -50,14 +85,16 @@ export default function Simulations() {
         </div>
         <div className="flex items-center gap-2 px-4 py-2 bg-secondary/20 text-secondary rounded-lg">
           <Zap className="h-5 w-5" />
-          <span className="font-medium">Empowerment Score: 78/100</span>
+          <span className="font-medium">
+            Empowerment Score: {empowermentScore ? `${empowermentScore.toFixed(1)}/100` : "—"}
+          </span>
         </div>
       </div>
 
       {/* Path Selection */}
       <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
         <h2 className="text-lg font-semibold text-foreground mb-4">Select Pathways to Compare</h2>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-3 mb-4">
           {paths.map((path) => (
             <button
               key={path.id}
@@ -74,6 +111,23 @@ export default function Simulations() {
             </button>
           ))}
         </div>
+        <button
+          onClick={runSimulation}
+          disabled={selectedPaths.length === 0 || isLoading}
+          className="px-6 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Running Simulation...
+            </>
+          ) : (
+            <>
+              <Zap className="h-4 w-4" />
+              Run Simulation
+            </>
+          )}
+        </button>
       </div>
 
       {/* Income Projection Chart - Updated chart colors for light theme */}

@@ -1,10 +1,31 @@
+import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
-import { TrendingUp, Target, Briefcase, FileText, Mic, ArrowRight, Zap } from "lucide-react"
+import { TrendingUp, Target, Briefcase, FileText, Mic, ArrowRight, Zap, Loader2 } from "lucide-react"
 import { useUser } from "../lib/user-context"
+import { twinAPI } from "../lib/api"
 
 export default function Dashboard() {
   const { user } = useUser()
+  const [twin, setTwin] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(true)
   const displayName = user?.name?.split(" ")[0] || "there"
+
+  useEffect(() => {
+    const fetchTwin = async () => {
+      try {
+        const response = await twinAPI.get()
+        if (response.status === 'success' && response.data?.twin) {
+          setTwin(response.data.twin)
+        }
+      } catch (error) {
+        // Twin doesn't exist yet, that's okay
+        console.log("No twin found yet")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchTwin()
+  }, [])
 
   return (
     <div className="space-y-6">
@@ -17,12 +38,16 @@ export default function Dashboard() {
           </div>
           <div className="flex items-center gap-6">
             <div className="text-center">
-              <p className="text-2xl font-bold text-secondary">78</p>
+              <p className="text-2xl font-bold text-secondary">
+                {isLoading ? <Loader2 className="h-6 w-6 animate-spin mx-auto" /> : (twin?.empowermentScore?.toFixed(1) || "—")}
+              </p>
               <p className="text-xs text-muted-foreground">Empowerment Score</p>
             </div>
             <div className="h-12 w-px bg-border"></div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-accent">R4.2K</p>
+              <p className="text-2xl font-bold text-accent">
+                {isLoading ? <Loader2 className="h-6 w-6 animate-spin mx-auto" /> : (twin?.incomeProjections?.threeMonth ? `R${(twin.incomeProjections.threeMonth / 1000).toFixed(1)}K` : "—")}
+              </p>
               <p className="text-xs text-muted-foreground">3-Month Projection</p>
             </div>
           </div>
