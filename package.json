@@ -1,22 +1,22 @@
 {
   "name": "empowerai-monorepo",
   "version": "1.0.0",
+  "type": "module",
   "description": "Youth Economic Digital Twin Platform - Melsoft Academy Hackathon 2025",
   "private": true,
   "workspaces": [
     "frontend",
-    "backend"
+    "empowerai-backend"
   ],
   "scripts": {
-    "dev": "npm run dev:ai",
     "dev:frontend": "cd frontend && npm run dev",
-    "dev:backend": "cd backend && npm run dev",
+    "dev:backend": "cd empowerai-backend && npm run dev",
     "setup:ai": "cd ai-service && powershell -ExecutionPolicy Bypass -File setup-venv.ps1",
     "dev:ai": "cd ai-service && powershell -ExecutionPolicy Bypass -File dev.ps1",
     "dev:all": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\" \"npm run dev:ai\"",
-    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install",
+    "install:all": "npm install && cd frontend && npm install && cd ../empowerai-backend && npm install",
     "build:frontend": "cd frontend && npm run build",
-    "build:backend": "cd backend && npm run build",
+    "build:backend": "cd empowerai-backend && npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -27,6 +27,7 @@
   ],
   "author": "Team Nicolette",
   "license": "MIT",
+  "dependencies": {},
   "devDependencies": {
     "concurrently": "^8.2.2"
   }
