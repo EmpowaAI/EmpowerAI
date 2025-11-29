@@ -11,6 +11,14 @@ exports.register = async (req, res, next) => {
   try {
     const { name, email, password, age, province, education, skills } = req.body;
 
+    // Validate required fields
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Name, email, and password are required'
+      });
+    }
+
     // Check if user exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {

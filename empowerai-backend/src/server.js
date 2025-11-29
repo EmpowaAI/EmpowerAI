@@ -53,13 +53,13 @@ app.use(require('./middleware/errorHandler'));
 // Database connection
 if (process.env.MONGODB_URI) {
   mongoose.connect(process.env.MONGODB_URI)
-    .then(() => console.log('✅ MongoDB connected successfully'))
+    .then(() => console.log('MongoDB connected successfully'))
     .catch(err => {
-      console.error('❌ MongoDB connection error:', err.message);
-      console.log('⚠️  Server will continue without database (for testing)');
+      console.error('MongoDB connection error:', err.message);
+      console.log('Server will continue without database');
     });
 } else {
-  console.log('⚠️  MONGODB_URI not set - running without database');
+  console.log('MONGODB_URI not set - running without database');
 }
 
 const PORT = process.env.PORT || 5000;
