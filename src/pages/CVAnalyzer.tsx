@@ -1,19 +1,73 @@
-"use client"
+import type React from "react"
 
-import { useState } from "react"
-import { Upload, FileText, CheckCircle, AlertCircle, Lightbulb, ArrowRight } from "lucide-react"
+import { useState, useCallback } from "react"
+import { Upload, FileText, CheckCircle, AlertCircle, Sparkles, Loader2 } from "lucide-react"
 import { cn } from "../lib/utils"
 
-export default function CVAnalyzer() {
-  const [uploaded, setUploaded] = useState(false)
-  const [analyzing, setAnalyzing] = useState(false)
+interface AnalysisResult {
+  score: number
+  strengths: string[]
+  weaknesses: string[]
+  suggestions: string[]
+  keywords: string[]
+}
 
-  const handleUpload = () => {
-    setAnalyzing(true)
-    setTimeout(() => {
-      setAnalyzing(false)
-      setUploaded(true)
-    }, 2000)
+export default function CVAnalyzer() {
+  const [file, setFile] = useState<File | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [result, setResult] = useState<AnalysisResult | null>(null)
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+    const droppedFile = e.dataTransfer.files[0]
+    if (droppedFile && (droppedFile.type === "application/pdf" || droppedFile.type.includes("document"))) {
+      setFile(droppedFile)
+    }
+  }, [])
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0]
+    if (selectedFile) {
+      setFile(selectedFile)
+    }
+  }
+
+  const analyzeCV = async () => {
+    setIsAnalyzing(true)
+    // Simulate AI analysis
+    await new Promise((resolve) => setTimeout(resolve, 2500))
+
+    setResult({
+      score: 72,
+      strengths: [
+        "Clear contact information",
+        "Good education section",
+        "Relevant work experience listed",
+        "Professional formatting",
+      ],
+      weaknesses: [
+        "Missing quantifiable achievements",
+        "No skills section visible",
+        "Summary could be more impactful",
+        "Lacking industry keywords",
+      ],
+      suggestions: [
+        "Add specific metrics to your achievements (e.g., 'Increased sales by 20%')",
+        "Include a dedicated skills section with both technical and soft skills",
+        "Tailor your summary to match the job description",
+        "Add relevant certifications or courses",
+        "Include your LinkedIn profile URL",
+      ],
+      keywords: ["Communication", "Problem-solving", "Microsoft Office", "Customer Service", "Data Analysis"],
+    })
+    setIsAnalyzing(false)
+  }
+
+  const resetAnalysis = () => {
+    setFile(null)
+    setResult(null)
   }
 
   return (
@@ -21,122 +75,164 @@ export default function CVAnalyzer() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">CV Analyzer</h1>
-        <p className="text-muted-foreground">Get AI-powered feedback on your CV</p>
+        <p className="text-muted-foreground">Upload your CV and get AI-powered feedback</p>
       </div>
 
-      {!uploaded ? (
-        /* Upload Section - Updated styling for light theme */
-        <div
-          onClick={handleUpload}
-          className={cn(
-            "border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-colors bg-card",
-            analyzing ? "border-primary bg-primary/5" : "border-border hover:border-primary/50",
-          )}
-        >
-          {analyzing ? (
-            <div className="flex flex-col items-center">
-              <div className="h-16 w-16 rounded-full border-4 border-primary border-t-transparent animate-spin mb-4" />
-              <p className="text-lg font-medium text-foreground">Analyzing your CV...</p>
-              <p className="text-muted-foreground">This may take a few seconds</p>
-            </div>
-          ) : (
-            <>
-              <div className="h-16 w-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
-                <Upload className="h-8 w-8 text-primary" />
+      {!result ? (
+        <div className="max-w-2xl mx-auto space-y-6">
+          {/* Upload Area */}
+          <div
+            onDrop={handleDrop}
+            onDragOver={(e) => {
+              e.preventDefault()
+              setIsDragging(true)
+            }}
+            onDragLeave={() => setIsDragging(false)}
+            className={cn(
+              "border-2 border-dashed rounded-xl p-12 text-center transition-colors",
+              isDragging ? "border-primary bg-primary/5" : "border-border bg-card",
+              file && "border-accent bg-accent/5",
+            )}
+          >
+            {file ? (
+              <div className="space-y-4">
+                <div className="h-16 w-16 rounded-xl bg-accent/20 flex items-center justify-center mx-auto">
+                  <FileText className="h-8 w-8 text-accent" />
+                </div>
+                <div>
+                  <p className="font-medium text-foreground">{file.name}</p>
+                  <p className="text-sm text-muted-foreground">{(file.size / 1024).toFixed(1)} KB</p>
+                </div>
+                <button onClick={() => setFile(null)} className="text-sm text-primary hover:underline">
+                  Remove file
+                </button>
               </div>
-              <p className="text-lg font-medium text-foreground mb-2">Drop your CV here or click to upload</p>
-              <p className="text-muted-foreground">Supports PDF, DOC, DOCX (Max 5MB)</p>
-            </>
+            ) : (
+              <div className="space-y-4">
+                <div className="h-16 w-16 rounded-xl bg-primary/20 flex items-center justify-center mx-auto">
+                  <Upload className="h-8 w-8 text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium text-foreground">Drop your CV here or click to browse</p>
+                  <p className="text-sm text-muted-foreground">Supports PDF, DOC, DOCX (max 5MB)</p>
+                </div>
+                <label className="inline-block">
+                  <input type="file" accept=".pdf,.doc,.docx" onChange={handleFileSelect} className="hidden" />
+                  <span className="px-4 py-2 bg-primary text-white rounded-lg font-medium cursor-pointer hover:bg-primary/90 transition-colors">
+                    Select File
+                  </span>
+                </label>
+              </div>
+            )}
+          </div>
+
+          {/* Analyze Button */}
+          {file && (
+            <button
+              onClick={analyzeCV}
+              disabled={isAnalyzing}
+              className="w-full flex items-center justify-center gap-2 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors"
+            >
+              {isAnalyzing ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  Analyzing your CV...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-5 w-5" />
+                  Analyze CV
+                </>
+              )}
+            </button>
           )}
         </div>
       ) : (
-        /* Analysis Results */
         <div className="space-y-6">
-          {/* CV Score - Updated for light theme */}
-          <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-foreground">CV Score</h2>
-              <span className="text-3xl font-bold text-secondary">72/100</span>
-            </div>
-            <div className="h-3 bg-muted rounded-full overflow-hidden">
-              <div className="h-full w-[72%] bg-gradient-to-r from-primary to-secondary rounded-full" />
-            </div>
-            <p className="text-sm text-muted-foreground mt-2">
-              Good! Your CV is above average but has room for improvement.
+          {/* Score */}
+          <div className="bg-gradient-to-r from-primary/10 to-secondary/10 border border-border rounded-xl p-8 text-center">
+            <p className="text-sm text-muted-foreground mb-2">Your CV Score</p>
+            <p className="text-5xl font-bold text-foreground mb-2">
+              {result.score}
+              <span className="text-2xl">/100</span>
+            </p>
+            <p className="text-secondary font-medium">
+              {result.score >= 80 ? "Excellent!" : result.score >= 60 ? "Good, but room for improvement" : "Needs work"}
             </p>
           </div>
 
-          {/* Skills Extracted */}
-          <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-            <div className="flex items-center gap-2 mb-4">
-              <FileText className="h-5 w-5 text-primary" />
-              <h2 className="text-lg font-semibold text-foreground">Skills Extracted</h2>
+          {/* Analysis Grid */}
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Strengths */}
+            <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+              <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-accent" />
+                Strengths
+              </h3>
+              <ul className="space-y-2">
+                {result.strengths.map((item, i) => (
+                  <li key={i} className="flex items-start gap-2 text-muted-foreground">
+                    <CheckCircle className="h-4 w-4 text-accent mt-0.5 flex-shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
             </div>
-            <div className="flex flex-wrap gap-2">
-              {[
-                "Microsoft Office",
-                "Customer Service",
-                "Communication",
-                "Data Entry",
-                "Social Media",
-                "Problem Solving",
-              ].map((skill) => (
-                <span
-                  key={skill}
-                  className="px-3 py-1 bg-accent/20 text-accent rounded-full text-sm flex items-center gap-1 font-medium"
-                >
-                  <CheckCircle className="h-3 w-3" /> {skill}
-                </span>
-              ))}
+
+            {/* Weaknesses */}
+            <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+              <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+                <AlertCircle className="h-5 w-5 text-warning" />
+                Areas to Improve
+              </h3>
+              <ul className="space-y-2">
+                {result.weaknesses.map((item, i) => (
+                  <li key={i} className="flex items-start gap-2 text-muted-foreground">
+                    <AlertCircle className="h-4 w-4 text-warning mt-0.5 flex-shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
 
-          {/* Missing Skills */}
+          {/* Suggestions */}
           <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-            <div className="flex items-center gap-2 mb-4">
-              <AlertCircle className="h-5 w-5 text-warning" />
-              <h2 className="text-lg font-semibold text-foreground">Missing Skills for Target Roles</h2>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {["Web Development", "Project Management", "Data Analysis"].map((skill) => (
-                <span key={skill} className="px-3 py-1 bg-warning/20 text-warning rounded-full text-sm font-medium">
-                  {skill}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Recommendations */}
-          <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-            <div className="flex items-center gap-2 mb-4">
-              <Lightbulb className="h-5 w-5 text-secondary" />
-              <h2 className="text-lg font-semibold text-foreground">Recommendations</h2>
-            </div>
+            <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              AI Suggestions
+            </h3>
             <ul className="space-y-3">
-              {[
-                'Add quantifiable achievements (e.g., "Increased sales by 20%")',
-                "Include a professional summary at the top",
-                "Add relevant keywords for ATS optimization",
-                "Consider adding a skills section with proficiency levels",
-              ].map((rec, i) => (
+              {result.suggestions.map((item, i) => (
                 <li key={i} className="flex items-start gap-3 text-muted-foreground">
-                  <ArrowRight className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-                  {rec}
+                  <span className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 text-xs font-medium text-primary">
+                    {i + 1}
+                  </span>
+                  {item}
                 </li>
               ))}
             </ul>
           </div>
 
+          {/* Keywords */}
+          <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+            <h3 className="font-semibold text-foreground mb-4">Recommended Keywords to Add</h3>
+            <div className="flex flex-wrap gap-2">
+              {result.keywords.map((keyword, i) => (
+                <span key={i} className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
+                  {keyword}
+                </span>
+              ))}
+            </div>
+          </div>
+
           {/* Actions */}
-          <div className="flex flex-wrap gap-4">
-            <button className="px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors">
-              Download Improved CV
-            </button>
+          <div className="flex justify-center">
             <button
-              onClick={() => setUploaded(false)}
-              className="px-6 py-3 bg-muted text-foreground rounded-lg font-medium hover:bg-muted/80 transition-colors"
+              onClick={resetAnalysis}
+              className="px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors"
             >
-              Upload New CV
+              Analyze Another CV
             </button>
           </div>
         </div>
@@ -144,3 +240,4 @@ export default function CVAnalyzer() {
     </div>
   )
 }
+
