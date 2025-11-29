@@ -55,7 +55,28 @@ exports.register = async (req, res, next) => {
       }
     });
   } catch (error) {
-    next(error);
+    console.error('Registration error:', error);
+    
+    // Handle specific MongoDB errors
+    if (error.name === 'MongoServerError' && error.code === 11000) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'User already exists with this email'
+      });
+    }
+    
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        status: 'error',
+        message: error.message
+      });
+    }
+    
+    // Generic error
+    res.status(500).json({
+      status: 'error',
+      message: error.message || 'Failed to register user. Please try again.'
+    });
   }
 };
 
