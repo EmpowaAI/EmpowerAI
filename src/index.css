@@ -1,31 +1,35 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@theme inline {
-  --font-sans: "Inter", system-ui, sans-serif;
+@layer base {
+  :root {
+    --font-sans: "Inter", system-ui, sans-serif;
 
-  /* Updated to new light theme color palette */
-  --color-background: #f8fafc;
-  --color-foreground: #334155;
-  --color-card: #ffffff;
-  --color-card-foreground: #334155;
-  --color-primary: #7c3aed;
-  --color-primary-foreground: #ffffff;
-  --color-secondary: #06b6d4;
-  --color-secondary-foreground: #ffffff;
-  --color-muted: #f1f5f9;
-  --color-muted-foreground: #64748b;
-  --color-accent: #84cc16;
-  --color-accent-foreground: #ffffff;
-  --color-border: #e2e8f0;
-  --color-ring: #7c3aed;
-  --color-success: #84cc16;
-  --color-warning: #f59e0b;
-  --color-destructive: #ef4444;
+    /* Updated to new light theme color palette */
+    --color-background: #f8fafc;
+    --color-foreground: #334155;
+    --color-card: #ffffff;
+    --color-card-foreground: #334155;
+    --color-primary: #7c3aed;
+    --color-primary-foreground: #ffffff;
+    --color-secondary: #06b6d4;
+    --color-secondary-foreground: #ffffff;
+    --color-muted: #f1f5f9;
+    --color-muted-foreground: #64748b;
+    --color-accent: #84cc16;
+    --color-accent-foreground: #ffffff;
+    --color-border: #e2e8f0;
+    --color-ring: #7c3aed;
+    --color-success: #84cc16;
+    --color-warning: #f59e0b;
+    --color-destructive: #ef4444;
 
-  --radius-sm: 0.375rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+  }
 }
 
 * {
