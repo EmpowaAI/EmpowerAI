@@ -57,11 +57,6 @@ export default function CVAnalyzer() {
     } finally {
       setIsAnalyzing(false)
     }
-        "Include your LinkedIn profile URL",
-      ],
-      keywords: ["Communication", "Problem-solving", "Microsoft Office", "Customer Service", "Data Analysis"],
-    })
-    setIsAnalyzing(false)
   }
 
   const resetAnalysis = () => {
@@ -258,17 +253,19 @@ export default function CVAnalyzer() {
             </ul>
           </div>
 
-          {/* Keywords */}
-          <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-            <h3 className="font-semibold text-foreground mb-4">Recommended Keywords to Add</h3>
-            <div className="flex flex-wrap gap-2">
-              {result.keywords.map((keyword, i) => (
-                <span key={i} className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
-                  {keyword}
-                </span>
-              ))}
+          {/* Missing Skills (as recommended keywords) */}
+          {result.missingSkills && result.missingSkills.length > 0 && (
+            <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+              <h3 className="font-semibold text-foreground mb-4">Recommended Keywords to Add</h3>
+              <div className="flex flex-wrap gap-2">
+                {result.missingSkills.map((skill, i) => (
+                  <span key={i} className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
+                    {skill}
+                  </span>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Actions */}
           <div className="flex justify-center">
