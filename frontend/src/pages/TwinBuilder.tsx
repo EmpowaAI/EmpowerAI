@@ -1,7 +1,8 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { CheckCircle, ChevronRight, ChevronLeft, Sparkles } from "lucide-react"
+import { CheckCircle, ChevronRight, ChevronLeft, Sparkles, Loader2 } from "lucide-react"
 import { cn } from "../lib/utils"
+import { twinAPI } from "../lib/api"
 
 const steps = ["Personal Info", "Education", "Skills", "Goals"]
 const provinces = [
@@ -43,6 +44,8 @@ const careerGoals = [
 
 export default function TwinBuilder() {
   const [currentStep, setCurrentStep] = useState(0)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
   const [formData, setFormData] = useState({
     age: "",
     province: "",
@@ -66,11 +69,29 @@ export default function TwinBuilder() {
     }))
   }
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1)
     } else {
-      navigate("/dashboard/simulations")
+      // Last step - create twin
+      setError("")
+      setIsLoading(true)
+      
+      try {
+        const response = await twinAPI.create({
+          skills: formData.skills,
+          education: formData.education,
+          interests: formData.goals,
+        })
+        
+        if (response.status === 'success') {
+          navigate("/dashboard")
+        }
+      } catch (err: any) {
+        setError(err.message || "Failed to create twin. Please try again.")
+      } finally {
+        setIsLoading(false)
+      }
     }
   }
 
@@ -216,20 +237,32 @@ export default function TwinBuilder() {
         )}
       </div>
 
+      {/* Error Message */}
+      {error && (
+        <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-sm text-destructive">
+          {error}
+        </div>
+      )}
+
       {/* Navigation Buttons */}
       <div className="flex items-center justify-between">
         <button
           onClick={handleBack}
-          disabled={currentStep === 0}
+          disabled={currentStep === 0 || isLoading}
           className="flex items-center gap-2 px-4 py-2 text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           <ChevronLeft className="h-5 w-5" /> Back
         </button>
         <button
           onClick={handleNext}
-          className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors"
+          disabled={isLoading}
+          className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {currentStep === steps.length - 1 ? (
+          {isLoading ? (
+            <>
+              <Loader2 className="h-5 w-5 animate-spin" /> Creating Twin...
+            </>
+          ) : currentStep === steps.length - 1 ? (
             <>
               <Sparkles className="h-5 w-5" /> Generate Twin
             </>

@@ -1,52 +1,97 @@
 
 import { useState } from "react"
-import { Mic, MessageSquare, Play, RefreshCw, CheckCircle, ChevronRight } from "lucide-react"
+import { Mic, MessageSquare, Play, RefreshCw, CheckCircle, ChevronRight, Loader2 } from "lucide-react"
 import { cn } from "../lib/utils"
+import { interviewAPI } from "../lib/api"
 
 const interviewTypes = [
-  { id: "technical", label: "Technical", desc: "IT and development roles" },
+  { id: "tech", label: "Technical", desc: "IT and development roles" },
   { id: "behavioral", label: "Behavioral", desc: "Soft skills and teamwork" },
-  { id: "sa-specific", label: "SA-Specific", desc: "Local company scenarios" },
+  { id: "non-tech", label: "Non-Technical", desc: "General roles" },
 ]
 
-const questions = [
-  "Tell me about yourself and why you're interested in this role.",
-  "Describe a challenging situation you faced and how you handled it.",
-  "What are your greatest strengths and weaknesses?",
-  "Where do you see yourself in 5 years?",
-  "Why should we hire you over other candidates?",
-]
+interface Question {
+  id: string
+  text: string
+}
+
+interface Feedback {
+  score: number
+  feedback: string
+  strengths?: string[]
+  improvements?: string[]
+}
 
 export default function InterviewCoach() {
   const [mode, setMode] = useState<"select" | "practice" | "feedback">("select")
   const [interviewType, setInterviewType] = useState("")
+  const [sessionId, setSessionId] = useState("")
+  const [questions, setQuestions] = useState<Question[]>([])
   const [currentQuestion, setCurrentQuestion] = useState(0)
-  const [responses, setResponses] = useState<string[]>([])
+  const [responses, setResponses] = useState<{ questionId: string; response: string; feedback?: Feedback }[]>([])
   const [currentResponse, setCurrentResponse] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
 
-  const startInterview = (type: string) => {
-    setInterviewType(type)
-    setMode("practice")
-    setCurrentQuestion(0)
-    setResponses([])
+  const startInterview = async (type: string) => {
+    setError("")
+    setIsLoading(true)
+    try {
+      const response = await interviewAPI.start(type, "medium")
+      if (response.status === 'success' && response.data?.session) {
+        setSessionId(response.data.session.sessionId)
+        setQuestions(response.data.session.questions || [])
+        setInterviewType(type)
+        setMode("practice")
+        setCurrentQuestion(0)
+        setResponses([])
+        setCurrentResponse("")
+      }
+    } catch (err: any) {
+      setError(err.message || "Failed to start interview. Please try again.")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const submitResponse = () => {
-    setResponses([...responses, currentResponse])
-    setCurrentResponse("")
-    if (currentQuestion < questions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1)
-    } else {
-      setMode("feedback")
+  const submitResponse = async () => {
+    if (!currentResponse.trim() || !questions[currentQuestion]) return
+
+    setIsLoading(true)
+    try {
+      const questionId = questions[currentQuestion].id
+      const response = await interviewAPI.answer(sessionId, questionId, currentResponse)
+      
+      if (response.status === 'success' && response.data?.feedback) {
+        setResponses([...responses, {
+          questionId,
+          response: currentResponse,
+          feedback: response.data.feedback
+        }])
+        setCurrentResponse("")
+        
+        if (currentQuestion < questions.length - 1) {
+          setCurrentQuestion(currentQuestion + 1)
+        } else {
+          setMode("feedback")
+        }
+      }
+    } catch (err: any) {
+      setError(err.message || "Failed to submit answer. Please try again.")
+    } finally {
+      setIsLoading(false)
     }
   }
 
   const restart = () => {
     setMode("select")
     setInterviewType("")
+    setSessionId("")
+    setQuestions([])
     setCurrentQuestion(0)
     setResponses([])
     setCurrentResponse("")
+    setError("")
   }
 
   return (
@@ -57,6 +102,12 @@ export default function InterviewCoach() {
         <p className="text-muted-foreground">Practice interviews and build your confidence</p>
       </div>
 
+      {error && (
+        <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-sm text-destructive">
+          {error}
+        </div>
+      )}
+
       {mode === "select" && (
         /* Interview Type Selection */
         <div className="space-y-6">
@@ -66,7 +117,8 @@ export default function InterviewCoach() {
               <button
                 key={type.id}
                 onClick={() => startInterview(type.id)}
-                className="bg-card border border-border rounded-xl p-6 text-left hover:border-primary/50 transition-colors group shadow-sm"
+                disabled={isLoading}
+                className="bg-card border border-border rounded-xl p-6 text-left hover:border-primary/50 transition-colors group shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <div className="h-12 w-12 rounded-lg bg-primary/20 flex items-center justify-center mb-4">
                   <MessageSquare className="h-6 w-6 text-primary" />
@@ -74,7 +126,7 @@ export default function InterviewCoach() {
                 <h3 className="font-semibold text-foreground mb-1">{type.label}</h3>
                 <p className="text-sm text-muted-foreground">{type.desc}</p>
                 <div className="flex items-center gap-1 text-primary mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                  Start <ChevronRight className="h-4 w-4" />
+                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Start <ChevronRight className="h-4 w-4" /></>}
                 </div>
               </button>
             ))}
@@ -126,7 +178,9 @@ export default function InterviewCoach() {
             <div className="h-16 w-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-6">
               <Mic className="h-8 w-8 text-primary" />
             </div>
-            <p className="text-xl font-medium text-foreground text-center mb-8">{questions[currentQuestion]}</p>
+            <p className="text-xl font-medium text-foreground text-center mb-8">
+              {questions[currentQuestion]?.text || "Loading question..."}
+            </p>
             <textarea
               value={currentResponse}
               onChange={(e) => setCurrentResponse(e.target.value)}
@@ -148,15 +202,66 @@ export default function InterviewCoach() {
               disabled={!currentResponse.trim()}
               className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {currentQuestion < questions.length - 1 ? "Next Question" : "Finish"} <Play className="h-4 w-4" />
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                <>
+                  {currentQuestion < questions.length - 1 ? "Next Question" : "Finish"} <Play className="h-4 w-4" />
+                </>
+              )}
             </button>
           </div>
         </div>
       )}
 
       {mode === "feedback" && (
-        /* Feedback Mode - Updated gradient colors */
+        /* Feedback Mode */
         <div className="space-y-6">
+          {/* Overall Score */}
+          {responses.length > 0 && (
+            <div className="bg-gradient-to-r from-primary/10 to-secondary/10 border border-border rounded-xl p-8 text-center">
+              <p className="text-sm text-muted-foreground mb-2">Overall Performance</p>
+              <p className="text-5xl font-bold text-foreground mb-2">
+                {responses.length > 0 
+                  ? Math.round(responses.reduce((sum, r) => sum + (r.feedback?.score || 0), 0) / responses.length * 100) / 100
+                  : 0}
+                <span className="text-2xl">/10</span>
+              </p>
+            </div>
+          )}
+
+          {/* Question-by-Question Feedback */}
+          <div className="space-y-4">
+            {responses.map((response, index) => {
+              const question = questions.find(q => q.id === response.questionId)
+              return (
+                <div key={index} className="bg-card border border-border rounded-xl p-6 shadow-sm">
+                  <div className="flex items-start justify-between mb-4">
+                    <h3 className="font-semibold text-foreground">Question {index + 1}</h3>
+                    {response.feedback && (
+                      <span className="px-3 py-1 bg-accent/20 text-accent rounded-lg text-sm font-medium">
+                        Score: {(response.feedback.score * 10).toFixed(1)}/10
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-muted-foreground mb-3">{question?.text || "Question"}</p>
+                  <div className="bg-background border border-border rounded-lg p-4 mb-3">
+                    <p className="text-sm text-muted-foreground mb-1">Your Answer:</p>
+                    <p className="text-foreground">{response.response}</p>
+                  </div>
+                  {response.feedback && (
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-foreground">Feedback:</p>
+                      <p className="text-muted-foreground">{response.feedback.feedback}</p>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
           {/* Score */}
           <div className="bg-gradient-to-r from-primary/10 to-secondary/10 border border-border rounded-xl p-8 text-center">
             <p className="text-sm text-muted-foreground mb-2">Your Score</p>
