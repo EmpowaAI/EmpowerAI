@@ -19,6 +19,14 @@ exports.register = async (req, res, next) => {
       });
     }
 
+    // Check MongoDB connection
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({
+        status: 'error',
+        message: 'Database is not connected. Please try again in a moment.'
+      });
+    }
+
     // Check if user exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
