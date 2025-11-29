@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: empowerai-backend
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_EXPIRES_IN
+        value: 90d
+      - key: AI_SERVICE_URL
+        sync: false
+      - key: FRONTEND_URL
+        value: https://empower-ai-gamma.vercel.app
+

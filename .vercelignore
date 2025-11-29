@@ -1,0 +1,9 @@
+node_modules
+ai-service
+empowerai-backend
+docs
+*.md
+.git
+.env
+.env.local
+
