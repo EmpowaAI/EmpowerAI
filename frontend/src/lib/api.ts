@@ -48,7 +48,10 @@ const request = async <T>(
     return response.json();
   } catch (error: any) {
     if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
-      throw new Error(`Cannot connect to server. Please check if the backend is running at ${API_BASE}`);
+      const errorMsg = API_BASE.includes('localhost') 
+        ? `Cannot connect to server. The frontend is trying to connect to localhost. Please set VITE_API_URL environment variable in Vercel to: https://empowerai.onrender.com/api`
+        : `Cannot connect to server at ${API_BASE}. Please check if the backend is running.`;
+      throw new Error(errorMsg);
     }
     throw error;
   }
