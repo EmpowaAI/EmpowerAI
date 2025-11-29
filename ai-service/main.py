@@ -17,14 +17,14 @@ logger.info("Starting EmpowerAI AI Service...")
 app = FastAPI(
     title="EmpowerAI AI Service",
     description="""
-    AI Engine for Digital Twin, Simulations, and Analysis.
+    Service for Digital Twin, Simulations, and Analysis.
     
     ## Features
     
-    * **Digital Twin Generation** - Create AI-powered economic twins for users
+    * **Digital Twin Generation** - Create economic twins for users
     * **Path Simulation** - Simulate career paths with income projections
     * **CV Analysis** - Extract skills and provide improvement suggestions
-    * **Interview Coach** - AI-powered interview practice and feedback
+    * **Interview Coach** - Interview practice and feedback
     
     ## Quick Start
     

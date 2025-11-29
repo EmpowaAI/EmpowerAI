@@ -11,18 +11,17 @@ exports.startInterview = async (req, res, next) => {
       });
     }
 
-    // Call Python AI service to start interview
-    const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
-    const aiResponse = await axios.post(`${aiServiceUrl}/api/interview/start`, {
-      type: type, // 'tech', 'behavioral', or 'non-tech'
-      difficulty: difficulty || 'medium', // 'easy', 'medium', or 'hard'
+    const serviceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
+    const response = await axios.post(`${serviceUrl}/api/interview/start`, {
+      type: type,
+      difficulty: difficulty || 'medium',
       company: company || null
     });
 
     res.status(200).json({
       status: 'success',
       data: {
-        session: aiResponse.data
+        session: response.data
       }
     });
   } catch (error) {
@@ -43,9 +42,8 @@ exports.submitAnswer = async (req, res, next) => {
       });
     }
 
-    // Call Python AI service to evaluate answer
-    const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
-    const aiResponse = await axios.post(`${aiServiceUrl}/api/interview/${sessionId}/answer`, {
+    const serviceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
+    const apiResponse = await axios.post(`${serviceUrl}/api/interview/${sessionId}/answer`, {
       questionId,
       response
     });
@@ -53,7 +51,7 @@ exports.submitAnswer = async (req, res, next) => {
     res.status(200).json({
       status: 'success',
       data: {
-        feedback: aiResponse.data
+        feedback: apiResponse.data
       }
     });
   } catch (error) {
@@ -66,14 +64,13 @@ exports.getSession = async (req, res, next) => {
   try {
     const { sessionId } = req.params;
 
-    // Call Python AI service to get session
-    const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
-    const aiResponse = await axios.get(`${aiServiceUrl}/api/interview/${sessionId}`);
+    const serviceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
+    const response = await axios.get(`${serviceUrl}/api/interview/${sessionId}`);
 
     res.status(200).json({
       status: 'success',
       data: {
-        session: aiResponse.data
+        session: response.data
       }
     });
   } catch (error) {
