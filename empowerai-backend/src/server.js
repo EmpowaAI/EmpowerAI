@@ -41,9 +41,11 @@ app.use('/api/interview', require('./routes/interview'));
 
 // Health check
 app.get('/api/health', (req, res) => {
+  const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
   res.status(200).json({ 
     status: 'OK', 
     message: 'EmpowerAI Backend is running',
+    database: dbStatus,
     timestamp: new Date().toISOString()
   });
 });
@@ -53,14 +55,20 @@ app.use(require('./middleware/errorHandler'));
 
 // Database connection
 if (process.env.MONGODB_URI) {
-  mongoose.connect(process.env.MONGODB_URI)
-    .then(() => console.log('MongoDB connected successfully'))
+  mongoose.connect(process.env.MONGODB_URI, {
+    serverSelectionTimeoutMS: 30000,
+    socketTimeoutMS: 45000,
+    connectTimeoutMS: 30000,
+  })
+    .then(() => {
+      console.log('MongoDB connected successfully');
+    })
     .catch(err => {
       console.error('MongoDB connection error:', err.message);
-      console.log('Server will continue without database');
+      console.log('Server will continue but database operations will fail');
     });
 } else {
-  console.log('MONGODB_URI not set - running without database');
+  console.log('MONGODB_URI not set - database operations will fail');
 }
 
 const PORT = process.env.PORT || 5000;
