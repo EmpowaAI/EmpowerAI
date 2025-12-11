@@ -56,7 +56,6 @@ async function connectDatabase() {
   try {
     // Disable buffering to prevent timeout errors
     mongoose.set('bufferCommands', false);
-    mongoose.set('bufferMaxEntries', 0);
 
     await mongoose.connect(process.env.MONGODB_URI, {
       serverSelectionTimeoutMS: 30000,
@@ -64,6 +63,7 @@ async function connectDatabase() {
       connectTimeoutMS: 30000,
       maxPoolSize: 10,
       minPoolSize: 5,
+      bufferCommands: false, // Disable buffering in connection options
     });
     
     console.log('✅ MongoDB connected successfully');
