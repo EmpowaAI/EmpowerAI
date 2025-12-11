@@ -62,6 +62,16 @@ exports.createEconomicTwin = async (req, res, next) => {
     });
   } catch (error) {
     console.error('Error creating twin:', error.response?.data || error.message);
+    
+    // Handle rate limit errors specifically
+    if (error.response?.status === 429) {
+      return res.status(429).json({
+        status: 'error',
+        message: 'AI service is currently rate limited. Please try again in a few moments.',
+        retryAfter: 60 // Suggest retry after 60 seconds
+      });
+    }
+    
     next(error);
   }
 };
