@@ -38,23 +38,37 @@ aiServiceClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Retry on timeout or network errors
-    if (
+    // Check if this is a Cloudflare challenge (HTML response with 429)
+    const isCloudflareChallenge = error.response?.status === 429 && 
+      typeof error.response?.data === 'string' && 
+      error.response.data.includes('Just a moment');
+
+    // Retry on timeout, network errors, or rate limit errors (429)
+    const shouldRetry = (
       (axios.isAxiosError(error) && 
-       (error.code === 'ECONNABORTED' || error.code === 'ECONNREFUSED' || !error.response)) &&
-      originalRequest &&
-      !originalRequest._retry
-    ) {
+       (error.code === 'ECONNABORTED' || error.code === 'ECONNREFUSED' || !error.response)) ||
+      (error.response?.status === 429) // Rate limit (including Cloudflare)
+    );
+
+    if (shouldRetry && originalRequest && !originalRequest._retry) {
       originalRequest._retry = true;
 
       for (let i = 0; i < MAX_RETRIES; i++) {
         try {
-          await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS * (2 ** i)));
-          console.log(`[AI Service] Retry attempt ${i + 1}/${MAX_RETRIES} for ${originalRequest.url}`);
+          // Exponential backoff: 2s, 4s, 8s (longer for rate limits)
+          const delay = isCloudflareChallenge 
+            ? RETRY_DELAY_MS * (2 ** i) * 2 // Double delay for Cloudflare
+            : RETRY_DELAY_MS * (2 ** i);
+          
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          console.log(`[AI Service] Retry attempt ${i + 1}/${MAX_RETRIES} for ${originalRequest.url}${isCloudflareChallenge ? ' (Cloudflare rate limit)' : ''}`);
           return aiServiceClient(originalRequest);
         } catch (retryError) {
           console.warn(`[AI Service] Retry ${i + 1} failed:`, retryError.message);
           if (i === MAX_RETRIES - 1) {
+            if (isCloudflareChallenge) {
+              throw new Error('AI service is rate limited by Cloudflare. Please wait a moment and try again.');
+            }
             throw new Error(`AI service unavailable after ${MAX_RETRIES} retries. Please try again later.`);
           }
         }
@@ -66,7 +80,12 @@ aiServiceClient.interceptors.response.use(
       const status = error.response.status;
       const data = error.response.data;
 
-      if (status === 503) {
+      if (status === 429) {
+        if (isCloudflareChallenge) {
+          throw new Error('AI service is temporarily rate limited. Please wait a moment and try again.');
+        }
+        throw new Error('AI service is rate limited. Please try again in a few moments.');
+      } else if (status === 503) {
         throw new Error('AI service is temporarily unavailable. Please try again later.');
       } else if (status === 500) {
         throw new Error(data?.message || 'AI service encountered an error. Please try again.');
