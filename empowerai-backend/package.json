@@ -23,7 +23,8 @@
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^7.0.0",
     "mongoose": "^9.0.0",
-    "multer": "^2.0.2"
+    "multer": "^2.0.2",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "concurrently": "^9.2.1",

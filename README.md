@@ -3,7 +3,7 @@
 
 AI-Accelerated Solutions for Youth Economic Empowerment
 
-Melsoft Academy Hackathon 2025 | Team: Nicolette (Lead), Lunga, Eva, Siyanda, Lindy
+Team: Nicolette (Lead), Lunga, Eva, Siyanda, Lindy
 
 ---
 
@@ -25,11 +25,10 @@ EmpowerAI introduces an innovative Digital Economic Twin: a predictive simulatio
 
 ```
 EmpowerAI/
-├── frontend/          # Next.js + TailwindCSS (Eva & Siyanda)
-├── backend/           # Node.js + Express API (Lunga)
+├── frontend/          # React + Vite + TailwindCSS (Eva & Siyanda)
+├── empowerai-backend/ # Node.js + Express API (Lunga)
 ├── ai-service/        # Python FastAPI AI Engine (Nicolette)
-├── docs/              # Documentation (Lindy)
-└── shared/            # Shared types, utilities, configs
+└── docs/              # Documentation (Lindy)
 ```
 
 ---
@@ -68,7 +67,7 @@ npm run dev
 
 #### Backend (Port 5000)
 ```bash
-cd backend
+cd empowerai-backend
 npm install
 npm run dev
 ```
@@ -96,23 +95,23 @@ uvicorn main:app --reload
 
 ### Lunga (Backend Developer)
 - **Focus:** Node.js API, database models, authentication
-- **Directory:** `backend/`
+- **Directory:** `empowerai-backend/`
 - **Key Files:**
-  - `backend/routes/`
-  - `backend/models/`
-  - `backend/middleware/`
+  - `empowerai-backend/src/routes/`
+  - `empowerai-backend/src/models/`
+  - `empowerai-backend/src/middleware/`
 
 ### Eva & Siyanda (Frontend Developers)
 - **Focus:** React components, UI/UX, data visualization
 - **Directory:** `frontend/`
 - **Key Files:**
-  - `frontend/app/` (Next.js app directory)
-  - `frontend/components/`
-  - `frontend/lib/`
+  - `frontend/src/pages/` (React pages)
+  - `frontend/src/lib/`
+  - `frontend/src/components/`
 
 ### Lindy (Research & Documentation)
 - **Focus:** SA opportunities data, user testing, documentation
-- **Directory:** `docs/`, `backend/data/opportunities/`
+- **Directory:** `docs/`, `empowerai-backend/scripts/`
 
 ---
 
@@ -137,21 +136,22 @@ frontend/
 └── public/                # Static assets
 ```
 
-### Backend (`backend/`)
+### Backend (`empowerai-backend/`)
 ```
-backend/
-├── routes/                # API route handlers
-│   ├── auth.js
-│   ├── twin.js
-│   ├── simulation.js
-│   ├── cv.js
-│   └── opportunities.js
-├── models/                # MongoDB models
-├── controllers/           # Business logic
-├── middleware/            # Auth, validation, etc.
-├── services/              # External service integrations
-├── utils/                 # Helper functions
-└── data/                  # Static data (opportunities, etc.)
+empowerai-backend/
+├── src/
+│   ├── routes/            # API route handlers
+│   │   ├── auth.js
+│   │   ├── twin.js
+│   │   ├── cv.js
+│   │   ├── interview.js
+│   │   └── opportunities.js
+│   ├── controllers/       # Business logic
+│   ├── models/            # MongoDB models
+│   ├── middleware/        # Auth, validation, logging
+│   ├── services/          # External service integrations (AI service client)
+│   └── utils/             # Helper functions, validators
+└── scripts/               # Seed data scripts
 ```
 
 ### AI Service (`ai-service/`)
@@ -192,9 +192,9 @@ ai-service/
 ## Architecture Flow
 
 ```
-User → React Frontend (Next.js) → Node.js Backend (Express) → Python AI Service (FastAPI)
-                                                              ↓
-                                                         MongoDB Atlas
+User → React Frontend (Vite) → Node.js Backend (Express) → Python AI Service (FastAPI)
+                                                          ↓
+                                                     MongoDB Atlas
 ```
 
 ---
@@ -236,4 +236,4 @@ See `.env.example` files in each service directory for required variables.
 
 ## License
 
-MIT License - Melsoft Academy Hackathon 2025
+MIT License
