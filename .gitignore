@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+**/node_modules/
 __pycache__/
 *.py[cod]
 *$py.class
@@ -70,3 +71,6 @@ Thumbs.db
 *.tmp
 *.temp
 .cache/
+
+# Team messages (temporary)
+TEAM_MESSAGE.txt

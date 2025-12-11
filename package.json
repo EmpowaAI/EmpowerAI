@@ -2,7 +2,7 @@
   "name": "empowerai-monorepo",
   "version": "1.0.0",
   "type": "module",
-  "description": "Youth Economic Digital Twin Platform - Melsoft Academy Hackathon 2025",
+  "description": "Youth Economic Digital Twin Platform",
   "private": true,
   "workspaces": [
     "frontend",
