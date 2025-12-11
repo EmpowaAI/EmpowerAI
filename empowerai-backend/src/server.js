@@ -35,14 +35,7 @@ app.use(express.urlencoded({ extended: true }));
 // Request logging middleware
 app.use(require('./middleware/requestLogger'));
 
-// Routes
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/twin', require('./routes/twin'));
-app.use('/api/opportunities', require('./routes/opportunities'));
-app.use('/api/cv', require('./routes/cv'));
-app.use('/api/interview', require('./routes/interview'));
-
-// Health check
+// Health check (before database connection check)
 app.get('/api/health', (req, res) => {
   const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
   res.status(200).json({ 
@@ -53,30 +46,59 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Error handling middleware
-app.use(require('./middleware/errorHandler'));
+// Database connection - MUST happen before routes
+async function connectDatabase() {
+  if (!process.env.MONGODB_URI) {
+    console.error('MONGODB_URI not set - database operations will fail');
+    return false;
+  }
 
-// Database connection
-if (process.env.MONGODB_URI) {
-  mongoose.connect(process.env.MONGODB_URI, {
-    serverSelectionTimeoutMS: 30000,
-    socketTimeoutMS: 45000,
-    connectTimeoutMS: 30000,
-  })
-    .then(() => {
-      console.log('MongoDB connected successfully');
-    })
-    .catch(err => {
-      console.error('MongoDB connection error:', err.message);
-      console.log('Server will continue but database operations will fail');
+  try {
+    // Disable buffering to prevent timeout errors
+    mongoose.set('bufferCommands', false);
+    mongoose.set('bufferMaxEntries', 0);
+
+    await mongoose.connect(process.env.MONGODB_URI, {
+      serverSelectionTimeoutMS: 30000,
+      socketTimeoutMS: 45000,
+      connectTimeoutMS: 30000,
+      maxPoolSize: 10,
+      minPoolSize: 5,
     });
-} else {
-  console.log('MONGODB_URI not set - database operations will fail');
+    
+    console.log('✅ MongoDB connected successfully');
+    return true;
+  } catch (err) {
+    console.error('❌ MongoDB connection error:', err.message);
+    console.log('⚠️  Server will continue but database operations will fail');
+    return false;
+  }
 }
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Health check: http://localhost:${PORT}/api/health`);
-  console.log(`Service URL: ${process.env.AI_SERVICE_URL || 'http://localhost:8000'}`);
+// Connect to database first, then set up routes
+connectDatabase().then((connected) => {
+  if (connected) {
+    console.log('✅ Database ready, setting up routes...');
+  } else {
+    console.log('⚠️  Database not connected, routes will return 503 errors');
+  }
+
+  // Routes (set up after database connection attempt)
+  app.use('/api/auth', require('./routes/auth'));
+  app.use('/api/twin', require('./routes/twin'));
+  app.use('/api/opportunities', require('./routes/opportunities'));
+  app.use('/api/cv', require('./routes/cv'));
+  app.use('/api/interview', require('./routes/interview'));
+
+  // Error handling middleware
+  app.use(require('./middleware/errorHandler'));
+
+  // Start server
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
+    console.log(`🤖 AI Service URL: ${process.env.AI_SERVICE_URL || 'http://localhost:8000'}`);
+    console.log(`📦 Database status: ${mongoose.connection.readyState === 1 ? '✅ Connected' : '❌ Disconnected'}`);
+  });
 });
