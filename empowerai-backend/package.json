@@ -1,16 +1,21 @@
 {
   "name": "empowerai-backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "EmpowerAI Backend API - Node.js Express server for Youth Economic Digital Twin Platform",
+  "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "test": "jest"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "youth-empowerment",
+    "api",
+    "express",
+    "mongodb"
+  ],
+  "author": "Team Nicolette",
+  "license": "MIT",
   "type": "commonjs",
   "dependencies": {
     "axios": "^1.7.9",
