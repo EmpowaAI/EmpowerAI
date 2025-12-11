@@ -1,8 +1,17 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const mongoose = require('mongoose');
 
 module.exports = async (req, res, next) => {
   try {
+    // Check JWT_SECRET is configured
+    if (!process.env.JWT_SECRET) {
+      return res.status(500).json({
+        status: 'error',
+        message: 'Server configuration error'
+      });
+    }
+
     let token;
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
       token = req.headers.authorization.split(' ')[1];
@@ -17,6 +26,14 @@ module.exports = async (req, res, next) => {
 
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+    // Check database connection
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({
+        status: 'error',
+        message: 'Database is not connected. Please try again in a moment.'
+      });
+    }
     
     // Check if user still exists
     const currentUser = await User.findById(decoded.id);
