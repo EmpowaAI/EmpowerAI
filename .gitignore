@@ -74,3 +74,6 @@ Thumbs.db
 
 # Team messages (temporary)
 TEAM_MESSAGE.txt
+
+# Python virtual environment (should be in ai-service/.gitignore)
+ai-service/venv/
