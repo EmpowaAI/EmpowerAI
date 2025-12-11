@@ -48,10 +48,23 @@ const request = async <T>(
     return response.json();
   } catch (error: any) {
     if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
-      const errorMsg = API_BASE.includes('localhost') 
-        ? `Cannot connect to server. The frontend is trying to connect to localhost. Please set VITE_API_URL environment variable in Vercel to: https://empowerai.onrender.com/api`
-        : `Cannot connect to server at ${API_BASE}. Please check if the backend is running.`;
-      throw new Error(errorMsg);
+      // Check if we're in production (Vercel) but using localhost
+      const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+      const isUsingLocalhost = API_BASE.includes('localhost');
+      
+      if (isProduction && isUsingLocalhost) {
+        throw new Error(
+          `Cannot connect to server. The frontend is trying to connect to localhost in production. ` +
+          `Please set VITE_API_URL environment variable in Vercel to: https://empowerai.onrender.com/api ` +
+          `and redeploy. See docs/VERCEL_DEPLOYMENT.md for instructions.`
+        );
+      }
+      
+      throw new Error(
+        `Cannot connect to server at ${API_BASE}. ` +
+        `Please check if the backend is running. ` +
+        `Backend should be at: https://empowerai.onrender.com/api`
+      );
     }
     throw error;
   }
