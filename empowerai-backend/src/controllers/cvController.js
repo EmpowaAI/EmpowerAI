@@ -1,4 +1,4 @@
-const axios = require('axios');
+const aiServiceClient = require('../services/aiServiceClient');
 
 exports.analyzeCV = async (req, res, next) => {
   try {
@@ -11,8 +11,6 @@ exports.analyzeCV = async (req, res, next) => {
       });
     }
 
-    const serviceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
-    
     // Convert jobRequirements to array if it's a string
     let jobRequirementsArray = null;
     if (jobRequirements) {
@@ -24,7 +22,7 @@ exports.analyzeCV = async (req, res, next) => {
       }
     }
     
-    const response = await axios.post(`${serviceUrl}/api/cv/analyze`, {
+    const response = await aiServiceClient.post('/cv/analyze', {
       cvText,
       jobRequirements: jobRequirementsArray
     });

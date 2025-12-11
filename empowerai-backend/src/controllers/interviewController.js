@@ -1,4 +1,4 @@
-const axios = require('axios');
+const aiServiceClient = require('../services/aiServiceClient');
 
 exports.startInterview = async (req, res, next) => {
   try {
@@ -11,8 +11,7 @@ exports.startInterview = async (req, res, next) => {
       });
     }
 
-    const serviceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
-    const response = await axios.post(`${serviceUrl}/api/interview/start`, {
+    const response = await aiServiceClient.post('/interview/start', {
       type: type,
       difficulty: difficulty || 'medium',
       company: company || null
@@ -42,8 +41,7 @@ exports.submitAnswer = async (req, res, next) => {
       });
     }
 
-    const serviceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
-    const apiResponse = await axios.post(`${serviceUrl}/api/interview/${sessionId}/answer`, {
+    const apiResponse = await aiServiceClient.post(`/interview/${sessionId}/answer`, {
       questionId,
       response
     });
@@ -64,8 +62,7 @@ exports.getSession = async (req, res, next) => {
   try {
     const { sessionId } = req.params;
 
-    const serviceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
-    const response = await axios.get(`${serviceUrl}/api/interview/${sessionId}`);
+    const response = await aiServiceClient.get(`/interview/${sessionId}`);
 
     res.status(200).json({
       status: 'success',

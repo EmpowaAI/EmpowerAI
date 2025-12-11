@@ -1,6 +1,6 @@
 const EconomicTwin = require('../models/EconomicTwin');
 const User = require('../models/User');
-const axios = require('axios');
+const aiServiceClient = require('../services/aiServiceClient');
 
 exports.createEconomicTwin = async (req, res, next) => {
   try {
@@ -36,15 +36,22 @@ exports.createEconomicTwin = async (req, res, next) => {
       experience: experienceStr
     };
 
-    const serviceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
-    const response = await axios.post(`${serviceUrl}/api/twin/generate`, userData);
+    const response = await aiServiceClient.post('/twin/generate', userData);
 
+    // Map AI service response to database model
+    const incomeProjection = response.data.incomeProjection || response.data.incomeProjections;
+    const growthModel = response.data.growthModel || {};
+    
     const economicTwin = await EconomicTwin.create({
       userId,
-      skillVector: response.data.skillVector,
-      incomeProjections: response.data.incomeProjection,
-      empowermentScore: response.data.empowermentScore,
-      recommendedPaths: response.data.growthModel.recommendedPaths
+      skillVector: response.data.skillVector || [],
+      incomeProjections: incomeProjection || {
+        threeMonth: 0,
+        sixMonth: 0,
+        twelveMonth: 0
+      },
+      empowermentScore: response.data.empowermentScore || 0,
+      recommendedPaths: growthModel.recommendedPaths || []
     });
 
     res.status(201).json({
@@ -114,8 +121,7 @@ exports.runSimulation = async (req, res, next) => {
       userData.skillVector = existingTwin.skillVector;
     }
 
-    const serviceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
-    const simulationResponse = await axios.post(`${serviceUrl}/api/simulation/paths`, {
+    const simulationResponse = await aiServiceClient.post('/simulation/paths', {
       user_data: userData,
       path_ids: pathIds || null
     });

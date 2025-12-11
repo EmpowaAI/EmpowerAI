@@ -11,9 +11,9 @@ const economicTwinSchema = new mongoose.Schema({
   empowermentScore: Number,
   recommendedPaths: [{ type: String }], // Array of path names like 'freelancing', 'learnership'
   simulationHistory: [{
-    path: String,
+    paths: [String], // Changed from path to paths to match controller
     timestamp: Date,
-    projection: Object
+    results: Object // Changed from projection to results to match controller
   }]
 }, { timestamps: true });
 
