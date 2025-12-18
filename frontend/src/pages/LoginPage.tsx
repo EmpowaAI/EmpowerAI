@@ -1,5 +1,3 @@
-"use client"
-
 // pages/LoginPage.tsx
 import type React from "react"
 
@@ -30,9 +28,7 @@ export default function LoginPage() {
           name: response.data.user.name,
           email: response.data.user.email,
           id: response.data.user.id || response.data.user._id,
-          empowermentScore: (_empowermentScore: any): unknown => {
-            throw new Error("Function not implemented.")
-          },
+          empowermentScore: response.data.user.empowermentScore,
         })
         // Redirect based on progress
         if (!progress.cvCompleted) {
