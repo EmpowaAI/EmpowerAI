@@ -1,4 +1,4 @@
-import DigitalTwinChatbot from "../../../../../EmpowerAI/EmpowerAI/frontend/src/components/DigitalTwinChatbot";
+import DigitalTwinChatbot from "../components/DigitalTwinChatbot";
 import { Link } from "react-router-dom"
 import { TrendingUp, Target, Briefcase, FileText, Mic, ArrowRight, Zap, Sparkles, ChevronUp, Clock } from "lucide-react"
 import { useUser } from "../lib/user-context"

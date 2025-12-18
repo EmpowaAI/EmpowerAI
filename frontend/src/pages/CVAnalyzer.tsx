@@ -6,7 +6,7 @@ import { Upload, FileText, CheckCircle, Sparkles, Loader2, ArrowRight } from "lu
 import { cn } from "../lib/utils"
 import { cvAPI } from "../lib/api"
 import { useNavigate } from "react-router-dom"
-import ProgressTracker from "../../../../../EmpowerAI/EmpowerAI/frontend/src/components/ProgressTracker"
+import ProgressTracker from "../components/ProgressTracker"
 import { useUser } from "../lib/user-context"
 
 interface AnalysisResult {
