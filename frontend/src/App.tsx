@@ -1,5 +1,5 @@
 // App.tsx
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import { UserProvider, useUser } from './lib/user-context'
 import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/LoginPage'
@@ -24,33 +24,31 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function App() {
   return (
-    <BrowserRouter>
-      <UserProvider>
-        <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
-          
-          {/* Protected dashboard routes */}
-          <Route path="/dashboard" element={
-            <ProtectedRoute>
-              <DashboardLayout />
-            </ProtectedRoute>
-          }>
-            <Route index element={<Dashboard />} />
-            <Route path="cv-analyzer" element={<CVAnalyzer />} />
-            <Route path="twin" element={<TwinBuilder />} />
-            <Route path="simulations" element={<Simulations />} />
-            <Route path="opportunities" element={<Opportunities />} />
-            <Route path="interview" element={<InterviewCoach />} />
-          </Route>
-          
-          {/* Fallback route */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </UserProvider>
-    </BrowserRouter>
+    <UserProvider>
+      <Routes>
+        {/* Public routes */}
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+        
+        {/* Protected dashboard routes */}
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <DashboardLayout />
+          </ProtectedRoute>
+        }>
+          <Route index element={<Dashboard />} />
+          <Route path="cv-analyzer" element={<CVAnalyzer />} />
+          <Route path="twin" element={<TwinBuilder />} />
+          <Route path="simulations" element={<Simulations />} />
+          <Route path="opportunities" element={<Opportunities />} />
+          <Route path="interview" element={<InterviewCoach />} />
+        </Route>
+        
+        {/* Fallback route */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </UserProvider>
   )
 }
 
