@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "test": "jest"
+    "test": "jest",
+    "create-indexes": "node src/scripts/createIndexes.js"
   },
   "keywords": [
     "youth-empowerment",
@@ -24,12 +25,15 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "express-rate-limit": "^8.2.1",
     "express-validator": "^7.3.1",
+    "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^7.0.0",
     "mongoose": "^9.0.0",
     "multer": "^2.0.2",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "zod": "^4.2.1"
   },
   "devDependencies": {
     "concurrently": "^9.2.1",

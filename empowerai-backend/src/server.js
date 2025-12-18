@@ -1,11 +1,27 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const helmet = require('helmet');
 require('dotenv').config();
+
+const logger = require('./utils/logger');
+const { apiLimiter } = require('./middleware/rateLimiter');
 
 const app = express();
 
-// Middleware
+// Security middleware
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+    },
+  },
+  crossOriginEmbedderPolicy: false, // Allow embedding if needed
+}));
+
 // CORS configuration
 const allowedOrigins = [
   'http://localhost:5173',
@@ -29,8 +45,13 @@ app.use(cors({
   },
   credentials: true
 }));
+
+// Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Apply rate limiting to all API routes
+app.use('/api', apiLimiter);
 
 // Request logging middleware
 app.use(require('./middleware/requestLogger'));
@@ -38,11 +59,19 @@ app.use(require('./middleware/requestLogger'));
 // Health check (before database connection check)
 app.get('/api/health', (req, res) => {
   const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+  const memoryUsage = process.memoryUsage();
+  
   res.status(200).json({ 
     status: 'OK', 
     message: 'EmpowerAI Backend is running',
     database: dbStatus,
-    timestamp: new Date().toISOString()
+    uptime: Math.floor(process.uptime()),
+    memory: {
+      used: Math.round(memoryUsage.heapUsed / 1024 / 1024) + 'MB',
+      total: Math.round(memoryUsage.heapTotal / 1024 / 1024) + 'MB',
+    },
+    timestamp: new Date().toISOString(),
+    version: process.env.APP_VERSION || '1.0.0',
   });
 });
 
@@ -66,11 +95,17 @@ async function connectDatabase() {
       bufferCommands: false, // Disable buffering in connection options
     });
     
-    console.log('✅ MongoDB connected successfully');
+    logger.info('MongoDB connected successfully', {
+      host: mongoose.connection.host,
+      database: mongoose.connection.name,
+    });
     return true;
   } catch (err) {
-    console.error('❌ MongoDB connection error:', err.message);
-    console.log('⚠️  Server will continue but database operations will fail');
+    logger.error('MongoDB connection error', {
+      error: err.message,
+      stack: err.stack,
+    });
+    logger.warn('Server will continue but database operations will fail');
     return false;
   }
 }
@@ -78,9 +113,9 @@ async function connectDatabase() {
 // Connect to database first, then set up routes
 connectDatabase().then((connected) => {
   if (connected) {
-    console.log('✅ Database ready, setting up routes...');
+    logger.info('Database ready, setting up routes');
   } else {
-    console.log('⚠️  Database not connected, routes will return 503 errors');
+    logger.warn('Database not connected, routes will return 503 errors');
   }
 
   // Routes (set up after database connection attempt)
@@ -90,15 +125,24 @@ connectDatabase().then((connected) => {
   app.use('/api/cv', require('./routes/cv'));
   app.use('/api/interview', require('./routes/interview'));
 
-  // Error handling middleware
+  // 404 handler for undefined routes
+  app.use('*', (req, res, next) => {
+    const { NotFoundError } = require('./utils/errors');
+    next(new NotFoundError(`Route ${req.originalUrl} not found`));
+  });
+
+  // Error handling middleware (must be last)
   app.use(require('./middleware/errorHandler'));
 
   // Start server
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-    console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
-    console.log(`🤖 AI Service URL: ${process.env.AI_SERVICE_URL || 'http://localhost:8000'}`);
-    console.log(`📦 Database status: ${mongoose.connection.readyState === 1 ? '✅ Connected' : '❌ Disconnected'}`);
+    logger.info('Server started successfully', {
+      port: PORT,
+      environment: process.env.NODE_ENV || 'development',
+      healthCheck: `http://localhost:${PORT}/api/health`,
+      aiServiceUrl: process.env.AI_SERVICE_URL || 'http://localhost:8000',
+      databaseStatus: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+    });
   });
 });

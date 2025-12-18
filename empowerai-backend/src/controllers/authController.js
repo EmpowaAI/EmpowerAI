@@ -1,7 +1,21 @@
-const User = require('../models/User');
-const jwt = require('jsonwebtoken');
-const mongoose = require('mongoose');
+/**
+ * Authentication Controller
+ * Principal Engineer Level: Clean separation of concerns with proper error handling
+ */
 
+const jwt = require('jsonwebtoken');
+const logger = require('../utils/logger');
+const { sendSuccess } = require('../utils/response');
+const { 
+  UnauthorizedError, 
+} = require('../utils/errors');
+const userService = require('../services/userService');
+
+/**
+ * Sign JWT token
+ * @param {string} id - User ID
+ * @returns {string} JWT token
+ */
 const signToken = (id) => {
   if (!process.env.JWT_SECRET) {
     throw new Error('JWT_SECRET is not configured');
@@ -11,129 +25,114 @@ const signToken = (id) => {
   });
 };
 
+/**
+ * Register new user
+ * @route POST /api/auth/register
+ * @access Public
+ */
 exports.register = async (req, res, next) => {
+  const correlationId = req.correlationId;
+  
   try {
-    const { name, email, password, age, province, education, skills } = req.body;
-
-    // Validate required fields
-    if (!name || !email || !password) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Name, email, and password are required'
-      });
-    }
-
-    // Check MongoDB connection
-    if (mongoose.connection.readyState !== 1) {
-      return res.status(503).json({
-        status: 'error',
-        message: 'Database is not connected. Please try again in a moment.'
-      });
-    }
-
-    // Check if user exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'User already exists with this email'
-      });
-    }
-
-    // Create new user
-    const newUser = await User.create({
-      name,
-      email,
-      password,
-      age,
-      province,
-      education,
-      skills
-    });
+    // Use service layer to create user
+    const newUser = await userService.createUser(req.body, correlationId);
 
     // Generate token
     const token = signToken(newUser._id);
 
-    res.status(201).json({
-      status: 'success',
+    // Return success response with token
+    return sendSuccess(res, {
       token,
-      data: {
-        user: {
-          id: newUser._id,
-          name: newUser.name,
-          email: newUser.email,
-          province: newUser.province
-        }
+      user: {
+        id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        province: newUser.province,
+        age: newUser.age,
       }
-    });
+    }, 201);
   } catch (error) {
-    console.error('Registration error:', error);
-    
-    // Handle specific MongoDB errors
-    if (error.name === 'MongoServerError' && error.code === 11000) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'User already exists with this email'
-      });
-    }
-    
-    if (error.name === 'ValidationError') {
-      return res.status(400).json({
-        status: 'error',
-        message: error.message
-      });
-    }
-    
-    // Generic error
-    res.status(500).json({
-      status: 'error',
-      message: error.message || 'Failed to register user. Please try again.'
-    });
+    // Errors are handled by global error handler
+    next(error);
   }
 };
 
+/**
+ * Login user
+ * @route POST /api/auth/login
+ * @access Public
+ */
 exports.login = async (req, res, next) => {
+  const correlationId = req.correlationId;
+  
   try {
     const { email, password } = req.body;
 
-    // Check if email and password exist
-    if (!email || !password) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Please provide email and password'
-      });
+    // Find user with password included
+    const user = await userService.findByEmail(email, correlationId, true);
+    
+    if (!user) {
+      logger.warn('Login attempt with non-existent email', { correlationId, email });
+      throw new UnauthorizedError('Incorrect email or password');
     }
 
-    // Check MongoDB connection
-    if (mongoose.connection.readyState !== 1) {
-      return res.status(503).json({
-        status: 'error',
-        message: 'Database is not connected. Please try again in a moment.'
-      });
-    }
-
-    // Check if user exists and password is correct
-    const user = await User.findOne({ email }).select('+password');
-    if (!user || !(await user.correctPassword(password))) {
-      return res.status(401).json({
-        status: 'error',
-        message: 'Incorrect email or password'
-      });
+    // Verify password
+    const isPasswordCorrect = await user.correctPassword(password);
+    if (!isPasswordCorrect) {
+      logger.warn('Login attempt with incorrect password', { correlationId, email, userId: user._id });
+      throw new UnauthorizedError('Incorrect email or password');
     }
 
     // Generate token
     const token = signToken(user._id);
 
-    res.status(200).json({
-      status: 'success',
+    logger.info('User logged in successfully', {
+      correlationId,
+      userId: user._id,
+      email: user.email,
+    });
+
+    // Return success response with token
+    return sendSuccess(res, {
       token,
-      data: {
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          province: user.province
-        }
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        province: user.province,
+        age: user.age,
+        empowermentScore: user.empowermentScore,
+      }
+    });
+  } catch (error) {
+    // Errors are handled by global error handler
+    next(error);
+  }
+};
+
+/**
+ * Validate token
+ * @route GET /api/auth/validate
+ * @access Private
+ */
+exports.validate = async (req, res, next) => {
+  const correlationId = req.correlationId;
+  
+  try {
+    // User is already attached to req by auth middleware
+    const user = req.user;
+
+    logger.debug('Token validated successfully', {
+      correlationId,
+      userId: user.id,
+    });
+
+    return sendSuccess(res, {
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        province: user.province,
       }
     });
   } catch (error) {

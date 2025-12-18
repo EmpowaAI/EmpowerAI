@@ -1,27 +1,30 @@
 /**
  * Request Logger Middleware
- * Logs all incoming requests with correlation IDs for debugging
+ * Principal Engineer Level: Enhanced logging with correlation IDs and performance tracking
  */
 
 const { v4: uuidv4 } = require('uuid');
+const logger = require('../utils/logger');
 
 module.exports = (req, res, next) => {
   // Generate unique correlation ID for each request
-  req.id = uuidv4();
+  const correlationId = req.headers['x-correlation-id'] || uuidv4();
+  req.id = correlationId;
+  req.correlationId = correlationId;
+  
+  // Set correlation ID in response header
+  res.setHeader('X-Correlation-ID', correlationId);
+  
   const start = Date.now();
 
-  // Log request
-  console.log(`[${req.id}] ${req.method} ${req.originalUrl} - IP: ${req.ip}`);
+  // Log incoming request
+  logger.logRequest(correlationId, req.method, req.originalUrl, req.ip);
 
   // Log response when finished
   res.on('finish', () => {
     const duration = Date.now() - start;
-    const statusColor = res.statusCode >= 400 ? '\x1b[31m' : '\x1b[32m'; // Red for errors, green for success
-    console.log(
-      `${statusColor}[${req.id}] ${req.method} ${req.originalUrl} - Status: ${res.statusCode} - Duration: ${duration}ms\x1b[0m`
-    );
+    logger.logResponse(correlationId, req.method, req.originalUrl, res.statusCode, duration);
   });
 
   next();
 };
-
