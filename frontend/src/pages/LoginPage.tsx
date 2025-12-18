@@ -1,5 +1,6 @@
+"use client"
 
-
+// pages/LoginPage.tsx
 import type React from "react"
 
 import { useState } from "react"
@@ -15,7 +16,7 @@ export default function LoginPage() {
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
-  const { setUser } = useUser()
+  const { setUser, progress } = useUser()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -24,13 +25,23 @@ export default function LoginPage() {
 
     try {
       const response = await authAPI.login(email, password)
-      if (response.status === 'success' && response.data?.user) {
+      if (response.status === "success" && response.data?.user) {
         setUser({
           name: response.data.user.name,
           email: response.data.user.email,
-          id: response.data.user.id || response.data.user._id
+          id: response.data.user.id || response.data.user._id,
+          empowermentScore: (_empowermentScore: any): unknown => {
+            throw new Error("Function not implemented.")
+          },
         })
-        navigate("/dashboard")
+        // Redirect based on progress
+        if (!progress.cvCompleted) {
+          navigate("/dashboard/cv-analyzer")
+        } else if (!progress.twinCompleted) {
+          navigate("/dashboard/twin")
+        } else {
+          navigate("/dashboard")
+        }
       }
     } catch (err: any) {
       setError(err.message || "Login failed. Please check your credentials.")
@@ -41,21 +52,36 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-background flex">
-      {/* Left Panel - Updated gradient to use primary and secondary */}
-      <div className="hidden lg:flex flex-1 bg-gradient-to-br from-primary/20 to-secondary/10 p-12 flex-col justify-between">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-            <Zap className="h-5 w-5 text-white" />
-          </div>
-          <span className="text-xl font-bold text-foreground">EmpowerAI</span>
-        </Link>
-        <div>
-          <h1 className="text-4xl font-bold text-foreground mb-4">Welcome back to your economic future</h1>
-          <p className="text-muted-foreground text-lg">
+      {/* Left Panel */}
+      <div className="hidden lg:flex flex-1 relative p-12 flex-col justify-between overflow-hidden">
+        {/* Background Image */}
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: "url(/images/result.jpg)",
+          }}
+        />
+        {/* Dark overlay for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/60 to-black/70 backdrop-blur-sm" />
+
+        {/* Content with higher z-index */}
+        <div className="relative z-10">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+              <Zap className="h-5 w-5 text-white" />
+            </div>
+            <span className="text-xl font-bold text-white">EmpowerAI</span>
+          </Link>
+        </div>
+
+        <div className="relative z-10">
+          <h1 className="text-4xl font-bold text-white mb-4 drop-shadow-lg">Welcome back to your economic future</h1>
+          <p className="text-white/90 text-lg drop-shadow-md">
             Continue building your path to success with AI-powered guidance.
           </p>
         </div>
-        <p className="text-sm text-muted-foreground">Youth Economic Digital Twin Platform</p>
+
+        <p className="text-sm text-white/80 relative z-10 drop-shadow-md">Youth Economic Digital Twin Platform</p>
       </div>
 
       {/* Right Panel - Form */}

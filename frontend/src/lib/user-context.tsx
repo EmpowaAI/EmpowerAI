@@ -1,59 +1,85 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
-import { authAPI, removeToken } from "./api"
+import React, { createContext, useContext, useState, useEffect } from 'react'
 
 interface User {
   name: string
   email: string
-  id?: string
+  id: string
+  twinCreated?: boolean
+  empowermentScore?: number
+  twinId?: string
 }
 
 interface UserContextType {
   user: User | null
   setUser: (user: User | null) => void
   logout: () => void
-  isLoading: boolean
+  progress: {
+    cvCompleted: boolean
+    twinCompleted: boolean
+    empowermentScore: number | null
+  }
+  updateProgress: (key: keyof UserContextType['progress'], value: any) => void
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined)
 
-export function UserProvider({ children }: { children: ReactNode }) {
-  const [user, setUserState] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+export function UserProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(() => {
+    const saved = localStorage.getItem('user')
+    return saved ? JSON.parse(saved) : null
+  })
+  
+  const [progress, setProgress] = useState({
+    cvCompleted: localStorage.getItem('cvCompleted') === 'true',
+    twinCompleted: localStorage.getItem('twinCompleted') === 'true',
+    empowermentScore: localStorage.getItem('empowermentScore') 
+      ? parseInt(localStorage.getItem('empowermentScore')!) 
+      : null
+  })
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("empowerai-user")
-    if (storedUser) {
-      try {
-        setUserState(JSON.parse(storedUser))
-      } catch (e) {
-        localStorage.removeItem("empowerai-user")
-      }
-    }
-    setIsLoading(false)
-  }, [])
-
-  const setUser = (newUser: User | null) => {
-    setUserState(newUser)
-    if (newUser) {
-      localStorage.setItem("empowerai-user", JSON.stringify(newUser))
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user))
     } else {
-      localStorage.removeItem("empowerai-user")
+      localStorage.removeItem('user')
     }
+  }, [user])
+
+  const updateProgress = (key: keyof typeof progress, value: any) => {
+    const newProgress = { ...progress, [key]: value }
+    setProgress(newProgress)
+    localStorage.setItem(key, String(value))
   }
 
   const logout = () => {
     setUser(null)
-    removeToken()
-    authAPI.logout()
+    setProgress({
+      cvCompleted: false,
+      twinCompleted: false,
+      empowermentScore: null
+    })
+    localStorage.removeItem('user')
+    localStorage.removeItem('cvCompleted')
+    localStorage.removeItem('twinCompleted')
+    localStorage.removeItem('empowermentScore')
+    localStorage.removeItem('empowerai-token')
+    localStorage.removeItem('twinData')
+    localStorage.removeItem('twinCreated')
+    localStorage.removeItem('twinFormData')
+    localStorage.removeItem('cvSkills')
   }
 
-  return <UserContext.Provider value={{ user, setUser, logout, isLoading }}>{children}</UserContext.Provider>
+  return (
+    <UserContext.Provider value={{ user, setUser, logout, progress, updateProgress }}>
+      {children}
+    </UserContext.Provider>
+  )
 }
 
 export function useUser() {
   const context = useContext(UserContext)
   if (context === undefined) {
-    throw new Error("useUser must be used within a UserProvider")
+    throw new Error('useUser must be used within a UserProvider')
   }
   return context
 }

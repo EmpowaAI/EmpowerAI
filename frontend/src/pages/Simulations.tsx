@@ -36,7 +36,7 @@ const paths = [
 
 export default function Simulations() {
   const [selectedPaths, setSelectedPaths] = useState<string[]>([])
-  const [simulations, setSimulations] = useState<any>(null)
+  const [, setSimulations] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [empowermentScore, setEmpowermentScore] = useState<number | null>(null)
 
