@@ -9,6 +9,7 @@ import os
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from openai import RateLimitError
 from utils.ai_client import AIClient
 
 class CVAnalyzer:
@@ -32,6 +33,9 @@ class CVAnalyzer:
         # Use AI to extract skills
         try:
             ai_skills = self.ai_client.extract_skills(cv_text)
+        except RateLimitError:
+            # Re-raise rate limit errors so they can be handled at the route level
+            raise
         except Exception as e:
             print(f"AI extraction error: {e}")
             ai_skills = []
@@ -110,6 +114,9 @@ Provide only the suggestions, one per line, without numbering."""
                     line = line.strip()
                     if line and len(line) > 20:
                         suggestions.append(line)
+            except RateLimitError:
+                # Re-raise rate limit errors so they can be handled at the route level
+                raise
             except Exception as e:
                 print(f"AI suggestion error: {e}")
         
