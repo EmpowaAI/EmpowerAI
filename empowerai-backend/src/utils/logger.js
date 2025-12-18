@@ -5,6 +5,20 @@
 
 const winston = require('winston');
 const path = require('path');
+const fs = require('fs');
+
+// Ensure logs directory exists (only in production)
+if (process.env.NODE_ENV === 'production') {
+  const logsDir = path.join(__dirname, '../../logs');
+  try {
+    if (!fs.existsSync(logsDir)) {
+      fs.mkdirSync(logsDir, { recursive: true });
+    }
+  } catch (err) {
+    // If we can't create logs directory, just use console logging
+    console.warn('Could not create logs directory, using console logging only:', err.message);
+  }
+}
 
 // Define log levels
 const levels = {
@@ -67,28 +81,38 @@ const transports = [
   }),
 ];
 
-// Add file transports in production
+// Add file transports in production (only if logs directory exists)
 if (process.env.NODE_ENV === 'production') {
-  // Error log file
-  transports.push(
-    new winston.transports.File({
-      filename: path.join(__dirname, '../../logs/error.log'),
-      level: 'error',
-      format: format,
-      maxsize: 5242880, // 5MB
-      maxFiles: 5,
-    })
-  );
+  const logsDir = path.join(__dirname, '../../logs');
+  
+  // Only add file transports if logs directory exists and is writable
+  if (fs.existsSync(logsDir)) {
+    try {
+      // Error log file
+      transports.push(
+        new winston.transports.File({
+          filename: path.join(logsDir, 'error.log'),
+          level: 'error',
+          format: format,
+          maxsize: 5242880, // 5MB
+          maxFiles: 5,
+        })
+      );
 
-  // Combined log file
-  transports.push(
-    new winston.transports.File({
-      filename: path.join(__dirname, '../../logs/combined.log'),
-      format: format,
-      maxsize: 5242880, // 5MB
-      maxFiles: 5,
-    })
-  );
+      // Combined log file
+      transports.push(
+        new winston.transports.File({
+          filename: path.join(logsDir, 'combined.log'),
+          format: format,
+          maxsize: 5242880, // 5MB
+          maxFiles: 5,
+        })
+      );
+    } catch (err) {
+      // If file transport creation fails, continue with console only
+      console.warn('Could not create file transports, using console logging only:', err.message);
+    }
+  }
 }
 
 // Create logger instance
