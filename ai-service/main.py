@@ -3,15 +3,18 @@ EmpowerAI AI Service
 FastAPI service for Digital Twin generation, simulations, and AI features
 """
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.base import BaseHTTPMiddleware
 from dotenv import load_dotenv
 import os
+import uuid
 from datetime import datetime
-from utils.logger import logger
+from utils.logger import get_logger
 
 load_dotenv()
 
+logger = get_logger()
 logger.info("Starting EmpowerAI AI Service...")
 
 app = FastAPI(
@@ -37,10 +40,28 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
+# Correlation ID middleware
+class CorrelationIDMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        correlation_id = request.headers.get('X-Correlation-ID') or str(uuid.uuid4())
+        request.state.correlation_id = correlation_id
+        response = await call_next(request)
+        response.headers['X-Correlation-ID'] = correlation_id
+        return response
+
+app.add_middleware(CorrelationIDMiddleware)
+
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5000"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:5000",
+        "http://localhost:5173",
+        "https://empower-ai-gamma.vercel.app",
+        "https://empowerai.onrender.com",
+        os.getenv("FRONTEND_URL", ""),
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -58,12 +79,26 @@ async def root():
     }
 
 @app.get("/health")
-async def health_check():
-    """Health check endpoint"""
+async def health_check(request: Request):
+    """Health check endpoint with detailed status"""
+    correlation_id = request.state.correlation_id
+    
+    # Check OpenAI connection
+    openai_status = "connected"
+    try:
+        from utils.ai_client import AIClient
+        ai_client = AIClient()
+        openai_status = "enabled" if ai_client.enabled else "disabled"
+    except Exception as e:
+        openai_status = f"error: {str(e)}"
+    
     return {
         "status": "healthy",
         "service": "EmpowerAI AI Service",
-        "timestamp": datetime.now().isoformat()
+        "version": "1.0.0",
+        "openai_status": openai_status,
+        "timestamp": datetime.now().isoformat(),
+        "correlation_id": correlation_id
     }
 
 # Import routes

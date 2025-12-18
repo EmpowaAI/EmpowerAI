@@ -3,15 +3,20 @@ const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  age: { type: Number },
-  province: { type: String },
+  email: { type: String, required: true, unique: true, index: true },
+  password: { type: String, required: true, select: false },
+  age: { type: Number, index: true },
+  province: { type: String, index: true },
   education: { type: String },
   skills: [{ type: String }],
   interests: [{ type: String }],
   avatar: { type: String }
-}, { timestamps: true });
+}, { 
+  timestamps: true,
+  // Optimize queries by excluding password by default
+  toJSON: { virtuals: true, transform: function(doc, ret) { delete ret.password; return ret; } },
+  toObject: { virtuals: true, transform: function(doc, ret) { delete ret.password; return ret; } }
+});
 
 // Hash password before saving
 userSchema.pre('save', async function() {
