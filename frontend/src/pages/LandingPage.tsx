@@ -1,5 +1,3 @@
-"use client"
-
 // pages/LandingPage.tsx
 import { useState, useEffect, useLayoutEffect } from "react"
 import { Link } from "react-router-dom"
