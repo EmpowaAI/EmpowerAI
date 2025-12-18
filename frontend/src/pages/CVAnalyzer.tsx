@@ -1,9 +1,13 @@
+// pages/CVAnalyzer.tsx
 import type React from "react"
 
 import { useState, useCallback } from "react"
-import { Upload, FileText, CheckCircle, AlertCircle, Sparkles, Loader2 } from "lucide-react"
+import { Upload, FileText, CheckCircle, Sparkles, Loader2, ArrowRight } from "lucide-react"
 import { cn } from "../lib/utils"
 import { cvAPI } from "../lib/api"
+import { useNavigate } from "react-router-dom"
+import ProgressTracker from "../../../../../EmpowerAI/EmpowerAI/frontend/src/components/ProgressTracker"
+import { useUser } from "../lib/user-context"
 
 interface AnalysisResult {
   extractedSkills?: string[]
@@ -20,6 +24,8 @@ export default function CVAnalyzer() {
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [result, setResult] = useState<AnalysisResult | null>(null)
   const [error, setError] = useState("")
+  const navigate = useNavigate()
+  const { updateProgress } = useUser()
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -50,6 +56,19 @@ export default function CVAnalyzer() {
       const response = await cvAPI.analyze(cvText, jobRequirements || undefined)
       if (response.status === 'success' && response.data?.analysis) {
         setResult(response.data.analysis)
+        
+        // Mark CV as completed and save skills
+        updateProgress('cvCompleted', true)
+        
+        // Save extracted skills if available
+        if (response.data.analysis.extractedSkills) {
+          localStorage.setItem('cvSkills', JSON.stringify(response.data.analysis.extractedSkills))
+        }
+        
+        // Show success for a bit longer before redirecting
+        setTimeout(() => {
+          navigate("/dashboard/twin")
+        }, 3000) // Increased from 2000 to 3000
       }
     } catch (err: any) {
       setError(err.message || "Failed to analyze CV. Please try again.")
@@ -59,17 +78,16 @@ export default function CVAnalyzer() {
     }
   }
 
-  const resetAnalysis = () => {
-    setFile(null)
-    setResult(null)
-  }
 
   return (
     <div className="space-y-8">
+      {/* Progress Tracker */}
+      <ProgressTracker currentStep="cv" />
+      
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-foreground">CV Analyzer</h1>
-        <p className="text-muted-foreground">Upload your CV and get AI-powered feedback</p>
+        <h1 className="text-2xl font-bold text-foreground">Step 1: CV Analyzer</h1>
+        <p className="text-muted-foreground">Upload your CV to unlock personalized features</p>
       </div>
 
       {!result ? (
@@ -166,13 +184,27 @@ export default function CVAnalyzer() {
             ) : (
               <>
                 <Sparkles className="h-5 w-5" />
-                Analyze CV
+                Analyze CV & Continue
               </>
             )}
           </button>
         </div>
       ) : (
         <div className="space-y-6">
+          {/* Success Message */}
+          <div className="bg-gradient-to-r from-primary/10 to-accent/10 border border-accent/20 rounded-xl p-6">
+            <div className="flex items-center gap-3">
+              <CheckCircle className="h-8 w-8 text-accent" />
+              <div>
+                <h3 className="font-semibold text-foreground">CV Analysis Complete!</h3>
+                <p className="text-muted-foreground">
+                  We found {result.extractedSkills?.length || 0} skills in your CV. 
+                  Redirecting to Twin Builder...
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* Extracted Skills */}
           {result.extractedSkills && result.extractedSkills.length > 0 && (
             <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
@@ -190,34 +222,19 @@ export default function CVAnalyzer() {
             </div>
           )}
 
-          {/* Missing Skills */}
-          {result.missingSkills && result.missingSkills.length > 0 && (
-            <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-              <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-                <AlertCircle className="h-5 w-5 text-warning" />
-                Missing Skills
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {result.missingSkills.map((skill, i) => (
-                  <span key={i} className="px-3 py-1 bg-warning/20 text-warning rounded-lg text-sm">
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Suggestions */}
           {result.suggestions && result.suggestions.length > 0 && (
             <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
               <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-primary" />
-                Suggestions
+                AI Suggestions
               </h3>
-              <ul className="space-y-2">
+              <ul className="space-y-3">
                 {result.suggestions.map((item, i) => (
-                  <li key={i} className="flex items-start gap-2 text-muted-foreground">
-                    <CheckCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                  <li key={i} className="flex items-start gap-3 text-muted-foreground">
+                    <span className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 text-xs font-medium text-primary">
+                      {i + 1}
+                    </span>
                     {item}
                   </li>
                 ))}
@@ -225,55 +242,14 @@ export default function CVAnalyzer() {
             </div>
           )}
 
-          {/* Improved Version */}
-          {result.improvedVersion && (
-            <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-              <h3 className="font-semibold text-foreground mb-4">Improved CV Version</h3>
-              <div className="bg-background border border-border rounded-lg p-4">
-                <p className="text-muted-foreground whitespace-pre-wrap">{result.improvedVersion}</p>
-              </div>
-            </div>
-          )}
-
-          {/* Suggestions */}
-          <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-            <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-primary" />
-              AI Suggestions
-            </h3>
-            <ul className="space-y-3">
-              {result.suggestions.map((item, i) => (
-                <li key={i} className="flex items-start gap-3 text-muted-foreground">
-                  <span className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 text-xs font-medium text-primary">
-                    {i + 1}
-                  </span>
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Missing Skills (as recommended keywords) */}
-          {result.missingSkills && result.missingSkills.length > 0 && (
-            <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-              <h3 className="font-semibold text-foreground mb-4">Recommended Keywords to Add</h3>
-              <div className="flex flex-wrap gap-2">
-                {result.missingSkills.map((skill, i) => (
-                  <span key={i} className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Actions */}
+          {/* Continue Button */}
           <div className="flex justify-center">
             <button
-              onClick={resetAnalysis}
-              className="px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors"
+              onClick={() => navigate("/dashboard/twin")}
+              className="px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center gap-2"
             >
-              Analyze Another CV
+              Continue to Twin Builder
+              <ArrowRight className="h-4 w-4" />
             </button>
           </div>
         </div>
@@ -281,4 +257,3 @@ export default function CVAnalyzer() {
     </div>
   )
 }
-

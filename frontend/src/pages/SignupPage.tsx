@@ -1,4 +1,6 @@
+"use client"
 
+// pages/SignupPage.tsx
 import type React from "react"
 
 import { useState } from "react"
@@ -26,13 +28,17 @@ export default function SignupPage() {
 
     try {
       const response = await authAPI.register(formData)
-      if (response.status === 'success' && response.data?.user) {
+      if (response.status === "success" && response.data?.user) {
         setUser({
           name: response.data.user.name,
           email: response.data.user.email,
-          id: response.data.user.id || response.data.user._id
+          id: response.data.user.id || response.data.user._id,
+          empowermentScore: (): unknown => {
+            throw new Error("Function not implemented.")
+          },
         })
-        navigate("/dashboard/twin")
+        // Redirect to CV Analyzer first
+        navigate("/dashboard/cv-analyzer")
       }
     } catch (err: any) {
       setError(err.message || "Registration failed. Please try again.")
@@ -43,16 +49,25 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen bg-background flex">
-      {/* Left Panel - Updated gradient colors */}
-      <div className="hidden lg:flex flex-1 bg-gradient-to-br from-primary/20 to-secondary/10 p-12 flex-col justify-between">
-        <Link to="/" className="flex items-center gap-2">
+      {/* Left Panel */}
+      <div
+        className="hidden lg:flex flex-1 bg-cover bg-center p-12 flex-col justify-between relative"
+        style={{ backgroundImage: "url(/images/result.jpg)" }}
+      >
+        {/* Semi-transparent overlay for text readability */}
+        <div className="absolute inset-0 bg-black/50" />
+
+        {/* Content with relative positioning to appear above overlay */}
+        <Link to="/" className="flex items-center gap-2 relative z-10">
           <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
             <Zap className="h-5 w-5 text-white" />
           </div>
-          <span className="text-xl font-bold text-foreground">EmpowerAI</span>
+          <span className="text-xl font-bold text-white drop-shadow-lg">EmpowerAI</span>
         </Link>
-        <div>
-          <h1 className="text-4xl font-bold text-foreground mb-6">Start your journey to economic empowerment</h1>
+        <div className="relative z-10">
+          <h1 className="text-4xl font-bold text-white mb-6 drop-shadow-lg">
+            Start your journey to economic empowerment
+          </h1>
           <ul className="space-y-4">
             {[
               "Build your Digital Economic Twin",
@@ -60,14 +75,14 @@ export default function SignupPage() {
               "Get personalized career guidance",
               "Access SA-specific opportunities",
             ].map((item, i) => (
-              <li key={i} className="flex items-center gap-3 text-muted-foreground">
+              <li key={i} className="flex items-center gap-3 text-white drop-shadow-md">
                 <CheckCircle className="h-5 w-5 text-accent" />
                 {item}
               </li>
             ))}
           </ul>
         </div>
-        <p className="text-sm text-muted-foreground">Youth Economic Digital Twin Platform</p>
+        <p className="text-sm text-white/90 relative z-10 drop-shadow-md">Youth Economic Digital Twin Platform</p>
       </div>
 
       {/* Right Panel - Form */}

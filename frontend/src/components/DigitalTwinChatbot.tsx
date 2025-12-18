@@ -1,0 +1,292 @@
+import { useState, useEffect, useRef } from "react";
+import { Bot, X, Send, Sparkles, User, Clock, ThumbsUp, ThumbsDown } from "lucide-react";
+import { cn } from "../lib/utils";
+
+interface Message {
+  id: string;
+  text: string;
+  sender: 'user' | 'ai';
+  timestamp: Date;
+}
+
+const INITIAL_MESSAGES: Message[] = [
+  {
+    id: '1',
+    text: "Hi! I'm your Digital Economic Twin 🤖 I can help you explore career paths, analyze opportunities, and plan your financial future. What would you like to know?",
+    sender: 'ai',
+    timestamp: new Date(),
+  },
+  {
+    id: '2',
+    text: "You can ask me things like: 'What career paths match my skills?', 'How can I increase my earning potential?', or 'What skills should I learn next?'",
+    sender: 'ai',
+    timestamp: new Date(Date.now() + 1000),
+  },
+];
+
+const QUICK_QUESTIONS = [
+  "Best career for my skills?",
+  "Show income projections",
+  "Skills I should learn",
+  "Job opportunities near me",
+  "Interview tips",
+  "Update my twin"
+];
+
+export default function DigitalTwinChatbot() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
+  const [inputText, setInputText] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  // Focus input when chat opens
+  useEffect(() => {
+    if (isOpen) {
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }
+  }, [isOpen]);
+
+  const handleSendMessage = async () => {
+    if (!inputText.trim() || isLoading) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      text: inputText,
+      sender: 'user',
+      timestamp: new Date(),
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setInputText("");
+    setIsLoading(true);
+
+    // Simulate AI response delay
+    setTimeout(() => {
+      const aiResponses = [
+        `Based on your current skills and market trends in South Africa, I recommend focusing on digital marketing or web development. These fields have high demand and good earning potential.`,
+        `Your projected income for the next 3 months shows potential growth to R4,200/month if you pursue freelance opportunities in your current skill set.`,
+        `Consider learning React.js and TypeScript - these are highly sought-after skills in the SA tech market with salaries starting from R25,000/month.`,
+        `I found 3 relevant opportunities in your area: Junior Developer at TechCo SA (92% match), Digital Marketing Internship (88% match), and IT Support Role (85% match).`,
+        `For interviews, practice STAR method responses and focus on your soft skills. Remember to research the company thoroughly before your interview.`,
+        `I'll update your twin with recent progress. Your empowerment score has increased by 5 points this week!`
+      ];
+
+      const randomResponse = aiResponses[Math.floor(Math.random() * aiResponses.length)];
+      
+      const aiMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: randomResponse,
+        sender: 'ai',
+        timestamp: new Date(),
+      };
+
+      setMessages(prev => [...prev, aiMessage]);
+      setIsLoading(false);
+    }, 1500);
+  };
+
+  const handleQuickQuestion = (question: string) => {
+    setInputText(question);
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  };
+
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  if (!isOpen) {
+    return (
+      <button
+        onClick={() => setIsOpen(true)}
+        className="fixed bottom-24 right-6 z-40 group"
+      >
+        <div className="relative">
+          {/* Pulsing ring effect */}
+          <div className="absolute -inset-2 bg-gradient-to-r from-primary via-secondary to-accent rounded-full opacity-20 animate-pulse" />
+          
+          {/* Tooltip */}
+          <div className="absolute bottom-full right-0 mb-3 hidden group-hover:block">
+            <div className="bg-foreground text-background px-3 py-2 rounded-lg shadow-lg whitespace-nowrap text-sm">
+              Chat with your Digital Twin
+            </div>
+            <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-foreground" />
+          </div>
+
+          {/* Main button */}
+          <div className="relative h-14 w-14 rounded-full bg-gradient-to-br from-primary via-secondary to-accent shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 flex items-center justify-center">
+            <Bot className="h-7 w-7 text-white" />
+            <Sparkles className="absolute -top-1 -right-1 h-4 w-4 text-yellow-300 animate-pulse" />
+          </div>
+        </div>
+      </button>
+    );
+  }
+
+  return (
+    <>
+      {/* Backdrop for mobile */}
+      <div 
+        className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden"
+        onClick={() => setIsOpen(false)}
+      />
+
+      {/* Chatbot Container - Fixed size and positioned properly */}
+      <div className="fixed bottom-24 right-6 z-50 w-full max-w-md h-[500px] flex flex-col shadow-2xl rounded-xl overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-primary via-primary/90 to-secondary p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center">
+              <Bot className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h3 className="font-bold text-white">Digital Economic Twin</h3>
+              <p className="text-xs text-white/80 flex items-center gap-1">
+                <span className="h-2 w-2 rounded-full bg-green-400 animate-pulse"></span>
+                AI Assistant • Online
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsOpen(false)}
+              className="h-8 w-8 rounded-full hover:bg-white/20 flex items-center justify-center text-white transition-colors"
+              title="Close"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Messages Container - Scrollable area */}
+        <div className="flex-1 overflow-y-auto bg-gradient-to-b from-white to-gray-50 p-4 space-y-4">
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={cn(
+                "flex gap-3",
+                message.sender === 'user' ? 'flex-row-reverse' : 'flex-row'
+              )}
+            >
+              <div className={cn(
+                "h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0",
+                message.sender === 'user' 
+                  ? 'bg-accent/20 text-accent' 
+                  : 'bg-primary/20 text-primary'
+              )}>
+                {message.sender === 'user' ? (
+                  <User className="h-4 w-4" />
+                ) : (
+                  <Bot className="h-4 w-4" />
+                )}
+              </div>
+              <div className={cn(
+                "max-w-[70%] rounded-2xl p-3 shadow-sm",
+                message.sender === 'user'
+                  ? 'bg-accent text-white rounded-br-none'
+                  : 'bg-white border border-gray-200 rounded-bl-none'
+              )}>
+                <p className="text-sm">{message.text}</p>
+                <div className={cn(
+                  "flex items-center gap-1 mt-2 text-xs",
+                  message.sender === 'user' ? 'text-white/70' : 'text-gray-500'
+                )}>
+                  <Clock className="h-3 w-3" />
+                  {formatTime(message.timestamp)}
+                </div>
+              </div>
+            </div>
+          ))}
+          
+          {isLoading && (
+            <div className="flex gap-3">
+              <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
+                <Bot className="h-4 w-4 text-primary" />
+              </div>
+              <div className="bg-white border border-gray-200 rounded-2xl rounded-bl-none p-3 max-w-[70%]">
+                <div className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-primary animate-bounce" />
+                  <div className="h-2 w-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '0.2s' }} />
+                  <div className="h-2 w-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '0.4s' }} />
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Quick Questions - Fixed height */}
+        <div className="p-3 border-t border-gray-200 bg-gray-50">
+          <p className="text-xs font-medium text-gray-500 mb-2">Quick questions:</p>
+          <div className="flex flex-wrap gap-2">
+            {QUICK_QUESTIONS.map((question, index) => (
+              <button
+                key={index}
+                onClick={() => handleQuickQuestion(question)}
+                className="px-3 py-1.5 text-xs bg-white hover:bg-primary/10 hover:text-primary rounded-full border border-gray-300 transition-colors hover:border-primary/30"
+              >
+                {question}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Input Area - Fixed at bottom */}
+        <div className="p-3 border-t border-gray-200 bg-white">
+          <div className="flex gap-2">
+            <input
+              ref={inputRef}
+              type="text"
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+              placeholder="Ask your digital twin anything..."
+              className="flex-1 px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+              disabled={isLoading}
+            />
+            <button
+              onClick={handleSendMessage}
+              disabled={isLoading || !inputText.trim()}
+              className={cn(
+                "px-4 py-2 rounded-lg flex items-center gap-2 transition-all",
+                isLoading || !inputText.trim()
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  : "bg-primary text-white hover:bg-primary/90"
+              )}
+            >
+              <Send className="h-4 w-4" />
+            </button>
+          </div>
+          <div className="flex items-center justify-between mt-2">
+            <p className="text-xs text-gray-500">
+              Your AI-powered career guide
+            </p>
+            <div className="flex items-center gap-1">
+              <button
+                className="h-8 w-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-green-500 transition-colors"
+                title="Helpful"
+              >
+                <ThumbsUp className="h-4 w-4" />
+              </button>
+              <button
+                className="h-8 w-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-red-500 transition-colors"
+                title="Not helpful"
+              >
+                <ThumbsDown className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
