@@ -128,7 +128,8 @@ connectDatabase().then((connected) => {
   // 404 handler for undefined routes
   app.use('*', (req, res, next) => {
     const { NotFoundError } = require('./utils/errors');
-    next(new NotFoundError(`Route ${req.originalUrl} not found`));
+    const error = new NotFoundError(`Route ${req.originalUrl} not found`);
+    next(error);
   });
 
   // Error handling middleware (must be last)
