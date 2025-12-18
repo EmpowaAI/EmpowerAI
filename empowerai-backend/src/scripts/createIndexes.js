@@ -30,7 +30,55 @@ async function createIndexes() {
 
     // Create EconomicTwin indexes
     console.log('Creating EconomicTwin indexes...');
-    await EconomicTwin.collection.createIndex({ userId: 1 }, { unique: true, background: true });
+    
+    // Check for duplicate userIds before creating unique index
+    const duplicates = await EconomicTwin.aggregate([
+      {
+        $group: {
+          _id: '$userId',
+          count: { $sum: 1 },
+          ids: { $push: '$_id' }
+        }
+      },
+      {
+        $match: { count: { $gt: 1 } }
+      }
+    ]);
+    
+    if (duplicates.length > 0) {
+      console.log(`⚠️  Found ${duplicates.length} duplicate userId entries. Cleaning up...`);
+      
+      // Keep the most recent twin for each user, delete older ones
+      for (const dup of duplicates) {
+        const twins = await EconomicTwin.find({ userId: dup._id })
+          .sort({ createdAt: -1 })
+          .lean();
+        
+        // Keep the first (most recent), delete the rest
+        if (twins.length > 1) {
+          const idsToDelete = twins.slice(1).map(t => t._id);
+          await EconomicTwin.deleteMany({ _id: { $in: idsToDelete } });
+          console.log(`  Removed ${idsToDelete.length} duplicate twin(s) for user ${dup._id}`);
+        }
+      }
+      
+      console.log('✅ Duplicates cleaned up');
+    }
+    
+    // Try to create unique index, if it fails due to duplicates, create non-unique
+    try {
+      await EconomicTwin.collection.createIndex({ userId: 1 }, { unique: true, background: true });
+      console.log('✅ Created unique index on userId');
+    } catch (error) {
+      if (error.code === 11000 || error.codeName === 'DuplicateKey') {
+        console.log('⚠️  Cannot create unique index due to duplicates. Creating non-unique index instead.');
+        await EconomicTwin.collection.createIndex({ userId: 1 }, { background: true });
+        console.log('✅ Created non-unique index on userId');
+      } else {
+        throw error;
+      }
+    }
+    
     await EconomicTwin.collection.createIndex({ createdAt: -1 }, { background: true });
     await EconomicTwin.collection.createIndex({ 'simulationHistory.timestamp': -1 }, { background: true });
     console.log('✅ EconomicTwin indexes created');
