@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom"
 import { CheckCircle, ChevronRight, ChevronLeft, Sparkles, Loader2 } from "lucide-react"
 import { cn } from "../lib/utils"
 import { twinAPI, progressAPI, twinAPIDemo } from "../lib/api"
-import ProgressTracker from "../../../../../EmpowerAI/EmpowerAI/frontend/src/components/ProgressTracker"
+import ProgressTracker from "../components/ProgressTracker"
 import { useUser } from "../lib/user-context"
 
 const steps = ["Personal Info", "Education", "Skills", "Goals"]
