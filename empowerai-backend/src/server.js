@@ -125,8 +125,8 @@ connectDatabase().then((connected) => {
   app.use('/api/cv', require('./routes/cv'));
   app.use('/api/interview', require('./routes/interview'));
 
-  // 404 handler for undefined routes
-  app.use('*', (req, res, next) => {
+  // 404 handler for undefined routes (must be after all other routes)
+  app.use((req, res, next) => {
     const { NotFoundError } = require('./utils/errors');
     const error = new NotFoundError(`Route ${req.originalUrl} not found`);
     next(error);
