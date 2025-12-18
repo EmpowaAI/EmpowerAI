@@ -1,5 +1,3 @@
-"use client"
-
 // pages/SignupPage.tsx
 import type React from "react"
 
@@ -33,9 +31,7 @@ export default function SignupPage() {
           name: response.data.user.name,
           email: response.data.user.email,
           id: response.data.user.id || response.data.user._id,
-          empowermentScore: (): unknown => {
-            throw new Error("Function not implemented.")
-          },
+          empowermentScore: response.data.user.empowermentScore,
         })
         // Redirect to CV Analyzer first
         navigate("/dashboard/cv-analyzer")
