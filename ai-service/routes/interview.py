@@ -45,18 +45,27 @@ async def submit_answer(session_id: str, answer: InterviewAnswerRequest):
         session = sessions[session_id]
         questions = session['questions']
         
-        # Find the question
+        # Find the question - check both 'question' and 'text' fields for compatibility
         question = None
         for q in questions:
-            if q['id'] == answer.questionId:
+            if q.get('id') == answer.questionId or q.get('id') == answer.questionId:
                 question = q
                 break
         
         if not question:
             raise HTTPException(status_code=404, detail="Question not found")
         
+        # Normalize question format for evaluation
+        question_text = question.get('text') or question.get('question') or ''
+        question_for_eval = {
+            'id': question.get('id'),
+            'question': question_text,
+            'type': question.get('type', 'general'),
+            'difficulty': question.get('difficulty', 'medium')
+        }
+        
         # Evaluate response
-        feedback_data = interview_coach.evaluate_response(question, answer.response)
+        feedback_data = interview_coach.evaluate_response(question_for_eval, answer.response)
         
         # Store feedback in session
         session['feedback'].append(feedback_data)
