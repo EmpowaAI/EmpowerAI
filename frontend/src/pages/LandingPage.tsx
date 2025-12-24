@@ -35,21 +35,17 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 relative overflow-hidden transition-colors duration-300">
-      {/* Background Image - Career/Empowerment theme */}
+      {/* Background Image */}
       <div className="absolute inset-0 overflow-hidden">
         <img 
-          src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2084&q=80" 
+          src="/images/landing.png" 
           alt="" 
           className="w-full h-full object-cover"
           style={{
             opacity: '0.25',
-            filter: 'brightness(0.85) saturate(1.1)',
+            filter: 'brightness(0.9)',
           }}
           aria-hidden="true"
-          onError={(e) => {
-            // Fallback if image fails to load
-            e.currentTarget.style.display = 'none';
-          }}
         />
         {/* Overlay gradient for better content readability */}
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/80 via-white/70 to-cyan-50/80 dark:from-slate-900/75 dark:via-slate-800/75 dark:to-slate-900/75"></div>
