@@ -10,36 +10,32 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
-      <div className="relative overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-secondary rounded-2xl p-6 md:p-8 shadow-xl shadow-primary/20 animate-fade-in-up">
-        {/* Decorative elements */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-secondary/30 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
-
+      <div className="relative overflow-hidden bg-indigo-600 rounded-xl p-6 md:p-8 shadow-lg">
         <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-medium text-white flex items-center gap-1.5">
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="px-3 py-1.5 bg-white/20 rounded-full text-xs font-medium text-white flex items-center gap-1.5">
                 <Sparkles className="h-3 w-3" /> AI-Powered
               </span>
             </div>
-            <h1 className="text-2xl md:text-3xl font-bold text-white">Welcome back, {displayName}!</h1>
-            <p className="text-white/80 text-sm md:text-base max-w-md">
+            <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Welcome back, {displayName}!</h1>
+            <p className="text-indigo-100 text-sm md:text-base max-w-md">
               Your economic twin is ready. Let's build your future today.
             </p>
           </div>
 
-          <div className="flex items-center gap-4 md:gap-8">
-            <div className="text-center p-4 bg-white/10 backdrop-blur-sm rounded-xl">
+          <div className="flex items-center gap-6 md:gap-8">
+            <div className="text-center p-4 bg-white/10 rounded-lg border border-white/20">
               <div className="flex items-center justify-center gap-1 mb-1">
                 <p className="text-3xl font-bold text-white">78</p>
-                <ChevronUp className="h-5 w-5 text-accent" />
+                <ChevronUp className="h-5 w-5 text-emerald-300" />
               </div>
-              <p className="text-xs text-white/70">Empowerment Score</p>
+              <p className="text-xs text-indigo-100">Empowerment Score</p>
             </div>
             <div className="h-16 w-px bg-white/20"></div>
-            <div className="text-center p-4 bg-white/10 backdrop-blur-sm rounded-xl">
+            <div className="text-center p-4 bg-white/10 rounded-lg border border-white/20">
               <p className="text-3xl font-bold text-white">R4.2K</p>
-              <p className="text-xs text-white/70">3-Month Projection</p>
+              <p className="text-xs text-indigo-100">3-Month Projection</p>
             </div>
           </div>
         </div>
@@ -55,28 +51,26 @@ export default function Dashboard() {
           <div
             key={i}
             className={cn(
-              "bg-card border border-border rounded-xl p-5 hover:shadow-lg hover:border-primary/30 transition-all duration-300 animate-fade-in-up group",
-              `stagger-${i + 1}`,
+              "bg-white border border-slate-200 rounded-xl p-6 hover:shadow-md hover:border-indigo-300 transition-all duration-200 group"
             )}
-            style={{ opacity: 0 }}
           >
-            <div className="flex items-start justify-between mb-3">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{stat.label}</p>
+            <div className="flex items-start justify-between mb-4">
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">{stat.label}</p>
               <div
                 className={cn(
-                  "h-8 w-8 rounded-lg flex items-center justify-center transition-transform group-hover:scale-110",
-                  stat.color === "primary" && "bg-primary/10 text-primary",
-                  stat.color === "secondary" && "bg-secondary/10 text-secondary",
-                  stat.color === "warning" && "bg-warning/10 text-warning",
-                  stat.color === "accent" && "bg-accent/10 text-accent",
+                  "h-8 w-8 rounded-lg flex items-center justify-center transition-transform group-hover:scale-105",
+                  stat.color === "primary" && "bg-indigo-100 text-indigo-600",
+                  stat.color === "secondary" && "bg-cyan-100 text-cyan-600",
+                  stat.color === "warning" && "bg-amber-100 text-amber-600",
+                  stat.color === "accent" && "bg-emerald-100 text-emerald-600",
                 )}
               >
                 {stat.trend === "up" ? <TrendingUp className="h-4 w-4" /> : <Clock className="h-4 w-4" />}
               </div>
             </div>
-            <p className="text-2xl md:text-3xl font-bold text-foreground">{stat.value}</p>
+            <p className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">{stat.value}</p>
             <p
-              className={cn("text-xs mt-2 font-medium", stat.trend === "up" ? "text-accent" : "text-muted-foreground")}
+              className={cn("text-sm font-medium", stat.trend === "up" ? "text-emerald-600" : "text-slate-500")}
             >
               {stat.change}
             </p>
@@ -84,10 +78,10 @@ export default function Dashboard() {
         ))}
       </div>
 
-      <div className="animate-fade-in-up stagger-3" style={{ opacity: 0 }}>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-foreground">Quick Actions</h2>
-          <span className="text-xs text-muted-foreground">Choose an action to get started</span>
+      <div>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold text-slate-900">Quick Actions</h2>
+          <span className="text-sm text-slate-500">Choose an action to get started</span>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[
@@ -144,49 +138,45 @@ export default function Dashboard() {
               key={i}
               to={action.path}
               className={cn(
-                "group relative bg-card border border-border rounded-xl p-5 hover:shadow-xl transition-all duration-300 overflow-hidden",
-                "hover:border-transparent hover:-translate-y-1",
+                "group bg-white border border-slate-200 rounded-xl p-6 hover:shadow-md hover:border-indigo-300 transition-all duration-200"
               )}
             >
-              {/* Hover gradient overlay */}
-              <div
-                className={cn(
-                  "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300",
-                  action.bgColor,
-                )}
-              ></div>
-
-              <div className="relative">
-                <div className="flex items-start justify-between mb-4">
-                  <div
-                    className={cn(
-                      "h-12 w-12 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-lg transition-transform group-hover:scale-110",
-                      action.gradient,
-                    )}
-                  >
-                    <action.icon className="h-5 w-5 text-white" />
-                  </div>
-                  <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
-                    <ArrowRight className="h-4 w-4 text-foreground" />
-                  </div>
+              <div className="flex items-start justify-between mb-4">
+                <div
+                  className={cn(
+                    "h-12 w-12 rounded-lg flex items-center justify-center transition-transform group-hover:scale-105",
+                    stat.color === "primary" && "bg-indigo-100 text-indigo-600",
+                    stat.color === "secondary" && "bg-cyan-100 text-cyan-600",
+                    stat.color === "warning" && "bg-amber-100 text-amber-600",
+                    stat.color === "accent" && "bg-emerald-100 text-emerald-600",
+                    i === 0 && "bg-indigo-100 text-indigo-600",
+                    i === 1 && "bg-emerald-100 text-emerald-600",
+                    i === 2 && "bg-cyan-100 text-cyan-600",
+                    i === 3 && "bg-amber-100 text-amber-600",
+                    i === 4 && "bg-indigo-100 text-indigo-600",
+                    i === 5 && "bg-cyan-100 text-cyan-600",
+                  )}
+                >
+                  <action.icon className="h-6 w-6" />
                 </div>
-                <h3 className="font-semibold text-foreground text-base">{action.title}</h3>
-                <p className="text-sm text-muted-foreground mt-1">{action.desc}</p>
+                <ArrowRight className="h-5 w-5 text-slate-400 group-hover:text-indigo-600 transition-colors" />
               </div>
+              <h3 className="font-semibold text-slate-900 text-base mb-1">{action.title}</h3>
+              <p className="text-sm text-slate-600">{action.desc}</p>
             </Link>
           ))}
         </div>
       </div>
 
-      <div className="animate-fade-in-up stagger-4" style={{ opacity: 0 }}>
-        <div className="flex items-center justify-between mb-4">
+      <div>
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-lg font-semibold text-foreground">Recommended For You</h2>
-            <p className="text-xs text-muted-foreground mt-0.5">Based on your skills and preferences</p>
+            <h2 className="text-xl font-semibold text-slate-900">Recommended For You</h2>
+            <p className="text-sm text-slate-500 mt-1">Based on your skills and preferences</p>
           </div>
           <Link
             to="/dashboard/opportunities"
-            className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 font-medium transition-colors group"
+            className="flex items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-700 font-medium transition-colors group"
           >
             View all
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -206,26 +196,26 @@ export default function Dashboard() {
           ].map((job, i) => (
             <div
               key={i}
-              className="bg-card border border-border rounded-xl p-5 hover:shadow-lg hover:border-primary/30 transition-all duration-300 group"
+              className="bg-white border border-slate-200 rounded-xl p-6 hover:shadow-md hover:border-indigo-300 transition-all duration-200 group"
             >
               <div className="flex items-start justify-between mb-4">
-                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center group-hover:from-primary/30 group-hover:to-primary/10 transition-colors">
-                  <Briefcase className="h-5 w-5 text-primary" />
+                <div className="h-12 w-12 rounded-lg bg-indigo-100 flex items-center justify-center">
+                  <Briefcase className="h-6 w-6 text-indigo-600" />
                 </div>
                 <div className="flex flex-col items-end gap-1">
-                  <span className="px-2.5 py-1 bg-gradient-to-r from-accent to-accent/80 text-white text-xs rounded-full font-semibold shadow-sm">
+                  <span className="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs rounded-full font-semibold">
                     {job.match}% match
                   </span>
-                  <span className="text-xs text-muted-foreground">{job.posted}</span>
+                  <span className="text-xs text-slate-500">{job.posted}</span>
                 </div>
               </div>
-              <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">{job.title}</h3>
-              <p className="text-sm text-muted-foreground mt-1">{job.company}</p>
-              <div className="mt-4 flex items-center justify-between">
-                <span className="inline-flex items-center px-3 py-1 bg-muted text-xs text-muted-foreground rounded-full font-medium">
+              <h3 className="font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors mb-1">{job.title}</h3>
+              <p className="text-sm text-slate-600 mb-4">{job.company}</p>
+              <div className="flex items-center justify-between">
+                <span className="inline-flex items-center px-3 py-1 bg-slate-100 text-xs text-slate-700 rounded-full font-medium">
                   {job.type}
                 </span>
-                <button className="text-xs text-primary font-medium opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                <button className="text-xs text-indigo-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
                   View details <ArrowRight className="h-3 w-3" />
                 </button>
               </div>
