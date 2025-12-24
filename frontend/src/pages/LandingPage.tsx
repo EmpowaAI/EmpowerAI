@@ -154,15 +154,17 @@ export default function LandingPage() {
             </div>
             <div className="flex-1 relative w-full max-w-md mx-auto lg:mx-0 lg:max-w-none">
               {/* Hero Image */}
-              <div className="relative mb-6 lg:mb-0 lg:absolute lg:right-0 lg:top-0 lg:w-1/2 lg:h-full">
-                <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-slate-200/50 dark:border-slate-700/50">
+              <div className="relative mb-6 lg:mb-0 lg:absolute lg:right-0 lg:top-0 lg:w-1/2 lg:h-full flex items-center justify-center">
+                <div className="relative w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20 dark:border-slate-700/30 ring-4 ring-indigo-500/10 dark:ring-indigo-400/10">
                   <img 
-                    src="/images/landing.png" 
+                    src="/images/result.jpg" 
                     alt="EmpowerAI - Empowering South African Youth" 
                     className="w-full h-auto object-cover"
                   />
                   {/* Overlay gradient for better integration */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-indigo-600/20 via-transparent to-transparent"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/30 via-transparent to-transparent dark:from-indigo-950/40"></div>
+                  {/* Decorative shine effect */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent pointer-events-none"></div>
                 </div>
               </div>
               
