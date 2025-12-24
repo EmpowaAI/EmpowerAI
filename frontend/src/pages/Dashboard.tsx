@@ -145,10 +145,6 @@ export default function Dashboard() {
                 <div
                   className={cn(
                     "h-12 w-12 rounded-lg flex items-center justify-center transition-transform group-hover:scale-105",
-                    stat.color === "primary" && "bg-indigo-100 text-indigo-600",
-                    stat.color === "secondary" && "bg-cyan-100 text-cyan-600",
-                    stat.color === "warning" && "bg-amber-100 text-amber-600",
-                    stat.color === "accent" && "bg-emerald-100 text-emerald-600",
                     i === 0 && "bg-indigo-100 text-indigo-600",
                     i === 1 && "bg-emerald-100 text-emerald-600",
                     i === 2 && "bg-cyan-100 text-cyan-600",
