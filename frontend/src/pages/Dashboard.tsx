@@ -10,7 +10,7 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
-      <div className="relative overflow-hidden bg-indigo-600 rounded-xl p-6 md:p-8 shadow-lg">
+      <div className="relative overflow-hidden bg-indigo-600 dark:bg-indigo-700 rounded-xl p-6 md:p-8 shadow-lg">
         <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-3">
             <div className="flex items-center gap-2 mb-2">
@@ -172,7 +172,7 @@ export default function Dashboard() {
           </div>
           <Link
             to="/dashboard/opportunities"
-            className="flex items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-700 font-medium transition-colors group"
+            className="flex items-center gap-1.5 text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium transition-colors group"
           >
             View all
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
