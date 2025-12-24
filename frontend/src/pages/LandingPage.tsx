@@ -35,8 +35,17 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 relative overflow-hidden transition-colors duration-300">
-      {/* Amazing animated gradient background */}
+      {/* Background Image */}
       <div className="absolute inset-0 overflow-hidden">
+        <img 
+          src="/images/result.jpg" 
+          alt="" 
+          className="w-full h-full object-cover opacity-[0.15] dark:opacity-[0.08] transition-opacity duration-500"
+          aria-hidden="true"
+        />
+        {/* Overlay gradient for better content readability */}
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/90 via-white/80 to-cyan-50/90 dark:from-slate-900/95 dark:via-slate-800/95 dark:to-slate-900/95"></div>
+        
         {/* Animated gradient orbs - light mode */}
         <div className="absolute top-0 -left-1/4 w-[800px] h-[800px] bg-indigo-400/20 dark:bg-indigo-500/10 rounded-full blur-[120px] animate-pulse-soft"></div>
         <div className="absolute top-1/3 -right-1/4 w-[600px] h-[600px] bg-cyan-400/20 dark:bg-cyan-500/10 rounded-full blur-[100px] animate-pulse-soft" style={{ animationDelay: '1s' }}></div>
