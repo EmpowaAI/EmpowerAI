@@ -387,7 +387,7 @@ export default function LandingPage() {
               © 2025 EmpowerAI. Built with ❤️ for South African youth.
             </p>
             <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
-              Melsoft Academy Hackathon 2025 | Team: Nicolette, Lunga, Eva, Siyanda, Lindy
+              Techridle Team
             </p>
           </div>
         </div>
