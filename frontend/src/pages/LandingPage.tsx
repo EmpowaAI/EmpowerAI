@@ -262,10 +262,13 @@ export default function LandingPage() {
             ].map((feature, i) => (
               <div
                 key={i}
-                className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 sm:p-8 hover:border-indigo-300 dark:hover:border-indigo-500 transition-all duration-200 shadow-sm hover:shadow-md hover:scale-[1.02]"
+                className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 sm:p-8 hover:border-indigo-300 dark:hover:border-indigo-500 transition-all duration-300 shadow-sm hover:shadow-lg hover:scale-[1.02] group relative overflow-hidden"
               >
-                <div className="h-12 w-12 rounded-lg bg-indigo-100 flex items-center justify-center mb-4">
-                  <feature.icon className="h-6 w-6 text-indigo-600" />
+                <div className="relative">
+                  <div className="absolute inset-0 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-300"></div>
+                  <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-indigo-100 to-indigo-200 dark:from-indigo-900/50 dark:to-indigo-800/50 flex items-center justify-center mb-4 relative shadow-lg border border-indigo-200/50 dark:border-indigo-700/50 group-hover:scale-110 transition-transform duration-300">
+                    <feature.icon className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+                  </div>
                 </div>
                 <h3 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">{feature.title}</h3>
                 <p className="text-slate-600 dark:text-slate-300 text-base leading-relaxed">{feature.description}</p>
