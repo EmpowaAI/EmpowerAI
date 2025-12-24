@@ -37,14 +37,32 @@ export default function LandingPage() {
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 relative overflow-hidden transition-colors duration-300">
       {/* Amazing animated gradient background */}
       <div className="absolute inset-0 overflow-hidden">
-        {/* Animated gradient orbs */}
-        <div className="absolute top-0 -left-1/4 w-[800px] h-[800px] bg-indigo-400/20 rounded-full blur-[120px] animate-pulse-soft"></div>
-        <div className="absolute top-1/3 -right-1/4 w-[600px] h-[600px] bg-cyan-400/20 rounded-full blur-[100px] animate-pulse-soft" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute bottom-0 left-1/3 w-[700px] h-[700px] bg-indigo-300/15 rounded-full blur-[110px] animate-pulse-soft" style={{ animationDelay: '2s' }}></div>
+        {/* Animated gradient orbs - light mode */}
+        <div className="absolute top-0 -left-1/4 w-[800px] h-[800px] bg-indigo-400/20 dark:bg-indigo-500/10 rounded-full blur-[120px] animate-pulse-soft"></div>
+        <div className="absolute top-1/3 -right-1/4 w-[600px] h-[600px] bg-cyan-400/20 dark:bg-cyan-500/10 rounded-full blur-[100px] animate-pulse-soft" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute bottom-0 left-1/3 w-[700px] h-[700px] bg-indigo-300/15 dark:bg-indigo-400/10 rounded-full blur-[110px] animate-pulse-soft" style={{ animationDelay: '2s' }}></div>
+        
+        {/* Dark mode subtle stars */}
+        <div className="absolute inset-0 dark:opacity-100 opacity-0 transition-opacity duration-500">
+          {[...Array(20)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute rounded-full bg-white/40"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                width: `${Math.random() * 3 + 1}px`,
+                height: `${Math.random() * 3 + 1}px`,
+                animation: `twinkle ${Math.random() * 3 + 2}s ease-in-out infinite`,
+                animationDelay: `${Math.random() * 2}s`,
+              }}
+            />
+          ))}
+        </div>
       </div>
       
       {/* Subtle grid pattern overlay */}
-      <div className="absolute inset-0 opacity-[0.02]" style={{
+      <div className="absolute inset-0 opacity-[0.02] dark:opacity-[0.03]" style={{
         backgroundImage: `linear-gradient(rgba(99, 102, 241, 0.1) 1px, transparent 1px),
                           linear-gradient(90deg, rgba(99, 102, 241, 0.1) 1px, transparent 1px)`,
         backgroundSize: '50px 50px',
