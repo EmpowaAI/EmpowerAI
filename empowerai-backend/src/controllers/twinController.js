@@ -137,17 +137,28 @@ exports.runSimulation = async (req, res, next) => {
     });
 
     if (existingTwin) {
+      // Limit simulation history to last 20 entries to prevent unbounded growth
+      const MAX_HISTORY = 20;
+      
+      // Get current history
+      let history = existingTwin.simulationHistory || [];
+      
+      // Add new entry
+      history.push({
+        paths: pathIds || 'all',
+        timestamp: new Date(),
+        results: simulationResponse.data
+      });
+      
+      // Keep only last MAX_HISTORY entries (most recent)
+      if (history.length > MAX_HISTORY) {
+        history = history.slice(-MAX_HISTORY);
+      }
+      
+      // Update twin with limited history
       await EconomicTwin.findOneAndUpdate(
         { userId },
-        {
-          $push: {
-            simulationHistory: {
-              paths: pathIds || 'all',
-              timestamp: new Date(),
-              results: simulationResponse.data
-            }
-          }
-        }
+        { simulationHistory: history }
       );
     }
 
