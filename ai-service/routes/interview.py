@@ -3,6 +3,7 @@ FastAPI routes for Interview Coach
 """
 
 from fastapi import APIRouter, HTTPException
+from datetime import datetime, timedelta
 from models.schemas import (
     InterviewStartRequest,
     InterviewSessionResponse,
@@ -15,7 +16,30 @@ router = APIRouter()
 interview_coach = InterviewCoach()
 
 # Store sessions in memory (in production, use Redis or database)
+# Sessions expire after 1 hour of inactivity
 sessions = {}
+SESSION_EXPIRY_HOURS = 1
+
+def cleanup_expired_sessions():
+    """Remove sessions older than SESSION_EXPIRY_HOURS"""
+    now = datetime.now()
+    expired_keys = []
+    
+    for session_id, session in sessions.items():
+        # Check if session has a timestamp
+        if 'createdAt' in session:
+            session_age = now - session['createdAt']
+            if session_age > timedelta(hours=SESSION_EXPIRY_HOURS):
+                expired_keys.append(session_id)
+        # If no timestamp, assume it's old and remove it
+        else:
+            expired_keys.append(session_id)
+    
+    for key in expired_keys:
+        del sessions[key]
+    
+    if expired_keys:
+        print(f"Cleaned up {len(expired_keys)} expired interview session(s)")
 
 @router.post("/start", response_model=InterviewSessionResponse)
 async def start_interview(request: InterviewStartRequest):
@@ -23,11 +47,16 @@ async def start_interview(request: InterviewStartRequest):
     Start a new interview session
     """
     try:
+        # Clean up expired sessions before creating new one
+        cleanup_expired_sessions()
+        
         session = interview_coach.start_session(
             request.type,
             request.difficulty,
             request.company
         )
+        # Add timestamp for expiry tracking
+        session['createdAt'] = datetime.now()
         sessions[session['sessionId']] = session
         return InterviewSessionResponse(**session)
     except Exception as e:
@@ -39,8 +68,11 @@ async def submit_answer(session_id: str, answer: InterviewAnswerRequest):
     Submit an answer to an interview question and get feedback
     """
     try:
+        # Clean up expired sessions
+        cleanup_expired_sessions()
+        
         if session_id not in sessions:
-            raise HTTPException(status_code=404, detail="Session not found")
+            raise HTTPException(status_code=404, detail="Session not found or expired")
         
         session = sessions[session_id]
         questions = session['questions']
@@ -79,8 +111,10 @@ async def submit_answer(session_id: str, answer: InterviewAnswerRequest):
 @router.get("/{session_id}")
 async def get_session(session_id: str):
     """Get interview session details"""
+    cleanup_expired_sessions()
+    
     if session_id not in sessions:
-        raise HTTPException(status_code=404, detail="Session not found")
+        raise HTTPException(status_code=404, detail="Session not found or expired")
     return sessions[session_id]
 
 @router.get("/health")
