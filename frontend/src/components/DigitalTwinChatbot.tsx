@@ -167,7 +167,7 @@ export default function DigitalTwinChatbot() {
         </div>
 
         {/* Messages Container - Scrollable area */}
-        <div className="flex-1 overflow-y-auto bg-gradient-to-b from-white to-gray-50 p-4 space-y-4">
+        <div className="flex-1 overflow-y-auto bg-gradient-to-b from-white to-gray-50 dark:from-slate-800 dark:to-slate-900 p-4 space-y-4">
           {messages.map((message) => (
             <div
               key={message.id}
@@ -192,12 +192,12 @@ export default function DigitalTwinChatbot() {
                 "max-w-[70%] rounded-2xl p-3 shadow-sm",
                 message.sender === 'user'
                   ? 'bg-accent text-white rounded-br-none'
-                  : 'bg-white border border-gray-200 rounded-bl-none'
+                  : 'bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-bl-none'
               )}>
-                <p className="text-sm">{message.text}</p>
+                <p className="text-sm text-slate-900 dark:text-slate-100">{message.text}</p>
                 <div className={cn(
                   "flex items-center gap-1 mt-2 text-xs",
-                  message.sender === 'user' ? 'text-white/70' : 'text-gray-500'
+                  message.sender === 'user' ? 'text-white/70' : 'text-gray-500 dark:text-slate-400'
                 )}>
                   <Clock className="h-3 w-3" />
                   {formatTime(message.timestamp)}
@@ -211,7 +211,7 @@ export default function DigitalTwinChatbot() {
               <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
                 <Bot className="h-4 w-4 text-primary" />
               </div>
-              <div className="bg-white border border-gray-200 rounded-2xl rounded-bl-none p-3 max-w-[70%]">
+              <div className="bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-2xl rounded-bl-none p-3 max-w-[70%]">
                 <div className="flex items-center gap-2">
                   <div className="h-2 w-2 rounded-full bg-primary animate-bounce" />
                   <div className="h-2 w-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '0.2s' }} />
@@ -225,14 +225,14 @@ export default function DigitalTwinChatbot() {
         </div>
 
         {/* Quick Questions - Fixed height */}
-        <div className="p-3 border-t border-gray-200 bg-gray-50">
-          <p className="text-xs font-medium text-gray-500 mb-2">Quick questions:</p>
+        <div className="p-3 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800">
+          <p className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-2">Quick questions:</p>
           <div className="flex flex-wrap gap-2">
             {QUICK_QUESTIONS.map((question, index) => (
               <button
                 key={index}
                 onClick={() => handleQuickQuestion(question)}
-                className="px-3 py-1.5 text-xs bg-white hover:bg-primary/10 hover:text-primary rounded-full border border-gray-300 transition-colors hover:border-primary/30"
+                className="px-3 py-1.5 text-xs bg-white dark:bg-slate-700 hover:bg-primary/10 dark:hover:bg-primary/20 hover:text-primary dark:hover:text-primary rounded-full border border-gray-300 dark:border-slate-600 transition-colors hover:border-primary/30 dark:hover:border-primary/50 text-slate-900 dark:text-slate-100"
               >
                 {question}
               </button>
@@ -241,7 +241,7 @@ export default function DigitalTwinChatbot() {
         </div>
 
         {/* Input Area - Fixed at bottom */}
-        <div className="p-3 border-t border-gray-200 bg-white">
+        <div className="p-3 border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800">
           <div className="flex gap-2">
             <input
               ref={inputRef}
@@ -250,7 +250,7 @@ export default function DigitalTwinChatbot() {
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
               placeholder="Ask your digital twin anything..."
-              className="flex-1 px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+              className="flex-1 px-4 py-2 bg-gray-50 dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
               disabled={isLoading}
             />
             <button
@@ -259,7 +259,7 @@ export default function DigitalTwinChatbot() {
               className={cn(
                 "px-4 py-2 rounded-lg flex items-center gap-2 transition-all",
                 isLoading || !inputText.trim()
-                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  ? "bg-gray-100 dark:bg-slate-700 text-gray-400 dark:text-slate-500 cursor-not-allowed"
                   : "bg-primary text-white hover:bg-primary/90"
               )}
             >
@@ -267,18 +267,18 @@ export default function DigitalTwinChatbot() {
             </button>
           </div>
           <div className="flex items-center justify-between mt-2">
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 dark:text-slate-400">
               Your AI-powered career guide
             </p>
             <div className="flex items-center gap-1">
               <button
-                className="h-8 w-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-green-500 transition-colors"
+                className="h-8 w-8 rounded-full hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center justify-center text-gray-500 dark:text-slate-400 hover:text-green-500 dark:hover:text-green-400 transition-colors"
                 title="Helpful"
               >
                 <ThumbsUp className="h-4 w-4" />
               </button>
               <button
-                className="h-8 w-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-red-500 transition-colors"
+                className="h-8 w-8 rounded-full hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center justify-center text-gray-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
                 title="Not helpful"
               >
                 <ThumbsDown className="h-4 w-4" />
