@@ -10,32 +10,42 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
-      <div className="relative overflow-hidden bg-indigo-600 dark:bg-indigo-700 rounded-xl p-6 md:p-8 shadow-lg">
+      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-indigo-600 to-indigo-700 dark:from-indigo-700 dark:via-indigo-800 dark:to-indigo-900 rounded-xl p-6 md:p-8 shadow-xl border border-indigo-500/20 dark:border-indigo-600/20">
+        {/* Decorative pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
+            backgroundSize: '40px 40px',
+          }}></div>
+        </div>
+        
         <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div className="flex items-center gap-2 mb-2">
-              <span className="px-3 py-1.5 bg-white/20 rounded-full text-xs font-medium text-white flex items-center gap-1.5">
-                <Sparkles className="h-3 w-3" /> AI-Powered
+              <span className="px-4 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-xs font-semibold text-white flex items-center gap-1.5 border border-white/30 shadow-lg">
+                <Sparkles className="h-3.5 w-3.5" /> AI-Powered
               </span>
             </div>
-            <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Welcome back, {displayName}!</h1>
-            <p className="text-indigo-100 text-sm md:text-base max-w-md">
+            <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight leading-tight">
+              Welcome back, <span className="bg-gradient-to-r from-white to-indigo-100 bg-clip-text text-transparent">{displayName}</span>!
+            </h1>
+            <p className="text-indigo-100 text-base md:text-lg max-w-md leading-relaxed">
               Your economic twin is ready. Let's build your future today.
             </p>
           </div>
 
           <div className="flex items-center gap-6 md:gap-8">
-            <div className="text-center p-4 bg-white/10 rounded-lg border border-white/20">
-              <div className="flex items-center justify-center gap-1 mb-1">
-                <p className="text-3xl font-bold text-white">78</p>
-                <ChevronUp className="h-5 w-5 text-emerald-300" />
+            <div className="text-center p-5 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 shadow-lg hover:bg-white/15 transition-all duration-300">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <p className="text-4xl font-bold text-white tracking-tight">78</p>
+                <ChevronUp className="h-6 w-6 text-emerald-300 animate-bounce" />
               </div>
-              <p className="text-xs text-indigo-100">Empowerment Score</p>
+              <p className="text-xs font-medium text-indigo-100 uppercase tracking-wide">Empowerment Score</p>
             </div>
-            <div className="h-16 w-px bg-white/20"></div>
-            <div className="text-center p-4 bg-white/10 rounded-lg border border-white/20">
-              <p className="text-3xl font-bold text-white">R4.2K</p>
-              <p className="text-xs text-indigo-100">3-Month Projection</p>
+            <div className="h-16 w-px bg-white/30"></div>
+            <div className="text-center p-5 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 shadow-lg hover:bg-white/15 transition-all duration-300">
+              <p className="text-4xl font-bold text-white tracking-tight mb-2">R4.2K</p>
+              <p className="text-xs font-medium text-indigo-100 uppercase tracking-wide">3-Month Projection</p>
             </div>
           </div>
         </div>
@@ -51,18 +61,18 @@ export default function Dashboard() {
           <div
             key={i}
             className={cn(
-              "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-500 transition-all duration-200 group"
+              "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 hover:shadow-lg hover:border-indigo-300 dark:hover:border-indigo-500 transition-all duration-300 group relative overflow-hidden"
             )}
           >
             <div className="flex items-start justify-between mb-4">
               <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">{stat.label}</p>
               <div
                 className={cn(
-                  "h-8 w-8 rounded-lg flex items-center justify-center transition-transform group-hover:scale-105",
-                  stat.color === "primary" && "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400",
-                  stat.color === "secondary" && "bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400",
-                  stat.color === "warning" && "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400",
-                  stat.color === "accent" && "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400",
+                  "h-9 w-9 rounded-lg flex items-center justify-center transition-all duration-300 group-hover:scale-110 shadow-md",
+                  stat.color === "primary" && "bg-gradient-to-br from-indigo-100 to-indigo-200 dark:from-indigo-900/40 dark:to-indigo-800/40 text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-700/50",
+                  stat.color === "secondary" && "bg-gradient-to-br from-cyan-100 to-cyan-200 dark:from-cyan-900/40 dark:to-cyan-800/40 text-cyan-600 dark:text-cyan-400 border border-cyan-200/50 dark:border-cyan-700/50",
+                  stat.color === "warning" && "bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-900/40 dark:to-amber-800/40 text-amber-600 dark:text-amber-400 border border-amber-200/50 dark:border-amber-700/50",
+                  stat.color === "accent" && "bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-emerald-900/40 dark:to-emerald-800/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-700/50",
                 )}
               >
                 {stat.trend === "up" ? <TrendingUp className="h-4 w-4" /> : <Clock className="h-4 w-4" />}
@@ -138,19 +148,19 @@ export default function Dashboard() {
               key={i}
               to={action.path}
               className={cn(
-                "group bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-500 transition-all duration-200"
+                "group bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 hover:shadow-lg hover:border-indigo-300 dark:hover:border-indigo-500 transition-all duration-300 relative overflow-hidden"
               )}
             >
               <div className="flex items-start justify-between mb-4">
                 <div
                   className={cn(
-                    "h-12 w-12 rounded-lg flex items-center justify-center transition-transform group-hover:scale-105",
-                    i === 0 && "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400",
-                    i === 1 && "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400",
-                    i === 2 && "bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400",
-                    i === 3 && "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400",
-                    i === 4 && "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400",
-                    i === 5 && "bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400",
+                    "h-12 w-12 rounded-lg flex items-center justify-center transition-all duration-300 group-hover:scale-110 shadow-md",
+                    i === 0 && "bg-gradient-to-br from-indigo-100 to-indigo-200 dark:from-indigo-900/40 dark:to-indigo-800/40 text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-700/50",
+                    i === 1 && "bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-emerald-900/40 dark:to-emerald-800/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-700/50",
+                    i === 2 && "bg-gradient-to-br from-cyan-100 to-cyan-200 dark:from-cyan-900/40 dark:to-cyan-800/40 text-cyan-600 dark:text-cyan-400 border border-cyan-200/50 dark:border-cyan-700/50",
+                    i === 3 && "bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-900/40 dark:to-amber-800/40 text-amber-600 dark:text-amber-400 border border-amber-200/50 dark:border-amber-700/50",
+                    i === 4 && "bg-gradient-to-br from-indigo-100 to-indigo-200 dark:from-indigo-900/40 dark:to-indigo-800/40 text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-700/50",
+                    i === 5 && "bg-gradient-to-br from-cyan-100 to-cyan-200 dark:from-cyan-900/40 dark:to-cyan-800/40 text-cyan-600 dark:text-cyan-400 border border-cyan-200/50 dark:border-cyan-700/50",
                   )}
                 >
                   <action.icon className="h-6 w-6" />
