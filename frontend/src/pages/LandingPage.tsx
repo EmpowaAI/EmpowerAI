@@ -100,7 +100,7 @@ export default function LandingPage() {
             <div className="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center">
               <Zap className="h-5 w-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-slate-900">EmpowerAI</span>
+            <span className="text-xl font-bold text-slate-900 dark:text-slate-100">EmpowerAI</span>
           </Link>
           <div className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
