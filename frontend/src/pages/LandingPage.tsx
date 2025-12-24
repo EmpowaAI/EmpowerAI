@@ -14,11 +14,15 @@ import {
   Sparkles,
   X,
   Bot,
+  Moon,
+  Sun,
 } from "lucide-react"
+import { useTheme } from "../lib/theme"
 
 export default function LandingPage() {
   const [isMobile, setIsMobile] = useState(false)
   const [windowWidth, setWindowWidth] = useState(0)
+  const { theme, toggleTheme } = useTheme()
 
  useLayoutEffect(() => {
   const checkMobile = () => {
@@ -33,7 +37,7 @@ export default function LandingPage() {
 }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 relative overflow-hidden transition-colors duration-300">
       {/* Amazing animated gradient background */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Animated gradient orbs */}
@@ -62,7 +66,7 @@ export default function LandingPage() {
         </svg>
       </div>
 
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-sm shadow-sm">
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm shadow-sm">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center">
@@ -71,18 +75,25 @@ export default function LandingPage() {
             <span className="text-xl font-bold text-slate-900">EmpowerAI</span>
           </Link>
           <div className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-slate-600 hover:text-slate-900 transition-colors">
+            <a href="#features" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
               Features
             </a>
-            <a href="#how-it-works" className="text-slate-600 hover:text-slate-900 transition-colors">
+            <a href="#how-it-works" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
               How It Works
             </a>
-            <a href="#demo" className="text-slate-600 hover:text-slate-900 transition-colors">
+            <a href="#demo" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
               Demo
             </a>
           </div>
-          <div className="flex items-center gap-4">
-            <Link to="/login" className="text-slate-600 hover:text-slate-900 transition-colors text-sm sm:text-base">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:text-slate-100 dark:hover:bg-slate-800 transition-all"
+              aria-label="Toggle theme"
+            >
+              {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </button>
+            <Link to="/login" className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100 transition-colors text-sm sm:text-base">
               Sign In
             </Link>
             <Link
@@ -104,16 +115,16 @@ export default function LandingPage() {
                 <Sparkles className="h-3 w-3 sm:h-4 sm:w-4" />
                 AI-Powered Career Guidance
               </div>
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-slate-900 leading-tight mb-6 sm:mb-8 tracking-tight">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-slate-900 dark:text-slate-100 leading-tight mb-6 sm:mb-8 tracking-tight">
                 Your Digital
-                <span className="text-indigo-600">
+                <span className="text-indigo-600 dark:text-indigo-400">
                   {" "}
                   Economic
                 </span>
                 <br className="hidden sm:block" />
                 Twin Awaits
               </h1>
-              <p className="text-lg sm:text-xl md:text-2xl text-slate-600 max-w-2xl mb-8 sm:mb-10 mx-auto lg:mx-0 leading-relaxed">
+              <p className="text-lg sm:text-xl md:text-2xl text-slate-600 dark:text-slate-300 max-w-2xl mb-8 sm:mb-10 mx-auto lg:mx-0 leading-relaxed">
                 Visualize your future earning potential. Get personalized career pathways designed for South African
                 youth.
               </p>
@@ -133,14 +144,14 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="flex-1 relative w-full max-w-md mx-auto lg:mx-0 lg:max-w-none">
-              <div className="relative bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-xl mt-10 sm:mt-20">
+              <div className="relative bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 sm:p-8 shadow-xl mt-10 sm:mt-20">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-indigo-100 flex items-center justify-center">
+                  <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center">
                     <span className="text-lg sm:text-xl">👤</span>
                   </div>
                   <div>
-                    <p className="font-semibold text-slate-900 text-base sm:text-lg">Asanda, 22</p>
-                    <p className="text-sm text-slate-500">Soweto, Gauteng</p>
+                    <p className="font-semibold text-slate-900 dark:text-slate-100 text-base sm:text-lg">Asanda, 22</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Soweto, Gauteng</p>
                   </div>
                 </div>
                 <div className="space-y-4">
@@ -168,7 +179,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="py-12 sm:py-16 border-y border-slate-200 bg-white relative z-20">
+      <section className="py-12 sm:py-16 border-y border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 relative z-20 transition-colors">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 relative">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8 lg:gap-12">
             {[
@@ -183,21 +194,21 @@ export default function LandingPage() {
                     <stat.icon className="h-6 w-6 sm:h-7 sm:w-7 text-indigo-600" />
                   </div>
                 </div>
-                <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-2">{stat.value}</p>
-                <p className="text-sm text-slate-600">{stat.label}</p>
+                <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 dark:text-slate-100 mb-2">{stat.value}</p>
+                <p className="text-sm text-slate-600 dark:text-slate-400">{stat.label}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="features" className="py-16 sm:py-24 px-4 sm:px-6 bg-white relative z-20">
+      <section id="features" className="py-16 sm:py-24 px-4 sm:px-6 bg-white dark:bg-slate-900 relative z-20 transition-colors">
         <div className="mx-auto max-w-7xl relative">
           <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-4 sm:mb-6 tracking-tight">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-slate-100 mb-4 sm:mb-6 tracking-tight">
               Everything You Need to Succeed
             </h2>
-            <p className="text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto">
+            <p className="text-lg sm:text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
               Our AI-powered platform provides comprehensive tools for your economic empowerment journey.
             </p>
           </div>
@@ -237,24 +248,24 @@ export default function LandingPage() {
             ].map((feature, i) => (
               <div
                 key={i}
-                className="bg-white border border-slate-200 rounded-xl p-6 sm:p-8 hover:border-indigo-300 transition-all duration-200 shadow-sm hover:shadow-md hover:scale-[1.02]"
+                className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 sm:p-8 hover:border-indigo-300 dark:hover:border-indigo-500 transition-all duration-200 shadow-sm hover:shadow-md hover:scale-[1.02]"
               >
                 <div className="h-12 w-12 rounded-lg bg-indigo-100 flex items-center justify-center mb-4">
                   <feature.icon className="h-6 w-6 text-indigo-600" />
                 </div>
-                <h3 className="text-lg sm:text-xl font-semibold text-slate-900 mb-3">{feature.title}</h3>
-                <p className="text-slate-600 text-base leading-relaxed">{feature.description}</p>
+                <h3 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">{feature.title}</h3>
+                <p className="text-slate-600 dark:text-slate-300 text-base leading-relaxed">{feature.description}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="how-it-works" className="py-16 sm:py-24 px-4 sm:px-6 bg-slate-50 relative z-20">
+      <section id="how-it-works" className="py-16 sm:py-24 px-4 sm:px-6 bg-slate-50 dark:bg-slate-800/50 relative z-20 transition-colors">
         <div className="mx-auto max-w-7xl relative">
           <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-4 sm:mb-6 tracking-tight">How It Works</h2>
-            <p className="text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-slate-100 mb-4 sm:mb-6 tracking-tight">How It Works</h2>
+            <p className="text-lg sm:text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
               Get started in minutes and see your future unfold.
             </p>
           </div>
@@ -273,21 +284,21 @@ export default function LandingPage() {
                     </div>
                   </div>
                 </div>
-                <h3 className="text-lg sm:text-xl font-semibold text-slate-900 mb-2">{item.title}</h3>
-                <p className="text-slate-600 text-sm sm:text-base">{item.desc}</p>
+                <h3 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">{item.title}</h3>
+                <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-base">{item.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="demo" className="py-16 sm:py-24 px-4 sm:px-6 bg-white relative z-20">
+      <section id="demo" className="py-16 sm:py-24 px-4 sm:px-6 bg-white dark:bg-slate-900 relative z-20 transition-colors">
         <div className="mx-auto max-w-4xl relative">
-          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-8 sm:p-10 md:p-12 shadow-lg">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-6 sm:mb-8 tracking-tight">
+          <div className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-8 sm:p-10 md:p-12 shadow-lg">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 dark:text-slate-100 mb-6 sm:mb-8 tracking-tight">
               Meet Asanda from Soweto
             </h2>
-            <div className="space-y-4 text-slate-600 text-base sm:text-lg leading-relaxed">
+            <div className="space-y-4 text-slate-600 dark:text-slate-300 text-base sm:text-lg leading-relaxed">
               <p>
                 Asanda, 22, uploads her CV and enters her interests. EmpowerAI builds a digital version of her — her
                 Economic Twin.
@@ -296,7 +307,7 @@ export default function LandingPage() {
                 The twin runs simulations for learnerships, freelancing, a Web Design course, and entry-level support
                 roles.
               </p>
-              <p className="text-slate-900 font-semibold">
+              <p className="text-slate-900 dark:text-slate-100 font-semibold">
                 It shows her the best path: Freelancing + learnership → R4,200/month by Month 3.
               </p>
               <p>In 20 seconds, she sees her future clearly.</p>
@@ -305,7 +316,7 @@ export default function LandingPage() {
               {["Income Projections", "Career Roadmap", "Interview Prep", "Local Opportunities"].map((tag, i) => (
                 <span
                   key={i}
-                  className="px-4 py-2 bg-white border border-slate-200 rounded-full text-sm font-medium text-slate-700 flex items-center gap-2 shadow-sm"
+                  className="px-4 py-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-full text-sm font-medium text-slate-700 dark:text-slate-200 flex items-center gap-2 shadow-sm"
                 >
                   <CheckCircle className="h-4 w-4 text-emerald-600" />
                   <span>{tag}</span>
@@ -316,7 +327,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-indigo-600 relative z-20">
+      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-indigo-600 dark:bg-indigo-700 relative z-20 transition-colors">
         <div className="mx-auto max-w-4xl text-center relative">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-6 sm:mb-8 tracking-tight">
             Ready to See Your Future?
@@ -333,17 +344,52 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <footer className="py-8 sm:py-10 px-4 sm:px-6 border-t border-slate-200 bg-white relative z-20">
-        <div className="mx-auto max-w-7xl flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="h-6 w-6 rounded bg-indigo-600 flex items-center justify-center">
-              <Zap className="h-4 w-4 text-white" />
+      <footer className="py-12 sm:py-16 px-4 sm:px-6 border-t border-slate-200 dark:border-slate-700 bg-gradient-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-900 relative z-20 transition-colors">
+        <div className="mx-auto max-w-7xl">
+          {/* Main Footer Content */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12 mb-8">
+            {/* Brand Section */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center">
+                  <Zap className="h-5 w-5 text-white" />
+                </div>
+                <span className="text-xl font-bold text-slate-900 dark:text-slate-100">EmpowerAI</span>
+              </div>
+              <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed max-w-xs">
+                Empowering South African youth to visualize and achieve their economic potential through AI-powered career guidance.
+              </p>
             </div>
-            <span className="font-semibold text-slate-900 text-sm sm:text-base">EmpowerAI</span>
+
+            {/* Quick Links */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100 text-sm uppercase tracking-wide">Quick Links</h3>
+              <div className="space-y-2">
+                <a href="#features" className="block text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 text-sm transition-colors">Features</a>
+                <a href="#how-it-works" className="block text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 text-sm transition-colors">How It Works</a>
+                <a href="#demo" className="block text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 text-sm transition-colors">Demo</a>
+                <Link to="/signup" className="block text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 text-sm transition-colors">Get Started</Link>
+              </div>
+            </div>
+
+            {/* Empowerment Message */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100 text-sm uppercase tracking-wide">Your Future Starts Here</h3>
+              <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+                Join thousands of young South Africans taking control of their economic destiny. Build your digital twin, explore career paths, and unlock your potential.
+              </p>
+            </div>
           </div>
-          <p className="text-xs sm:text-sm text-slate-500 text-center">
-            Melsoft Academy Hackathon 2025 | Team: Nicolette, Lunga, Eva, Siyanda, Lindy
-          </p>
+
+          {/* Bottom Bar */}
+          <div className="pt-8 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
+              © 2025 EmpowerAI. Built with ❤️ for South African youth.
+            </p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
+              Melsoft Academy Hackathon 2025 | Team: Nicolette, Lunga, Eva, Siyanda, Lindy
+            </p>
+          </div>
         </div>
       </footer>
 

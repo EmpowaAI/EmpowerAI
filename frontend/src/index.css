@@ -8,7 +8,7 @@
   :root {
     --font-sans: "Inter", system-ui, sans-serif;
 
-    /* Professional indigo/cyan palette for youths and stakeholders */
+    /* Light mode - Professional indigo/cyan palette */
     --color-background: #ffffff;
     --color-foreground: #1e293b;
     --color-card: #ffffff;
@@ -31,6 +31,27 @@
     --radius-md: 0.5rem;
     --radius-lg: 0.75rem;
     --radius-xl: 1rem;
+  }
+
+  .dark {
+    /* Dark mode - Professional indigo/cyan palette */
+    --color-background: #0f172a;
+    --color-foreground: #f1f5f9;
+    --color-card: #1e293b;
+    --color-card-foreground: #f1f5f9;
+    --color-primary: #818cf8;
+    --color-primary-foreground: #ffffff;
+    --color-secondary: #38bdf8;
+    --color-secondary-foreground: #ffffff;
+    --color-muted: #1e293b;
+    --color-muted-foreground: #94a3b8;
+    --color-accent: #34d399;
+    --color-accent-foreground: #ffffff;
+    --color-border: #334155;
+    --color-ring: #818cf8;
+    --color-success: #34d399;
+    --color-warning: #fbbf24;
+    --color-destructive: #f87171;
   }
 }
 
