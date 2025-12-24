@@ -153,16 +153,20 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="flex-1 relative w-full max-w-md mx-auto lg:mx-0 lg:max-w-none">
-              <div className="relative bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 sm:p-8 shadow-xl mt-10 sm:mt-20">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center">
-                    <span className="text-lg sm:text-xl">👤</span>
+              <div className="relative bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 sm:p-8 shadow-xl mt-10 sm:mt-20 overflow-hidden group">
+                {/* Decorative gradient background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/50 via-transparent to-cyan-50/50 dark:from-indigo-900/20 dark:to-cyan-900/20 opacity-50"></div>
+                
+                <div className="relative">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center shadow-lg ring-4 ring-indigo-100 dark:ring-indigo-900/50">
+                      <span className="text-xl sm:text-2xl">👤</span>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-900 dark:text-slate-100 text-base sm:text-lg">Asanda, 22</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">Soweto, Gauteng</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-semibold text-slate-900 dark:text-slate-100 text-base sm:text-lg">Asanda, 22</p>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Soweto, Gauteng</p>
-                  </div>
-                </div>
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-slate-600 text-sm">Empowerment Score</span>
@@ -172,15 +176,16 @@ export default function LandingPage() {
                     <div className="h-full w-[78%] bg-gradient-to-r from-indigo-600 to-cyan-500 rounded-full"></div>
                   </div>
                   <div className="grid grid-cols-2 gap-4 mt-6">
-                    <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                      <p className="text-xs text-slate-500 mb-1">3-Month Projection</p>
-                      <p className="text-xl font-bold text-emerald-600">R4,200/mo</p>
+                    <div className="bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-900/30 dark:to-emerald-800/20 rounded-lg p-4 border border-emerald-200 dark:border-emerald-800/50 backdrop-blur-sm">
+                      <p className="text-xs text-emerald-700 dark:text-emerald-400 mb-1 font-medium">3-Month Projection</p>
+                      <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">R4,200/mo</p>
                     </div>
-                    <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                      <p className="text-xs text-slate-500 mb-1">Best Path</p>
-                      <p className="text-xl font-bold text-indigo-600">Mentorship</p>
+                    <div className="bg-gradient-to-br from-indigo-50 to-indigo-100/50 dark:from-indigo-900/30 dark:to-indigo-800/20 rounded-lg p-4 border border-indigo-200 dark:border-indigo-800/50 backdrop-blur-sm">
+                      <p className="text-xs text-indigo-700 dark:text-indigo-400 mb-1 font-medium">Best Path</p>
+                      <p className="text-xl font-bold text-indigo-600 dark:text-indigo-400">Mentorship</p>
                     </div>
                   </div>
+                </div>
                 </div>
               </div>
             </div>
