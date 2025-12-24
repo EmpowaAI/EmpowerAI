@@ -96,12 +96,13 @@ Return only the questions, one per line, without numbering."""
             fallback_questions = random.sample(pool, min(needed, len(pool)))
             questions.extend(fallback_questions)
         
-        # Format questions
+        # Format questions - use 'text' to match frontend expectations
         formatted_questions = []
         for i, q in enumerate(questions[:num_questions]):
             formatted_questions.append({
                 'id': f'q{i+1}',
-                'question': q,
+                'text': q,  # Changed from 'question' to 'text' for frontend compatibility
+                'question': q,  # Keep both for schema compatibility
                 'type': interview_type,
                 'difficulty': difficulty
             })

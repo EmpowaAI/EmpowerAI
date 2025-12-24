@@ -25,7 +25,17 @@ exports.startInterview = async (req, res, next) => {
     });
   } catch (error) {
     console.error('Error starting interview:', error.response?.data || error.message);
-    next(error);
+    
+    // Return user-friendly error message
+    const errorMessage = error.response?.data?.detail || 
+                        error.response?.data?.message || 
+                        error.message || 
+                        'Failed to start interview. Please try again.';
+    
+    return res.status(error.response?.status || 500).json({
+      status: 'error',
+      message: errorMessage
+    });
   }
 };
 
@@ -54,7 +64,16 @@ exports.submitAnswer = async (req, res, next) => {
     });
   } catch (error) {
     console.error('Error submitting answer:', error.response?.data || error.message);
-    next(error);
+    
+    const errorMessage = error.response?.data?.detail || 
+                      error.response?.data?.message || 
+                      error.message || 
+                      'Failed to submit answer. Please try again.';
+    
+    return res.status(error.response?.status || 500).json({
+      status: 'error',
+      message: errorMessage
+    });
   }
 };
 

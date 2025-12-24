@@ -73,8 +73,13 @@ class InterviewStartRequest(BaseModel):
 class InterviewQuestion(BaseModel):
     id: str
     question: str
+    text: Optional[str] = None  # Added for frontend compatibility
     type: str
     difficulty: str
+    
+    class Config:
+        # Allow both 'question' and 'text' fields
+        populate_by_name = True
 
 class InterviewSessionResponse(BaseModel):
     sessionId: str
