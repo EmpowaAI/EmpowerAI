@@ -40,11 +40,15 @@ export default function LandingPage() {
         <img 
           src="/images/result.jpg" 
           alt="" 
-          className="w-full h-full object-cover opacity-[0.15] dark:opacity-[0.08] transition-opacity duration-500"
+          className="w-full h-full object-cover"
+          style={{
+            opacity: '0.2',
+            filter: 'brightness(0.9)',
+          }}
           aria-hidden="true"
         />
         {/* Overlay gradient for better content readability */}
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/90 via-white/80 to-cyan-50/90 dark:from-slate-900/95 dark:via-slate-800/95 dark:to-slate-900/95"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/85 via-white/75 to-cyan-50/85 dark:from-slate-900/70 dark:via-slate-800/70 dark:to-slate-900/70"></div>
         
         {/* Animated gradient orbs - light mode */}
         <div className="absolute top-0 -left-1/4 w-[800px] h-[800px] bg-indigo-400/20 dark:bg-indigo-500/10 rounded-full blur-[120px] animate-pulse-soft"></div>
