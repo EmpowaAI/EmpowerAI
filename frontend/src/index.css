@@ -165,6 +165,19 @@
   animation: float 20s ease-in-out infinite;
 }
 
+/* Smooth theme transition */
+* {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+
+/* Don't transition on theme class itself */
+html.dark,
+html:not(.dark) {
+  transition: none;
+}
+
 .animate-bounce {
   animation: bounce 1s infinite;
 }
@@ -255,7 +268,16 @@
     opacity: 1;
     transform: scale(1);
   }
+}
 
-  
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
 }
 
