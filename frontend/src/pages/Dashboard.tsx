@@ -11,6 +11,17 @@ export default function Dashboard() {
   return (
     <div className="space-y-8">
       <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-indigo-600 to-indigo-700 dark:from-indigo-700 dark:via-indigo-800 dark:to-indigo-900 rounded-xl p-6 md:p-8 shadow-xl border border-indigo-500/20 dark:border-indigo-600/20">
+        {/* Background image overlay - subtle */}
+        <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]">
+          <img 
+            src="/images/result.jpg" 
+            alt="" 
+            className="w-full h-full object-cover"
+            aria-hidden="true"
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/80 to-indigo-700/80 dark:from-indigo-800/90 dark:to-indigo-900/90"></div>
+        </div>
+        
         {/* Decorative pattern */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0" style={{
