@@ -51,26 +51,26 @@ export default function Dashboard() {
           <div
             key={i}
             className={cn(
-              "bg-white border border-slate-200 rounded-xl p-6 hover:shadow-md hover:border-indigo-300 transition-all duration-200 group"
+              "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-500 transition-all duration-200 group"
             )}
           >
             <div className="flex items-start justify-between mb-4">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">{stat.label}</p>
+              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">{stat.label}</p>
               <div
                 className={cn(
                   "h-8 w-8 rounded-lg flex items-center justify-center transition-transform group-hover:scale-105",
-                  stat.color === "primary" && "bg-indigo-100 text-indigo-600",
-                  stat.color === "secondary" && "bg-cyan-100 text-cyan-600",
-                  stat.color === "warning" && "bg-amber-100 text-amber-600",
-                  stat.color === "accent" && "bg-emerald-100 text-emerald-600",
+                  stat.color === "primary" && "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400",
+                  stat.color === "secondary" && "bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400",
+                  stat.color === "warning" && "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400",
+                  stat.color === "accent" && "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400",
                 )}
               >
                 {stat.trend === "up" ? <TrendingUp className="h-4 w-4" /> : <Clock className="h-4 w-4" />}
               </div>
             </div>
-            <p className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">{stat.value}</p>
+            <p className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">{stat.value}</p>
             <p
-              className={cn("text-sm font-medium", stat.trend === "up" ? "text-emerald-600" : "text-slate-500")}
+              className={cn("text-sm font-medium", stat.trend === "up" ? "text-emerald-600 dark:text-emerald-400" : "text-slate-500 dark:text-slate-400")}
             >
               {stat.change}
             </p>
@@ -80,8 +80,8 @@ export default function Dashboard() {
 
       <div>
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-slate-900">Quick Actions</h2>
-          <span className="text-sm text-slate-500">Choose an action to get started</span>
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Quick Actions</h2>
+          <span className="text-sm text-slate-500 dark:text-slate-400">Choose an action to get started</span>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[
@@ -138,27 +138,27 @@ export default function Dashboard() {
               key={i}
               to={action.path}
               className={cn(
-                "group bg-white border border-slate-200 rounded-xl p-6 hover:shadow-md hover:border-indigo-300 transition-all duration-200"
+                "group bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-500 transition-all duration-200"
               )}
             >
               <div className="flex items-start justify-between mb-4">
                 <div
                   className={cn(
                     "h-12 w-12 rounded-lg flex items-center justify-center transition-transform group-hover:scale-105",
-                    i === 0 && "bg-indigo-100 text-indigo-600",
-                    i === 1 && "bg-emerald-100 text-emerald-600",
-                    i === 2 && "bg-cyan-100 text-cyan-600",
-                    i === 3 && "bg-amber-100 text-amber-600",
-                    i === 4 && "bg-indigo-100 text-indigo-600",
-                    i === 5 && "bg-cyan-100 text-cyan-600",
+                    i === 0 && "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400",
+                    i === 1 && "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400",
+                    i === 2 && "bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400",
+                    i === 3 && "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400",
+                    i === 4 && "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400",
+                    i === 5 && "bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400",
                   )}
                 >
                   <action.icon className="h-6 w-6" />
                 </div>
-                <ArrowRight className="h-5 w-5 text-slate-400 group-hover:text-indigo-600 transition-colors" />
+                <ArrowRight className="h-5 w-5 text-slate-400 dark:text-slate-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" />
               </div>
-              <h3 className="font-semibold text-slate-900 text-base mb-1">{action.title}</h3>
-              <p className="text-sm text-slate-600">{action.desc}</p>
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100 text-base mb-1">{action.title}</h3>
+              <p className="text-sm text-slate-600 dark:text-slate-300">{action.desc}</p>
             </Link>
           ))}
         </div>
@@ -192,26 +192,26 @@ export default function Dashboard() {
           ].map((job, i) => (
             <div
               key={i}
-              className="bg-white border border-slate-200 rounded-xl p-6 hover:shadow-md hover:border-indigo-300 transition-all duration-200 group"
+              className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-500 transition-all duration-200 group"
             >
               <div className="flex items-start justify-between mb-4">
-                <div className="h-12 w-12 rounded-lg bg-indigo-100 flex items-center justify-center">
-                  <Briefcase className="h-6 w-6 text-indigo-600" />
+                <div className="h-12 w-12 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                  <Briefcase className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
                 </div>
                 <div className="flex flex-col items-end gap-1">
-                  <span className="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs rounded-full font-semibold">
+                  <span className="px-3 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs rounded-full font-semibold">
                     {job.match}% match
                   </span>
-                  <span className="text-xs text-slate-500">{job.posted}</span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400">{job.posted}</span>
                 </div>
               </div>
-              <h3 className="font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors mb-1">{job.title}</h3>
-              <p className="text-sm text-slate-600 mb-4">{job.company}</p>
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors mb-1">{job.title}</h3>
+              <p className="text-sm text-slate-600 dark:text-slate-300 mb-4">{job.company}</p>
               <div className="flex items-center justify-between">
-                <span className="inline-flex items-center px-3 py-1 bg-slate-100 text-xs text-slate-700 rounded-full font-medium">
+                <span className="inline-flex items-center px-3 py-1 bg-slate-100 dark:bg-slate-700 text-xs text-slate-700 dark:text-slate-300 rounded-full font-medium">
                   {job.type}
                 </span>
-                <button className="text-xs text-indigo-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                <button className="text-xs text-indigo-600 dark:text-indigo-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
                   View details <ArrowRight className="h-3 w-3" />
                 </button>
               </div>
