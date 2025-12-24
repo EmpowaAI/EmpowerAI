@@ -33,12 +33,33 @@ export default function LandingPage() {
 }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 relative">
-      {/* Subtle background pattern - very light */}
-      <div className="absolute inset-0 opacity-[0.03]">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%236366f1' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        }}></div>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 relative overflow-hidden">
+      {/* Amazing animated gradient background */}
+      <div className="absolute inset-0 overflow-hidden">
+        {/* Animated gradient orbs */}
+        <div className="absolute top-0 -left-1/4 w-[800px] h-[800px] bg-indigo-400/20 rounded-full blur-[120px] animate-pulse-soft"></div>
+        <div className="absolute top-1/3 -right-1/4 w-[600px] h-[600px] bg-cyan-400/20 rounded-full blur-[100px] animate-pulse-soft" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute bottom-0 left-1/3 w-[700px] h-[700px] bg-indigo-300/15 rounded-full blur-[110px] animate-pulse-soft" style={{ animationDelay: '2s' }}></div>
+      </div>
+      
+      {/* Subtle grid pattern overlay */}
+      <div className="absolute inset-0 opacity-[0.02]" style={{
+        backgroundImage: `linear-gradient(rgba(99, 102, 241, 0.1) 1px, transparent 1px),
+                          linear-gradient(90deg, rgba(99, 102, 241, 0.1) 1px, transparent 1px)`,
+        backgroundSize: '50px 50px',
+      }}></div>
+      
+      {/* Subtle wave pattern */}
+      <div className="absolute bottom-0 left-0 right-0 h-64 opacity-[0.03]">
+        <svg className="w-full h-full" viewBox="0 0 1440 320" preserveAspectRatio="none">
+          <path fill="url(#waveGradient)" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,165.3C1248,149,1344,107,1392,85.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+          <defs>
+            <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#6366f1" />
+              <stop offset="100%" stopColor="#06b6d4" />
+            </linearGradient>
+          </defs>
+        </svg>
       </div>
 
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-sm shadow-sm">
@@ -75,7 +96,7 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-28 pb-16 sm:pt-32 sm:pb-20 px-4 sm:px-6 relative z-10">
+      <section className="pt-28 pb-16 sm:pt-32 sm:pb-20 px-4 sm:px-6 relative z-20">
         <div className="mx-auto max-w-7xl relative">
           <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
             <div className="flex-1 text-center lg:text-left">
@@ -147,7 +168,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="py-12 sm:py-16 border-y border-slate-200 bg-white relative z-10">
+      <section className="py-12 sm:py-16 border-y border-slate-200 bg-white relative z-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 relative">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8 lg:gap-12">
             {[
@@ -170,7 +191,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section id="features" className="py-16 sm:py-24 px-4 sm:px-6 bg-white relative z-10">
+      <section id="features" className="py-16 sm:py-24 px-4 sm:px-6 bg-white relative z-20">
         <div className="mx-auto max-w-7xl relative">
           <div className="text-center mb-12 sm:mb-16">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-4 sm:mb-6 tracking-tight">
@@ -229,7 +250,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section id="how-it-works" className="py-16 sm:py-24 px-4 sm:px-6 bg-slate-50 relative z-10">
+      <section id="how-it-works" className="py-16 sm:py-24 px-4 sm:px-6 bg-slate-50 relative z-20">
         <div className="mx-auto max-w-7xl relative">
           <div className="text-center mb-12 sm:mb-16">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-4 sm:mb-6 tracking-tight">How It Works</h2>
@@ -260,7 +281,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section id="demo" className="py-16 sm:py-24 px-4 sm:px-6 bg-white relative z-10">
+      <section id="demo" className="py-16 sm:py-24 px-4 sm:px-6 bg-white relative z-20">
         <div className="mx-auto max-w-4xl relative">
           <div className="bg-slate-50 border border-slate-200 rounded-2xl p-8 sm:p-10 md:p-12 shadow-lg">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-6 sm:mb-8 tracking-tight">
@@ -295,7 +316,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-indigo-600 relative z-10">
+      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-indigo-600 relative z-20">
         <div className="mx-auto max-w-4xl text-center relative">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-6 sm:mb-8 tracking-tight">
             Ready to See Your Future?
@@ -312,7 +333,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <footer className="py-8 sm:py-10 px-4 sm:px-6 border-t border-slate-200 bg-white relative z-10">
+      <footer className="py-8 sm:py-10 px-4 sm:px-6 border-t border-slate-200 bg-white relative z-20">
         <div className="mx-auto max-w-7xl flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <div className="h-6 w-6 rounded bg-indigo-600 flex items-center justify-center">
