@@ -14,15 +14,12 @@ import {
   Sparkles,
   X,
   Bot,
-  Moon,
-  Sun,
 } from "lucide-react"
-import { useTheme } from "../lib/theme"
+import ThemeToggle from "../components/ThemeToggle"
 
 export default function LandingPage() {
   const [isMobile, setIsMobile] = useState(false)
   const [windowWidth, setWindowWidth] = useState(0)
-  const { theme, toggleTheme } = useTheme()
 
  useLayoutEffect(() => {
   const checkMobile = () => {
@@ -86,13 +83,7 @@ export default function LandingPage() {
             </a>
           </div>
           <div className="flex items-center gap-3 sm:gap-4">
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:text-slate-100 dark:hover:bg-slate-800 transition-all"
-              aria-label="Toggle theme"
-            >
-              {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-            </button>
+            <ThemeToggle />
             <Link to="/login" className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100 transition-colors text-sm sm:text-base">
               Sign In
             </Link>

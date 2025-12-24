@@ -16,6 +16,7 @@ import {
 } from "lucide-react"
 import { cn } from "../lib/utils"
 import { useUser } from "../lib/user-context"
+import ThemeToggle from "../components/ThemeToggle"
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
@@ -263,8 +264,9 @@ export default function DashboardLayout() {
             <p className="text-xs text-muted-foreground hidden sm:block">Manage your career journey</p>
           </div>
 
-          {/* Progress indicator */}
-          <div className="flex items-center gap-2">
+          {/* Progress indicator and Theme Toggle */}
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
             {progress.twinCompleted ? (
               <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-accent/10 text-accent rounded-full text-xs font-medium">
                 <span className="h-2 w-2 rounded-full bg-accent animate-pulse"></span>
