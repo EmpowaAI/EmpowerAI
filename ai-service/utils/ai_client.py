@@ -1,3 +1,4 @@
+
 """
 OpenAI API client wrapper with rate limit handling
 Principal Engineer Level: Robust error handling and async support
@@ -25,8 +26,9 @@ class AIClient:
         if self.enabled:
             try:
                 self.client = OpenAI(api_key=api_key)
-                self.async_client = AsyncOpenAI(api_key=api_key)  # Async client
-                self.model = os.getenv("MODEL_NAME", "gpt-4")
+                self.async_client = AsyncOpenAI(api_key=api_key)
+                # Fixed: Use OPENAI_MODEL instead of MODEL_NAME
+                self.model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
                 self.embedding_model = os.getenv("EMBEDDING_MODEL", "text-embedding-ada-002")
                 logger.info("OpenAI client initialized successfully", extra={'model': self.model})
             except Exception as e:
@@ -36,6 +38,45 @@ class AIClient:
             logger.warning("OPENAI_API_KEY not set. AI features will use fallback methods.")
             self.enabled = False
     
+    def chat(self, message: str, system_prompt: str = None) -> str:
+        """
+        Send a chat message and get a response (sync method for simple chat)
+        
+        Args:
+            message: The user's message
+            system_prompt: Optional system prompt to set context
+            
+        Returns:
+            The AI's response as a string
+        """
+        if not self.enabled:
+            return "AI service is not available. Please check your API key configuration."
+        
+        try:
+            messages = []
+            if system_prompt:
+                messages.append({"role": "system", "content": system_prompt})
+            messages.append({"role": "user", "content": message})
+            
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                temperature=0.7,
+                max_tokens=500
+            )
+            
+            return response.choices[0].message.content
+            
+        except RateLimitError as e:
+            logger.error(f"Rate limit error in chat: {str(e)}")
+            return "I'm experiencing high demand right now. Please try again in a moment."
+        except APIError as e:
+            logger.error(f"OpenAI API error in chat: {str(e)}")
+            return "I'm having trouble connecting to the AI service. Please try again."
+        except Exception as e:
+            logger.error(f"Unexpected error in chat: {str(e)}")
+            return "An unexpected error occurred. Please try again."
+
     async def generate_text_async(
         self, 
         prompt: str, 
@@ -100,6 +141,7 @@ class AIClient:
                         "OpenAI API rate limit exceeded. Please try again later.",
                         retry_after=60
                     )
+            
             except APIError as e:
                 log.error("OpenAI API error", extra={
                     'error': str(e),
@@ -109,6 +151,7 @@ class AIClient:
                 if attempt == self.max_retries - 1:
                     raise ModelError(f"OpenAI API error: {str(e)}", model=self.model)
                 await asyncio.sleep(self.retry_delay * (2 ** attempt))
+            
             except Exception as e:
                 log.error("Unexpected error in OpenAI API call", extra={
                     'error': str(e),
@@ -119,7 +162,7 @@ class AIClient:
                 await asyncio.sleep(self.retry_delay * (2 ** attempt))
         
         return ""
-    
+
     def generate_text(
         self, 
         prompt: str, 
@@ -130,6 +173,7 @@ class AIClient:
     ) -> str:
         """Generate text using GPT with retry logic for rate limits (sync wrapper)"""
         import asyncio
+        
         try:
             loop = asyncio.get_event_loop()
         except RuntimeError:
@@ -139,7 +183,7 @@ class AIClient:
         return loop.run_until_complete(
             self.generate_text_async(prompt, system_prompt, temperature, max_tokens, correlation_id)
         )
-    
+
     def get_embeddings(self, text: str) -> List[float]:
         """Get text embeddings"""
         if not self.enabled:
@@ -154,7 +198,7 @@ class AIClient:
         except Exception as e:
             print(f"Embedding error: {e}")
             return []
-    
+
     def extract_skills(self, text: str) -> List[str]:
         """Extract skills from text using AI with fallback on rate limit"""
         if not text or not text.strip():
@@ -178,15 +222,18 @@ Skills:"""
             
             # Try to parse JSON from response
             import json
+            
             # Remove markdown code blocks if present
             result = result.strip()
             if result.startswith("```"):
                 result = result.split("```")[1]
                 if result.startswith("json"):
                     result = result[4:]
-            result = result.strip()
+                result = result.strip()
+            
             skills = json.loads(result)
             return skills if isinstance(skills, list) else []
+            
         except RateLimitError:
             # Rate limit hit - return empty list, will use keyword-based fallback
             print("Rate limit reached for skill extraction. Using fallback method.")
@@ -197,4 +244,3 @@ Skills:"""
             if result:
                 return [s.strip() for s in result.replace("[", "").replace("]", "").replace('"', "").split(",") if s.strip()]
             return []
-
