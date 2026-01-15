@@ -1,7 +1,7 @@
 // pages/CVAnalyzer.tsx
 import type React from "react"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useRef } from "react"
 import { Upload, FileText, CheckCircle, Sparkles, Loader2, ArrowRight } from "lucide-react"
 import { cn } from "../lib/utils"
 import { cvAPI } from "../lib/api"
@@ -24,6 +24,7 @@ export default function CVAnalyzer() {
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [result, setResult] = useState<AnalysisResult | null>(null)
   const [error, setError] = useState("")
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
   const navigate = useNavigate()
   const { updateProgress } = useUser()
 
@@ -164,12 +165,21 @@ export default function CVAnalyzer() {
                   <p className="font-medium text-foreground">Drop your CV here or click to browse</p>
                   <p className="text-sm text-muted-foreground">Supports PDF, DOC, DOCX (max 5MB)</p>
                 </div>
-                <label className="inline-block">
-                  <input type="file" accept=".pdf,.doc,.docx,.txt" onChange={handleFileSelect} className="hidden" />
-                  <span className="px-4 py-2 bg-primary text-white rounded-lg font-medium cursor-pointer hover:bg-primary/90 transition-colors">
-                    Select File
-                  </span>
-                </label>
+                {/* Hidden native file input + explicit trigger button for reliability */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,.doc,.docx,.txt"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors"
+                >
+                  Select File
+                </button>
                 <p className="text-xs text-muted-foreground">
                   Tip: For this early version, pasting your CV text above works best. File upload support is on the way.
                 </p>
