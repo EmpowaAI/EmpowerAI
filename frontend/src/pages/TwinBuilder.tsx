@@ -287,23 +287,27 @@ export default function TwinBuilder() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-3xl mx-auto space-y-8">
       {/* Progress Tracker */}
       <ProgressTracker currentStep="twin" />
       
       {/* Header */}
-      <div className="text-center mb-8">
-        <h1 className="text-2xl font-bold text-foreground">Step 2: Build Your Digital Twin</h1>
-        <p className="text-muted-foreground">Tell us about yourself to personalize your experience</p>
+      <div className="text-center">
+        <h1 className="text-3xl font-bold text-foreground tracking-tight">
+          Step 2: Build Your Digital Twin
+        </h1>
+        <p className="mt-2 text-muted-foreground text-sm sm:text-base">
+          Tell us about yourself so we can generate an accurate economic profile tailored to you.
+        </p>
       </div>
 
       {/* Internal Progress Steps */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between bg-card border border-border rounded-xl px-4 sm:px-6 py-4 shadow-sm">
         {steps.map((step, i) => (
           <div key={i} className="flex items-center">
             <div
               className={cn(
-                "h-10 w-10 rounded-full flex items-center justify-center font-medium transition-colors",
+                "h-10 w-10 rounded-full flex items-center justify-center font-medium transition-colors shadow-sm",
                 i < currentStep
                   ? "bg-accent text-white"
                   : i === currentStep
@@ -314,22 +318,22 @@ export default function TwinBuilder() {
               {i < currentStep ? <CheckCircle className="h-5 w-5" /> : i + 1}
             </div>
             {i < steps.length - 1 && (
-              <div className={cn("w-12 md:w-24 h-1 mx-2", i < currentStep ? "bg-accent" : "bg-muted")} />
+              <div className={cn("w-10 md:w-20 h-1 mx-2 rounded-full", i < currentStep ? "bg-accent" : "bg-muted")} />
             )}
           </div>
         ))}
       </div>
 
       {/* Step Title */}
-      <div className="text-center mb-8">
-        <h2 className="text-xl font-bold text-foreground">{steps[currentStep]}</h2>
-        <p className="text-muted-foreground mt-1">
+      <div className="text-center">
+        <h2 className="text-xl font-semibold text-foreground">{steps[currentStep]}</h2>
+        <p className="text-muted-foreground mt-1 text-sm">
           Step {currentStep + 1} of {steps.length}
         </p>
       </div>
 
       {/* Form Content */}
-      <div className="bg-card border border-border rounded-xl p-6 mb-6 shadow-sm">
+      <div className="bg-card border border-border rounded-2xl p-6 sm:p-7 mb-4 shadow-md">
         {currentStep === 0 && (
           <div className="space-y-6">
             <div>
