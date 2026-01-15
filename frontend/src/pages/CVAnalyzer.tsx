@@ -45,7 +45,11 @@ export default function CVAnalyzer() {
 
   const analyzeCV = async () => {
     if (!cvText.trim()) {
-      setError("Please enter CV text or upload a file")
+      if (file) {
+        setError("File upload support is coming soon. For now, please paste your CV text above so we can analyze it.")
+      } else {
+        setError("Please paste your CV text above before continuing.")
+      }
       return
     }
 
@@ -161,11 +165,14 @@ export default function CVAnalyzer() {
                   <p className="text-sm text-muted-foreground">Supports PDF, DOC, DOCX (max 5MB)</p>
                 </div>
                 <label className="inline-block">
-                  <input type="file" accept=".pdf,.doc,.docx" onChange={handleFileSelect} className="hidden" />
+                  <input type="file" accept=".pdf,.doc,.docx,.txt" onChange={handleFileSelect} className="hidden" />
                   <span className="px-4 py-2 bg-primary text-white rounded-lg font-medium cursor-pointer hover:bg-primary/90 transition-colors">
                     Select File
                   </span>
                 </label>
+                <p className="text-xs text-muted-foreground">
+                  Tip: For this early version, pasting your CV text above works best. File upload support is on the way.
+                </p>
               </div>
             )}
           </div>
@@ -173,7 +180,7 @@ export default function CVAnalyzer() {
           {/* Analyze Button */}
           <button
             onClick={analyzeCV}
-            disabled={isAnalyzing || !cvText.trim()}
+            disabled={isAnalyzing || (!cvText.trim() && !file)}
             className="w-full flex items-center justify-center gap-2 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isAnalyzing ? (
