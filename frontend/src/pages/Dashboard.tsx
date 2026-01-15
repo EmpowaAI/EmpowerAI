@@ -30,39 +30,39 @@ export default function Dashboard() {
           }}></div>
         </div>
         
-        <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-6 animate-in fade-in-up">
           <div className="space-y-4">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="px-4 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-xs font-semibold text-white flex items-center gap-1.5 border border-white/30 shadow-lg">
+            <div className="flex items-center gap-2 mb-2 animate-in fade-in-up" style={{ animationDelay: '0.1s' }}>
+              <span className="px-3 sm:px-4 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-xs font-semibold text-white flex items-center gap-1.5 border border-white/30 shadow-lg">
                 <Sparkles className="h-3.5 w-3.5" /> AI-Powered
               </span>
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight leading-tight">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight leading-tight animate-in fade-in-up" style={{ animationDelay: '0.2s' }}>
               Welcome back, <span className="bg-gradient-to-r from-white to-indigo-100 bg-clip-text text-transparent">{displayName}</span>!
             </h1>
-            <p className="text-indigo-100 text-base md:text-lg max-w-md leading-relaxed">
+            <p className="text-indigo-100 text-sm sm:text-base md:text-lg max-w-md leading-relaxed animate-in fade-in-up" style={{ animationDelay: '0.3s' }}>
               Your economic twin is ready. Let's build your future today.
             </p>
           </div>
 
-          <div className="flex items-center gap-6 md:gap-8">
-            <div className="text-center p-5 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 shadow-lg hover:bg-white/15 transition-all duration-300">
+          <div className="flex items-center gap-4 sm:gap-6 md:gap-8 animate-in fade-in-up" style={{ animationDelay: '0.4s' }}>
+            <div className="text-center p-4 sm:p-5 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 shadow-lg hover:bg-white/15 transition-all duration-300 hover:scale-105">
               <div className="flex items-center justify-center gap-2 mb-2">
-                <p className="text-4xl font-bold text-white tracking-tight">78</p>
-                <ChevronUp className="h-6 w-6 text-emerald-300 animate-bounce" />
+                <p className="text-3xl sm:text-4xl font-bold text-white tracking-tight">78</p>
+                <ChevronUp className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-300 animate-bounce" />
               </div>
               <p className="text-xs font-medium text-indigo-100 uppercase tracking-wide">Empowerment Score</p>
             </div>
-            <div className="h-16 w-px bg-white/30"></div>
-            <div className="text-center p-5 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 shadow-lg hover:bg-white/15 transition-all duration-300">
-              <p className="text-4xl font-bold text-white tracking-tight mb-2">R4.2K</p>
+            <div className="h-12 sm:h-16 w-px bg-white/30 hidden sm:block"></div>
+            <div className="text-center p-4 sm:p-5 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 shadow-lg hover:bg-white/15 transition-all duration-300 hover:scale-105">
+              <p className="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-2">R4.2K</p>
               <p className="text-xs font-medium text-indigo-100 uppercase tracking-wide">3-Month Projection</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: "Skills Matched", value: "12", change: "+3 this week", trend: "up", color: "primary" },
           { label: "Opportunities", value: "28", change: "8 new today", trend: "up", color: "secondary" },
@@ -72,11 +72,13 @@ export default function Dashboard() {
           <div
             key={i}
             className={cn(
-              "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 hover:shadow-lg hover:border-indigo-300 dark:hover:border-indigo-500 transition-all duration-300 group relative overflow-hidden"
+              "bg-card border border-border rounded-xl p-4 sm:p-6 hover:shadow-lg hover:border-primary/40 transition-all duration-300 group relative overflow-hidden animate-in fade-in-up",
+              "hover:scale-[1.02] hover:-translate-y-1"
             )}
+            style={{ animationDelay: `${i * 0.1}s` }}
           >
             <div className="flex items-start justify-between mb-4">
-              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">{stat.label}</p>
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{stat.label}</p>
               <div
                 className={cn(
                   "h-9 w-9 rounded-lg flex items-center justify-center transition-all duration-300 group-hover:scale-110 shadow-md",
@@ -89,9 +91,9 @@ export default function Dashboard() {
                 {stat.trend === "up" ? <TrendingUp className="h-4 w-4" /> : <Clock className="h-4 w-4" />}
               </div>
             </div>
-            <p className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">{stat.value}</p>
+            <p className="text-2xl sm:text-3xl font-bold text-foreground mb-2">{stat.value}</p>
             <p
-              className={cn("text-sm font-medium", stat.trend === "up" ? "text-emerald-600 dark:text-emerald-400" : "text-slate-500 dark:text-slate-400")}
+              className={cn("text-sm font-medium", stat.trend === "up" ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground")}
             >
               {stat.change}
             </p>
@@ -99,12 +101,12 @@ export default function Dashboard() {
         ))}
       </div>
 
-      <div>
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Quick Actions</h2>
-          <span className="text-sm text-slate-500 dark:text-slate-400">Choose an action to get started</span>
+      <div className="animate-in fade-in-up" style={{ animationDelay: '0.5s' }}>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-6">
+          <h2 className="text-xl font-semibold text-foreground">Quick Actions</h2>
+          <span className="text-sm text-muted-foreground hidden sm:inline">Choose an action to get started</span>
         </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[
             {
               icon: TrendingUp,
@@ -159,8 +161,10 @@ export default function Dashboard() {
               key={i}
               to={action.path}
               className={cn(
-                "group bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 hover:shadow-lg hover:border-indigo-300 dark:hover:border-indigo-500 transition-all duration-300 relative overflow-hidden"
+              "group bg-card border border-border rounded-xl p-4 sm:p-6 hover:shadow-lg hover:border-primary/40 transition-all duration-300 relative overflow-hidden animate-in fade-in-up",
+                "hover:scale-[1.02] hover:-translate-y-1"
               )}
+              style={{ animationDelay: `${(i + 4) * 0.1}s` }}
             >
               <div className="flex items-start justify-between mb-4">
                 <div
@@ -178,28 +182,28 @@ export default function Dashboard() {
                 </div>
                 <ArrowRight className="h-5 w-5 text-slate-400 dark:text-slate-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" />
               </div>
-              <h3 className="font-semibold text-slate-900 dark:text-slate-100 text-base mb-1">{action.title}</h3>
-              <p className="text-sm text-slate-600 dark:text-slate-300">{action.desc}</p>
+            <h3 className="font-semibold text-foreground text-base mb-1">{action.title}</h3>
+            <p className="text-sm text-muted-foreground">{action.desc}</p>
             </Link>
           ))}
         </div>
       </div>
 
-      <div>
-        <div className="flex items-center justify-between mb-6">
+      <div className="animate-in fade-in-up" style={{ animationDelay: '0.6s' }}>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-6">
           <div>
-            <h2 className="text-xl font-semibold text-slate-900">Recommended For You</h2>
-            <p className="text-sm text-slate-500 mt-1">Based on your skills and preferences</p>
+            <h2 className="text-xl font-semibold text-foreground">Recommended For You</h2>
+            <p className="text-sm text-muted-foreground mt-1">Based on your skills and preferences</p>
           </div>
           <Link
             to="/dashboard/opportunities"
-            className="flex items-center gap-1.5 text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium transition-colors group"
+            className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 font-medium transition-colors group"
           >
             View all
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[
             { title: "Junior Web Developer", company: "TechCo SA", type: "Full-time", match: 92, posted: "2h ago" },
             {
@@ -213,7 +217,8 @@ export default function Dashboard() {
           ].map((job, i) => (
             <div
               key={i}
-              className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-500 transition-all duration-200 group"
+              className="bg-card border border-border rounded-xl p-4 sm:p-6 hover:shadow-md hover:border-primary/40 transition-all duration-200 group animate-in fade-in-up hover:scale-[1.02] hover:-translate-y-1"
+              style={{ animationDelay: `${(i + 10) * 0.1}s` }}
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="h-12 w-12 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
@@ -223,16 +228,16 @@ export default function Dashboard() {
                   <span className="px-3 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs rounded-full font-semibold">
                     {job.match}% match
                   </span>
-                  <span className="text-xs text-slate-500 dark:text-slate-400">{job.posted}</span>
+                  <span className="text-xs text-muted-foreground">{job.posted}</span>
                 </div>
               </div>
-              <h3 className="font-semibold text-slate-900 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors mb-1">{job.title}</h3>
-              <p className="text-sm text-slate-600 dark:text-slate-300 mb-4">{job.company}</p>
+              <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors mb-1">{job.title}</h3>
+              <p className="text-sm text-muted-foreground mb-4">{job.company}</p>
               <div className="flex items-center justify-between">
-                <span className="inline-flex items-center px-3 py-1 bg-slate-100 dark:bg-slate-700 text-xs text-slate-700 dark:text-slate-300 rounded-full font-medium">
+                <span className="inline-flex items-center px-3 py-1 bg-muted text-xs text-muted-foreground rounded-full font-medium">
                   {job.type}
                 </span>
-                <button className="text-xs text-indigo-600 dark:text-indigo-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                <button className="text-xs text-primary font-medium opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
                   View details <ArrowRight className="h-3 w-3" />
                 </button>
               </div>
