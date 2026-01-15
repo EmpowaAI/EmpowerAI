@@ -59,15 +59,8 @@ export default function TwinBuilder() {
   const navigate = useNavigate()
   const { user, updateProgress } = useUser()
 
-  // Check if twin is already created on component mount
+  // Load any saved form data on mount so users can resume or update details
   useEffect(() => {
-    const twinCreated = localStorage.getItem('twinCreated')
-    if (twinCreated === 'true') {
-      console.log("Twin already created, redirecting to dashboard")
-      navigate("/dashboard", { replace: true })
-    }
-    
-    // Load saved form data if exists
     const savedFormData = localStorage.getItem('twinFormData')
     if (savedFormData) {
       try {
