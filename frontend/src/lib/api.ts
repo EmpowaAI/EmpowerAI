@@ -18,8 +18,15 @@ const request = async <T>(endpoint: string, options: RequestInit = {}): Promise<
     });
     
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Request failed' }));
-      throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      const error = await response.json().catch(() => ({ 
+        message: `Request failed with status ${response.status}`,
+        status: response.status 
+      }));
+      // Use the error message from backend if available
+      const errorMessage = error.message || error.detail || `HTTP error! status: ${response.status}`;
+      const apiError = new Error(errorMessage);
+      (apiError as any).status = error.status || response.status;
+      throw apiError;
     }
     return response.json();
   } catch (error: any) {
