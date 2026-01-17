@@ -31,12 +31,24 @@ const request = async <T>(endpoint: string, options: RequestInit = {}): Promise<
 export const authAPI = {
   register: async (data: any) => {
     const response = await request<any>('/auth/register', { method: 'POST', body: JSON.stringify(data) });
-    if (response.token) setToken(response.token);
+    // Backend returns token in response.data.token
+    if (response.data?.token) {
+      setToken(response.data.token);
+    } else if (response.token) {
+      // Fallback for legacy format
+      setToken(response.token);
+    }
     return response;
   },
   login: async (email: string, password: string) => {
     const response = await request<any>('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
-    if (response.token) setToken(response.token);
+    // Backend returns token in response.data.token
+    if (response.data?.token) {
+      setToken(response.data.token);
+    } else if (response.token) {
+      // Fallback for legacy format
+      setToken(response.token);
+    }
     return response;
   },
   logout: () => removeToken(),
