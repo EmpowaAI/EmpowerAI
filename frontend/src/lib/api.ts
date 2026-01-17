@@ -183,6 +183,33 @@ export const progressAPI = {
   }
 };
 
+// Chat API - calls the AI service directly
+const AI_SERVICE_BASE = import.meta.env.VITE_AI_SERVICE_URL || 'http://localhost:8000/api';
+
+export const chatAPI = {
+  sendMessage: async (message: string) => {
+    try {
+      const response = await fetch(`${AI_SERVICE_BASE}/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message }),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ detail: 'Request failed' }));
+        throw new Error(error.detail || `HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Chat API error:', error);
+      throw error;
+    }
+  },
+};
+
 // Demo/fallback implementation for development
 export const twinAPIDemo = {
   create: async (data: any) => {
