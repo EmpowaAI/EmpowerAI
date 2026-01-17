@@ -183,38 +183,21 @@ export const progressAPI = {
   }
 };
 
-// Chat API - calls the AI service directly
-const AI_SERVICE_BASE = import.meta.env.VITE_AI_SERVICE_URL || 'http://localhost:8000/api';
-
+// Chat API - calls the backend, which proxies to AI service
 export const chatAPI = {
   sendMessage: async (message: string) => {
-    const url = `${AI_SERVICE_BASE}/chat`;
-    console.log('Chat API: Calling', url);
-    
     try {
-      const response = await fetch(url, {
+      const response = await request<any>('/chat', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({ message }),
       });
       
-      console.log('Chat API: Response status', response.status);
-      
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({ detail: 'Request failed' }));
-        console.error('Chat API error response:', error);
-        throw new Error(error.detail || `HTTP error! status: ${response.status}`);
-      }
-      
-      return await response.json();
+      // Return in the format expected by the component
+      return {
+        reply: response.data?.reply || 'I received your message but got an empty response.'
+      };
     } catch (error: any) {
       console.error('Chat API error:', error);
-      // More specific error messages
-      if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
-        throw new Error(`Cannot connect to AI service at ${url}. Please check if the service is running and the URL is correct.`);
-      }
       throw error;
     }
   },
