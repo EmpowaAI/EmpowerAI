@@ -18,24 +18,46 @@ class AIClient:
     """Wrapper for OpenAI API calls with retry logic"""
     
     def __init__(self):
-        api_key = os.getenv("OPENAI_API_KEY")
-        self.enabled = bool(api_key)
+        # Check for Azure OpenAI first, then fall back to regular OpenAI
+        azure_api_key = os.getenv("AZURE_OPENAI_API_KEY")
+        azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+        openai_api_key = os.getenv("OPENAI_API_KEY")
+        
         self.max_retries = 3
         self.retry_delay = 2  # Initial delay in seconds
+        self.use_azure = bool(azure_api_key and azure_endpoint)
+        self.enabled = bool(azure_api_key and azure_endpoint) or bool(openai_api_key)
         
         if self.enabled:
             try:
-                self.client = OpenAI(api_key=api_key)
-                self.async_client = AsyncOpenAI(api_key=api_key)
-                # Fixed: Use OPENAI_MODEL instead of MODEL_NAME
-                self.model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+                if self.use_azure:
+                    # Azure OpenAI configuration
+                    self.client = OpenAI(
+                        api_key=azure_api_key,
+                        base_url=azure_endpoint
+                    )
+                    self.async_client = AsyncOpenAI(
+                        api_key=azure_api_key,
+                        base_url=azure_endpoint
+                    )
+                    self.model = os.getenv("AZURE_OPENAI_MODEL", os.getenv("OPENAI_MODEL", "gpt-4o-mini"))
+                    logger.info("Azure OpenAI client initialized successfully", extra={
+                        'model': self.model,
+                        'endpoint': azure_endpoint
+                    })
+                else:
+                    # Regular OpenAI configuration
+                    self.client = OpenAI(api_key=openai_api_key)
+                    self.async_client = AsyncOpenAI(api_key=openai_api_key)
+                    self.model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+                    logger.info("OpenAI client initialized successfully", extra={'model': self.model})
+                
                 self.embedding_model = os.getenv("EMBEDDING_MODEL", "text-embedding-ada-002")
-                logger.info("OpenAI client initialized successfully", extra={'model': self.model})
             except Exception as e:
                 logger.error("OpenAI client initialization failed", extra={'error': str(e)})
                 self.enabled = False
         else:
-            logger.warning("OPENAI_API_KEY not set. AI features will use fallback methods.")
+            logger.warning("Neither AZURE_OPENAI_API_KEY/AZURE_OPENAI_ENDPOINT nor OPENAI_API_KEY set. AI features will use fallback methods.")
             self.enabled = False
     
     def chat(self, message: str, system_prompt: str = None) -> str:

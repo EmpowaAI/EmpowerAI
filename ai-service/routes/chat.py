@@ -11,7 +11,7 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     reply: str
 
-@router.post("/chat", response_model=ChatResponse)
+@router.post("/", response_model=ChatResponse)
 async def chat_endpoint(request: ChatRequest):
     if not ai_client.enabled:
         raise HTTPException(status_code=503, detail="AI service not configured")

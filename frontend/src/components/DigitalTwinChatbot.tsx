@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Bot, X, Send, Sparkles, User, Clock, ThumbsUp, ThumbsDown } from "lucide-react";
 import { cn } from "../lib/utils";
+import { chatAPI } from "../lib/api";
 
 interface Message {
   id: string;
@@ -64,32 +65,37 @@ export default function DigitalTwinChatbot() {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentInput = inputText;
     setInputText("");
     setIsLoading(true);
 
-    // Simulate AI response delay
-    setTimeout(() => {
-      const aiResponses = [
-        `Based on your current skills and market trends in South Africa, I recommend focusing on digital marketing or web development. These fields have high demand and good earning potential.`,
-        `Your projected income for the next 3 months shows potential growth to R4,200/month if you pursue freelance opportunities in your current skill set.`,
-        `Consider learning React.js and TypeScript - these are highly sought-after skills in the SA tech market with salaries starting from R25,000/month.`,
-        `I found 3 relevant opportunities in your area: Junior Developer at TechCo SA (92% match), Digital Marketing Internship (88% match), and IT Support Role (85% match).`,
-        `For interviews, practice STAR method responses and focus on your soft skills. Remember to research the company thoroughly before your interview.`,
-        `I'll update your twin with recent progress. Your empowerment score has increased by 5 points this week!`
-      ];
-
-      const randomResponse = aiResponses[Math.floor(Math.random() * aiResponses.length)];
+    try {
+      // Call the AI service chat endpoint
+      const response = await chatAPI.sendMessage(currentInput);
       
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: randomResponse,
+        text: response.reply || "I'm sorry, I couldn't process your request. Please try again.",
         sender: 'ai',
         timestamp: new Date(),
       };
 
       setMessages(prev => [...prev, aiMessage]);
+    } catch (error: any) {
+      console.error('Chat error:', error);
+      
+      // Fallback error message
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: error.message || "I'm having trouble connecting to the AI service. Please try again in a moment.",
+        sender: 'ai',
+        timestamp: new Date(),
+      };
+
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   const handleQuickQuestion = (question: string) => {
