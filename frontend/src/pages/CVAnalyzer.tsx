@@ -58,7 +58,10 @@ export default function CVAnalyzer() {
     setIsAnalyzing(true)
 
     try {
+      console.log('CV Analysis: Starting analysis...', { cvTextLength: cvText.length });
       const response = await cvAPI.analyze(cvText, jobRequirements || undefined)
+      console.log('CV Analysis: Response received', { status: response.status, hasData: !!response.data });
+      
       if (response.status === 'success' && response.data?.analysis) {
         setResult(response.data.analysis)
         
@@ -74,9 +77,14 @@ export default function CVAnalyzer() {
         setTimeout(() => {
           navigate("/dashboard/twin")
         }, 3000) // Increased from 2000 to 3000
+      } else {
+        console.warn('CV Analysis: Unexpected response format', response);
+        setError("Unexpected response format. Please try again.")
       }
     } catch (err: any) {
-      setError(err.message || "Failed to analyze CV. Please try again.")
+      console.error('CV Analysis: Error occurred', err);
+      const errorMessage = err.message || err.response?.data?.message || "Failed to analyze CV. Please try again."
+      setError(errorMessage)
       setResult(null)
     } finally {
       setIsAnalyzing(false)
