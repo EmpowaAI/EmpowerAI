@@ -25,7 +25,24 @@ module.exports = async (req, res, next) => {
     }
 
     // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (jwtError) {
+      // More specific error messages for debugging
+      if (jwtError.name === 'TokenExpiredError') {
+        return res.status(401).json({
+          status: 'error',
+          message: 'Your session has expired. Please log in again.'
+        });
+      } else if (jwtError.name === 'JsonWebTokenError') {
+        return res.status(401).json({
+          status: 'error',
+          message: 'Invalid token. Please log in again.'
+        });
+      }
+      throw jwtError;
+    }
     
     // Check database connection
     if (mongoose.connection.readyState !== 1) {
@@ -48,9 +65,11 @@ module.exports = async (req, res, next) => {
     req.user = currentUser;
     next();
   } catch (error) {
+    // Log error for debugging
+    console.error('Auth middleware error:', error.message);
     res.status(401).json({
       status: 'error',
-      message: 'Invalid token'
+      message: 'Authentication failed. Please log in again.'
     });
   }
 };
