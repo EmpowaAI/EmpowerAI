@@ -124,6 +124,7 @@ connectDatabase().then((connected) => {
   app.use('/api/opportunities', require('./routes/opportunities'));
   app.use('/api/cv', require('./routes/cv'));
   app.use('/api/interview', require('./routes/interview'));
+  app.use('/api/chat', require('./routes/chat'));
 
   // 404 handler for undefined routes (must be after all other routes)
   app.use((req, res, next) => {
