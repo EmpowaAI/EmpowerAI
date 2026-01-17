@@ -184,17 +184,28 @@ export const progressAPI = {
 };
 
 // Chat API - calls the backend, which proxies to AI service
+// Uses direct fetch (no auth token) since chat is public
 export const chatAPI = {
   sendMessage: async (message: string) => {
     try {
-      const response = await request<any>('/chat', {
+      const response = await fetch(`${API_BASE}/chat`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ message }),
       });
       
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: 'Request failed' }));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
       // Return in the format expected by the component
       return {
-        reply: response.data?.reply || 'I received your message but got an empty response.'
+        reply: data.data?.reply || data.reply || 'I received your message but got an empty response.'
       };
     } catch (error: any) {
       console.error('Chat API error:', error);
