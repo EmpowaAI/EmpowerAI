@@ -57,14 +57,40 @@ app.use('/api', apiLimiter);
 app.use(require('./middleware/requestLogger'));
 
 // Health check (before database connection check)
-app.get('/api/health', (req, res) => {
+// Health check endpoint with AI service connectivity test
+app.get('/api/health', async (req, res) => {
   const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
   const memoryUsage = process.memoryUsage();
+  const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
+  
+  // Test AI service connectivity
+  let aiServiceStatus = 'unknown';
+  let aiServiceError = null;
+  try {
+    const axios = require('axios');
+    const healthResponse = await axios.get(`${aiServiceUrl}/health`, { timeout: 5000 });
+    aiServiceStatus = healthResponse.data?.status === 'healthy' ? 'connected' : 'unhealthy';
+    if (healthResponse.data) {
+      aiServiceStatus += ` (openai: ${healthResponse.data.openai_status || 'unknown'})`;
+    }
+  } catch (error) {
+    aiServiceStatus = 'disconnected';
+    aiServiceError = {
+      code: error.code || 'UNKNOWN',
+      message: error.message,
+      url: `${aiServiceUrl}/health`
+    };
+  }
   
   res.status(200).json({ 
     status: 'OK', 
     message: 'EmpowerAI Backend is running',
     database: dbStatus,
+    aiService: {
+      status: aiServiceStatus,
+      url: aiServiceUrl,
+      error: aiServiceError
+    },
     uptime: Math.floor(process.uptime()),
     memory: {
       used: Math.round(memoryUsage.heapUsed / 1024 / 1024) + 'MB',
