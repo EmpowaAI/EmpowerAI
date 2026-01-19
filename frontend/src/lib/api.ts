@@ -23,9 +23,10 @@ const request = async <T>(endpoint: string, options: RequestInit = {}): Promise<
         status: response.status 
       }));
       // Use the error message from backend if available
-      const errorMessage = error.message || error.detail || `HTTP error! status: ${response.status}`;
+      const errorMessage = error.message || error.data?.message || error.detail || `HTTP error! status: ${response.status}`;
       const apiError = new Error(errorMessage);
       (apiError as any).status = error.status || response.status;
+      (apiError as any).response = error;
       throw apiError;
     }
     return response.json();
