@@ -10,6 +10,10 @@
   - Fixed Opportunities page branding (removed "LinkedIn" references)
   - Created reusable components: LoadingState, EmptyState, ErrorAlert
   - Updated Opportunities page to use new components
+- **CV Analyzer fixes**
+  - Fixed "Select File" button not working (implemented useRef to trigger file input)
+  - Improved error handling and logging for CV analysis
+  - Enhanced error messages for file uploads and AI service connection issues
 
 ## ⚠️ Important
 **Most SA job boards don't provide public RSS feeds.** Tested URLs returned 404.
