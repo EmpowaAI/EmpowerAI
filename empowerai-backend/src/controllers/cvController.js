@@ -1,6 +1,9 @@
 const aiServiceClient = require('../services/aiServiceClient');
 const { AppError, BadRequestError, ServiceUnavailableError } = require('../utils/errors');
 
+// Request timeout constant (matches aiServiceClient timeout)
+const REQUEST_TIMEOUT = 30000; // 30 seconds
+
 exports.analyzeCV = async (req, res, next) => {
   try {
     const { cvText, jobRequirements } = req.body;
