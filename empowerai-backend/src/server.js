@@ -150,25 +150,26 @@ connectDatabase().then((connected) => {
   
   // Test AI service connectivity on startup (non-blocking)
   if (process.env.NODE_ENV === 'production') {
-    const aiServiceClient = require('./services/aiServiceClient');
     const axios = require('axios');
     
-    // Test health endpoint
-    axios.get(`${aiServiceUrl}/health`, { timeout: 5000 })
-      .then(response => {
-        logger.info('AI Service health check passed', {
-          status: response.status,
-          openaiStatus: response.data?.openai_status
+    // Test health endpoint (non-blocking, won't prevent server from starting)
+    setTimeout(() => {
+      axios.get(`${aiServiceUrl}/health`, { timeout: 5000 })
+        .then(response => {
+          logger.info('AI Service health check passed', {
+            status: response.status,
+            openaiStatus: response.data?.openai_status
+          });
+        })
+        .catch(error => {
+          logger.warn('AI Service health check failed', {
+            message: error.message,
+            code: error.code,
+            url: `${aiServiceUrl}/health`,
+            note: 'This may be normal if the service is starting up or sleeping'
+          });
         });
-      })
-      .catch(error => {
-        logger.warn('AI Service health check failed', {
-          message: error.message,
-          code: error.code,
-          url: `${aiServiceUrl}/health`,
-          note: 'This may be normal if the service is starting up or sleeping'
-        });
-      });
+    }, 2000); // Wait 2 seconds before checking to let the service start
   }
   
   app.listen(PORT, () => {
