@@ -138,12 +138,45 @@ connectDatabase().then((connected) => {
 
   // Start server
   const PORT = process.env.PORT || 5000;
+  
+  // Log AI service configuration on startup
+  const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
+  logger.info('AI Service Configuration', {
+    aiServiceUrl,
+    baseURL: `${aiServiceUrl}/api`,
+    cvAnalyzeEndpoint: `${aiServiceUrl}/api/cv/analyze`,
+    healthCheckEndpoint: `${aiServiceUrl}/health`
+  });
+  
+  // Test AI service connectivity on startup (non-blocking)
+  if (process.env.NODE_ENV === 'production') {
+    const aiServiceClient = require('./services/aiServiceClient');
+    const axios = require('axios');
+    
+    // Test health endpoint
+    axios.get(`${aiServiceUrl}/health`, { timeout: 5000 })
+      .then(response => {
+        logger.info('AI Service health check passed', {
+          status: response.status,
+          openaiStatus: response.data?.openai_status
+        });
+      })
+      .catch(error => {
+        logger.warn('AI Service health check failed', {
+          message: error.message,
+          code: error.code,
+          url: `${aiServiceUrl}/health`,
+          note: 'This may be normal if the service is starting up or sleeping'
+        });
+      });
+  }
+  
   app.listen(PORT, () => {
     logger.info('Server started successfully', {
       port: PORT,
       environment: process.env.NODE_ENV || 'development',
       healthCheck: `http://localhost:${PORT}/api/health`,
-      aiServiceUrl: process.env.AI_SERVICE_URL || 'http://localhost:8000',
+      aiServiceUrl,
       databaseStatus: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
     });
   });

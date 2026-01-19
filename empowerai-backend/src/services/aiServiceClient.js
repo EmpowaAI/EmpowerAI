@@ -6,10 +6,17 @@
 
 const axios = require('axios');
 
-const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://localhost:8000';
+const AI_SERVICE_URL = (process.env.AI_SERVICE_URL || 'http://localhost:8000').replace(/\/$/, ''); // Remove trailing slash
 const REQUEST_TIMEOUT = 30000; // 30 seconds
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 1000; // 1 second
+
+// Log configuration
+console.log('[AI Service Client] Initialized with:', {
+  aiServiceUrl: AI_SERVICE_URL,
+  baseURL: `${AI_SERVICE_URL}/api`,
+  timeout: REQUEST_TIMEOUT
+});
 
 // Create axios instance with default config
 const aiServiceClient = axios.create({
