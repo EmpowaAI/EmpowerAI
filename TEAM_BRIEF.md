@@ -1,10 +1,15 @@
 # Team Brief - RSS Feed Aggregator
 
 ## ✅ Completed Today
-- RSS feed aggregator infrastructure (complete and ready)
-- UI improvements (LoadingState, EmptyState, ErrorAlert components)
-- Automated scheduler (runs daily at 2 AM SAST)
-- API endpoints (`/api/rss/update`, `/api/rss/status`)
+- **RSS feed aggregator infrastructure** (complete and ready)
+  - RSS feed service with data transformation
+  - Automated scheduler (runs daily at 2 AM SAST)
+  - API endpoints (`/api/rss/update`, `/api/rss/status`)
+  - Deduplication logic
+- **UI fixes & improvements**
+  - Fixed Opportunities page branding (removed "LinkedIn" references)
+  - Created reusable components: LoadingState, EmptyState, ErrorAlert
+  - Updated Opportunities page to use new components
 
 ## ⚠️ Important
 **Most SA job boards don't provide public RSS feeds.** Tested URLs returned 404.
