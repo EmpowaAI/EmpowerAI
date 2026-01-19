@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react"
-import { Search, MapPin, Clock, Briefcase, GraduationCap, Building, Heart, Filter, ExternalLink, Loader2, AlertCircle } from "lucide-react"
+import { Search, MapPin, Clock, Briefcase, GraduationCap, Building, Heart, Filter, ExternalLink, Loader2 } from "lucide-react"
 import { cn } from "../lib/utils"
 import { opportunitiesAPI } from "../lib/api"
 import { useUser } from "../lib/user-context"
+import LoadingState from "../components/LoadingState"
+import EmptyState from "../components/EmptyState"
+import ErrorAlert from "../components/ErrorAlert"
 
 interface Opportunity {
   id: string
@@ -163,10 +166,11 @@ export default function Opportunities() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Loading opportunities from LinkedIn...</p>
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Career Opportunities</h1>
+          <p className="text-muted-foreground">Real jobs, learnerships, internships, and bursaries across South Africa</p>
         </div>
+        <LoadingState message="Loading opportunities..." />
       </div>
     )
   }
@@ -175,8 +179,8 @@ export default function Opportunities() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-foreground">LinkedIn Opportunities</h1>
-        <p className="text-muted-foreground">Real jobs and internships from LinkedIn</p>
+        <h1 className="text-2xl font-bold text-foreground">Career Opportunities</h1>
+        <p className="text-muted-foreground">Real jobs, learnerships, internships, and bursaries across South Africa</p>
       </div>
 
       {/* Search and Filter */}
@@ -187,7 +191,7 @@ export default function Opportunities() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search LinkedIn opportunities..."
+            placeholder="Search opportunities..."
             className="w-full pl-12 pr-4 py-3 bg-card border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
@@ -218,10 +222,10 @@ export default function Opportunities() {
 
       {/* Error Message */}
       {error && (
-        <div className="flex items-center gap-3 p-4 bg-destructive/10 border border-destructive/20 rounded-xl">
-          <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0" />
-          <p className="text-sm text-destructive">{error}</p>
-        </div>
+        <ErrorAlert 
+          message={error} 
+          onDismiss={() => setError("")}
+        />
       )}
 
       {/* Results Count */}
@@ -289,17 +293,19 @@ export default function Opportunities() {
                 className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
               >
                 <ExternalLink className="h-4 w-4" />
-                Apply on LinkedIn
+                Apply Now
               </button>
             </div>
           </div>
         ))}
       </div>
 
-      {filteredOpportunities.length === 0 && !loading && (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">No opportunities found. Try adjusting your search.</p>
-        </div>
+      {filteredOpportunities.length === 0 && !loading && !error && (
+        <EmptyState
+          icon={Briefcase}
+          title="No opportunities found"
+          description="Try adjusting your search filters or check back later for new opportunities."
+        />
       )}
     </div>
   )
