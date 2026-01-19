@@ -168,6 +168,70 @@ export const interviewAPI = {
   }
 };
 
+export const opportunitiesAPI = {
+  getAll: async (filters?: { province?: string; type?: string; skills?: string }) => {
+    try {
+      const queryParams = new URLSearchParams();
+      if (filters?.province) queryParams.append('province', filters.province);
+      if (filters?.type) queryParams.append('type', filters.type);
+      if (filters?.skills) queryParams.append('skills', filters.skills);
+      
+      const queryString = queryParams.toString();
+      const url = `/opportunities${queryString ? `?${queryString}` : ''}`;
+      return await request<any>(url);
+    } catch (error) {
+      console.error('Failed to get opportunities:', error);
+      throw error;
+    }
+  },
+  
+  getById: async (id: string) => {
+    try {
+      return await request<any>(`/opportunities/${id}`);
+    } catch (error) {
+      console.error('Failed to get opportunity:', error);
+      throw error;
+    }
+  },
+};
+
+export const statsAPI = {
+  getDashboardStats: async () => {
+    try {
+      // This will combine data from twin, opportunities, and CV analysis
+      const [twinResponse, opportunitiesResponse] = await Promise.allSettled([
+        twinAPI.get(),
+        opportunitiesAPI.getAll()
+      ]);
+      
+      const twin = twinResponse.status === 'fulfilled' ? twinResponse.value.data?.twin : null;
+      const opportunities = opportunitiesResponse.status === 'fulfilled' 
+        ? opportunitiesResponse.value.data?.opportunities || [] 
+        : [];
+      
+      // Calculate stats from real data
+      const cvSkills = localStorage.getItem('cvSkills') 
+        ? JSON.parse(localStorage.getItem('cvSkills')!) 
+        : [];
+      
+      return {
+        status: 'success',
+        data: {
+          empowermentScore: twin?.empowermentScore || 0,
+          threeMonthProjection: twin?.incomeProjections?.threeMonth || 0,
+          skillsMatched: cvSkills.length || 0,
+          opportunitiesCount: opportunities.length,
+          interviewsPracticed: 0, // TODO: Get from interview sessions
+          cvScore: 72, // TODO: Calculate from CV analysis history
+        }
+      };
+    } catch (error) {
+      console.error('Failed to get dashboard stats:', error);
+      throw error;
+    }
+  },
+};
+
 export const progressAPI = {
   saveTwinCompletion: async (twinId: string) => {
     try {
