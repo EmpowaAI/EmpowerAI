@@ -254,7 +254,7 @@ export default function Simulations() {
       <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
         <h2 className="text-lg font-semibold text-foreground mb-4">Select Pathways to Compare</h2>
         <div className="flex flex-wrap gap-3 mb-4">
-          {paths.map((path) => (
+          {pathsConfig.map((path) => (
             <button
               key={path.id}
               onClick={() => togglePath(path.id)}
@@ -270,6 +270,13 @@ export default function Simulations() {
             </button>
           ))}
         </div>
+        
+        {error && (
+          <div className="mb-4 flex items-center gap-3 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+            <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0" />
+            <p className="text-sm text-destructive">{error}</p>
+          </div>
+        )}
         <button
           onClick={runSimulation}
           disabled={selectedPaths.length === 0 || isLoading}
@@ -421,26 +428,47 @@ export default function Simulations() {
         )
       )}
 
-      {/* AI Recommendation - Updated gradient */}
-      <div className="bg-gradient-to-r from-primary/10 to-secondary/10 border border-border rounded-xl p-6">
-        <div className="flex items-start gap-4">
-          <div className="h-12 w-12 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
-            <Zap className="h-6 w-6 text-primary" />
+      {/* AI Recommendation - Show based on simulation results */}
+      {simulations.length > 0 && (() => {
+        // Find the best path (highest 12-month income)
+        const bestPath = simulations.reduce((best, current) => {
+          const bestIncome = best.projections.twelveMonth?.income || 0
+          const currentIncome = current.projections.twelveMonth?.income || 0
+          return currentIncome > bestIncome ? current : best
+        }, simulations[0])
+        
+        const pathConfig = getPathConfig(bestPath.pathId)
+        const projection = bestPath.projections.twelveMonth?.income || 0
+        
+        return (
+          <div className="bg-gradient-to-r from-primary/10 to-secondary/10 border border-border rounded-xl p-6">
+            <div className="flex items-start gap-4">
+              <div className="h-12 w-12 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
+                <Zap className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">AI Recommendation</h3>
+                <p className="text-muted-foreground mb-4">
+                  Based on your skills and profile, we recommend the{" "}
+                  <strong className="text-foreground">{bestPath.pathName || pathConfig.label}</strong> path.
+                  {projection > 0 && (
+                    <>
+                      {" "}This path offers the potential to earn{" "}
+                      <strong className="text-foreground">R{projection.toLocaleString()}/month</strong> within 12 months.
+                    </>
+                  )}
+                </p>
+                {bestPath.description && (
+                  <p className="text-sm text-muted-foreground mb-4">{bestPath.description}</p>
+                )}
+                <button className="flex items-center gap-2 text-primary hover:underline">
+                  View detailed roadmap <ArrowRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
           </div>
-          <div>
-            <h3 className="text-lg font-semibold text-foreground mb-2">AI Recommendation</h3>
-            <p className="text-muted-foreground mb-4">
-              Based on your skills and goals, we recommend starting with{" "}
-              <strong className="text-foreground">Freelancing</strong> while pursuing a{" "}
-              <strong className="text-foreground">Short Course in Web Development</strong>. This combination offers the
-              fastest path to R10,000/month within 8 months.
-            </p>
-            <button className="flex items-center gap-2 text-primary hover:underline">
-              View detailed roadmap <ArrowRight className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-      </div>
+        )
+      })()}
     </div>
   )
 }
