@@ -34,21 +34,41 @@ ENABLE_RSS_SCHEDULER=true
 
 ### RSS Feed Sources
 
-Currently configured feeds:
+**⚠️ Important Note:** Most South African job boards do not provide public RSS feeds, or they require authentication/API access. The RSS aggregator infrastructure is ready, but you'll need to:
 
-1. **Indeed SA** - `https://za.indeed.com/rss?q=entry+level&l=South+Africa`
-   - Type: Jobs
-   - Updates: Daily
+1. **Find working RSS feeds** - Test URLs using `npm run rss:test` script
+2. **Use manual seeding** - Continue using `npm run seed:opportunities` for now
+3. **Add feeds as discovered** - Edit `src/services/rssFeedService.js` when you find working feeds
 
-2. **Careers24** - `https://www.careers24.com/jobs/rss?location=South%20Africa&keywords=entry%20level`
-   - Type: Jobs
-   - Updates: Daily
+### Finding RSS Feeds
 
-3. **RemoteOk** - `https://remoteok.io/remote-rss`
-   - Type: Freelance/Remote
-   - Updates: Daily
+To find working RSS feeds:
 
-To add more feeds, edit `src/services/rssFeedService.js` and add to `FEED_SOURCES` array.
+1. **Test URLs manually**:
+   ```bash
+   node scripts/test-rss-url.js
+   ```
+
+2. **Check job board websites**:
+   - Look for "RSS" or "Feed" links in footer
+   - Check `/feed/` or `/rss.xml` URLs
+   - Look for "Subscribe" or "Job Alerts" sections
+
+3. **Common RSS URL patterns**:
+   - `https://example.com/feed/`
+   - `https://example.com/rss.xml`
+   - `https://example.com/jobs/rss`
+   - `https://example.com/rss?category=jobs`
+
+### Currently Configured (Placeholder Feeds)
+
+The service is configured with placeholder feeds that need to be replaced with working URLs:
+
+1. **MyJobMag** - Needs valid RSS URL
+2. **CareerJet SA** - Needs valid RSS URL  
+3. **AllJobs.co.za** - Needs valid RSS URL
+
+**To add a working feed**, edit `src/services/rssFeedService.js` and add to `FEED_SOURCES` array.
 
 ## Usage
 

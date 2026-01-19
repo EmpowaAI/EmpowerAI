@@ -23,26 +23,44 @@ const parser = new Parser({
 });
 
 // RSS Feed Sources - Real South African Job Boards
+// Using verified working RSS feed URLs
 const FEED_SOURCES = [
   {
-    name: 'Indeed SA',
-    url: 'https://za.indeed.com/rss?q=entry+level&l=South+Africa',
+    name: 'MyJobMag - Entry Level',
+    url: 'https://www.myjobmag.co.za/feeds/rss.xml?category=entry-level',
     type: 'job',
-    transform: transformIndeedFeed
+    transform: transformMyJobMagFeed
   },
   {
-    name: 'Careers24',
-    url: 'https://www.careers24.com/jobs/rss?location=South%20Africa&keywords=entry%20level',
-    type: 'job',
-    transform: transformCareers24Feed
+    name: 'MyJobMag - Learnerships',
+    url: 'https://www.myjobmag.co.za/feeds/rss.xml?category=learnerships',
+    type: 'learnership',
+    transform: transformMyJobMagFeed
   },
-  // Note: PNet doesn't have public RSS, but we can add if available
-  // Adding placeholder for future RSS feeds
   {
-    name: 'Remote Work',
-    url: 'https://remoteok.io/remote-rss',
-    type: 'freelance',
-    transform: transformRemoteOkFeed
+    name: 'MyJobMag - Internships',
+    url: 'https://www.myjobmag.co.za/feeds/rss.xml?category=internships',
+    type: 'internship',
+    transform: transformMyJobMagFeed
+  },
+  {
+    name: 'MyJobMag - All Jobs',
+    url: 'https://www.myjobmag.co.za/feeds/rss.xml',
+    type: 'job',
+    transform: transformMyJobMagFeed
+  },
+  {
+    name: 'CareerJet SA',
+    url: 'https://www.careerjet.co.za/rss/jobs.xml?l=south+africa&q=entry+level',
+    type: 'job',
+    transform: transformCareerJetFeed
+  },
+  // Adding general job board RSS feeds
+  {
+    name: 'AllJobs.co.za',
+    url: 'https://www.alljobs.co.za/jobs/rss.xml',
+    type: 'job',
+    transform: transformAllJobsFeed
   }
 ];
 
@@ -274,6 +292,148 @@ function transformRemoteOkFeed(item, source) {
     };
   } catch (error) {
     logger.error('Error transforming RemoteOk feed item:', error);
+    return null;
+  }
+}
+
+/**
+ * Transform MyJobMag RSS item to Opportunity format
+ */
+function transformMyJobMagFeed(item, source) {
+  try {
+    const title = item.title || 'Untitled Job';
+    const description = item.contentSnippet || item.content || item.description || '';
+    const link = item.link || item.guid || '';
+    
+    if (!link || !title) {
+      return null;
+    }
+
+    // Extract location from title or description
+    const location = extractLocation(item.title, description) || 'South Africa';
+
+    // Extract company from description or title
+    let company = extractCompany(description) || extractCompany(item.title) || 'Company Not Specified';
+
+    // Determine province from location
+    const province = getProvinceFromLocation(location);
+
+    // Extract skills from description
+    const skills = extractSkills(description);
+
+    // Determine type from source or description
+    let type = source.type || determineOpportunityType(title, description);
+
+    // Extract salary if mentioned
+    const salaryRange = extractSalaryRange(description);
+
+    // Extract deadline if mentioned in description
+    let deadline = item.pubDate ? new Date(item.pubDate) : new Date();
+    const deadlineMatch = description.match(/(deadline|closing|apply by)[:\s]+([0-9]{1,2}[\/\-][0-9]{1,2}[\/\-][0-9]{4})/i);
+    if (deadlineMatch && deadlineMatch[2]) {
+      try {
+        deadline = new Date(deadlineMatch[2]);
+      } catch (e) {
+        // Keep default deadline
+      }
+    }
+
+    return {
+      title: cleanTitle(title),
+      type: type,
+      company: company,
+      location: location,
+      province: province,
+      description: cleanDescription(description),
+      requirements: [],
+      skills: skills,
+      salaryRange: salaryRange,
+      deadline: deadline,
+      applicationUrl: link,
+      isActive: true
+    };
+  } catch (error) {
+    logger.error('Error transforming MyJobMag feed item:', error);
+    return null;
+  }
+}
+
+/**
+ * Transform CareerJet RSS item to Opportunity format
+ */
+function transformCareerJetFeed(item, source) {
+  try {
+    const title = item.title || 'Untitled Job';
+    const description = item.contentSnippet || item.content || item.description || '';
+    const link = item.link || item.guid || '';
+    
+    if (!link || !title) {
+      return null;
+    }
+
+    const location = extractLocation(item.title, description) || 'South Africa';
+    const company = extractCompany(description) || extractCompany(item.title) || 'Company Not Specified';
+    const province = getProvinceFromLocation(location);
+    const skills = extractSkills(description);
+    const type = determineOpportunityType(title, description);
+    const salaryRange = extractSalaryRange(description);
+
+    return {
+      title: cleanTitle(title),
+      type: type,
+      company: company,
+      location: location,
+      province: province,
+      description: cleanDescription(description),
+      requirements: [],
+      skills: skills,
+      salaryRange: salaryRange,
+      deadline: item.pubDate ? new Date(item.pubDate) : new Date(),
+      applicationUrl: link,
+      isActive: true
+    };
+  } catch (error) {
+    logger.error('Error transforming CareerJet feed item:', error);
+    return null;
+  }
+}
+
+/**
+ * Transform AllJobs.co.za RSS item to Opportunity format
+ */
+function transformAllJobsFeed(item, source) {
+  try {
+    const title = item.title || 'Untitled Job';
+    const description = item.contentSnippet || item.content || item.description || '';
+    const link = item.link || item.guid || '';
+    
+    if (!link || !title) {
+      return null;
+    }
+
+    const location = extractLocation(item.title, description) || 'South Africa';
+    const company = extractCompany(description) || extractCompany(item.title) || 'Company Not Specified';
+    const province = getProvinceFromLocation(location);
+    const skills = extractSkills(description);
+    const type = determineOpportunityType(title, description);
+    const salaryRange = extractSalaryRange(description);
+
+    return {
+      title: cleanTitle(title),
+      type: type,
+      company: company,
+      location: location,
+      province: province,
+      description: cleanDescription(description),
+      requirements: [],
+      skills: skills,
+      salaryRange: salaryRange,
+      deadline: item.pubDate ? new Date(item.pubDate) : new Date(),
+      applicationUrl: link,
+      isActive: true
+    };
+  } catch (error) {
+    logger.error('Error transforming AllJobs feed item:', error);
     return null;
   }
 }
