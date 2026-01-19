@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+// Updated: Fixed page locking after twin generation
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom"
 import {
   Zap,
