@@ -66,14 +66,42 @@ exports.analyzeCV = async (req, res, next) => {
       }
     }
     
-    // Network errors, timeouts, etc.
-    if (error.code === 'ECONNREFUSED' || error.code === 'ECONNABORTED' || !error.response) {
+    // Network errors, timeouts, DNS errors, etc.
+    if (!error.response) {
       const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
-      const errorMsg = error.code === 'ECONNREFUSED' 
-        ? `Cannot connect to AI service at ${aiServiceUrl}. Please check if the service is running.`
-        : error.code === 'ECONNABORTED'
-        ? 'AI service request timed out. Please try again.'
-        : 'AI service is unavailable. Please check if the service is running and the AI_SERVICE_URL environment variable is set correctly.';
+      const errorCode = error.code || error.errno || 'UNKNOWN';
+      const errorMessage = error.message || 'Unknown error';
+      
+      console.error('[CV Controller] Network error details:', {
+        code: errorCode,
+        message: errorMessage,
+        stack: error.stack,
+        config: {
+          url: error.config?.url,
+          method: error.config?.method,
+          baseURL: error.config?.baseURL,
+          timeout: error.config?.timeout
+        }
+      });
+      
+      let errorMsg;
+      switch (errorCode) {
+        case 'ECONNREFUSED':
+          errorMsg = `Cannot connect to AI service at ${aiServiceUrl}. The service may be down or not accepting connections.`;
+          break;
+        case 'ECONNABORTED':
+          errorMsg = `AI service request timed out after ${REQUEST_TIMEOUT}ms. The service may be slow or unresponsive.`;
+          break;
+        case 'ENOTFOUND':
+          errorMsg = `Cannot resolve AI service hostname. Please check that AI_SERVICE_URL (${aiServiceUrl}) is correct.`;
+          break;
+        case 'ETIMEDOUT':
+          errorMsg = `AI service connection timed out. Please check if the service is running at ${aiServiceUrl}.`;
+          break;
+        default:
+          errorMsg = `AI service is unavailable (${errorCode}: ${errorMessage}). Please check if the service is running at ${aiServiceUrl} and the AI_SERVICE_URL environment variable is set correctly.`;
+      }
+      
       return next(new ServiceUnavailableError(errorMsg));
     }
     
