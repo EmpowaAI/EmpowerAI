@@ -23,7 +23,12 @@ exports.analyzeCV = async (req, res, next) => {
       }
     }
     
-    console.log('[CV Controller] Calling AI service for CV analysis...');
+    const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
+    console.log('[CV Controller] Calling AI service for CV analysis...', {
+      aiServiceUrl,
+      endpoint: '/cv/analyze',
+      fullUrl: `${aiServiceUrl}/api/cv/analyze`
+    });
     const response = await aiServiceClient.post('/cv/analyze', {
       cvText,
       jobRequirements: jobRequirementsArray
@@ -63,7 +68,13 @@ exports.analyzeCV = async (req, res, next) => {
     
     // Network errors, timeouts, etc.
     if (error.code === 'ECONNREFUSED' || error.code === 'ECONNABORTED' || !error.response) {
-      return next(new ServiceUnavailableError('AI service is unavailable. Please try again later.'));
+      const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
+      const errorMsg = error.code === 'ECONNREFUSED' 
+        ? `Cannot connect to AI service at ${aiServiceUrl}. Please check if the service is running.`
+        : error.code === 'ECONNABORTED'
+        ? 'AI service request timed out. Please try again.'
+        : 'AI service is unavailable. Please check if the service is running and the AI_SERVICE_URL environment variable is set correctly.';
+      return next(new ServiceUnavailableError(errorMsg));
     }
     
     // Pass through other errors
