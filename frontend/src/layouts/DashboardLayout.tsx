@@ -45,6 +45,18 @@ export default function DashboardLayout() {
       // Wait a bit to prevent immediate redirect flash
       await new Promise(resolve => setTimeout(resolve, 100))
       
+      // Sync progress from localStorage to ensure it's up to date
+      const cvCompleted = localStorage.getItem('cvCompleted') === 'true'
+      const twinCompleted = localStorage.getItem('twinCompleted') === 'true'
+      
+      // Update progress if it's different from localStorage
+      if (cvCompleted !== progress.cvCompleted || twinCompleted !== progress.twinCompleted) {
+        // Progress will be synced by UserContext, just wait a tick
+        await new Promise(resolve => setTimeout(resolve, 50))
+        setIsChecking(false)
+        return
+      }
+      
       // Don't redirect if already on correct path
       const currentPath = location.pathname
       

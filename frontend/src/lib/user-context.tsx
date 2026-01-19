@@ -29,13 +29,44 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     return saved ? JSON.parse(saved) : null
   })
   
-  const [progress, setProgress] = useState({
+  // Initialize progress from localStorage
+  const getProgressFromStorage = () => ({
     cvCompleted: localStorage.getItem('cvCompleted') === 'true',
     twinCompleted: localStorage.getItem('twinCompleted') === 'true',
     empowermentScore: localStorage.getItem('empowermentScore') 
       ? parseInt(localStorage.getItem('empowermentScore')!) 
       : null
   })
+
+  const [progress, setProgress] = useState(getProgressFromStorage)
+
+  // Sync progress from localStorage when it changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setProgress(getProgressFromStorage())
+    }
+    
+    // Listen for storage events (from other tabs)
+    window.addEventListener('storage', handleStorageChange)
+    
+    // Also check localStorage periodically (for same-tab updates)
+    const interval = setInterval(() => {
+      const newProgress = getProgressFromStorage()
+      setProgress(prev => {
+        if (prev.cvCompleted !== newProgress.cvCompleted || 
+            prev.twinCompleted !== newProgress.twinCompleted ||
+            prev.empowermentScore !== newProgress.empowermentScore) {
+          return newProgress
+        }
+        return prev
+      })
+    }, 500) // Check every 500ms
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      clearInterval(interval)
+    }
+  }, [])
 
   useEffect(() => {
     if (user) {
