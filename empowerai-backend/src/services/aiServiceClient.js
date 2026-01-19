@@ -23,7 +23,7 @@ const aiServiceClient = axios.create({
 // Request interceptor for logging
 aiServiceClient.interceptors.request.use(
   (config) => {
-    console.log(`[AI Service] ${config.method.toUpperCase()} ${config.url}`);
+    console.log(`[AI Service] ${config.method.toUpperCase()} ${config.baseURL}${config.url}`);
     return config;
   },
   (error) => {
@@ -79,6 +79,12 @@ aiServiceClient.interceptors.response.use(
     if (error.response) {
       const status = error.response.status;
       const data = error.response.data;
+      const url = error.config?.url || 'unknown endpoint';
+
+      console.error(`[AI Service] Error response from ${url}:`, {
+        status,
+        message: data?.message || data?.detail || error.message
+      });
 
       if (status === 429) {
         if (isCloudflareChallenge) {
@@ -88,10 +94,21 @@ aiServiceClient.interceptors.response.use(
       } else if (status === 503) {
         throw new Error('AI service is temporarily unavailable. Please try again later.');
       } else if (status === 500) {
-        throw new Error(data?.message || 'AI service encountered an error. Please try again.');
+        throw new Error(data?.message || data?.detail || 'AI service encountered an error. Please try again.');
       } else if (status === 400) {
-        throw new Error(data?.message || 'Invalid request to AI service.');
+        throw new Error(data?.message || data?.detail || 'Invalid request to AI service.');
+      } else if (status === 404) {
+        throw new Error(`AI service endpoint ${url} not found. Please check if the service is configured correctly.`);
       }
+    }
+    
+    // Log connection errors with more detail
+    if (!error.response) {
+      console.error('[AI Service] Connection error:', {
+        message: error.message,
+        code: error.code,
+        baseURL: AI_SERVICE_URL
+      });
     }
 
     return Promise.reject(error);
