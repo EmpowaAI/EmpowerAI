@@ -1,12 +1,52 @@
 import DigitalTwinChatbot from "../components/DigitalTwinChatbot";
 import { Link } from "react-router-dom"
-import { TrendingUp, Target, Briefcase, FileText, Mic, ArrowRight, Zap, Sparkles, ChevronUp, Clock } from "lucide-react"
+import { TrendingUp, Target, Briefcase, FileText, Mic, ArrowRight, Zap, Sparkles, ChevronUp, Clock, Loader2 } from "lucide-react"
 import { useUser } from "../lib/user-context"
 import { cn } from "../lib/utils"
+import { statsAPI } from "../lib/api"
+import { useState, useEffect } from "react"
+
+interface DashboardStats {
+  empowermentScore: number
+  threeMonthProjection: number
+  skillsMatched: number
+  opportunitiesCount: number
+  interviewsPracticed: number
+  cvScore: number
+}
 
 export default function Dashboard() {
   const { user } = useUser()
   const displayName = user?.name?.split(" ")[0] || "there"
+  const [stats, setStats] = useState<DashboardStats | null>(null)
+  const [loading, setLoading] = useState(true)
+  
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setLoading(true)
+        const response = await statsAPI.getDashboardStats()
+        if (response.status === 'success' && response.data) {
+          setStats(response.data)
+        }
+      } catch (error) {
+        console.error('Failed to load dashboard stats:', error)
+        // Fallback to default values if API fails
+        setStats({
+          empowermentScore: 0,
+          threeMonthProjection: 0,
+          skillsMatched: 0,
+          opportunitiesCount: 0,
+          interviewsPracticed: 0,
+          cvScore: 0
+        })
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchStats()
+  }, [])
 
   return (
     <div className="space-y-8">
@@ -48,14 +88,28 @@ export default function Dashboard() {
           <div className="flex items-center gap-4 sm:gap-6 md:gap-8 animate-in fade-in-up" style={{ animationDelay: '0.4s' }}>
             <div className="text-center p-4 sm:p-5 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 shadow-lg hover:bg-white/15 transition-all duration-300 hover:scale-105">
               <div className="flex items-center justify-center gap-2 mb-2">
-                <p className="text-3xl sm:text-4xl font-bold text-white tracking-tight">78</p>
-                <ChevronUp className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-300 animate-bounce" />
+                {loading ? (
+                  <Loader2 className="h-8 w-8 text-white animate-spin" />
+                ) : (
+                  <>
+                    <p className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
+                      {stats?.empowermentScore || 0}
+                    </p>
+                    <ChevronUp className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-300 animate-bounce" />
+                  </>
+                )}
               </div>
               <p className="text-xs font-medium text-indigo-100 uppercase tracking-wide">Empowerment Score</p>
             </div>
             <div className="h-12 sm:h-16 w-px bg-white/30 hidden sm:block"></div>
             <div className="text-center p-4 sm:p-5 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 shadow-lg hover:bg-white/15 transition-all duration-300 hover:scale-105">
-              <p className="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-2">R4.2K</p>
+              {loading ? (
+                <Loader2 className="h-8 w-8 text-white animate-spin mx-auto mb-2" />
+              ) : (
+                <p className="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-2">
+                  R{((stats?.threeMonthProjection || 0) / 1000).toFixed(1)}K
+                </p>
+              )}
               <p className="text-xs font-medium text-indigo-100 uppercase tracking-wide">3-Month Projection</p>
             </div>
           </div>
@@ -64,10 +118,34 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Skills Matched", value: "12", change: "+3 this week", trend: "up", color: "primary" },
-          { label: "Opportunities", value: "28", change: "8 new today", trend: "up", color: "secondary" },
-          { label: "Interviews Practiced", value: "5", change: "85% avg score", trend: "neutral", color: "warning" },
-          { label: "CV Score", value: "72%", change: "+8% improved", trend: "up", color: "accent" },
+          { 
+            label: "Skills Matched", 
+            value: loading ? "..." : String(stats?.skillsMatched || 0), 
+            change: "+3 this week", 
+            trend: "up" as const, 
+            color: "primary" as const 
+          },
+          { 
+            label: "Opportunities", 
+            value: loading ? "..." : String(stats?.opportunitiesCount || 0), 
+            change: "Available now", 
+            trend: "up" as const, 
+            color: "secondary" as const 
+          },
+          { 
+            label: "Interviews Practiced", 
+            value: loading ? "..." : String(stats?.interviewsPracticed || 0), 
+            change: "Start practicing", 
+            trend: "neutral" as const, 
+            color: "warning" as const 
+          },
+          { 
+            label: "CV Score", 
+            value: loading ? "..." : `${stats?.cvScore || 0}%`, 
+            change: "+8% improved", 
+            trend: "up" as const, 
+            color: "accent" as const 
+          },
         ].map((stat, i) => (
           <div
             key={i}

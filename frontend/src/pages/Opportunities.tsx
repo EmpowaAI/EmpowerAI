@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react"
-import { Search, MapPin, Clock, Briefcase, GraduationCap, Building, Heart, Filter, ExternalLink } from "lucide-react"
+import { Search, MapPin, Clock, Briefcase, GraduationCap, Building, Heart, Filter, ExternalLink, Loader2, AlertCircle } from "lucide-react"
 import { cn } from "../lib/utils"
+import { opportunitiesAPI } from "../lib/api"
+import { useUser } from "../lib/user-context"
 
 interface Opportunity {
   id: string
@@ -22,65 +24,98 @@ export default function Opportunities() {
   const [saved, setSaved] = useState<string[]>([])
   const [opportunities, setOpportunities] = useState<Opportunity[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+  const { user } = useUser()
 
-  // Note: LinkedIn API requires authentication and has limitations
-  // This is a conceptual implementation
   useEffect(() => {
-    const fetchLinkedInJobs = async () => {
+    const fetchOpportunities = async () => {
       try {
         setLoading(true)
-        // In a real implementation, you'd use:
-        // 1. LinkedIn Jobs API (restricted access)
-        // 2. RapidAPI LinkedIn alternatives
-        // 3. Web scraping (with proper permissions)
-        // 4. Partner with LinkedIn for official integration
+        setError("")
         
-        // For demo purposes, we'll simulate API call
-        const mockOpportunities = await simulateLinkedInFetch()
-        setOpportunities(mockOpportunities)
-      } catch (error) {
+        // Get user's province and skills for filtering
+        const filters: { province?: string; type?: string; skills?: string } = {}
+        // TODO: Add province to User interface, for now get from localStorage
+        const userProvince = (user as any)?.province || localStorage.getItem('userProvince')
+        if (userProvince) {
+          filters.province = userProvince
+        }
+        
+        // Get skills from CV analysis
+        const cvSkills = localStorage.getItem('cvSkills')
+        if (cvSkills) {
+          try {
+            const skills = JSON.parse(cvSkills)
+            if (Array.isArray(skills) && skills.length > 0) {
+              filters.skills = skills.slice(0, 5).join(',') // Limit to 5 skills
+            }
+          } catch (e) {
+            console.error('Error parsing CV skills:', e)
+          }
+        }
+        
+        const response = await opportunitiesAPI.getAll(filters)
+        
+        if (response.status === 'success' && response.data?.opportunities) {
+          // Transform backend data to match frontend Opportunity interface
+          const transformedOpportunities = response.data.opportunities.map((opp: any) => ({
+            id: opp._id || opp.id,
+            title: opp.title,
+            company: opp.company || 'Company Name',
+            location: opp.location || opp.province?.join(', ') || 'Location TBD',
+            type: opp.type || 'job',
+            category: opp.type || 'job',
+            salary: opp.salaryRange 
+              ? `R${opp.salaryRange.min?.toLocaleString() || 0} - R${opp.salaryRange.max?.toLocaleString() || 0}`
+              : undefined,
+            match: calculateMatchScore(opp, user),
+            posted: opp.createdAt 
+              ? new Date(opp.createdAt).toLocaleDateString()
+              : 'Recently',
+            applyUrl: opp.applicationUrl || '#',
+            description: opp.description || 'No description available'
+          }))
+          
+          setOpportunities(transformedOpportunities)
+        } else {
+          // Fallback to empty array if no opportunities
+          setOpportunities([])
+        }
+      } catch (error: any) {
         console.error("Error fetching opportunities:", error)
+        setError(error.message || "Failed to load opportunities. Please try again later.")
+        // Keep empty array on error, don't show mock data
+        setOpportunities([])
       } finally {
         setLoading(false)
       }
     }
 
-    fetchLinkedInJobs()
-  }, [])
+    fetchOpportunities()
+  }, [user])
 
-  const simulateLinkedInFetch = (): Promise<Opportunity[]> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve([
-          {
-            id: "linkedin-1",
-            title: "Software Engineer",
-            company: "Amazon Web Services",
-            location: "Cape Town",
-            type: "Full-time",
-            category: "job",
-            salary: "R45,000 - R65,000",
-            match: 95,
-            posted: "1 day ago",
-            applyUrl: "https://www.linkedin.com/jobs/view/123456789",
-            description: "Looking for experienced software engineer..."
-          },
-          {
-            id: "linkedin-2",
-            title: "Data Science Intern",
-            company: "Standard Bank",
-            location: "Johannesburg",
-            type: "Internship",
-            category: "internship",
-            salary: "R15,000/month",
-            match: 88,
-            posted: "3 days ago",
-            applyUrl: "https://www.linkedin.com/jobs/view/987654321",
-            description: "Data science internship for graduates..."
-          },
-        ])
-      }, 1000)
-    })
+  const calculateMatchScore = (opportunity: any, _user: any): number => {
+    // Simple matching algorithm based on skills and province
+    let score = 50 // Base score
+    
+    const cvSkills = localStorage.getItem('cvSkills')
+    if (cvSkills && opportunity.skills) {
+      try {
+        const userSkills = JSON.parse(cvSkills)
+        const oppSkills = Array.isArray(opportunity.skills) ? opportunity.skills : []
+        const matchingSkills = userSkills.filter((skill: string) => 
+          oppSkills.some((oppSkill: string) => 
+            oppSkill.toLowerCase().includes(skill.toLowerCase()) ||
+            skill.toLowerCase().includes(oppSkill.toLowerCase())
+          )
+        )
+        score += (matchingSkills.length / Math.max(oppSkills.length, 1)) * 50
+      } catch (e) {
+        // Ignore parsing errors
+      }
+    }
+    
+    return Math.min(Math.round(score), 100)
   }
 
   const filteredOpportunities = opportunities.filter((opp) => {
@@ -181,8 +216,25 @@ export default function Opportunities() {
         ))}
       </div>
 
+      {/* Error Message */}
+      {error && (
+        <div className="flex items-center gap-3 p-4 bg-destructive/10 border border-destructive/20 rounded-xl">
+          <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0" />
+          <p className="text-sm text-destructive">{error}</p>
+        </div>
+      )}
+
       {/* Results Count */}
-      <p className="text-sm text-muted-foreground">Showing {filteredOpportunities.length} opportunities from LinkedIn</p>
+      <p className="text-sm text-muted-foreground">
+        {loading ? (
+          <span className="flex items-center gap-2">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Loading opportunities...
+          </span>
+        ) : (
+          `Showing ${filteredOpportunities.length} ${filteredOpportunities.length === 1 ? 'opportunity' : 'opportunities'}`
+        )}
+      </p>
 
       {/* Opportunities List */}
       <div className="space-y-4">
