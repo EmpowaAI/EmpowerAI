@@ -95,9 +95,17 @@ aiServiceClient.interceptors.response.use(
 
       if (status === 429) {
         if (isCloudflareChallenge) {
-          throw new Error('AI service is temporarily rate limited. Please wait a moment and try again.');
+          // Create a custom error with retry information
+          const rateLimitError = new Error('AI service is temporarily rate limited. Please wait a moment and try again.');
+          rateLimitError.isRateLimit = true;
+          rateLimitError.retryAfter = 30; // Suggest 30 seconds
+          throw rateLimitError;
         }
-        throw new Error('AI service is rate limited. Please try again in a few moments.');
+        // Regular 429 rate limit
+        const rateLimitError = new Error('AI service is rate limited. Please try again in a few moments.');
+        rateLimitError.isRateLimit = true;
+        rateLimitError.retryAfter = 60; // Suggest 60 seconds
+        throw rateLimitError;
       } else if (status === 503) {
         throw new Error('AI service is temporarily unavailable. Please try again later.');
       } else if (status === 500) {

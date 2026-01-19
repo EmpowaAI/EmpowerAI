@@ -54,8 +54,15 @@ exports.analyzeCV = async (req, res, next) => {
     
     // Check for rate limit errors in the error message (from aiServiceClient)
     const errorMessage = error.message || '';
-    if (errorMessage.toLowerCase().includes('rate limit')) {
-      return next(new ServiceUnavailableError(errorMessage || 'AI service is rate limited. Please try again in a few moments.'));
+    if (error.isRateLimit || errorMessage.toLowerCase().includes('rate limit')) {
+      const retryAfter = error.retryAfter || 60;
+      const message = errorMessage || `AI service is rate limited. Please try again in ${retryAfter} seconds.`;
+      return res.status(429).json({
+        status: 'error',
+        message,
+        retryAfter,
+        code: 'RATE_LIMIT'
+      });
     }
     
     // Wrap AI service errors as operational errors so they show proper messages
