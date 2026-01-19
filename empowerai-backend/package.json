@@ -8,7 +8,8 @@
     "dev": "nodemon src/server.js",
     "test": "jest",
     "create-indexes": "node src/scripts/createIndexes.js",
-    "seed:opportunities": "node scripts/seedOpportunities.js"
+    "seed:opportunities": "node scripts/seedOpportunities.js",
+    "rss:fetch": "node scripts/fetchRssFeeds.js"
   },
   "keywords": [
     "youth-empowerment",
@@ -33,6 +34,8 @@
     "mongodb": "^7.0.0",
     "mongoose": "^9.0.0",
     "multer": "^2.0.2",
+    "node-cron": "^4.2.1",
+    "rss-parser": "^3.13.0",
     "uuid": "^9.0.1",
     "winston": "^3.19.0",
     "zod": "^4.2.1"

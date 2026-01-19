@@ -140,6 +140,17 @@ async function connectDatabase() {
 connectDatabase().then((connected) => {
   if (connected) {
     logger.info('Database ready, setting up routes');
+    
+    // Start RSS feed scheduler (only if database is connected)
+    if (process.env.ENABLE_RSS_SCHEDULER !== 'false') {
+      try {
+        const { startRssScheduler } = require('./services/rssScheduler');
+        startRssScheduler();
+        logger.info('RSS feed scheduler initialized');
+      } catch (error) {
+        logger.warn('Failed to start RSS feed scheduler:', error.message);
+      }
+    }
   } else {
     logger.warn('Database not connected, routes will return 503 errors');
   }
@@ -151,6 +162,7 @@ connectDatabase().then((connected) => {
   app.use('/api/cv', require('./routes/cv'));
   app.use('/api/interview', require('./routes/interview'));
   app.use('/api/chat', require('./routes/chat'));
+  app.use('/api/rss', require('./routes/rss'));
 
   // 404 handler for undefined routes (must be after all other routes)
   app.use((req, res, next) => {
