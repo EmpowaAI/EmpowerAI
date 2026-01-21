@@ -3,7 +3,7 @@ import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { CheckCircle, ChevronRight, ChevronLeft, Sparkles, Loader2 } from "lucide-react"
 import { cn } from "../lib/utils"
-import { twinAPI, progressAPI, twinAPIDemo } from "../lib/api"
+import { twinAPI, progressAPI } from "../lib/api"
 import ProgressTracker from "../components/ProgressTracker"
 import { useUser } from "../lib/user-context"
 
@@ -190,15 +190,9 @@ export default function TwinBuilder() {
         
         console.log("Sending twin data:", twinData)
         
-        // Try to save to API, fallback to demo
-        let response;
-        try {
-          response = await twinAPI.create(twinData)
-          console.log("API Response:", response)
-        } catch (apiError) {
-          console.log("API failed, trying demo fallback")
-          response = await twinAPIDemo.create(twinData)
-        }
+        // Save to API - no fallback to demo
+        const response = await twinAPI.create(twinData)
+        console.log("API Response:", response)
         
         if (response && (response.status === 'success' || response.data?.twin)) {
           // Calculate empowerment score
