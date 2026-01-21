@@ -1,6 +1,7 @@
 const aiServiceClient = require('../services/aiServiceClient');
 const { AppError, BadRequestError, ServiceUnavailableError } = require('../utils/errors');
 const FormData = require('form-data');
+const axios = require('axios');
 const fs = require('fs').promises;
 const path = require('path');
 
@@ -164,7 +165,7 @@ exports.analyzeCVFile = async (req, res, next) => {
 
     // Send file to AI service for parsing and analysis
     // The AI service has PyPDF2 and python-docx for parsing
-    const formData = new FormDataLib();
+    const formData = new FormData();
     formData.append('cvFile', file.buffer, {
       filename: file.originalname,
       contentType: file.mimetype
