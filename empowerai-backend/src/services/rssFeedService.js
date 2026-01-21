@@ -10,7 +10,7 @@ const Opportunity = require('../models/Opportunity');
 const logger = require('../utils/logger');
 
 const parser = new Parser({
-  timeout: 15000,
+  timeout: 30000, // increased timeout for slow feeds
   maxRedirects: 5,
   customFields: {
     item: [
@@ -73,14 +73,15 @@ async function fetchAllFeeds() {
   let totalSkipped = 0;
   let totalErrors = 0;
 
-  for (const source of FEED_SOURCES) {
+  // Process each feed source
+  await Promise.all(FEED_SOURCES.map(async (source) => {
     try {
       logger.info(`Fetching feed: ${source.name} (${source.url})`);
       const feed = await parser.parseURL(source.url);
       
       if (!feed || !feed.items || feed.items.length === 0) {
         logger.warn(`No items found in feed: ${source.name}`);
-        continue;
+        return;
       }
 
       logger.info(`Found ${feed.items.length} items in ${source.name} feed`);
@@ -138,9 +139,27 @@ async function fetchAllFeeds() {
       // Continue with other feeds even if one fails
     }
   }
+  ));
 
   logger.info(`RSS aggregation complete: ${totalNew} new, ${totalSkipped} skipped, ${totalErrors} errors`);
   return { new: totalNew, skipped: totalSkipped, errors: totalErrors };
+}
+
+
+/** 
+ * Manual perge of old opportunities
+ * Remove opportunities older than 30 days.
+  */
+async function purgeOldOpportunities(daysOld = 30) {
+  const cutoffDate = new Date(Date.now() - daysOld * 24 * 60 * 60 * 1000);
+  try {
+    const results = await Opportunity.deleteMany({ createdAt: { $lt: cutoffDate } });
+    logger.info(`Purged old opportunities older than ${daysOld} days: ${results.deletedCount} removed.`);
+    return results.deletedCount;
+  } catch (error) {
+    logger.error('Error purging old opportunities:', error.message);
+    throw error;
+  }
 }
 
 /**
