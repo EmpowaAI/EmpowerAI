@@ -8,6 +8,8 @@ import { cvAPI } from "../lib/api"
 import { useNavigate } from "react-router-dom"
 import ProgressTracker from "../components/ProgressTracker"
 import { useUser } from "../lib/user-context"
+import RateLimitAlert from "../components/RateLimitAlert"
+import ErrorAlert from "../components/ErrorAlert"
 
 interface AnalysisResult {
   extractedSkills?: string[]
@@ -24,6 +26,8 @@ export default function CVAnalyzer() {
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [result, setResult] = useState<AnalysisResult | null>(null)
   const [error, setError] = useState("")
+  const [isRateLimited, setIsRateLimited] = useState(false)
+  const [retryAfter, setRetryAfter] = useState(60)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const navigate = useNavigate()
   const { updateProgress } = useUser()
@@ -84,7 +88,20 @@ export default function CVAnalyzer() {
     } catch (err: any) {
       console.error('CV Analysis: Error occurred', err);
       const errorMessage = err.message || err.response?.data?.message || "Failed to analyze CV. Please try again."
-      setError(errorMessage)
+      
+      // Check if it's a rate limit error
+      const isRateLimit = err.response?.status === 429 || 
+                         err.response?.data?.code === 'RATE_LIMIT' ||
+                         errorMessage.toLowerCase().includes('rate limit')
+      
+      if (isRateLimit) {
+        setIsRateLimited(true)
+        setRetryAfter(err.response?.data?.retryAfter || 60)
+        setError("")
+      } else {
+        setIsRateLimited(false)
+        setError(errorMessage)
+      }
       setResult(null)
     } finally {
       setIsAnalyzing(false)
