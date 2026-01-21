@@ -9,7 +9,8 @@
     "test": "jest",
     "create-indexes": "node src/scripts/createIndexes.js",
     "seed:opportunities": "node scripts/seedOpportunities.js",
-    "rss:fetch": "node scripts/fetchRssFeeds.js"
+    "rss:fetch": "node scripts/fetchRssFeeds.js",
+    "rss:test-purge": "node scripts/testPurge.js"
   },
   "keywords": [
     "youth-empowerment",
