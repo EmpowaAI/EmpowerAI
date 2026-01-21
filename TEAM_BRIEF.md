@@ -61,4 +61,15 @@ curl -X POST https://your-backend-url/api/rss/purge?days=30
 2. **Manual purge**: `POST /api/rss/purge?days=30` - Removes opportunities older than specified days
 3. **Check status**: `GET /api/rss/status` - See scheduler status
 
+## ✅ Live Testing Results (2026-01-21)
+**All endpoints tested and working on production:**
+- ✅ `GET /api/rss/status` - Returns scheduler status
+- ✅ `POST /api/rss/update` - Fire-and-forget confirmed (returns immediately)
+- ✅ `POST /api/rss/purge?days=30` - Fire-and-forget confirmed (returns immediately)
+
+**Check Render logs for background processing results:**
+- Look for "Manual RSS feed update triggered"
+- Look for "RSS aggregation complete: X new, Y skipped, Z errors"
+- Look for "Manual purge completed, removed X old opportunities"
+
 **The code is ready - we just need valid RSS feed URLs!**
