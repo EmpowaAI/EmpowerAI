@@ -39,6 +39,8 @@
 - `empowerai-backend/scripts/fetchRssFeeds.js` - Manual fetch script
 - `empowerai-backend/scripts/testPurge.js` - Test purge functionality
 
+**See also:** `empowerai-backend/docs/RSS_FEED_SETUP.md` for detailed RSS setup documentation
+
 ## 🚀 Quick Test
 ```bash
 cd empowerai-backend
