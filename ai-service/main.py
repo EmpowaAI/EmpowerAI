@@ -115,10 +115,12 @@ async def health_check(request: Request):
 
 # Import routes
 from routes import digital_twin, simulation, cv_analysis, interview, chat
+from routes import cv_analysis_file
 
 app.include_router(digital_twin.router, prefix="/api/twin", tags=["Digital Twin"])
 app.include_router(simulation.router, prefix="/api/simulation", tags=["Simulation"])
 app.include_router(cv_analysis.router, prefix="/api/cv", tags=["CV Analysis"])
+app.include_router(cv_analysis_file.router, prefix="/api/cv", tags=["CV Analysis"])
 app.include_router(interview.router, prefix="/api/interview", tags=["Interview Coach"])
 app.include_router(chat.router, prefix="/api/chat", tags=["Chat"])
 

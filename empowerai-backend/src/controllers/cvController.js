@@ -1,5 +1,8 @@
 const aiServiceClient = require('../services/aiServiceClient');
 const { AppError, BadRequestError, ServiceUnavailableError } = require('../utils/errors');
+const FormData = require('form-data');
+const fs = require('fs').promises;
+const path = require('path');
 
 // Request timeout constant (matches aiServiceClient timeout)
 const REQUEST_TIMEOUT = 30000; // 30 seconds

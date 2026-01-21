@@ -135,6 +135,50 @@ export const cvAPI = {
       throw error;
     }
   },
+  
+  analyzeFile: async (file: File, jobRequirements?: string) => {
+    try {
+      const token = getToken();
+      const formData = new FormData();
+      formData.append('cvFile', file);
+      if (jobRequirements) {
+        formData.append('jobRequirements', jobRequirements);
+      }
+      
+      const headers: HeadersInit = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      // Don't set Content-Type - browser will set it with boundary for FormData
+      
+      const response = await fetch(`${API_BASE}/cv/analyze-file`, {
+        method: 'POST',
+        headers,
+        body: formData
+      });
+      
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ 
+          message: `Request failed with status ${response.status}`,
+          status: response.status 
+        }));
+        const errorMessage = error.message || error.data?.message || error.detail || `HTTP error! status: ${response.status}`;
+        const apiError = new Error(errorMessage);
+        (apiError as any).status = error.status || response.status;
+        (apiError as any).response = {
+          ...error,
+          status: response.status,
+          data: error
+        };
+        throw apiError;
+      }
+      
+      return response.json();
+    } catch (error) {
+      console.error('CV file analysis failed:', error);
+      throw error;
+    }
+  },
 };
 
 export const interviewAPI = {

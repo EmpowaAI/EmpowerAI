@@ -25,6 +25,8 @@ const aiServiceClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  maxContentLength: 10 * 1024 * 1024, // 10MB
+  maxBodyLength: 10 * 1024 * 1024, // 10MB
 });
 
 // Request interceptor for logging
