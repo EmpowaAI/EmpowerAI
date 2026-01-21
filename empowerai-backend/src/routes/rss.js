@@ -11,6 +11,9 @@ const rssController = require('../controllers/rssController');
 // Manual trigger for RSS feed updates
 router.post('/update', rssController.triggerUpdate);
 
+// Manual purge of old opportunities
+router.post('/purge', rssController.triggerPurge);
+
 // Get scheduler status
 router.get('/status', rssController.getStatus);
 

@@ -4,7 +4,7 @@
  * Handles API requests for RSS feed operations
  */
 
-const { fetchAllFeeds } = require('../services/rssFeedService');
+const { fetchAllFeeds, purgeOldOpportunities } = require('../services/rssFeedService');
 const { startRssScheduler, stopRssScheduler, getSchedulerStatus } = require('../services/rssScheduler');
 const { sendSuccess, sendError } = require('../utils/response');
 const logger = require('../utils/logger');
@@ -25,7 +25,7 @@ exports.triggerUpdate = (req, res,) => {
 
     // Fire-and-forget: purge opportunities older than 30 days
     purgeOldOpportunities()
-      .then(count => logger.info(`Manual purge completed, removed ${count} old opportunities removed`))
+      .then(count => logger.info(`Manual purge completed, removed ${count} old opportunities`))
       .catch(err => logger.error('Error during manual purge of old opportunities:', err));
     
     sendSuccess(res, {
@@ -70,4 +70,21 @@ exports.stopScheduler = async (req, res, next) => {
     logger.error('Error stopping scheduler:', error);
     sendError(res, error.message || 'Failed to stop scheduler', 500);
   }
+};
+
+/**
+ * Manual purge of old opportunities (fire-and-forget)
+ */
+exports.triggerPurge = (req, res) => {
+  const daysOld = parseInt(req.query.days) || 30;
+  
+  logger.info(`Manual purge triggered for opportunities older than ${daysOld} days`);
+  
+  purgeOldOpportunities(daysOld)
+    .then(count => logger.info(`Manual purge completed, removed ${count} old opportunities`))
+    .catch(err => logger.error('Error during manual purge of old opportunities:', err));
+  
+  sendSuccess(res, {
+    message: `Purge initiated for opportunities older than ${daysOld} days`
+  });
 };
