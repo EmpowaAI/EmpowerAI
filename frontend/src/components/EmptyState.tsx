@@ -1,8 +1,8 @@
-import { LucideIcon } from "lucide-react"
+import type { LucideProps } from "lucide-react"
 import { cn } from "../lib/utils"
 
 interface EmptyStateProps {
-  icon: LucideIcon
+  icon: React.ComponentType<LucideProps>;
   title: string
   description?: string
   action?: React.ReactNode
