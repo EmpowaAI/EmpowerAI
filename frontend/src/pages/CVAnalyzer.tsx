@@ -49,12 +49,9 @@ export default function CVAnalyzer() {
   }
 
   const analyzeCV = async () => {
-    if (!cvText.trim()) {
-      if (file) {
-        setError("File upload support is coming soon. For now, please paste your CV text above so we can analyze it.")
-      } else {
-        setError("Please paste your CV text above before continuing.")
-      }
+    // Check if we have file or text
+    if (!cvText.trim() && !file) {
+      setError("Please paste your CV text above or upload a file before continuing.")
       return
     }
 
@@ -62,8 +59,18 @@ export default function CVAnalyzer() {
     setIsAnalyzing(true)
 
     try {
-      console.log('CV Analysis: Starting analysis...', { cvTextLength: cvText.length });
-      const response = await cvAPI.analyze(cvText, jobRequirements || undefined)
+      let response;
+      
+      if (file) {
+        // Analyze from uploaded file
+        console.log('CV Analysis: Starting file analysis...', { filename: file.name, size: file.size });
+        response = await cvAPI.analyzeFile(file, jobRequirements || undefined)
+      } else {
+        // Analyze from text
+        console.log('CV Analysis: Starting text analysis...', { cvTextLength: cvText.length });
+        response = await cvAPI.analyze(cvText, jobRequirements || undefined)
+      }
+      
       console.log('CV Analysis: Response received', { status: response.status, hasData: !!response.data });
       
       if (response.status === 'success' && response.data?.analysis) {
@@ -80,7 +87,7 @@ export default function CVAnalyzer() {
         // Show success for a bit longer before redirecting
         setTimeout(() => {
           navigate("/dashboard/twin")
-        }, 3000) // Increased from 2000 to 3000
+        }, 3000)
       } else {
         console.warn('CV Analysis: Unexpected response format', response);
         setError("Unexpected response format. Please try again.")
@@ -213,7 +220,7 @@ export default function CVAnalyzer() {
                   Select File
                 </button>
                 <p className="text-xs text-muted-foreground">
-                  Tip: For this early version, pasting your CV text above works best. File upload support is on the way.
+                  Supported formats: PDF, DOCX, TXT (max 5MB)
                 </p>
               </div>
             )}
