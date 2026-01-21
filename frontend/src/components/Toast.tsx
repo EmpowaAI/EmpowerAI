@@ -42,10 +42,11 @@ export default function Toast({ message, type = "info", duration = 3000, onClose
   return (
     <div
       className={cn(
-        "fixed top-4 right-4 z-50 flex items-center gap-3 px-4 py-3 rounded-lg border shadow-lg transition-all duration-300 max-w-md",
+        "fixed top-4 right-4 z-[9999] flex items-center gap-3 px-4 py-3 rounded-lg border shadow-xl transition-all duration-300 max-w-md",
         styles[type],
         isVisible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-full"
       )}
+      style={{ zIndex: 9999 }}
     >
       <Icon className="h-5 w-5 flex-shrink-0" />
       <p className="flex-1 text-sm font-medium">{message}</p>
