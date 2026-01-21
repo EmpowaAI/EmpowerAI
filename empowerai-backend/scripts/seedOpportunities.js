@@ -277,10 +277,14 @@ const opportunities = [
  */
 const seedOpportunities = async () => {
   try {
-    // Connect to MongoDB
-    console.log('Connecting to MongoDB...');
-    await mongoose.connect(process.env.MONGODB_URI);
-    console.log('✓ Connected to MongoDB');
+    const isStandalone = require.main === module;
+    
+    // Connect to MongoDB only if not already connected
+    if (mongoose.connection.readyState === 0) {
+      console.log('Connecting to MongoDB...');
+      await mongoose.connect(process.env.MONGODB_URI);
+      console.log('✓ Connected to MongoDB');
+    }
 
     // Clear existing opportunities (optional - comment out if you want to keep existing data)
     console.log('Clearing existing opportunities...');
@@ -330,10 +334,24 @@ const seedOpportunities = async () => {
     });
 
     console.log('\n✅ Database seeded successfully!');
-    process.exit(0);
+    
+    // Return result instead of exiting if called from API
+    if (isStandalone) {
+      await mongoose.connection.close();
+      process.exit(0);
+    }
+    
+    return {
+      count: insertResult.length,
+      deleted: deleteResult.deletedCount
+    };
   } catch (error) {
     console.error('❌ Error seeding database:', error);
-    process.exit(1);
+    if (require.main === module) {
+      await mongoose.connection.close();
+      process.exit(1);
+    }
+    throw error;
   }
 };
 
