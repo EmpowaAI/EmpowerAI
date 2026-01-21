@@ -62,10 +62,12 @@ export default function LoginPage() {
 
         {/* Content with higher z-index */}
         <div className="relative z-10">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-              <Zap className="h-5 w-5 text-white" />
-            </div>
+          <Link to="/" className="flex items-center gap-3">
+            <img 
+              src="/images/logo.jpeg" 
+              alt="EmpowerAI Logo" 
+              className="h-10 w-10 rounded-lg object-cover shadow-lg"
+            />
             <span className="text-xl font-bold text-white">EmpowerAI</span>
           </Link>
         </div>

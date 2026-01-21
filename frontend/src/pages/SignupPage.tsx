@@ -54,10 +54,12 @@ export default function SignupPage() {
         <div className="absolute inset-0 bg-black/50" />
 
         {/* Content with relative positioning to appear above overlay */}
-        <Link to="/" className="flex items-center gap-2 relative z-10">
-          <div className="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center">
-            <Zap className="h-5 w-5 text-white" />
-          </div>
+        <Link to="/" className="flex items-center gap-3 relative z-10">
+          <img 
+            src="/images/logo.jpeg" 
+            alt="EmpowerAI Logo" 
+            className="h-10 w-10 rounded-lg object-cover shadow-lg"
+          />
           <span className="text-xl font-bold text-white drop-shadow-lg">EmpowerAI</span>
         </Link>
         <div className="relative z-10">
@@ -84,10 +86,12 @@ export default function SignupPage() {
       {/* Right Panel - Form */}
       <div className="flex-1 flex items-center justify-center p-6 sm:p-8 bg-gradient-to-br from-indigo-50 via-background to-cyan-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950">
         <div className="w-full max-w-md bg-card border border-border rounded-2xl shadow-xl p-6 sm:p-8">
-          <div className="lg:hidden flex items-center gap-2 mb-8">
-            <div className="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center">
-              <Zap className="h-5 w-5 text-white" />
-            </div>
+          <div className="lg:hidden flex items-center gap-3 mb-8">
+            <img 
+              src="/images/logo.jpeg" 
+              alt="EmpowerAI Logo" 
+              className="h-10 w-10 rounded-lg object-cover shadow-sm"
+            />
             <span className="text-xl font-bold text-foreground">EmpowerAI</span>
           </div>
 

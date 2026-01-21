@@ -149,9 +149,11 @@ export default function DashboardLayout() {
           {/* Logo */}
           <div className="p-5 flex items-center justify-between border-b border-border">
             <Link to="/" className="flex items-center gap-3 group">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg shadow-primary/25 group-hover:shadow-primary/40 transition-shadow">
-                <Zap className="h-5 w-5 text-white" />
-              </div>
+              <img 
+                src="/images/logo.jpeg" 
+                alt="EmpowerAI Logo" 
+                className="h-10 w-10 rounded-xl object-cover shadow-lg shadow-primary/25 group-hover:shadow-primary/40 transition-shadow"
+              />
               <span className="text-xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
                 EmpowerAI
               </span>
