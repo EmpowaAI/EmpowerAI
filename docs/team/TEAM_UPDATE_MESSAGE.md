@@ -19,12 +19,28 @@ Just finished comprehensive testing of the live system and **great news - everyt
 - CV Analysis endpoint
 - Frontend fully accessible
 
+## ⚠️ IMPORTANT: Seed Database First!
+
+**Before testing, we need to populate the database with opportunities:**
+
+```bash
+curl -X POST https://empowerai.onrender.com/api/admin/seed-opportunities
+```
+
+This will add 20+ real South African opportunities (learnerships, internships, jobs, bursaries) so users can actually test the Opportunities page.
+
+**Verify it worked:**
+```bash
+curl https://empowerai.onrender.com/api/admin/stats
+```
+
 ## Next Steps
 Before we open to users, **let's do our own internal testing first** to:
-1. Catch any edge cases we might have missed
-2. Test the full user journey end-to-end
-3. Verify UI/UX flows
-4. Get familiar with the system ourselves
+1. **Seed the database** (see above)
+2. Catch any edge cases we might have missed
+3. Test the full user journey end-to-end
+4. Verify UI/UX flows
+5. Get familiar with the system ourselves
 
 **Live URLs:**
 - Frontend: https://empower-ai-gamma.vercel.app
@@ -36,4 +52,4 @@ Before we open to users, **let's do our own internal testing first** to:
 
 Full test report saved in `docs/testing/SYSTEM_TEST_REPORT.md` if you want details.
 
-Let's test it out and share any feedback! 🚀
+Let's seed the database and test it out! 🚀

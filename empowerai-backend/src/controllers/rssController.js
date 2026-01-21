@@ -5,23 +5,32 @@
  */
 
 const { fetchAllFeeds, purgeOldOpportunities } = require('../services/rssFeedService');
+const { fetchAndSaveJobs } = require('../services/jobAPIService');
 const { startRssScheduler, stopRssScheduler, getSchedulerStatus } = require('../services/rssScheduler');
 const { sendSuccess, sendError } = require('../utils/response');
 const logger = require('../utils/logger');
 
 /**
  * Fire-and-forget manual RSS feed update with optional purge 
+ * Now also fetches from job APIs (Adzuna, Indeed)
  * */
 exports.triggerUpdate = (req, res,) => {
   
-    logger.info('Manual RSS feed update triggered');
+    logger.info('Manual feed update triggered (RSS + Job APIs)');
     
     /**
-     * Fire-and-forget: fetch feeds
+     * Fire-and-forget: fetch RSS feeds
      */
     fetchAllFeeds()
-      .then(() => logger.info('Manual RSS feed update completed'))
-      .catch(err => logger.error('Error during manual RSS feed update:', err));
+      .then(() => logger.info('RSS feed update completed'))
+      .catch(err => logger.error('Error during RSS feed update:', err));
+
+    /**
+     * Fire-and-forget: fetch from job APIs (Adzuna, Indeed)
+     */
+    fetchAndSaveJobs()
+      .then(result => logger.info(`Job API update completed: ${result.new} new, ${result.skipped} skipped`))
+      .catch(err => logger.error('Error during job API update:', err));
 
     // Fire-and-forget: purge opportunities older than 30 days
     purgeOldOpportunities()
@@ -29,7 +38,7 @@ exports.triggerUpdate = (req, res,) => {
       .catch(err => logger.error('Error during manual purge of old opportunities:', err));
     
     sendSuccess(res, {
-      message: 'RSS feeds updated successfully' });
+      message: 'Feeds updated successfully (RSS + Job APIs)' });
     };
      
 

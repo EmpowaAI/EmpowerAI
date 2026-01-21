@@ -6,6 +6,7 @@
 
 const cron = require('node-cron');
 const { fetchAllFeeds } = require('./rssFeedService');
+const { fetchAndSaveJobs } = require('./jobAPIService');
 const logger = require('../utils/logger');
 
 let scheduledJob = null;
@@ -24,16 +25,25 @@ function startRssScheduler() {
   // Better: Use 0 0 * * * (midnight UTC = 2 AM SAST) or 0 2 * * * if server is in UTC
   
   scheduledJob = cron.schedule('0 2 * * *', async () => {
-    logger.info('Starting scheduled RSS feed aggregation...');
+    logger.info('Starting scheduled feed aggregation (RSS + Job APIs)...');
     try {
-      const result = await fetchAllFeeds();
+      // Fetch from RSS feeds
+      const rssResult = await fetchAllFeeds();
       logger.info('Scheduled RSS feed aggregation completed', {
-        new: result.new,
-        skipped: result.skipped,
-        errors: result.errors
+        new: rssResult.new,
+        skipped: rssResult.skipped,
+        errors: rssResult.errors
+      });
+      
+      // Fetch from job APIs
+      const apiResult = await fetchAndSaveJobs();
+      logger.info('Scheduled job API aggregation completed', {
+        new: apiResult.new,
+        skipped: apiResult.skipped,
+        total: apiResult.total
       });
     } catch (error) {
-      logger.error('Scheduled RSS feed aggregation failed:', error.message);
+      logger.error('Scheduled feed aggregation failed:', error.message);
     }
   }, {
     scheduled: true,
