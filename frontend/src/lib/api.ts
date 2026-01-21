@@ -26,7 +26,11 @@ const request = async <T>(endpoint: string, options: RequestInit = {}): Promise<
       const errorMessage = error.message || error.data?.message || error.detail || `HTTP error! status: ${response.status}`;
       const apiError = new Error(errorMessage);
       (apiError as any).status = error.status || response.status;
-      (apiError as any).response = error;
+      (apiError as any).response = {
+        ...error,
+        status: response.status,
+        data: error
+      };
       throw apiError;
     }
     return response.json();
