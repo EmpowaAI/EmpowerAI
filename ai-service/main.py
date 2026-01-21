@@ -11,7 +11,7 @@ import os
 import uuid
 from datetime import datetime
 from utils.logger import get_logger
-#from routes import chat
+
 
 load_dotenv()
 from routes import chat
@@ -114,7 +114,7 @@ async def health_check(request: Request):
     }
 
 # Import routes
-from routes import digital_twin, simulation, cv_analysis, interview
+from routes import digital_twin, simulation, cv_analysis, interview, chat
 
 app.include_router(digital_twin.router, prefix="/api/twin", tags=["Digital Twin"])
 app.include_router(simulation.router, prefix="/api/simulation", tags=["Simulation"])
