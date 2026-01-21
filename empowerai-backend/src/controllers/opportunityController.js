@@ -1,4 +1,5 @@
 const Opportunity = require('../models/Opportunity');
+const logger = require('../utils/logger');
 
 exports.getAllOpportunities = async (req, res, next) => {
   try {
@@ -6,13 +7,39 @@ exports.getAllOpportunities = async (req, res, next) => {
     
     let filter = { isActive: true };
     
-    if (province) filter.province = { $in: [province] };
-    if (type) filter.type = type;
+    // Province filter: province is an array field, so check if it contains the value
+    if (province) {
+      filter.province = province; // MongoDB will check if array contains this value
+    }
+    
+    // Type filter: exact match
+    if (type && type !== 'all') {
+      filter.type = type;
+    }
+    
+    // Skills filter: check if skills array contains any of the provided skills (case-insensitive)
     if (skills) {
-      filter.skills = { $in: skills.split(',') };
+      const skillArray = skills.split(',').map(s => s.trim()).filter(s => s);
+      if (skillArray.length > 0) {
+        // Use regex for case-insensitive matching
+        filter.skills = { 
+          $in: skillArray.map(skill => new RegExp(skill, 'i'))
+        };
+      }
     }
 
-    const opportunities = await Opportunity.find(filter);
+    // Sort by most recent first
+    const opportunities = await Opportunity.find(filter)
+      .sort({ createdAt: -1 })
+      .limit(100); // Limit to 100 most recent opportunities
+
+    logger.info('Opportunities fetched', { 
+      count: opportunities.length, 
+      filters: filter,
+      hasProvince: !!province,
+      hasType: !!type,
+      hasSkills: !!skills
+    });
 
     res.status(200).json({
       status: 'success',
@@ -22,6 +49,7 @@ exports.getAllOpportunities = async (req, res, next) => {
       }
     });
   } catch (error) {
+    logger.error('Error fetching opportunities', error);
     next(error);
   }
 };

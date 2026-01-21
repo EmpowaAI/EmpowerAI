@@ -37,25 +37,15 @@ export default function Opportunities() {
         setError("")
         
         // Get user's province and skills for filtering
+        // NOTE: We don't apply filters by default to show all opportunities
+        // Users can filter using the UI filters
         const filters: { province?: string; type?: string; skills?: string } = {}
-        // TODO: Add province to User interface, for now get from localStorage
-        const userProvince = (user as any)?.province || localStorage.getItem('userProvince')
-        if (userProvince) {
-          filters.province = userProvince
-        }
         
-        // Get skills from CV analysis
-        const cvSkills = localStorage.getItem('cvSkills')
-        if (cvSkills) {
-          try {
-            const skills = JSON.parse(cvSkills)
-            if (Array.isArray(skills) && skills.length > 0) {
-              filters.skills = skills.slice(0, 5).join(',') // Limit to 5 skills
-            }
-          } catch (e) {
-            console.error('Error parsing CV skills:', e)
-          }
-        }
+        // Only apply province filter if explicitly set (not from user profile to avoid empty results)
+        // Users can use the filter UI to filter by province
+        
+        // Don't auto-apply skills filter - let users see all opportunities first
+        // Skills filter can be applied via the search/filter UI
         
         const response = await opportunitiesAPI.getAll(filters)
         
@@ -122,10 +112,11 @@ export default function Opportunities() {
   }
 
   const filteredOpportunities = opportunities.filter((opp) => {
-    const matchesSearch =
+    const matchesSearch = !search || 
       opp.title.toLowerCase().includes(search.toLowerCase()) || 
-      opp.company.toLowerCase().includes(search.toLowerCase())
-    const matchesCategory = category === "all" || opp.category === category
+      opp.company.toLowerCase().includes(search.toLowerCase()) ||
+      (opp.description && opp.description.toLowerCase().includes(search.toLowerCase()))
+    const matchesCategory = category === "all" || opp.category === category || opp.type === category
     return matchesSearch && matchesCategory
   })
 
