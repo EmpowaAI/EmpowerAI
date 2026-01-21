@@ -10,6 +10,7 @@ import ProgressTracker from "../components/ProgressTracker"
 import { useUser } from "../lib/user-context"
 import RateLimitAlert from "../components/RateLimitAlert"
 import ErrorAlert from "../components/ErrorAlert"
+import Toast, { useToast } from "../components/Toast"
 
 interface AnalysisResult {
   extractedSkills?: string[]
@@ -31,6 +32,7 @@ export default function CVAnalyzer() {
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const navigate = useNavigate()
   const { updateProgress } = useUser()
+  const { toasts, success, removeToast } = useToast()
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -84,6 +86,13 @@ export default function CVAnalyzer() {
           localStorage.setItem('cvSkills', JSON.stringify(response.data.analysis.extractedSkills))
         }
         
+        // Show success notification
+        if (file) {
+          success(`CV uploaded and analyzed successfully! Found ${response.data.analysis.extractedSkills?.length || 0} skills.`)
+        } else {
+          success(`CV analyzed successfully! Found ${response.data.analysis.extractedSkills?.length || 0} skills.`)
+        }
+        
         // Show success for a bit longer before redirecting
         setTimeout(() => {
           navigate("/dashboard/twin")
@@ -118,6 +127,16 @@ export default function CVAnalyzer() {
 
   return (
     <div className="space-y-8">
+      {/* Toast Notifications */}
+      {toasts.map((toast) => (
+        <Toast
+          key={toast.id}
+          message={toast.message}
+          type={toast.type}
+          onClose={() => removeToast(toast.id)}
+        />
+      ))}
+      
       {/* Progress Tracker */}
       <ProgressTracker currentStep="cv" />
       

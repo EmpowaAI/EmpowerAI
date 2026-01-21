@@ -3,7 +3,7 @@ import { Link } from "react-router-dom"
 import { TrendingUp, Target, Briefcase, FileText, Mic, ArrowRight, Zap, Sparkles, ChevronUp, Clock, Loader2 } from "lucide-react"
 import { useUser } from "../lib/user-context"
 import { cn } from "../lib/utils"
-import { statsAPI } from "../lib/api"
+import { statsAPI, opportunitiesAPI } from "../lib/api"
 import { useState, useEffect } from "react"
 
 interface DashboardStats {
@@ -15,11 +15,22 @@ interface DashboardStats {
   cvScore: number
 }
 
+interface RecommendedOpportunity {
+  id: string
+  title: string
+  company: string
+  type: string
+  match: number
+  posted: string
+}
+
 export default function Dashboard() {
   const { user } = useUser()
   const displayName = user?.name?.split(" ")[0] || "there"
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [loading, setLoading] = useState(true)
+  const [recommendedJobs, setRecommendedJobs] = useState<RecommendedOpportunity[]>([])
+  const [jobsLoading, setJobsLoading] = useState(true)
   
   useEffect(() => {
     const fetchStats = async () => {
@@ -31,15 +42,7 @@ export default function Dashboard() {
         }
       } catch (error) {
         console.error('Failed to load dashboard stats:', error)
-        // Fallback to default values if API fails
-        setStats({
-          empowermentScore: 0,
-          threeMonthProjection: 0,
-          skillsMatched: 0,
-          opportunitiesCount: 0,
-          interviewsPracticed: 0,
-          cvScore: 0
-        })
+        // Don't set fallback values - show loading/empty state instead
       } finally {
         setLoading(false)
       }
@@ -47,6 +50,84 @@ export default function Dashboard() {
     
     fetchStats()
   }, [])
+
+  useEffect(() => {
+    const fetchRecommendedJobs = async () => {
+      try {
+        setJobsLoading(true)
+        // Get user's province and skills for filtering
+        const filters: { province?: string; skills?: string } = {}
+        const userProvince = (user as any)?.province || localStorage.getItem('userProvince')
+        if (userProvince) {
+          filters.province = userProvince
+        }
+        
+        const cvSkills = localStorage.getItem('cvSkills')
+        if (cvSkills) {
+          try {
+            const skills = JSON.parse(cvSkills)
+            if (Array.isArray(skills) && skills.length > 0) {
+              filters.skills = skills.slice(0, 5).join(',')
+            }
+          } catch (e) {
+            console.error('Error parsing CV skills:', e)
+          }
+        }
+        
+        const response = await opportunitiesAPI.getAll(filters)
+        
+        if (response.status === 'success' && response.data?.opportunities) {
+          // Get top 3 opportunities sorted by match score
+          const opportunities = response.data.opportunities
+            .map((opp: any) => ({
+              id: opp._id || opp.id,
+              title: opp.title,
+              company: opp.company || 'Company Name',
+              type: opp.type || 'job',
+              match: calculateMatchScore(opp, user),
+              posted: opp.createdAt 
+                ? new Date(opp.createdAt).toLocaleDateString('en-ZA', { month: 'short', day: 'numeric' })
+                : 'Recently'
+            }))
+            .sort((a: RecommendedOpportunity, b: RecommendedOpportunity) => b.match - a.match)
+            .slice(0, 3)
+          
+          setRecommendedJobs(opportunities)
+        }
+      } catch (error) {
+        console.error('Failed to load recommended jobs:', error)
+        // Don't show hardcoded fallback - just leave empty
+      } finally {
+        setJobsLoading(false)
+      }
+    }
+    
+    fetchRecommendedJobs()
+  }, [user])
+
+  const calculateMatchScore = (opp: any, user: any): number => {
+    // Calculate match score based on skills, location, etc.
+    let score = 50 // Base score
+    
+    const cvSkills = localStorage.getItem('cvSkills')
+    if (cvSkills && opp.skills) {
+      try {
+        const userSkills = JSON.parse(cvSkills)
+        const oppSkills = Array.isArray(opp.skills) ? opp.skills : []
+        const matchingSkills = userSkills.filter((skill: string) => 
+          oppSkills.some((oppSkill: string) => 
+            oppSkill.toLowerCase().includes(skill.toLowerCase()) || 
+            skill.toLowerCase().includes(oppSkill.toLowerCase())
+          )
+        )
+        score += matchingSkills.length * 10
+      } catch (e) {
+        console.error('Error calculating match score:', e)
+      }
+    }
+    
+    return Math.min(Math.max(score, 0), 100)
+  }
 
   return (
     <div className="space-y-8">
@@ -281,47 +362,64 @@ export default function Dashboard() {
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[
-            { title: "Junior Web Developer", company: "TechCo SA", type: "Full-time", match: 92, posted: "2h ago" },
-            {
-              title: "Digital Marketing Learnership",
-              company: "MediaHouse",
-              type: "Learnership",
-              match: 88,
-              posted: "5h ago",
-            },
-            { title: "IT Support Internship", company: "FinServe", type: "Internship", match: 85, posted: "1d ago" },
-          ].map((job, i) => (
-            <div
-              key={i}
-              className="bg-card border border-border rounded-xl p-4 sm:p-6 hover:shadow-md hover:border-primary/40 transition-all duration-200 group animate-in fade-in-up hover:scale-[1.02] hover:-translate-y-1"
-              style={{ animationDelay: `${(i + 10) * 0.1}s` }}
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className="h-12 w-12 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
-                  <Briefcase className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+        {jobsLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-card border border-border rounded-xl p-4 sm:p-6 animate-pulse">
+                <div className="h-12 w-12 rounded-lg bg-muted mb-4" />
+                <div className="h-4 bg-muted rounded w-3/4 mb-2" />
+                <div className="h-3 bg-muted rounded w-1/2" />
+              </div>
+            ))}
+          </div>
+        ) : recommendedJobs.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {recommendedJobs.map((job, i) => (
+              <Link
+                key={job.id}
+                to={`/dashboard/opportunities#${job.id}`}
+                className="bg-card border border-border rounded-xl p-4 sm:p-6 hover:shadow-md hover:border-primary/40 transition-all duration-200 group animate-in fade-in-up hover:scale-[1.02] hover:-translate-y-1"
+                style={{ animationDelay: `${(i + 10) * 0.1}s` }}
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="h-12 w-12 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                    <Briefcase className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    <span className="px-3 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs rounded-full font-semibold">
+                      {job.match}% match
+                    </span>
+                    <span className="text-xs text-muted-foreground">{job.posted}</span>
+                  </div>
                 </div>
-                <div className="flex flex-col items-end gap-1">
-                  <span className="px-3 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs rounded-full font-semibold">
-                    {job.match}% match
+                <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors mb-1">{job.title}</h3>
+                <p className="text-sm text-muted-foreground mb-4">{job.company}</p>
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex items-center px-3 py-1 bg-muted text-xs text-muted-foreground rounded-full font-medium">
+                    {job.type}
                   </span>
-                  <span className="text-xs text-muted-foreground">{job.posted}</span>
+                  <span className="text-xs text-primary font-medium opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                    View details <ArrowRight className="h-3 w-3" />
+                  </span>
                 </div>
-              </div>
-              <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors mb-1">{job.title}</h3>
-              <p className="text-sm text-muted-foreground mb-4">{job.company}</p>
-              <div className="flex items-center justify-between">
-                <span className="inline-flex items-center px-3 py-1 bg-muted text-xs text-muted-foreground rounded-full font-medium">
-                  {job.type}
-                </span>
-                <button className="text-xs text-primary font-medium opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                  View details <ArrowRight className="h-3 w-3" />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="bg-card border border-border rounded-xl p-8 text-center">
+            <Briefcase className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-foreground mb-2">No Opportunities Available</h3>
+            <p className="text-muted-foreground mb-4">
+              Check back later or browse all opportunities to find matches.
+            </p>
+            <Link
+              to="/dashboard/opportunities"
+              className="inline-flex items-center gap-2 text-primary hover:underline font-medium"
+            >
+              Browse All Opportunities <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        )}
       </div>
       <DigitalTwinChatbot />
     </div>
