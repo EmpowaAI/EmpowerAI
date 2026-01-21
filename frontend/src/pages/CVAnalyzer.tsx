@@ -40,13 +40,17 @@ export default function CVAnalyzer() {
     const droppedFile = e.dataTransfer.files[0]
     if (droppedFile && (droppedFile.type === "application/pdf" || droppedFile.type.includes("document"))) {
       setFile(droppedFile)
+      // Show immediate feedback that file was dropped
+      success(`File "${droppedFile.name}" uploaded successfully! Click "Analyze CV & Continue" to proceed.`)
     }
-  }, [])
+  }, [success])
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0]
     if (selectedFile) {
       setFile(selectedFile)
+      // Show immediate feedback that file was selected
+      success(`File "${selectedFile.name}" selected. Click "Analyze CV & Continue" to proceed.`)
     }
   }
 
