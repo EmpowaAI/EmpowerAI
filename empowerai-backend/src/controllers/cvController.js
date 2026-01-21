@@ -129,3 +129,117 @@ exports.analyzeCV = async (req, res, next) => {
   }
 };
 
+/**
+ * Analyze CV from uploaded file
+ * @route POST /api/cv/analyze-file
+ * @access Private
+ */
+exports.analyzeCVFile = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'CV file is required'
+      });
+    }
+
+    const { jobRequirements } = req.body;
+    const file = req.file;
+
+    // Convert jobRequirements to array if it's a string
+    let jobRequirementsArray = null;
+    if (jobRequirements) {
+      if (typeof jobRequirements === 'string') {
+        jobRequirementsArray = jobRequirements.split(/[,\n]/).map(s => s.trim()).filter(s => s);
+      } else if (Array.isArray(jobRequirements)) {
+        jobRequirementsArray = jobRequirements;
+      }
+    }
+
+    console.log('[CV Controller] Calling AI service for CV file analysis...', {
+      filename: file.originalname,
+      mimetype: file.mimetype,
+      size: file.size
+    });
+
+    // Send file to AI service for parsing and analysis
+    // The AI service has PyPDF2 and python-docx for parsing
+    const formData = new FormDataLib();
+    formData.append('cvFile', file.buffer, {
+      filename: file.originalname,
+      contentType: file.mimetype
+    });
+    if (jobRequirementsArray && jobRequirementsArray.length > 0) {
+      formData.append('jobRequirements', JSON.stringify(jobRequirementsArray));
+    }
+
+    const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
+    // Use axios directly for FormData (aiServiceClient doesn't handle FormData well)
+    const response = await axios.post(`${aiServiceUrl}/api/cv/analyze-file`, formData, {
+      headers: {
+        ...formData.getHeaders()
+      },
+      timeout: 60000, // 60 seconds for file processing
+      maxContentLength: 10 * 1024 * 1024, // 10MB
+      maxBodyLength: 10 * 1024 * 1024 // 10MB
+    });
+
+    console.log('[CV Controller] AI service response received successfully');
+    res.status(200).json({
+      status: 'success',
+      data: {
+        analysis: response.data
+      }
+    });
+  } catch (error) {
+    console.error('[CV Controller] Error analyzing CV file:', {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+      code: error.code
+    });
+    
+    // Check for rate limit errors
+    const errorMessage = error.message || '';
+    if (error.isRateLimit || errorMessage.toLowerCase().includes('rate limit')) {
+      const retryAfter = error.retryAfter || 60;
+      const message = errorMessage || `AI service is rate limited. Please try again in ${retryAfter} seconds.`;
+      return res.status(429).json({
+        status: 'error',
+        message,
+        retryAfter,
+        code: 'RATE_LIMIT'
+      });
+    }
+    
+    // Handle file-specific errors
+    if (error.message && error.message.includes('Invalid file type')) {
+      return next(new BadRequestError(error.message));
+    }
+    
+    // Wrap AI service errors
+    if (error.response) {
+      const status = error.response.status;
+      const data = error.response.data;
+      const message = data?.message || data?.detail || error.message || 'Failed to analyze CV file';
+      
+      if (status === 400) {
+        return next(new BadRequestError(message));
+      } else if (status === 429 || status === 503) {
+        return next(new ServiceUnavailableError(message));
+      } else if (status >= 500) {
+        return next(new ServiceUnavailableError('AI service is temporarily unavailable. Please try again later.'));
+      } else {
+        return next(new AppError(message, status));
+      }
+    }
+    
+    // Network errors
+    if (!error.response) {
+      const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
+      return next(new ServiceUnavailableError(`AI service is unavailable. Please check if the service is running at ${aiServiceUrl}.`));
+    }
+    
+    next(error);
+  }
+};
