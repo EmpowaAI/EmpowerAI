@@ -3,7 +3,7 @@ import type React from "react"
 
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { Zap, Eye, EyeOff, CheckCircle, Loader2 } from "lucide-react"
+import { Eye, EyeOff, CheckCircle, Loader2 } from "lucide-react"
 import { authAPI } from "../lib/api"
 import { useUser } from "../lib/user-context"
 
