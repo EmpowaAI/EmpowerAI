@@ -148,10 +148,17 @@ export default function CVAnalyzer() {
             />
           </div>
 
-          {error && (
-            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-sm text-destructive">
-              {error}
-            </div>
+          {isRateLimited && (
+            <RateLimitAlert
+              retryAfter={retryAfter}
+              onRetry={() => {
+                setIsRateLimited(false)
+                analyzeCV()
+              }}
+            />
+          )}
+          {error && !isRateLimited && (
+            <ErrorAlert message={error} onDismiss={() => setError("")} />
           )}
 
           {/* Upload Area (Alternative) */}
