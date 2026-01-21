@@ -11,6 +11,7 @@ import TwinBuilder from './pages/TwinBuilder'
 import Simulations from './pages/Simulations'
 import Opportunities from './pages/Opportunities'
 import InterviewCoach from './pages/InterviewCoach'
+import AboutPage from './pages/AboutPage'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user } = useUser()
@@ -28,6 +29,7 @@ function App() {
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<LandingPage />} />
+        <Route path="/about" element={<AboutPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
         
