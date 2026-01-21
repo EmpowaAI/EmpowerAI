@@ -208,11 +208,14 @@ export default function CVAnalyzer() {
             {file ? (
               <div className="space-y-4">
                 <div className="h-16 w-16 rounded-xl bg-accent/20 flex items-center justify-center mx-auto">
-                  <FileText className="h-8 w-8 text-accent" />
+                  <CheckCircle className="h-8 w-8 text-accent" />
                 </div>
                 <div>
-                  <p className="font-medium text-foreground">{file.name}</p>
-                  <p className="text-sm text-muted-foreground">{(file.size / 1024).toFixed(1)} KB</p>
+                  <p className="font-medium text-foreground flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-accent" />
+                    {file.name}
+                  </p>
+                  <p className="text-sm text-muted-foreground">{(file.size / 1024).toFixed(1)} KB - Ready to analyze</p>
                 </div>
                 <button onClick={() => setFile(null)} className="text-sm text-primary hover:underline">
                   Remove file

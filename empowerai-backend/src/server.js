@@ -137,9 +137,27 @@ async function connectDatabase() {
 }
 
 // Connect to database first, then set up routes
-connectDatabase().then((connected) => {
+connectDatabase().then(async (connected) => {
   if (connected) {
     logger.info('Database ready, setting up routes');
+    
+    // Auto-seed opportunities if database is empty
+    try {
+      const Opportunity = require('./models/Opportunity');
+      const opportunityCount = await Opportunity.countDocuments({ isActive: true });
+      
+      if (opportunityCount === 0) {
+        logger.info('No opportunities found in database, auto-seeding...');
+        const { seedOpportunities } = require('../scripts/seedOpportunities');
+        const result = await seedOpportunities();
+        logger.info(`Auto-seeded ${result?.new || 0} opportunities`);
+      } else {
+        logger.info(`Database already has ${opportunityCount} opportunities`);
+      }
+    } catch (error) {
+      logger.warn('Failed to auto-seed opportunities:', error.message);
+      // Don't block server startup if seeding fails
+    }
     
     // Start RSS feed scheduler (only if database is connected)
     if (process.env.ENABLE_RSS_SCHEDULER !== 'false') {
