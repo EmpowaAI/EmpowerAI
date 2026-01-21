@@ -620,5 +620,6 @@ function cleanDescription(description) {
 
 module.exports = {
   fetchAllFeeds,
+  purgeOldOpportunities,
   FEED_SOURCES
 };
