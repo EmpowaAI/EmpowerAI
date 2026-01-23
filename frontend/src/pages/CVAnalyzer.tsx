@@ -111,12 +111,18 @@ export default function CVAnalyzer() {
       
       // Check if it's a rate limit error
       const isRateLimit = err.response?.status === 429 || 
+                         err.status === 429 ||
                          err.response?.data?.code === 'RATE_LIMIT' ||
                          errorMessage.toLowerCase().includes('rate limit')
       
       if (isRateLimit) {
         setIsRateLimited(true)
-        setRetryAfter(err.response?.data?.retryAfter || 60)
+        // Extract retryAfter from multiple possible locations
+        const retryAfter = err.retryAfter || 
+                         err.response?.data?.retryAfter || 
+                         err.response?.retryAfter || 
+                         60
+        setRetryAfter(retryAfter)
         setError("")
       } else {
         setIsRateLimited(false)

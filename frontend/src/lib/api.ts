@@ -162,14 +162,30 @@ export const cvAPI = {
           message: `Request failed with status ${response.status}`,
           status: response.status 
         }));
+        
+        // Extract retryAfter from response headers or error body
+        const retryAfterHeader = response.headers.get('Retry-After');
+        const retryAfter = retryAfterHeader 
+          ? parseInt(retryAfterHeader, 10) 
+          : error.retryAfter || error.data?.retryAfter;
+        
         const errorMessage = error.message || error.data?.message || error.detail || `HTTP error! status: ${response.status}`;
         const apiError = new Error(errorMessage);
         (apiError as any).status = error.status || response.status;
         (apiError as any).response = {
           ...error,
           status: response.status,
-          data: error
+          data: {
+            ...error,
+            retryAfter: retryAfter || (response.status === 429 ? 60 : undefined)
+          }
         };
+        
+        // Add retryAfter to error for easy access
+        if (retryAfter) {
+          (apiError as any).retryAfter = retryAfter;
+        }
+        
         throw apiError;
       }
       
