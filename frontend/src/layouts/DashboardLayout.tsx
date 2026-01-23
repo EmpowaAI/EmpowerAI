@@ -18,6 +18,7 @@ import {
 import { cn } from "../lib/utils"
 import { useUser } from "../lib/user-context"
 import ThemeToggle from "../components/ThemeToggle"
+import Logo from "../components/Logo"
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
@@ -148,16 +149,7 @@ export default function DashboardLayout() {
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="p-5 flex items-center justify-between border-b border-border">
-            <Link to="/" className="flex items-center gap-3 group">
-              <img 
-                src="/images/logo.jpeg" 
-                alt="EmpowerAI Logo" 
-                className="h-10 w-10 rounded-xl object-cover shadow-lg shadow-primary/25 group-hover:shadow-primary/40 transition-shadow"
-              />
-              <span className="text-xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
-                EmpowerAI
-              </span>
-            </Link>
+            <Logo variant="default" size="md" linkTo="/" />
             <button
               className="lg:hidden text-muted-foreground hover:text-foreground p-2 hover:bg-muted rounded-lg transition-colors"
               onClick={() => setSidebarOpen(false)}

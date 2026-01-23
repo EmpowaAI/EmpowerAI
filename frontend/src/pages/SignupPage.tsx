@@ -6,6 +6,7 @@ import { Link, useNavigate } from "react-router-dom"
 import { Eye, EyeOff, CheckCircle, Loader2 } from "lucide-react"
 import { authAPI } from "../lib/api"
 import { useUser } from "../lib/user-context"
+import Logo from "../components/Logo"
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -54,14 +55,9 @@ export default function SignupPage() {
         <div className="absolute inset-0 bg-black/50" />
 
         {/* Content with relative positioning to appear above overlay */}
-        <Link to="/" className="flex items-center gap-3 relative z-10">
-          <img 
-            src="/images/logo.jpeg" 
-            alt="EmpowerAI Logo" 
-            className="h-10 w-10 rounded-lg object-cover shadow-lg"
-          />
-          <span className="text-xl font-bold text-white drop-shadow-lg">EmpowerAI</span>
-        </Link>
+        <div className="relative z-10">
+          <Logo variant="light" size="md" linkTo="/" />
+        </div>
         <div className="relative z-10">
           <h1 className="text-4xl font-bold text-white mb-6 drop-shadow-lg">
             Start your journey to economic empowerment
@@ -86,13 +82,8 @@ export default function SignupPage() {
       {/* Right Panel - Form */}
       <div className="flex-1 flex items-center justify-center p-6 sm:p-8 bg-gradient-to-br from-indigo-50 via-background to-cyan-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950">
         <div className="w-full max-w-md bg-card border border-border rounded-2xl shadow-xl p-6 sm:p-8">
-          <div className="lg:hidden flex items-center gap-3 mb-8">
-            <img 
-              src="/images/logo.jpeg" 
-              alt="EmpowerAI Logo" 
-              className="h-10 w-10 rounded-lg object-cover shadow-sm"
-            />
-            <span className="text-xl font-bold text-foreground">EmpowerAI</span>
+          <div className="lg:hidden mb-8">
+            <Logo variant="default" size="md" linkTo="/" />
           </div>
 
           <h2 className="text-3xl font-bold text-foreground mb-2 tracking-tight">Create account</h2>

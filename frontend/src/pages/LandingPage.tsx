@@ -16,6 +16,7 @@ import {
   Bot,
 } from "lucide-react"
 import ThemeToggle from "../components/ThemeToggle"
+import Logo from "../components/Logo"
 
 export default function LandingPage() {
   const [isMobile, setIsMobile] = useState(false)
@@ -96,14 +97,7 @@ export default function LandingPage() {
 
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm shadow-sm">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3">
-            <img 
-              src="/images/logo.jpeg" 
-              alt="EmpowerAI Logo" 
-              className="h-10 w-10 rounded-lg object-cover shadow-sm"
-            />
-            <span className="text-xl font-bold text-slate-900 dark:text-slate-100">EmpowerAI</span>
-          </Link>
+          <Logo variant="dark" size="md" linkTo="/" />
           <div className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
               Features

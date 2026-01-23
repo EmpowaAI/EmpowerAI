@@ -6,6 +6,7 @@ import { Link, useNavigate } from "react-router-dom"
 import { Zap, Eye, EyeOff, Loader2 } from "lucide-react"
 import { authAPI } from "../lib/api"
 import { useUser } from "../lib/user-context"
+import Logo from "../components/Logo"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -62,14 +63,7 @@ export default function LoginPage() {
 
         {/* Content with higher z-index */}
         <div className="relative z-10">
-          <Link to="/" className="flex items-center gap-3">
-            <img 
-              src="/images/logo.jpeg" 
-              alt="EmpowerAI Logo" 
-              className="h-10 w-10 rounded-lg object-cover shadow-lg"
-            />
-            <span className="text-xl font-bold text-white">EmpowerAI</span>
-          </Link>
+          <Logo variant="light" size="md" linkTo="/" />
         </div>
 
         <div className="relative z-10">
@@ -85,11 +79,8 @@ export default function LoginPage() {
       {/* Right Panel - Form */}
       <div className="flex-1 flex items-center justify-center p-6 sm:p-8">
         <div className="w-full max-w-md bg-card border border-border rounded-2xl shadow-xl p-6 sm:p-8">
-          <div className="lg:hidden flex items-center gap-2 mb-8">
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center shadow-sm">
-              <Zap className="h-5 w-5 text-white" />
-            </div>
-            <span className="text-xl font-bold text-foreground">EmpowerAI</span>
+          <div className="lg:hidden mb-8">
+            <Logo variant="default" size="md" linkTo="/" />
           </div>
 
           <h2 className="text-3xl font-bold text-foreground mb-2 tracking-tight">Sign in</h2>
