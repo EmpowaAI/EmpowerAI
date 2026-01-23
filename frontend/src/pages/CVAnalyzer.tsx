@@ -107,23 +107,34 @@ export default function CVAnalyzer() {
       }
     } catch (err: any) {
       console.error('CV Analysis: Error occurred', err);
-      const errorMessage = err.message || err.response?.data?.message || "Failed to analyze CV. Please try again."
       
-      // Check if it's a rate limit error
-      const isRateLimit = err.response?.status === 429 || 
+      // Check status code first (most reliable indicator)
+      const statusCode = err.status || err.response?.status || err.response?.data?.statusCode;
+      const errorMessage = err.message || err.response?.data?.message || err.response?.data?.error || "Failed to analyze CV. Please try again."
+      
+      // Check if it's a rate limit error - check multiple indicators
+      const errorLower = errorMessage.toLowerCase()
+      const isRateLimit = statusCode === 429 || 
+                         err.response?.status === 429 ||
                          err.status === 429 ||
                          err.response?.data?.code === 'RATE_LIMIT' ||
-                         errorMessage.toLowerCase().includes('rate limit')
+                         err.response?.data?.error === 'RateLimitError' ||
+                         errorLower.includes('rate limit') ||
+                         errorLower.includes('too many requests') ||
+                         errorLower.includes('429') ||
+                         errorLower.includes('status code 429')
       
       if (isRateLimit) {
         setIsRateLimited(true)
         // Extract retryAfter from multiple possible locations
         const retryAfter = err.retryAfter || 
                          err.response?.data?.retryAfter || 
-                         err.response?.retryAfter || 
+                         err.response?.retryAfter ||
+                         err.response?.headers?.['retry-after'] ||
                          60
-        setRetryAfter(retryAfter)
+        setRetryAfter(Math.max(1, Math.min(retryAfter, 300))) // Clamp between 1 and 300 seconds
         setError("")
+        console.log('Rate limit detected:', { statusCode, retryAfter, errorMessage })
       } else {
         setIsRateLimited(false)
         setError(errorMessage)
@@ -186,9 +197,11 @@ export default function CVAnalyzer() {
 
           {isRateLimited && (
             <RateLimitAlert
+              message="The AI service is currently processing many requests. Please wait a moment before trying again."
               retryAfter={retryAfter}
               onRetry={() => {
                 setIsRateLimited(false)
+                setError("")
                 analyzeCV()
               }}
             />

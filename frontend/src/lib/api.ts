@@ -158,10 +158,16 @@ export const cvAPI = {
       });
       
       if (!response.ok) {
-        const error = await response.json().catch(() => ({ 
-          message: `Request failed with status ${response.status}`,
-          status: response.status 
-        }));
+        let error;
+        try {
+          error = await response.json();
+        } catch {
+          // If JSON parsing fails, create error object from status
+          error = { 
+            message: `Request failed with status ${response.status}`,
+            status: response.status 
+          };
+        }
         
         // Extract retryAfter from response headers or error body
         const retryAfterHeader = response.headers.get('Retry-After');
@@ -169,7 +175,14 @@ export const cvAPI = {
           ? parseInt(retryAfterHeader, 10) 
           : error.retryAfter || error.data?.retryAfter;
         
-        const errorMessage = error.message || error.data?.message || error.detail || `HTTP error! status: ${response.status}`;
+        // For 429 errors, use a more user-friendly message
+        let errorMessage = error.message || error.data?.message || error.detail;
+        if (response.status === 429 && !errorMessage) {
+          errorMessage = 'Too many requests. Please wait a moment and try again.';
+        } else if (!errorMessage) {
+          errorMessage = `HTTP error! status: ${response.status}`;
+        }
+        
         const apiError = new Error(errorMessage);
         (apiError as any).status = error.status || response.status;
         (apiError as any).response = {
@@ -177,13 +190,14 @@ export const cvAPI = {
           status: response.status,
           data: {
             ...error,
-            retryAfter: retryAfter || (response.status === 429 ? 60 : undefined)
+            retryAfter: retryAfter || (response.status === 429 ? 60 : undefined),
+            code: response.status === 429 ? 'RATE_LIMIT' : error.code
           }
         };
         
         // Add retryAfter to error for easy access
-        if (retryAfter) {
-          (apiError as any).retryAfter = retryAfter;
+        if (retryAfter || response.status === 429) {
+          (apiError as any).retryAfter = retryAfter || 60;
         }
         
         throw apiError;
