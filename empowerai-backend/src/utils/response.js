@@ -66,6 +66,10 @@ const sendError = (res, error, statusCode = 500, details = {}) => {
   // Add retry information for rate limits
   if (isErrorObject && error.retryAfter) {
     response.retryAfter = error.retryAfter;
+    // Add code for easier detection in frontend
+    if (statusCode === 429) {
+      response.code = 'RATE_LIMIT';
+    }
   }
 
   // Add stack trace in development
