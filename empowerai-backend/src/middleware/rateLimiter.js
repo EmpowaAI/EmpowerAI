@@ -51,9 +51,7 @@ const aiServiceLimiter = rateLimit({
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
   // Use user ID for rate limiting if authenticated, otherwise use IP
-  keyGenerator: (req) => {
-    return req.user?.id || req.ip || 'unknown';
-  },
+  
   handler: (req, res) => {
     const { RateLimitError } = require('../utils/errors');
     const { sendError } = require('../utils/response');
