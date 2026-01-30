@@ -146,7 +146,7 @@ export default function DigitalTwinChatbot() {
       />
 
       {/* Chatbot Container - Fixed size and positioned properly */}
-      <div className="fixed bottom-6 sm:bottom-8 right-4 sm:right-6 z-50 w-[calc(100%-2rem)] sm:w-[420px] sm:max-w-md h-[60vh] sm:h-[500px] max-h-[600px] flex flex-col shadow-2xl rounded-xl overflow-hidden animate-in fade-in zoom-in-95">
+      <div className="fixed bottom-6 sm:bottom-8 right-4 sm:right-6 left-4 sm:left-auto z-50 sm:w-96 max-w-full h-[60vh] sm:h-[500px] max-h-[80vh] flex flex-col shadow-2xl rounded-xl overflow-hidden animate-in fade-in zoom-in-95">
         {/* Header */}
         <div className="bg-gradient-to-r from-primary via-primary/90 to-secondary p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -224,7 +224,7 @@ export default function DigitalTwinChatbot() {
               <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
                 <Bot className="h-4 w-4 text-primary" />
               </div>
-              <div className="bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-2xl rounded-bl-none p-3 max-w-[75%]">
+              <div className="bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-2xl rounded-bl-none p-3 max-w-[75%] sm:max-w-[70%]">
                 <div className="flex items-center gap-2">
                   <div className="h-2 w-2 rounded-full bg-indigo-600 dark:bg-indigo-400 animate-bounce" />
                   <div className="h-2 w-2 rounded-full bg-indigo-600 dark:bg-indigo-400 animate-bounce" style={{ animationDelay: '0.2s' }} />

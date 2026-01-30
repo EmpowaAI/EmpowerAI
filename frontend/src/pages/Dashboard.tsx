@@ -231,8 +231,7 @@ export default function Dashboard() {
           <div
             key={i}
             className={cn(
-              "bg-card border border-border rounded-xl p-4 sm:p-6 hover:shadow-lg hover:border-primary/40 transition-all duration-300 group relative overflow-hidden animate-in fade-in-up",
-              "hover:scale-[1.02] hover:-translate-y-1"
+              "bg-card border border-border rounded-xl p-4 sm:p-6 hover:shadow-lg hover:border-primary/40 transition-all duration-300 group relative overflow-hidden animate-in fade-in-up hover:scale-105 hover:-translate-y-1"
             )}
             style={{ animationDelay: `${i * 0.1}s` }}
           >
@@ -320,8 +319,7 @@ export default function Dashboard() {
               key={i}
               to={action.path}
               className={cn(
-              "group bg-card border border-border rounded-xl p-4 sm:p-6 hover:shadow-lg hover:border-primary/40 transition-all duration-300 relative overflow-hidden animate-in fade-in-up",
-                "hover:scale-[1.02] hover:-translate-y-1"
+              "group bg-card border border-border rounded-xl p-4 sm:p-6 hover:shadow-lg hover:border-primary/40 transition-all duration-300 relative overflow-hidden animate-in fade-in-up hover:scale-105 hover:-translate-y-1"
               )}
               style={{ animationDelay: `${(i + 4) * 0.1}s` }}
             >

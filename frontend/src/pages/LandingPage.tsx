@@ -588,7 +588,7 @@ function DigitalTwinChatbot() {
                 <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                   <Bot className="h-5 w-5 text-primary" />
                 </div>
-                <div className="bg-gray-100 rounded-2xl rounded-tl-none p-3 max-w-[80%]">
+                <div className="bg-gray-100 rounded-2xl rounded-tl-none p-3 max-w-xs sm:max-w-sm">
                   <p className="text-sm text-gray-800">
                     Hi! I'm your Digital Economic Twin. I can help you explore career paths, simulate your future
                     earnings, and guide you towards economic empowerment. What would you like to know?
