@@ -524,10 +524,11 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="border-t border-slate-800 pt-8 text-center text-sm text-slate-400">
-            <p>&copy; 2024 EmpowerAI. All rights reserved.</p>
+            <p>&copy; 2025 EmpowerAI. All rights reserved.</p>
           </div>
         </div>
       </footer>
     </div>
   )
 }
+
