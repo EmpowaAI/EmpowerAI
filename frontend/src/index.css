@@ -283,6 +283,24 @@ html:not(.dark) {
   }
 }
 
+/* Responsive helpers */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+@layer utilities {
+  .w-full-sm {
+    width: 100%;
+  }
+  @media (min-width: 640px) {
+    .w-full-sm {
+      width: auto;
+    }
+  }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
