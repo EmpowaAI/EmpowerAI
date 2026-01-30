@@ -49,6 +49,7 @@ export default function TwinBuilder() {
   const [currentStep, setCurrentStep] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const [successMsg, setSuccessMsg] = useState("")
   const [formData, setFormData] = useState({
     age: "",
     province: "",
@@ -200,7 +201,14 @@ export default function TwinBuilder() {
           console.log("Empowerment Score:", empowermentScore)
           
           // Get twin ID from response or generate one
-          const twinId = response.data?.twin?.id || `twin_${Date.now()}`
+          const twinObj = response.data?.twin || null
+          const twinId = twinObj?.id || twinObj?._id || `twin_${Date.now()}`
+          const created = twinObj && twinObj.createdAt && twinObj.updatedAt
+            ? new Date(twinObj.createdAt).getTime() === new Date(twinObj.updatedAt).getTime()
+            : true
+
+          setSuccessMsg(created ? 'Digital Twin created successfully.' : 'Existing Digital Twin updated.')
+          setIsLoading(false)
           
           // Create twin object with all data
           const twinWithScore = {
@@ -242,7 +250,7 @@ export default function TwinBuilder() {
             // Continue even if API progress save fails
           }
           
-          // Show success message and redirect to dashboard index
+          // Redirect to dashboard after short delay
           setTimeout(() => {
             console.log("Redirecting to dashboard...")
             navigate("/dashboard", { 
@@ -254,7 +262,7 @@ export default function TwinBuilder() {
                 showWelcome: true
               } 
             })
-          }, 1500)
+          }, 1200)
         } else {
           throw new Error("Failed to create twin: Invalid response")
         }

@@ -128,7 +128,7 @@ export default function SignupPage() {
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-4 py-3.5 sm:py-3 bg-background border border-border rounded-lg text-base sm:text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all min-h-[52px]"
+                  className="w-full px-4 py-3.5 sm:py-3 bg-background border border-border rounded-lg text-base sm:text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all min-h-[48px]"
                 placeholder="Enter your name"
                 required
               />
@@ -140,7 +140,7 @@ export default function SignupPage() {
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-3.5 sm:py-3 bg-background border border-border rounded-lg text-base sm:text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all min-h-[52px]"
+                className="w-full px-4 py-3.5 sm:py-3 bg-background border border-border rounded-lg text-base sm:text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all min-h-[48px]"
                 placeholder="you@example.com"
                 required
               />
@@ -153,14 +153,14 @@ export default function SignupPage() {
                   type={showPassword ? "text" : "password"}
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full px-4 py-3.5 sm:py-3 bg-background border border-border rounded-lg text-base sm:text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent pr-12 transition-all min-h-[52px]"
+                  className="w-full px-4 py-3.5 sm:py-3 bg-background border border-border rounded-lg text-base sm:text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent pr-12 transition-all min-h-[48px]"
                   placeholder="Create a password"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground min-w-[44px] min-h-[44px] flex items-center justify-center"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground w-11 h-11 flex items-center justify-center"
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
@@ -181,7 +181,7 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3.5 sm:py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm hover:shadow-md min-h-[52px] text-base touch-manipulation"
+              className="w-full py-3.5 sm:py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm hover:shadow-md min-h-[48px] text-base touch-manipulation"
             >
               {isLoading ? (
                 <>

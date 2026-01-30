@@ -204,7 +204,7 @@ export default function DashboardLayout() {
                       shouldDisable && "group-hover:bg-muted"
                     )}
                   >
-                    <item.icon className="h-[18px] w-[18px]" />
+                    <item.icon className="h-4 w-4" />
                   </div>
                   <span className="flex-1">{item.label}</span>
                   {shouldDisable && !isActive && (
