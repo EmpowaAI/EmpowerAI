@@ -14,6 +14,7 @@ import {
   Sparkles,
   X,
   Bot,
+  Menu,
 } from "lucide-react"
 import ThemeToggle from "../components/ThemeToggle"
 import Logo from "../components/Logo"
@@ -21,6 +22,7 @@ import Logo from "../components/Logo"
 export default function LandingPage() {
   const [isMobile, setIsMobile] = useState(false)
   const [windowWidth, setWindowWidth] = useState(0)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
  useLayoutEffect(() => {
   const checkMobile = () => {
@@ -52,9 +54,35 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/80 via-white/70 to-cyan-50/80 dark:from-slate-900/75 dark:via-slate-800/75 dark:to-slate-900/75"></div>
         
         {/* Animated gradient orbs - light mode */}
-        <div className="absolute top-0 -left-1/4 w-[800px] h-[800px] bg-indigo-400/20 dark:bg-indigo-500/10 rounded-full blur-[120px] animate-pulse-soft"></div>
-        <div className="absolute top-1/3 -right-1/4 w-[600px] h-[600px] bg-cyan-400/20 dark:bg-cyan-500/10 rounded-full blur-[100px] animate-pulse-soft" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute bottom-0 left-1/3 w-[700px] h-[700px] bg-indigo-300/15 dark:bg-indigo-400/10 rounded-full blur-[110px] animate-pulse-soft" style={{ animationDelay: '2s' }}></div>
+        <div
+          className="absolute top-0 -left-1/4 bg-indigo-400/20 dark:bg-indigo-500/10 rounded-full animate-pulse-soft"
+          style={{
+            width: isMobile ? 280 : 800,
+            height: isMobile ? 280 : 800,
+            filter: 'blur(80px)',
+            opacity: 0.9,
+          }}
+        />
+
+        <div
+          className="absolute top-1/3 -right-1/4 bg-cyan-400/20 dark:bg-cyan-500/10 rounded-full animate-pulse-soft"
+          style={{
+            width: isMobile ? 220 : 600,
+            height: isMobile ? 220 : 600,
+            filter: 'blur(60px)',
+            animationDelay: '1s',
+          }}
+        />
+
+        <div
+          className="absolute bottom-0 left-1/3 bg-indigo-300/15 dark:bg-indigo-400/10 rounded-full animate-pulse-soft"
+          style={{
+            width: isMobile ? 260 : 700,
+            height: isMobile ? 260 : 700,
+            filter: 'blur(70px)',
+            animationDelay: '2s',
+          }}
+        />
         
         {/* Dark mode subtle stars */}
         <div className="absolute inset-0 dark:opacity-100 opacity-0 transition-opacity duration-500">
@@ -109,6 +137,16 @@ export default function LandingPage() {
               Demo
             </a>
           </div>
+          {/* Mobile menu button */}
+          <div className="md:hidden flex items-center gap-2">
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              aria-label="Open menu"
+              className="p-2 rounded-md text-slate-600 dark:text-slate-300 hover:bg-muted hover:text-slate-900 transition-colors"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+          </div>
           <div className="flex items-center gap-3 sm:gap-4">
             <ThemeToggle />
             <Link to="/login" className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100 transition-colors text-sm sm:text-base">
@@ -116,13 +154,35 @@ export default function LandingPage() {
             </Link>
             <Link
               to="/signup"
-              className="px-4 py-2 sm:px-6 sm:py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-all duration-200 text-sm sm:text-base shadow-sm hover:shadow-md"
+              className="px-4 py-2 sm:px-6 sm:py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-all duration-200 text-sm sm:text-base shadow-sm hover:shadow-md w-full-sm text-center"
             >
               Get Started
             </Link>
           </div>
         </div>
       </nav>
+
+      {/* Mobile slide-in menu */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-60">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setMobileMenuOpen(false)} />
+          <div className="absolute top-0 right-0 w-3/4 max-w-xs h-full bg-white dark:bg-slate-900 p-6 shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <Logo variant="dark" size="sm" linkTo="/" />
+              <button onClick={() => setMobileMenuOpen(false)} aria-label="Close menu" className="p-2 rounded-md text-slate-600 dark:text-slate-300">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <nav className="flex flex-col gap-4">
+              <a href="#features" onClick={() => setMobileMenuOpen(false)} className="text-slate-700 dark:text-slate-200">Features</a>
+              <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="text-slate-700 dark:text-slate-200">How It Works</a>
+              <a href="#demo" onClick={() => setMobileMenuOpen(false)} className="text-slate-700 dark:text-slate-200">Demo</a>
+              <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="text-slate-700 dark:text-slate-200">Sign In</Link>
+              <Link to="/signup" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-center">Get Started</Link>
+            </nav>
+          </div>
+        </div>
+      )}
 
       {/* Hero Section */}
       <section className="pt-28 pb-16 sm:pt-32 sm:pb-20 px-4 sm:px-6 relative z-20">
@@ -149,13 +209,13 @@ export default function LandingPage() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <Link
                   to="/signup"
-                  className="px-6 py-3 sm:px-8 sm:py-4 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-200 flex items-center justify-center gap-2 text-base sm:text-lg shadow-md hover:shadow-lg transform hover:scale-[1.02]"
+                  className="px-6 py-3 sm:px-8 sm:py-4 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-200 flex items-center justify-center gap-2 text-base sm:text-lg shadow-md hover:shadow-lg transform hover:scale-[1.02] w-full sm:w-auto"
                 >
                   Get Started <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Link>
                 <a
                   href="#demo"
-                  className="px-6 py-3 sm:px-8 sm:py-4 border-2 border-indigo-600 text-indigo-600 rounded-lg font-semibold hover:bg-indigo-50 transition-all duration-200 text-center text-base sm:text-lg"
+                  className="px-6 py-3 sm:px-8 sm:py-4 border-2 border-indigo-600 text-indigo-600 rounded-lg font-semibold hover:bg-indigo-50 transition-all duration-200 text-center text-base sm:text-lg w-full sm:w-auto"
                 >
                   Watch Demo
                 </a>
@@ -182,7 +242,7 @@ export default function LandingPage() {
                     <span className="text-indigo-600 font-bold text-lg">78/100</span>
                   </div>
                   <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                    <div className="h-full w-[78%] bg-gradient-to-r from-indigo-600 to-cyan-500 rounded-full"></div>
+                    <div className="h-full w-3/4 bg-gradient-to-r from-indigo-600 to-cyan-500 rounded-full"></div>
                   </div>
                   <div className="grid grid-cols-2 gap-4 mt-6">
                     <div className="bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-900/30 dark:to-emerald-800/20 rounded-lg p-4 border border-emerald-200 dark:border-emerald-800/50 backdrop-blur-sm">

@@ -42,8 +42,8 @@ exports.createEconomicTwin = async (req, res, next) => {
     const incomeProjection = response.data.incomeProjection || response.data.incomeProjections;
     const growthModel = response.data.growthModel || {};
     
-    const economicTwin = await EconomicTwin.create({
-      userId,
+    // Use an upsert so repeated requests don't error when a twin already exists
+    const update = {
       skillVector: response.data.skillVector || [],
       incomeProjections: incomeProjection || {
         threeMonth: 0,
@@ -52,9 +52,18 @@ exports.createEconomicTwin = async (req, res, next) => {
       },
       empowermentScore: response.data.empowermentScore || 0,
       recommendedPaths: growthModel.recommendedPaths || []
-    });
+    };
 
-    res.status(201).json({
+    const economicTwin = await EconomicTwin.findOneAndUpdate(
+      { userId },
+      { $set: update, $setOnInsert: { userId } },
+      { new: true, upsert: true, setDefaultsOnInsert: true }
+    );
+
+    // Return 200 for update, 201 for created (approximate: if createdAt === updatedAt then newly created)
+    const created = (economicTwin.createdAt && economicTwin.createdAt.getTime && economicTwin.createdAt.getTime() === economicTwin.updatedAt.getTime());
+
+    res.status(created ? 201 : 200).json({
       status: 'success',
       data: {
         twin: economicTwin
