@@ -1,4 +1,4 @@
-// pages/LandingPage.tsx
+﻿// pages/LandingPage.tsx
 import { useState, useEffect, useLayoutEffect } from "react"
 import { Link } from "react-router-dom"
 import {
@@ -277,7 +277,7 @@ export default function LandingPage() {
                 <div className="relative">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center shadow-lg ring-4 ring-indigo-100 dark:ring-indigo-900/50">
-                      <span className="text-xl sm:text-2xl">👤</span>
+                      <span className="text-xl sm:text-2xl">≡ƒæñ</span>
                     </div>
                     <div>
                       <p className="font-semibold text-slate-900 dark:text-slate-100 text-base sm:text-lg">Asanda, 22</p>
