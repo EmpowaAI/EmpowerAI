@@ -158,7 +158,7 @@ export default function Opportunities() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">Career Opportunities</h1>
+          <h1 className="text-2xl font-bold text-foreground">Career Opportunities</h1>
           <p className="text-muted-foreground">Real jobs, learnerships, internships, and bursaries across South Africa</p>
         </div>
         <LoadingState message="Loading opportunities..." />
@@ -170,7 +170,7 @@ export default function Opportunities() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">Career Opportunities</h1>
+        <h1 className="text-2xl font-bold text-foreground">Career Opportunities</h1>
         <p className="text-muted-foreground">Real jobs, learnerships, internships, and bursaries across South Africa</p>
       </div>
 
@@ -199,7 +199,7 @@ export default function Opportunities() {
             key={cat.id}
             onClick={() => setCategory(cat.id)}
             className={cn(
-              "flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-colors",
+              "flex items-center gap-2 px-4 py-2 rounded-lg transition-colors",
               category === cat.id
                 ? "bg-primary text-white"
                 : "bg-card border border-border text-muted-foreground hover:text-foreground",
@@ -236,7 +236,7 @@ export default function Opportunities() {
         {filteredOpportunities.map((opp) => (
           <div
             key={opp.id}
-            className="bg-card border border-border rounded-xl p-4 sm:p-6 hover:border-primary/50 transition-colors shadow-sm"
+            className="bg-card border border-border rounded-xl p-6 hover:border-primary/50 transition-colors shadow-sm"
           >
             <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
               <div className="flex gap-4 flex-1">
@@ -281,7 +281,7 @@ export default function Opportunities() {
               </div>
               <button
                 onClick={() => handleApply(opp)}
-                className="flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
               >
                 <ExternalLink className="h-4 w-4" />
                 Apply Now

@@ -163,14 +163,14 @@ export default function CVAnalyzer() {
       
       {/* Header */}
       <div>
-        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">Step 1: CV Analyzer</h1>
+        <h1 className="text-2xl font-bold text-foreground">Step 1: CV Analyzer</h1>
         <p className="text-muted-foreground">Upload your CV to unlock personalized features</p>
       </div>
 
       {!result ? (
         <div className="max-w-2xl mx-auto space-y-6">
           {/* CV Text Input */}
-          <div className="bg-card border border-border rounded-xl p-4 sm:p-6">
+          <div className="bg-card border border-border rounded-xl p-6">
             <label className="block text-sm font-medium text-foreground mb-2">
               Paste your CV text here
             </label>
@@ -178,12 +178,12 @@ export default function CVAnalyzer() {
               value={cvText}
               onChange={(e) => setCvText(e.target.value)}
               placeholder="Paste your CV content here..."
-              className="w-full h-32 sm:h-40 px-3 sm:px-4 py-2.5 sm:py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+              className="w-full h-40 px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
             />
           </div>
 
           {/* Job Requirements (Optional) */}
-          <div className="bg-card border border-border rounded-xl p-4 sm:p-6">
+          <div className="bg-card border border-border rounded-xl p-6">
             <label className="block text-sm font-medium text-foreground mb-2">
               Job Requirements (Optional)
             </label>
@@ -191,7 +191,7 @@ export default function CVAnalyzer() {
               value={jobRequirements}
               onChange={(e) => setJobRequirements(e.target.value)}
               placeholder="Paste job requirements to get tailored feedback..."
-              className="w-full h-32 px-3 sm:px-4 py-2.5 sm:py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+              className="w-full h-32 px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
             />
           </div>
 
@@ -275,7 +275,7 @@ export default function CVAnalyzer() {
           <button
             onClick={analyzeCV}
             disabled={isAnalyzing || (!cvText.trim() && !file)}
-            className="w-full flex items-center justify-center gap-2 py-3 min-h-[44px] touch-manipulation bg-primary text-white rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-full flex items-center justify-center gap-2 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isAnalyzing ? (
               <>
@@ -293,7 +293,7 @@ export default function CVAnalyzer() {
       ) : (
         <div className="space-y-6">
           {/* Success Message */}
-          <div className="bg-gradient-to-r from-primary/10 to-accent/10 border border-accent/20 rounded-xl p-4 sm:p-6">
+          <div className="bg-gradient-to-r from-primary/10 to-accent/10 border border-accent/20 rounded-xl p-6">
             <div className="flex items-center gap-3">
               <CheckCircle className="h-8 w-8 text-accent" />
               <div>
