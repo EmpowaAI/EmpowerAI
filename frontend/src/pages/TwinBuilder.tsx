@@ -280,7 +280,7 @@ export default function TwinBuilder() {
       
       {/* Header */}
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-foreground tracking-tight">
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground tracking-tight">
           Step 2: Build Your Digital Twin
         </h1>
         <p className="mt-2 text-muted-foreground text-sm sm:text-base">
@@ -320,7 +320,7 @@ export default function TwinBuilder() {
       </div>
 
       {/* Form Content */}
-      <div className="bg-card border border-border rounded-2xl p-6 sm:p-7 mb-4 shadow-md">
+      <div className="bg-card border border-border rounded-2xl p-4 sm:p-6 md:p-7 mb-4 shadow-md">
         {currentStep === 0 && (
           <div className="space-y-6">
             <div>
@@ -329,7 +329,7 @@ export default function TwinBuilder() {
                 type="number"
                 value={formData.age}
                 onChange={(e) => setFormData({ ...formData, age: e.target.value })}
-                className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="Enter your age"
                 min="16"
                 max="35"
@@ -342,7 +342,7 @@ export default function TwinBuilder() {
               <select
                 value={formData.province}
                 onChange={(e) => setFormData({ ...formData, province: e.target.value })}
-                className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 required
               >
                 <option value="">Select your province</option>
@@ -359,14 +359,14 @@ export default function TwinBuilder() {
         {currentStep === 1 && (
           <div>
             <label className="block text-sm font-medium text-foreground mb-4">Highest Education Level *</label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {educationLevels.map((level) => (
                 <button
                   key={level}
                   type="button"
                   onClick={() => setFormData({ ...formData, education: level })}
                   className={cn(
-                    "px-4 py-3 rounded-lg border text-left transition-colors",
+                    "px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border text-left transition-colors",
                     formData.education === level
                       ? "border-primary bg-primary/10 text-foreground"
                       : "border-border bg-background text-muted-foreground hover:border-primary/50",
@@ -408,7 +408,7 @@ export default function TwinBuilder() {
           <div>
             <label className="block text-sm font-medium text-foreground mb-4">Career Goals *</label>
             <p className="text-sm text-muted-foreground mb-3">Select up to 3 goals (at least one required)</p>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {careerGoals.map((goal) => (
                 <button
                   key={goal}
@@ -416,7 +416,7 @@ export default function TwinBuilder() {
                   onClick={() => toggleGoal(goal)}
                   disabled={!formData.goals.includes(goal) && formData.goals.length >= 3}
                   className={cn(
-                    "px-4 py-3 rounded-lg border text-left transition-colors",
+                    "px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border text-left transition-colors",
                     formData.goals.includes(goal)
                       ? "border-primary bg-primary/10 text-foreground"
                       : "border-border bg-background text-muted-foreground hover:border-primary/50 disabled:opacity-50",
