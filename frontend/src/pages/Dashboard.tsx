@@ -197,7 +197,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[
           { 
             label: "Skills Matched", 
@@ -265,7 +265,7 @@ export default function Dashboard() {
           <h2 className="text-xl font-semibold text-foreground">Quick Actions</h2>
           <span className="text-sm text-muted-foreground hidden sm:inline">Choose an action to get started</span>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {[
             {
               icon: TrendingUp,
@@ -363,7 +363,7 @@ export default function Dashboard() {
           </Link>
         </div>
         {jobsLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {[1, 2, 3].map((i) => (
               <div key={i} className="bg-card border border-border rounded-xl p-4 sm:p-6 animate-pulse">
                 <div className="h-12 w-12 rounded-lg bg-muted mb-4" />
@@ -373,7 +373,7 @@ export default function Dashboard() {
             ))}
           </div>
         ) : recommendedJobs.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {recommendedJobs.map((job, i) => (
               <Link
                 key={job.id}
