@@ -130,8 +130,8 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6 md:space-y-8">
-      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-indigo-600 to-indigo-700 dark:from-indigo-700 dark:via-indigo-800 dark:to-indigo-900 rounded-xl p-4 sm:p-6 md:p-8 shadow-xl border border-indigo-500/20 dark:border-indigo-600/20">
+    <div className="space-y-8">
+      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-indigo-600 to-indigo-700 dark:from-indigo-700 dark:via-indigo-800 dark:to-indigo-900 rounded-xl p-6 md:p-8 shadow-xl border border-indigo-500/20 dark:border-indigo-600/20">
         {/* Background image overlay - subtle */}
         <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]">
           <img 
@@ -197,7 +197,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { 
             label: "Skills Matched", 
@@ -265,7 +265,7 @@ export default function Dashboard() {
           <h2 className="text-xl font-semibold text-foreground">Quick Actions</h2>
           <span className="text-sm text-muted-foreground hidden sm:inline">Choose an action to get started</span>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[
             {
               icon: TrendingUp,
@@ -363,7 +363,7 @@ export default function Dashboard() {
           </Link>
         </div>
         {jobsLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[1, 2, 3].map((i) => (
               <div key={i} className="bg-card border border-border rounded-xl p-4 sm:p-6 animate-pulse">
                 <div className="h-12 w-12 rounded-lg bg-muted mb-4" />
@@ -373,7 +373,7 @@ export default function Dashboard() {
             ))}
           </div>
         ) : recommendedJobs.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {recommendedJobs.map((job, i) => (
               <Link
                 key={job.id}
