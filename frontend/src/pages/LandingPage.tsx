@@ -1,4 +1,4 @@
-﻿// LandingPage.tsx - Professional, Clean, Beautiful
+﻿// LandingPage.tsx - Professional with cool background & demo section
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import {
@@ -18,6 +18,7 @@ import {
   Shield,
   Star,
   Award,
+  Play,
 } from "lucide-react"
 import ThemeToggle from "../components/ThemeToggle"
 import Logo from "../components/Logo"
@@ -37,19 +38,25 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 relative">
-      {/* Subtle Background Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-indigo-50/20 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950/20 pointer-events-none" />
-      
-      {/* Subtle Accent Elements */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/5 dark:bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-500/5 dark:bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+      {/* Cool Background with Overlay */}
+      <div className="fixed inset-0 -z-10">
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-5 dark:opacity-10"
+          style={{ backgroundImage: "url(/images/landing.png)" }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-white via-white/95 to-indigo-50/30 dark:from-slate-950 dark:via-slate-900/95 dark:to-indigo-950/20" />
+        
+        {/* Subtle animated accents */}
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-500/5 dark:bg-indigo-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '8s' }} />
+        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-indigo-500/5 dark:bg-indigo-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '10s', animationDelay: '2s' }} />
+      </div>
 
       {/* Navigation */}
       <nav className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
         scrolled 
           ? "bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg shadow-sm border-b border-slate-200 dark:border-slate-800" 
-          : "bg-transparent"
+          : "bg-white/80 dark:bg-slate-900/80 backdrop-blur-md"
       )}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
@@ -62,6 +69,9 @@ export default function LandingPage() {
               </a>
               <a href="#how-it-works" className="text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors">
                 How It Works
+              </a>
+              <a href="#demo" className="text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors">
+                Demo
               </a>
               <a href="#testimonials" className="text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors">
                 Success Stories
@@ -94,6 +104,7 @@ export default function LandingPage() {
             <div className="px-4 py-4 space-y-2">
               <a href="#features" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-colors">Features</a>
               <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-colors">How It Works</a>
+              <a href="#demo" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-colors">Demo</a>
               <a href="#testimonials" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-colors">Success Stories</a>
               <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-colors">Sign In</Link>
               <Link to="/signup" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-center transition-colors">Get Started</Link>
@@ -131,10 +142,11 @@ export default function LandingPage() {
                   <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <a
-                  href="#how-it-works"
+                  href="#demo"
                   className="inline-flex items-center justify-center gap-2 border-2 border-slate-200 dark:border-slate-700 hover:border-indigo-600 dark:hover:border-indigo-400 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200"
                 >
-                  See How It Works
+                  <Play className="h-5 w-5" />
+                  Watch Demo
                 </a>
               </div>
 
@@ -159,7 +171,7 @@ export default function LandingPage() {
 
             {/* Right Content - Clean Feature Card */}
             <div className="relative">
-              <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl p-8 border border-slate-200 dark:border-slate-800">
+              <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-2xl shadow-2xl p-8 border border-slate-200 dark:border-slate-800">
                 <div className="absolute -top-4 -right-4 bg-indigo-600 text-white px-6 py-2 rounded-full font-semibold text-sm shadow-lg">
                   Free Forever
                 </div>
@@ -204,7 +216,7 @@ export default function LandingPage() {
               </div>
 
               {/* Floating Success Badge */}
-              <div className="absolute -bottom-6 -left-6 bg-white dark:bg-slate-900 rounded-xl shadow-xl p-4 border border-slate-200 dark:border-slate-800">
+              <div className="absolute -bottom-6 -left-6 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm rounded-xl shadow-xl p-4 border border-slate-200 dark:border-slate-800">
                 <div className="flex items-center gap-3">
                   <div className="h-12 w-12 rounded-full bg-indigo-100 dark:bg-indigo-950 flex items-center justify-center">
                     <Award className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
@@ -221,7 +233,7 @@ export default function LandingPage() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-20 bg-slate-50 dark:bg-slate-900 border-y border-slate-200 dark:border-slate-800">
+      <section className="py-20 bg-slate-50/50 dark:bg-slate-900/50 backdrop-blur-sm border-y border-slate-200 dark:border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-12">
             {[
@@ -266,7 +278,7 @@ export default function LandingPage() {
             ].map((feature, i) => (
               <div
                 key={i}
-                className="group bg-white dark:bg-slate-900 rounded-xl p-8 border border-slate-200 dark:border-slate-800 hover:border-indigo-200 dark:hover:border-indigo-900 hover:shadow-lg transition-all duration-300"
+                className="group bg-white/70 dark:bg-slate-900/70 backdrop-blur-sm rounded-xl p-8 border border-slate-200 dark:border-slate-800 hover:border-indigo-200 dark:hover:border-indigo-900 hover:shadow-lg transition-all duration-300"
               >
                 <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-950 mb-6 group-hover:scale-110 transition-transform">
                   <feature.icon className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
@@ -280,7 +292,7 @@ export default function LandingPage() {
       </section>
 
       {/* How It Works */}
-      <section id="how-it-works" className="py-24 px-4 sm:px-6 lg:px-8 bg-slate-50 dark:bg-slate-900">
+      <section id="how-it-works" className="py-24 px-4 sm:px-6 lg:px-8 bg-slate-50/50 dark:bg-slate-900/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 dark:text-white mb-4">
@@ -298,7 +310,7 @@ export default function LandingPage() {
               { step: "3", title: "Explore Your Future", description: "Discover career paths, income projections, and opportunities", icon: TrendingUp },
             ].map((item, i) => (
               <div key={i} className="relative">
-                <div className="bg-white dark:bg-slate-800 rounded-xl p-8 shadow-sm border border-slate-200 dark:border-slate-700 hover:shadow-lg transition-all duration-300">
+                <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-xl p-8 shadow-sm border border-slate-200 dark:border-slate-700 hover:shadow-lg transition-all duration-300">
                   <div className="absolute -top-6 left-1/2 -translate-x-1/2 h-12 w-12 rounded-full bg-indigo-600 flex items-center justify-center shadow-lg">
                     <span className="text-white font-bold text-lg">{item.step}</span>
                   </div>
@@ -316,8 +328,74 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Demo Section */}
+      <section id="demo" className="py-24 px-4 sm:px-6 lg:px-8 relative">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 dark:text-white mb-4">
+              See EmpowerAI in <span className="text-indigo-600 dark:text-indigo-400">Action</span>
+            </h2>
+            <p className="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto">
+              Watch how we're helping South African youth discover their economic potential
+            </p>
+          </div>
+
+          <div className="max-w-5xl mx-auto">
+            <div className="relative group cursor-pointer">
+              {/* Video Placeholder */}
+              <div className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800">
+                <img 
+                  src="/images/result.jpg" 
+                  alt="EmpowerAI Demo Preview" 
+                  className="w-full h-full object-cover"
+                />
+                {/* Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent group-hover:from-black/70 transition-all duration-300" />
+                
+                {/* Play Button */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="h-20 w-20 rounded-full bg-indigo-600 hover:bg-indigo-700 flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300">
+                    <Play className="h-10 w-10 text-white ml-1" />
+                  </div>
+                </div>
+
+                {/* Coming Soon Badge */}
+                <div className="absolute top-6 right-6 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-semibold text-slate-900 dark:text-white">
+                  Demo Coming Soon
+                </div>
+              </div>
+
+              {/* Demo Features */}
+              <div className="grid md:grid-cols-3 gap-6 mt-8">
+                <div className="text-center">
+                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-950 mb-3">
+                    <Zap className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+                  </div>
+                  <p className="font-semibold text-slate-900 dark:text-white mb-1">Quick Setup</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">Get started in under 5 minutes</p>
+                </div>
+                <div className="text-center">
+                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-950 mb-3">
+                    <Target className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+                  </div>
+                  <p className="font-semibold text-slate-900 dark:text-white mb-1">Accurate Results</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">95% career match accuracy</p>
+                </div>
+                <div className="text-center">
+                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-950 mb-3">
+                    <CheckCircle className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+                  </div>
+                  <p className="font-semibold text-slate-900 dark:text-white mb-1">Proven Success</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">1,000+ users empowered</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Testimonials */}
-      <section id="testimonials" className="py-24 px-4 sm:px-6 lg:px-8 relative">
+      <section id="testimonials" className="py-24 px-4 sm:px-6 lg:px-8 bg-slate-50/50 dark:bg-slate-900/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center mb-16">
             <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 dark:text-white mb-4">
@@ -334,7 +412,7 @@ export default function LandingPage() {
               { name: "Sipho K.", location: "Durban", role: "Unemployed → Business Owner", quote: "The career simulation showed me entrepreneurship was my path. Best decision I ever made!", rating: 5 },
               { name: "Nomsa T.", location: "Johannesburg", role: "Waitress → Marketing Professional", quote: "From minimum wage to a career I love. The AI guidance was truly life-changing!", rating: 5 },
             ].map((testimonial, i) => (
-              <div key={i} className="bg-white dark:bg-slate-900 rounded-xl p-8 shadow-sm border border-slate-200 dark:border-slate-800">
+              <div key={i} className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-sm rounded-xl p-8 shadow-sm border border-slate-200 dark:border-slate-800">
                 <div className="flex gap-1 mb-4">
                   {[...Array(testimonial.rating)].map((_, i) => (
                     <Star key={i} className="h-5 w-5 fill-indigo-500 text-indigo-500" />
@@ -374,13 +452,13 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-slate-900 dark:bg-slate-950 text-slate-400 py-16 px-4 sm:px-6 lg:px-8">
+      {/* Footer - Fixed with better contrast */}
+      <footer className="bg-slate-900 dark:bg-black text-slate-300 dark:text-slate-400 py-16 px-4 sm:px-6 lg:px-8 border-t border-slate-800">
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-4 gap-12 mb-12">
             <div>
               <Logo variant="light" size="lg" linkTo="/" />
-              <p className="mt-4 text-sm leading-relaxed">
+              <p className="mt-4 text-sm leading-relaxed text-slate-400">
                 Empowering South African youth through AI-driven career guidance and economic planning.
               </p>
             </div>
@@ -389,6 +467,7 @@ export default function LandingPage() {
               <ul className="space-y-2 text-sm">
                 <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
                 <li><a href="#how-it-works" className="hover:text-white transition-colors">How It Works</a></li>
+                <li><a href="#demo" className="hover:text-white transition-colors">Demo</a></li>
                 <li><a href="#testimonials" className="hover:text-white transition-colors">Success Stories</a></li>
               </ul>
             </div>
@@ -408,7 +487,7 @@ export default function LandingPage() {
               </ul>
             </div>
           </div>
-          <div className="border-t border-slate-800 pt-8 text-center text-sm">
+          <div className="border-t border-slate-800 pt-8 text-center text-sm text-slate-400">
             <p>&copy; 2025 EmpowerAI. All rights reserved. Built with care for South African youth.</p>
           </div>
         </div>
