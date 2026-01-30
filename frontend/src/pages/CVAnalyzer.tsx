@@ -275,7 +275,7 @@ export default function CVAnalyzer() {
           <button
             onClick={analyzeCV}
             disabled={isAnalyzing || (!cvText.trim() && !file)}
-            className="w-full flex items-center justify-center gap-2 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-full flex items-center justify-center gap-2 py-3 min-h-[44px] touch-manipulation bg-primary text-white rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isAnalyzing ? (
               <>
