@@ -15,9 +15,11 @@ import {
   X,
   Bot,
   Menu,
+  Briefcase,
 } from "lucide-react"
 import ThemeToggle from "../components/ThemeToggle"
 import Logo from "../components/Logo"
+import DigitalTwinChatbot from "../components/DigitalTwinChatbot"
 import { cn } from "../lib/utils"
 
 export default function LandingPage() {
