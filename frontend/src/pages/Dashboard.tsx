@@ -130,8 +130,8 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-indigo-600 to-indigo-700 dark:from-indigo-700 dark:via-indigo-800 dark:to-indigo-900 rounded-xl p-6 md:p-8 shadow-xl border border-indigo-500/20 dark:border-indigo-600/20">
+    <div className="space-y-4 sm:space-y-6 md:space-y-8">
+      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-indigo-600 to-indigo-700 dark:from-indigo-700 dark:via-indigo-800 dark:to-indigo-900 rounded-xl p-4 sm:p-6 md:p-8 shadow-xl border border-indigo-500/20 dark:border-indigo-600/20">
         {/* Background image overlay - subtle */}
         <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]">
           <img 
