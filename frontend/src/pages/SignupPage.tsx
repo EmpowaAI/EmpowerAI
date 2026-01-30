@@ -6,6 +6,7 @@ import { Link, useNavigate } from "react-router-dom"
 import { Eye, EyeOff, CheckCircle, Loader2 } from "lucide-react"
 import { authAPI } from "../lib/api"
 import { useUser } from "../lib/user-context"
+import { syncProgressFromBackend, unlockAllPages } from "../utils/progressSync"
 import Logo from "../components/Logo"
 
 export default function SignupPage() {
@@ -18,7 +19,7 @@ export default function SignupPage() {
     password: "",
   })
   const navigate = useNavigate()
-  const { setUser } = useUser()
+  const { setUser, updateProgress } = useUser()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -34,8 +35,34 @@ export default function SignupPage() {
           id: response.data.user.id || response.data.user._id,
           empowermentScore: response.data.user.empowermentScore,
         })
-        // Redirect to CV Analyzer first
-        navigate("/dashboard/cv-analyzer")
+        
+        // Check if user already has progress (in case of duplicate signup or existing account)
+        try {
+          const syncedProgress = await syncProgressFromBackend()
+          
+          // Update progress in context
+          updateProgress('cvCompleted', syncedProgress.cvCompleted)
+          updateProgress('twinCompleted', syncedProgress.twinCompleted)
+          if (syncedProgress.empowermentScore) {
+            updateProgress('empowermentScore', syncedProgress.empowermentScore)
+          }
+          
+          // If user already has completed everything, unlock all pages and go to dashboard
+          if (syncedProgress.cvCompleted && syncedProgress.twinCompleted) {
+            unlockAllPages(syncedProgress.empowermentScore || undefined)
+            navigate("/dashboard", { replace: true })
+          } else if (syncedProgress.cvCompleted) {
+            // CV completed but twin not completed
+            navigate("/dashboard/twin", { replace: true })
+          } else {
+            // New user, start with CV Analyzer
+            navigate("/dashboard/cv-analyzer", { replace: true })
+          }
+        } catch (error) {
+          console.log('Error syncing progress, redirecting to CV analyzer:', error)
+          // New user, start with CV Analyzer
+          navigate("/dashboard/cv-analyzer", { replace: true })
+        }
       }
     } catch (err: any) {
       setError(err.message || "Registration failed. Please try again.")
@@ -45,7 +72,7 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-background flex flex-col sm:flex-row">
       {/* Left Panel */}
       <div
         className="hidden lg:flex flex-1 bg-cover bg-center p-12 flex-col justify-between relative"
@@ -70,7 +97,7 @@ export default function SignupPage() {
               "Access SA-specific opportunities",
             ].map((item, i) => (
               <li key={i} className="flex items-center gap-3 text-white drop-shadow-md">
-                <CheckCircle className="h-5 w-5 text-accent" />
+                <CheckCircle className="h-5 w-5 text-accent flex-shrink-0" />
                 {item}
               </li>
             ))}
@@ -80,28 +107,28 @@ export default function SignupPage() {
       </div>
 
       {/* Right Panel - Form */}
-      <div className="flex-1 flex items-center justify-center p-6 sm:p-8 bg-gradient-to-br from-indigo-50 via-background to-cyan-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950">
-        <div className="w-full max-w-md bg-card border border-border rounded-2xl shadow-xl p-6 sm:p-8">
-          <div className="lg:hidden mb-8">
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8 bg-gradient-to-br from-indigo-50 via-background to-cyan-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950">
+        <div className="w-full max-w-md bg-card border border-border rounded-2xl shadow-xl p-5 sm:p-6 md:p-8">
+          <div className="lg:hidden mb-6 sm:mb-8">
             <Logo variant="default" size="md" linkTo="/" />
           </div>
 
-          <h2 className="text-3xl font-bold text-foreground mb-2 tracking-tight">Create account</h2>
-          <p className="text-muted-foreground mb-8">
+          <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-2 tracking-tight">Create account</h2>
+          <p className="text-sm sm:text-base text-muted-foreground mb-6 sm:mb-8">
             Already have an account?{" "}
             <Link to="/login" className="text-primary hover:text-primary/80 font-medium hover:underline">
               Sign in
             </Link>
           </p>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Full Name</label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                className="w-full px-4 py-3.5 sm:py-3 bg-background border border-border rounded-lg text-base sm:text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all min-h-[52px]"
                 placeholder="Enter your name"
                 required
               />
@@ -113,7 +140,7 @@ export default function SignupPage() {
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                className="w-full px-4 py-3.5 sm:py-3 bg-background border border-border rounded-lg text-base sm:text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all min-h-[52px]"
                 placeholder="you@example.com"
                 required
               />
@@ -126,22 +153,22 @@ export default function SignupPage() {
                   type={showPassword ? "text" : "password"}
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent pr-12 transition-all"
+                  className="w-full px-4 py-3.5 sm:py-3 bg-background border border-border rounded-lg text-base sm:text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent pr-12 transition-all min-h-[52px]"
                   placeholder="Create a password"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground min-w-[44px] min-h-[44px] flex items-center justify-center"
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
             </div>
 
-            <label className="flex items-start gap-2">
-              <input type="checkbox" className="mt-1 rounded border-border text-primary focus:ring-primary" required />
+            <label className="flex items-start gap-2 cursor-pointer">
+              <input type="checkbox" className="mt-1 rounded border-border text-primary focus:ring-primary w-4 h-4 flex-shrink-0" required />
               <span className="text-sm text-muted-foreground">I agree to the Terms of Service and Privacy Policy</span>
             </label>
 
@@ -154,11 +181,11 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm hover:shadow-md"
+              className="w-full py-3.5 sm:py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm hover:shadow-md min-h-[52px] text-base touch-manipulation"
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className="h-5 w-5 animate-spin" />
                   Creating account...
                 </>
               ) : (
