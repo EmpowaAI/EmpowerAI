@@ -123,69 +123,135 @@ export default function LandingPage() {
         </svg>
       </div>
 
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm shadow-sm">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-4 flex items-center justify-between">
-          <Logo variant="dark" size="md" linkTo="/" />
-          <div className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
-              Features
-            </a>
-            <a href="#how-it-works" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
-              How It Works
-            </a>
-            <a href="#demo" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
-              Demo
-            </a>
-          </div>
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center gap-2">
-            <button
-              onClick={() => setMobileMenuOpen(true)}
-              aria-label="Open menu"
-              className="p-2 rounded-md text-slate-600 dark:text-slate-300 hover:bg-muted hover:text-slate-900 transition-colors"
-            >
-              <Menu className="h-5 w-5" />
-            </button>
-          </div>
-          <div className="flex items-center gap-3 sm:gap-4">
-            <ThemeToggle />
-            <Link to="/login" className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100 transition-colors text-sm sm:text-base">
-              Sign In
-            </Link>
-            <Link
-              to="/signup"
-              className="px-4 py-2 sm:px-6 sm:py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-all duration-200 text-sm sm:text-base shadow-sm hover:shadow-md w-full-sm text-center"
-            >
-              Get Started
-            </Link>
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-slate-200/80 dark:border-slate-700/80 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm shadow-sm">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-3 sm:py-4">
+          <div className="flex items-center justify-between h-12">
+            {/* Logo */}
+            <div className="flex-shrink-0">
+              <Logo variant="dark" size="md" linkTo="/" />
+            </div>
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-8">
+              <a href="#features" className="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium text-sm">
+                Features
+              </a>
+              <a href="#how-it-works" className="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium text-sm">
+                How It Works
+              </a>
+              <a href="#demo" className="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium text-sm">
+                Demo
+              </a>
+            </div>
+
+            {/* Right side - Auth buttons and theme toggle */}
+            <div className="flex items-center space-x-3 sm:space-x-4">
+              <div className="hidden md:block">
+                <ThemeToggle />
+              </div>
+              
+              <div className="hidden md:flex items-center space-x-4">
+                <Link 
+                  to="/login" 
+                  className="text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium text-sm px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  to="/signup"
+                  className="bg-gradient-to-r from-indigo-600 to-indigo-500 text-white px-4 py-2 rounded-lg font-medium text-sm hover:shadow-lg hover:shadow-indigo-500/20 transition-all duration-200 transform hover:-translate-y-0.5"
+                >
+                  Get Started
+                </Link>
+              </div>
+
+              {/* Mobile menu button */}
+              <div className="md:hidden flex items-center">
+                <ThemeToggle className="mr-2" />
+                <button
+                  onClick={() => setMobileMenuOpen(true)}
+                  aria-label="Open menu"
+                  className="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                >
+                  <Menu className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </nav>
 
       {/* Mobile slide-in menu */}
-      {mobileMenuOpen && (
-        <div className="fixed inset-0 z-60">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setMobileMenuOpen(false)} />
-          <div className="absolute top-0 right-0 w-3/4 max-w-xs h-full bg-white dark:bg-slate-900 p-6 shadow-2xl">
-            <div className="flex items-center justify-between mb-6">
-              <Logo variant="dark" size="sm" linkTo="/" />
-              <button onClick={() => setMobileMenuOpen(false)} aria-label="Close menu" className="p-2 rounded-md text-slate-600 dark:text-slate-300">
+      <div className={`fixed inset-0 z-60 transition-opacity duration-300 ${mobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+        <div 
+          className={`absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${mobileMenuOpen ? 'opacity-100' : 'opacity-0'}`} 
+          onClick={() => setMobileMenuOpen(false)} 
+        />
+        <div 
+          className={`absolute top-0 right-0 w-4/5 sm:max-w-sm h-full bg-white dark:bg-slate-900 shadow-2xl transform transition-transform duration-300 ease-in-out ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        >
+          <div className="h-full flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800">
+              <Logo variant="dark" size="md" linkTo="/" />
+              <button 
+                onClick={() => setMobileMenuOpen(false)} 
+                aria-label="Close menu" 
+                className="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <nav className="flex flex-col gap-4">
-              <a href="#features" onClick={() => setMobileMenuOpen(false)} className="text-slate-700 dark:text-slate-200">Features</a>
-              <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="text-slate-700 dark:text-slate-200">How It Works</a>
-              <a href="#demo" onClick={() => setMobileMenuOpen(false)} className="text-slate-700 dark:text-slate-200">Demo</a>
-              <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="text-slate-700 dark:text-slate-200">Sign In</Link>
-              <Link to="/signup" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-center">Get Started</Link>
+            <nav className="flex-1 p-4 overflow-y-auto">
+              <div className="space-y-1">
+                <a 
+                  href="#features" 
+                  onClick={() => setMobileMenuOpen(false)} 
+                  className="block px-4 py-3 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg font-medium transition-colors"
+                >
+                  Features
+                </a>
+                <a 
+                  href="#how-it-works" 
+                  onClick={() => setMobileMenuOpen(false)} 
+                  className="block px-4 py-3 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg font-medium transition-colors"
+                >
+                  How It Works
+                </a>
+                <a 
+                  href="#demo" 
+                  onClick={() => setMobileMenuOpen(false)} 
+                  className="block px-4 py-3 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg font-medium transition-colors mb-4"
+                >
+                  Demo
+                </a>
+                
+                <div className="pt-2 border-t border-slate-200 dark:border-slate-800 mt-2">
+                  <Link 
+                    to="/login" 
+                    onClick={() => setMobileMenuOpen(false)} 
+                    className="block w-full text-center px-4 py-2.5 text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg font-medium transition-colors mb-3"
+                  >
+                    Sign In
+                  </Link>
+                  <Link 
+                    to="/signup" 
+                    onClick={() => setMobileMenuOpen(false)} 
+                    className="block w-full text-center bg-gradient-to-r from-indigo-600 to-indigo-500 text-white px-4 py-2.5 rounded-lg font-medium hover:shadow-lg hover:shadow-indigo-500/20 transition-all"
+                  >
+                    Get Started
+                  </Link>
+                </div>
+              </div>
             </nav>
           </div>
         </div>
       )}
 
-      {/* Hero Section */}
-      <section className="pt-28 pb-16 sm:pt-32 sm:pb-20 px-4 sm:px-6 relative z-20">
+      </div>
+      </div>
+
+      {/* Hero Section - Adjusted padding to account for fixed header */}
+      <section className="pt-24 pb-16 sm:pt-28 sm:pb-20 px-4 sm:px-6 relative z-20">
         <div className="mx-auto max-w-7xl relative">
           <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
             <div className="flex-1 text-center lg:text-left">
