@@ -133,18 +133,21 @@ export default function DashboardLayout() {
   return (
     <div className="h-screen bg-background flex overflow-hidden">
       {/* Mobile Overlay */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-foreground/20 backdrop-blur-sm z-40 lg:hidden transition-opacity"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+      <div
+        className={cn(
+          "fixed inset-0 bg-foreground/20 backdrop-blur-sm z-40 lg:hidden transition-all duration-300 ease-in-out",
+          sidebarOpen ? "opacity-100 visible" : "opacity-0 invisible"
+        )}
+        onClick={() => setSidebarOpen(false)}
+        aria-hidden={!sidebarOpen}
+      />
 
       <aside
         className={cn(
-          "fixed lg:static inset-y-0 left-0 z-50 w-72 bg-card border-r border-border transform transition-all duration-300 ease-out lg:transform-none flex-shrink-0 shadow-xl lg:shadow-none",
+          "fixed lg:static inset-y-0 left-0 z-50 w-72 bg-card/95 backdrop-blur-md lg:backdrop-blur-0 lg:bg-card border-r border-border transform transition-all duration-300 ease-in-out lg:transform-none flex-shrink-0 shadow-2xl lg:shadow-none",
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
         )}
+        aria-label="Sidebar"
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
@@ -204,7 +207,7 @@ export default function DashboardLayout() {
                       shouldDisable && "group-hover:bg-muted"
                     )}
                   >
-                    <item.icon className="h-[18px] w-[18px]" />
+                    <item.icon className="h-4 w-4" />
                   </div>
                   <span className="flex-1">{item.label}</span>
                   {shouldDisable && !isActive && (
@@ -217,9 +220,9 @@ export default function DashboardLayout() {
           </nav>
 
           {/* User Section */}
-          <div className="p-4 border-t border-border">
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors">
-              <div className="h-11 w-11 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0 shadow-md">
+          <div className="p-3 border-t border-border">
+            <div className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/50 hover:bg-muted transition-colors">
+              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0 shadow-md">
                 <span className="text-sm font-semibold text-white">{initials}</span>
               </div>
               <div className="flex-1 min-w-0">
@@ -228,8 +231,9 @@ export default function DashboardLayout() {
               </div>
               <button
                 onClick={handleLogout}
-                className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-all flex-shrink-0"
+                className="p-2 -mr-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-all flex-shrink-0 active:scale-95"
                 title="Logout"
+                aria-label="Logout"
               >
                 <LogOut className="h-4 w-4" />
               </button>
@@ -240,10 +244,11 @@ export default function DashboardLayout() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 h-full">
-        <header className="h-16 border-b border-border bg-card/80 backdrop-blur-md flex items-center px-4 md:px-6 gap-4 flex-shrink-0 sticky top-0 z-30">
+        <header className="h-16 border-b border-border bg-card/90 backdrop-blur-md flex items-center px-4 md:px-6 gap-3 flex-shrink-0 sticky top-0 z-30">
           <button
-            className="lg:hidden text-muted-foreground hover:text-foreground p-2 hover:bg-muted rounded-lg transition-colors"
+            className="lg:hidden text-muted-foreground hover:text-foreground p-2 -ml-1 hover:bg-muted rounded-lg transition-colors active:scale-95"
             onClick={() => setSidebarOpen(true)}
+            aria-label="Open menu"
           >
             <Menu className="h-5 w-5" />
           </button>
@@ -266,36 +271,36 @@ export default function DashboardLayout() {
             </button>
           )}
 
-          <div className="flex-1">
-            <h1 className="text-lg font-semibold text-foreground">{currentPage?.label || "Dashboard"}</h1>
-            <p className="text-xs text-muted-foreground hidden sm:block">Manage your career journey</p>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-lg font-semibold text-foreground truncate">{currentPage?.label || "Dashboard"}</h1>
+            <p className="text-xs text-muted-foreground hidden sm:block truncate">Manage your career journey</p>
           </div>
 
           {/* Progress indicator and Theme Toggle */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <ThemeToggle />
             {progress.twinCompleted ? (
-              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-accent/10 text-accent rounded-full text-xs font-medium">
-                <span className="h-2 w-2 rounded-full bg-accent animate-pulse"></span>
-                Score: {progress.empowermentScore || 0}/100
+              <div className="hidden xs:flex items-center gap-2 px-3 py-1.5 bg-accent/10 text-accent rounded-full text-xs font-medium whitespace-nowrap">
+                <span className="h-2 w-2 rounded-full bg-accent animate-pulse flex-shrink-0"></span>
+                <span className="truncate">Score: {progress.empowermentScore || 0}/100</span>
               </div>
             ) : progress.cvCompleted ? (
-              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-warning/10 text-warning rounded-full text-xs font-medium">
-                <span className="h-2 w-2 rounded-full bg-warning animate-pulse"></span>
-                Complete Twin Builder
+              <div className="hidden xs:flex items-center gap-2 px-3 py-1.5 bg-warning/10 text-warning rounded-full text-xs font-medium whitespace-nowrap">
+                <span className="h-2 w-2 rounded-full bg-warning animate-pulse flex-shrink-0"></span>
+                <span className="truncate">Complete Twin</span>
               </div>
             ) : (
-              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-warning/10 text-warning rounded-full text-xs font-medium">
-                <span className="h-2 w-2 rounded-full bg-warning animate-pulse"></span>
-                Start with CV Analyzer
+              <div className="hidden xs:flex items-center gap-2 px-3 py-1.5 bg-warning/10 text-warning rounded-full text-xs font-medium whitespace-nowrap">
+                <span className="h-2 w-2 rounded-full bg-warning animate-pulse flex-shrink-0"></span>
+                <span className="truncate">Start CV Analyzer</span>
               </div>
             )}
           </div>
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto bg-gradient-to-b from-background to-muted/30">
-          <div className="p-4 md:p-8 max-w-7xl mx-auto">
+        <main className="flex-1 overflow-y-auto bg-gradient-to-b from-background to-muted/20">
+          <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto w-full">
             <Outlet />
           </div>
         </main>

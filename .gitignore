@@ -15,7 +15,8 @@ ENV/
 # Build outputs
 .next/
 out/
-dist/
+# dist/ - commented out to allow committing frontend/dist for Vercel
+!frontend/dist/
 dist-ssr
 build/
 *.egg-info/
