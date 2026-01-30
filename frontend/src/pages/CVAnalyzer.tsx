@@ -1,8 +1,6 @@
-// pages/CVAnalyzer.tsx
-import type React from "react"
-
+// pages/CVAnalyzer.tsx - Fixed loaders
 import { useState, useCallback, useRef } from "react"
-import { Upload, FileText, CheckCircle, Sparkles, Loader2, ArrowRight } from "lucide-react"
+import { Upload, CheckCircle, Sparkles, Loader2, ArrowRight } from "lucide-react"
 import { cn } from "../lib/utils"
 import { cvAPI } from "../lib/api"
 import { useNavigate } from "react-router-dom"
@@ -40,7 +38,6 @@ export default function CVAnalyzer() {
     const droppedFile = e.dataTransfer.files[0]
     if (droppedFile && (droppedFile.type === "application/pdf" || droppedFile.type.includes("document"))) {
       setFile(droppedFile)
-      // Show immediate feedback that file was dropped
       success(`File "${droppedFile.name}" uploaded successfully! Click "Analyze CV & Continue" to proceed.`)
     }
   }, [success])
@@ -49,13 +46,11 @@ export default function CVAnalyzer() {
     const selectedFile = e.target.files?.[0]
     if (selectedFile) {
       setFile(selectedFile)
-      // Show immediate feedback that file was selected
       success(`File "${selectedFile.name}" selected. Click "Analyze CV & Continue" to proceed.`)
     }
   }
 
   const analyzeCV = async () => {
-    // Check if we have file or text
     if (!cvText.trim() && !file) {
       setError("Please paste your CV text above or upload a file before continuing.")
       return
@@ -68,11 +63,9 @@ export default function CVAnalyzer() {
       let response;
       
       if (file) {
-        // Analyze from uploaded file
         console.log('CV Analysis: Starting file analysis...', { filename: file.name, size: file.size });
         response = await cvAPI.analyzeFile(file, jobRequirements || undefined)
       } else {
-        // Analyze from text
         console.log('CV Analysis: Starting text analysis...', { cvTextLength: cvText.length });
         response = await cvAPI.analyze(cvText, jobRequirements || undefined)
       }
@@ -82,218 +75,205 @@ export default function CVAnalyzer() {
       if (response.status === 'success' && response.data?.analysis) {
         setResult(response.data.analysis)
         
-        // Mark CV as completed and save skills
         updateProgress('cvCompleted', true)
         
-        // Save extracted skills if available
         if (response.data.analysis.extractedSkills) {
           localStorage.setItem('cvSkills', JSON.stringify(response.data.analysis.extractedSkills))
         }
         
-        // Show success notification
-        if (file) {
-          success(`CV uploaded and analyzed successfully! Found ${response.data.analysis.extractedSkills?.length || 0} skills.`)
-        } else {
-          success(`CV analyzed successfully! Found ${response.data.analysis.extractedSkills?.length || 0} skills.`)
-        }
+        success(`CV analyzed successfully! Found ${response.data.analysis.extractedSkills?.length || 0} skills.`)
         
-        // Show success for a bit longer before redirecting
         setTimeout(() => {
           navigate("/dashboard/twin")
-        }, 3000)
+        }, 2500)
       } else {
-        console.warn('CV Analysis: Unexpected response format', response);
-        setError("Unexpected response format. Please try again.")
+        throw new Error(response.message || 'Analysis failed')
       }
     } catch (err: any) {
-      console.error('CV Analysis: Error occurred', err);
+      console.error('CV Analysis Error:', err)
       
-      // Check status code first (most reliable indicator)
-      const statusCode = err.status || err.response?.status || err.response?.data?.statusCode;
-      const errorMessage = err.message || err.response?.data?.message || err.response?.data?.error || "Failed to analyze CV. Please try again."
-      
-      // Check if it's a rate limit error - check multiple indicators
-      const errorLower = errorMessage.toLowerCase()
-      const isRateLimit = statusCode === 429 || 
-                         err.response?.status === 429 ||
-                         err.status === 429 ||
-                         err.response?.data?.code === 'RATE_LIMIT' ||
-                         err.response?.data?.error === 'RateLimitError' ||
-                         errorLower.includes('rate limit') ||
-                         errorLower.includes('too many requests') ||
-                         errorLower.includes('429') ||
-                         errorLower.includes('status code 429')
-      
-      if (isRateLimit) {
+      if (err.status === 429 || err.code === 'RATE_LIMIT') {
         setIsRateLimited(true)
-        // Extract retryAfter from multiple possible locations
-        const retryAfter = err.retryAfter || 
-                         err.response?.data?.retryAfter || 
-                         err.response?.retryAfter ||
-                         err.response?.headers?.['retry-after'] ||
-                         60
-        setRetryAfter(Math.max(1, Math.min(retryAfter, 300))) // Clamp between 1 and 300 seconds
-        setError("")
-        console.log('Rate limit detected:', { statusCode, retryAfter, errorMessage })
+        setRetryAfter(err.retryAfter || 60)
+        setError(err.message || 'Rate limit reached. Please try again in a moment.')
       } else {
-        setIsRateLimited(false)
-        setError(errorMessage)
+        setError(err.message || 'Failed to analyze CV. Please try again.')
       }
-      setResult(null)
     } finally {
       setIsAnalyzing(false)
     }
   }
 
-
   return (
-    <div className="space-y-8">
+    <div className="space-y-5 sm:space-y-6 md:space-y-8 -mx-3 sm:mx-0">
       {/* Toast Notifications */}
-      {toasts.map((toast) => (
-        <Toast
-          key={toast.id}
-          message={toast.message}
-          type={toast.type}
-          onClose={() => removeToast(toast.id)}
-        />
-      ))}
+      <Toast toasts={toasts} onRemove={removeToast} />
       
       {/* Progress Tracker */}
       <ProgressTracker currentStep="cv" />
       
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Step 1: CV Analyzer</h1>
-        <p className="text-muted-foreground">Upload your CV to unlock personalized features</p>
+      <div className="text-center sm:text-left px-3 sm:px-0">
+        <h1 className="text-2xl sm:text-2xl md:text-3xl font-bold text-foreground">Step 1: CV Analyzer</h1>
+        <p className="text-base sm:text-base text-muted-foreground mt-2 sm:mt-2">Upload your CV to unlock personalized features</p>
       </div>
 
+      {/* Alert Messages */}
+      {isRateLimited && <RateLimitAlert message={error} retryAfter={retryAfter} />}
+      {error && !isRateLimited && <ErrorAlert message={error} onDismiss={() => setError("")} />}
+
       {!result ? (
-        <div className="max-w-2xl mx-auto space-y-6">
-          {/* CV Text Input */}
-          <div className="bg-card border border-border rounded-xl p-6">
-            <label className="block text-sm font-medium text-foreground mb-2">
-              Paste your CV text here
-            </label>
-            <textarea
-              value={cvText}
-              onChange={(e) => setCvText(e.target.value)}
-              placeholder="Paste your CV content here..."
-              className="w-full h-40 px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-            />
-          </div>
-
-          {/* Job Requirements (Optional) */}
-          <div className="bg-card border border-border rounded-xl p-6">
-            <label className="block text-sm font-medium text-foreground mb-2">
-              Job Requirements (Optional)
-            </label>
-            <textarea
-              value={jobRequirements}
-              onChange={(e) => setJobRequirements(e.target.value)}
-              placeholder="Paste job requirements to get tailored feedback..."
-              className="w-full h-32 px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-            />
-          </div>
-
-          {isRateLimited && (
-            <RateLimitAlert
-              message="The AI service is currently processing many requests. Please wait a moment before trying again."
-              retryAfter={retryAfter}
-              onRetry={() => {
-                setIsRateLimited(false)
-                setError("")
-                analyzeCV()
-              }}
-            />
-          )}
-          {error && !isRateLimited && (
-            <ErrorAlert message={error} onDismiss={() => setError("")} />
-          )}
-
-          {/* Upload Area (Alternative) */}
-          <div
-            onDrop={handleDrop}
-            onDragOver={(e) => {
-              e.preventDefault()
-              setIsDragging(true)
-            }}
-            onDragLeave={() => setIsDragging(false)}
-            className={cn(
-              "border-2 border-dashed rounded-xl p-12 text-center transition-colors",
-              isDragging ? "border-primary bg-primary/5" : "border-border bg-card",
-              file && "border-accent bg-accent/5",
-            )}
-          >
-            {file ? (
-              <div className="space-y-4">
-                <div className="h-16 w-16 rounded-xl bg-accent/20 flex items-center justify-center mx-auto">
-                  <CheckCircle className="h-8 w-8 text-accent" />
+        <div className="max-w-2xl mx-auto space-y-4 sm:space-y-4 md:space-y-6 px-3 sm:px-0">
+          {/* Simple Loading Overlay */}
+          {isAnalyzing && (
+            <div className="bg-card border border-border rounded-xl sm:rounded-xl p-8 md:p-12 text-center animate-fade-in">
+              <div className="max-w-md mx-auto space-y-6">
+                <div className="relative inline-block">
+                  <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl animate-pulse" />
+                  <div className="relative h-20 w-20 md:h-24 md:w-24 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-2xl mx-auto">
+                    <Sparkles className="h-10 w-10 md:h-12 md:w-12 text-white animate-pulse" />
+                  </div>
                 </div>
-                <div>
-                  <p className="font-medium text-foreground flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-accent" />
-                    {file.name}
+                
+                <div className="space-y-3">
+                  <h3 className="text-xl md:text-2xl font-bold text-foreground">
+                    Analyzing Your CV...
+                  </h3>
+                  <p className="text-sm md:text-base text-muted-foreground">
+                    Our AI is carefully reviewing your CV and extracting skills
                   </p>
-                  <p className="text-sm text-muted-foreground">{(file.size / 1024).toFixed(1)} KB - Ready to analyze</p>
                 </div>
-                <button onClick={() => setFile(null)} className="text-sm text-primary hover:underline">
-                  Remove file
-                </button>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="h-16 w-16 rounded-xl bg-primary/20 flex items-center justify-center mx-auto">
-                  <Upload className="h-8 w-8 text-primary" />
-                </div>
-                <div>
-                  <p className="font-medium text-foreground">Drop your CV here or click to browse</p>
-                  <p className="text-sm text-muted-foreground">Supports PDF, DOC, DOCX (max 5MB)</p>
-                </div>
-                {/* Hidden native file input + explicit trigger button for reliability */}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".pdf,.doc,.docx,.txt"
-                  onChange={handleFileSelect}
-                  className="hidden"
-                />
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors"
-                >
-                  Select File
-                </button>
-                <p className="text-xs text-muted-foreground">
-                  Supported formats: PDF, DOCX, TXT (max 5MB)
-                </p>
-              </div>
-            )}
-          </div>
 
-          {/* Analyze Button */}
-          <button
-            onClick={analyzeCV}
-            disabled={isAnalyzing || (!cvText.trim() && !file)}
-            className="w-full flex items-center justify-center gap-2 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {isAnalyzing ? (
-              <>
-                <Loader2 className="h-5 w-5 animate-spin" />
-                Analyzing your CV...
-              </>
-            ) : (
-              <>
-                <Sparkles className="h-5 w-5" />
-                Analyze CV & Continue
-              </>
-            )}
-          </button>
+                {/* Animated dots */}
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                </div>
+
+                {/* Progress bar */}
+                <div className="space-y-2">
+                  <div className="h-2 bg-muted rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-primary to-secondary rounded-full animate-pulse" style={{ width: '70%' }} />
+                  </div>
+                  <p className="text-xs text-muted-foreground">This usually takes 10-30 seconds...</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Form - Only hidden when analyzing */}
+          {!isAnalyzing && (
+            <>
+            {/* CV Text Input */}
+            <div className="bg-card border border-border rounded-xl sm:rounded-xl p-4 sm:p-4 md:p-6">
+              <label className="block text-sm sm:text-sm font-medium text-foreground mb-2 sm:mb-2">
+                Paste your CV text here
+              </label>
+              <textarea
+                value={cvText}
+                onChange={(e) => setCvText(e.target.value)}
+                placeholder="Paste your CV content here..."
+                className="w-full h-32 sm:h-32 md:h-40 px-4 sm:px-4 py-3 sm:py-3 bg-background border border-border rounded-lg text-base sm:text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+              />
+            </div>
+
+            {/* Job Requirements (Optional) */}
+            <div className="bg-card border border-border rounded-xl sm:rounded-xl p-4 sm:p-4 md:p-6">
+              <label className="block text-sm sm:text-sm font-medium text-foreground mb-2 sm:mb-2">
+                Job Requirements (Optional)
+              </label>
+              <textarea
+                value={jobRequirements}
+                onChange={(e) => setJobRequirements(e.target.value)}
+                placeholder="Paste job requirements to get tailored feedback..."
+                className="w-full h-24 sm:h-24 md:h-32 px-4 sm:px-4 py-3 sm:py-3 bg-background border border-border rounded-lg text-base sm:text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+              />
+            </div>
+
+            {/* Upload Area */}
+            <div
+              onDrop={handleDrop}
+              onDragOver={(e) => {
+                e.preventDefault()
+                setIsDragging(true)
+              }}
+              onDragLeave={() => setIsDragging(false)}
+              className={cn(
+                "border-2 border-dashed rounded-xl p-5 sm:p-6 md:p-8 lg:p-12 text-center transition-colors",
+                isDragging ? "border-primary bg-primary/5" : "border-border bg-card",
+                file && "border-accent bg-accent/5",
+              )}
+            >
+              {file ? (
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-xl bg-accent/20 flex items-center justify-center mx-auto">
+                    <CheckCircle className="h-6 w-6 sm:h-8 sm:w-8 text-accent" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm sm:text-base text-foreground flex items-center justify-center gap-2 break-all">
+                      <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-accent flex-shrink-0" />
+                      <span className="truncate max-w-[200px] sm:max-w-none">{file.name}</span>
+                    </p>
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-1">{(file.size / 1024).toFixed(1)} KB - Ready to analyze</p>
+                  </div>
+                  <button onClick={() => setFile(null)} className="text-xs sm:text-sm text-primary hover:underline">
+                    Remove file
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-xl bg-primary/20 flex items-center justify-center mx-auto">
+                    <Upload className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm sm:text-base text-foreground">Drop your CV here or click to browse</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-1">Supports PDF, DOC, DOCX (max 5MB)</p>
+                  </div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".pdf,.doc,.docx,.txt"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="px-4 py-2 sm:px-6 sm:py-3 bg-primary text-white rounded-lg text-sm sm:text-base font-medium hover:bg-primary/90 transition-colors"
+                  >
+                    Select File
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Analyze Button */}
+            <button
+              onClick={analyzeCV}
+              disabled={isAnalyzing || (!cvText.trim() && !file)}
+              className="w-full flex items-center justify-center gap-2 py-4 sm:py-3.5 md:py-4 bg-primary text-white rounded-lg text-base sm:text-base font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[52px] sm:min-h-[48px] touch-manipulation"
+            >
+              {isAnalyzing ? (
+                <>
+                  <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+                  <span>Analyzing your CV...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <span>Analyze CV & Continue</span>
+                </>
+              )}
+            </button>
+          </>
+          )}
         </div>
       ) : (
-        <div className="space-y-6">
+
+        <div className="space-y-6 px-3 sm:px-0">
           {/* Success Message */}
-          <div className="bg-gradient-to-r from-primary/10 to-accent/10 border border-accent/20 rounded-xl p-6">
+          <div className="bg-gradient-to-r from-primary/10 to-accent/10 border border-accent/20 rounded-xl p-6 animate-fade-in">
             <div className="flex items-center gap-3">
               <CheckCircle className="h-8 w-8 text-accent" />
               <div>

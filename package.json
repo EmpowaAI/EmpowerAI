@@ -9,6 +9,8 @@
     "empowerai-backend"
   ],
   "scripts": {
+    "build": "npm run build --prefix frontend",
+    "install": "npm install --prefix frontend",
     "dev:frontend": "cd frontend && npm run dev",
     "dev:backend": "cd empowerai-backend && npm run dev",
     "setup:ai": "cd ai-service && powershell -ExecutionPolicy Bypass -File setup-venv.ps1",
