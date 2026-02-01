@@ -1,5 +1,5 @@
-const express = require('express');
-const { createEconomicTwin, getEconomicTwin, runSimulation, updateEconomicTwin } = require('../controllers/twinController');
+﻿const express = require('express');
+const { createEconomicTwin, getEconomicTwin, runSimulation } = require('../controllers/twinController');
 const auth = require('../middleware/auth');
 const router = express.Router();
 
@@ -7,7 +7,6 @@ const router = express.Router();
 router.use(auth);
 
 router.post('/create', createEconomicTwin);
-router.put('/update', updateEconomicTwin); // New update endpoint
 router.get('/my-twin', getEconomicTwin);
 router.post('/simulate', runSimulation);
 
