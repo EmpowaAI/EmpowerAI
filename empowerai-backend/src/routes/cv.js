@@ -8,8 +8,9 @@ const router = express.Router();
 // All routes protected by authentication
 router.use(auth);
 
+// TEMPORARILY DISABLED: Rate limiter causing issues - will re-enable with proper configuration
 // Apply AI service rate limiter to CV analysis endpoints
-router.use(aiServiceLimiter);
+// router.use(aiServiceLimiter);
 
 // Configure multer for file uploads
 const upload = multer({

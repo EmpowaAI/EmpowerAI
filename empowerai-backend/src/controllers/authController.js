@@ -64,11 +64,12 @@ exports.register = async (req, res, next) => {
  */
 exports.login = async (req, res, next) => {
   const correlationId = req.correlationId;
+  const startTime = Date.now();
   
   try {
     const { email, password } = req.body;
 
-    // Find user with password included
+    // Find user with password included (optimized query)
     const user = await userService.findByEmail(email, correlationId, true);
     
     if (!user) {
@@ -76,15 +77,18 @@ exports.login = async (req, res, next) => {
       throw new UnauthorizedError('Incorrect email or password');
     }
 
-    // Verify password
+    // Verify password (bcrypt comparison - optimized to 10 rounds)
     const isPasswordCorrect = await user.correctPassword(password);
     if (!isPasswordCorrect) {
       logger.warn('Login attempt with incorrect password', { correlationId, email, userId: user._id });
       throw new UnauthorizedError('Incorrect email or password');
     }
 
-    // Generate token
+    // Generate token (fast operation)
     const token = signToken(user._id);
+    
+    const duration = Date.now() - startTime;
+    logger.info('Login performance', { correlationId, duration: `${duration}ms` });
 
     logger.info('User logged in successfully', {
       correlationId,

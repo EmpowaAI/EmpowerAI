@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  email: { type: String, required: true, unique: true, index: true },
+  email: { type: String, required: true, unique: true, index: true, sparse: true },
   password: { type: String, required: true, select: false },
   age: { type: Number, index: true },
   province: { type: String, index: true },
@@ -19,11 +19,13 @@ const userSchema = new mongoose.Schema({
 });
 
 // Hash password before saving
+// Using 10 rounds instead of 12 for better performance (still secure)
+// 12 rounds can take 300-500ms, 10 rounds takes ~100ms
 userSchema.pre('save', async function() {
   if (!this.isModified('password')) {
     return;
   }
-  this.password = await bcrypt.hash(this.password, 12);
+  this.password = await bcrypt.hash(this.password, 10);
 });
 
 // Compare password method

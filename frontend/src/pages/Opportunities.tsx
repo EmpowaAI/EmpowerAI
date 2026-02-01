@@ -167,46 +167,46 @@ export default function Opportunities() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 sm:space-y-5 md:space-y-6 -mx-3 sm:mx-0">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Career Opportunities</h1>
-        <p className="text-muted-foreground">Real jobs, learnerships, internships, and bursaries across South Africa</p>
+      <div className="text-center sm:text-left px-3 sm:px-0">
+        <h1 className="text-2xl sm:text-2xl md:text-3xl font-bold text-foreground">Career Opportunities</h1>
+        <p className="text-base sm:text-base text-muted-foreground mt-2 sm:mt-2">Real jobs, learnerships, internships, and bursaries across South Africa</p>
       </div>
 
       {/* Search and Filter */}
-      <div className="flex flex-col md:flex-row gap-4">
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-3 md:gap-4 px-3 sm:px-0">
         <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <Search className="absolute left-4 sm:left-4 top-1/2 -translate-y-1/2 h-5 w-5 sm:h-5 sm:w-5 text-muted-foreground pointer-events-none" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search opportunities..."
-            className="w-full pl-12 pr-4 py-3 bg-card border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            className="w-full pl-12 sm:pl-12 pr-4 sm:pr-4 py-3 sm:py-3 text-base sm:text-base bg-card border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary min-h-[52px] touch-manipulation"
           />
         </div>
-        <button className="flex items-center gap-2 px-4 py-3 bg-card border border-border rounded-lg text-muted-foreground hover:text-foreground transition-colors">
-          <Filter className="h-5 w-5" />
-          Filters
+        <button className="flex items-center justify-center gap-2 px-4 sm:px-4 py-3 sm:py-3 bg-card border border-border rounded-lg text-base sm:text-base text-muted-foreground hover:text-foreground transition-colors min-h-[52px] touch-manipulation">
+          <Filter className="h-5 w-5 sm:h-5 sm:w-5" />
+          <span className="sm:inline">Filters</span>
         </button>
       </div>
 
       {/* Categories */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2.5 sm:gap-2 px-3 sm:px-0">
         {categories.map((cat) => (
           <button
             key={cat.id}
             onClick={() => setCategory(cat.id)}
             className={cn(
-              "flex items-center gap-2 px-4 py-2 rounded-lg transition-colors",
+              "flex items-center gap-2 sm:gap-2 px-4 sm:px-4 py-2.5 sm:py-2.5 text-sm sm:text-sm rounded-lg transition-colors min-h-[44px] sm:min-h-[40px] touch-manipulation",
               category === cat.id
                 ? "bg-primary text-white"
                 : "bg-card border border-border text-muted-foreground hover:text-foreground",
             )}
           >
-            <cat.icon className="h-4 w-4" />
-            {cat.label}
+            <cat.icon className="h-4 w-4 sm:h-4 sm:w-4 flex-shrink-0" />
+            <span>{cat.label}</span>
           </button>
         ))}
       </div>
@@ -232,59 +232,59 @@ export default function Opportunities() {
       </p>
 
       {/* Opportunities List */}
-      <div className="space-y-4">
+      <div className="space-y-4 px-3 sm:px-0">
         {filteredOpportunities.map((opp) => (
           <div
             key={opp.id}
-            className="bg-card border border-border rounded-xl p-6 hover:border-primary/50 transition-colors shadow-sm"
+            className="bg-card border border-border rounded-none sm:rounded-xl p-5 sm:p-6 hover:border-primary/50 transition-colors shadow-sm"
           >
-            <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-              <div className="flex gap-4 flex-1">
-                <div className="h-12 w-12 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
-                  <Building className="h-6 w-6 text-primary" />
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4">
+              <div className="flex gap-3 sm:gap-4 flex-1 min-w-0">
+                <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
+                  <Building className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                 </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-foreground">{opp.title}</h3>
-                  <p className="text-muted-foreground">{opp.company}</p>
-                  <div className="flex flex-wrap items-center gap-3 mt-2 text-sm text-muted-foreground">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base sm:text-lg font-semibold text-foreground break-words">{opp.title}</h3>
+                  <p className="text-sm sm:text-base text-muted-foreground">{opp.company}</p>
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-2 text-xs sm:text-sm text-muted-foreground">
                     <span className="flex items-center gap-1">
-                      <MapPin className="h-4 w-4" /> {opp.location}
+                      <MapPin className="h-3 w-3 sm:h-4 sm:w-4" /> <span className="truncate">{opp.location}</span>
                     </span>
                     <span className="flex items-center gap-1">
-                      <Clock className="h-4 w-4" /> {opp.posted}
+                      <Clock className="h-3 w-3 sm:h-4 sm:w-4" /> {opp.posted}
                     </span>
                   </div>
-                  <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{opp.description}</p>
+                  <p className="mt-2 text-xs sm:text-sm text-muted-foreground line-clamp-2">{opp.description}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="px-3 py-1 bg-accent/20 text-accent text-sm rounded-full font-medium">
+              <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                <span className="px-2 sm:px-3 py-1 bg-accent/20 text-accent text-xs sm:text-sm rounded-full font-medium whitespace-nowrap">
                   {opp.match}% match
                 </span>
                 <button
                   onClick={() => toggleSave(opp.id)}
                   className={cn(
-                    "p-2 rounded-lg transition-colors",
+                    "p-1.5 sm:p-2 rounded-lg transition-colors flex-shrink-0",
                     saved.includes(opp.id)
                       ? "bg-destructive/20 text-destructive"
                       : "bg-muted text-muted-foreground hover:text-foreground",
                   )}
                 >
-                  <Heart className={cn("h-5 w-5", saved.includes(opp.id) && "fill-current")} />
+                  <Heart className={cn("h-4 w-4 sm:h-5 sm:w-5", saved.includes(opp.id) && "fill-current")} />
                 </button>
               </div>
             </div>
-            <div className="flex flex-wrap items-center justify-between gap-3 mt-4">
-              <div className="flex flex-wrap items-center gap-3">
-                <span className="px-3 py-1 bg-muted text-sm text-muted-foreground rounded-lg">{opp.type}</span>
-                {opp.salary && <span className="text-sm font-medium text-foreground">{opp.salary}</span>}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-4 pt-4 border-t border-border">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                <span className="px-2 sm:px-3 py-1 bg-muted text-xs sm:text-sm text-muted-foreground rounded-lg">{opp.type}</span>
+                {opp.salary && <span className="text-xs sm:text-sm font-medium text-foreground">{opp.salary}</span>}
               </div>
               <button
                 onClick={() => handleApply(opp)}
-                className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+                className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm sm:text-base bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors w-full sm:w-auto"
               >
-                <ExternalLink className="h-4 w-4" />
-                Apply Now
+                <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span>Apply Now</span>
               </button>
             </div>
           </div>

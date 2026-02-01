@@ -11,10 +11,16 @@ const request = async <T>(endpoint: string, options: RequestInit = {}): Promise<
   
   if (token) headers.set('Authorization', `Bearer ${token}`);
 
+  // Add timeout for requests (30 seconds for auth, 60 for others)
+  const timeout = endpoint.includes('/auth/') ? 30000 : 60000;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+
   try {
     const response = await fetch(`${API_BASE}${endpoint}`, { 
       ...options, 
-      headers 
+      headers,
+      signal: controller.signal
     });
     
     if (!response.ok) {
@@ -23,19 +29,42 @@ const request = async <T>(endpoint: string, options: RequestInit = {}): Promise<
         status: response.status 
       }));
       // Use the error message from backend if available
+      // Backend sends: { status: 'error', message: '...', ... }
       const errorMessage = error.message || error.data?.message || error.detail || `HTTP error! status: ${response.status}`;
       const apiError = new Error(errorMessage);
-      (apiError as any).status = error.status || response.status;
+      (apiError as any).status = error.status || error.statusCode || response.status;
       (apiError as any).response = {
         ...error,
         status: response.status,
-        data: error
+        statusCode: error.statusCode || response.status,
+        data: {
+          ...error,
+          message: errorMessage, // Ensure message is always set
+          code: error.code || error.error
+        }
       };
+      // Set isRateLimit flag if it's a 429 error
+      if (response.status === 429) {
+        (apiError as any).isRateLimit = true;
+        (apiError as any).retryAfter = error.retryAfter || 60;
+      }
       throw apiError;
     }
-    return response.json();
+    
+    const data = await response.json();
+    clearTimeout(timeoutId); // Clear timeout after successful response
+    return data;
   } catch (error: any) {
+    clearTimeout(timeoutId);
     console.error('API Request Error:', error);
+    
+    // Handle timeout/abort errors
+    if (error.name === 'AbortError' || error.message?.includes('timeout') || error.message?.includes('aborted')) {
+      const timeoutError = new Error('Request timed out. Please check your connection and try again.');
+      (timeoutError as any).isTimeout = true;
+      throw timeoutError;
+    }
+    
     throw error;
   }
 };

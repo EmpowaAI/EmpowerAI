@@ -146,23 +146,26 @@ class AIClient:
                 return response.choices[0].message.content
                 
             except RateLimitError as e:
-                if attempt < self.max_retries - 1:
-                    wait_time = self.retry_delay * (2 ** attempt)
-                    log.warning(f"Rate limit hit, retrying in {wait_time}s", extra={
-                        'attempt': attempt + 1,
-                        'max_retries': self.max_retries,
-                        'wait_time': wait_time
-                    })
-                    await asyncio.sleep(wait_time)
-                else:
-                    log.error("Rate limit exceeded after all retries", extra={
-                        'error': str(e),
-                        'max_retries': self.max_retries
-                    })
-                    raise RateLimitExceeded(
-                        "OpenAI API rate limit exceeded. Please try again later.",
-                        retry_after=60
-                    )
+                # DO NOT retry on rate limits - this causes cascading requests
+                # Extract retry_after from error if available
+                retry_after = 60  # Default
+                if hasattr(e, 'response') and e.response:
+                    retry_after_header = e.response.headers.get('retry-after')
+                    if retry_after_header:
+                        try:
+                            retry_after = int(retry_after_header)
+                        except:
+                            pass
+                
+                log.error("Rate limit exceeded - NOT retrying to prevent cascading requests", extra={
+                    'error': str(e),
+                    'retry_after': retry_after,
+                    'note': 'Retries disabled to prevent rate limit cascades'
+                })
+                raise RateLimitExceeded(
+                    "OpenAI API rate limit exceeded. Please try again later.",
+                    retry_after=retry_after
+                )
             
             except APIError as e:
                 log.error("OpenAI API error", extra={
@@ -229,7 +232,7 @@ class AIClient:
         prompt = f"""Extract all skills, competencies, and abilities mentioned in the following text. 
 Return only a JSON array of skill names, nothing else.
 
-Text: {text}
+Text: {text[:2000]}  # Limit text length to reduce token usage
 
 Skills:"""
         
@@ -256,13 +259,11 @@ Skills:"""
             skills = json.loads(result)
             return skills if isinstance(skills, list) else []
             
-        except RateLimitError:
-            # Rate limit hit - return empty list, will use keyword-based fallback
-            print("Rate limit reached for skill extraction. Using fallback method.")
-            return []
+        except RateLimitError as e:
+            # Rate limit hit - DO NOT retry, re-raise so route can handle it properly
+            # The route will return 429 with proper retry_after
+            raise
         except Exception as e:
             print(f"Error extracting skills: {e}")
-            # Fallback: split by common delimiters
-            if result:
-                return [s.strip() for s in result.replace("[", "").replace("]", "").replace('"', "").split(",") if s.strip()]
+            # Fallback: return empty list, will use keyword-based fallback
             return []

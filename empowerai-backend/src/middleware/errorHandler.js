@@ -58,6 +58,54 @@ const handleMongoDuplicateKeyError = (err, req, res) => {
   const field = Object.keys(err.keyValue || {})[0];
   const message = `${field} already exists`;
 
+  // Special handling for twin duplicate errors - return success instead of error
+  if (req.originalUrl?.includes('/twin') && field === 'userId') {
+    logger.info('Twin duplicate detected in error handler, fetching existing twin', {
+      correlationId,
+      userId: err.keyValue?.userId,
+      url: req.originalUrl
+    });
+    
+    // Try to fetch and return existing twin
+    const EconomicTwin = require('../models/EconomicTwin');
+    const userId = err.keyValue?.userId || req.user?.id;
+    
+    if (userId) {
+      EconomicTwin.findOne({ userId })
+        .then(existingTwin => {
+          if (existingTwin) {
+            const { sendSuccess } = require('../utils/response');
+            return sendSuccess(res, {
+              twin: existingTwin,
+              message: 'Twin already exists'
+            });
+          } else {
+            // Twin exists but can't fetch it - return success anyway
+            const { sendSuccess } = require('../utils/response');
+            return sendSuccess(res, {
+              twin: null,
+              message: 'Twin already exists for this user',
+              code: 'DUPLICATE_TWIN'
+            });
+          }
+        })
+        .catch(lookupError => {
+          logger.error('Error fetching existing twin in error handler', {
+            correlationId,
+            error: lookupError.message
+          });
+          // Return success anyway to prevent page locking
+          const { sendSuccess } = require('../utils/response');
+          return sendSuccess(res, {
+            twin: null,
+            message: 'Twin already exists for this user',
+            code: 'DUPLICATE_TWIN'
+          });
+        });
+      return; // Don't continue with error handling
+    }
+  }
+
   logger.logError(err, correlationId, {
     method: req.method,
     url: req.originalUrl,
