@@ -4,6 +4,9 @@
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "framework": "vite",
+  "env": {
+    "VITE_API_URL": "https://empowerai.onrender.com/api"
+  },
   "rewrites": [
     {
       "source": "/(.*)",
