@@ -189,6 +189,7 @@ connectDatabase().then(async (connected) => {
 
   // Routes (set up after database connection attempt)
   app.use('/api/auth', require('./routes/auth'));
+  app.use('/api/account', require('./routes/account')); // Email verification & password reset
   app.use('/api/twin', require('./routes/twin'));
   app.use('/api/opportunities', require('./routes/opportunities'));
   app.use('/api/cv', require('./routes/cv'));
