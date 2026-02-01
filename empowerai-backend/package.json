@@ -37,6 +37,7 @@
     "mongoose": "^9.0.0",
     "multer": "^2.0.2",
     "node-cron": "^4.2.1",
+    "nodemailer": "^7.0.13",
     "rss-parser": "^3.13.0",
     "uuid": "^9.0.1",
     "winston": "^3.19.0",

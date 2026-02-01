@@ -10,7 +10,14 @@ const userSchema = new mongoose.Schema({
   education: { type: String },
   skills: [{ type: String }],
   interests: [{ type: String }],
-  avatar: { type: String }
+  avatar: { type: String },
+
+   // New fields
+  isVerified: { type: Boolean, default: false },
+  emailToken: { type: String, select: false },
+  emailTokenExpires: { type: Date, select: false },
+  resetToken: { type: String, select: false },
+  resetTokenExpires: { type: Date, select: false }
 }, { 
   timestamps: true,
   // Optimize queries by excluding password by default
