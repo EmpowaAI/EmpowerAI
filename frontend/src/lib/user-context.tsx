@@ -8,11 +8,19 @@ interface User {
   twinCreated?: boolean
   empowermentScore?: number
   twinId?: string
+  phone?: string
+  location?: string
+  occupation?: string
+  education?: string
+  bio?: string
+  createdAt?: string
+  cvAnalyzed?: boolean
 }
 
 interface UserContextType {
   user: User | null
   setUser: (user: User | null) => void
+  updateUser: (updates: Partial<User>) => void
   logout: () => void
   progress: {
     cvCompleted: boolean
@@ -146,6 +154,13 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  const updateUser = (updates: Partial<User>) => {
+    if (user) {
+      const updatedUser = { ...user, ...updates }
+      setUser(updatedUser)
+    }
+  }
+
   const logout = () => {
     setUser(null)
     setProgress({
@@ -165,7 +180,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <UserContext.Provider value={{ user, setUser, logout, progress, updateProgress }}>
+    <UserContext.Provider value={{ user, setUser, updateUser, logout, progress, updateProgress }}>
       {children}
     </UserContext.Provider>
   )

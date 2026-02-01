@@ -11,6 +11,7 @@ import Simulations from './pages/Simulations'
 import Opportunities from './pages/Opportunities'
 import CVAnalyzer from './pages/CVAnalyzer'
 import InterviewCoach from './pages/InterviewCoach'
+import Profile from './pages/Profile'
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
             <Route path="opportunities" element={<Opportunities />} />
             <Route path="cv-analyzer" element={<CVAnalyzer />} />
             <Route path="interview-coach" element={<InterviewCoach />} />
+            <Route path="profile" element={<Profile />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />
