@@ -76,6 +76,12 @@ exports.login = async (req, res, next) => {
       throw new UnauthorizedError('Incorrect email or password');
     }
 
+     // Check if email is verified
+    if (!user.isVerified) {
+      logger.warn('Login attempt with unverified email', { correlationId, email, userId: user._id });
+      throw new UnauthorizedError('Email is not verified. Please verify your email first.');
+    }
+
     // Verify password
     const isPasswordCorrect = await user.correctPassword(password);
     if (!isPasswordCorrect) {

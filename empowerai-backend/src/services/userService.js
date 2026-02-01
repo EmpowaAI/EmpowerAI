@@ -7,6 +7,9 @@ const User = require('../models/User');
 const mongoose = require('mongoose');
 const logger = require('../utils/logger');
 const { NotFoundError, ConflictError, ServiceUnavailableError } = require('../utils/errors');
+const crypto = require("crypto");
+const emailService = require("./emailService");
+
 
 class UserService {
   /**
@@ -64,38 +67,101 @@ class UserService {
    * @returns {Promise<object>} Created user
    */
   async createUser(userData, correlationId = null) {
-    // Check database connection
-    if (mongoose.connection.readyState !== 1) {
-      throw new ServiceUnavailableError('Database is not connected', 'mongodb');
-    }
-
-    // Check if user already exists
-    const exists = await this.userExists(userData.email);
-    if (exists) {
-      logger.warn('User creation attempted with existing email', { correlationId, email: userData.email });
-      throw new ConflictError('User already exists with this email');
-    }
-
-    // Create user
-    const user = await User.create({
-      name: userData.name,
-      email: userData.email.toLowerCase(),
-      password: userData.password,
-      age: userData.age,
-      province: userData.province,
-      education: userData.education,
-      skills: userData.skills || [],
-      interests: userData.interests || [],
-    });
-
-    logger.info('User created successfully', {
-      correlationId,
-      userId: user._id,
-      email: user.email,
-    });
-
-    return user;
+  if (mongoose.connection.readyState !== 1) {
+    throw new ServiceUnavailableError('Database is not connected', 'mongodb');
   }
+
+  const exists = await this.userExists(userData.email);
+  if (exists) {
+    logger.warn('User creation attempted with existing email', { correlationId, email: userData.email });
+    throw new ConflictError('User already exists with this email');
+  }
+
+  // Generate email token
+  const rawToken = crypto.randomBytes(32).toString("hex");
+  const emailToken = crypto.createHash("sha256").update(rawToken).digest("hex");
+
+  const user = await User.create({
+    name: userData.name,
+    email: userData.email.toLowerCase(),
+    password: userData.password,
+    age: userData.age,
+    province: userData.province,
+    education: userData.education,
+    skills: userData.skills || [],
+    interests: userData.interests || [],
+    isVerified: false,
+    emailToken,
+    emailTokenExpires: Date.now() + 60 * 60 * 1000 // 1 hour
+  });
+
+  await emailService.sendVerification(user.email, rawToken);
+
+  logger.info('User created (pending verification)', {
+    correlationId,
+    userId: user._id,
+    email: user.email,
+  });
+
+  return user;
+}
+
+async verifyEmail(rawToken, correlationId = null) {
+  const token = crypto.createHash("sha256").update(rawToken).digest("hex");
+
+  const user = await User.findOne({
+    emailToken: token,
+    emailTokenExpires: { $gt: Date.now() }
+  });
+
+  if (!user) {
+    throw new NotFoundError("Invalid or expired token");
+  }
+
+  user.isVerified = true;
+  user.emailToken = null;
+  user.emailTokenExpires = null;
+  await user.save();
+
+  logger.info("Email verified", { correlationId, userId: user._id });
+}
+
+async forgotPassword(email, correlationId = null) {
+  const user = await User.findOne({ email: email.toLowerCase() });
+  if (!user) return; // silent
+
+  const raw = crypto.randomBytes(32).toString("hex");
+  const token = crypto.createHash("sha256").update(raw).digest("hex");
+
+  user.resetToken = token;
+  user.resetTokenExpires = Date.now() + 30 * 60 * 1000;
+  await user.save();
+
+  await emailService.sendReset(user.email, raw);
+
+  logger.info("Password reset email sent", { correlationId, userId: user._id });
+}
+
+async resetPassword({ token, newPassword }) {
+  const hashed = crypto.createHash("sha256").update(token).digest("hex");
+
+  const user = await User.findOne({
+    resetToken: hashed,
+    resetTokenExpires: { $gt: Date.now() }
+  });
+
+  if (!user) {
+    throw new NotFoundError("Invalid or expired token");
+  }
+
+  user.password = newPassword; // your model should hash
+  user.resetToken = null;
+  user.resetTokenExpires = null;
+  await user.save();
+
+  logger.info("Password reset successful", { userId: user._id });
+}
+
 
   /**
    * Update user
