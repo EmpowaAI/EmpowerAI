@@ -14,6 +14,7 @@ import {
   LogOut,
   ArrowLeft,
   ChevronRight,
+  Settings,
 } from "lucide-react"
 import { cn } from "../lib/utils"
 import { useUser } from "../lib/user-context"
@@ -26,7 +27,7 @@ const navItems = [
   { icon: TrendingUp, label: "Simulations", path: "/dashboard/simulations" },
   { icon: Briefcase, label: "Opportunities", path: "/dashboard/opportunities" },
   { icon: FileText, label: "CV Analyzer", path: "/dashboard/cv-analyzer" },
-  { icon: Mic, label: "Interview Coach", path: "/dashboard/interview" },
+  { icon: Mic, label: "Interview Coach", path: "/dashboard/interview-coach" },
 ]
 
 export default function DashboardLayout() {
@@ -78,7 +79,7 @@ export default function DashboardLayout() {
       const allowedPaths = {
         "/dashboard/simulations": progress.cvCompleted && progress.twinCompleted,
         "/dashboard/opportunities": progress.cvCompleted && progress.twinCompleted,
-        "/dashboard/interview": progress.cvCompleted && progress.twinCompleted,
+        "/dashboard/interview-coach": progress.cvCompleted && progress.twinCompleted,
       }
       
       const isAllowed = allowedPaths[currentPath] || false
@@ -220,8 +221,12 @@ export default function DashboardLayout() {
           </nav>
 
           {/* User Section */}
-          <div className="p-3 border-t border-border">
-            <div className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/50 hover:bg-muted transition-colors">
+          <div className="p-3 border-t border-border space-y-2">
+            <Link
+              to="/dashboard/profile"
+              onClick={() => setSidebarOpen(false)}
+              className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/50 hover:bg-muted transition-colors group"
+            >
               <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0 shadow-md">
                 <span className="text-sm font-semibold text-white">{initials}</span>
               </div>
@@ -229,15 +234,15 @@ export default function DashboardLayout() {
                 <p className="text-sm font-semibold text-foreground truncate">{displayName}</p>
                 <p className="text-xs text-muted-foreground truncate">{displayEmail}</p>
               </div>
-              <button
-                onClick={handleLogout}
-                className="p-2 -mr-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-all flex-shrink-0 active:scale-95"
-                title="Logout"
-                aria-label="Logout"
-              >
-                <LogOut className="h-4 w-4" />
-              </button>
-            </div>
+              <Settings className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" />
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 p-2.5 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all active:scale-95"
+            >
+              <LogOut className="h-4 w-4" />
+              <span className="text-sm font-medium">Logout</span>
+            </button>
           </div>
         </div>
       </aside>
