@@ -95,35 +95,35 @@ export default function InterviewCoach() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-5 sm:space-y-6 md:space-y-8 -mx-3 sm:mx-0">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Interview Coach</h1>
-        <p className="text-muted-foreground">Practice interviews and build your confidence</p>
+      <div className="px-3 sm:px-0">
+        <h1 className="text-2xl sm:text-2xl md:text-3xl font-bold text-foreground">Interview Coach</h1>
+        <p className="text-base sm:text-base text-muted-foreground mt-1 sm:mt-0">Practice interviews and build your confidence</p>
       </div>
 
       {error && (
-        <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-sm text-destructive">
+        <div className="mx-3 sm:mx-0 p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-sm text-destructive">
           {error}
         </div>
       )}
 
       {mode === "select" && (
         /* Interview Type Selection */
-        <div className="space-y-6">
-          <h2 className="text-lg font-semibold text-foreground">Select Interview Type</h2>
-          <div className="grid md:grid-cols-3 gap-4">
+        <div className="space-y-5 sm:space-y-6 px-3 sm:px-0">
+          <h2 className="text-lg sm:text-lg md:text-xl font-semibold text-foreground">Select Interview Type</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {interviewTypes.map((type) => (
               <button
                 key={type.id}
                 onClick={() => startInterview(type.id)}
                 disabled={isLoading}
-                className="bg-card border border-border rounded-xl p-6 text-left hover:border-primary/50 transition-colors group shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-card border border-border rounded-xl sm:rounded-xl p-5 sm:p-6 text-left hover:border-primary/50 transition-colors group shadow-sm disabled:opacity-50 disabled:cursor-not-allowed min-h-[140px] sm:min-h-[160px] touch-manipulation"
               >
-                <div className="h-12 w-12 rounded-lg bg-primary/20 flex items-center justify-center mb-4">
+                <div className="h-12 w-12 rounded-lg bg-primary/20 flex items-center justify-center mb-4 flex-shrink-0">
                   <MessageSquare className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="font-semibold text-foreground mb-1">{type.label}</h3>
+                <h3 className="font-semibold text-base sm:text-base text-foreground mb-2">{type.label}</h3>
                 <p className="text-sm text-muted-foreground">{type.desc}</p>
                 <div className="flex items-center gap-1 text-primary mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
                   {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Start <ChevronRight className="h-4 w-4" /></>}
@@ -133,9 +133,9 @@ export default function InterviewCoach() {
           </div>
 
           {/* Tips */}
-          <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-            <h3 className="font-semibold text-foreground mb-4">Interview Tips</h3>
-            <ul className="space-y-3 text-muted-foreground">
+          <div className="bg-card border border-border rounded-xl sm:rounded-xl p-5 sm:p-6 shadow-sm">
+            <h3 className="font-semibold text-base sm:text-base text-foreground mb-4">Interview Tips</h3>
+            <ul className="space-y-3 text-sm sm:text-sm text-muted-foreground">
               <li className="flex items-start gap-2">
                 <CheckCircle className="h-5 w-5 text-accent flex-shrink-0 mt-0.5" />
                 Use the STAR method: Situation, Task, Action, Result
@@ -185,7 +185,7 @@ export default function InterviewCoach() {
               value={currentResponse}
               onChange={(e) => setCurrentResponse(e.target.value)}
               placeholder="Type your response here..."
-              className="w-full h-32 px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+              className="w-full h-40 sm:h-32 md:h-40 px-4 py-3.5 sm:py-3 bg-background border border-border rounded-lg text-base sm:text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
             />
           </div>
 

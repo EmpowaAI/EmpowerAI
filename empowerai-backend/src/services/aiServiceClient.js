@@ -7,9 +7,10 @@
 const axios = require('axios');
 
 const AI_SERVICE_URL = (process.env.AI_SERVICE_URL || 'http://localhost:8000').replace(/\/$/, ''); // Remove trailing slash
-const REQUEST_TIMEOUT = 30000; // 30 seconds
+// Increased timeout for Render free tier (cold starts can take 30-60 seconds)
+const REQUEST_TIMEOUT = process.env.NODE_ENV === 'production' ? 90000 : 30000; // 90 seconds in production, 30 in dev
 const MAX_RETRIES = 3;
-const RETRY_DELAY_MS = 1000; // 1 second
+const RETRY_DELAY_MS = 2000; // 2 seconds (increased for Render cold starts)
 
 // Log configuration
 console.log('[AI Service Client] Initialized with:', {
@@ -52,11 +53,13 @@ aiServiceClient.interceptors.response.use(
       typeof error.response?.data === 'string' && 
       error.response.data.includes('Just a moment');
 
-    // Retry on timeout, network errors, or rate limit errors (429)
+    // Retry on timeout and network errors ONLY - DO NOT retry on 429 rate limits
+    // Retrying on 429 causes cascading requests that all count toward the limit
+    const isRateLimit = error.response?.status === 429;
     const shouldRetry = (
-      (axios.isAxiosError(error) && 
-       (error.code === 'ECONNABORTED' || error.code === 'ECONNREFUSED' || !error.response)) ||
-      (error.response?.status === 429) // Rate limit (including Cloudflare)
+      axios.isAxiosError(error) && 
+      !isRateLimit && // Explicitly exclude 429 from retries
+      (error.code === 'ECONNABORTED' || error.code === 'ECONNREFUSED' || !error.response)
     );
 
     if (shouldRetry && originalRequest && !originalRequest._retry) {
@@ -109,7 +112,12 @@ aiServiceClient.interceptors.response.use(
         rateLimitError.retryAfter = 60; // Suggest 60 seconds
         throw rateLimitError;
       } else if (status === 503) {
-        throw new Error('AI service is temporarily unavailable. Please try again later.');
+        // Render free tier services can sleep - provide helpful message
+        const isRender = AI_SERVICE_URL.includes('render.com') || AI_SERVICE_URL.includes('onrender.com');
+        const message = isRender 
+          ? 'AI service is waking up (Render free tier cold start). Please wait 30-60 seconds and try again.'
+          : 'AI service is temporarily unavailable. Please try again later.';
+        throw new Error(message);
       } else if (status === 500) {
         throw new Error(data?.message || data?.detail || 'AI service encountered an error. Please try again.');
       } else if (status === 400) {
@@ -121,11 +129,25 @@ aiServiceClient.interceptors.response.use(
     
     // Log connection errors with more detail
     if (!error.response) {
+      const isRender = AI_SERVICE_URL.includes('render.com') || AI_SERVICE_URL.includes('onrender.com');
+      const isTimeout = error.code === 'ECONNABORTED' || error.message?.includes('timeout');
+      
       console.error('[AI Service] Connection error:', {
         message: error.message,
         code: error.code,
-        baseURL: AI_SERVICE_URL
+        baseURL: AI_SERVICE_URL,
+        isRender,
+        isTimeout,
+        note: isRender && isTimeout ? 'Render free tier cold start may be causing delay' : null
       });
+      
+      // Provide helpful error message for Render cold starts
+      if (isRender && isTimeout) {
+        const renderError = new Error('AI service is waking up (Render free tier). Please wait 30-60 seconds and try again.');
+        renderError.isRenderColdStart = true;
+        renderError.retryAfter = 60;
+        throw renderError;
+      }
     }
 
     return Promise.reject(error);

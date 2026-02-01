@@ -38,12 +38,18 @@ class UserService {
    * @returns {Promise<object|null>} User object or null
    */
   async findByEmail(email, correlationId = null, includePassword = false) {
+    // Optimize query: only select needed fields for login
     const query = User.findOne({ email: email.toLowerCase() });
     
     if (includePassword) {
       query.select('+password');
+    } else {
+      // For non-login queries, exclude password and other heavy fields
+      query.select('-password');
     }
 
+    // Add lean() for faster queries when we don't need Mongoose document methods
+    // But keep document for login since we need correctPassword method
     return await query;
   }
 
