@@ -67,7 +67,8 @@ export default function DashboardLayout() {
       const alwaysAllowed = [
         "/dashboard/cv-analyzer",
         "/dashboard",
-        "/dashboard/twin"
+        "/dashboard/twin",
+        "/dashboard/profile"
       ]
       
       if (alwaysAllowed.includes(currentPath)) {
