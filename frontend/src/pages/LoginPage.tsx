@@ -1,4 +1,4 @@
-﻿// pages/LoginPage.tsx - Enhanced with beautiful animations
+// pages/LoginPage.tsx - Enhanced with beautiful animations
 import type React from "react"
 
 import { useState } from "react"
