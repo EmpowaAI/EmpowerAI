@@ -13,34 +13,49 @@ const {
   FRONTEND_URL
 } = process.env;
 
-if (!EMAIL_HOST || !EMAIL_USER || !FRONTEND_URL) {
-  throw new Error('Email environment variables not configured');
+// Check if email service is configured
+const isEmailConfigured = EMAIL_HOST && EMAIL_USER && FRONTEND_URL;
+
+if (!isEmailConfigured) {
+  console.warn('⚠️  Email service not configured. Email features will be disabled.');
+  console.warn('   Set EMAIL_HOST, EMAIL_USER, EMAIL_PASS, and FRONTEND_URL to enable emails.');
 }
 
-// Create transporter ONCE
-const transporter = nodemailer.createTransport({
-  host: EMAIL_HOST,
-  port: Number(EMAIL_PORT),
-  secure: false,
-  auth: {
-    user: EMAIL_USER,
-    pass: EMAIL_PASS,
-  },
-});
+// Create transporter ONCE (only if configured)
+let transporter = null;
+if (isEmailConfigured) {
+  transporter = nodemailer.createTransport({
+    host: EMAIL_HOST,
+    port: Number(EMAIL_PORT) || 587,
+    secure: false,
+    auth: {
+      user: EMAIL_USER,
+      pass: EMAIL_PASS,
+    },
+  });
+}
 
 // Core send function
 const send = async (to, subject, html) => {
+  if (!isEmailConfigured || !transporter) {
+    console.log(`[Email] Would send email to ${to}: ${subject}`);
+    console.log(`[Email] Email service not configured - skipping actual send`);
+    return;
+  }
+
   await transporter.sendMail({
     from: `"EmpowerAI" <${EMAIL_USER}>`,
     to,
     subject,
     html,
   });
+  
+  console.log(`[Email] Sent "${subject}" to ${to}`);
 };
 
 // Email verification
 exports.sendVerification = async (email, token) => {
-  const link = `${FRONTEND_URL}/verify?token=${token}`;
+  const link = `${FRONTEND_URL || 'http://localhost:5173'}/verify?token=${token}`;
 
   await send(
     email,
@@ -56,7 +71,7 @@ exports.sendVerification = async (email, token) => {
 
 // Password reset
 exports.sendReset = async (email, token) => {
-  const link = `${FRONTEND_URL}/reset-password?token=${token}`;
+  const link = `${FRONTEND_URL || 'http://localhost:5173'}/reset-password?token=${token}`;
 
   await send(
     email,
@@ -69,3 +84,6 @@ exports.sendReset = async (email, token) => {
     `
   );
 };
+
+// Export config status for health checks
+exports.isConfigured = isEmailConfigured;
