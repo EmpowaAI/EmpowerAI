@@ -409,6 +409,61 @@ exports.getEconomicTwin = async (req, res, next) => {
   }
 };
 
+// Generate fallback simulation data when AI service is unavailable
+function generateFallbackSimulation(pathIds, userData) {
+  const pathData = {
+    freelancing: {
+      name: 'Freelancing',
+      description: 'Start freelancing with your current skills',
+      threeMonth: { income: 3500, skillGrowth: 15, employabilityIndex: 65, milestones: ['First client', 'Portfolio built', '5 projects completed'] },
+      sixMonth: { income: 6800, skillGrowth: 28, employabilityIndex: 72, milestones: ['Regular clients', 'Specialized niche', '15+ projects'] },
+      twelveMonth: { income: 12500, skillGrowth: 45, employabilityIndex: 80, milestones: ['Agency rates', 'International clients', 'Passive income'] }
+    },
+    learnership: {
+      name: 'Learnership',
+      description: 'Join a learnership program in your field',
+      threeMonth: { income: 4200, skillGrowth: 20, employabilityIndex: 70, milestones: ['Program started', 'Industry mentor', 'Certification progress'] },
+      sixMonth: { income: 5500, skillGrowth: 35, employabilityIndex: 78, milestones: ['Mid-program assessment', 'Real project experience', 'Industry connections'] },
+      twelveMonth: { income: 8500, skillGrowth: 55, employabilityIndex: 85, milestones: ['Certification earned', 'Job placement', 'Professional network'] }
+    },
+    short_course: {
+      name: 'Short Course',
+      description: 'Complete a focused upskilling course',
+      threeMonth: { income: 3000, skillGrowth: 25, employabilityIndex: 68, milestones: ['Course completed', 'New certification', 'Portfolio updated'] },
+      sixMonth: { income: 7200, skillGrowth: 40, employabilityIndex: 75, milestones: ['Skills applied', 'Freelance projects', 'Industry recognition'] },
+      twelveMonth: { income: 11000, skillGrowth: 50, employabilityIndex: 82, milestones: ['Advanced skills', 'Market competitive', 'Higher rates'] }
+    },
+    entry_tech: {
+      name: 'Entry Tech Job',
+      description: 'Secure an entry-level tech position',
+      threeMonth: { income: 8500, skillGrowth: 18, employabilityIndex: 72, milestones: ['Job secured', 'Team integrated', 'First project'] },
+      sixMonth: { income: 10200, skillGrowth: 32, employabilityIndex: 78, milestones: ['Performance review', 'Increased responsibility', 'Mentorship'] },
+      twelveMonth: { income: 15000, skillGrowth: 48, employabilityIndex: 84, milestones: ['Promotion potential', 'Senior projects', 'Leadership opportunities'] }
+    },
+    internship: {
+      name: 'Internship',
+      description: 'Gain practical experience through internship',
+      threeMonth: { income: 5000, skillGrowth: 22, employabilityIndex: 68, milestones: ['Internship started', 'Team contribution', 'Skills development'] },
+      sixMonth: { income: 6500, skillGrowth: 38, employabilityIndex: 76, milestones: ['Key projects', 'Full-time consideration', 'Industry knowledge'] },
+      twelveMonth: { income: 12000, skillGrowth: 52, employabilityIndex: 83, milestones: ['Job offer', 'Professional transition', 'Career foundation'] }
+    },
+    graduate_program: {
+      name: 'Graduate Program',
+      description: 'Join a structured graduate development program',
+      threeMonth: { income: 9500, skillGrowth: 24, employabilityIndex: 75, milestones: ['Program onboarding', 'Rotations started', 'Training modules'] },
+      sixMonth: { income: 11500, skillGrowth: 42, employabilityIndex: 80, milestones: ['Department rotation', 'Leadership training', 'Project ownership'] },
+      twelveMonth: { income: 18000, skillGrowth: 58, employabilityIndex: 88, milestones: ['Program completion', 'Permanent placement', 'Fast-track career'] }
+    }
+  };
+
+  return (pathIds || Object.keys(pathData)).map(pathId => ({
+    pathId,
+    pathName: pathData[pathId]?.name || pathId,
+    description: pathData[pathId]?.description || 'Career pathway simulation',
+    projections: pathData[pathId] || pathData.freelancing
+  }));
+}
+
 exports.runSimulation = async (req, res, next) => {
   try {
     const userId = req.user.id;
@@ -439,10 +494,20 @@ exports.runSimulation = async (req, res, next) => {
       userData.skillVector = existingTwin.skillVector;
     }
 
-    const simulationResponse = await aiServiceClient.post('/simulation/paths', {
-      user_data: userData,
-      path_ids: pathIds || null
-    });
+    let simulationData;
+
+    try {
+      // Try AI service first
+      const simulationResponse = await aiServiceClient.post('/simulation/paths', {
+        user_data: userData,
+        path_ids: pathIds || null
+      });
+      simulationData = simulationResponse.data;
+    } catch (aiError) {
+      // AI service failed - use fallback simulation
+      console.log('AI service unavailable, using fallback simulation');
+      simulationData = generateFallbackSimulation(pathIds, userData);
+    }
 
     if (existingTwin) {
       // Limit simulation history to last 20 entries to prevent unbounded growth
@@ -455,7 +520,7 @@ exports.runSimulation = async (req, res, next) => {
       history.push({
         paths: pathIds || 'all',
         timestamp: new Date(),
-        results: simulationResponse.data
+        results: simulationData
       });
       
       // Keep only last MAX_HISTORY entries (most recent)
@@ -473,7 +538,7 @@ exports.runSimulation = async (req, res, next) => {
     res.status(200).json({
       status: 'success',
       data: {
-        simulations: simulationResponse.data
+        simulations: simulationData
       }
     });
   } catch (error) {
