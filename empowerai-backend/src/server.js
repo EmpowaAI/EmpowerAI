@@ -183,6 +183,7 @@ connectDatabase().then(async (connected) => {
   app.use('/api/rss', require('./routes/rss'));
   app.use('/api/admin', require('./routes/admin'));
   app.use('/api/account', require('./routes/account'));
+  app.use('/api/user', require('./routes/user'));
 
 
   // 404 handler for undefined routes (must be after all other routes)

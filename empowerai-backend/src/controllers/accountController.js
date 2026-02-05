@@ -5,6 +5,7 @@
 
 const userService = require('../services/userService');
 const { sendSuccess } = require('../utils/response');
+const logger = require('../utils/logger');
 
 /**
  * Verify email
@@ -13,16 +14,20 @@ const { sendSuccess } = require('../utils/response');
  */
 exports.verifyEmail = async (req, res, next) => {
   const correlationId = req.correlationId;
+  const { token } = req.query;
 
   try {
-    const { token } = req.query;
+    logger.info('Email verification requested', { correlationId, token });
 
     await userService.verifyEmail(token, correlationId);
+
+    logger.info('Email verified successfully', { correlationId, token });
 
     return sendSuccess(res, {
       message: 'Email verified successfully. You can now log in.'
     });
   } catch (error) {
+    logger.error('Email verification failed', { correlationId, token, error: error.message });
     next(error);
   }
 };
@@ -35,16 +40,20 @@ exports.verifyEmail = async (req, res, next) => {
  */
 exports.forgotPassword = async (req, res, next) => {
   const correlationId = req.correlationId;
+  const { email } = req.body;
 
   try {
-    const { email } = req.body;
+    logger.info('Password reset requested', { correlationId, email });
 
     await userService.forgotPassword(email, correlationId);
+
+    logger.info('Password reset process initiated (email sent if exists)', { correlationId, email });
 
     return sendSuccess(res, {
       message: 'If that email exists, a reset link has been sent.'
     });
   } catch (error) {
+    logger.error('Password reset request failed', { correlationId, email, error: error.message });
     next(error);
   }
 };
@@ -57,16 +66,20 @@ exports.forgotPassword = async (req, res, next) => {
  */
 exports.resetPassword = async (req, res, next) => {
   const correlationId = req.correlationId;
+  const { token, newPassword } = req.body;
 
   try {
-    const { token, newPassword } = req.body;
+    logger.info('Password reset attempt', { correlationId, token });
 
-    await userService.resetPassword({ token, newPassword });
+    await userService.resetPassword({ token, newPassword }, correlationId);
+
+    logger.info('Password reset successful', { correlationId, token });
 
     return sendSuccess(res, {
       message: 'Password reset successful. You can now log in.'
     });
   } catch (error) {
+    logger.error('Password reset failed', { correlationId, token, error: error.message });
     next(error);
   }
 };
