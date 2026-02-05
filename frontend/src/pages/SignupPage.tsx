@@ -3,7 +3,8 @@ import type React from "react"
 
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { Eye, EyeOff, CheckCircle, Loader2, Sparkles, Shield, Zap } from "lucide-react"
+import { Eye, EyeOff, CheckCircle, Loader2, Sparkles, Shield, Zap, XCircle } from "lucide-react"
+import toast from 'react-hot-toast'
 import { authAPI } from "../lib/api"
 import { useUser } from "../lib/user-context"
 import { syncProgressFromBackend, unlockAllPages } from "../utils/progressSync"
@@ -18,13 +19,69 @@ export default function SignupPage() {
     email: "",
     password: "",
   })
+  const [fieldErrors, setFieldErrors] = useState({
+    name: "",
+    email: "",
+    password: "",
+  })
   const [focusedField, setFocusedField] = useState<string | null>(null)
   const navigate = useNavigate()
   const { setUser, updateProgress } = useUser()
 
+  // Real-time validation
+  const validateField = (field: string, value: string) => {
+    let error = ""
+    
+    switch (field) {
+      case "name":
+        if (!value.trim()) {
+          error = "Name is required"
+        } else if (value.trim().length < 2) {
+          error = "Name must be at least 2 characters"
+        }
+        break
+      case "email":
+        if (!value.trim()) {
+          error = "Email is required"
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          error = "Please enter a valid email address"
+        }
+        break
+      case "password":
+        if (!value) {
+          error = "Password is required"
+        } else if (value.length < 6) {
+          error = "Password must be at least 6 characters"
+        }
+        break
+    }
+    
+    setFieldErrors(prev => ({ ...prev, [field]: error }))
+    return error === ""
+  }
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+    // Only validate if field has been touched (user started typing)
+    if (value.length > 0 || fieldErrors[field as keyof typeof fieldErrors]) {
+      validateField(field, value)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
+
+    // Validate all fields
+    const nameValid = validateField("name", formData.name)
+    const emailValid = validateField("email", formData.email)
+    const passwordValid = validateField("password", formData.password)
+
+    if (!nameValid || !emailValid || !passwordValid) {
+      toast.error("Please fix the errors before submitting")
+      return
+    }
+
     setIsLoading(true)
 
     try {
@@ -36,6 +93,8 @@ export default function SignupPage() {
           id: response.data.user.id || response.data.user._id,
           empowermentScore: response.data.user.empowermentScore,
         })
+        
+        toast.success(`Welcome to EmpowerAI, ${response.data.user.name}! 🎉`)
         
         // Check if user already has progress (in case of duplicate signup or existing account)
         try {
@@ -66,7 +125,9 @@ export default function SignupPage() {
         }
       }
     } catch (err: any) {
-      setError(err.message || "Registration failed. Please try again.")
+      const errorMessage = err.message || "Registration failed. Please try again."
+      setError(errorMessage)
+      toast.error(errorMessage)
     } finally {
       setIsLoading(false)
     }
@@ -148,63 +209,87 @@ export default function SignupPage() {
               <div className="relative">
                 <label 
                   className={`absolute left-4 transition-all duration-200 pointer-events-none ${
-                    focusedField === 'name' || formData.name ? 'text-xs -top-2.5 bg-card px-2 text-primary' : 'top-4 text-base text-muted-foreground'
-                  }`}
+                    focusedField === 'name' || formData.name ? 'text-xs -top-2.5 bg-card px-2' : 'top-4 text-base text-muted-foreground'
+                  } ${fieldErrors.name ? 'text-destructive' : focusedField === 'name' ? 'text-primary' : ''}`}
                 >
                   Full Name
                 </label>
                 <input
                   type="text"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) => handleInputChange('name', e.target.value)}
                   onFocus={() => setFocusedField('name')}
                   onBlur={() => setFocusedField(null)}
                   className={`w-full px-4 py-4 bg-background border-2 rounded-xl text-base text-foreground focus:outline-none transition-all min-h-[56px] ${
-                    focusedField === 'name' ? 'border-primary shadow-lg shadow-primary/10' : 'border-border hover:border-border/80'
+                    fieldErrors.name 
+                      ? 'border-destructive' 
+                      : focusedField === 'name' 
+                        ? 'border-primary shadow-lg shadow-primary/10' 
+                        : 'border-border hover:border-border/80'
                   }`}
                   required
                 />
+                {fieldErrors.name && (
+                  <div className="flex items-center gap-1 mt-1.5 text-xs text-destructive animate-slide-up">
+                    <XCircle className="h-3.5 w-3.5" />
+                    <span>{fieldErrors.name}</span>
+                  </div>
+                )}
               </div>
 
               {/* Email Input with floating effect */}
               <div className="relative">
                 <label 
                   className={`absolute left-4 transition-all duration-200 pointer-events-none ${
-                    focusedField === 'email' || formData.email ? 'text-xs -top-2.5 bg-card px-2 text-primary' : 'top-4 text-base text-muted-foreground'
-                  }`}
+                    focusedField === 'email' || formData.email ? 'text-xs -top-2.5 bg-card px-2' : 'top-4 text-base text-muted-foreground'
+                  } ${fieldErrors.email ? 'text-destructive' : focusedField === 'email' ? 'text-primary' : ''}`}
                 >
                   Email Address
                 </label>
                 <input
                   type="email"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={(e) => handleInputChange('email', e.target.value)}
                   onFocus={() => setFocusedField('email')}
                   onBlur={() => setFocusedField(null)}
                   className={`w-full px-4 py-4 bg-background border-2 rounded-xl text-base text-foreground focus:outline-none transition-all min-h-[56px] ${
-                    focusedField === 'email' ? 'border-primary shadow-lg shadow-primary/10' : 'border-border hover:border-border/80'
+                    fieldErrors.email 
+                      ? 'border-destructive' 
+                      : focusedField === 'email' 
+                        ? 'border-primary shadow-lg shadow-primary/10' 
+                        : 'border-border hover:border-border/80'
                   }`}
                   required
                 />
+                {fieldErrors.email && (
+                  <div className="flex items-center gap-1 mt-1.5 text-xs text-destructive animate-slide-up">
+                    <XCircle className="h-3.5 w-3.5" />
+                    <span>{fieldErrors.email}</span>
+                  </div>
+                )}
               </div>
 
               {/* Password Input with floating effect */}
               <div className="relative">
                 <label 
                   className={`absolute left-4 transition-all duration-200 pointer-events-none ${
-                    focusedField === 'password' || formData.password ? 'text-xs -top-2.5 bg-card px-2 text-primary' : 'top-4 text-base text-muted-foreground'
-                  }`}
+                    focusedField === 'password' || formData.password ? 'text-xs -top-2.5 bg-card px-2' : 'top-4 text-base text-muted-foreground'
+                  } ${fieldErrors.password ? 'text-destructive' : focusedField === 'password' ? 'text-primary' : ''}`}
                 >
                   Password
                 </label>
                 <input
                   type={showPassword ? "text" : "password"}
                   value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  onChange={(e) => handleInputChange('password', e.target.value)}
                   onFocus={() => setFocusedField('password')}
                   onBlur={() => setFocusedField(null)}
                   className={`w-full px-4 py-4 pr-12 bg-background border-2 rounded-xl text-base text-foreground focus:outline-none transition-all min-h-[56px] ${
-                    focusedField === 'password' ? 'border-primary shadow-lg shadow-primary/10' : 'border-border hover:border-border/80'
+                    fieldErrors.password 
+                      ? 'border-destructive' 
+                      : focusedField === 'password' 
+                        ? 'border-primary shadow-lg shadow-primary/10' 
+                        : 'border-border hover:border-border/80'
                   }`}
                   required
                 />
@@ -215,6 +300,12 @@ export default function SignupPage() {
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
+                {fieldErrors.password && (
+                  <div className="flex items-center gap-1 mt-1.5 text-xs text-destructive animate-slide-up">
+                    <XCircle className="h-3.5 w-3.5" />
+                    <span>{fieldErrors.password}</span>
+                  </div>
+                )}
               </div>
 
               {/* Password strength indicator */}
