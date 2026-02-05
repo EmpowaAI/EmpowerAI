@@ -62,8 +62,10 @@ export default function Opportunities() {
               ? `R${opp.salaryRange.min?.toLocaleString() || 0} - R${opp.salaryRange.max?.toLocaleString() || 0}`
               : undefined,
             match: calculateMatchScore(opp, user),
-            posted: opp.createdAt 
-              ? new Date(opp.createdAt).toLocaleDateString()
+            posted: opp.deadline 
+              ? `Closes ${new Date(opp.deadline).toLocaleDateString('en-ZA', { year: 'numeric', month: 'short', day: 'numeric' })}`
+              : opp.createdAt 
+              ? `Posted ${new Date(opp.createdAt).toLocaleDateString('en-ZA', { year: 'numeric', month: 'short', day: 'numeric' })}`
               : 'Recently',
             applyUrl: opp.applicationUrl || '#',
             description: opp.description || 'No description available'
@@ -125,11 +127,19 @@ export default function Opportunities() {
   }
 
   const handleApply = (opportunity: Opportunity) => {
-    // Open LinkedIn application page in new tab
-    window.open(opportunity.applyUrl, '_blank', 'noopener,noreferrer')
-    
-    // Optional: Track application in your database
-    trackApplication(opportunity.id)
+    // Validate and open application URL
+    if (opportunity.applyUrl && opportunity.applyUrl !== '#') {
+      // Ensure URL has protocol
+      const url = opportunity.applyUrl.startsWith('http') 
+        ? opportunity.applyUrl 
+        : `https://${opportunity.applyUrl}`
+      window.open(url, '_blank', 'noopener,noreferrer')
+      
+      // Track application in database
+      trackApplication(opportunity.id)
+    } else {
+      alert('Application link not available for this opportunity.')
+    }
   }
 
   const trackApplication = async (opportunityId: string) => {
