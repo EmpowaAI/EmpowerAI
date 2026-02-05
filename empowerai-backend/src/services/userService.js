@@ -213,7 +213,45 @@ async resetPassword({ token, newPassword }) {
       updatedAt: user.updatedAt,
     };
   }
+
+  async updateUser(userId, updateData, correlationId = null) {
+    const user = await this.findById(userId, correlationId);
+
+    // Only allow certain fields to be updated
+    const allowedFields = ['name', 'age', 'province', 'education', 'skills', 'interests'];
+    const updates = {};
+
+    for (const field of allowedFields) {
+      if (updateData[field] !== undefined) {
+        updates[field] = updateData[field];
+      }
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: updates },
+      { new: true, runValidators: true }
+    );
+
+    logger.info('User updated successfully', {
+      correlationId,
+      userId,
+      updatedFields: Object.keys(updates),
+    });
+
+    return updatedUser;
+}
+
+async deleteUser(userId, correlationId = null) {
+  const user = await this.findById(userId, correlationId);
+  await User.findByIdAndDelete(userId);
+
+  logger.info('User deleted successfully', {
+    correlationId,
+    userId,
+  });
+}
+
 }
 
 module.exports = new UserService();
-
