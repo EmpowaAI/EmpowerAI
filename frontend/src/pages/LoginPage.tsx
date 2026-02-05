@@ -4,10 +4,12 @@ import type React from "react"
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { Zap, Eye, EyeOff, Loader2, Sparkles, TrendingUp, Users } from "lucide-react"
+import toast from 'react-hot-toast'
 import { authAPI } from "../lib/api"
 import { useUser } from "../lib/user-context"
 import { syncProgressFromBackend, unlockAllPages } from "../utils/progressSync"
 import Logo from "../components/Logo"
+import LoadingButton from "../components/LoadingButton"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -34,6 +36,8 @@ export default function LoginPage() {
           id: response.data.user.id || response.data.user._id,
           empowermentScore: response.data.user.empowermentScore,
         })
+        
+        toast.success(`Welcome back, ${response.data.user.name}!`)
         
         // Sync progress from backend to ensure accurate state
         try {
@@ -71,7 +75,9 @@ export default function LoginPage() {
         }
       }
     } catch (err: any) {
-      setError(err.message || "Login failed. Please check your credentials.")
+      const errorMessage = err.message || "Login failed. Please check your credentials."
+      setError(errorMessage)
+      toast.error(errorMessage)
     } finally {
       setIsLoading(false)
     }
