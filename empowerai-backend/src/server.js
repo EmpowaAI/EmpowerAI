@@ -2,12 +2,16 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
+const compression = require('compression');
 require('dotenv').config();
 
 const logger = require('./utils/logger');
 const { apiLimiter } = require('./middleware/rateLimiter');
 
 const app = express();
+
+// Compression middleware - reduces response size by ~70%
+app.use(compression());
 
 // Trust proxy - Required for Render and other hosting platforms
 // This allows Express to correctly identify the client IP from X-Forwarded-For header
