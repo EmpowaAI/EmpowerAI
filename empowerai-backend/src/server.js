@@ -197,6 +197,9 @@ connectDatabase().then(async (connected) => {
   app.use('/api/chat', require('./routes/chat'));
   app.use('/api/rss', require('./routes/rss'));
   app.use('/api/admin', require('./routes/admin'));
+  app.use('/api/account', require('./routes/account'));
+  app.use('/api/user', require('./routes/user'));
+
 
   // Root route handler (for Render health checks and general requests)
   app.get('/', (req, res) => {
