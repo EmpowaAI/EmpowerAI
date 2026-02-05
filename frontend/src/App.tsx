@@ -1,4 +1,5 @@
 ﻿import { Routes, Route, Navigate } from 'react-router-dom'
+import { Toaster } from 'react-hot-toast'
 import { UserProvider } from './lib/user-context'
 import { ThemeProvider } from './lib/theme'
 import LandingPage from './pages/LandingPage'
@@ -17,6 +18,29 @@ function App() {
   return (
     <ThemeProvider>
       <UserProvider>
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background: 'hsl(var(--color-card))',
+              color: 'hsl(var(--color-card-foreground))',
+              border: '1px solid hsl(var(--color-border))',
+            },
+            success: {
+              iconTheme: {
+                primary: '#10b981',
+                secondary: '#ffffff',
+              },
+            },
+            error: {
+              iconTheme: {
+                primary: '#ef4444',
+                secondary: '#ffffff',
+              },
+            },
+          }}
+        />
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />

@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react"
 import { Search, MapPin, Clock, Briefcase, GraduationCap, Building, Heart, Filter, ExternalLink, Loader2 } from "lucide-react"
+import toast from 'react-hot-toast'
 import { cn } from "../lib/utils"
 import { opportunitiesAPI } from "../lib/api"
 import { useUser } from "../lib/user-context"
 import LoadingState from "../components/LoadingState"
 import EmptyState from "../components/EmptyState"
 import ErrorAlert from "../components/ErrorAlert"
+import LoadingButton from "../components/LoadingButton"
 
 interface Opportunity {
   id: string
@@ -28,6 +30,7 @@ export default function Opportunities() {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [applyingId, setApplyingId] = useState<string | null>(null)
   const { user } = useUser()
 
   useEffect(() => {
@@ -126,19 +129,32 @@ export default function Opportunities() {
     setSaved((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]))
   }
 
-  const handleApply = (opportunity: Opportunity) => {
-    // Validate and open application URL
-    if (opportunity.applyUrl && opportunity.applyUrl !== '#') {
+  const handleApply = async (opportunity: Opportunity) => {
+    // Validate application URL
+    if (!opportunity.applyUrl || opportunity.applyUrl === '#') {
+      toast.error('Application link not available for this opportunity.')
+      return
+    }
+
+    try {
+      setApplyingId(opportunity.id)
+      
+      // Track application in database first
+      await trackApplication(opportunity.id)
+      
       // Ensure URL has protocol
       const url = opportunity.applyUrl.startsWith('http') 
         ? opportunity.applyUrl 
         : `https://${opportunity.applyUrl}`
+      
+      // Open application URL
       window.open(url, '_blank', 'noopener,noreferrer')
       
-      // Track application in database
-      trackApplication(opportunity.id)
-    } else {
-      alert('Application link not available for this opportunity.')
+      toast.success(`Opening application for ${opportunity.company}`)
+    } catch (error) {
+      toast.error('Failed to track application')
+    } finally {
+      setApplyingId(null)
     }
   }
 
@@ -289,13 +305,15 @@ export default function Opportunities() {
                 <span className="px-2 sm:px-3 py-1 bg-muted text-xs sm:text-sm text-muted-foreground rounded-lg">{opp.type}</span>
                 {opp.salary && <span className="text-xs sm:text-sm font-medium text-foreground">{opp.salary}</span>}
               </div>
-              <button
+              <LoadingButton
                 onClick={() => handleApply(opp)}
+                isLoading={applyingId === opp.id}
+                loadingText="Opening..."
+                icon={<ExternalLink className="h-3 w-3 sm:h-4 sm:w-4" />}
                 className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm sm:text-base bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors w-full sm:w-auto"
               >
-                <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span>Apply Now</span>
-              </button>
+                Apply Now
+              </LoadingButton>
             </div>
           </div>
         ))}
