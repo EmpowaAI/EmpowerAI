@@ -11,7 +11,14 @@ export default defineConfig({
     },
   },
   build: {
-    chunkSizeWarningLimit: 1000, // Increase limit to 1000kb (default is 500kb)
+    chunkSizeWarningLimit: 1000,
+    minify: 'terser', // Better minification than esbuild
+    terserOptions: {
+      compress: {
+        drop_console: true, // Remove console.logs in production
+        drop_debugger: true,
+      },
+    },
     rollupOptions: {
       output: {
         manualChunks: {
@@ -22,5 +29,7 @@ export default defineConfig({
         },
       },
     },
+    // Enable source maps for debugging but keep them external
+    sourcemap: false, // Disable sourcemaps in production for smaller files
   },
 })
