@@ -32,7 +32,7 @@ const opportunities = [
     requirements: ["Matric", "Basic computer literacy", "South African citizen", "Aged 18-35"],
     skills: ["Computer Literacy", "Communication", "Problem Solving", "Customer Service"],
     salaryRange: { min: 4000, max: 6000 },
-    deadline: new Date('2025-03-31'),
+    deadline: new Date('2026-03-31'),
     applicationUrl: "https://www.mict.org.za/learnerships/apply",
     isActive: true
   },
@@ -46,7 +46,7 @@ const opportunities = [
     requirements: ["Matric with Mathematics", "Basic programming knowledge preferred", "South African citizen"],
     skills: ["JavaScript", "React", "Node.js", "Problem Solving", "Teamwork"],
     salaryRange: { min: 6000, max: 10000 },
-    deadline: new Date('2025-04-15'),
+    deadline: new Date('2026-04-15'),
     applicationUrl: "https://capitec.taleo.net/careersection/ex/jobdetail.ftl?job=241005",
     isActive: true
   },
@@ -60,7 +60,7 @@ const opportunities = [
     requirements: ["Matric with Mathematics", "Interest in data analysis", "South African citizen"],
     skills: ["Python", "SQL", "Data Analysis", "Excel", "Communication"],
     salaryRange: { min: 7000, max: 12000 },
-    deadline: new Date('2025-04-30'),
+    deadline: new Date('2026-04-30'),
     applicationUrl: "https://standardbank.wd3.myworkdaysite.com/en-US/Search/",
     isActive: true
   },
@@ -74,7 +74,7 @@ const opportunities = [
     requirements: ["Matric", "Strong communication skills", "Active social media presence preferred"],
     skills: ["Social Media", "Content Creation", "Communication", "Creativity", "Writing"],
     salaryRange: { min: 4000, max: 6500 },
-    deadline: new Date('2025-05-15'),
+    deadline: new Date('2026-05-15'),
     applicationUrl: "https://www.serviceseta.org.za/learnerships/apply",
     isActive: true
   },
@@ -90,7 +90,7 @@ const opportunities = [
     requirements: ["Computer Science/IT degree or final year", "Knowledge of Java/Python", "Problem-solving skills"],
     skills: ["Java", "Python", "Spring Boot", "React", "Agile", "Git"],
     salaryRange: { min: 12000, max: 18000 },
-    deadline: new Date('2025-04-20'),
+    deadline: new Date('2026-04-20'),
     applicationUrl: "https://takealot.recruitee.com/",
     isActive: true
   },
@@ -104,7 +104,7 @@ const opportunities = [
     requirements: ["Statistics/Mathematics/Data Science degree", "Strong analytical skills", "Proficiency in Excel"],
     skills: ["Data Analysis", "Statistics", "Excel", "SQL", "Python", "Power BI"],
     salaryRange: { min: 15000, max: 22000 },
-    deadline: new Date('2025-05-01'),
+    deadline: new Date('2026-05-01'),
     applicationUrl: "https://discovery.wd3.myworkdaysite.com/en-US/discovery_sa/careers/search/",
     isActive: true
   },
@@ -118,7 +118,7 @@ const opportunities = [
     requirements: ["IT-related qualification or final year", "Good communication skills", "Driver's license"],
     skills: ["IT Support", "Networking", "Communication", "Problem Solving", "Customer Service"],
     salaryRange: { min: 10000, max: 15000 },
-    deadline: new Date('2025-04-10'),
+    deadline: new Date('2026-04-10'),
     applicationUrl: "https://www.dimensiondata.co.za/careers/job-opportunities",
     isActive: true
   },
@@ -134,7 +134,7 @@ const opportunities = [
     requirements: ["IT/Computer Science degree or equivalent", "1-2 years experience or strong portfolio", "Knowledge of React/Vue"],
     skills: ["React", "JavaScript", "TypeScript", "CSS", "Git", "Agile"],
     salaryRange: { min: 20000, max: 28000 },
-    deadline: new Date('2025-05-30'),
+    deadline: new Date('2026-05-30'),
     applicationUrl: "https://nedbank.wd3.myworkdaysite.com/en-US/nedbank_sa/careers/",
     isActive: true
   },
@@ -148,7 +148,7 @@ const opportunities = [
     requirements: ["Matric", "Excellent communication skills", "Customer service experience preferred"],
     skills: ["Communication", "Customer Service", "Problem Solving", "Patience", "Empathy"],
     salaryRange: { min: 12000, max: 18000 },
-    deadline: new Date('2025-04-25'),
+    deadline: new Date('2026-04-25'),
     applicationUrl: "https://fnb.wd3.myworkdaysite.com/en-US/fnb_sa/careers/",
     isActive: true
   },
@@ -162,7 +162,7 @@ const opportunities = [
     requirements: ["Statistics/Mathematics/Commerce degree", "Strong Excel skills", "Attention to detail"],
     skills: ["Excel", "SQL", "Data Analysis", "Statistics", "Power BI", "Problem Solving"],
     salaryRange: { min: 18000, max: 25000 },
-    deadline: new Date('2025-05-15'),
+    deadline: new Date('2026-05-15'),
     applicationUrl: "https://shoprite.wd3.myworkdaysite.com/en-US/shoprite_sa/careers/",
     isActive: true
   },
@@ -176,7 +176,7 @@ const opportunities = [
     requirements: ["IT/Computer Science/Engineering degree", "Strong academic record", "Leadership potential"],
     skills: ["Programming", "Problem Solving", "Leadership", "Communication", "Teamwork"],
     salaryRange: { min: 22000, max: 30000 },
-    deadline: new Date('2025-04-30'),
+    deadline: new Date('2026-04-30'),
     applicationUrl: "https://mtn.wd3.myworkdaysite.com/en-US/mtn_sa/careers/",
     isActive: true
   },
@@ -192,7 +192,7 @@ const opportunities = [
     requirements: ["South African citizen", "Household income under R350,000/year", "Acceptance to public university"],
     skills: ["Mathematics", "Science", "Problem Solving", "Academic Excellence"],
     salaryRange: { min: 0, max: 0 }, // Bursary, not a job
-    deadline: new Date('2025-01-31'), // Note: Bursary deadlines are usually early in the year
+    deadline: new Date('2026-01-31'), // Note: Bursary deadlines are usually early in the year
     applicationUrl: "https://www.nsfas.org.za/portal/index.php?id=1009",
     isActive: true
   },
@@ -206,7 +206,7 @@ const opportunities = [
     requirements: ["Mathematics and Physical Science with 70%+", "South African citizen", "Household income under R600,000/year"],
     skills: ["Mathematics", "Physical Science", "Problem Solving", "Analytical Thinking"],
     salaryRange: { min: 0, max: 0 },
-    deadline: new Date('2025-02-28'),
+    deadline: new Date('2026-02-28'),
     applicationUrl: "https://www.eskom.co.za/wp-content/uploads/static_files/downloads/Eskom-Bursary-Programme-2025.pdf",
     isActive: true
   },
@@ -252,7 +252,7 @@ const opportunities = [
     requirements: ["Matric", "South African citizen", "Aged 18-35", "No criminal record"],
     skills: ["Communication", "Numeracy", "Customer Service", "Attention to Detail"],
     salaryRange: { min: 4500, max: 7000 },
-    deadline: new Date('2025-04-05'),
+    deadline: new Date('2026-04-05'),
     applicationUrl: "https://www.bankseta.org.za/applications/learnerships/",
     isActive: true
   },
@@ -266,7 +266,7 @@ const opportunities = [
     requirements: ["Matric", "Interest in retail", "Leadership potential", "South African citizen"],
     skills: ["Customer Service", "Leadership", "Inventory Management", "Communication", "Sales"],
     salaryRange: { min: 5000, max: 8000 },
-    deadline: new Date('2025-05-20'),
+    deadline: new Date('2026-05-20'),
     applicationUrl: "https://www.woolworths.co.za/careers/learning-development/learnerships",
     isActive: true
   }
