@@ -3,7 +3,7 @@ import { Link } from "react-router-dom"
 import { TrendingUp, Target, Briefcase, FileText, Mic, ArrowRight, Zap, Sparkles, ChevronUp, Clock, Loader2 } from "lucide-react"
 import { useUser } from "../lib/user-context"
 import { cn } from "../lib/utils"
-import { statsAPI, opportunitiesAPI } from "../lib/api"
+import { statsAPI, opportunitiesAPI, applicationsAPI } from "../lib/api"
 import { useState, useEffect } from "react"
 
 interface DashboardStats {
@@ -13,6 +13,7 @@ interface DashboardStats {
   opportunitiesCount: number
   interviewsPracticed: number
   cvScore: number
+  applicationsCount?: number
 }
 
 interface RecommendedOpportunity {
@@ -22,23 +23,32 @@ interface RecommendedOpportunity {
   type: string
   match: number
   posted: string
+  matchReason?: string
 }
 
 export default function Dashboard() {
-  const { user } = useUser()
+  const { user, progress } = useUser()
   const displayName = user?.name?.split(" ")[0] || "there"
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [recommendedJobs, setRecommendedJobs] = useState<RecommendedOpportunity[]>([])
   const [jobsLoading, setJobsLoading] = useState(true)
+  const [twinData, setTwinData] = useState<any | null>(null)
   
   useEffect(() => {
     const fetchStats = async () => {
       try {
         setLoading(true)
-        const response = await statsAPI.getDashboardStats()
-        if (response.status === 'success' && response.data) {
-          setStats(response.data)
+        const [response, appStats] = await Promise.allSettled([
+          statsAPI.getDashboardStats(),
+          applicationsAPI.getStats()
+        ])
+        if (response.status === 'fulfilled' && response.value.status === 'success' && response.value.data) {
+          const base = response.value.data
+          const applicationsCount = appStats.status === 'fulfilled'
+            ? appStats.value.data?.total || 0
+            : 0
+          setStats({ ...base, applicationsCount })
         }
       } catch (error) {
         console.error('Failed to load dashboard stats:', error)
@@ -50,6 +60,29 @@ export default function Dashboard() {
     
     fetchStats()
   }, [])
+
+  useEffect(() => {
+    const loadTwin = async () => {
+      try {
+        const cached = localStorage.getItem('twinData')
+        if (cached) {
+          setTwinData(JSON.parse(cached))
+        }
+        if (user) {
+          const { twinAPI } = await import("../lib/api")
+          const twinResponse = await twinAPI.get()
+          const twin = twinResponse?.data?.twin || null
+          if (twin) {
+            setTwinData(twin)
+            localStorage.setItem('twinData', JSON.stringify(twin))
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load twin data:', error)
+      }
+    }
+    loadTwin()
+  }, [user])
 
   useEffect(() => {
     const fetchRecommendedJobs = async () => {
@@ -114,6 +147,7 @@ export default function Dashboard() {
               company: opp.company || 'Company Name',
               type: opp.type || 'job',
               match: calculateMatchScore(opp, user),
+              matchReason: opp.matchReason,
               posted: opp.createdAt 
                 ? new Date(opp.createdAt).toLocaleDateString('en-ZA', { month: 'short', day: 'numeric' })
                 : 'Recently'
@@ -158,9 +192,99 @@ export default function Dashboard() {
     return Math.min(Math.max(score, 0), 100)
   }
 
+  const goals = twinData?.careerGoals || twinData?.interests || []
+  const careerSkillMap: Record<string, string[]> = {
+    "Tech Career": ["JavaScript", "Python", "React", "SQL", "Git", "APIs"],
+    "Freelancing": ["Client communication", "Project management", "Portfolio", "Pricing", "Marketing"],
+    "Corporate Job": ["Communication", "Excel", "Presentation", "Teamwork", "Time management"],
+    "Entrepreneurship": ["Business planning", "Sales", "Finance basics", "Customer discovery", "Branding"],
+    "Creative Industry": ["Design tools", "Storytelling", "Content strategy", "Editing", "Brand thinking"],
+    "Finance": ["Accounting", "Excel", "Financial analysis", "Risk", "Compliance"],
+    "Healthcare": ["Patient care", "Attention to detail", "Ethics", "Communication", "Teamwork"],
+    "Education": ["Facilitation", "Curriculum planning", "Communication", "Assessment", "Mentoring"]
+  }
+  const targetSkills = Array.from(new Set((goals || []).flatMap((g: string) => careerSkillMap[g] || []))).slice(0, 8)
+  const cvSkills = (() => {
+    try {
+      const s = localStorage.getItem('cvSkills')
+      return s ? JSON.parse(s) : []
+    } catch {
+      return []
+    }
+  })()
+
   return (
     <div className="space-y-8">
-      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-indigo-600 to-indigo-700 dark:from-indigo-700 dark:via-indigo-800 dark:to-indigo-900 rounded-xl p-6 md:p-8 shadow-xl border border-indigo-500/20 dark:border-indigo-600/20">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-6 shadow-sm">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">Your Journey</p>
+              <h2 className="text-2xl font-semibold text-foreground mt-1">Next best steps</h2>
+              <p className="text-sm text-muted-foreground mt-2">
+                Keep momentum by completing each milestone in order.
+              </p>
+            </div>
+            <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+              <Target className="h-6 w-6" />
+            </div>
+          </div>
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-3">
+            {[
+              { label: "Build Digital Twin", done: progress.twinCompleted, path: "/dashboard/twin" },
+              { label: "Analyze CV", done: progress.cvCompleted, path: "/dashboard/cv-analyzer" },
+              { label: "Practice Interview", done: false, path: "/dashboard/interview-coach" },
+            ].map((step, i) => (
+              <Link
+                key={step.label}
+                to={step.path}
+                className={cn(
+                  "flex items-center justify-between px-4 py-3 rounded-xl border transition-colors",
+                  step.done ? "bg-accent/10 border-accent/30 text-foreground" : "bg-muted/40 border-border text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <span className={cn("h-2.5 w-2.5 rounded-full", step.done ? "bg-accent" : "bg-muted-foreground")} />
+                  <span className="text-sm font-medium">{step.label}</span>
+                </div>
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+          <p className="text-xs uppercase tracking-wider text-muted-foreground">Career Snapshot</p>
+          <div className="mt-3 space-y-3">
+            <div>
+              <p className="text-xs text-muted-foreground">Goals</p>
+              <p className="text-sm font-medium text-foreground">
+                {Array.isArray(goals) && goals.length > 0 ? goals.join(", ") : "Set your goals"}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Province</p>
+              <p className="text-sm font-medium text-foreground">
+                {(user as any)?.province || twinData?.province || "Not set"}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Top Skills</p>
+              <p className="text-sm font-medium text-foreground">
+                {Array.isArray(cvSkills) && cvSkills.length > 0 ? cvSkills.slice(0, 5).join(", ") : "Add skills"}
+              </p>
+            </div>
+          </div>
+          <Link
+            to="/dashboard/twin"
+            className="mt-4 inline-flex items-center gap-2 text-sm text-primary hover:text-primary/80 font-medium"
+          >
+            Update profile <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </div>
+
+      <div className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-secondary dark:from-primary dark:via-primary dark:to-secondary rounded-xl p-6 md:p-8 shadow-xl border border-primary/20">
         {/* Background image overlay - subtle */}
         <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]">
           <img 
@@ -169,7 +293,7 @@ export default function Dashboard() {
             className="w-full h-full object-cover"
             aria-hidden="true"
           />
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/80 to-indigo-700/80 dark:from-indigo-800/90 dark:to-indigo-900/90"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/80 to-secondary/80"></div>
         </div>
         
         {/* Decorative pattern */}
@@ -188,9 +312,9 @@ export default function Dashboard() {
               </span>
             </div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight leading-tight animate-in fade-in-up" style={{ animationDelay: '0.2s' }}>
-              Welcome back, <span className="bg-gradient-to-r from-white to-indigo-100 bg-clip-text text-transparent">{displayName}</span>!
+              Welcome back, <span className="bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">{displayName}</span>!
             </h1>
-            <p className="text-indigo-100 text-sm sm:text-base md:text-lg max-w-md leading-relaxed animate-in fade-in-up" style={{ animationDelay: '0.3s' }}>
+            <p className="text-white/80 text-sm sm:text-base md:text-lg max-w-md leading-relaxed animate-in fade-in-up" style={{ animationDelay: '0.3s' }}>
               Your economic twin is ready. Let's build your future today.
             </p>
           </div>
@@ -209,7 +333,7 @@ export default function Dashboard() {
                   </>
                 )}
               </div>
-              <p className="text-xs font-medium text-indigo-100 uppercase tracking-wide">Empowerment Score</p>
+              <p className="text-xs font-medium text-white/80 uppercase tracking-wide">Empowerment Score</p>
             </div>
             <div className="h-12 sm:h-16 w-px bg-white/30 hidden sm:block"></div>
             <div className="text-center p-4 sm:p-5 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 shadow-lg hover:bg-white/15 transition-all duration-300 hover:scale-105">
@@ -220,7 +344,7 @@ export default function Dashboard() {
                   R{((stats?.threeMonthProjection || 0) / 1000).toFixed(1)}K
                 </p>
               )}
-              <p className="text-xs font-medium text-indigo-100 uppercase tracking-wide">3-Month Projection</p>
+              <p className="text-xs font-medium text-white/80 uppercase tracking-wide">3-Month Projection</p>
             </div>
           </div>
         </div>
@@ -243,10 +367,10 @@ export default function Dashboard() {
             color: "secondary" as const 
           },
           { 
-            label: "Interviews Practiced", 
-            value: loading ? "..." : String(stats?.interviewsPracticed || 0), 
-            change: "Start practicing", 
-            trend: "neutral" as const, 
+            label: "Applications", 
+            value: loading ? "..." : String(stats?.applicationsCount || 0), 
+            change: "Tracked from Apply Now", 
+            trend: "up" as const, 
             color: "warning" as const 
           },
           { 
@@ -269,8 +393,8 @@ export default function Dashboard() {
               <div
                 className={cn(
                   "h-9 w-9 rounded-lg flex items-center justify-center transition-all duration-300 group-hover:scale-110 shadow-md",
-                  stat.color === "primary" && "bg-gradient-to-br from-indigo-100 to-indigo-200 dark:from-indigo-900/40 dark:to-indigo-800/40 text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-700/50",
-                  stat.color === "secondary" && "bg-gradient-to-br from-cyan-100 to-cyan-200 dark:from-cyan-900/40 dark:to-cyan-800/40 text-cyan-600 dark:text-cyan-400 border border-cyan-200/50 dark:border-cyan-700/50",
+                  stat.color === "primary" && "bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-emerald-900/40 dark:to-emerald-800/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/50 dark:border-emerald-700/50",
+                  stat.color === "secondary" && "bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/40 dark:to-orange-800/40 text-orange-600 dark:text-orange-300 border border-orange-200/50 dark:border-orange-700/50",
                   stat.color === "warning" && "bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-900/40 dark:to-amber-800/40 text-amber-600 dark:text-amber-400 border border-amber-200/50 dark:border-amber-700/50",
                   stat.color === "accent" && "bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-emerald-900/40 dark:to-emerald-800/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-700/50",
                 )}
@@ -286,6 +410,75 @@ export default function Dashboard() {
             </p>
           </div>
         ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">Future Timeline</p>
+              <h2 className="text-xl font-semibold text-foreground mt-1">3, 6, 12‑month milestones</h2>
+            </div>
+            <TrendingUp className="h-6 w-6 text-primary" />
+          </div>
+          <div className="mt-6 space-y-4">
+            {[
+              { label: "3 months", value: twinData?.incomeProjections?.threeMonth || stats?.threeMonthProjection || 0, milestone: "Build portfolio + 2 applications" },
+              { label: "6 months", value: twinData?.incomeProjections?.sixMonth || 0, milestone: "Interview ready + 1 offer pipeline" },
+              { label: "12 months", value: twinData?.incomeProjections?.twelveMonth || 0, milestone: "Stabilized income + growth plan" }
+            ].map((item, i) => (
+              <div key={item.label} className="flex items-center gap-4">
+                <div className="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold">
+                  {i + 1}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-semibold text-foreground">{item.label}</p>
+                    <p className="text-sm text-muted-foreground">R{(item.value || 0).toLocaleString()}</p>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{item.milestone}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">Skill Gap Radar</p>
+              <h2 className="text-xl font-semibold text-foreground mt-1">Focus skills for your goals</h2>
+            </div>
+            <Zap className="h-6 w-6 text-secondary" />
+          </div>
+          {targetSkills.length > 0 ? (
+            <div className="mt-6 space-y-3">
+              {targetSkills.map((skill) => {
+                const hasSkill = Array.isArray(cvSkills) && cvSkills.some((s: string) => s.toLowerCase().includes(skill.toLowerCase()))
+                return (
+                  <div key={skill}>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-foreground">{skill}</span>
+                      <span className={cn("text-xs font-medium", hasSkill ? "text-accent" : "text-warning")}>
+                        {hasSkill ? "Covered" : "Gap"}
+                      </span>
+                    </div>
+                    <div className="h-2 bg-muted rounded-full mt-2 overflow-hidden">
+                      <div
+                        className={cn("h-full", hasSkill ? "bg-accent" : "bg-warning")}
+                        style={{ width: hasSkill ? "100%" : "45%" }}
+                      />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <div className="mt-6 text-sm text-muted-foreground">
+              Set career goals to see recommended skills.
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="animate-in fade-in-up" style={{ animationDelay: '0.5s' }}>
@@ -327,22 +520,22 @@ export default function Dashboard() {
               gradient: "from-warning to-warning/70",
               bgColor: "bg-warning/5",
             },
-            {
-              icon: Target,
-              title: "View Roadmap",
-              desc: "Track your progress",
-              path: "/dashboard/twin",
-              gradient: "from-destructive to-destructive/70",
-              bgColor: "bg-destructive/5",
-            },
-            {
-              icon: Zap,
-              title: "Update Twin",
-              desc: "Add new skills",
-              path: "/dashboard/twin",
-              gradient: "from-primary to-secondary",
-              bgColor: "bg-primary/5",
-            },
+        {
+          icon: Target,
+          title: "View Roadmap",
+          desc: "Track your progress",
+          path: "/dashboard/twin",
+          gradient: "from-destructive to-destructive/70",
+          bgColor: "bg-destructive/5",
+        },
+        {
+          icon: Zap,
+          title: "My Applications",
+          desc: "Track jobs you've applied to",
+          path: "/dashboard/applications",
+          gradient: "from-primary to-secondary",
+          bgColor: "bg-primary/5",
+        },
           ].map((action, i) => (
             <Link
               key={i}
@@ -356,17 +549,17 @@ export default function Dashboard() {
                 <div
                   className={cn(
                     "h-12 w-12 rounded-lg flex items-center justify-center transition-all duration-300 group-hover:scale-110 shadow-md",
-                    i === 0 && "bg-gradient-to-br from-indigo-100 to-indigo-200 dark:from-indigo-900/40 dark:to-indigo-800/40 text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-700/50",
+                    i === 0 && "bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-emerald-900/40 dark:to-emerald-800/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/50 dark:border-emerald-700/50",
                     i === 1 && "bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-emerald-900/40 dark:to-emerald-800/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-700/50",
-                    i === 2 && "bg-gradient-to-br from-cyan-100 to-cyan-200 dark:from-cyan-900/40 dark:to-cyan-800/40 text-cyan-600 dark:text-cyan-400 border border-cyan-200/50 dark:border-cyan-700/50",
+                    i === 2 && "bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/40 dark:to-orange-800/40 text-orange-600 dark:text-orange-300 border border-orange-200/50 dark:border-orange-700/50",
                     i === 3 && "bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-900/40 dark:to-amber-800/40 text-amber-600 dark:text-amber-400 border border-amber-200/50 dark:border-amber-700/50",
-                    i === 4 && "bg-gradient-to-br from-indigo-100 to-indigo-200 dark:from-indigo-900/40 dark:to-indigo-800/40 text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-700/50",
-                    i === 5 && "bg-gradient-to-br from-cyan-100 to-cyan-200 dark:from-cyan-900/40 dark:to-cyan-800/40 text-cyan-600 dark:text-cyan-400 border border-cyan-200/50 dark:border-cyan-700/50",
+                    i === 4 && "bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-emerald-900/40 dark:to-emerald-800/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/50 dark:border-emerald-700/50",
+                    i === 5 && "bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/40 dark:to-orange-800/40 text-orange-600 dark:text-orange-300 border border-orange-200/50 dark:border-orange-700/50",
                   )}
                 >
                   <action.icon className="h-6 w-6" />
                 </div>
-                <ArrowRight className="h-5 w-5 text-slate-400 dark:text-slate-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" />
+                <ArrowRight className="h-5 w-5 text-slate-400 dark:text-slate-500 group-hover:text-primary transition-colors" />
               </div>
             <h3 className="font-semibold text-foreground text-base mb-1">{action.title}</h3>
             <p className="text-sm text-muted-foreground">{action.desc}</p>
@@ -409,8 +602,8 @@ export default function Dashboard() {
                 style={{ animationDelay: `${(i + 10) * 0.1}s` }}
               >
                 <div className="flex items-start justify-between mb-4">
-                  <div className="h-12 w-12 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
-                    <Briefcase className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+                  <div className="h-12 w-12 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                    <Briefcase className="h-6 w-6 text-emerald-700 dark:text-emerald-300" />
                   </div>
                   <div className="flex flex-col items-end gap-1">
                     <span className="px-3 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs rounded-full font-semibold">
@@ -421,6 +614,9 @@ export default function Dashboard() {
                 </div>
                 <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors mb-1">{job.title}</h3>
                 <p className="text-sm text-muted-foreground mb-4">{job.company}</p>
+                {job.matchReason && (
+                  <p className="text-xs text-muted-foreground mb-3">Why this match: <span className="text-foreground">{job.matchReason}</span></p>
+                )}
                 <div className="flex items-center justify-between">
                   <span className="inline-flex items-center px-3 py-1 bg-muted text-xs text-muted-foreground rounded-full font-medium">
                     {job.type}

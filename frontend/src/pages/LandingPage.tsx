@@ -1,4 +1,4 @@
-﻿// LandingPage.tsx - MOBILE-FIRST with Animated Background
+// LandingPage.tsx - MOBILE-FIRST with Animated Background
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import {
@@ -40,10 +40,10 @@ export default function LandingPage() {
     <div className="min-h-screen bg-white dark:bg-slate-950 relative overflow-hidden">
       {/* ANIMATED Background */}
       <div className="fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-white via-indigo-50/30 to-purple-50/20 dark:from-slate-950 dark:via-indigo-950/30 dark:to-purple-950/20" />
-        <div className="absolute top-0 -left-48 w-96 h-96 bg-gradient-to-br from-indigo-400/30 to-purple-400/30 dark:from-indigo-600/20 dark:to-purple-600/20 rounded-full blur-3xl animate-blob" />
-        <div className="absolute top-0 -right-48 w-96 h-96 bg-gradient-to-br from-cyan-400/30 to-indigo-400/30 dark:from-cyan-600/20 dark:to-indigo-600/20 rounded-full blur-3xl animate-blob animation-delay-2000" />
-        <div className="absolute -bottom-48 left-1/2 w-96 h-96 bg-gradient-to-br from-purple-400/30 to-pink-400/30 dark:from-purple-600/20 dark:to-pink-600/20 rounded-full blur-3xl animate-blob animation-delay-4000" />
+        <div className="absolute inset-0 bg-gradient-to-br from-white via-primary/10 to-secondary/10 dark:from-slate-950 dark:via-primary/20 dark:to-secondary/30" />
+        <div className="absolute top-0 -left-48 w-96 h-96 bg-gradient-to-br from-primary/30 to-secondary/30 dark:from-primary/20 dark:to-secondary/20 rounded-full blur-3xl animate-blob" />
+        <div className="absolute top-0 -right-48 w-96 h-96 bg-gradient-to-br from-secondary/30 to-primary/30 dark:from-secondary/20 dark:to-primary/20 rounded-full blur-3xl animate-blob animation-delay-2000" />
+        <div className="absolute -bottom-48 left-1/2 w-96 h-96 bg-gradient-to-br from-secondary/30 to-pink-400/30 dark:from-secondary/20 dark:to-pink-600/20 rounded-full blur-3xl animate-blob animation-delay-4000" />
         <div 
           className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
           style={{
@@ -67,13 +67,13 @@ export default function LandingPage() {
             
             {/* Desktop Nav */}
             <div className="hidden lg:flex items-center gap-6 xl:gap-8">
-              <a href="#features" className="text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors text-base">Features</a>
-              <a href="#how-it-works" className="text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors text-base">How It Works</a>
-              <a href="#demo" className="text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors text-base">Demo</a>
-              <a href="#testimonials" className="text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors text-base">Success</a>
+              <a href="#features" className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary font-medium transition-colors text-base">Features</a>
+              <a href="#how-it-works" className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary font-medium transition-colors text-base">How It Works</a>
+              <a href="#demo" className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary font-medium transition-colors text-base">Demo</a>
+              <a href="#testimonials" className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary font-medium transition-colors text-base">Success</a>
               <ThemeToggle />
-              <Link to="/login" className="text-slate-700 dark:text-slate-300 hover:text-indigo-600 font-medium transition-colors text-base px-4 py-2 min-h-[44px] flex items-center">Sign In</Link>
-              <Link to="/signup" className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-semibold transition-colors shadow-sm hover:shadow-md min-h-[44px] flex items-center text-base">Get Started</Link>
+              <Link to="/login" className="text-slate-700 dark:text-slate-300 hover:text-primary font-medium transition-colors text-base px-4 py-2 min-h-[44px] flex items-center">Sign In</Link>
+              <Link to="/signup" className="bg-primary hover:bg-primary/90 text-white px-6 py-2.5 rounded-lg font-semibold transition-colors shadow-sm hover:shadow-md min-h-[44px] flex items-center text-base">Get Started</Link>
             </div>
 
             {/* Mobile Menu Button */}
@@ -100,7 +100,7 @@ export default function LandingPage() {
               <a href="#testimonials" onClick={() => setMobileMenuOpen(false)} className="block py-3.5 px-4 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-colors min-h-[52px] flex items-center text-base">Success Stories</a>
               <div className="pt-2 border-t border-slate-200 dark:border-slate-800 mt-2 space-y-1">
                 <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="block py-3.5 px-4 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-colors min-h-[52px] flex items-center text-base">Sign In</Link>
-                <Link to="/signup" onClick={() => setMobileMenuOpen(false)} className="block py-3.5 px-4 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-center transition-colors min-h-[52px] flex items-center justify-center text-base">Get Started Free</Link>
+                <Link to="/signup" onClick={() => setMobileMenuOpen(false)} className="block py-3.5 px-4 rounded-lg bg-primary hover:bg-primary/90 text-white font-semibold text-center transition-colors min-h-[52px] flex items-center justify-center text-base">Get Started Free</Link>
               </div>
             </div>
           </div>
@@ -113,14 +113,14 @@ export default function LandingPage() {
           <div className="grid lg:grid-cols-2 gap-12 md:gap-16 items-center">
             {/* Left Content - Mobile Optimized */}
             <div className="text-center lg:text-left space-y-6 md:space-y-8 relative z-10">
-              <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-100 dark:border-indigo-900 text-indigo-700 dark:text-indigo-300 text-sm md:text-base font-medium animate-fade-in">
+              <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-primary/10 dark:bg-primary/10 border border-primary/10 dark:border-primary/30 text-primary dark:text-primary text-sm md:text-base font-medium animate-fade-in">
                 <Sparkles className="h-4 w-4" />
                 <span className="whitespace-nowrap">AI-Powered Career Guidance</span>
               </div>
               
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight text-slate-900 dark:text-white animate-slide-up">
                 Your Digital
-                <span className="block text-indigo-600 dark:text-indigo-400">Economic Twin</span>
+                <span className="block text-primary dark:text-primary">Economic Twin</span>
               </h1>
 
               <p className="text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto lg:mx-0 leading-relaxed animate-fade-in animation-delay-200">
@@ -130,14 +130,14 @@ export default function LandingPage() {
               <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center lg:justify-start animate-fade-in animation-delay-400">
                 <Link
                   to="/signup"
-                  className="group inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white px-6 sm:px-8 py-4 rounded-lg font-semibold text-base md:text-lg transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 active:scale-100 min-h-[52px] touch-manipulation w-full sm:w-auto"
+                  className="group inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 active:bg-primary/80 text-white px-6 sm:px-8 py-4 rounded-lg font-semibold text-base md:text-lg transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 active:scale-100 min-h-[52px] touch-manipulation w-full sm:w-auto"
                 >
                   <span>Start Your Journey</span>
                   <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <a
                   href="#demo"
-                  className="inline-flex items-center justify-center gap-2 border-2 border-slate-300 dark:border-slate-600 hover:border-indigo-600 dark:hover:border-indigo-400 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 px-6 sm:px-8 py-4 rounded-lg font-semibold text-base md:text-lg transition-all duration-200 hover:scale-105 active:scale-100 min-h-[52px] touch-manipulation w-full sm:w-auto"
+                  className="inline-flex items-center justify-center gap-2 border-2 border-slate-300 dark:border-slate-600 hover:border-primary dark:hover:border-primary text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary px-6 sm:px-8 py-4 rounded-lg font-semibold text-base md:text-lg transition-all duration-200 hover:scale-105 active:scale-100 min-h-[52px] touch-manipulation w-full sm:w-auto"
                 >
                   <Play className="h-5 w-5" />
                   <span>Watch Demo</span>
@@ -149,14 +149,14 @@ export default function LandingPage() {
                 <div className="flex items-center gap-2.5">
                   <div className="flex -space-x-2">
                     {[1, 2, 3, 4].map((i) => (
-                      <div key={i} className="h-9 w-9 md:h-10 md:w-10 rounded-full bg-gradient-to-br from-indigo-400 to-indigo-600 border-2 border-white dark:border-slate-900" />
+                      <div key={i} className="h-9 w-9 md:h-10 md:w-10 rounded-full bg-gradient-to-br from-primary to-primary border-2 border-white dark:border-slate-900" />
                     ))}
                   </div>
                   <span className="text-sm md:text-base text-slate-600 dark:text-slate-400 font-medium">1,000+ users</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   {[1, 2, 3, 4, 5].map((i) => (
-                    <Star key={i} className="h-5 w-5 md:h-6 md:w-6 fill-indigo-500 text-indigo-500" />
+                    <Star key={i} className="h-5 w-5 md:h-6 md:w-6 fill-primary text-primary" />
                   ))}
                   <span className="text-sm md:text-base text-slate-600 dark:text-slate-400 font-medium ml-1.5">4.9/5</span>
                 </div>
@@ -166,14 +166,14 @@ export default function LandingPage() {
             {/* Right Content - Mobile-First Card */}
             <div className="relative animate-float mt-8 lg:mt-0">
               <div className="bg-white/75 dark:bg-slate-900/75 backdrop-blur-xl rounded-2xl md:rounded-3xl shadow-2xl p-6 md:p-8 border border-slate-200/50 dark:border-slate-800/50">
-                <div className="absolute -top-3 -right-3 md:-top-4 md:-right-4 bg-indigo-600 text-white px-4 md:px-6 py-2 rounded-full font-semibold text-xs md:text-sm shadow-lg animate-bounce-slow">
+                <div className="absolute -top-3 -right-3 md:-top-4 md:-right-4 bg-primary text-white px-4 md:px-6 py-2 rounded-full font-semibold text-xs md:text-sm shadow-lg animate-bounce-slow">
                   Free Forever
                 </div>
                 
                 <div className="space-y-5 md:space-y-6">
                   <div className="flex items-center gap-3 md:gap-4">
-                    <div className="h-14 w-14 md:h-16 md:w-16 flex-shrink-0 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center">
-                      <span className="text-2xl">👤</span>
+                    <div className="h-14 w-14 md:h-16 md:w-16 flex-shrink-0 rounded-full bg-gradient-to-br from-primary to-primary flex items-center justify-center">
+                      <span className="text-2xl">??</span>
                     </div>
                     <div className="min-w-0">
                       <p className="font-semibold text-base md:text-lg text-slate-900 dark:text-white truncate">Thabo Ndlovu, 23</p>
@@ -184,10 +184,10 @@ export default function LandingPage() {
                   <div>
                     <div className="flex justify-between items-center mb-2.5">
                       <span className="text-sm md:text-base font-medium text-slate-600 dark:text-slate-400">Empowerment Score</span>
-                      <span className="text-xl md:text-2xl font-bold text-indigo-600 dark:text-indigo-400">82/100</span>
+                      <span className="text-xl md:text-2xl font-bold text-primary dark:text-primary">82/100</span>
                     </div>
                     <div className="h-3 md:h-4 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                      <div className="h-full w-[82%] bg-gradient-to-r from-indigo-600 to-indigo-500 dark:from-indigo-500 dark:to-indigo-400 rounded-full animate-progress" />
+                      <div className="h-full w-[82%] bg-gradient-to-r from-primary to-primary dark:from-primary dark:to-primary rounded-full animate-progress" />
                     </div>
                   </div>
 
@@ -203,7 +203,7 @@ export default function LandingPage() {
                   </div>
 
                   <div className="flex items-center gap-2.5 text-sm md:text-base text-slate-600 dark:text-slate-400 pt-2">
-                    <CheckCircle className="h-5 w-5 md:h-6 md:w-6 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
+                    <CheckCircle className="h-5 w-5 md:h-6 md:w-6 text-primary dark:text-primary flex-shrink-0" />
                     <span>CV analyzed in 60 seconds</span>
                   </div>
                 </div>
@@ -212,8 +212,8 @@ export default function LandingPage() {
               {/* Floating Success Badge - Hidden on small mobile */}
               <div className="hidden sm:block absolute -bottom-4 md:-bottom-6 -left-4 md:-left-6 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-xl shadow-xl p-3 md:p-4 border border-slate-200/50 dark:border-slate-800/50 animate-float animation-delay-1000">
                 <div className="flex items-center gap-2 md:gap-3">
-                  <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-indigo-100 dark:bg-indigo-950 flex items-center justify-center flex-shrink-0">
-                    <Award className="h-5 w-5 md:h-6 md:w-6 text-indigo-600 dark:text-indigo-400" />
+                  <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-primary/10 dark:bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <Award className="h-5 w-5 md:h-6 md:w-6 text-primary dark:text-primary" />
                   </div>
                   <div>
                     <p className="text-xs md:text-sm font-semibold text-slate-900 dark:text-white">95% Success</p>
@@ -237,8 +237,8 @@ export default function LandingPage() {
               { icon: Zap, value: "24/7", label: "AI Support", sublabel: "always available" },
             ].map((stat, i) => (
               <div key={i} className="text-center group">
-                <div className="inline-flex h-12 w-12 md:h-14 md:w-14 items-center justify-center rounded-xl bg-indigo-100 dark:bg-indigo-950 mb-3 md:mb-4 group-hover:scale-110 transition-transform touch-manipulation">
-                  <stat.icon className="h-6 w-6 md:h-7 md:w-7 text-indigo-600 dark:text-indigo-400" />
+                <div className="inline-flex h-12 w-12 md:h-14 md:w-14 items-center justify-center rounded-xl bg-primary/10 dark:bg-primary/10 mb-3 md:mb-4 group-hover:scale-110 transition-transform touch-manipulation">
+                  <stat.icon className="h-6 w-6 md:h-7 md:w-7 text-primary dark:text-primary" />
                 </div>
                 <p className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-1.5 md:mb-2">{stat.value}</p>
                 <p className="text-sm md:text-base font-medium text-slate-900 dark:text-white leading-tight">{stat.label}</p>
@@ -254,7 +254,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center mb-12 md:mb-16">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-3 md:mb-4">
-              Everything You Need to <span className="text-indigo-600 dark:text-indigo-400">Succeed</span>
+              Everything You Need to <span className="text-primary dark:text-primary">Succeed</span>
             </h2>
             <p className="text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed">
               Comprehensive AI-powered tools designed for South African youth
@@ -272,10 +272,10 @@ export default function LandingPage() {
             ].map((feature, i) => (
               <div
                 key={i}
-                className="group bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-xl md:rounded-2xl p-6 md:p-8 border border-slate-200/50 dark:border-slate-800/50 hover:border-indigo-200 dark:hover:border-indigo-900 hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-100 touch-manipulation"
+                className="group bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-xl md:rounded-2xl p-6 md:p-8 border border-slate-200/50 dark:border-slate-800/50 hover:border-primary/30 dark:hover:border-primary/30 hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-100 touch-manipulation"
               >
-                <div className="inline-flex h-12 w-12 md:h-14 md:w-14 items-center justify-center rounded-lg md:rounded-xl bg-indigo-100 dark:bg-indigo-950 mb-5 md:mb-6 group-hover:scale-110 transition-transform">
-                  <feature.icon className="h-6 w-6 md:h-7 md:w-7 text-indigo-600 dark:text-indigo-400" />
+                <div className="inline-flex h-12 w-12 md:h-14 md:w-14 items-center justify-center rounded-lg md:rounded-xl bg-primary/10 dark:bg-primary/10 mb-5 md:mb-6 group-hover:scale-110 transition-transform">
+                  <feature.icon className="h-6 w-6 md:h-7 md:w-7 text-primary dark:text-primary" />
                 </div>
                 <h3 className="text-lg md:text-xl font-bold text-slate-900 dark:text-white mb-2 md:mb-3">{feature.title}</h3>
                 <p className="text-sm md:text-base text-slate-600 dark:text-slate-400 leading-relaxed">{feature.description}</p>
@@ -290,7 +290,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 md:mb-16">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-3 md:mb-4">
-              Get Started in <span className="text-indigo-600 dark:text-indigo-400">3 Simple Steps</span>
+              Get Started in <span className="text-primary dark:text-primary">3 Simple Steps</span>
             </h2>
             <p className="text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-400 leading-relaxed">
               Your journey to economic empowerment begins here
@@ -305,12 +305,12 @@ export default function LandingPage() {
             ].map((item, i) => (
               <div key={i} className="relative group">
                 <div className="bg-white/75 dark:bg-slate-800/75 backdrop-blur-xl rounded-xl md:rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl transition-all duration-300 group-hover:scale-105 active:scale-100 touch-manipulation">
-                  <div className="absolute -top-5 md:-top-6 left-1/2 -translate-x-1/2 h-10 w-10 md:h-12 md:w-12 rounded-full bg-indigo-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                  <div className="absolute -top-5 md:-top-6 left-1/2 -translate-x-1/2 h-10 w-10 md:h-12 md:w-12 rounded-full bg-primary flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
                     <span className="text-white font-bold text-base md:text-lg">{item.step}</span>
                   </div>
                   <div className="mt-6 md:mt-8 mb-5 md:mb-6 flex justify-center">
-                    <div className="h-14 w-14 md:h-16 md:w-16 rounded-xl bg-indigo-50 dark:bg-indigo-950 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <item.icon className="h-7 w-7 md:h-8 md:w-8 text-indigo-600 dark:text-indigo-400" />
+                    <div className="h-14 w-14 md:h-16 md:w-16 rounded-xl bg-primary/10 dark:bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <item.icon className="h-7 w-7 md:h-8 md:w-8 text-primary dark:text-primary" />
                     </div>
                   </div>
                   <h3 className="text-lg md:text-xl font-bold text-slate-900 dark:text-white mb-2 md:mb-3 text-center">{item.title}</h3>
@@ -327,7 +327,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 md:mb-16">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-3 md:mb-4">
-              See EmpowerAI in <span className="text-indigo-600 dark:text-indigo-400">Action</span>
+              See EmpowerAI in <span className="text-primary dark:text-primary">Action</span>
             </h2>
             <p className="text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed">
               Watch how we're helping South African youth discover their economic potential
@@ -344,7 +344,7 @@ export default function LandingPage() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent group-hover:from-black/70 transition-all duration-300" />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="h-16 w-16 md:h-20 md:w-20 rounded-full bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300 animate-pulse-slow touch-manipulation">
+                  <div className="h-16 w-16 md:h-20 md:w-20 rounded-full bg-primary hover:bg-primary/90 active:bg-primary/80 flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300 animate-pulse-slow touch-manipulation">
                     <Play className="h-8 w-8 md:h-10 md:w-10 text-white ml-1" />
                   </div>
                 </div>
@@ -360,8 +360,8 @@ export default function LandingPage() {
                   { icon: CheckCircle, title: "Proven Success", desc: "1,000+ users" },
                 ].map((item, i) => (
                   <div key={i} className="text-center group hover:scale-105 transition-transform touch-manipulation">
-                    <div className="inline-flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-950 mb-2 md:mb-3 group-hover:scale-110 transition-transform">
-                      <item.icon className="h-5 w-5 md:h-6 md:w-6 text-indigo-600 dark:text-indigo-400" />
+                    <div className="inline-flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-lg bg-primary/10 dark:bg-primary/10 mb-2 md:mb-3 group-hover:scale-110 transition-transform">
+                      <item.icon className="h-5 w-5 md:h-6 md:w-6 text-primary dark:text-primary" />
                     </div>
                     <p className="font-semibold text-sm md:text-base text-slate-900 dark:text-white mb-1">{item.title}</p>
                     <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400">{item.desc}</p>
@@ -378,7 +378,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center mb-12 md:mb-16">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-3 md:mb-4">
-              Real <span className="text-indigo-600 dark:text-indigo-400">Success Stories</span>
+              Real <span className="text-primary dark:text-primary">Success Stories</span>
             </h2>
             <p className="text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-400 leading-relaxed">
               See how EmpowerAI is transforming careers across South Africa
@@ -387,19 +387,19 @@ export default function LandingPage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6 lg:gap-8">
             {[
-              { name: "Lerato M.", location: "Cape Town", role: "Student → Software Developer", quote: "EmpowerAI helped me discover tech skills I didn't know I had. I'm now earning R12k/month!", rating: 5 },
-              { name: "Sipho K.", location: "Durban", role: "Unemployed → Business Owner", quote: "The career simulation showed me entrepreneurship was my path. Best decision I ever made!", rating: 5 },
-              { name: "Nomsa T.", location: "Johannesburg", role: "Waitress → Marketing Pro", quote: "From minimum wage to a career I love. The AI guidance was truly life-changing!", rating: 5 },
+              { name: "Lerato M.", location: "Cape Town", role: "Student ? Software Developer", quote: "EmpowerAI helped me discover tech skills I didn't know I had. I'm now earning R12k/month!", rating: 5 },
+              { name: "Sipho K.", location: "Durban", role: "Unemployed ? Business Owner", quote: "The career simulation showed me entrepreneurship was my path. Best decision I ever made!", rating: 5 },
+              { name: "Nomsa T.", location: "Johannesburg", role: "Waitress ? Marketing Pro", quote: "From minimum wage to a career I love. The AI guidance was truly life-changing!", rating: 5 },
             ].map((testimonial, i) => (
               <div key={i} className="bg-white/75 dark:bg-slate-900/75 backdrop-blur-xl rounded-xl md:rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200/50 dark:border-slate-800/50 hover:shadow-xl hover:scale-105 active:scale-100 transition-all duration-300 touch-manipulation">
                 <div className="flex gap-1 mb-4">
                   {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 fill-indigo-500 text-indigo-500" />
+                    <Star key={i} className="h-5 w-5 fill-primary text-primary" />
                   ))}
                 </div>
                 <p className="text-sm md:text-base text-slate-700 dark:text-slate-300 mb-5 md:mb-6 leading-relaxed">"{testimonial.quote}"</p>
                 <div className="flex items-center gap-3">
-                  <div className="h-11 w-11 md:h-12 md:w-12 flex-shrink-0 rounded-full bg-gradient-to-br from-indigo-400 to-indigo-600" />
+                  <div className="h-11 w-11 md:h-12 md:w-12 flex-shrink-0 rounded-full bg-gradient-to-br from-primary to-primary" />
                   <div className="min-w-0">
                     <p className="font-semibold text-sm md:text-base text-slate-900 dark:text-white truncate">{testimonial.name}</p>
                     <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 truncate">{testimonial.role}</p>
@@ -412,18 +412,18 @@ export default function LandingPage() {
       </section>
 
       {/* Mobile-First CTA Section */}
-      <section className="py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700 dark:from-indigo-900 dark:via-indigo-950 dark:to-purple-950 relative overflow-hidden">
+      <section className="py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-primary via-primary to-secondary dark:from-primary/30 dark:via-primary/20 dark:to-secondary/30 relative overflow-hidden">
         <div className="absolute inset-0 bg-grid-white/5" />
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 md:mb-6 animate-fade-in leading-tight">
             Ready to Transform Your Future?
           </h2>
-          <p className="text-base sm:text-lg md:text-xl text-indigo-100 dark:text-indigo-200 mb-6 md:mb-8 max-w-2xl mx-auto animate-fade-in animation-delay-200 leading-relaxed">
+          <p className="text-base sm:text-lg md:text-xl text-white/80 dark:text-white/80 mb-6 md:mb-8 max-w-2xl mx-auto animate-fade-in animation-delay-200 leading-relaxed">
             Join over 1,000 South African youth building better careers with AI-powered guidance
           </p>
           <Link
             to="/signup"
-            className="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-50 active:bg-slate-100 text-indigo-600 px-8 md:px-10 py-4 md:py-5 rounded-lg font-bold text-base md:text-lg transition-all duration-200 shadow-2xl hover:scale-105 active:scale-100 animate-fade-in animation-delay-400 min-h-[52px] touch-manipulation w-full sm:w-auto max-w-md mx-auto"
+            className="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-50 active:bg-slate-100 text-primary px-8 md:px-10 py-4 md:py-5 rounded-lg font-bold text-base md:text-lg transition-all duration-200 shadow-2xl hover:scale-105 active:scale-100 animate-fade-in animation-delay-400 min-h-[52px] touch-manipulation w-full sm:w-auto max-w-md mx-auto"
           >
             <span>Start Your Journey Free</span>
             <ArrowRight className="h-5 w-5 md:h-6 md:w-6" />
@@ -474,3 +474,7 @@ export default function LandingPage() {
     </div>
   )
 }
+
+
+
+

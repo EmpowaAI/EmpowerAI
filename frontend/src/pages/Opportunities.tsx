@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react"
 import { Search, MapPin, Clock, Briefcase, GraduationCap, Building, Heart, Filter, ExternalLink, Loader2 } from "lucide-react"
-import { Link } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 import toast from 'react-hot-toast'
 import { cn } from "../lib/utils"
-import { opportunitiesAPI } from "../lib/api"
+import { opportunitiesAPI, applicationsAPI } from "../lib/api"
 import { useUser } from "../lib/user-context"
 import LoadingState from "../components/LoadingState"
 import EmptyState from "../components/EmptyState"
@@ -19,12 +19,16 @@ interface Opportunity {
   category: string
   salary?: string
   match: number
+  matchReason?: string
+  source?: string
+  updatedAt?: string
   posted: string
   applyUrl: string
   description: string
 }
 
 export default function Opportunities() {
+  const location = useLocation()
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [category, setCategory] = useState("all")
@@ -39,6 +43,7 @@ export default function Opportunities() {
   const [hasMore, setHasMore] = useState(false)
   const [totalFiltered, setTotalFiltered] = useState<number | null>(null)
   const [reloadTick, setReloadTick] = useState(0)
+  const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity | null>(null)
   const { user } = useUser()
 
   useEffect(() => {
@@ -87,6 +92,53 @@ export default function Opportunities() {
   }, [user, careerGoalFilters.length])
 
   useEffect(() => {
+    const fetchSelectedByHash = async () => {
+      const hashId = location.hash?.replace('#', '').trim()
+      if (!hashId) {
+        setSelectedOpportunity(null)
+        return
+      }
+      try {
+        const response = await opportunitiesAPI.getById(hashId)
+        if (response.status === 'success' && response.data?.opportunity) {
+          const opp = response.data.opportunity
+          const mapped: Opportunity = {
+            id: opp._id || opp.id,
+            title: opp.title,
+            company: opp.company || 'Company Name',
+            location: opp.location || opp.province?.join(', ') || 'Location TBD',
+            type: opp.type || 'job',
+            category: opp.type || 'job',
+            salary: opp.salaryRange 
+              ? `R${opp.salaryRange.min?.toLocaleString() || 0} - R${opp.salaryRange.max?.toLocaleString() || 0}`
+              : undefined,
+            match: calculateMatchScore(opp, user),
+            matchReason: opp.matchReason,
+            source: opp.source,
+            updatedAt: opp.updatedAt,
+            posted: opp.deadline 
+              ? `Closes ${new Date(opp.deadline).toLocaleDateString('en-ZA', { year: 'numeric', month: 'short', day: 'numeric' })}`
+              : opp.createdAt 
+              ? `Posted ${new Date(opp.createdAt).toLocaleDateString('en-ZA', { year: 'numeric', month: 'short', day: 'numeric' })}`
+              : 'Recently',
+            applyUrl: opp.applicationUrl || '#',
+            description: opp.description || 'No description available'
+          }
+          setSelectedOpportunity(mapped)
+        } else {
+          setSelectedOpportunity(null)
+          setError("Opportunity not found.")
+        }
+      } catch (e: any) {
+        setSelectedOpportunity(null)
+        setError(e.message || "Opportunity not found.")
+      }
+    }
+
+    fetchSelectedByHash()
+  }, [location.hash, user])
+
+  useEffect(() => {
     const fetchOpportunities = async () => {
       try {
         setLoading(true)
@@ -122,6 +174,9 @@ export default function Opportunities() {
               ? `R${opp.salaryRange.min?.toLocaleString() || 0} - R${opp.salaryRange.max?.toLocaleString() || 0}`
               : undefined,
             match: calculateMatchScore(opp, user),
+            matchReason: opp.matchReason,
+            source: opp.source,
+            updatedAt: opp.updatedAt,
             posted: opp.deadline 
               ? `Closes ${new Date(opp.deadline).toLocaleDateString('en-ZA', { year: 'numeric', month: 'short', day: 'numeric' })}`
               : opp.createdAt 
@@ -187,6 +242,9 @@ export default function Opportunities() {
   }
 
   const filteredOpportunities = opportunities
+  const listWithSelected = selectedOpportunity
+    ? [selectedOpportunity, ...filteredOpportunities.filter(o => o.id !== selectedOpportunity.id)]
+    : filteredOpportunities
 
   const toggleSave = (id: string) => {
     setSaved((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]))
@@ -223,12 +281,7 @@ export default function Opportunities() {
 
   const trackApplication = async (opportunityId: string) => {
     try {
-      // Send to your backend to track applications
-      await fetch('/api/applications', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ opportunityId })
-      })
+      await applicationsAPI.track(opportunityId)
     } catch (error) {
       console.error('Failed to track application:', error)
     }
@@ -285,7 +338,10 @@ export default function Opportunities() {
       {/* Header */}
       <div className="text-center sm:text-left px-3 sm:px-0">
         <h1 className="text-2xl sm:text-2xl md:text-3xl font-bold text-foreground">Career Opportunities</h1>
-        <p className="text-base sm:text-base text-muted-foreground mt-2 sm:mt-2">Real jobs, learnerships, internships, and bursaries across South Africa</p>
+        <p className="text-base sm:text-base text-muted-foreground mt-2 sm:mt-2">
+          Real jobs, learnerships, internships, and bursaries across South Africa.
+          <span className="ml-2 text-xs text-muted-foreground">Updated daily - Transparent matching</span>
+        </p>
       </div>
 
       {/* Career Goals Prompt */}
@@ -328,6 +384,7 @@ export default function Opportunities() {
           <button
             key={goal}
             onClick={() => toggleCareerGoal(goal)}
+            aria-pressed={careerGoalFilters.includes(goal)}
             className={cn(
               "flex items-center gap-2 sm:gap-2 px-4 sm:px-4 py-2.5 sm:py-2.5 text-sm sm:text-sm rounded-lg transition-colors min-h-[44px] sm:min-h-[40px] touch-manipulation",
               careerGoalFilters.includes(goal)
@@ -347,6 +404,9 @@ export default function Opportunities() {
           </button>
         )}
       </div>
+      <p className="text-xs text-muted-foreground px-3 sm:px-0">
+        Match scores consider your skills, location, and career goals. Adjust filters to refine results.
+      </p>
 
       {/* Categories */}
       <div className="flex flex-wrap gap-2.5 sm:gap-2 px-3 sm:px-0">
@@ -357,6 +417,7 @@ export default function Opportunities() {
               setCategory(cat.id)
               setPage(1)
             }}
+            aria-pressed={category === cat.id}
             className={cn(
               "flex items-center gap-2 sm:gap-2 px-4 sm:px-4 py-2.5 sm:py-2.5 text-sm sm:text-sm rounded-lg transition-colors min-h-[44px] sm:min-h-[40px] touch-manipulation",
               category === cat.id
@@ -395,19 +456,24 @@ export default function Opportunities() {
             Loading opportunities...
           </span>
         ) : (
-          `${totalFiltered !== null ? `${totalFiltered}` : filteredOpportunities.length} ${
-            (totalFiltered !== null ? totalFiltered : filteredOpportunities.length) === 1 ? 'opportunity' : 'opportunities'
+          `${totalFiltered !== null ? `${totalFiltered}` : listWithSelected.length} ${
+            (totalFiltered !== null ? totalFiltered : listWithSelected.length) === 1 ? 'opportunity' : 'opportunities'
           }`
         )}
       </p>
 
       {/* Opportunities List */}
       <div className="space-y-4 px-3 sm:px-0">
-        {filteredOpportunities.map((opp) => (
+        {listWithSelected.map((opp) => (
           <div
             key={opp.id}
             className="bg-card border border-border rounded-none sm:rounded-xl p-5 sm:p-6 hover:border-primary/50 transition-colors shadow-sm"
           >
+            {selectedOpportunity?.id === opp.id && (
+              <div className="mb-3 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 text-accent text-xs font-medium">
+                Selected opportunity
+              </div>
+            )}
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4">
               <div className="flex gap-3 sm:gap-4 flex-1 min-w-0">
                 <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
@@ -425,6 +491,25 @@ export default function Opportunities() {
                     </span>
                   </div>
                   <p className="mt-2 text-xs sm:text-sm text-muted-foreground line-clamp-2">{opp.description}</p>
+                  {(opp.source || opp.updatedAt) && (
+                    <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                      {opp.source && (
+                        <span className="px-2 py-1 rounded-full bg-muted text-muted-foreground">
+                          Source: {opp.source}
+                        </span>
+                      )}
+                      {opp.updatedAt && (
+                        <span className="px-2 py-1 rounded-full bg-muted text-muted-foreground">
+                          Updated {new Date(opp.updatedAt).toLocaleDateString('en-ZA', { year: 'numeric', month: 'short', day: 'numeric' })}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  {opp.matchReason && (
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Why this match: <span className="text-foreground">{opp.matchReason}</span>
+                    </p>
+                  )}
                 </div>
               </div>
               <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
@@ -486,7 +571,7 @@ export default function Opportunities() {
         </div>
       )}
 
-      {filteredOpportunities.length === 0 && !loading && !error && (
+      {listWithSelected.length === 0 && !loading && !error && (
         <div className="space-y-3">
           <EmptyState
             icon={Briefcase}
@@ -508,3 +593,5 @@ export default function Opportunities() {
     </div>
   )
 }
+
+

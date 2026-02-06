@@ -94,6 +94,8 @@ export default function InterviewCoach() {
     setError("")
   }
 
+  const responseWordCount = currentResponse.trim() ? currentResponse.trim().split(/\s+/).length : 0
+
   const normalizeScore = (score: number | undefined): number => {
     if (typeof score !== "number" || Number.isNaN(score)) return 0
     let s = score
@@ -197,6 +199,10 @@ export default function InterviewCoach() {
               placeholder="Type your response here..."
               className="w-full h-40 sm:h-32 md:h-40 px-4 py-3.5 sm:py-3 bg-background border border-border rounded-lg text-base sm:text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
             />
+            <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+              <span>{responseWordCount} words</span>
+              <span>{responseWordCount < 20 ? "Try adding more detail and a clear outcome." : "Good length. Focus on clarity and impact."}</span>
+            </div>
           </div>
 
           {/* Actions */}

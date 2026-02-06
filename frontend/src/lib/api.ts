@@ -398,6 +398,36 @@ export const progressAPI = {
   }
 };
 
+export const applicationsAPI = {
+  track: async (opportunityId: string) => {
+    try {
+      return await request<any>('/applications', {
+        method: 'POST',
+        body: JSON.stringify({ opportunityId })
+      });
+    } catch (error) {
+      console.error('Failed to track application:', error);
+      throw error;
+    }
+  },
+  getMy: async () => {
+    try {
+      return await request<any>('/applications');
+    } catch (error) {
+      console.error('Failed to get applications:', error);
+      throw error;
+    }
+  },
+  getStats: async () => {
+    try {
+      return await request<any>('/applications/stats');
+    } catch (error) {
+      console.error('Failed to get application stats:', error);
+      throw error;
+    }
+  }
+};
+
 // Chat API - calls the backend, which proxies to AI service
 // Uses direct fetch (no auth token) since chat is public
 export const chatAPI = {

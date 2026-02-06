@@ -226,9 +226,9 @@ export default function DigitalTwinChatbot() {
               </div>
               <div className="bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-2xl rounded-bl-none p-3 max-w-[75%] sm:max-w-[70%]">
                 <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-indigo-600 dark:bg-indigo-400 animate-bounce" />
-                  <div className="h-2 w-2 rounded-full bg-indigo-600 dark:bg-indigo-400 animate-bounce" style={{ animationDelay: '0.2s' }} />
-                  <div className="h-2 w-2 rounded-full bg-indigo-600 dark:bg-indigo-400 animate-bounce" style={{ animationDelay: '0.4s' }} />
+                  <div className="h-2 w-2 rounded-full bg-primary animate-bounce" />
+                  <div className="h-2 w-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '0.2s' }} />
+                  <div className="h-2 w-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '0.4s' }} />
                 </div>
               </div>
             </div>
@@ -245,7 +245,7 @@ export default function DigitalTwinChatbot() {
               <button
                 key={index}
                 onClick={() => handleQuickQuestion(question)}
-                className="px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs bg-white dark:bg-slate-700 hover:bg-primary/10 dark:hover:bg-primary/20 hover:text-primary dark:hover:text-indigo-400 rounded-full border border-gray-300 dark:border-slate-600 transition-colors hover:border-primary/30 dark:hover:border-indigo-500 text-slate-900 dark:text-slate-100 active:scale-95"
+                className="px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs bg-white dark:bg-slate-700 hover:bg-primary/10 dark:hover:bg-primary/20 hover:text-primary rounded-full border border-gray-300 dark:border-slate-600 transition-colors hover:border-primary/30 text-slate-900 dark:text-slate-100 active:scale-95"
               >
                 {question}
               </button>
