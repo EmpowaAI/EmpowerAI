@@ -1,5 +1,5 @@
 const express = require('express');
-const { startInterview, submitAnswer, getSession } = require('../controllers/interviewController');
+const { startInterview, submitAnswer, getSession, debugNormalizeScore } = require('../controllers/interviewController');
 const auth = require('../middleware/auth');
 const router = express.Router();
 
@@ -7,6 +7,8 @@ const router = express.Router();
 router.use(auth);
 
 router.post('/start', startInterview);
+// Debug: normalize score (protected)
+router.post('/debug/normalize', debugNormalizeScore);
 router.post('/:sessionId/answer', submitAnswer);
 router.get('/:sessionId', getSession);
 

@@ -15,6 +15,9 @@ const logger = require('../utils/logger');
 
 let schedulerInterval = null;
 let isRunning = false;
+let lastRunAt = null;
+let lastSuccessAt = null;
+let lastError = null;
 
 /**
  * Start the job API scheduler
@@ -24,6 +27,11 @@ function startJobAPIScheduler() {
   
   if (!enabled) {
     logger.info('Job API scheduler is disabled');
+    return;
+  }
+
+  if (schedulerInterval) {
+    logger.warn('Job API scheduler already running');
     return;
   }
 
@@ -38,7 +46,7 @@ function startJobAPIScheduler() {
   }
 
   // Interval in minutes (default: 120 = every 2 hours)
-  const intervalMinutes = parseInt(process.env.JOB_API_FETCH_INTERVAL || '120');
+  const intervalMinutes = Math.max(parseInt(process.env.JOB_API_FETCH_INTERVAL || '120', 10) || 120, 15);
   const intervalMs = intervalMinutes * 60 * 1000;
 
   logger.info(`Job API scheduler starting - fetch interval: ${intervalMinutes} minutes`);
@@ -77,6 +85,7 @@ async function fetchRealOpportunities() {
   }
 
   isRunning = true;
+  lastRunAt = new Date();
 
   try {
     let totalAdded = 0;
@@ -118,9 +127,15 @@ async function fetchRealOpportunities() {
 
     // Log overall results
     logger.info(`Job API fetch complete: ${totalAdded} opportunities added, ${totalSkipped} skipped`);
+    lastSuccessAt = new Date();
+    lastError = null;
 
   } catch (error) {
     logger.error('Fatal error in job API fetch:', error);
+    lastError = {
+      message: error.message,
+      at: new Date()
+    };
   } finally {
     isRunning = false;
   }
@@ -166,5 +181,11 @@ async function saveOpportunities(jobs, source) {
 module.exports = {
   startJobAPIScheduler,
   stopJobAPIScheduler,
-  fetchRealOpportunities
+  fetchRealOpportunities,
+  getSchedulerStatus: () => ({
+    isRunning: schedulerInterval !== null,
+    lastRun: lastRunAt,
+    lastSuccess: lastSuccessAt,
+    lastError
+  })
 };

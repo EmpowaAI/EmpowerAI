@@ -10,6 +10,9 @@ const { fetchAndSaveJobs } = require('./jobAPIService');
 const logger = require('../utils/logger');
 
 let scheduledJob = null;
+let lastRunAt = null;
+let lastSuccessAt = null;
+let lastError = null;
 
 /**
  * Start RSS feed scheduler
@@ -26,6 +29,7 @@ function startRssScheduler() {
   
   scheduledJob = cron.schedule('0 2 * * *', async () => {
     logger.info('Starting scheduled feed aggregation (RSS + Job APIs)...');
+    lastRunAt = new Date();
     try {
       // Fetch from RSS feeds
       const rssResult = await fetchAllFeeds();
@@ -42,8 +46,15 @@ function startRssScheduler() {
         skipped: apiResult.skipped,
         total: apiResult.total
       });
+
+      lastSuccessAt = new Date();
+      lastError = null;
     } catch (error) {
       logger.error('Scheduled feed aggregation failed:', error.message);
+      lastError = {
+        message: error.message,
+        at: new Date()
+      };
     }
   }, {
     scheduled: true,
@@ -71,7 +82,9 @@ function stopRssScheduler() {
 function getSchedulerStatus() {
   return {
     isRunning: scheduledJob !== null,
-    lastRun: null // Could track last run time
+    lastRun: lastRunAt,
+    lastSuccess: lastSuccessAt,
+    lastError
   };
 }
 

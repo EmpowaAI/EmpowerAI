@@ -9,6 +9,7 @@ const logger = require('./utils/logger');
 const { apiLimiter } = require('./middleware/rateLimiter');
 
 const app = express();
+let serverInstance = null;
 
 // Compression middleware - reduces response size by ~70%
 app.use(compression());
@@ -115,6 +116,47 @@ app.get('/api/health', async (req, res) => {
     },
     timestamp: new Date().toISOString(),
     version: process.env.APP_VERSION || '1.0.0',
+  });
+});
+
+// Liveness probe (simple)
+app.get('/api/health/live', (req, res) => {
+  res.status(200).json({
+    status: 'OK',
+    message: 'Alive',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Readiness probe (depends on DB)
+app.get('/api/health/ready', async (req, res) => {
+  const dbReady = mongoose.connection.readyState === 1;
+  let schedulers = null;
+  try {
+    const { getSchedulerStatus: getRssStatus } = require('./services/rssScheduler');
+    const { getSchedulerStatus: getJobStatus } = require('./services/jobAPIScheduler');
+    schedulers = {
+      rss: getRssStatus(),
+      jobApi: getJobStatus()
+    };
+  } catch (e) {
+    schedulers = { error: e.message };
+  }
+
+  if (!dbReady) {
+    return res.status(503).json({
+      status: 'NOT_READY',
+      database: 'disconnected',
+      schedulers,
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  res.status(200).json({
+    status: 'READY',
+    database: 'connected',
+    schedulers,
+    timestamp: new Date().toISOString()
   });
 });
 
@@ -281,7 +323,7 @@ connectDatabase().then(async (connected) => {
     }, 2000); // Wait 2 seconds before checking to let the service start
   }
   
-  app.listen(PORT, () => {
+  serverInstance = app.listen(PORT, () => {
     logger.info('Server started successfully', {
       port: PORT,
       environment: process.env.NODE_ENV || 'development',
@@ -291,3 +333,37 @@ connectDatabase().then(async (connected) => {
     });
   });
 });
+
+// Process-level error handling
+process.on('unhandledRejection', (reason) => {
+  logger.error('Unhandled Promise Rejection', { reason });
+});
+
+process.on('uncaughtException', (error) => {
+  logger.error('Uncaught Exception', { error: error.message, stack: error.stack });
+});
+
+// Graceful shutdown
+const shutdown = async (signal) => {
+  try {
+    logger.info('Shutdown signal received', { signal });
+    const { stopRssScheduler } = require('./services/rssScheduler');
+    const { stopJobAPIScheduler } = require('./services/jobAPIScheduler');
+    stopRssScheduler();
+    stopJobAPIScheduler();
+
+    if (serverInstance) {
+      await new Promise((resolve) => serverInstance.close(resolve));
+    }
+
+    await mongoose.connection.close(false);
+    logger.info('Shutdown complete');
+    process.exit(0);
+  } catch (error) {
+    logger.error('Shutdown error', { error: error.message });
+    process.exit(1);
+  }
+};
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));

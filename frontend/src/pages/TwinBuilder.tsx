@@ -58,7 +58,7 @@ export default function TwinBuilder() {
     goals: [] as string[],
   })
   const navigate = useNavigate()
-  const { user, updateProgress } = useUser()
+  const { user, updateProgress, updateUser } = useUser()
 
   // Load any saved form data on mount so users can resume or update details
   useEffect(() => {
@@ -222,6 +222,12 @@ export default function TwinBuilder() {
           // Update user context
           updateProgress('twinCompleted', true)
           updateProgress('empowermentScore', empowermentScore)
+          updateUser({
+            province: formData.province,
+            education: formData.education,
+            skills: formData.skills,
+            interests: formData.goals
+          })
           
           // Save twin data to localStorage for other components
           localStorage.setItem('twinData', JSON.stringify(twinWithScore))
@@ -236,10 +242,17 @@ export default function TwinBuilder() {
               ...user,
               twinCreated: true,
               empowermentScore,
-              twinId
+              twinId,
+              province: formData.province,
+              education: formData.education,
+              skills: formData.skills,
+              interests: formData.goals
             }
             localStorage.setItem('user', JSON.stringify(updatedUser))
           }
+
+          // Cache for quick filters
+          localStorage.setItem('userProvince', formData.province)
           
           // Try to save progress to API (non-blocking)
           try {

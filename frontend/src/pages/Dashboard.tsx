@@ -55,8 +55,8 @@ export default function Dashboard() {
     const fetchRecommendedJobs = async () => {
       try {
         setJobsLoading(true)
-        // Get user's province and skills for filtering
-        const filters: { province?: string; skills?: string } = {}
+        // Get user's province, skills, and career goals for filtering
+        const filters: { province?: string; skills?: string; careerGoals?: string } = {}
         const userProvince = (user as any)?.province || localStorage.getItem('userProvince')
         if (userProvince) {
           filters.province = userProvince
@@ -72,6 +72,35 @@ export default function Dashboard() {
           } catch (e) {
             console.error('Error parsing CV skills:', e)
           }
+        }
+
+        let goals: string[] = []
+        try {
+          const twinDataRaw = localStorage.getItem('twinData')
+          if (twinDataRaw) {
+            const twinData = JSON.parse(twinDataRaw)
+            goals = twinData?.careerGoals || twinData?.interests || []
+          }
+        } catch (e) {
+          // Ignore parse errors and proceed without career filtering
+        }
+
+        if ((!goals || goals.length === 0) && user) {
+          try {
+            const { twinAPI } = await import("../lib/api")
+            const twinResponse = await twinAPI.get()
+            const twin = twinResponse?.data?.twin
+            goals = twin?.careerGoals || twin?.interests || []
+            if (twin) {
+              localStorage.setItem('twinData', JSON.stringify(twin))
+            }
+          } catch (e) {
+            // Ignore fetch errors
+          }
+        }
+
+        if (Array.isArray(goals) && goals.length > 0) {
+          filters.careerGoals = goals.join(',')
         }
         
         const response = await opportunitiesAPI.getAll(filters)

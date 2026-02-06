@@ -1,5 +1,6 @@
-﻿const aiServiceClient = require('../services/aiServiceClient');
+const aiServiceClient = require('../services/aiServiceClient');
 const { v4: uuidv4 } = require('uuid');
+const logger = require('../utils/logger');
 
 // Fallback interview questions when AI service is unavailable
 function generateFallbackQuestions(type, difficulty) {
@@ -63,6 +64,43 @@ function generateFallbackFeedback(response) {
       'Use the STAR method for better structure'
     ]
   };
+}
+
+function normalizeFeedback(feedbackData) {
+  if (!feedbackData || typeof feedbackData !== 'object') {
+    return {
+      score: 0.6,
+      feedback: 'Thanks for your response. Try to add more structure and specific examples.',
+      strengths: ['Clear effort'],
+      improvements: ['Add more detail']
+    };
+  }
+
+  let score = typeof feedbackData.score === 'number' ? feedbackData.score : 0.6;
+  // Normalize score to 0..1 scale
+  if (score > 1 && score <= 10) score = score / 10;
+  if (score > 10 && score <= 100) score = score / 100;
+  if (score < 0) score = 0;
+  if (score > 1) score = 1;
+
+  const strengths = Array.isArray(feedbackData.strengths) ? feedbackData.strengths : [];
+  const improvements = Array.isArray(feedbackData.improvements) ? feedbackData.improvements : [];
+
+  return {
+    score,
+    feedback: feedbackData.feedback || 'Thanks for your response. Try to add more structure and specific examples.',
+    strengths: strengths.length > 0 ? strengths : ['Clear effort'],
+    improvements: improvements.length > 0 ? improvements : ['Add more detail']
+  };
+}
+
+function normalizeScoreOnly(rawScore) {
+  let score = typeof rawScore === 'number' ? rawScore : 0.6;
+  if (score > 1 && score <= 10) score = score / 10;
+  if (score > 10 && score <= 100) score = score / 100;
+  if (score < 0) score = 0;
+  if (score > 1) score = 1;
+  return score;
 }
 
 exports.startInterview = async (req, res, next) => {
@@ -156,6 +194,16 @@ exports.submitAnswer = async (req, res, next) => {
       feedbackData = generateFallbackFeedback(response);
     }
 
+    const rawScore = feedbackData?.score;
+    feedbackData = normalizeFeedback(feedbackData);
+    logger.info('Interview feedback normalized', {
+      correlationId: req.correlationId,
+      sessionId,
+      questionId,
+      rawScore,
+      normalizedScore: feedbackData.score
+    });
+
     res.status(200).json({
       status: 'success',
       data: {
@@ -194,3 +242,21 @@ exports.getSession = async (req, res, next) => {
     next(error);
   }
 };
+exports.debugNormalizeScore = async (req, res) => {
+  const { score } = req.body || {};
+  const normalized = normalizeScoreOnly(score);
+  logger.info('Interview debug normalize', {
+    correlationId: req.correlationId,
+    rawScore: score,
+    normalizedScore: normalized
+  });
+  res.status(200).json({
+    status: 'success',
+    data: {
+      rawScore: score,
+      normalizedScore: normalized
+    }
+  });
+};
+
+

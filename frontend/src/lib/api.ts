@@ -276,12 +276,17 @@ export const interviewAPI = {
 };
 
 export const opportunitiesAPI = {
-  getAll: async (filters?: { province?: string; type?: string; skills?: string }) => {
+  getAll: async (filters?: { province?: string; type?: string; skills?: string; careerGoals?: string; q?: string; page?: number; limit?: number; sort?: string }) => {
     try {
       const queryParams = new URLSearchParams();
       if (filters?.province) queryParams.append('province', filters.province);
       if (filters?.type) queryParams.append('type', filters.type);
       if (filters?.skills) queryParams.append('skills', filters.skills);
+      if (filters?.careerGoals) queryParams.append('careerGoals', filters.careerGoals);
+      if (filters?.q) queryParams.append('q', filters.q);
+      if (typeof filters?.page === 'number') queryParams.append('page', String(filters.page));
+      if (typeof filters?.limit === 'number') queryParams.append('limit', String(filters.limit));
+      if (filters?.sort) queryParams.append('sort', filters.sort);
       
       const queryString = queryParams.toString();
       const url = `/opportunities${queryString ? `?${queryString}` : ''}`;
@@ -306,15 +311,34 @@ export const statsAPI = {
   getDashboardStats: async () => {
     try {
       // This will combine data from twin, opportunities, and CV analysis
+      let careerGoalsFilter: string | undefined;
+      try {
+        const twinDataRaw = localStorage.getItem('twinData');
+        if (twinDataRaw) {
+          const twinData = JSON.parse(twinDataRaw);
+          const goals = twinData?.careerGoals || twinData?.interests || [];
+          if (Array.isArray(goals) && goals.length > 0) {
+            careerGoalsFilter = goals.join(',');
+          }
+        }
+      } catch (e) {
+        // Ignore parse errors
+      }
+
       const [twinResponse, opportunitiesResponse] = await Promise.allSettled([
         twinAPI.get(),
-        opportunitiesAPI.getAll()
+        opportunitiesAPI.getAll(
+          careerGoalsFilter ? { careerGoals: careerGoalsFilter, limit: 1 } : { limit: 1 }
+        )
       ]);
       
       const twin = twinResponse.status === 'fulfilled' ? twinResponse.value.data?.twin : null;
       const opportunities = opportunitiesResponse.status === 'fulfilled' 
         ? opportunitiesResponse.value.data?.opportunities || [] 
         : [];
+      const totalOpportunities = opportunitiesResponse.status === 'fulfilled'
+        ? opportunitiesResponse.value.meta?.totalFiltered
+        : null;
       
       // Calculate stats from real data
       const cvSkills = localStorage.getItem('cvSkills') 
@@ -327,7 +351,7 @@ export const statsAPI = {
           empowermentScore: twin?.empowermentScore || 0,
           threeMonthProjection: twin?.incomeProjections?.threeMonth || 0,
           skillsMatched: cvSkills.length || 0,
-          opportunitiesCount: opportunities.length,
+          opportunitiesCount: typeof totalOpportunities === 'number' ? totalOpportunities : opportunities.length,
           interviewsPracticed: 0, // TODO: Get from interview sessions
           cvScore: 72, // TODO: Calculate from CV analysis history
         }

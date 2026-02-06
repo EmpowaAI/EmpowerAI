@@ -94,6 +94,16 @@ export default function InterviewCoach() {
     setError("")
   }
 
+  const normalizeScore = (score: number | undefined): number => {
+    if (typeof score !== "number" || Number.isNaN(score)) return 0
+    let s = score
+    if (s > 1 && s <= 10) s = s / 10
+    if (s > 10 && s <= 100) s = s / 100
+    if (s < 0) s = 0
+    if (s > 1) s = 1
+    return s
+  }
+
   return (
     <div className="space-y-5 sm:space-y-6 md:space-y-8 -mx-3 sm:mx-0">
       {/* Header */}
@@ -221,29 +231,33 @@ export default function InterviewCoach() {
         /* Feedback Mode */
         <div className="space-y-6">
           {/* Overall Score */}
-          {responses.length > 0 && (
+          {responses.length > 0 && (() => {
+            const normalizedScores = responses.map(r => normalizeScore(r.feedback?.score))
+            const avgScore = normalizedScores.reduce((sum, s) => sum + s, 0) / Math.max(normalizedScores.length, 1)
+            const score10 = (avgScore * 10).toFixed(1)
+            return (
             <div className="bg-gradient-to-r from-primary/10 to-secondary/10 border border-border rounded-xl p-8 text-center">
               <p className="text-sm text-muted-foreground mb-2">Overall Performance</p>
               <p className="text-5xl font-bold text-foreground mb-2">
-                {responses.length > 0 
-                  ? Math.round(responses.reduce((sum, r) => sum + (r.feedback?.score || 0), 0) / responses.length * 100) / 100
-                  : 0}
+                {score10}
                 <span className="text-2xl">/10</span>
               </p>
             </div>
-          )}
+            )
+          })()}
 
           {/* Question-by-Question Feedback */}
           <div className="space-y-4">
             {responses.map((response, index) => {
               const question = questions.find(q => q.id === response.questionId)
+              const score10 = (normalizeScore(response.feedback?.score) * 10).toFixed(1)
               return (
                 <div key={index} className="bg-card border border-border rounded-xl p-6 shadow-sm">
                   <div className="flex items-start justify-between mb-4">
                     <h3 className="font-semibold text-foreground">Question {index + 1}</h3>
                     {response.feedback && (
                       <span className="px-3 py-1 bg-accent/20 text-accent rounded-lg text-sm font-medium">
-                        Score: {(response.feedback.score * 10).toFixed(1)}/10
+                        Score: {score10}/10
                       </span>
                     )}
                   </div>
@@ -263,38 +277,62 @@ export default function InterviewCoach() {
             })}
           </div>
           {/* Score */}
-          <div className="bg-gradient-to-r from-primary/10 to-secondary/10 border border-border rounded-xl p-8 text-center">
-            <p className="text-sm text-muted-foreground mb-2">Your Score</p>
-            <p className="text-5xl font-bold text-foreground mb-2">
-              85<span className="text-2xl">/100</span>
-            </p>
-            <p className="text-secondary font-medium">Excellent Performance!</p>
-          </div>
+          {responses.length > 0 && (() => {
+            const normalizedScores = responses.map(r => normalizeScore(r.feedback?.score))
+            const avgScore = normalizedScores.reduce((sum, s) => sum + s, 0) / Math.max(normalizedScores.length, 1)
+            const score100 = Math.round(avgScore * 100)
+            const label = score100 >= 85 ? "Excellent Performance!" : score100 >= 70 ? "Good Performance" : score100 >= 55 ? "Fair Performance" : "Needs Improvement"
+            return (
+              <div className="bg-gradient-to-r from-primary/10 to-secondary/10 border border-border rounded-xl p-8 text-center">
+                <p className="text-sm text-muted-foreground mb-2">Your Score</p>
+                <p className="text-5xl font-bold text-foreground mb-2">
+                  {score100}<span className="text-2xl">/100</span>
+                </p>
+                <p className="text-secondary font-medium">{label}</p>
+              </div>
+            )
+          })()}
 
           {/* Detailed Feedback */}
           <div className="grid md:grid-cols-2 gap-6">
-            <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-              <h3 className="font-semibold text-foreground mb-4">Strengths</h3>
-              <ul className="space-y-2">
-                {["Clear communication", "Good use of examples", "Confident delivery", "Well-structured answers"].map(
-                  (item, i) => (
-                    <li key={i} className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle className="h-4 w-4 text-accent" /> {item}
-                    </li>
-                  ),
-                )}
-              </ul>
-            </div>
-            <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-              <h3 className="font-semibold text-foreground mb-4">Areas to Improve</h3>
-              <ul className="space-y-2">
-                {["Be more concise", "Add more specific metrics", "Practice STAR method"].map((item, i) => (
-                  <li key={i} className="flex items-center gap-2 text-muted-foreground">
-                    <ChevronRight className="h-4 w-4 text-warning" /> {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {(() => {
+              const strengths = Array.from(
+                new Set(
+                  responses.flatMap(r => r.feedback?.strengths || [])
+                )
+              )
+              const improvements = Array.from(
+                new Set(
+                  responses.flatMap(r => r.feedback?.improvements || [])
+                )
+              )
+              const strengthsList = strengths.length > 0 ? strengths : ["Clear effort", "Good structure"]
+              const improvementsList = improvements.length > 0 ? improvements : ["Add more specific examples", "Quantify outcomes"]
+              return (
+                <>
+                  <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+                    <h3 className="font-semibold text-foreground mb-4">Strengths</h3>
+                    <ul className="space-y-2">
+                      {strengthsList.map((item, i) => (
+                        <li key={i} className="flex items-center gap-2 text-muted-foreground">
+                          <CheckCircle className="h-4 w-4 text-accent" /> {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+                    <h3 className="font-semibold text-foreground mb-4">Areas to Improve</h3>
+                    <ul className="space-y-2">
+                      {improvementsList.map((item, i) => (
+                        <li key={i} className="flex items-center gap-2 text-muted-foreground">
+                          <ChevronRight className="h-4 w-4 text-warning" /> {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </>
+              )
+            })()}
           </div>
 
           {/* Actions */}
