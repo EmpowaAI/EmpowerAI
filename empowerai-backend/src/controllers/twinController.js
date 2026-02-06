@@ -497,15 +497,18 @@ exports.runSimulation = async (req, res, next) => {
     let simulationData;
 
     try {
-      // Try AI service first
+      // Try AI service first with shorter timeout (5 seconds)
       const simulationResponse = await aiServiceClient.post('/simulation/paths', {
         user_data: userData,
         path_ids: pathIds || null
+      }, {
+        timeout: 5000 // 5 second timeout for faster fallback
       });
       simulationData = simulationResponse.data;
+      console.log('AI service simulation successful');
     } catch (aiError) {
       // AI service failed - use fallback simulation
-      console.log('AI service unavailable, using fallback simulation');
+      console.log('AI service unavailable, using fallback simulation:', aiError.message);
       simulationData = generateFallbackSimulation(pathIds, userData);
     }
 
