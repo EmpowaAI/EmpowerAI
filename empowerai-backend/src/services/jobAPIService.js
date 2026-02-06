@@ -37,9 +37,7 @@ async function fetchAdzunaJobs() {
             app_id: ADZUNA_APP_ID,
             app_key: ADZUNA_APP_KEY,
             results_per_page: 50,
-            what: keyword,
-            content_type: 'job',
-            sort_by: 'date'
+            what: keyword
           },
           timeout: 10000
         });
