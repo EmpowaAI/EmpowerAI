@@ -312,12 +312,12 @@ export default function Simulations() {
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis 
                       dataKey="month" 
-                      stroke="hsl(var(--muted-foreground))"
-                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                      stroke="hsl(var(--foreground))"
+                      tick={{ fill: 'hsl(var(--foreground))' }}
                     />
                     <YAxis 
-                      stroke="hsl(var(--muted-foreground))"
-                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                      stroke="hsl(var(--foreground))"
+                      tick={{ fill: 'hsl(var(--foreground))' }}
                       tickFormatter={(value) => `R${(value / 1000).toFixed(0)}K`}
                     />
                     <Tooltip
@@ -327,8 +327,9 @@ export default function Simulations() {
                         borderRadius: "0.5rem",
                       }}
                       formatter={(value: number) => [`R${value.toLocaleString()}`, ""]}
+                      labelStyle={{ color: 'hsl(var(--foreground))' }}
                     />
-                    <Legend />
+                    <Legend wrapperStyle={{ color: 'hsl(var(--foreground))' }} />
                     {simulations.map((sim) => {
                       const pathConfig = getPathConfig(sim.pathId)
                       const chartKey = mapPathIdToChartKey(sim.pathId)
@@ -390,14 +391,14 @@ export default function Simulations() {
                     <XAxis 
                       type="number" 
                       domain={[0, 100]} 
-                      stroke="hsl(var(--muted-foreground))"
-                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                      stroke="hsl(var(--foreground))"
+                      tick={{ fill: 'hsl(var(--foreground))' }}
                     />
                     <YAxis 
                       type="category" 
                       dataKey="skill" 
-                      stroke="hsl(var(--muted-foreground))"
-                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                      stroke="hsl(var(--foreground))"
+                      tick={{ fill: 'hsl(var(--foreground))' }}
                       width={100} 
                     />
                     <Tooltip
@@ -407,8 +408,9 @@ export default function Simulations() {
                         borderRadius: "0.5rem",
                       }}
                       formatter={(value: number) => [`${value}%`, "Score"]}
+                      labelStyle={{ color: 'hsl(var(--foreground))' }}
                     />
-                    <Bar dataKey="score" fill="hsl(var(--secondary))" radius={[0, 4, 4, 0]} />
+                    <Bar dataKey="score" fill="#7C3AED" radius={[0, 4, 4, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -472,3 +474,6 @@ export default function Simulations() {
     </div>
   )
 }
+
+
+
