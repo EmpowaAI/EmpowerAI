@@ -154,7 +154,7 @@ export default function DashboardLayout() {
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="p-5 flex items-center justify-between border-b border-border">
-            <Logo variant="default" size="md" linkTo="/" />
+            <Logo variant="default" size="md" linkTo="/dashboard" />
             <button
               className="lg:hidden text-muted-foreground hover:text-foreground p-2 hover:bg-muted rounded-lg transition-colors"
               onClick={() => setSidebarOpen(false)}
