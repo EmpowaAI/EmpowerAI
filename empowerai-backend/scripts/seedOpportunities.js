@@ -33,7 +33,7 @@ const opportunities = [
     skills: ["Computer Literacy", "Communication", "Problem Solving", "Customer Service"],
     salaryRange: { min: 4000, max: 6000 },
     deadline: new Date('2026-03-31'),
-    applicationUrl: "https://www.mict.org.za/learnerships/apply",
+    applicationUrl: "https://www.mict.org.za",
     isActive: true
   },
   {
@@ -47,7 +47,7 @@ const opportunities = [
     skills: ["JavaScript", "React", "Node.js", "Problem Solving", "Teamwork"],
     salaryRange: { min: 6000, max: 10000 },
     deadline: new Date('2026-04-15'),
-    applicationUrl: "https://capitec.taleo.net/careersection/ex/jobdetail.ftl?job=241005",
+    applicationUrl: "https://www.capitecbank.co.za/careers",
     isActive: true
   },
   {
@@ -61,7 +61,7 @@ const opportunities = [
     skills: ["Python", "SQL", "Data Analysis", "Excel", "Communication"],
     salaryRange: { min: 7000, max: 12000 },
     deadline: new Date('2026-04-30'),
-    applicationUrl: "https://standardbank.wd3.myworkdaysite.com/en-US/Search/",
+    applicationUrl: "https://www.standardbank.co.za/careers",
     isActive: true
   },
   {
@@ -75,7 +75,7 @@ const opportunities = [
     skills: ["Social Media", "Content Creation", "Communication", "Creativity", "Writing"],
     salaryRange: { min: 4000, max: 6500 },
     deadline: new Date('2026-05-15'),
-    applicationUrl: "https://www.serviceseta.org.za/learnerships/apply",
+    applicationUrl: "https://www.serviceseta.org.za",
     isActive: true
   },
 
@@ -91,7 +91,7 @@ const opportunities = [
     skills: ["Java", "Python", "Spring Boot", "React", "Agile", "Git"],
     salaryRange: { min: 12000, max: 18000 },
     deadline: new Date('2026-04-20'),
-    applicationUrl: "https://takealot.recruitee.com/",
+    applicationUrl: "https://www.takealot.com/careers/",
     isActive: true
   },
   {
@@ -105,7 +105,7 @@ const opportunities = [
     skills: ["Data Analysis", "Statistics", "Excel", "SQL", "Python", "Power BI"],
     salaryRange: { min: 15000, max: 22000 },
     deadline: new Date('2026-05-01'),
-    applicationUrl: "https://discovery.wd3.myworkdaysite.com/en-US/discovery_sa/careers/search/",
+    applicationUrl: "https://careers.discovery.co.za/",
     isActive: true
   },
   {
@@ -119,7 +119,7 @@ const opportunities = [
     skills: ["IT Support", "Networking", "Communication", "Problem Solving", "Customer Service"],
     salaryRange: { min: 10000, max: 15000 },
     deadline: new Date('2026-04-10'),
-    applicationUrl: "https://www.dimensiondata.co.za/careers/job-opportunities",
+    applicationUrl: "https://www.dimensiondata.com/careers",
     isActive: true
   },
 
@@ -135,7 +135,7 @@ const opportunities = [
     skills: ["React", "JavaScript", "TypeScript", "CSS", "Git", "Agile"],
     salaryRange: { min: 20000, max: 28000 },
     deadline: new Date('2026-05-30'),
-    applicationUrl: "https://nedbank.wd3.myworkdaysite.com/en-US/nedbank_sa/careers/",
+    applicationUrl: "https://www.nedbank.co.za/careers",
     isActive: true
   },
   {
@@ -149,7 +149,7 @@ const opportunities = [
     skills: ["Communication", "Customer Service", "Problem Solving", "Patience", "Empathy"],
     salaryRange: { min: 12000, max: 18000 },
     deadline: new Date('2026-04-25'),
-    applicationUrl: "https://fnb.wd3.myworkdaysite.com/en-US/fnb_sa/careers/",
+    applicationUrl: "https://www.fnb.co.za/careers",
     isActive: true
   },
   {
@@ -163,7 +163,7 @@ const opportunities = [
     skills: ["Excel", "SQL", "Data Analysis", "Statistics", "Power BI", "Problem Solving"],
     salaryRange: { min: 18000, max: 25000 },
     deadline: new Date('2026-05-15'),
-    applicationUrl: "https://shoprite.wd3.myworkdaysite.com/en-US/shoprite_sa/careers/",
+    applicationUrl: "https://www.shopritecareers.co.za/",
     isActive: true
   },
   {
@@ -177,7 +177,7 @@ const opportunities = [
     skills: ["Programming", "Problem Solving", "Leadership", "Communication", "Teamwork"],
     salaryRange: { min: 22000, max: 30000 },
     deadline: new Date('2026-04-30'),
-    applicationUrl: "https://mtn.wd3.myworkdaysite.com/en-US/mtn_sa/careers/",
+    applicationUrl: "https://www.mtn.co.za/careers",
     isActive: true
   },
 
@@ -253,7 +253,7 @@ const opportunities = [
     skills: ["Communication", "Numeracy", "Customer Service", "Attention to Detail"],
     salaryRange: { min: 4500, max: 7000 },
     deadline: new Date('2026-04-05'),
-    applicationUrl: "https://www.bankseta.org.za/applications/learnerships/",
+    applicationUrl: "https://www.bankseta.org.za/",
     isActive: true
   },
   {
@@ -267,7 +267,7 @@ const opportunities = [
     skills: ["Customer Service", "Leadership", "Inventory Management", "Communication", "Sales"],
     salaryRange: { min: 5000, max: 8000 },
     deadline: new Date('2026-05-20'),
-    applicationUrl: "https://www.woolworths.co.za/careers/learning-development/learnerships",
+    applicationUrl: "https://www.woolworths.co.za/careers",
     isActive: true
   }
 ];
