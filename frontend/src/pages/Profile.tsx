@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react"
 import { User, Mail, Phone, MapPin, Briefcase, GraduationCap, Save, Loader2, CheckCircle, AlertCircle, Edit2, Camera } from "lucide-react"
 import { useUser } from "../lib/user-context"
+import { userAPI } from "../lib/api"
 import { cn } from "../lib/utils"
 
 export default function Profile() {
   const { user, updateUser } = useUser()
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [saveMessage, setSaveMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
   
   const [formData, setFormData] = useState({
@@ -19,18 +21,44 @@ export default function Profile() {
     bio: user?.bio || "",
   })
 
+  // Load user profile from backend on mount
   useEffect(() => {
-    if (user) {
-      setFormData({
-        name: user.name || "",
-        email: user.email || "",
-        phone: user.phone || "",
-        location: user.location || "",
-        occupation: user.occupation || "",
-        education: user.education || "",
-        bio: user.bio || "",
-      })
+    const loadProfile = async () => {
+      try {
+        setIsLoading(true)
+        const response = await userAPI.getProfile()
+        if (response.status === 'success' && response.data?.user) {
+          const profileData = response.data.user
+          setFormData({
+            name: profileData.name || "",
+            email: profileData.email || "",
+            phone: profileData.phone || "",
+            location: profileData.location || "",
+            occupation: profileData.occupation || "",
+            education: profileData.education || "",
+            bio: profileData.bio || "",
+          })
+        }
+      } catch (error) {
+        console.error('Failed to load profile:', error)
+        // Fall back to user context data
+        if (user) {
+          setFormData({
+            name: user.name || "",
+            email: user.email || "",
+            phone: user.phone || "",
+            location: user.location || "",
+            occupation: user.occupation || "",
+            education: user.education || "",
+            bio: user.bio || "",
+          })
+        }
+      } finally {
+        setIsLoading(false)
+      }
     }
+
+    loadProfile()
   }, [user])
 
   const handleSave = async () => {
@@ -38,19 +66,22 @@ export default function Profile() {
     setSaveMessage(null)
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      const response = await userAPI.updateProfile(formData)
       
-      // Update user context (you'll need to implement updateUser in user-context)
-      if (updateUser) {
-        updateUser(formData)
+      if (response.status === 'success') {
+        // Update user context
+        if (updateUser) {
+          updateUser(formData)
+        }
+        
+        setSaveMessage({ type: "success", text: "Profile updated successfully!" })
+        setIsEditing(false)
+        
+        // Clear success message after 3 seconds
+        setTimeout(() => setSaveMessage(null), 3000)
+      } else {
+        throw new Error(response.message || 'Failed to update profile')
       }
-      
-      setSaveMessage({ type: "success", text: "Profile updated successfully!" })
-      setIsEditing(false)
-      
-      // Clear success message after 3 seconds
-      setTimeout(() => setSaveMessage(null), 3000)
     } catch (error: any) {
       setSaveMessage({ type: "error", text: error.message || "Failed to update profile" })
     } finally {
