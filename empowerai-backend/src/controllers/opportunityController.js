@@ -1,9 +1,10 @@
 const Opportunity = require('../models/Opportunity');
 const logger = require('../utils/logger');
+const { getMatchedOpportunities, extractUserProfile } = require('../services/opportunityMatchingService');
 
 exports.getAllOpportunities = async (req, res, next) => {
   try {
-    const { province, type, skills } = req.query;
+    const { province, type, skills, minScore } = req.query;
     
     // First, check total count in database for debugging
     const totalCount = await Opportunity.countDocuments({});
@@ -12,7 +13,7 @@ exports.getAllOpportunities = async (req, res, next) => {
     logger.info('Opportunities query started', { 
       totalCount,
       activeCount,
-      queryParams: { province, type, skills }
+      queryParams: { province, type, skills, minScore }
     });
     
     let filter = { isActive: true };
@@ -46,19 +47,42 @@ exports.getAllOpportunities = async (req, res, next) => {
       .sort({ createdAt: -1 })
       .lean(); // Use lean() for better performance and to get plain JS objects
 
+    // Apply smart matching if user profile available
+    let processedOpportunities = opportunities;
+    
+    const userProfile = extractUserProfile(req);
+    if (userProfile && (skills || province || minScore)) {
+      userProfile.minMatchScore = minScore ? parseInt(minScore) : 30;
+      processedOpportunities = await getMatchedOpportunities(opportunities, userProfile);
+      
+      logger.info('Smart matching applied', {
+        beforeMatching: opportunities.length,
+        afterMatching: processedOpportunities.length,
+        averageScore: processedOpportunities.length > 0 
+          ? Math.round(processedOpportunities.reduce((sum, o) => sum + o.matchScore, 0) / processedOpportunities.length)
+          : 0
+      });
+    }
+
     logger.info('Opportunities fetched successfully', { 
-      count: opportunities.length,
+      count: processedOpportunities.length,
       totalInDB: totalCount,
       activeInDB: activeCount,
       filterApplied: JSON.stringify(filter),
-      sampleTitles: opportunities.slice(0, 3).map(o => o.title)
+      sampleTitles: processedOpportunities.slice(0, 3).map(o => o.title)
     });
 
     res.status(200).json({
       status: 'success',
-      results: opportunities.length,
+      results: processedOpportunities.length,
+      meta: {
+        totalInDatabase: activeCount,
+        filtered: processedOpportunities.length,
+        dataSource: 'real opportunities from Adzuna, Indeed, and job boards',
+        lastUpdated: new Date().toISOString()
+      },
       data: {
-        opportunities
+        opportunities: processedOpportunities
       }
     });
   } catch (error) {

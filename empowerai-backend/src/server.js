@@ -187,6 +187,17 @@ connectDatabase().then(async (connected) => {
         logger.warn('Failed to start RSS feed scheduler:', error.message);
       }
     }
+
+    // Start Job API scheduler (Adzuna, Indeed) for real opportunities
+    if (process.env.ENABLE_JOB_API_SCHEDULER !== 'false') {
+      try {
+        const { startJobAPIScheduler } = require('./services/jobAPIScheduler');
+        startJobAPIScheduler();
+        logger.info('Job API scheduler initialized');
+      } catch (error) {
+        logger.warn('Failed to start Job API scheduler:', error.message);
+      }
+    }
   } else {
     logger.warn('Database not connected, routes will return 503 errors');
   }
