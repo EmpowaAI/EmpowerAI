@@ -14,11 +14,11 @@ function generateFallbackQuestions(type, difficulty) {
     behavioral: [
       { id: uuidv4(), text: 'Tell me about a time when you had to work with a difficult team member. How did you handle it?' },
       { id: uuidv4(), text: 'Describe a situation where you had to meet a tight deadline. How did you manage your time?' },
-      { id: uuidv4(), text: 'Can you give an example of when you showed leadership, even if you weren'\''t in a leadership position?' },
+      { id: uuidv4(), text: 'Can you give an example of when you showed leadership, even if you weren\'t in a leadership position?' },
       { id: uuidv4(), text: 'Tell me about a time you failed at something. What did you learn from it?' },
       { id: uuidv4(), text: 'Describe a situation where you had to adapt to significant changes at work.' }
     ],
-    '\''non-tech'\'': [
+    'non-tech': [
       { id: uuidv4(), text: 'Why are you interested in this position and our company?' },
       { id: uuidv4(), text: 'What are your greatest strengths and how would they benefit our team?' },
       { id: uuidv4(), text: 'Where do you see yourself in 3-5 years?' },
@@ -27,7 +27,7 @@ function generateFallbackQuestions(type, difficulty) {
     ]
   };
 
-  return questionSets[type] || questionSets['\''non-tech'\''];
+  return questionSets[type] || questionSets['non-tech'];
 }
 
 // Generate fallback feedback for answer
@@ -143,7 +143,7 @@ exports.submitAnswer = async (req, res, next) => {
 
     try {
       // Try AI service first with shorter timeout
-      const apiResponse = await aiServiceClient.post(/interview/\/answer, {
+      const apiResponse = await aiServiceClient.post('/interview/answer', {
         questionId,
         response
       }, { timeout: 8000 }); // 8 second timeout
@@ -181,7 +181,7 @@ exports.getSession = async (req, res, next) => {
   try {
     const { sessionId } = req.params;
 
-    const response = await aiServiceClient.get(/interview/\);
+    const response = await aiServiceClient.get(`/interview/${sessionId}`);
 
     res.status(200).json({
       status: 'success',
