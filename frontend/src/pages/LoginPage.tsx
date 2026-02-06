@@ -84,7 +84,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-background to-cyan-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 flex flex-col sm:flex-row animate-fade-in">
+    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/10 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 flex flex-col sm:flex-row animate-fade-in">
       {/* Left Panel */}
       <div className="hidden lg:flex flex-1 relative p-12 flex-col justify-between overflow-hidden">
         {/* Background Image */}
@@ -98,7 +98,7 @@ export default function LoginPage() {
         <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/60 to-black/70 backdrop-blur-sm" />
 
         {/* Animated gradient accent */}
-        <div className="absolute inset-0 bg-gradient-to-tr from-indigo-600/20 via-transparent to-cyan-600/20 opacity-50" />
+        <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 via-transparent to-secondary/20 opacity-50" />
 
         {/* Content with higher z-index */}
         <div className="relative z-10 animate-slide-up">
@@ -114,7 +114,7 @@ export default function LoginPage() {
           {/* Trust indicators */}
           <div className="flex items-center gap-6 pt-4">
             <div className="flex items-center gap-2 text-white/90">
-              <Users className="h-5 w-5 text-cyan-400" />
+              <Users className="h-5 w-5 text-secondary" />
               <span className="text-sm font-medium">10,000+ Users</span>
             </div>
             <div className="flex items-center gap-2 text-white/90">
@@ -139,9 +139,9 @@ export default function LoginPage() {
 
             {/* Header with gradient accent */}
             <div className="mb-8">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-100 dark:bg-indigo-950/50 rounded-full mb-4">
-                <Sparkles className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
-                <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">Secure Login</span>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 dark:bg-primary/10 rounded-full mb-4">
+                <Sparkles className="h-3.5 w-3.5 text-primary dark:text-primary" />
+                <span className="text-xs font-semibold text-primary dark:text-primary">Secure Login</span>
               </div>
               <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-2 tracking-tight">Sign in</h2>
               <p className="text-sm sm:text-base text-muted-foreground">
@@ -231,7 +231,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-4 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white rounded-xl font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-100 min-h-[56px] text-base touch-manipulation group"
+                className="w-full py-4 bg-gradient-to-r from-primary to-primary hover:from-primary hover:to-primary/80 text-white rounded-xl font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-100 min-h-[56px] text-base touch-manipulation group"
               >
                 {isLoading ? (
                   <>
@@ -252,3 +252,5 @@ export default function LoginPage() {
     </div>
   )
 }
+
+

@@ -14,10 +14,10 @@ export default function ThemeToggle() {
         "bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-900",
         "border border-slate-200/80 dark:border-slate-700/80",
         "hover:bg-gradient-to-br hover:from-slate-200 hover:to-slate-100 dark:hover:from-slate-700 dark:hover:to-slate-800",
-        "hover:border-indigo-300 dark:hover:border-indigo-600",
-        "hover:shadow-lg hover:shadow-indigo-500/20 dark:hover:shadow-indigo-900/30",
+        "hover:border-primary/40 dark:hover:border-primary/50",
+        "hover:shadow-lg hover:shadow-primary/20 dark:hover:shadow-primary/30",
         "active:scale-[0.96]",
-        "focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-900",
+        "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-900",
         "backdrop-blur-sm"
       )}
       aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
@@ -26,7 +26,7 @@ export default function ThemeToggle() {
       {/* Subtle glow effect */}
       <div className={cn(
         "absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300",
-        "bg-gradient-to-br from-indigo-400/10 to-cyan-400/10 dark:from-indigo-500/20 dark:to-cyan-500/20",
+        "bg-gradient-to-br from-primary/10 to-secondary/10 dark:from-primary/20 dark:to-secondary/20",
         "blur-sm"
       )} />
       
@@ -45,7 +45,7 @@ export default function ThemeToggle() {
         <Moon
           className={cn(
             "absolute inset-0 w-5 h-5 transition-all duration-500 ease-in-out",
-            "text-indigo-600 dark:text-indigo-400",
+            "text-primary dark:text-primary",
             isDark 
               ? "opacity-100 rotate-0 scale-100 group-hover:-rotate-12" 
               : "opacity-0 -rotate-90 scale-0"

@@ -28,6 +28,7 @@ const navItems = [
   { icon: Briefcase, label: "Opportunities", path: "/dashboard/opportunities" },
   { icon: FileText, label: "CV Analyzer", path: "/dashboard/cv-analyzer" },
   { icon: Mic, label: "Interview Coach", path: "/dashboard/interview-coach" },
+  { icon: Briefcase, label: "My Applications", path: "/dashboard/applications" },
 ]
 
 export default function DashboardLayout() {
@@ -81,6 +82,7 @@ export default function DashboardLayout() {
         "/dashboard/simulations": progress.cvCompleted && progress.twinCompleted,
         "/dashboard/opportunities": progress.cvCompleted && progress.twinCompleted,
         "/dashboard/interview-coach": progress.cvCompleted && progress.twinCompleted,
+        "/dashboard/applications": progress.cvCompleted && progress.twinCompleted,
       }
       
       const isAllowed = allowedPaths[currentPath] || false
@@ -305,8 +307,8 @@ export default function DashboardLayout() {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto bg-gradient-to-b from-background to-muted/20">
-          <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto w-full">
+        <main className="flex-1 overflow-y-auto app-shell relative">
+          <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto w-full relative z-10">
             <Outlet />
           </div>
         </main>
