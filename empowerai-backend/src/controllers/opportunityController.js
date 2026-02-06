@@ -4,7 +4,7 @@ const { getMatchedOpportunities, extractUserProfile } = require('../services/opp
 
 exports.getAllOpportunities = async (req, res, next) => {
   try {
-    const { province, type, skills, minScore } = req.query;
+    const { province, type, skills, minScore, page, limit, sort, q } = req.query;
     
     // First, check total count in database for debugging
     const totalCount = await Opportunity.countDocuments({});
@@ -13,7 +13,7 @@ exports.getAllOpportunities = async (req, res, next) => {
     logger.info('Opportunities query started', { 
       totalCount,
       activeCount,
-      queryParams: { province, type, skills, minScore }
+      queryParams: { province, type, skills, minScore, page, limit, sort, q }
     });
     
     let filter = { isActive: true };
@@ -40,19 +40,117 @@ exports.getAllOpportunities = async (req, res, next) => {
       }
     }
 
+    // Career filter: match selected career goals against title/description/company/skills
+    const careerQuery =
+      req.query.career ||
+      req.query.careerGoal ||
+      req.query.careerGoals ||
+      req.query.interests;
+
+    const userCareerGoals = Array.isArray(req.user?.interests) ? req.user.interests : [];
+
+    const careerTaxonomy = {
+      'Tech Career': ['software', 'developer', 'engineer', 'data', 'it', 'cyber', 'cloud', 'devops', 'ai', 'ml', 'web', 'mobile'],
+      'Freelancing': ['freelance', 'contract', 'gig', 'remote', 'self-employed'],
+      'Corporate Job': ['corporate', 'office', 'graduate program', 'management', 'analyst', 'coordinator'],
+      'Entrepreneurship': ['entrepreneur', 'startup', 'founder', 'business owner', 'small business'],
+      'Creative Industry': ['design', 'graphic', 'ui', 'ux', 'content', 'writer', 'video', 'photography', 'marketing'],
+      'Finance': ['finance', 'accounting', 'banking', 'audit', 'tax', 'investment', 'financial'],
+      'Healthcare': ['health', 'medical', 'nurse', 'clinic', 'pharmacy', 'care'],
+      'Education': ['teacher', 'education', 'tutor', 'training', 'facilitator', 'lecturer']
+    };
+
+    const expandCareerTerms = (terms) => {
+      const expanded = [];
+      for (const term of terms) {
+        expanded.push(term);
+        if (careerTaxonomy[term]) {
+          expanded.push(...careerTaxonomy[term]);
+        }
+      }
+      return expanded;
+    };
+
+    const baseCareerTerms = []
+      .concat(
+        typeof careerQuery === 'string'
+          ? careerQuery.split(',').map(s => s.trim())
+          : [],
+        userCareerGoals
+      )
+      .filter(Boolean);
+
+    const careerTerms = expandCareerTerms(baseCareerTerms);
+
+    if (careerTerms.length > 0) {
+      const careerRegexes = careerTerms.map(term =>
+        new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i')
+      );
+
+      filter.$or = [
+        { title: { $in: careerRegexes } },
+        { description: { $in: careerRegexes } },
+        { company: { $in: careerRegexes } },
+        { skills: { $in: careerRegexes } }
+      ];
+    }
+
+    // Text search filter (q) across title/company/description/location
+    if (q && typeof q === 'string' && q.trim().length > 0) {
+      const qRegexes = q
+        .split(' ')
+        .map(s => s.trim())
+        .filter(Boolean)
+        .map(term => new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'));
+
+      const qOr = [
+        { title: { $in: qRegexes } },
+        { description: { $in: qRegexes } },
+        { company: { $in: qRegexes } },
+        { location: { $in: qRegexes } }
+      ];
+
+      if (filter.$or) {
+        filter.$and = [
+          { $or: filter.$or },
+          { $or: qOr }
+        ];
+        delete filter.$or;
+      } else {
+        filter.$or = qOr;
+      }
+    }
+
     logger.info('Opportunities filter applied', { filter: JSON.stringify(filter) });
 
-    // Sort by most recent first, no limit to see all opportunities
+    const pageNum = Math.max(parseInt(page, 10) || 1, 1);
+    const limitNum = Math.min(Math.max(parseInt(limit, 10) || 30, 1), 100);
+    const skip = (pageNum - 1) * limitNum;
+
+    const totalFiltered = await Opportunity.countDocuments(filter);
+
+    let sortSpec = { createdAt: -1 };
+    if (sort === 'deadline') sortSpec = { deadline: 1 };
+    if (sort === 'company') sortSpec = { company: 1 };
+
+    // Sort by most recent first by default
     const opportunities = await Opportunity.find(filter)
-      .sort({ createdAt: -1 })
+      .sort(sortSpec)
+      .skip(skip)
+      .limit(limitNum)
       .lean(); // Use lean() for better performance and to get plain JS objects
 
     // Apply smart matching if user profile available
     let processedOpportunities = opportunities;
     
     const userProfile = extractUserProfile(req);
-    if (userProfile && (skills || province || minScore)) {
-      userProfile.minMatchScore = minScore ? parseInt(minScore) : 30;
+    const hasCareerFilter = careerTerms.length > 0;
+    const hasSearchQuery = typeof q === 'string' && q.trim().length > 0;
+    if (userProfile && (skills || province || minScore || hasCareerFilter || hasSearchQuery)) {
+      userProfile.minMatchScore = minScore ? parseInt(minScore) : 0;
+      if (careerTerms.length > 0) {
+        userProfile.careerGoals = careerTerms;
+      }
       processedOpportunities = await getMatchedOpportunities(opportunities, userProfile);
       
       logger.info('Smart matching applied', {
@@ -61,6 +159,43 @@ exports.getAllOpportunities = async (req, res, next) => {
         averageScore: processedOpportunities.length > 0 
           ? Math.round(processedOpportunities.reduce((sum, o) => sum + o.matchScore, 0) / processedOpportunities.length)
           : 0
+      });
+    }
+
+    // Relevance scoring for q/career terms when requested
+    const relevanceTerms = []
+      .concat(
+        careerTerms || [],
+        typeof q === 'string' ? q.split(' ').map(s => s.trim()).filter(Boolean) : []
+      )
+      .filter(Boolean);
+
+    if (relevanceTerms.length > 0) {
+      processedOpportunities = processedOpportunities.map(opp => {
+        const haystack = [
+          opp.title,
+          opp.company,
+          opp.description,
+          opp.location,
+          Array.isArray(opp.skills) ? opp.skills.join(' ') : ''
+        ].join(' ').toLowerCase();
+
+        const relevanceScore = relevanceTerms.reduce((acc, term) => {
+          const t = term.toLowerCase();
+          if (!t) return acc;
+          return acc + (haystack.includes(t) ? 1 : 0);
+        }, 0);
+
+        return { ...opp, relevanceScore };
+      });
+    }
+
+    if (sort === 'relevance' && relevanceTerms.length > 0) {
+      processedOpportunities.sort((a, b) => {
+        if ((b.relevanceScore || 0) !== (a.relevanceScore || 0)) {
+          return (b.relevanceScore || 0) - (a.relevanceScore || 0);
+        }
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       });
     }
 
@@ -78,6 +213,11 @@ exports.getAllOpportunities = async (req, res, next) => {
       meta: {
         totalInDatabase: activeCount,
         filtered: processedOpportunities.length,
+        totalFiltered,
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.max(Math.ceil(totalFiltered / limitNum), 1),
+        hasMore: pageNum * limitNum < totalFiltered,
         dataSource: 'real opportunities from Adzuna, Indeed, and job boards',
         lastUpdated: new Date().toISOString()
       },

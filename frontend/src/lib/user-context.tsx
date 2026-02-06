@@ -12,6 +12,9 @@ interface User {
   location?: string
   occupation?: string
   education?: string
+  province?: string
+  skills?: string[]
+  interests?: string[]
   bio?: string
   createdAt?: string
   cvAnalyzed?: boolean

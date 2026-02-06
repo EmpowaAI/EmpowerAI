@@ -25,7 +25,8 @@ function calculateMatchScore(userProfile, opportunity) {
     location: 0,
     experience: 0,
     salary: 0,
-    type: 0
+    type: 0,
+    career: 0
   };
 
   // 1. Skills matching (40% weight)
@@ -107,7 +108,21 @@ function calculateMatchScore(userProfile, opportunity) {
     weights.type = typeMatches ? 5 : 1;
   }
 
-  score = weights.skills + weights.location + weights.experience + weights.salary + weights.type;
+  // 6. Career goal alignment (bonus up to 10%)
+  if (userProfile.careerGoals && userProfile.careerGoals.length > 0) {
+    const terms = userProfile.careerGoals.map(t => t.toLowerCase());
+    const haystack = [
+      opportunity.title,
+      opportunity.company,
+      opportunity.description,
+      Array.isArray(opportunity.skills) ? opportunity.skills.join(' ') : ''
+    ].join(' ').toLowerCase();
+
+    const matches = terms.some(term => haystack.includes(term));
+    weights.career = matches ? 10 : 0;
+  }
+
+  score = weights.skills + weights.location + weights.experience + weights.salary + weights.type + weights.career;
 
   return Math.min(Math.max(Math.round(score), 0), 100);
 }
@@ -151,6 +166,22 @@ function getMatchReason(userProfile, opportunity, score) {
     reasons.push('matches your experience level');
   }
 
+  // Career goals
+  if (userProfile.careerGoals && userProfile.careerGoals.length > 0) {
+    const haystack = [
+      opportunity.title,
+      opportunity.company,
+      opportunity.description,
+      Array.isArray(opportunity.skills) ? opportunity.skills.join(' ') : ''
+    ].join(' ').toLowerCase();
+    const matchedGoal = userProfile.careerGoals.find(goal =>
+      haystack.includes(goal.toLowerCase())
+    );
+    if (matchedGoal) {
+      reasons.push(`aligns with ${matchedGoal}`);
+    }
+  }
+
   return reasons.length > 0 ? reasons.join(', ') : `${score}% match`;
 }
 
@@ -166,6 +197,7 @@ function extractUserProfile(req) {
     yearsOfExperience: 0,
     salaryExpectation: null,
     preferredJobTypes: ['job', 'internship', 'learnership'],
+    careerGoals: user.interests || [],
     ...user.profile
   };
 
@@ -180,6 +212,15 @@ function extractUserProfile(req) {
   // Try to get province from query parameters
   if (req.query.province) {
     profile.province = req.query.province;
+  }
+
+  // Try to get career goals from query parameters
+  const careerQuery = req.query.career || req.query.careerGoal || req.query.careerGoals || req.query.interests;
+  if (typeof careerQuery === 'string') {
+    profile.careerGoals = careerQuery
+      .split(',')
+      .map(s => s.trim())
+      .filter(s => s);
   }
 
   return profile;

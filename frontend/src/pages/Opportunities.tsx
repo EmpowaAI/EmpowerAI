@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { Search, MapPin, Clock, Briefcase, GraduationCap, Building, Heart, Filter, ExternalLink, Loader2 } from "lucide-react"
+import { Link } from "react-router-dom"
 import toast from 'react-hot-toast'
 import { cn } from "../lib/utils"
 import { opportunitiesAPI } from "../lib/api"
@@ -25,13 +26,65 @@ interface Opportunity {
 
 export default function Opportunities() {
   const [search, setSearch] = useState("")
+  const [debouncedSearch, setDebouncedSearch] = useState("")
   const [category, setCategory] = useState("all")
+  const [careerGoalFilters, setCareerGoalFilters] = useState<string[]>([])
   const [saved, setSaved] = useState<string[]>([])
   const [opportunities, setOpportunities] = useState<Opportunity[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [applyingId, setApplyingId] = useState<string | null>(null)
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [hasMore, setHasMore] = useState(false)
+  const [totalFiltered, setTotalFiltered] = useState<number | null>(null)
+  const [reloadTick, setReloadTick] = useState(0)
   const { user } = useUser()
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setDebouncedSearch(search.trim()), 300)
+    return () => clearTimeout(timeout)
+  }, [search])
+
+  useEffect(() => {
+    setPage(1)
+  }, [debouncedSearch, category, careerGoalFilters.join(',')])
+
+  useEffect(() => {
+    try {
+      const twinDataRaw = localStorage.getItem('twinData')
+      if (twinDataRaw) {
+        const twinData = JSON.parse(twinDataRaw)
+        const goals = twinData?.careerGoals || twinData?.interests || []
+        if (Array.isArray(goals) && goals.length > 0) {
+          setCareerGoalFilters(goals)
+        }
+      }
+    } catch (e) {
+      // Ignore parse errors
+    }
+  }, [])
+
+  useEffect(() => {
+    const twinFetch = async () => {
+      try {
+        if (careerGoalFilters.length === 0 && user) {
+          const { twinAPI } = await import("../lib/api")
+          const twinResponse = await twinAPI.get()
+          const twin = twinResponse?.data?.twin
+          const goals = twin?.careerGoals || twin?.interests || []
+          if (Array.isArray(goals) && goals.length > 0) {
+            setCareerGoalFilters(goals)
+            localStorage.setItem('twinData', JSON.stringify(twin))
+          }
+        }
+      } catch (e) {
+        // Ignore fetch errors
+      }
+    }
+
+    twinFetch()
+  }, [user, careerGoalFilters.length])
 
   useEffect(() => {
     const fetchOpportunities = async () => {
@@ -39,16 +92,20 @@ export default function Opportunities() {
         setLoading(true)
         setError("")
         
-        // Get user's province and skills for filtering
-        // NOTE: We don't apply filters by default to show all opportunities
-        // Users can filter using the UI filters
-        const filters: { province?: string; type?: string; skills?: string } = {}
-        
-        // Only apply province filter if explicitly set (not from user profile to avoid empty results)
-        // Users can use the filter UI to filter by province
-        
-        // Don't auto-apply skills filter - let users see all opportunities first
-        // Skills filter can be applied via the search/filter UI
+        // Get user's career goals from their Digital Twin (localStorage)
+        const filters: { province?: string; type?: string; skills?: string; careerGoals?: string; q?: string; page?: number; limit?: number; sort?: string } = {}
+        if (careerGoalFilters.length > 0) {
+          filters.careerGoals = careerGoalFilters.join(',')
+        }
+        if (category && category !== "all") {
+          filters.type = category
+        }
+        if (debouncedSearch) {
+          filters.q = debouncedSearch
+        }
+        filters.page = page
+        filters.limit = 24
+        filters.sort = debouncedSearch || careerGoalFilters.length > 0 ? 'relevance' : 'createdAt'
         
         const response = await opportunitiesAPI.getAll(filters)
         
@@ -75,22 +132,35 @@ export default function Opportunities() {
           }))
           
           setOpportunities(transformedOpportunities)
+          if (response.meta) {
+            setTotalPages(response.meta.totalPages || 1)
+            setHasMore(Boolean(response.meta.hasMore))
+            setTotalFiltered(
+              typeof response.meta.totalFiltered === 'number' ? response.meta.totalFiltered : null
+            )
+          }
         } else {
           // Fallback to empty array if no opportunities
           setOpportunities([])
+          setTotalPages(1)
+          setHasMore(false)
+          setTotalFiltered(null)
         }
       } catch (error: any) {
         console.error("Error fetching opportunities:", error)
         setError(error.message || "Failed to load opportunities. Please try again later.")
         // Keep empty array on error, don't show mock data
         setOpportunities([])
+        setTotalPages(1)
+        setHasMore(false)
+        setTotalFiltered(null)
       } finally {
         setLoading(false)
       }
     }
 
     fetchOpportunities()
-  }, [user])
+  }, [user, careerGoalFilters, category, debouncedSearch, page, reloadTick])
 
   const calculateMatchScore = (opportunity: any, _user: any): number => {
     // Simple matching algorithm based on skills and province
@@ -116,14 +186,7 @@ export default function Opportunities() {
     return Math.min(Math.round(score), 100)
   }
 
-  const filteredOpportunities = opportunities.filter((opp) => {
-    const matchesSearch = !search || 
-      opp.title.toLowerCase().includes(search.toLowerCase()) || 
-      opp.company.toLowerCase().includes(search.toLowerCase()) ||
-      (opp.description && opp.description.toLowerCase().includes(search.toLowerCase()))
-    const matchesCategory = category === "all" || opp.category === category || opp.type === category
-    return matchesSearch && matchesCategory
-  })
+  const filteredOpportunities = opportunities
 
   const toggleSave = (id: string) => {
     setSaved((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]))
@@ -180,6 +243,31 @@ export default function Opportunities() {
     { id: "course", label: "Courses", icon: GraduationCap },
   ]
 
+  const careerGoals = [
+    "Tech Career",
+    "Freelancing",
+    "Corporate Job",
+    "Entrepreneurship",
+    "Creative Industry",
+    "Finance",
+    "Healthcare",
+    "Education",
+  ]
+
+  const toggleCareerGoal = (goal: string) => {
+    setCareerGoalFilters((prev) =>
+      prev.includes(goal) ? prev.filter((g) => g !== goal) : [...prev, goal]
+    )
+    setPage(1)
+  }
+
+  const clearFilters = () => {
+    setSearch("")
+    setCategory("all")
+    setCareerGoalFilters([])
+    setPage(1)
+  }
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -200,6 +288,22 @@ export default function Opportunities() {
         <p className="text-base sm:text-base text-muted-foreground mt-2 sm:mt-2">Real jobs, learnerships, internships, and bursaries across South Africa</p>
       </div>
 
+      {/* Career Goals Prompt */}
+      {careerGoalFilters.length === 0 && (
+        <div className="mx-3 sm:mx-0 rounded-xl border border-border bg-card p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <p className="text-sm font-medium text-foreground">Get matched opportunities</p>
+            <p className="text-xs text-muted-foreground">Select a career goal below or update your Digital Twin to personalize results.</p>
+          </div>
+          <Link
+            to="/dashboard/twin"
+            className="inline-flex items-center justify-center px-4 py-2 text-xs sm:text-sm rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors"
+          >
+            Update Digital Twin
+          </Link>
+        </div>
+      )}
+
       {/* Search and Filter */}
       <div className="flex flex-col sm:flex-row gap-3 sm:gap-3 md:gap-4 px-3 sm:px-0">
         <div className="relative flex-1">
@@ -218,12 +322,41 @@ export default function Opportunities() {
         </button>
       </div>
 
+      {/* Career Goals Filter */}
+      <div className="flex flex-wrap gap-2.5 sm:gap-2 px-3 sm:px-0">
+        {careerGoals.map((goal) => (
+          <button
+            key={goal}
+            onClick={() => toggleCareerGoal(goal)}
+            className={cn(
+              "flex items-center gap-2 sm:gap-2 px-4 sm:px-4 py-2.5 sm:py-2.5 text-sm sm:text-sm rounded-lg transition-colors min-h-[44px] sm:min-h-[40px] touch-manipulation",
+              careerGoalFilters.includes(goal)
+                ? "bg-accent text-white"
+                : "bg-card border border-border text-muted-foreground hover:text-foreground",
+            )}
+          >
+            <span>{goal}</span>
+          </button>
+        ))}
+        {careerGoalFilters.length > 0 && (
+          <button
+            onClick={() => setCareerGoalFilters([])}
+            className="px-4 py-2.5 text-sm rounded-lg border border-border text-muted-foreground hover:text-foreground bg-card"
+          >
+            Clear goals
+          </button>
+        )}
+      </div>
+
       {/* Categories */}
       <div className="flex flex-wrap gap-2.5 sm:gap-2 px-3 sm:px-0">
         {categories.map((cat) => (
           <button
             key={cat.id}
-            onClick={() => setCategory(cat.id)}
+            onClick={() => {
+              setCategory(cat.id)
+              setPage(1)
+            }}
             className={cn(
               "flex items-center gap-2 sm:gap-2 px-4 sm:px-4 py-2.5 sm:py-2.5 text-sm sm:text-sm rounded-lg transition-colors min-h-[44px] sm:min-h-[40px] touch-manipulation",
               category === cat.id
@@ -239,10 +372,19 @@ export default function Opportunities() {
 
       {/* Error Message */}
       {error && (
-        <ErrorAlert 
-          message={error} 
-          onDismiss={() => setError("")}
-        />
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <ErrorAlert 
+            message={error} 
+            onDismiss={() => setError("")}
+            className="flex-1"
+          />
+          <button
+            onClick={() => setReloadTick((t) => t + 1)}
+            className="px-4 py-2 text-sm rounded-lg border border-border text-muted-foreground hover:text-foreground bg-card"
+          >
+            Retry
+          </button>
+        </div>
       )}
 
       {/* Results Count */}
@@ -253,7 +395,9 @@ export default function Opportunities() {
             Loading opportunities...
           </span>
         ) : (
-          `Showing ${filteredOpportunities.length} ${filteredOpportunities.length === 1 ? 'opportunity' : 'opportunities'}`
+          `${totalFiltered !== null ? `${totalFiltered}` : filteredOpportunities.length} ${
+            (totalFiltered !== null ? totalFiltered : filteredOpportunities.length) === 1 ? 'opportunity' : 'opportunities'
+          }`
         )}
       </p>
 
@@ -319,12 +463,47 @@ export default function Opportunities() {
         ))}
       </div>
 
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between px-3 sm:px-0">
+          <button
+            onClick={() => setPage((p) => Math.max(p - 1, 1))}
+            disabled={page <= 1}
+            className="px-4 py-2 text-sm rounded-lg border border-border text-muted-foreground hover:text-foreground bg-card disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <span className="text-sm text-muted-foreground">
+            Page {page} of {totalPages}
+          </span>
+          <button
+            onClick={() => setPage((p) => p + 1)}
+            disabled={!hasMore}
+            className="px-4 py-2 text-sm rounded-lg border border-border text-muted-foreground hover:text-foreground bg-card disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      )}
+
       {filteredOpportunities.length === 0 && !loading && !error && (
-        <EmptyState
-          icon={Briefcase}
-          title="No opportunities found"
-          description="Try adjusting your search filters or check back later for new opportunities."
-        />
+        <div className="space-y-3">
+          <EmptyState
+            icon={Briefcase}
+            title="No opportunities found"
+            description="Try adjusting your search, category, or career goals to see more results."
+          />
+          {(debouncedSearch || category !== "all" || careerGoalFilters.length > 0) && (
+            <div className="flex justify-center">
+              <button
+                onClick={clearFilters}
+                className="px-4 py-2 text-sm rounded-lg border border-border text-muted-foreground hover:text-foreground bg-card"
+              >
+                Clear filters
+              </button>
+            </div>
+          )}
+        </div>
       )}
     </div>
   )
