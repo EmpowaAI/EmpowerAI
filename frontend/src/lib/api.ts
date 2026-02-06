@@ -405,6 +405,42 @@ export const chatAPI = {
   },
 };
 
+// User API - profile management
+export const userAPI = {
+  getProfile: async () => {
+    try {
+      return await request<any>('/user/profile');
+    } catch (error) {
+      console.error('Failed to get user profile:', error);
+      throw error;
+    }
+  },
+  
+  updateProfile: async (data: any) => {
+    try {
+      return await request<any>('/user/profile', {
+        method: 'PUT',
+        body: JSON.stringify(data)
+      });
+    } catch (error) {
+      console.error('Failed to update user profile:', error);
+      throw error;
+    }
+  },
+  
+  changePassword: async (currentPassword: string, newPassword: string) => {
+    try {
+      return await request<any>('/user/change-password', {
+        method: 'POST',
+        body: JSON.stringify({ currentPassword, newPassword })
+      });
+    } catch (error) {
+      console.error('Failed to change password:', error);
+      throw error;
+    }
+  }
+};
+
 // Demo/fallback implementation for development
 export const twinAPIDemo = {
   create: async (data: any) => {

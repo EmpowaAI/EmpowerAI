@@ -69,6 +69,41 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   const [progress, setProgress] = useState(getProgressFromStorage)
 
+  // Load user from backend on app start if token exists
+  useEffect(() => {
+    const loadUserFromBackend = async () => {
+      const token = localStorage.getItem('empowerai-token')
+      if (token && !user) {
+        try {
+          const response = await fetch(
+            `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/validate`,
+            {
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            }
+          )
+          
+          if (response.ok) {
+            const data = await response.json()
+            if (data.data?.user) {
+              setUser(data.data.user)
+              console.log('User loaded from backend:', data.data.user.email)
+            }
+          } else if (response.status === 401) {
+            // Token is invalid, clear it
+            localStorage.removeItem('empowerai-token')
+          }
+        } catch (error) {
+          console.warn('Failed to validate token:', error)
+        }
+      }
+    }
+    
+    loadUserFromBackend()
+  }, [])
+
   // Sync progress from backend on mount and when user changes - PERMANENT FIX for locked pages
   useEffect(() => {
     const syncProgress = async () => {

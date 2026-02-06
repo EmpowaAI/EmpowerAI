@@ -258,6 +258,37 @@ async deleteUser(userId, correlationId = null) {
   });
 }
 
+/**
+ * Change user password
+ * @param {string} userId - User ID
+ * @param {string} currentPassword - Current password
+ * @param {string} newPassword - New password
+ * @param {string} correlationId - Request correlation ID
+ * @returns {Promise<void>}
+ */
+async changePassword(userId, currentPassword, newPassword, correlationId = null) {
+  const user = await User.findById(userId).select('+password');
+  
+  if (!user) {
+    throw new NotFoundError('User not found');
+  }
+  
+  // Verify current password
+  const isPasswordCorrect = await user.correctPassword(currentPassword, user.password);
+  if (!isPasswordCorrect) {
+    throw new Error('Current password is incorrect');
+  }
+  
+  // Update password
+  user.password = newPassword;
+  await user.save();
+  
+  logger.info('User password changed successfully', {
+    correlationId,
+    userId,
+  });
+}
+
 }
 
 module.exports = new UserService();

@@ -10,6 +10,16 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    // Proxy API requests to backend during development
+    proxy: {
+      '/api': {
+        target: process.env.VITE_API_TARGET || 'http://localhost:5000',
+        changeOrigin: true,
+        rewrite: (path) => path,
+      }
+    }
+  },
   build: {
     chunkSizeWarningLimit: 1000,
     minify: 'terser', // Better minification than esbuild
