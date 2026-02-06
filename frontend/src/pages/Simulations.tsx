@@ -312,12 +312,12 @@ export default function Simulations() {
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis 
                       dataKey="month" 
-                      stroke="hsl(var(--foreground))"
-                      tick={{ fill: 'hsl(var(--foreground))' }}
+                      stroke="var(--color-foreground)"
+                      tick={{ fill: 'var(--color-foreground)' }}
                     />
                     <YAxis 
-                      stroke="hsl(var(--foreground))"
-                      tick={{ fill: 'hsl(var(--foreground))' }}
+                      stroke="var(--color-foreground)"
+                      tick={{ fill: 'var(--color-foreground)' }}
                       tickFormatter={(value) => `R${(value / 1000).toFixed(0)}K`}
                     />
                     <Tooltip
@@ -327,9 +327,9 @@ export default function Simulations() {
                         borderRadius: "0.5rem",
                       }}
                       formatter={(value: number) => [`R${value.toLocaleString()}`, ""]}
-                      labelStyle={{ color: 'hsl(var(--foreground))' }}
+                      labelStyle={{ color: 'var(--color-foreground)' }}
                     />
-                    <Legend wrapperStyle={{ color: 'hsl(var(--foreground))' }} />
+                    <Legend wrapperStyle={{ color: 'var(--color-foreground)' }} />
                     {simulations.map((sim) => {
                       const pathConfig = getPathConfig(sim.pathId)
                       const chartKey = mapPathIdToChartKey(sim.pathId)
@@ -391,14 +391,14 @@ export default function Simulations() {
                     <XAxis 
                       type="number" 
                       domain={[0, 100]} 
-                      stroke="hsl(var(--foreground))"
-                      tick={{ fill: 'hsl(var(--foreground))' }}
+                      stroke="var(--color-foreground)"
+                      tick={{ fill: 'var(--color-foreground)' }}
                     />
                     <YAxis 
                       type="category" 
                       dataKey="skill" 
-                      stroke="hsl(var(--foreground))"
-                      tick={{ fill: 'hsl(var(--foreground))' }}
+                      stroke="var(--color-foreground)"
+                      tick={{ fill: 'var(--color-foreground)' }}
                       width={100} 
                     />
                     <Tooltip
@@ -408,7 +408,7 @@ export default function Simulations() {
                         borderRadius: "0.5rem",
                       }}
                       formatter={(value: number) => [`${value}%`, "Score"]}
-                      labelStyle={{ color: 'hsl(var(--foreground))' }}
+                      labelStyle={{ color: 'var(--color-foreground)' }}
                     />
                     <Bar dataKey="score" fill="#7C3AED" radius={[0, 4, 4, 0]} />
                   </BarChart>
@@ -474,6 +474,7 @@ export default function Simulations() {
     </div>
   )
 }
+
 
 
 
