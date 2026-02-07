@@ -1,6 +1,6 @@
 import DigitalTwinChatbot from "../components/DigitalTwinChatbot";
 import { Link } from "react-router-dom"
-import { TrendingUp, Target, Briefcase, FileText, Mic, ArrowRight, Zap, Sparkles, ChevronUp, Clock, Loader2 } from "lucide-react"
+import { TrendingUp, Target, Briefcase, FileText, Mic, ArrowRight, Zap, Sparkles, ChevronUp, Clock, Loader2, ChevronRight } from "lucide-react"
 import { useUser } from "../lib/user-context"
 import { cn } from "../lib/utils"
 import { statsAPI, opportunitiesAPI, applicationsAPI } from "../lib/api"
