@@ -107,6 +107,7 @@ function calculateMatchScore(userProfile, opportunity) {
 
     weights.type = typeMatches ? 5 : 1;
   }
+  const hasSkillMatch = weights.skills > 0;
 
   // 6. Career goal alignment (bonus up to 10%)
   if (userProfile.careerGoals && userProfile.careerGoals.length > 0) {
@@ -121,6 +122,7 @@ function calculateMatchScore(userProfile, opportunity) {
     const matches = terms.some(term => haystack.includes(term));
     weights.career = matches ? 10 : 0;
   }
+  const hasCareerMatch = weights.career > 0;
 
   score = weights.skills + weights.location + weights.experience + weights.salary + weights.type + weights.career;
 
@@ -235,15 +237,30 @@ async function getMatchedOpportunities(opportunities, userProfile) {
   }
 
   // Calculate match scores
-  const scoredOpportunities = opportunities.map(opp => ({
-    ...opp,
-    matchScore: calculateMatchScore(userProfile, opp),
-    matchReason: getMatchReason(userProfile, opp, calculateMatchScore(userProfile, opp))
-  }));
+  const scoredOpportunities = opportunities.map(opp => {
+    const matchScore = calculateMatchScore(userProfile, opp);
+    return {
+      ...opp,
+      matchScore,
+      matchReason: getMatchReason(userProfile, opp, matchScore)
+    };
+  });
 
   // Filter out very low matches
-  const minScore = userProfile.minMatchScore || 30;
-  const filtered = scoredOpportunities.filter(opp => opp.matchScore >= minScore);
+  const minScore = userProfile.minMatchScore || 45;
+  let filtered = scoredOpportunities.filter(opp => opp.matchScore >= minScore);
+
+  // If career goals or skills were provided, require at least one to match
+  const requireSignal = (userProfile.careerGoals && userProfile.careerGoals.length > 0) ||
+    (userProfile.skills && userProfile.skills.length > 0);
+  if (requireSignal) {
+    filtered = filtered.filter(opp => {
+      const reason = (opp.matchReason || '').toLowerCase();
+      const hasCareer = userProfile.careerGoals && userProfile.careerGoals.some(goal => reason.includes(goal.toLowerCase()));
+      const hasSkill = reason.includes('skills match');
+      return hasCareer || hasSkill;
+    });
+  }
 
   // Sort by match score descending
   filtered.sort((a, b) => b.matchScore - a.matchScore);
