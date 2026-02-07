@@ -146,7 +146,7 @@ export default function Dashboard() {
               title: opp.title,
               company: opp.company || 'Company Name',
               type: opp.type || 'job',
-              match: calculateMatchScore(opp, user),
+              match: typeof opp.matchScore === 'number' ? opp.matchScore : calculateMatchScore(opp, user),
               matchReason: opp.matchReason,
               posted: opp.createdAt 
                 ? new Date(opp.createdAt).toLocaleDateString('en-ZA', { month: 'short', day: 'numeric' })
