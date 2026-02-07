@@ -4,9 +4,50 @@ const FormData = require('form-data');
 const axios = require('axios');
 const fs = require('fs').promises;
 const path = require('path');
+const { enqueueCvTask } = require('../services/cvQueue');
+const { extractSkillsEnhanced } = require('../utils/skillExtractors');
 
 // Request timeout constant (matches aiServiceClient timeout)
 const REQUEST_TIMEOUT = 30000; // 30 seconds
+
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+const buildBasicAnalysis = (cvText, jobRequirementsArray) => {
+  const extractedSkills = extractSkillsEnhanced(cvText || '');
+  const missingSkills = Array.isArray(jobRequirementsArray)
+    ? jobRequirementsArray.filter(req =>
+        !extractedSkills.some(skill => skill.toLowerCase().includes(req.toLowerCase()))
+      )
+    : [];
+  const suggestions = [];
+
+  if (extractedSkills.length === 0) {
+    suggestions.push('Add more detail about your skills and tools to improve matching.');
+  }
+  if (missingSkills.length > 0) {
+    suggestions.push('Consider adding evidence for these requirements: ' + missingSkills.slice(0, 5).join(', '));
+  }
+  suggestions.push('Include measurable outcomes (numbers, projects, and results) to strengthen your CV.');
+
+  return {
+    extractedSkills,
+    missingSkills,
+    suggestions,
+    analysisSource: 'fallback'
+  };
+};
+
+const callWithRateLimitRetry = async (fn) => {
+  try {
+    return await fn();
+  } catch (error) {
+    const isRateLimit = error?.isRateLimit || error?.response?.status === 429;
+    if (!isRateLimit) throw error;
+    const retryAfter = error.retryAfter || error.response?.data?.retryAfter || 60;
+    await sleep(Math.min(retryAfter, 120) * 1000);
+    return await fn();
+  }
+};
 
 exports.analyzeCV = async (req, res, next) => {
   try {
@@ -36,10 +77,14 @@ exports.analyzeCV = async (req, res, next) => {
       endpoint: '/cv/analyze',
       fullUrl: `${aiServiceUrl}/api/cv/analyze`
     });
-    const response = await aiServiceClient.post('/cv/analyze', {
-      cvText,
-      jobRequirements: jobRequirementsArray
-    });
+    const response = await enqueueCvTask(() =>
+      callWithRateLimitRetry(() =>
+        aiServiceClient.post('/cv/analyze', {
+          cvText,
+          jobRequirements: jobRequirementsArray
+        })
+      )
+    );
 
     console.log('[CV Controller] AI service response received successfully');
     res.status(200).json({
@@ -60,12 +105,14 @@ exports.analyzeCV = async (req, res, next) => {
     const errorMessage = error.message || '';
     if (error.isRateLimit || errorMessage.toLowerCase().includes('rate limit')) {
       const retryAfter = error.retryAfter || 60;
-      const message = errorMessage || `AI service is rate limited. Please try again in ${retryAfter} seconds.`;
-      return res.status(429).json({
-        status: 'error',
-        message,
-        retryAfter,
-        code: 'RATE_LIMIT'
+      const analysis = buildBasicAnalysis(cvText, jobRequirementsArray);
+      return res.status(200).json({
+        status: 'success',
+        data: {
+          analysis,
+          fallback: true,
+          message: `AI service is rate limited. Showing basic CV insights while you wait ${retryAfter} seconds.`
+        }
       });
     }
     
@@ -78,7 +125,15 @@ exports.analyzeCV = async (req, res, next) => {
       if (status === 400) {
         return next(new BadRequestError(message));
       } else if (status === 429 || status === 503) {
-        return next(new ServiceUnavailableError(message));
+        const analysis = buildBasicAnalysis(cvText, jobRequirementsArray);
+        return res.status(200).json({
+          status: 'success',
+          data: {
+            analysis,
+            fallback: true,
+            message: 'AI service is temporarily unavailable. Showing basic CV insights.'
+          }
+        });
       } else if (status >= 500) {
         return next(new ServiceUnavailableError('AI service is temporarily unavailable. Please try again later.'));
       } else {
@@ -128,7 +183,15 @@ exports.analyzeCV = async (req, res, next) => {
           errorMsg = `AI service is unavailable (${errorCode}: ${errorMessage}). Please check if the service is running at ${aiServiceUrl} and the AI_SERVICE_URL environment variable is set correctly.`;
       }
       
-      return next(new ServiceUnavailableError(errorMsg));
+      const analysis = buildBasicAnalysis(cvText, jobRequirementsArray);
+      return res.status(200).json({
+        status: 'success',
+        data: {
+          analysis,
+          fallback: true,
+          message: errorMsg
+        }
+      });
     }
     
     // Pass through other errors
@@ -182,14 +245,18 @@ exports.analyzeCVFile = async (req, res, next) => {
 
     const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
     // Use axios directly for FormData (aiServiceClient doesn't handle FormData well)
-    const response = await axios.post(`${aiServiceUrl}/api/cv/analyze-file`, formData, {
-      headers: {
-        ...formData.getHeaders()
-      },
-      timeout: 60000, // 60 seconds for file processing
-      maxContentLength: 10 * 1024 * 1024, // 10MB
-      maxBodyLength: 10 * 1024 * 1024 // 10MB
-    });
+    const response = await enqueueCvTask(() =>
+      callWithRateLimitRetry(() =>
+        axios.post(`${aiServiceUrl}/api/cv/analyze-file`, formData, {
+          headers: {
+            ...formData.getHeaders()
+          },
+          timeout: 60000, // 60 seconds for file processing
+          maxContentLength: 10 * 1024 * 1024, // 10MB
+          maxBodyLength: 10 * 1024 * 1024 // 10MB
+        })
+      )
+    );
 
     console.log('[CV Controller] AI service response received successfully');
     res.status(200).json({
@@ -214,16 +281,19 @@ exports.analyzeCVFile = async (req, res, next) => {
     
     if (error.isRateLimit || isOpenAIRateLimit || errorMessage.toLowerCase().includes('rate limit')) {
       const retryAfter = error.retryAfter || error.response?.data?.retryAfter || 60;
-      // Provide clearer message if it's OpenAI rate limit
-      const message = isOpenAIRateLimit 
-        ? 'OpenAI API rate limit reached. Please wait a moment and try again.'
-        : errorMessage || `AI service is rate limited. Please try again in ${retryAfter} seconds.`;
-      return res.status(429).json({
-        status: 'error',
-        message,
-        retryAfter,
-        code: 'RATE_LIMIT',
-        source: isOpenAIRateLimit ? 'openai' : 'backend'
+      let cvTextFallback = '';
+      if (file.mimetype === 'text/plain' || file.originalname?.toLowerCase().endsWith('.txt')) {
+        cvTextFallback = file.buffer.toString('utf8');
+      }
+      const analysis = buildBasicAnalysis(cvTextFallback, jobRequirementsArray);
+      return res.status(200).json({
+        status: 'success',
+        data: {
+          analysis,
+          fallback: true,
+          message: `AI service is rate limited. Showing basic CV insights while you wait ${retryAfter} seconds.`,
+          source: isOpenAIRateLimit ? 'openai' : 'backend'
+        }
       });
     }
     
@@ -240,13 +310,20 @@ exports.analyzeCVFile = async (req, res, next) => {
       
       if (status === 400) {
         return next(new BadRequestError(message));
-      } else if (status === 429) {
-        // Rate limit error - use RateLimitError class
-        const retryAfter = data?.retryAfter || data?.retry_after || 60;
-        const rateLimitMessage = `AI service is currently rate limited. Please wait ${retryAfter} seconds and try again.`;
-        return next(new RateLimitError(rateLimitMessage, retryAfter));
-      } else if (status === 503) {
-        return next(new ServiceUnavailableError(message || 'AI service is temporarily unavailable. Please try again later.'));
+      } else if (status === 429 || status === 503) {
+        let cvTextFallback = '';
+        if (file.mimetype === 'text/plain' || file.originalname?.toLowerCase().endsWith('.txt')) {
+          cvTextFallback = file.buffer.toString('utf8');
+        }
+        const analysis = buildBasicAnalysis(cvTextFallback, jobRequirementsArray);
+        return res.status(200).json({
+          status: 'success',
+          data: {
+            analysis,
+            fallback: true,
+            message: 'AI service is temporarily unavailable. Showing basic CV insights.'
+          }
+        });
       } else if (status >= 500) {
         return next(new ServiceUnavailableError('AI service is temporarily unavailable. Please try again later.'));
       } else {
@@ -257,10 +334,26 @@ exports.analyzeCVFile = async (req, res, next) => {
     // Network errors or errors without response
     if (!error.response) {
       if (error.code === 'ECONNREFUSED' || error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
-        return next(new ServiceUnavailableError('AI service is temporarily unavailable. This might be due to the service waking up (Render free tier). Please wait a moment and try again.'));
+        const analysis = buildBasicAnalysis('', jobRequirementsArray);
+        return res.status(200).json({
+          status: 'success',
+          data: {
+            analysis,
+            fallback: true,
+            message: 'AI service is temporarily unavailable. Showing basic CV insights.'
+          }
+        });
       }
       const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
-      return next(new ServiceUnavailableError(`AI service is unavailable. Please check if the service is running at ${aiServiceUrl}.`));
+      const analysis = buildBasicAnalysis('', jobRequirementsArray);
+      return res.status(200).json({
+        status: 'success',
+        data: {
+          analysis,
+          fallback: true,
+          message: `AI service is unavailable. Please check if the service is running at ${aiServiceUrl}.`
+        }
+      });
     }
     
     // If we get here, it's an unexpected error - make it operational so it shows a proper message
