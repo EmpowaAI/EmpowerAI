@@ -64,14 +64,16 @@ exports.getStats = async (req, res, next) => {
  * Refresh opportunities and backfill skills
  * POST /api/admin/refresh-opportunities
  */
-exports.refreshOpportunities = async (req, res, next) => {
+async function performRefresh({ runBackfill, runFetch, triggeredBy }) {
   const startedAt = new Date();
   let refreshRecord;
-  try {
-    const runBackfill = req.body?.backfill !== false;
-    const runFetch = req.body?.fetch !== false;
+  let backfill = { processed: 0, updated: 0 };
+  let fetch = {
+    jobApis: { new: 0, skipped: 0, total: 0 },
+    rss: { new: 0, skipped: 0, errors: 0 }
+  };
 
-    let backfill = { processed: 0, updated: 0 };
+  try {
     if (runBackfill) {
       const cursor = Opportunity.find({ isActive: true }).cursor();
       const bulkOps = [];
@@ -107,10 +109,6 @@ exports.refreshOpportunities = async (req, res, next) => {
       }
     }
 
-    let fetch = {
-      jobApis: { new: 0, skipped: 0, total: 0 },
-      rss: { new: 0, skipped: 0, errors: 0 }
-    };
     if (runFetch) {
       try {
         fetch.jobApis = await fetchAndSaveJobs();
@@ -131,25 +129,25 @@ exports.refreshOpportunities = async (req, res, next) => {
       startedAt,
       finishedAt,
       durationMs,
-      triggeredBy: req.refreshTriggeredBy || 'admin',
+      triggeredBy,
       backfill,
       fetch,
       status: 'success'
     });
 
     logger.info('Admin: Refresh completed', {
-      triggeredBy: req.refreshTriggeredBy || 'admin',
+      triggeredBy,
       durationMs,
       backfill,
       fetch
     });
 
-    sendSuccess(res, {
+    return {
       message: 'Refresh completed',
       backfill,
       fetch,
       refreshId: refreshRecord?._id
-    });
+    };
   } catch (error) {
     logger.error('Admin: Error refreshing opportunities', error);
     try {
@@ -159,13 +157,42 @@ exports.refreshOpportunities = async (req, res, next) => {
         startedAt,
         finishedAt,
         durationMs,
-        triggeredBy: req.refreshTriggeredBy || 'admin',
+        triggeredBy,
         status: 'error',
         error: error.message || 'Unknown error'
       });
     } catch (writeError) {
       logger.error('Admin: Error recording refresh run', writeError);
     }
+    throw error;
+  }
+}
+
+exports.refreshOpportunities = async (req, res, next) => {
+  const runBackfill = req.body?.backfill !== false;
+  const runFetch = req.body?.fetch !== false;
+  const asyncMode = req.body?.async === true || req.query?.async === 'true';
+  const triggeredBy = req.refreshTriggeredBy || 'admin';
+
+  if (asyncMode) {
+    sendSuccess(res, {
+      message: 'Refresh queued',
+      backfill: runBackfill,
+      fetch: runFetch
+    }, 202);
+
+    setImmediate(() => {
+      performRefresh({ runBackfill, runFetch, triggeredBy })
+        .catch(error => logger.error('Admin: Async refresh failed', error));
+    });
+
+    return;
+  }
+
+  try {
+    const result = await performRefresh({ runBackfill, runFetch, triggeredBy });
+    sendSuccess(res, result);
+  } catch (error) {
     sendError(res, error.message || 'Failed to refresh opportunities', 500);
   }
 };

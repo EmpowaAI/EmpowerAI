@@ -19,6 +19,11 @@ const parser = new Parser({
       ['company', 'company'],
       ['location', 'location'],
       ['jobType', 'jobType'],
+      ['dc:creator', 'creator'],
+      ['himalayasJobs:companyName', 'companyName'],
+      ['himalayasJobs:locationRestriction', 'locationRestriction'],
+      ['himalayasJobs:timezoneRestriction', 'timezoneRestriction'],
+      ['himalayasJobs:category', 'category']
     ]
   }
 });
@@ -27,41 +32,40 @@ const parser = new Parser({
 // Using verified working RSS feed URLs
 const FEED_SOURCES = [
   {
-    name: 'MyJobMag - Entry Level',
-    url: 'https://www.myjobmag.co.za/feeds/rss.xml?category=entry-level',
+    name: 'Himalayas Remote Jobs',
+    url: 'https://himalayas.app/jobs/rss',
     type: 'job',
-    transform: transformMyJobMagFeed
+    transform: transformRemoteGenericFeed
   },
   {
-    name: 'MyJobMag - Learnerships',
-    url: 'https://www.myjobmag.co.za/feeds/rss.xml?category=learnerships',
-    type: 'learnership',
-    transform: transformMyJobMagFeed
-  },
-  {
-    name: 'MyJobMag - Internships',
-    url: 'https://www.myjobmag.co.za/feeds/rss.xml?category=internships',
-    type: 'internship',
-    transform: transformMyJobMagFeed
-  },
-  {
-    name: 'MyJobMag - All Jobs',
-    url: 'https://www.myjobmag.co.za/feeds/rss.xml',
+    name: 'We Work Remotely',
+    url: 'https://weworkremotely.com/remote-jobs.rss',
     type: 'job',
-    transform: transformMyJobMagFeed
+    transform: transformRemoteGenericFeed
   },
   {
-    name: 'CareerJet SA',
-    url: 'https://www.careerjet.co.za/rss/jobs.xml?l=south+africa&q=entry+level',
+    name: 'Empllo Remote Jobs',
+    url: 'https://empllo.com/feeds/remote-jobs.rss',
     type: 'job',
-    transform: transformCareerJetFeed
+    transform: transformRemoteGenericFeed
   },
-  // Adding general job board RSS feeds
   {
-    name: 'AllJobs.co.za',
-    url: 'https://www.alljobs.co.za/jobs/rss.xml',
+    name: 'WorkAnywhere Remote Jobs',
+    url: 'https://workanywhere.pro/rss.xml',
     type: 'job',
-    transform: transformAllJobsFeed
+    transform: transformRemoteGenericFeed
+  },
+  {
+    name: 'Real Work From Anywhere',
+    url: 'https://www.realworkfromanywhere.com/rss.xml',
+    type: 'job',
+    transform: transformRemoteGenericFeed
+  },
+  {
+    name: 'JobsCollider Remote Jobs',
+    url: 'https://jobscollider.com/remote-jobs.rss',
+    type: 'job',
+    transform: transformRemoteGenericFeed
   }
 ];
 
@@ -454,6 +458,53 @@ function transformAllJobsFeed(item, source) {
     };
   } catch (error) {
     logger.error('Error transforming AllJobs feed item:', error);
+    return null;
+  }
+}
+
+/**
+ * Generic transform for remote/global RSS feeds
+ */
+function transformRemoteGenericFeed(item, source) {
+  try {
+    const title = item.title || 'Untitled Job';
+    const description = item.contentSnippet || item.content || item.description || '';
+    const link = item.link || item.guid || '';
+
+    if (!link || !title) {
+      return null;
+    }
+
+    const company =
+      item.companyName ||
+      item.creator ||
+      item.author ||
+      extractCompany(description) ||
+      'Company Not Specified';
+
+    const location = item.locationRestriction || 'Remote';
+    const province = ['Nationwide'];
+    const skills = extractSkillsEnhanced(description);
+    const type = determineOpportunityType(title, description);
+    const salaryRange = extractSalaryRange(description);
+
+    return {
+      title: cleanTitle(title),
+      type: type,
+      company: company,
+      location: location,
+      province: province,
+      description: cleanDescription(description),
+      requirements: [],
+      skills: skills,
+      salaryRange: salaryRange,
+      deadline: item.pubDate ? new Date(item.pubDate) : new Date(),
+      applicationUrl: link,
+      isActive: true,
+      source: 'rss'
+    };
+  } catch (error) {
+    logger.error('Error transforming remote feed item:', error);
     return null;
   }
 }
