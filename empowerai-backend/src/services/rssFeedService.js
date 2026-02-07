@@ -8,6 +8,7 @@
 const Parser = require('rss-parser');
 const Opportunity = require('../models/Opportunity');
 const logger = require('../utils/logger');
+const { extractSkillsEnhanced } = require('../utils/skillExtractors');
 
 const parser = new Parser({
   timeout: 30000, // increased timeout for slow feeds
@@ -209,7 +210,7 @@ function transformIndeedFeed(item, source) {
     const province = getProvinceFromLocation(location);
 
     // Extract skills from description
-    const skills = extractSkills(description);
+    const skills = extractSkillsEnhanced(description);
 
     // Determine type from title/description
     const type = determineOpportunityType(title, description);
@@ -253,7 +254,7 @@ function transformCareers24Feed(item, source) {
     const location = extractLocation(item.title, description) || 'South Africa';
     const company = extractCompany(description) || 'Company Not Specified';
     const province = getProvinceFromLocation(location);
-    const skills = extractSkills(description);
+    const skills = extractSkillsEnhanced(description);
     const type = determineOpportunityType(title, description);
     const salaryRange = extractSalaryRange(description);
 
@@ -292,7 +293,7 @@ function transformRemoteOkFeed(item, source) {
 
     // For remote work, set location to "Remote"
     const company = extractCompany(description) || 'Remote Company';
-    const skills = extractSkills(description);
+    const skills = extractSkillsEnhanced(description);
     const salaryRange = extractSalaryRange(description);
 
     return {
@@ -338,7 +339,7 @@ function transformMyJobMagFeed(item, source) {
     const province = getProvinceFromLocation(location);
 
     // Extract skills from description
-    const skills = extractSkills(description);
+    const skills = extractSkillsEnhanced(description);
 
     // Determine type from source or description
     let type = source.type || determineOpportunityType(title, description);
@@ -393,7 +394,7 @@ function transformCareerJetFeed(item, source) {
     const location = extractLocation(item.title, description) || 'South Africa';
     const company = extractCompany(description) || extractCompany(item.title) || 'Company Not Specified';
     const province = getProvinceFromLocation(location);
-    const skills = extractSkills(description);
+    const skills = extractSkillsEnhanced(description);
     const type = determineOpportunityType(title, description);
     const salaryRange = extractSalaryRange(description);
 
@@ -433,7 +434,7 @@ function transformAllJobsFeed(item, source) {
     const location = extractLocation(item.title, description) || 'South Africa';
     const company = extractCompany(description) || extractCompany(item.title) || 'Company Not Specified';
     const province = getProvinceFromLocation(location);
-    const skills = extractSkills(description);
+    const skills = extractSkillsEnhanced(description);
     const type = determineOpportunityType(title, description);
     const salaryRange = extractSalaryRange(description);
 
@@ -532,29 +533,6 @@ function getProvinceFromLocation(location) {
 /**
  * Helper: Extract skills from description
  */
-function extractSkills(description) {
-  if (!description) return [];
-  
-  const commonSkills = [
-    'JavaScript', 'Python', 'Java', 'React', 'Node.js', 'SQL', 'HTML', 'CSS',
-    'Communication', 'Problem Solving', 'Teamwork', 'Leadership',
-    'Excel', 'Word', 'PowerPoint', 'Customer Service', 'Sales',
-    'Marketing', 'Accounting', 'Finance', 'Project Management',
-    'Agile', 'Scrum', 'Git', 'Docker', 'AWS', 'Azure'
-  ];
-
-  const foundSkills = [];
-  const descLower = description.toLowerCase();
-
-  for (const skill of commonSkills) {
-    if (descLower.includes(skill.toLowerCase())) {
-      foundSkills.push(skill);
-    }
-  }
-
-  return foundSkills.slice(0, 10); // Limit to 10 skills
-}
-
 /**
  * Helper: Determine opportunity type from title/description
  */
@@ -623,3 +601,5 @@ module.exports = {
   purgeOldOpportunities,
   FEED_SOURCES
 };
+
+
