@@ -30,6 +30,7 @@ function calculateMatchScore(userProfile, opportunity) {
   };
 
   // 1. Skills matching (40% weight)
+  let skillsMatched = 0;
   if (userProfile.skills && opportunity.skills) {
     const userSkillsLower = userProfile.skills.map(s => s.toLowerCase());
     const oppSkillsLower = opportunity.skills.map(s => s.toLowerCase());
@@ -40,6 +41,7 @@ function calculateMatchScore(userProfile, opportunity) {
       )
     );
     
+    skillsMatched = matchingSkills.length;
     weights.skills = (matchingSkills.length / Math.max(oppSkillsLower.length, 1)) * 40;
   }
 
@@ -107,9 +109,10 @@ function calculateMatchScore(userProfile, opportunity) {
 
     weights.type = typeMatches ? 5 : 1;
   }
-  const hasSkillMatch = weights.skills > 0;
+  const hasSkillMatch = skillsMatched > 0;
 
   // 6. Career goal alignment (bonus up to 10%)
+  let hasCareerMatch = false;
   if (userProfile.careerGoals && userProfile.careerGoals.length > 0) {
     const terms = userProfile.careerGoals.map(t => t.toLowerCase());
     const haystack = [
@@ -119,12 +122,17 @@ function calculateMatchScore(userProfile, opportunity) {
       Array.isArray(opportunity.skills) ? opportunity.skills.join(' ') : ''
     ].join(' ').toLowerCase();
 
-    const matches = terms.some(term => haystack.includes(term));
-    weights.career = matches ? 10 : 0;
+    hasCareerMatch = terms.some(term => haystack.includes(term));
+    weights.career = hasCareerMatch ? 10 : 0;
   }
-  const hasCareerMatch = weights.career > 0;
 
   score = weights.skills + weights.location + weights.experience + weights.salary + weights.type + weights.career;
+  // If the user provided skills/goals and none match, drop to 0
+  const hasSignals = (userProfile.skills && userProfile.skills.length > 0) ||
+    (userProfile.careerGoals && userProfile.careerGoals.length > 0);
+  if (hasSignals && !hasSkillMatch && !hasCareerMatch) {
+    score = 0;
+  }
 
   return Math.min(Math.max(Math.round(score), 0), 100);
 }
@@ -248,19 +256,7 @@ async function getMatchedOpportunities(opportunities, userProfile) {
 
   // Filter out very low matches
   const minScore = userProfile.minMatchScore || 45;
-  let filtered = scoredOpportunities.filter(opp => opp.matchScore >= minScore);
-
-  // If career goals or skills were provided, require at least one to match
-  const requireSignal = (userProfile.careerGoals && userProfile.careerGoals.length > 0) ||
-    (userProfile.skills && userProfile.skills.length > 0);
-  if (requireSignal) {
-    filtered = filtered.filter(opp => {
-      const reason = (opp.matchReason || '').toLowerCase();
-      const hasCareer = userProfile.careerGoals && userProfile.careerGoals.some(goal => reason.includes(goal.toLowerCase()));
-      const hasSkill = reason.includes('skills match');
-      return hasCareer || hasSkill;
-    });
-  }
+  const filtered = scoredOpportunities.filter(opp => opp.matchScore >= minScore);
 
   // Sort by match score descending
   filtered.sort((a, b) => b.matchScore - a.matchScore);

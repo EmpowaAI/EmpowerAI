@@ -121,6 +121,7 @@ exports.getAllOpportunities = async (req, res, next) => {
     const hasSearchQuery = typeof q === 'string' && q.trim().length > 0;
     const matchingActive = userProfile && (skills || province || minScore || hasCareerFilter || hasSearchQuery);
 
+    const strictMatch = process.env.OPPORTUNITY_STRICT_MATCH === 'true';
     if (matchingActive) {
       // Fetch a larger pool, then match + paginate (prevents empty results on strict filters)
       const poolLimit = Math.min(Math.max(limitNum * 5, 100), 500);
@@ -129,7 +130,7 @@ exports.getAllOpportunities = async (req, res, next) => {
         .limit(poolLimit)
         .lean();
 
-      userProfile.minMatchScore = minScore ? parseInt(minScore) : 45;
+      userProfile.minMatchScore = minScore ? parseInt(minScore) : (strictMatch ? 60 : 45);
       if (careerTerms.length > 0) {
         userProfile.careerGoals = careerTerms;
       }
@@ -149,7 +150,8 @@ exports.getAllOpportunities = async (req, res, next) => {
         processedOpportunities.length === 0 &&
         hasCareerFilter &&
         !skills &&
-        !hasSearchQuery
+        !hasSearchQuery &&
+        !strictMatch
       ) {
         processedOpportunities = await Opportunity.find(filter)
           .sort(sortSpec)
