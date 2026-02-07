@@ -7,8 +7,12 @@
 
 const mongoose = require('mongoose');
 const Opportunity = require('../models/Opportunity');
+const RefreshRun = require('../models/RefreshRun');
 const { sendSuccess, sendError } = require('../utils/response');
 const logger = require('../utils/logger');
+const { extractSkillsEnhanced } = require('../utils/skillExtractors');
+const { fetchAndSaveJobs } = require('../services/jobAPIService');
+const { fetchAllFeeds } = require('../services/rssFeedService');
 
 /**
  * Seed opportunities database
@@ -53,5 +57,115 @@ exports.getStats = async (req, res, next) => {
   } catch (error) {
     logger.error('Admin: Error getting stats', error);
     sendError(res, error.message || 'Failed to get statistics', 500);
+  }
+};
+
+/**
+ * Refresh opportunities and backfill skills
+ * POST /api/admin/refresh-opportunities
+ */
+exports.refreshOpportunities = async (req, res, next) => {
+  const startedAt = new Date();
+  let refreshRecord;
+  try {
+    const runBackfill = req.body?.backfill !== false;
+    const runFetch = req.body?.fetch !== false;
+
+    let backfill = { processed: 0, updated: 0 };
+    if (runBackfill) {
+      const cursor = Opportunity.find({ isActive: true }).cursor();
+      const bulkOps = [];
+
+      for await (const opp of cursor) {
+        backfill.processed += 1;
+        const baseText = `${opp.title || ''} ${opp.company || ''} ${opp.description || ''}`;
+        const extracted = extractSkillsEnhanced(baseText);
+        if (extracted.length === 0) continue;
+
+        const existing = Array.isArray(opp.skills) ? opp.skills : [];
+        const merged = Array.from(new Set([...existing, ...extracted])).slice(0, 12);
+
+        if (merged.length !== existing.length ||
+            merged.some((skill, idx) => skill !== existing[idx])) {
+          bulkOps.push({
+            updateOne: {
+              filter: { _id: opp._id },
+              update: { $set: { skills: merged } }
+            }
+          });
+          backfill.updated += 1;
+        }
+
+        if (bulkOps.length >= 500) {
+          await Opportunity.bulkWrite(bulkOps);
+          bulkOps.length = 0;
+        }
+      }
+
+      if (bulkOps.length > 0) {
+        await Opportunity.bulkWrite(bulkOps);
+      }
+    }
+
+    let fetch = {
+      jobApis: { new: 0, skipped: 0, total: 0 },
+      rss: { new: 0, skipped: 0, errors: 0 }
+    };
+    if (runFetch) {
+      try {
+        fetch.jobApis = await fetchAndSaveJobs();
+      } catch (error) {
+        logger.error('Admin: Error fetching job APIs', error);
+      }
+
+      try {
+        fetch.rss = await fetchAllFeeds();
+      } catch (error) {
+        logger.error('Admin: Error fetching RSS feeds', error);
+      }
+    }
+
+    const finishedAt = new Date();
+    const durationMs = finishedAt.getTime() - startedAt.getTime();
+    refreshRecord = await RefreshRun.create({
+      startedAt,
+      finishedAt,
+      durationMs,
+      triggeredBy: req.refreshTriggeredBy || 'admin',
+      backfill,
+      fetch,
+      status: 'success'
+    });
+
+    logger.info('Admin: Refresh completed', {
+      triggeredBy: req.refreshTriggeredBy || 'admin',
+      durationMs,
+      backfill,
+      fetch
+    });
+
+    sendSuccess(res, {
+      message: 'Refresh completed',
+      backfill,
+      fetch,
+      refreshId: refreshRecord?._id
+    });
+  } catch (error) {
+    logger.error('Admin: Error refreshing opportunities', error);
+    try {
+      const finishedAt = new Date();
+      const durationMs = finishedAt.getTime() - startedAt.getTime();
+      refreshRecord = await RefreshRun.create({
+        startedAt,
+        finishedAt,
+        durationMs,
+        triggeredBy: req.refreshTriggeredBy || 'admin',
+        status: 'error',
+        error: error.message || 'Unknown error'
+      });
+    } catch (writeError) {
+      logger.error('Admin: Error recording refresh run', writeError);
+    }
+    sendError(res, error.message || 'Failed to refresh opportunities', 500);
   }
 };

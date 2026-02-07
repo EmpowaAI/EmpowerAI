@@ -8,6 +8,7 @@
 const axios = require('axios');
 const Opportunity = require('../models/Opportunity');
 const logger = require('../utils/logger');
+const { extractSkillsEnhanced } = require('../utils/skillExtractors');
 
 // API Configuration
 const ADZUNA_APP_ID = process.env.ADZUNA_APP_ID;
@@ -73,7 +74,7 @@ function transformAdzunaJob(job) {
     province: province,
     description: cleanDescription(job.description || ''),
     requirements: [],
-    skills: extractSkills(job.description || ''),
+    skills: extractSkillsEnhanced(job.description || ''),
     salaryRange: job.salary_min && job.salary_max ? {
       min: job.salary_min,
       max: job.salary_max
@@ -137,7 +138,7 @@ function transformIndeedJob(job) {
     province: province,
     description: cleanDescription(job.snippet || ''),
     requirements: [],
-    skills: extractSkills(job.snippet || ''),
+    skills: extractSkillsEnhanced(job.snippet || ''),
     salaryRange: null, // Indeed API doesn't always provide salary
     deadline: job.date ? new Date(job.date) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
     applicationUrl: job.url || job.link || '',
@@ -294,29 +295,6 @@ function getProvinceFromLocation(location) {
   }
   
   return ['Gauteng'];
-}
-
-function extractSkills(description) {
-  if (!description) return [];
-  
-  const commonSkills = [
-    'JavaScript', 'Python', 'Java', 'React', 'Node.js', 'SQL', 'HTML', 'CSS',
-    'Communication', 'Problem Solving', 'Teamwork', 'Leadership',
-    'Excel', 'Word', 'PowerPoint', 'Customer Service', 'Sales',
-    'Marketing', 'Accounting', 'Finance', 'Project Management',
-    'Agile', 'Scrum', 'Git', 'Docker', 'AWS', 'Azure'
-  ];
-  
-  const foundSkills = [];
-  const descLower = description.toLowerCase();
-  
-  for (const skill of commonSkills) {
-    if (descLower.includes(skill.toLowerCase())) {
-      foundSkills.push(skill);
-    }
-  }
-  
-  return foundSkills.slice(0, 10);
 }
 
 function cleanDescription(description) {
