@@ -15,6 +15,7 @@ import {
   ArrowLeft,
   ChevronRight,
   Settings,
+  Shield,
 } from "lucide-react"
 import { cn } from "../lib/utils"
 import { useUser } from "../lib/user-context"
@@ -29,6 +30,7 @@ const navItems = [
   { icon: FileText, label: "CV Analyzer", path: "/dashboard/cv-analyzer" },
   { icon: Mic, label: "Interview Coach", path: "/dashboard/interview-coach" },
   { icon: Briefcase, label: "My Applications", path: "/dashboard/applications" },
+  { icon: Shield, label: "Admin", path: "/dashboard/admin" },
 ]
 
 export default function DashboardLayout() {
@@ -69,7 +71,8 @@ export default function DashboardLayout() {
         "/dashboard/cv-analyzer",
         "/dashboard",
         "/dashboard/twin",
-        "/dashboard/profile"
+        "/dashboard/profile",
+        "/dashboard/admin"
       ]
       
       if (alwaysAllowed.includes(currentPath)) {
@@ -175,6 +178,7 @@ export default function DashboardLayout() {
               // Determine if item should be disabled
               const shouldDisable = !(
                 item.path === "/dashboard/cv-analyzer" ||
+                item.path === "/dashboard/admin" ||
                 (item.path === "/dashboard/twin" && progress.cvCompleted) ||
                 (progress.cvCompleted && progress.twinCompleted)
               )

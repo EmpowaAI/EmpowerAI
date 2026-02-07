@@ -15,6 +15,7 @@ import InterviewCoach from './pages/InterviewCoach'
 import Applications from './pages/Applications'
 import Profile from './pages/Profile'
 import Chat from './pages/Chat'
+import AdminPanel from './pages/AdminPanel'
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
             <Route path="applications" element={<Applications />} />
             <Route path="chat" element={<Chat />} />
             <Route path="profile" element={<Profile />} />
+            <Route path="admin" element={<AdminPanel />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

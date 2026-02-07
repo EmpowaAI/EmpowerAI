@@ -398,6 +398,57 @@ export const progressAPI = {
   }
 };
 
+const adminRequest = async <T>(endpoint: string, adminKey: string, options: RequestInit = {}): Promise<T> => {
+  const headers = new Headers(options.headers);
+  headers.set('Content-Type', 'application/json');
+  if (adminKey) headers.set('x-admin-key', adminKey);
+
+  const timeout = 60000;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const response = await fetch(`${API_BASE}${endpoint}`, {
+      ...options,
+      headers,
+      signal: controller.signal
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({
+        message: `Request failed with status ${response.status}`,
+        status: response.status
+      }));
+      const errorMessage = error.message || error.data?.message || error.detail || `HTTP error! status: ${response.status}`;
+      const apiError = new Error(errorMessage);
+      (apiError as any).status = error.status || error.statusCode || response.status;
+      (apiError as any).response = {
+        ...error,
+        status: response.status,
+        statusCode: error.statusCode || response.status,
+        data: {
+          ...error,
+          message: errorMessage,
+          code: error.code || error.error
+        }
+      };
+      throw apiError;
+    }
+
+    const data = await response.json();
+    clearTimeout(timeoutId);
+    return data;
+  } catch (error: any) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError' || error.message?.includes('timeout') || error.message?.includes('aborted')) {
+      const timeoutError = new Error('Request timed out. Please check your connection and try again.');
+      (timeoutError as any).isTimeout = true;
+      throw timeoutError;
+    }
+    throw error;
+  }
+};
+
 export const applicationsAPI = {
   track: async (opportunityId: string) => {
     try {
@@ -425,6 +476,29 @@ export const applicationsAPI = {
       console.error('Failed to get application stats:', error);
       throw error;
     }
+  }
+};
+
+export const adminAPI = {
+  getStats: async (adminKey: string) =>
+    adminRequest<any>('/admin/stats', adminKey),
+  getCareerTaxonomy: async (adminKey: string) =>
+    adminRequest<any>('/admin/career-taxonomy', adminKey),
+  updateCareerTaxonomy: async (adminKey: string, taxonomy: any) =>
+    adminRequest<any>('/admin/career-taxonomy', adminKey, {
+      method: 'PUT',
+      body: JSON.stringify({ taxonomy })
+    }),
+  refreshOpportunities: async (adminKey: string, options: { backfill?: boolean; fetch?: boolean; async?: boolean }) => {
+    const query = options.async ? '?async=true' : '';
+    const body = JSON.stringify({
+      backfill: options.backfill !== false,
+      fetch: options.fetch !== false
+    });
+    return adminRequest<any>(`/admin/refresh-opportunities${query}`, adminKey, {
+      method: 'POST',
+      body
+    });
   }
 };
 
