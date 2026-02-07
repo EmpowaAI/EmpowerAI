@@ -22,6 +22,10 @@ router.post('/seed-opportunities', adminController.seedOpportunities);
 // Get database statistics
 router.get('/stats', adminController.getStats);
 
+// Career taxonomy management
+router.get('/career-taxonomy', adminController.getCareerTaxonomy);
+router.put('/career-taxonomy', adminController.updateCareerTaxonomy);
+
 // Refresh opportunities (backfill skills + fetch new)
 router.post('/refresh-opportunities', adminController.refreshOpportunities);
 

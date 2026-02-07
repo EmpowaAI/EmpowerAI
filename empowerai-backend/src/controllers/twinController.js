@@ -1,6 +1,7 @@
 const EconomicTwin = require('../models/EconomicTwin');
 const User = require('../models/User');
 const aiServiceClient = require('../services/aiServiceClient');
+const { recordCareerSelections } = require('../services/careerAnalyticsService');
 
 exports.createEconomicTwin = async (req, res, next) => {
   try {
@@ -67,6 +68,9 @@ exports.createEconomicTwin = async (req, res, next) => {
       if (Object.keys(userUpdates).length > 0) {
         await User.findByIdAndUpdate(userId, userUpdates, { new: true });
       }
+
+      const careersToTrack = (interests && interests.length > 0) ? interests : careerGoals;
+      recordCareerSelections(careersToTrack).catch(() => {});
 
       // Try to regenerate twin data with AI service (non-blocking)
       let updatedTwinData = {};
@@ -174,6 +178,9 @@ exports.createEconomicTwin = async (req, res, next) => {
     if (Object.keys(userUpdates).length > 0) {
       await User.findByIdAndUpdate(userId, userUpdates, { new: true });
     }
+
+    const careersToTrack = (interests && interests.length > 0) ? interests : careerGoals;
+    recordCareerSelections(careersToTrack).catch(() => {});
 
     // Map AI service response to database model (or use defaults if AI service failed)
     const incomeProjection = response?.data?.incomeProjection || response?.data?.incomeProjections;

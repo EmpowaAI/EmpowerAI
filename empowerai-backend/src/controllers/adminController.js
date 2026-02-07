@@ -8,11 +8,13 @@
 const mongoose = require('mongoose');
 const Opportunity = require('../models/Opportunity');
 const RefreshRun = require('../models/RefreshRun');
+const CareerAnalytics = require('../models/CareerAnalytics');
 const { sendSuccess, sendError } = require('../utils/response');
 const logger = require('../utils/logger');
 const { extractSkillsEnhanced } = require('../utils/skillExtractors');
 const { fetchAndSaveJobs } = require('../services/jobAPIService');
 const { fetchAllFeeds } = require('../services/rssFeedService');
+const { getCareerTaxonomy, setCareerTaxonomy } = require('../services/taxonomyService');
 
 /**
  * Seed opportunities database
@@ -48,15 +50,53 @@ exports.getStats = async (req, res, next) => {
   try {
     const opportunityCount = await Opportunity.countDocuments({ isActive: true });
     const totalOpportunities = await Opportunity.countDocuments();
+    const topCareers = await CareerAnalytics.find({})
+      .sort({ count: -1 })
+      .limit(10)
+      .lean();
     
     sendSuccess(res, {
       activeOpportunities: opportunityCount,
       totalOpportunities: totalOpportunities,
+      topCareers,
       timestamp: new Date().toISOString()
     });
   } catch (error) {
     logger.error('Admin: Error getting stats', error);
     sendError(res, error.message || 'Failed to get statistics', 500);
+  }
+};
+
+/**
+ * Get career taxonomy
+ * GET /api/admin/career-taxonomy
+ */
+exports.getCareerTaxonomy = async (req, res, next) => {
+  try {
+    const taxonomy = await getCareerTaxonomy();
+    sendSuccess(res, { taxonomy });
+  } catch (error) {
+    logger.error('Admin: Error getting career taxonomy', error);
+    sendError(res, error.message || 'Failed to get career taxonomy', 500);
+  }
+};
+
+/**
+ * Update career taxonomy
+ * PUT /api/admin/career-taxonomy
+ */
+exports.updateCareerTaxonomy = async (req, res, next) => {
+  try {
+    const incoming = req.body?.taxonomy;
+    if (!incoming || typeof incoming !== 'object') {
+      return sendError(res, 'taxonomy is required and must be an object', 400);
+    }
+
+    const saved = await setCareerTaxonomy(incoming);
+    sendSuccess(res, { taxonomy: saved });
+  } catch (error) {
+    logger.error('Admin: Error updating career taxonomy', error);
+    sendError(res, error.message || 'Failed to update career taxonomy', 500);
   }
 };
 
