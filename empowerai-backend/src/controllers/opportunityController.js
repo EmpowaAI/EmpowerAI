@@ -152,6 +152,20 @@ exports.getAllOpportunities = async (req, res, next) => {
           ? Math.round(processedOpportunities.reduce((sum, o) => sum + o.matchScore, 0) / processedOpportunities.length)
           : 0
       });
+
+      // Fallback: if career goal matching yields zero and no explicit skills/search filters, return unfiltered list
+      if (
+        processedOpportunities.length === 0 &&
+        hasCareerFilter &&
+        !skills &&
+        !hasSearchQuery
+      ) {
+        processedOpportunities = await Opportunity.find(filter)
+          .sort(sortSpec)
+          .skip(skip)
+          .limit(limitNum)
+          .lean();
+      }
     } else {
       // Standard pagination when no matching is applied
       processedOpportunities = await Opportunity.find(filter)
