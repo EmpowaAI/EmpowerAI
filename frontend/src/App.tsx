@@ -16,7 +16,6 @@ import Applications from './pages/Applications'
 import Profile from './pages/Profile'
 import Chat from './pages/Chat'
 import AdminPanel from './pages/AdminPanel'
-import { Navigate } from 'react-router-dom'
 
 function App() {
   return (
