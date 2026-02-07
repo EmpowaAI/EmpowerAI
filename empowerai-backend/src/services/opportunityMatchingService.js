@@ -11,6 +11,7 @@
  */
 
 const logger = require('../utils/logger');
+const educationBoosts = require('../config/educationBoosts');
 
 /**
  * Calculate match score for an opportunity
@@ -26,7 +27,9 @@ function calculateMatchScore(userProfile, opportunity) {
     experience: 0,
     salary: 0,
     type: 0,
-    career: 0
+    career: 0,
+    boost: 0,
+    educationBoost: 0
   };
 
   // 1. Skills matching (40% weight)
@@ -126,11 +129,52 @@ function calculateMatchScore(userProfile, opportunity) {
     weights.career = hasCareerMatch ? 25 : 0;
   }
 
-  score = weights.skills + weights.location + weights.experience + weights.salary + weights.type + weights.career;
+  // 7. Boost signals (up to 15%)
+  let hasBoostMatch = false;
+  if (Array.isArray(userProfile.boostSkills) && userProfile.boostSkills.length > 0) {
+    const boostTerms = userProfile.boostSkills.map(t => t.toLowerCase());
+    const haystack = [
+      opportunity.title,
+      opportunity.company,
+      opportunity.description,
+      Array.isArray(opportunity.skills) ? opportunity.skills.join(' ') : ''
+    ].join(' ').toLowerCase();
+
+    hasBoostMatch = boostTerms.some(term => haystack.includes(term));
+    weights.boost = hasBoostMatch ? 15 : 0;
+  }
+
+  // 8. Education-based boost (up to 10%)
+  if (userProfile.education && educationBoosts?.levels?.length) {
+    const edu = userProfile.education.toLowerCase();
+    const boostTerms = educationBoosts.levels
+      .filter(level => level.match?.some(m => edu.includes(m)))
+      .flatMap(level => level.boostSkills || [])
+      .map(s => s.toLowerCase());
+
+    if (boostTerms.length > 0) {
+      const haystack = [
+        opportunity.title,
+        opportunity.company,
+        opportunity.description,
+        Array.isArray(opportunity.skills) ? opportunity.skills.join(' ') : ''
+      ].join(' ').toLowerCase();
+
+      const educationBoostMatch = boostTerms.some(term => haystack.includes(term));
+      weights.educationBoost = educationBoostMatch ? (educationBoosts.weight || 10) : 0;
+    }
+  }
+
+  score = weights.skills + weights.location + weights.experience + weights.salary + weights.type + weights.career + weights.boost + weights.educationBoost;
   // If the user provided skills/goals and none match, drop to 0
   const hasSignals = (userProfile.skills && userProfile.skills.length > 0) ||
     (userProfile.careerGoals && userProfile.careerGoals.length > 0);
   if (hasSignals && !hasSkillMatch && !hasCareerMatch) {
+    score = 0;
+  }
+
+  // If strict career match is enabled, enforce a career match when goals are provided
+  if (userProfile.strictCareerMatch && userProfile.careerGoals && userProfile.careerGoals.length > 0 && !hasCareerMatch) {
     score = 0;
   }
 
@@ -207,6 +251,7 @@ function extractUserProfile(req) {
     yearsOfExperience: 0,
     salaryExpectation: null,
     preferredJobTypes: ['job', 'internship', 'learnership'],
+    education: user.education || null,
     careerGoals: user.interests || [],
     ...user.profile
   };
@@ -239,6 +284,10 @@ function extractUserProfile(req) {
     if (!Number.isNaN(parsed)) {
       profile.minMatchScore = parsed;
     }
+  }
+
+  if (req.query.strictCareer === 'true') {
+    profile.strictCareerMatch = true;
   }
 
   return profile;

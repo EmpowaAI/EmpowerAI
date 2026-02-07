@@ -1,6 +1,7 @@
 const Opportunity = require('../models/Opportunity');
 const logger = require('../utils/logger');
 const { getMatchedOpportunities, extractUserProfile } = require('../services/opportunityMatchingService');
+const { getCareerTaxonomy } = require('../services/taxonomyService');
 
 exports.getAllOpportunities = async (req, res, next) => {
   try {
@@ -40,26 +41,34 @@ exports.getAllOpportunities = async (req, res, next) => {
 
     const userCareerGoals = Array.isArray(req.user?.interests) ? req.user.interests : [];
 
-    const careerTaxonomy = {
-      'Tech Career': ['software', 'developer', 'engineer', 'data', 'it', 'cyber', 'cloud', 'devops', 'ai', 'ml', 'web', 'mobile'],
-      'Freelancing': ['freelance', 'contract', 'gig', 'remote', 'self-employed'],
-      'Corporate Job': ['corporate', 'office', 'graduate program', 'management', 'analyst', 'coordinator'],
-      'Entrepreneurship': ['entrepreneur', 'startup', 'founder', 'business owner', 'small business'],
-      'Creative Industry': ['design', 'graphic', 'ui', 'ux', 'content', 'writer', 'video', 'photography', 'marketing'],
-      'Finance': ['finance', 'accounting', 'banking', 'audit', 'tax', 'investment', 'financial'],
-      'Healthcare': ['health', 'medical', 'nurse', 'clinic', 'pharmacy', 'care'],
-      'Education': ['teacher', 'education', 'tutor', 'training', 'facilitator', 'lecturer']
-    };
+    const taxonomy = await getCareerTaxonomy();
 
     const expandCareerTerms = (terms) => {
       const expanded = [];
+      const boostSkills = new Set();
+      let strict = false;
+
       for (const term of terms) {
         expanded.push(term);
-        if (careerTaxonomy[term]) {
-          expanded.push(...careerTaxonomy[term]);
+        const entry = taxonomy[term];
+        if (entry) {
+          if (Array.isArray(entry.terms)) {
+            expanded.push(...entry.terms);
+          }
+          if (Array.isArray(entry.boostSkills)) {
+            entry.boostSkills.forEach(skill => boostSkills.add(skill));
+          }
+          if (entry.strict) {
+            strict = true;
+          }
         }
       }
-      return expanded;
+
+      return {
+        terms: expanded,
+        boostSkills: Array.from(boostSkills),
+        strict
+      };
     };
 
     const baseCareerTerms = []
@@ -71,7 +80,8 @@ exports.getAllOpportunities = async (req, res, next) => {
       )
       .filter(Boolean);
 
-    const careerTerms = expandCareerTerms(baseCareerTerms);
+    const careerExpansion = expandCareerTerms(baseCareerTerms);
+    const careerTerms = careerExpansion.terms;
 
     // NOTE: Career goals are used for matching/scoring, not strict DB filtering.
 
@@ -142,6 +152,11 @@ exports.getAllOpportunities = async (req, res, next) => {
       if (careerTerms.length > 0) {
         userProfile.careerGoals = careerTerms;
       }
+      if (careerExpansion.boostSkills.length > 0) {
+        userProfile.boostSkills = careerExpansion.boostSkills;
+      }
+      const strictCareerQuery = req.query.strictCareer === 'true';
+      userProfile.strictCareerMatch = strictCareerQuery || careerExpansion.strict;
 
       processedOpportunities = await getMatchedOpportunities(pool, userProfile);
 
