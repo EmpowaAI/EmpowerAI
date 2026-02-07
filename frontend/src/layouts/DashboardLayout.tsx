@@ -307,8 +307,8 @@ export default function DashboardLayout() {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto app-shell relative">
-          <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto w-full relative z-10">
+        <main className="flex-1 overflow-y-auto bg-gradient-to-b from-background to-muted/20">
+          <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto w-full">
             <Outlet />
           </div>
         </main>

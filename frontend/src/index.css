@@ -94,23 +94,6 @@
   outline-offset: 2px;
 }
 
-.app-shell {
-  background:
-    radial-gradient(1200px 600px at -10% -10%, rgba(20, 184, 166, 0.12), transparent 60%),
-    radial-gradient(900px 500px at 110% -20%, rgba(249, 115, 22, 0.12), transparent 60%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(248, 250, 252, 0.9));
-}
-
-.app-shell::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image: linear-gradient(rgba(15, 118, 110, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(15, 118, 110, 0.08) 1px, transparent 1px);
-  background-size: 60px 60px;
-  opacity: 0.35;
-}
 
 @keyframes fade-in-up {
   from {
