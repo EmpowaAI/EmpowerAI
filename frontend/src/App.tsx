@@ -16,6 +16,7 @@ import Applications from './pages/Applications'
 import Profile from './pages/Profile'
 import Chat from './pages/Chat'
 import AdminPanel from './pages/AdminPanel'
+import { Navigate } from 'react-router-dom'
 
 function App() {
   return (
@@ -40,7 +41,14 @@ function App() {
             <Route path="applications" element={<Applications />} />
             <Route path="chat" element={<Chat />} />
             <Route path="profile" element={<Profile />} />
-            <Route path="admin" element={<AdminPanel />} />
+            <Route
+              path="admin"
+              element={
+                import.meta.env.VITE_ENABLE_ADMIN === 'true'
+                  ? <AdminPanel />
+                  : <Navigate to="/dashboard" replace />
+              }
+            />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

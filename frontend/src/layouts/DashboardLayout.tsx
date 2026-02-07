@@ -30,7 +30,9 @@ const navItems = [
   { icon: FileText, label: "CV Analyzer", path: "/dashboard/cv-analyzer" },
   { icon: Mic, label: "Interview Coach", path: "/dashboard/interview-coach" },
   { icon: Briefcase, label: "My Applications", path: "/dashboard/applications" },
-  { icon: Shield, label: "Admin", path: "/dashboard/admin" },
+  ...(import.meta.env.VITE_ENABLE_ADMIN === "true"
+    ? [{ icon: Shield, label: "Admin", path: "/dashboard/admin" }]
+    : []),
 ]
 
 export default function DashboardLayout() {
@@ -72,7 +74,7 @@ export default function DashboardLayout() {
         "/dashboard",
         "/dashboard/twin",
         "/dashboard/profile",
-        "/dashboard/admin"
+        ...(import.meta.env.VITE_ENABLE_ADMIN === "true" ? ["/dashboard/admin"] : [])
       ]
       
       if (alwaysAllowed.includes(currentPath)) {
@@ -178,7 +180,7 @@ export default function DashboardLayout() {
               // Determine if item should be disabled
               const shouldDisable = !(
                 item.path === "/dashboard/cv-analyzer" ||
-                item.path === "/dashboard/admin" ||
+                (import.meta.env.VITE_ENABLE_ADMIN === "true" && item.path === "/dashboard/admin") ||
                 (item.path === "/dashboard/twin" && progress.cvCompleted) ||
                 (progress.cvCompleted && progress.twinCompleted)
               )
