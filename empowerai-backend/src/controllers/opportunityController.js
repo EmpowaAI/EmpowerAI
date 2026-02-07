@@ -147,7 +147,7 @@ exports.getAllOpportunities = async (req, res, next) => {
     const hasCareerFilter = careerTerms.length > 0;
     const hasSearchQuery = typeof q === 'string' && q.trim().length > 0;
     if (userProfile && (skills || province || minScore || hasCareerFilter || hasSearchQuery)) {
-      userProfile.minMatchScore = minScore ? parseInt(minScore) : 0;
+      userProfile.minMatchScore = minScore ? parseInt(minScore) : 45;
       if (careerTerms.length > 0) {
         userProfile.careerGoals = careerTerms;
       }
