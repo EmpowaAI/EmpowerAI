@@ -44,6 +44,7 @@ export default function Opportunities() {
   const [totalFiltered, setTotalFiltered] = useState<number | null>(null)
   const [reloadTick, setReloadTick] = useState(0)
   const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity | null>(null)
+  const [fallbackNotice, setFallbackNotice] = useState("")
   const { user } = useUser()
 
   useEffect(() => {
@@ -159,9 +160,24 @@ export default function Opportunities() {
         filters.limit = 24
         filters.sort = debouncedSearch || careerGoalFilters.length > 0 ? 'relevance' : 'createdAt'
         
-        const response = await opportunitiesAPI.getAll(filters)
+        setFallbackNotice("")
+        let response = await opportunitiesAPI.getAll(filters)
         
         if (response.status === 'success' && response.data?.opportunities) {
+          const shouldFallback =
+            response.data.opportunities.length === 0 &&
+            careerGoalFilters.length > 0 &&
+            !debouncedSearch &&
+            category === "all"
+
+          if (shouldFallback) {
+            const fallbackFilters = { ...filters }
+            delete fallbackFilters.careerGoals
+            fallbackFilters.sort = 'createdAt'
+            response = await opportunitiesAPI.getAll(fallbackFilters)
+            setFallbackNotice("No exact matches for your goals yet. Showing all opportunities instead.")
+          }
+
           // Transform backend data to match frontend Opportunity interface
           const transformedOpportunities = response.data.opportunities.map((opp: any) => ({
             id: opp._id || opp.id,
@@ -445,6 +461,12 @@ export default function Opportunities() {
           >
             Retry
           </button>
+        </div>
+      )}
+
+      {fallbackNotice && !error && (
+        <div className="px-4 py-3 rounded-lg border border-border bg-card text-xs text-muted-foreground">
+          {fallbackNotice}
         </div>
       )}
 
