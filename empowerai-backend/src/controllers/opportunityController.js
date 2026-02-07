@@ -29,16 +29,7 @@ exports.getAllOpportunities = async (req, res, next) => {
       filter.type = type;
     }
     
-    // Skills filter: check if skills array contains any of the provided skills (case-insensitive)
-    if (skills) {
-      const skillArray = skills.split(',').map(s => s.trim()).filter(s => s);
-      if (skillArray.length > 0) {
-        // Use regex for case-insensitive matching
-        filter.skills = { 
-          $in: skillArray.map(skill => new RegExp(skill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'))
-        };
-      }
-    }
+    // NOTE: Skills are used for matching/scoring, not strict DB filtering.
 
     // Career filter: match selected career goals against title/description/company/skills
     const careerQuery =

@@ -113,7 +113,7 @@ export default function Opportunities() {
             salary: opp.salaryRange 
               ? `R${opp.salaryRange.min?.toLocaleString() || 0} - R${opp.salaryRange.max?.toLocaleString() || 0}`
               : undefined,
-            match: calculateMatchScore(opp, user),
+            match: typeof opp.matchScore === 'number' ? opp.matchScore : calculateMatchScore(opp, user),
             matchReason: opp.matchReason,
             source: opp.source,
             updatedAt: opp.updatedAt,
@@ -152,6 +152,17 @@ export default function Opportunities() {
         }
         if (category && category !== "all") {
           filters.type = category
+        }
+        const cvSkills = localStorage.getItem('cvSkills')
+        if (cvSkills) {
+          try {
+            const skills = JSON.parse(cvSkills)
+            if (Array.isArray(skills) && skills.length > 0) {
+              filters.skills = skills.slice(0, 5).join(',')
+            }
+          } catch {
+            // ignore
+          }
         }
         if (debouncedSearch) {
           filters.q = debouncedSearch
