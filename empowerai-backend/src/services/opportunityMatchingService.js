@@ -111,7 +111,7 @@ function calculateMatchScore(userProfile, opportunity) {
   }
   const hasSkillMatch = skillsMatched > 0;
 
-  // 6. Career goal alignment (bonus up to 10%)
+  // 6. Career goal alignment (bonus up to 25%)
   let hasCareerMatch = false;
   if (userProfile.careerGoals && userProfile.careerGoals.length > 0) {
     const terms = userProfile.careerGoals.map(t => t.toLowerCase());
@@ -123,7 +123,7 @@ function calculateMatchScore(userProfile, opportunity) {
     ].join(' ').toLowerCase();
 
     hasCareerMatch = terms.some(term => haystack.includes(term));
-    weights.career = hasCareerMatch ? 10 : 0;
+    weights.career = hasCareerMatch ? 25 : 0;
   }
 
   score = weights.skills + weights.location + weights.experience + weights.salary + weights.type + weights.career;
@@ -231,6 +231,14 @@ function extractUserProfile(req) {
       .split(',')
       .map(s => s.trim())
       .filter(s => s);
+  }
+
+  // Try to get minimum score from query parameters
+  if (req.query.minScore) {
+    const parsed = parseInt(req.query.minScore, 10);
+    if (!Number.isNaN(parsed)) {
+      profile.minMatchScore = parsed;
+    }
   }
 
   return profile;

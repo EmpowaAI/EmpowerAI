@@ -130,7 +130,15 @@ exports.getAllOpportunities = async (req, res, next) => {
         .limit(poolLimit)
         .lean();
 
-      userProfile.minMatchScore = minScore ? parseInt(minScore) : (strictMatch ? 60 : 45);
+      const hasUserSkills = Array.isArray(userProfile.skills) && userProfile.skills.length > 0;
+      if (minScore) {
+        userProfile.minMatchScore = parseInt(minScore);
+      } else if (strictMatch) {
+        // In strict mode, allow lower threshold when only career goals are provided
+        userProfile.minMatchScore = hasUserSkills ? 60 : 25;
+      } else {
+        userProfile.minMatchScore = hasUserSkills ? 45 : 20;
+      }
       if (careerTerms.length > 0) {
         userProfile.careerGoals = careerTerms;
       }
