@@ -15,8 +15,8 @@ let serverInstance = null;
 app.use(compression());
 
 // Trust proxy - Required for Render and other hosting platforms
-// This allows Express to correctly identify the client IP from X-Forwarded-For header
-app.set('trust proxy', true);
+// Set to 1 so only the first proxy hop is trusted (prevents rate-limit bypass)
+app.set('trust proxy', 1);
 
 // Security middleware
 app.use(helmet({
