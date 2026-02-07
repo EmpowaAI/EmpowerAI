@@ -82,18 +82,7 @@ exports.getAllOpportunities = async (req, res, next) => {
 
     const careerTerms = expandCareerTerms(baseCareerTerms);
 
-    if (careerTerms.length > 0) {
-      const careerRegexes = careerTerms.map(term =>
-        new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i')
-      );
-
-      filter.$or = [
-        { title: { $in: careerRegexes } },
-        { description: { $in: careerRegexes } },
-        { company: { $in: careerRegexes } },
-        { skills: { $in: careerRegexes } }
-      ];
-    }
+    // NOTE: Career goals are used for matching/scoring, not strict DB filtering.
 
     // Text search filter (q) across title/company/description/location
     if (q && typeof q === 'string' && q.trim().length > 0) {
@@ -133,33 +122,43 @@ exports.getAllOpportunities = async (req, res, next) => {
     if (sort === 'deadline') sortSpec = { deadline: 1 };
     if (sort === 'company') sortSpec = { company: 1 };
 
-    // Sort by most recent first by default
-    const opportunities = await Opportunity.find(filter)
-      .sort(sortSpec)
-      .skip(skip)
-      .limit(limitNum)
-      .lean(); // Use lean() for better performance and to get plain JS objects
-
     // Apply smart matching if user profile available
-    let processedOpportunities = opportunities;
+    let processedOpportunities = [];
     
     const userProfile = extractUserProfile(req);
     const hasCareerFilter = careerTerms.length > 0;
     const hasSearchQuery = typeof q === 'string' && q.trim().length > 0;
-    if (userProfile && (skills || province || minScore || hasCareerFilter || hasSearchQuery)) {
+    const matchingActive = userProfile && (skills || province || minScore || hasCareerFilter || hasSearchQuery);
+
+    if (matchingActive) {
+      // Fetch a larger pool, then match + paginate (prevents empty results on strict filters)
+      const poolLimit = Math.min(Math.max(limitNum * 5, 100), 500);
+      const pool = await Opportunity.find(filter)
+        .sort(sortSpec)
+        .limit(poolLimit)
+        .lean();
+
       userProfile.minMatchScore = minScore ? parseInt(minScore) : 45;
       if (careerTerms.length > 0) {
         userProfile.careerGoals = careerTerms;
       }
-      processedOpportunities = await getMatchedOpportunities(opportunities, userProfile);
-      
+
+      processedOpportunities = await getMatchedOpportunities(pool, userProfile);
+
       logger.info('Smart matching applied', {
-        beforeMatching: opportunities.length,
+        beforeMatching: pool.length,
         afterMatching: processedOpportunities.length,
         averageScore: processedOpportunities.length > 0 
           ? Math.round(processedOpportunities.reduce((sum, o) => sum + o.matchScore, 0) / processedOpportunities.length)
           : 0
       });
+    } else {
+      // Standard pagination when no matching is applied
+      processedOpportunities = await Opportunity.find(filter)
+        .sort(sortSpec)
+        .skip(skip)
+        .limit(limitNum)
+        .lean();
     }
 
     // Relevance scoring for q/career terms when requested
@@ -199,30 +198,40 @@ exports.getAllOpportunities = async (req, res, next) => {
       });
     }
 
+    // Paginate after matching (if matching was active)
+    let pagedOpportunities = processedOpportunities;
+    let effectiveTotal = totalFiltered;
+    if (matchingActive) {
+      effectiveTotal = processedOpportunities.length;
+      const start = skip;
+      const end = skip + limitNum;
+      pagedOpportunities = processedOpportunities.slice(start, end);
+    }
+
     logger.info('Opportunities fetched successfully', { 
-      count: processedOpportunities.length,
+      count: pagedOpportunities.length,
       totalInDB: totalCount,
       activeInDB: activeCount,
       filterApplied: JSON.stringify(filter),
-      sampleTitles: processedOpportunities.slice(0, 3).map(o => o.title)
+      sampleTitles: pagedOpportunities.slice(0, 3).map(o => o.title)
     });
 
     res.status(200).json({
       status: 'success',
-      results: processedOpportunities.length,
+      results: pagedOpportunities.length,
       meta: {
         totalInDatabase: activeCount,
-        filtered: processedOpportunities.length,
-        totalFiltered,
+        filtered: pagedOpportunities.length,
+        totalFiltered: effectiveTotal,
         page: pageNum,
         limit: limitNum,
-        totalPages: Math.max(Math.ceil(totalFiltered / limitNum), 1),
-        hasMore: pageNum * limitNum < totalFiltered,
+        totalPages: Math.max(Math.ceil(effectiveTotal / limitNum), 1),
+        hasMore: pageNum * limitNum < effectiveTotal,
         dataSource: 'real opportunities from Adzuna, Indeed, and job boards',
         lastUpdated: new Date().toISOString()
       },
       data: {
-        opportunities: processedOpportunities
+        opportunities: pagedOpportunities
       }
     });
   } catch (error) {
