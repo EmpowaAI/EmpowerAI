@@ -215,75 +215,6 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-6 shadow-sm">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-xs uppercase tracking-wider text-muted-foreground">Your Journey</p>
-              <h2 className="text-2xl font-semibold text-foreground mt-1">Next best steps</h2>
-              <p className="text-sm text-muted-foreground mt-2">
-                Keep momentum by completing each milestone in order.
-              </p>
-            </div>
-            <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-              <Target className="h-6 w-6" />
-            </div>
-          </div>
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-3">
-            {[
-              { label: "Build Digital Twin", done: progress.twinCompleted, path: "/dashboard/twin" },
-              { label: "Analyze CV", done: progress.cvCompleted, path: "/dashboard/cv-analyzer" },
-              { label: "Practice Interview", done: false, path: "/dashboard/interview-coach" },
-            ].map((step, i) => (
-              <Link
-                key={step.label}
-                to={step.path}
-                className={cn(
-                  "flex items-center justify-between px-4 py-3 rounded-xl border transition-colors",
-                  step.done ? "bg-accent/10 border-accent/30 text-foreground" : "bg-muted/40 border-border text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <div className="flex items-center gap-2">
-                  <span className={cn("h-2.5 w-2.5 rounded-full", step.done ? "bg-accent" : "bg-muted-foreground")} />
-                  <span className="text-sm font-medium">{step.label}</span>
-                </div>
-                <ChevronRight className="h-4 w-4" />
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-          <p className="text-xs uppercase tracking-wider text-muted-foreground">Career Snapshot</p>
-          <div className="mt-3 space-y-3">
-            <div>
-              <p className="text-xs text-muted-foreground">Goals</p>
-              <p className="text-sm font-medium text-foreground">
-                {Array.isArray(goals) && goals.length > 0 ? goals.join(", ") : "Set your goals"}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Province</p>
-              <p className="text-sm font-medium text-foreground">
-                {(user as any)?.province || twinData?.province || "Not set"}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Top Skills</p>
-              <p className="text-sm font-medium text-foreground">
-                {Array.isArray(cvSkills) && cvSkills.length > 0 ? cvSkills.slice(0, 5).join(", ") : "Add skills"}
-              </p>
-            </div>
-          </div>
-          <Link
-            to="/dashboard/twin"
-            className="mt-4 inline-flex items-center gap-2 text-sm text-primary hover:text-primary/80 font-medium"
-          >
-            Update profile <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </div>
-
       <div className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-secondary dark:from-primary dark:via-primary dark:to-secondary rounded-xl p-6 md:p-8 shadow-xl border border-primary/20">
         {/* Background image overlay - subtle */}
         <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]">
@@ -410,6 +341,75 @@ export default function Dashboard() {
             </p>
           </div>
         ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-6 shadow-sm">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">Your Journey</p>
+              <h2 className="text-2xl font-semibold text-foreground mt-1">Next best steps</h2>
+              <p className="text-sm text-muted-foreground mt-2">
+                Keep momentum by completing each milestone in order.
+              </p>
+            </div>
+            <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+              <Target className="h-6 w-6" />
+            </div>
+          </div>
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-3">
+            {[
+              { label: "Build Digital Twin", done: progress.twinCompleted, path: "/dashboard/twin" },
+              { label: "Analyze CV", done: progress.cvCompleted, path: "/dashboard/cv-analyzer" },
+              { label: "Practice Interview", done: false, path: "/dashboard/interview-coach" },
+            ].map((step, i) => (
+              <Link
+                key={step.label}
+                to={step.path}
+                className={cn(
+                  "flex items-center justify-between px-4 py-3 rounded-xl border transition-colors",
+                  step.done ? "bg-accent/10 border-accent/30 text-foreground" : "bg-muted/40 border-border text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <span className={cn("h-2.5 w-2.5 rounded-full", step.done ? "bg-accent" : "bg-muted-foreground")} />
+                  <span className="text-sm font-medium">{step.label}</span>
+                </div>
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+          <p className="text-xs uppercase tracking-wider text-muted-foreground">Career Snapshot</p>
+          <div className="mt-3 space-y-3">
+            <div>
+              <p className="text-xs text-muted-foreground">Goals</p>
+              <p className="text-sm font-medium text-foreground">
+                {Array.isArray(goals) && goals.length > 0 ? goals.join(", ") : "Set your goals"}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Province</p>
+              <p className="text-sm font-medium text-foreground">
+                {(user as any)?.province || twinData?.province || "Not set"}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Top Skills</p>
+              <p className="text-sm font-medium text-foreground">
+                {Array.isArray(cvSkills) && cvSkills.length > 0 ? cvSkills.slice(0, 5).join(", ") : "Add skills"}
+              </p>
+            </div>
+          </div>
+          <Link
+            to="/dashboard/twin"
+            className="mt-4 inline-flex items-center gap-2 text-sm text-primary hover:text-primary/80 font-medium"
+          >
+            Update profile <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
