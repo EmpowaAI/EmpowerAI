@@ -1,5 +1,5 @@
 // pages/CVAnalyzer.tsx - Fixed loaders
-import { useState, useCallback, useRef } from "react"
+import { useState, useCallback, useRef, useEffect } from "react"
 import { Upload, CheckCircle, Sparkles, Loader2, ArrowRight } from "lucide-react"
 import { cn } from "../lib/utils"
 import { cvAPI } from "../lib/api"
@@ -27,6 +27,7 @@ export default function CVAnalyzer() {
   const [error, setError] = useState("")
   const [isRateLimited, setIsRateLimited] = useState(false)
   const [retryAfter, setRetryAfter] = useState(60)
+  const [autoRetryCount, setAutoRetryCount] = useState(0)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const navigate = useNavigate()
   const { updateProgress } = useUser()
@@ -50,7 +51,7 @@ export default function CVAnalyzer() {
     }
   }
 
-  const analyzeCV = async () => {
+  const analyzeCV = async (fromRetry = false) => {
     if (!cvText.trim() && !file) {
       setError("Please paste your CV text above or upload a file before continuing.")
       return
@@ -58,6 +59,9 @@ export default function CVAnalyzer() {
 
     setError("")
     setIsAnalyzing(true)
+    if (!fromRetry) {
+      setIsRateLimited(false)
+    }
 
     try {
       let response;
@@ -80,6 +84,10 @@ export default function CVAnalyzer() {
         if (response.data.analysis.extractedSkills) {
           localStorage.setItem('cvSkills', JSON.stringify(response.data.analysis.extractedSkills))
         }
+
+        if (response.data?.fallback) {
+          success("AI is busy. Showing basic CV insights for now.")
+        }
         
         success(`CV analyzed successfully! Found ${response.data.analysis.extractedSkills?.length || 0} skills.`)
         
@@ -96,6 +104,9 @@ export default function CVAnalyzer() {
         setIsRateLimited(true)
         setRetryAfter(err.retryAfter || 60)
         setError(err.message || 'Rate limit reached. Please try again in a moment.')
+        if (!fromRetry) {
+          setAutoRetryCount(0)
+        }
       } else {
         setError(err.message || 'Failed to analyze CV. Please try again.')
       }
@@ -103,6 +114,18 @@ export default function CVAnalyzer() {
       setIsAnalyzing(false)
     }
   }
+
+  useEffect(() => {
+    if (!isRateLimited || isAnalyzing) return
+    if (autoRetryCount >= 2) return
+
+    const timer = setTimeout(() => {
+      setAutoRetryCount((count) => count + 1)
+      analyzeCV(true)
+    }, retryAfter * 1000)
+
+    return () => clearTimeout(timer)
+  }, [isRateLimited, retryAfter, autoRetryCount, isAnalyzing])
 
   return (
     <div className="space-y-5 sm:space-y-6 md:space-y-8 -mx-3 sm:mx-0">
@@ -119,7 +142,13 @@ export default function CVAnalyzer() {
       </div>
 
       {/* Alert Messages */}
-      {isRateLimited && <RateLimitAlert message={error} retryAfter={retryAfter} />}
+      {isRateLimited && (
+        <RateLimitAlert
+          message={error}
+          retryAfter={retryAfter}
+          onRetry={() => analyzeCV(true)}
+        />
+      )}
       {error && !isRateLimited && <ErrorAlert message={error} onDismiss={() => setError("")} />}
 
       {!result ? (
