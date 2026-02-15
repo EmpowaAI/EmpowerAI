@@ -397,3 +397,6 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 *Empowering the next generation, one digital twin at a time.*
 
 </div>
+## Pair Collaboration
+
+This README update was completed through pair programming collaboration.
