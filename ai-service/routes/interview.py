@@ -2,7 +2,7 @@
 FastAPI routes for Interview Coach
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from datetime import datetime, timedelta
 from models.schemas import (
     InterviewStartRequest,
@@ -11,27 +11,28 @@ from models.schemas import (
     InterviewFeedback
 )
 from services.interview_coach import InterviewCoach
+from utils.logger import get_logger
+from utils.ai_client import AIClient
 
 router = APIRouter()
 interview_coach = InterviewCoach()
+ai_client = AIClient()  # Get singleton instance
 
-# Store sessions in memory (in production, use Redis or database)
-# Sessions expire after 1 hour of inactivity
+# Store sessions in memory
 sessions = {}
 SESSION_EXPIRY_HOURS = 1
 
+logger = get_logger()
+
 def cleanup_expired_sessions():
-    """Remove sessions older than SESSION_EXPIRY_HOURS"""
     now = datetime.now()
     expired_keys = []
     
     for session_id, session in sessions.items():
-        # Check if session has a timestamp
-        if 'createdAt' in session:
-            session_age = now - session['createdAt']
+        if 'startedAt' in session and session['startedAt']:
+            session_age = now - session['startedAt']
             if session_age > timedelta(hours=SESSION_EXPIRY_HOURS):
                 expired_keys.append(session_id)
-        # If no timestamp, assume it's old and remove it
         else:
             expired_keys.append(session_id)
     
@@ -39,86 +40,110 @@ def cleanup_expired_sessions():
         del sessions[key]
     
     if expired_keys:
-        print(f"Cleaned up {len(expired_keys)} expired interview session(s)")
+        logger.info(f"Cleaned up {len(expired_keys)} expired sessions")
 
 @router.post("/start", response_model=InterviewSessionResponse)
-async def start_interview(request: InterviewStartRequest):
-    """
-    Start a new interview session
-    """
+async def start_interview(request: InterviewStartRequest, req: Request):
     try:
-        # Clean up expired sessions before creating new one
         cleanup_expired_sessions()
         
-        session = interview_coach.start_session(
+        # Log Azure status and CV data
+        logger.info(f"Azure OpenAI enabled: {ai_client.enabled}")
+        if request.cvData:
+            skill_count = len(request.cvData.sections.skills) if request.cvData.sections else 0
+            logger.info(f"CV data received with {skill_count} skills")
+        else:
+            logger.info("No CV data provided for this session")
+        
+        # Convert CV data to dict for the coach
+        cv_data = request.cvData.dict() if request.cvData else None
+        
+        # AWAIT the async method
+        session = await interview_coach.start_session(
             request.type,
             request.difficulty,
-            request.company
+            request.company,
+            cv_data  # Pass CV data to coach
         )
-        # Add timestamp for expiry tracking
-        session['createdAt'] = datetime.now()
+        
+        session['startedAt'] = datetime.now()
         sessions[session['sessionId']] = session
+        
+        logger.info(f"Interview session started: {session['sessionId']} with Azure: {ai_client.enabled}")
+        
         return InterviewSessionResponse(**session)
+        
     except Exception as e:
+        logger.error(f"Error starting interview: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error starting interview: {str(e)}")
 
-@router.post("/{session_id}/answer", response_model=InterviewFeedback)
-async def submit_answer(session_id: str, answer: InterviewAnswerRequest):
-    """
-    Submit an answer to an interview question and get feedback
-    """
+@router.post("/answer", response_model=InterviewFeedback)
+async def submit_answer(answer: InterviewAnswerRequest, req: Request):
     try:
-        # Clean up expired sessions
         cleanup_expired_sessions()
         
-        if session_id not in sessions:
-            raise HTTPException(status_code=404, detail="Session not found or expired")
+        if answer.sessionId not in sessions:
+            raise HTTPException(status_code=404, detail="Session not found")
         
-        session = sessions[session_id]
+        session = sessions[answer.sessionId]
         questions = session['questions']
         
-        # Find the question - check both 'question' and 'text' fields for compatibility
         question = None
         for q in questions:
-            if q.get('id') == answer.questionId or q.get('id') == answer.questionId:
+            if q.get('id') == answer.questionId:
                 question = q
                 break
         
         if not question:
             raise HTTPException(status_code=404, detail="Question not found")
         
-        # Normalize question format for evaluation
-        question_text = question.get('text') or question.get('question') or ''
-        question_for_eval = {
-            'id': question.get('id'),
-            'question': question_text,
-            'type': question.get('type', 'general'),
-            'difficulty': question.get('difficulty', 'medium')
-        }
+        # Convert CV data to dict if provided
+        cv_data = answer.cvData.dict() if answer.cvData else None
         
-        # Evaluate response
-        feedback_data = interview_coach.evaluate_response(question_for_eval, answer.response)
+        # Log before evaluation
+        logger.info(f"Evaluating answer for question {answer.questionId} with Azure: {ai_client.enabled}")
+        if cv_data:
+            logger.info(f"CV context provided with {len(cv_data.get('sections', {}).get('skills', []))} skills")
+        else:
+            logger.info("No CV context for this answer")
         
-        # Store feedback in session
+        # AWAIT the async method
+        feedback_data = await interview_coach.evaluate_response(question, answer.response, cv_data)
+        
+        # Log after evaluation
+        logger.info(f"Evaluation complete - Score: {feedback_data['score']}, Used Azure: {ai_client.enabled}")
+        
+        if 'strengths' not in feedback_data:
+            feedback_data['strengths'] = []
+        if 'improvements' not in feedback_data:
+            feedback_data['improvements'] = []
+        if 'suggestedAnswer' not in feedback_data:
+            feedback_data['suggestedAnswer'] = None
+        
         session['feedback'].append(feedback_data)
         
         return InterviewFeedback(**feedback_data)
+        
     except HTTPException:
         raise
     except Exception as e:
+        logger.error(f"Error evaluating answer: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error evaluating answer: {str(e)}")
 
-@router.get("/{session_id}")
-async def get_session(session_id: str):
-    """Get interview session details"""
+@router.get("/session/{session_id}")
+async def get_session(session_id: str, req: Request):
     cleanup_expired_sessions()
     
     if session_id not in sessions:
-        raise HTTPException(status_code=404, detail="Session not found or expired")
+        raise HTTPException(status_code=404, detail="Session not found")
+    
     return sessions[session_id]
 
 @router.get("/health")
 async def health_check():
-    """Health check for interview coach service"""
-    return {"status": "ok", "service": "interview_coach"}
-
+    return {
+        "status": "ok", 
+        "service": "interview_coach",
+        "active_sessions": len(sessions),
+        "azure_enabled": ai_client.enabled
+    }

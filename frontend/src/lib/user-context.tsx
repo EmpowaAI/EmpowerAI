@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react'
+// frontend/src/lib/user-context.tsx
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
 import { syncProgressFromBackend } from '../utils/progressSync'
 
 interface User {
@@ -20,6 +21,32 @@ interface User {
   cvAnalyzed?: boolean
 }
 
+export interface CVData {
+  sections: {
+    about: string
+    skills: string[]
+    education: string[]
+    experience: string[]
+    achievements: string[]
+  }
+  score: number
+  readinessLevel: string
+  summary: string
+  linkCheck?: {
+    linkedin: boolean
+    github: boolean
+    portfolio: boolean
+  }
+  recommendations?: string[]
+  missingKeywords?: string[]
+  incomeIdeas?: Array<{
+    title: string
+    difficulty: string
+    potential: string
+    description: string
+  }>
+}
+
 interface UserContextType {
   user: User | null
   setUser: (user: User | null) => void
@@ -31,6 +58,9 @@ interface UserContextType {
     empowermentScore: number | null
   }
   updateProgress: (key: keyof UserContextType['progress'], value: any) => void
+  cvData: CVData | null
+  refreshCVData: () => void
+  clearCVData: () => void
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined)
@@ -48,7 +78,18 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     return null
   })
   
-  // Initialize progress from localStorage
+  const [cvData, setCvData] = useState<CVData | null>(() => {
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        const saved = localStorage.getItem('comprehensiveCVAnalysis')
+        return saved ? JSON.parse(saved) : null
+      }
+    } catch (error) {
+      console.error('Error reading CV data from localStorage:', error)
+    }
+    return null
+  })
+  
   const getProgressFromStorage = () => {
     try {
       if (typeof window !== 'undefined' && window.localStorage) {
@@ -71,8 +112,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   }
 
   const [progress, setProgress] = useState(getProgressFromStorage)
+  const initialLoadDone = useRef(false);
 
-  // Load user from backend on app start if token exists
   useEffect(() => {
     const loadUserFromBackend = async () => {
       const token = localStorage.getItem('empowerai-token')
@@ -95,7 +136,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
               console.log('User loaded from backend:', data.data.user.email)
             }
           } else if (response.status === 401) {
-            // Token is invalid, clear it
             localStorage.removeItem('empowerai-token')
           }
         } catch (error) {
@@ -107,15 +147,17 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     loadUserFromBackend()
   }, [])
 
-  // Sync progress from backend on mount and when user changes - PERMANENT FIX for locked pages
+  // Only sync progress once on mount
   useEffect(() => {
+    if (initialLoadDone.current) return;
+    initialLoadDone.current = true;
+    
     const syncProgress = async () => {
       if (user) {
         try {
           const syncedProgress = await syncProgressFromBackend()
           setProgress(syncedProgress)
           
-          // If twin exists, ensure all pages are unlocked
           if (syncedProgress.cvCompleted && syncedProgress.twinCompleted) {
             localStorage.setItem('cvCompleted', 'true')
             localStorage.setItem('twinCompleted', 'true')
@@ -132,40 +174,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     syncProgress()
   }, [user])
 
-  // Sync progress from localStorage when it changes
-  useEffect(() => {
-    try {
-      const handleStorageChange = () => {
-        setProgress(getProgressFromStorage())
-      }
-      
-      // Listen for storage events (from other tabs)
-      if (typeof window !== 'undefined') {
-        window.addEventListener('storage', handleStorageChange)
-        
-        // Also check localStorage periodically (for same-tab updates)
-        const interval = setInterval(() => {
-          const newProgress = getProgressFromStorage()
-          setProgress(prev => {
-            if (prev.cvCompleted !== newProgress.cvCompleted || 
-                prev.twinCompleted !== newProgress.twinCompleted ||
-                prev.empowermentScore !== newProgress.empowermentScore) {
-              return newProgress
-            }
-            return prev
-          })
-        }, 500) // Check every 500ms
-        
-        return () => {
-          window.removeEventListener('storage', handleStorageChange)
-          clearInterval(interval)
-        }
-      }
-    } catch (error) {
-      console.error('Error setting up progress sync:', error)
-    }
-  }, [])
-
   useEffect(() => {
     try {
       if (typeof window !== 'undefined' && window.localStorage) {
@@ -180,17 +188,19 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user])
 
-  const updateProgress = (key: keyof typeof progress, value: any) => {
-    const newProgress = { ...progress, [key]: value }
-    setProgress(newProgress)
-    try {
-      if (typeof window !== 'undefined' && window.localStorage) {
-        localStorage.setItem(key, String(value))
+  const updateProgress = useCallback((key: keyof typeof progress, value: any) => {
+    setProgress(prev => {
+      const newProgress = { ...prev, [key]: value }
+      try {
+        if (typeof window !== 'undefined' && window.localStorage) {
+          localStorage.setItem(key, String(value))
+        }
+      } catch (error) {
+        console.error('Error updating progress in localStorage:', error)
       }
-    } catch (error) {
-      console.error('Error updating progress in localStorage:', error)
-    }
-  }
+      return newProgress
+    })
+  }, [])
 
   const updateUser = (updates: Partial<User>) => {
     if (user) {
@@ -199,8 +209,35 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  // Only refresh CV data when explicitly called, not on every render
+  const refreshCVData = useCallback(() => {
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        const saved = localStorage.getItem('comprehensiveCVAnalysis')
+        if (saved) {
+          const parsed = JSON.parse(saved)
+          setCvData(parsed)
+          console.log('CV data refreshed:', parsed.sections?.skills?.length || 0, 'skills found')
+        } else {
+          setCvData(null)
+        }
+      }
+    } catch (error) {
+      console.error('Error refreshing CV data:', error)
+      setCvData(null)
+    }
+  }, []) // No dependencies!
+
+  const clearCVData = () => {
+    setCvData(null)
+    localStorage.removeItem('comprehensiveCVAnalysis')
+    localStorage.removeItem('cvSkills')
+    updateProgress('cvCompleted', false)
+  }
+
   const logout = () => {
     setUser(null)
+    setCvData(null)
     setProgress({
       cvCompleted: false,
       twinCompleted: false,
@@ -215,10 +252,22 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('twinCreated')
     localStorage.removeItem('twinFormData')
     localStorage.removeItem('cvSkills')
+    localStorage.removeItem('comprehensiveCVAnalysis')
+    localStorage.removeItem('cvFileName')
   }
 
   return (
-    <UserContext.Provider value={{ user, setUser, updateUser, logout, progress, updateProgress }}>
+    <UserContext.Provider value={{ 
+      user, 
+      setUser, 
+      updateUser, 
+      logout, 
+      progress, 
+      updateProgress,
+      cvData,
+      refreshCVData,
+      clearCVData,
+    }}>
       {children}
     </UserContext.Provider>
   )
