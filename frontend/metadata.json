@@ -1,0 +1,5 @@
+{
+  "name": "Gemini CV Audit & Twin Sync",
+  "description": "A high-performance CV analysis tool that audits market readiness, extracts skills, and suggests income opportunities using Gemini 3 models.",
+  "requestFramePermissions": []
+}

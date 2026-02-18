@@ -12,13 +12,12 @@ from models.schemas import CVAnalysisResponse
 from services.cv_analyzer import CVAnalyzer
 import re
 import json
-import traceback
 
 router = APIRouter()
 cv_analyzer = CVAnalyzer()
 
 def extract_text_from_pdf(file_content: bytes) -> str:
-    """Extract text from PDF file with improved error handling."""
+    """Extract text from PDF file with improved structure preservation"""
     try:
         pdf_file = io.BytesIO(file_content)
         pdf_reader = PyPDF2.PdfReader(pdf_file)
@@ -40,23 +39,14 @@ def extract_text_from_pdf(file_content: bytes) -> str:
         
         print(f"Extracted {len(text)} characters from PDF")
         print(f"First 500 chars:\n{text[:500]}")
-        
-        if not text or len(text.strip()) < 10:
-            raise ValueError("PDF contains insufficient readable text")
-            
         return text
         
     except Exception as e:
         print(f"Error extracting PDF text: {str(e)}")
-        print(traceback.format_exc())
-        # Re-raise as HTTPException with clear message
-        raise HTTPException(
-            status_code=400,
-            detail=f"Could not extract text from PDF: {str(e)}. Please ensure the file is not scanned or image-based."
-        )
+        raise HTTPException(status_code=400, detail=f"Error reading PDF: {str(e)}")
 
 def extract_text_from_docx(file_content: bytes) -> str:
-    """Extract text from DOCX file with error handling."""
+    """Extract text from DOCX file"""
     try:
         docx_file = io.BytesIO(file_content)
         doc = Document(docx_file)
@@ -72,49 +62,22 @@ def extract_text_from_docx(file_content: bytes) -> str:
         
         print(f"Extracted {len(text)} characters from DOCX")
         print(f"First 500 chars:\n{text[:500]}")
-        
-        if not text or len(text.strip()) < 10:
-            raise ValueError("DOCX contains insufficient text")
-            
         return text
         
     except Exception as e:
         print(f"Error extracting DOCX text: {str(e)}")
-        print(traceback.format_exc())
-        raise HTTPException(
-            status_code=400,
-            detail=f"Could not extract text from DOCX: {str(e)}. Please ensure the file is a valid Word document."
-        )
+        raise HTTPException(status_code=400, detail=f"Error reading DOCX: {str(e)}")
 
 def extract_text_from_txt(file_content: bytes) -> str:
-    """Extract text from TXT file with error handling."""
+    """Extract text from TXT file"""
     try:
         text = file_content.decode('utf-8').strip()
         print(f"Extracted {len(text)} characters from TXT")
         print(f"First 500 chars:\n{text[:500]}")
-        
-        if not text or len(text) < 10:
-            raise ValueError("TXT file is empty or too short")
-            
         return text
-    except UnicodeDecodeError as e:
-        print(f"Error decoding TXT (trying latin-1): {e}")
-        try:
-            text = file_content.decode('latin-1').strip()
-            return text
-        except Exception as e2:
-            print(f"Fallback decoding also failed: {e2}")
-            raise HTTPException(
-                status_code=400,
-                detail="Could not decode text file. Please ensure it's a plain text file with UTF-8 encoding."
-            )
     except Exception as e:
         print(f"Error extracting TXT text: {str(e)}")
-        print(traceback.format_exc())
-        raise HTTPException(
-            status_code=400,
-            detail=f"Error reading text file: {str(e)}"
-        )
+        raise HTTPException(status_code=400, detail=f"Error reading text file: {str(e)}")
 
 @router.post("/analyze-file", response_model=CVAnalysisResponse)
 async def analyze_cv_file(
@@ -143,11 +106,10 @@ async def analyze_cv_file(
                 detail="Unsupported file type. Please upload PDF, DOCX, or TXT file."
             )
         
-        # Double-check extracted text
         if not cv_text or len(cv_text.strip()) < 10:
             raise HTTPException(
                 status_code=400,
-                detail="Could not extract sufficient text from file. Please ensure the file contains readable content."
+                detail="Could not extract text from file. Please ensure the file contains readable text."
             )
         
         # Parse job requirements if provided
@@ -160,8 +122,8 @@ async def analyze_cv_file(
                 job_requirements_list = [req.strip() for req in jobRequirements.split(',') if req.strip()]
                 print(f"Parsed job requirements (CSV): {job_requirements_list}")
         
-        # Analyze CV (async)
-        result = await cv_analyzer.analyze_cv(
+        # Analyze CV
+        result = cv_analyzer.analyze_cv(
             cv_text,
             job_requirements_list
         )
@@ -184,12 +146,7 @@ async def analyze_cv_file(
             headers={"Retry-After": str(retry_after)}
         )
     except HTTPException:
-        # Already formatted – re-raise
         raise
     except Exception as e:
-        print(f"Unexpected error analyzing CV file: {str(e)}")
-        print(traceback.format_exc())
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error analyzing CV file: {str(e)}"
-        )
+        print(f"Error analyzing CV file: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error analyzing CV file: {str(e)}")
