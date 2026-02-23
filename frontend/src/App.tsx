@@ -2,8 +2,8 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { UserProvider, useUser } from './lib/user-context'
 import LandingPage from './pages/LandingPage'
-import LoginPage from './pages/LoginPage'
-import SignupPage from './pages/SignupPage'
+import LoginPage from './pages/Auth/LoginPage'
+import SignupPage from './pages/Auth/SignupPage'
 import DashboardLayout from './layouts/DashboardLayout'
 import Dashboard from './pages/Dashboard'
 import CVAnalyzer from './pages/CVAnalyzer'
@@ -12,6 +12,9 @@ import Simulations from './pages/Simulations'
 import Opportunities from './pages/Opportunities'
 import InterviewCoach from './pages/InterviewCoach'
 import AboutPage from './pages/AboutPage'
+import ForgotPassword from './pages/Auth/ForgotPassword'
+import ResetPassword from './pages/Auth/ResetPassword'
+import EmailVerified from './pages/Auth/EmailVerified'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user } = useUser()
@@ -32,6 +35,9 @@ function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/email-verified" element={<EmailVerified />} />
         
         {/* Protected dashboard routes */}
         <Route path="/dashboard" element={

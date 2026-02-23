@@ -1,24 +1,21 @@
-// pages/SignupPage.tsx
+// pages/LoginPage.tsx
 import type React from "react"
 
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { Eye, EyeOff, CheckCircle, Loader2 } from "lucide-react"
-import { authAPI } from "../lib/api"
-import { useUser } from "../lib/user-context"
-import Logo from "../components/Logo"
+import { Eye, EyeOff, Loader2 } from "lucide-react"
+import { authAPI } from "../../lib/api"
+import { useUser } from "../../lib/user-context"
+import Logo from "../../components/Logo"
 
-export default function SignupPage() {
+export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-  })
   const navigate = useNavigate()
-  const { setUser } = useUser()
+  const { setUser, progress } = useUser()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -26,7 +23,7 @@ export default function SignupPage() {
     setIsLoading(true)
 
     try {
-      const response = await authAPI.register(formData)
+      const response = await authAPI.login(email, password)
       if (response.status === "success" && response.data?.user) {
         setUser({
           name: response.data.user.name,
@@ -34,85 +31,73 @@ export default function SignupPage() {
           id: response.data.user.id || response.data.user._id,
           empowermentScore: response.data.user.empowermentScore,
         })
-        // Redirect to CV Analyzer first
-        navigate("/dashboard/cv-analyzer")
+        // Redirect based on progress
+        if (!progress.cvCompleted) {
+          navigate("/dashboard/cv-analyzer")
+        } else if (!progress.twinCompleted) {
+          navigate("/dashboard/twin")
+        } else {
+          navigate("/dashboard")
+        }
       }
     } catch (err: any) {
-      setError(err.message || "Registration failed. Please try again.")
+      setError(err.message || "Login failed. Please check your credentials.")
     } finally {
       setIsLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-background to-cyan-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 flex">
       {/* Left Panel */}
-      <div
-        className="hidden lg:flex flex-1 bg-cover bg-center p-12 flex-col justify-between relative"
-        style={{ backgroundImage: "url(/images/result.jpg)" }}
-      >
-        {/* Semi-transparent overlay for text readability */}
-        <div className="absolute inset-0 bg-black/50" />
+      <div className="hidden lg:flex flex-1 relative p-12 flex-col justify-between overflow-hidden">
+        {/* Background Image */}
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: "url(/images/result.jpg)",
+          }}
+        />
+        {/* Dark overlay for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/60 to-black/70 backdrop-blur-sm" />
 
-        {/* Content with relative positioning to appear above overlay */}
+        {/* Content with higher z-index */}
         <div className="relative z-10">
           <Logo variant="light" size="md" linkTo="/" />
         </div>
+
         <div className="relative z-10">
-          <h1 className="text-4xl font-bold text-white mb-6 drop-shadow-lg">
-            Start your journey to economic empowerment
-          </h1>
-          <ul className="space-y-4">
-            {[
-              "Build your Digital Economic Twin",
-              "Visualize your earning potential",
-              "Get personalized career guidance",
-              "Access SA-specific opportunities",
-            ].map((item, i) => (
-              <li key={i} className="flex items-center gap-3 text-white drop-shadow-md">
-                <CheckCircle className="h-5 w-5 text-accent" />
-                {item}
-              </li>
-            ))}
-          </ul>
+          <h1 className="text-4xl font-bold text-white mb-4 drop-shadow-lg">Welcome back to your economic future</h1>
+          <p className="text-white/90 text-lg drop-shadow-md">
+            Continue building your path to success with AI-powered guidance.
+          </p>
         </div>
-        <p className="text-sm text-white/90 relative z-10 drop-shadow-md">Youth Economic Digital Twin Platform</p>
+
+        <p className="text-sm text-white/80 relative z-10 drop-shadow-md">Youth Economic Digital Twin Platform</p>
       </div>
 
       {/* Right Panel - Form */}
-      <div className="flex-1 flex items-center justify-center p-6 sm:p-8 bg-gradient-to-br from-indigo-50 via-background to-cyan-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950">
+      <div className="flex-1 flex items-center justify-center p-6 sm:p-8">
         <div className="w-full max-w-md bg-card border border-border rounded-2xl shadow-xl p-6 sm:p-8">
           <div className="lg:hidden mb-8">
             <Logo variant="default" size="md" linkTo="/" />
           </div>
 
-          <h2 className="text-3xl font-bold text-foreground mb-2 tracking-tight">Create account</h2>
+          <h2 className="text-3xl font-bold text-foreground mb-2 tracking-tight">Sign in</h2>
           <p className="text-muted-foreground mb-8">
-            Already have an account?{" "}
-            <Link to="/login" className="text-primary hover:text-primary/80 font-medium hover:underline">
-              Sign in
+            Don't have an account?{" "}
+            <Link to="/signup" className="text-primary hover:text-primary/80 font-medium hover:underline">
+              Sign up
             </Link>
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Full Name</label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                placeholder="Enter your name"
-                required
-              />
-            </div>
-
-            <div>
               <label className="block text-sm font-medium text-foreground mb-2">Email</label>
               <input
                 type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                 placeholder="you@example.com"
                 required
@@ -124,10 +109,10 @@ export default function SignupPage() {
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent pr-12 transition-all"
-                  placeholder="Create a password"
+                  placeholder="Enter your password"
                   required
                 />
                 <button
@@ -140,10 +125,18 @@ export default function SignupPage() {
               </div>
             </div>
 
-            <label className="flex items-start gap-2">
-              <input type="checkbox" className="mt-1 rounded border-border text-primary focus:ring-primary" required />
-              <span className="text-sm text-muted-foreground">I agree to the Terms of Service and Privacy Policy</span>
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2">
+                <input type="checkbox" className="rounded border-border text-primary focus:ring-primary" />
+                <span className="text-sm text-muted-foreground">Remember me</span>
+              </label>
+              <Link
+                  to="/forgot-password"
+                  className="text-sm text-primary hover:text-primary/80 hover:underline"
+                >
+                  Forgot password?
+              </Link>
+            </div>
 
             {error && (
               <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-sm text-destructive">
@@ -159,10 +152,10 @@ export default function SignupPage() {
               {isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Creating account...
+                  Signing in...
                 </>
               ) : (
-                "Create account"
+                "Sign in"
               )}
             </button>
           </form>

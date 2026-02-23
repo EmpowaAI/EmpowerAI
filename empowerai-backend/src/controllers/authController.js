@@ -1,147 +1,144 @@
 /**
  * Authentication Controller
- * Principal Engineer Level: Clean separation of concerns with proper error handling
+ * Handles:
+ * - User registration
+ * - User login
+ * - Token validation
+ * - Token refresh
+ * - Logout
+ * Used by auth routes for authentication-related endpoints.
+ * Note: This controller is focused on authentication flows and delegates business logic to AuthService. It does not handle user profile management or email verification, which are responsibilities of UserService and AccountService respectively.
  */
 
-const jwt = require('jsonwebtoken');
 const logger = require('../utils/logger');
 const { sendSuccess } = require('../utils/response');
-const { 
-  UnauthorizedError, 
-} = require('../utils/errors');
-const userService = require('../services/userService');
+const { UnauthorizedError } = require('../utils/errors');
+const AuthService = require('../services/authService');
+const UserRepository = require('../repositories/UserRepository');
+const AccountService = require('../services/accountService');
+const RegisterDto = require('../DTOs/Auth/RegisterDto');
+const LoginDto = require('../DTOs/Auth/LoginDto');
+const User = require('../models/User');
+
+const userRepository = new UserRepository(User);
+const accountService = new AccountService(userRepository);
+const authService = new AuthService(userRepository, accountService);
+
 
 /**
- * Sign JWT token
- * @param {string} id - User ID
- * @returns {string} JWT token
- */
-const signToken = (id) => {
-  if (!process.env.JWT_SECRET) {
-    throw new Error('JWT_SECRET is not configured');
-  }
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN || '7d'
-  });
-};
-
-/**
- * Register new user
+ * Register
  * @route POST /api/auth/register
  * @access Public
  */
 exports.register = async (req, res, next) => {
   const correlationId = req.correlationId;
-  
+  const dto = new RegisterDto(req.body.name, req.body.email, req.body.password);
+
   try {
-    // Use service layer to create user
-    const newUser = await userService.createUser(req.body, correlationId);
-
-    // Generate token
-    const token = signToken(newUser._id);
-
-    // Return success response with token
+    logger.info(`Register attempt for email: ${dto.email}`, { correlationId });
+    const newUser = await authService.register(dto, correlationId);
+    logger.info(`User registered successfully: ${newUser.email}`, { correlationId, userId: newUser._id });
     return sendSuccess(res, {
-      token,
-      user: {
-        id: newUser._id,
-        name: newUser.name,
-        email: newUser.email,
-        province: newUser.province,
-        age: newUser.age,
-      }
+      message: 'Registration successful. Please check your email to verify your account.'
     }, 201);
   } catch (error) {
-    // Errors are handled by global error handler
+    logger.error(`Registration failed for email: ${dto.email}`, { correlationId, error: error.message });
     next(error);
   }
 };
 
+
 /**
- * Login user
+ * Login
  * @route POST /api/auth/login
  * @access Public
  */
 exports.login = async (req, res, next) => {
   const correlationId = req.correlationId;
-  
+  const dto = new LoginDto(req.body.email, req.body.password);
+
   try {
-    const { email, password } = req.body;
-
-    // Find user with password included
-    const user = await userService.findByEmail(email, correlationId, true);
-    
-    if (!user) {
-      logger.warn('Login attempt with non-existent email', { correlationId, email });
-      throw new UnauthorizedError('Incorrect email or password');
-    }
-
-     // Check if email is verified
-    if (!user.isVerified) {
-      logger.warn('Login attempt with unverified email', { correlationId, email, userId: user._id });
-      throw new UnauthorizedError('Email is not verified. Please verify your email first.');
-    }
-
-    // Verify password
-    const isPasswordCorrect = await user.correctPassword(password);
-    if (!isPasswordCorrect) {
-      logger.warn('Login attempt with incorrect password', { correlationId, email, userId: user._id });
-      throw new UnauthorizedError('Incorrect email or password');
-    }
-
-    // Generate token
-    const token = signToken(user._id);
-
-    logger.info('User logged in successfully', {
-      correlationId,
-      userId: user._id,
-      email: user.email,
-    });
-
-    // Return success response with token
+    logger.info(`Login attempt for email: ${dto.email}`, { correlationId });
+    const result = await authService.login(dto, correlationId);
+    logger.info(`Login successful for email: ${dto.email}`, { correlationId, userId: result.userId });
     return sendSuccess(res, {
-      token,
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
       user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        province: user.province,
-        age: user.age,
-        empowermentScore: user.empowermentScore,
+        id: result.userId,
+        name: result.name,
+        email: result.email,
       }
     });
   } catch (error) {
-    // Errors are handled by global error handler
+    logger.error(`Login failed for email: ${dto.email}`, { correlationId, error: error.message });
     next(error);
   }
 };
 
+
 /**
- * Validate token
+ * Refresh Token
+ * @route POST /api/auth/refresh-token
+ * @access Public
+ */
+exports.refreshToken = async (req, res, next) => {
+  const correlationId = req.correlationId;
+  const { refreshToken } = req.body;
+
+  try {
+    logger.info(`Token refresh requested`, { correlationId });
+    const result = await authService.refreshToken(refreshToken, correlationId);
+    logger.info(`Token refreshed successfully`, { correlationId });
+    return sendSuccess(res, { accessToken: result.accessToken });
+  } catch (error) {
+    logger.error(`Token refresh failed`, { correlationId, error: error.message });
+    next(error);
+  }
+};
+
+
+/**
+ * Logout
+ * @route POST /api/auth/logout
+ * @access Private
+ */
+exports.logout = async (req, res, next) => {
+  const correlationId = req.correlationId;
+  const { refreshToken } = req.body;
+
+  try {
+    logger.info(`Logout requested`, { correlationId });
+    await authService.logout(refreshToken, correlationId);
+    logger.info(`Logout successful`, { correlationId });
+    return sendSuccess(res, { message: 'Logged out successfully' });
+  } catch (error) {
+    logger.error(`Logout failed`, { correlationId, error: error.message });
+    next(error);
+  }
+};
+
+
+/**
+ * Validate Token
  * @route GET /api/auth/validate
  * @access Private
  */
 exports.validate = async (req, res, next) => {
   const correlationId = req.correlationId;
-  
+
   try {
-    // User is already attached to req by auth middleware
     const user = req.user;
-
-    logger.debug('Token validated successfully', {
-      correlationId,
-      userId: user.id,
-    });
-
+    logger.info(`Token validated for user: ${user.email}`, { correlationId, userId: user._id });
     return sendSuccess(res, {
       user: {
-        id: user.id,
+        id: user._id,
         name: user.name,
         email: user.email,
-        province: user.province,
       }
     });
   } catch (error) {
+    logger.error(`Token validation failed`, { correlationId, error: error.message });
     next(error);
   }
 };
