@@ -1,10 +1,5 @@
-<<<<<<< Updated upstream
 ﻿import { Routes, Route, Navigate } from 'react-router-dom'
 import { UserProvider, useUser } from './lib/user-context'
-=======
-import { Routes, Route, Navigate } from 'react-router-dom'
-import { UserProvider } from './lib/user-context'
->>>>>>> Stashed changes
 import { ThemeProvider } from './lib/theme'
 import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/Auth/LoginPage'
