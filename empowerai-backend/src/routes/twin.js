@@ -1,4 +1,4 @@
-﻿const express = require('express');
+const express = require('express');
 const { createEconomicTwin, getEconomicTwin, runSimulation } = require('../controllers/twinController');
 const auth = require('../middleware/auth');
 const router = express.Router();

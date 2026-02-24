@@ -326,8 +326,8 @@ export default function Simulations() {
                         border: "1px solid hsl(var(--border))",
                         borderRadius: "0.5rem",
                       }}
-                      formatter={(value: number) => [`R${value.toLocaleString()}`, ""]}
                       labelStyle={{ color: 'hsl(var(--foreground))' }}
+                      formatter={(value: number) => [`R${value.toLocaleString()}`, ""]}
                     />
                     <Legend wrapperStyle={{ color: 'hsl(var(--foreground))' }} />
                     {simulations.map((sim) => {
@@ -407,8 +407,8 @@ export default function Simulations() {
                         border: "1px solid hsl(var(--border))",
                         borderRadius: "0.5rem",
                       }}
-                      formatter={(value: number) => [`${value}%`, "Score"]}
                       labelStyle={{ color: 'hsl(var(--foreground))' }}
+                      formatter={(value: number) => [`${value}%`, "Score"]}
                     />
                     <Bar dataKey="score" fill="#7C3AED" radius={[0, 4, 4, 0]} />
                   </BarChart>
@@ -474,6 +474,3 @@ export default function Simulations() {
     </div>
   )
 }
-
-
-

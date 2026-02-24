@@ -1,4 +1,4 @@
-﻿// LandingPage.tsx - MOBILE-FIRST with Animated Background
+// LandingPage.tsx - MOBILE-FIRST with Animated Background
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import {

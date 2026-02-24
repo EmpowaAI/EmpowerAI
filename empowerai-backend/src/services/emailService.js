@@ -10,7 +10,11 @@ const nodemailer = require('nodemailer');
 
 const { EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASS, FRONTEND_URL } = process.env;
 
+<<<<<<< Updated upstream
 // Check if email is configured - make it optional for graceful degradation
+=======
+// Check if email service is configured
+>>>>>>> Stashed changes
 const isEmailConfigured = EMAIL_HOST && EMAIL_USER && FRONTEND_URL;
 
 if (!isEmailConfigured) {
@@ -18,7 +22,11 @@ if (!isEmailConfigured) {
   console.warn('   Set EMAIL_HOST, EMAIL_USER, EMAIL_PASS, and FRONTEND_URL to enable emails.');
 }
 
+<<<<<<< Updated upstream
 // Create transporter only if configured
+=======
+// Create transporter ONCE (only if configured)
+>>>>>>> Stashed changes
 let transporter = null;
 if (isEmailConfigured) {
   transporter = nodemailer.createTransport({
@@ -29,6 +37,7 @@ if (isEmailConfigured) {
       user: EMAIL_USER,
       pass: EMAIL_PASS,
     },
+<<<<<<< Updated upstream
   });
 }
 
@@ -53,9 +62,36 @@ const baseTemplate = (title, message, buttonText, buttonLink) => {
   `;
 };
 
+=======
+  });
+}
+
+// Core send function
+const send = async (to, subject, html) => {
+  if (!isEmailConfigured || !transporter) {
+    console.log(`[Email] Would send email to ${to}: ${subject}`);
+    console.log(`[Email] Email service not configured - skipping actual send`);
+    return;
+  }
+
+  await transporter.sendMail({
+    from: `"EmpowerAI" <${EMAIL_USER}>`,
+    to,
+    subject,
+    html,
+  });
+  
+  console.log(`[Email] Sent "${subject}" to ${to}`);
+};
+
+// Email verification
+exports.sendVerification = async (email, token) => {
+  const link = `${FRONTEND_URL || 'http://localhost:5173'}/verify?token=${token}`;
+>>>>>>> Stashed changes
 
 class EmailService {
 
+<<<<<<< Updated upstream
   async send(to, subject, html) {
     if (!isEmailConfigured || !transporter) {
       console.log(`[Email] Would send email to ${to}: ${subject}`);
@@ -87,3 +123,23 @@ class EmailService {
 }
 
 module.exports = EmailService;
+=======
+// Password reset
+exports.sendReset = async (email, token) => {
+  const link = `${FRONTEND_URL || 'http://localhost:5173'}/reset-password?token=${token}`;
+
+  await send(
+    email,
+    'Reset your password',
+    `
+      <h2>Password reset</h2>
+      <p>Click the link below to reset your password:</p>
+      <a href="${link}">${link}</a>
+      <p>This link expires in 30 minutes.</p>
+    `
+  );
+};
+
+// Export config status for health checks
+exports.isConfigured = isEmailConfigured;
+>>>>>>> Stashed changes

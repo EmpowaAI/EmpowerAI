@@ -1,4 +1,8 @@
+<<<<<<< Updated upstream:frontend/src/pages/Auth/LoginPage.tsx
 ﻿// pages/Auth/LoginPage.tsx - Enhanced with beautiful animations
+=======
+// pages/LoginPage.tsx - Enhanced with beautiful animations
+>>>>>>> Stashed changes:frontend/src/pages/LoginPage.tsx
 import type React from "react"
 
 import { useState } from "react"
