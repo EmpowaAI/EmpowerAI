@@ -31,6 +31,38 @@ const loginSchema = z.object({
 });
 
 /**
+ * Forgot password validation schema
+ */
+const forgotPasswordSchema = z.object({
+  email: z.string().email('Invalid email address').toLowerCase(),
+});
+
+
+/**
+ * Reset password validation schema
+ */
+const resetPasswordSchema = z.object({
+  token: z.string().min(1, 'Token is required'),
+  newPassword: z.string().min(8, 'Password must be at least 8 characters').regex(
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+    'Password must contain at least one uppercase letter, one lowercase letter, and one number'
+  ),
+});
+
+
+/**
+ * Update profile validation schema
+ */
+const updateProfileSchema = z.object({
+  name: z.string().min(2).max(100).optional(),
+  age: z.number().int().min(16).max(100).optional(),
+  province: z.string().max(50).optional(),
+  education: z.string().max(200).optional(),
+  skills: z.array(z.string()).optional(),
+  interests: z.array(z.string()).optional(),
+});
+
+/**
  * Twin creation validation schema
  */
 const createTwinSchema = z.object({
@@ -85,7 +117,7 @@ const validate = (schema, data) => {
     return schema.parse(data);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const errors = error.errors.map((err) => ({
+      const errors = error.issues.map((err) => ({
         field: err.path.join('.'),
         message: err.message,
       }));
@@ -98,6 +130,8 @@ const validate = (schema, data) => {
 module.exports = {
   registerSchema,
   loginSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
   createTwinSchema,
   simulationSchema,
   cvAnalysisSchema,

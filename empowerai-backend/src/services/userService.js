@@ -1,159 +1,85 @@
 /**
  * User Service
- * Principal Engineer Level: Business logic separated from controllers
+ * Handles:
+ * - User profile retrieval
+ * - User profile updates
+ * - Account deletion
+ * Used by UserController for profile management endpoints.
+ * Note: This service focuses on user profile management and does not handle authentication, email verification, or password resets, which are responsibilities of AuthService and AccountService.
  */
 
-const User = require('../models/User');
-const mongoose = require('mongoose');
 const logger = require('../utils/logger');
-const { NotFoundError, ConflictError, ServiceUnavailableError } = require('../utils/errors');
+const { NotFoundError } = require('../utils/errors');
+const GetUserDto = require('../DTOs/User/GetUserDto');
+const EditUserDto = require('../DTOs/User/EditUserDto');
+
 
 class UserService {
-  /**
-   * Find user by ID
-   * @param {string} userId - User ID
-   * @param {string} correlationId - Request correlation ID
-   * @returns {Promise<object>} User object
-   */
-  async findById(userId, correlationId = null) {
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-      throw new NotFoundError('User not found');
-    }
 
-    const user = await User.findById(userId);
-    
+  constructor(userRepository) {
+    this.userRepository = userRepository;
+  }
+
+
+  //---------------------------------
+  // Get User Profile
+  //---------------------------------
+
+  async getProfile(userId, correlationId = null) {
+    logger.info(`Retrieving profile for user ID: ${userId}`, { correlationId });
+
+    const user = await this.userRepository.findById(userId);
     if (!user) {
-      logger.warn('User not found', { correlationId, userId });
+      logger.warn(`User not found with ID: ${userId}`, { correlationId });
       throw new NotFoundError('User not found');
     }
 
-    return user;
+    logger.info(`Profile retrieved for user ID: ${userId}`, { correlationId });
+    return new GetUserDto(user);
   }
 
-  /**
-   * Find user by email
-   * @param {string} email - User email
-   * @param {string} correlationId - Request correlation ID
-   * @param {boolean} includePassword - Include password in result
-   * @returns {Promise<object|null>} User object or null
-   */
-  async findByEmail(email, correlationId = null, includePassword = false) {
-    // Optimize query: only select needed fields for login
-    const query = User.findOne({ email: email.toLowerCase() });
-    
-    if (includePassword) {
-      query.select('+password');
-    } else {
-      // For non-login queries, exclude password and other heavy fields
-      query.select('-password');
-    }
 
-    // Add lean() for faster queries when we don't need Mongoose document methods
-    // But keep document for login since we need correctPassword method
-    return await query;
-  }
+  //---------------------------------
+  // Update User Profile
+  //---------------------------------
 
-  /**
-   * Check if user exists
-   * @param {string} email - User email
-   * @returns {Promise<boolean>} True if user exists
-   */
-  async userExists(email) {
-    const user = await User.findOne({ email: email.toLowerCase() });
-    return !!user;
-  }
+  async updateProfile(userId, dto, correlationId = null) {
+    logger.info(`Updating profile for user ID: ${userId}`, { correlationId });
 
-  /**
-   * Create new user
-   * @param {object} userData - User data
-   * @param {string} correlationId - Request correlation ID
-   * @returns {Promise<object>} Created user
-   */
-  async createUser(userData, correlationId = null) {
-    // Check database connection
-    if (mongoose.connection.readyState !== 1) {
-      throw new ServiceUnavailableError('Database is not connected', 'mongodb');
-    }
-
-    // Check if user already exists
-    const exists = await this.userExists(userData.email);
-    if (exists) {
-      logger.warn('User creation attempted with existing email', { correlationId, email: userData.email });
-      throw new ConflictError('User already exists with this email');
-    }
-
-    // Create user
-    const user = await User.create({
-      name: userData.name,
-      email: userData.email.toLowerCase(),
-      password: userData.password,
-      age: userData.age,
-      province: userData.province,
-      education: userData.education,
-      skills: userData.skills || [],
-      interests: userData.interests || [],
+    const allowedFields = ['name', 'age', 'province', 'education', 'skills', 'interests'];
+    const updateFields = {};
+    allowedFields.forEach(field => {
+      if (dto[field] !== undefined) updateFields[field] = dto[field];
     });
 
-    logger.info('User created successfully', {
-      correlationId,
-      userId: user._id,
-      email: user.email,
-    });
+    const updatedUser = await this.userRepository.update(userId, updateFields);
+    if (!updatedUser) {
+      logger.warn(`User not found for update with ID: ${userId}`, { correlationId });
+      throw new NotFoundError('User not found');
+    }
 
-    return user;
+    logger.info(`Profile updated for user ID: ${userId}`, { correlationId });
+    return new GetUserDto(updatedUser);
   }
 
-  /**
-   * Update user
-   * @param {string} userId - User ID
-   * @param {object} updateData - Data to update
-   * @param {string} correlationId - Request correlation ID
-   * @returns {Promise<object>} Updated user
-   */
-  async updateUser(userId, updateData, correlationId = null) {
-    const user = await this.findById(userId, correlationId);
 
-    // Remove fields that shouldn't be updated directly
-    const { password, email, ...allowedUpdates } = updateData;
+  //---------------------------------
+  // Delete Account
+  //---------------------------------
 
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      { $set: allowedUpdates },
-      { new: true, runValidators: true }
-    );
+  async deleteAccount(userId, correlationId = null) {
+    logger.info(`Deleting account for user ID: ${userId}`, { correlationId });
 
-    logger.info('User updated successfully', {
-      correlationId,
-      userId,
-      updatedFields: Object.keys(allowedUpdates),
-    });
+    const deletedUser = await this.userRepository.delete(userId);
+    if (!deletedUser) {
+      logger.warn(`User not found for deletion with ID: ${userId}`, { correlationId });
+      throw new NotFoundError('User not found');
+    }
 
-    return updatedUser;
+    logger.info(`Account deleted for user ID: ${userId}`, { correlationId });
+    return true;
   }
 
-  /**
-   * Get user profile (sanitized)
-   * @param {string} userId - User ID
-   * @param {string} correlationId - Request correlation ID
-   * @returns {Promise<object>} User profile
-   */
-  async getUserProfile(userId, correlationId = null) {
-    const user = await this.findById(userId, correlationId);
-
-    return {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      age: user.age,
-      province: user.province,
-      education: user.education,
-      skills: user.skills || [],
-      interests: user.interests || [],
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    };
-  }
 }
 
-module.exports = new UserService();
-
+module.exports = UserService;

@@ -1,13 +1,12 @@
-﻿// pages/LoginPage.tsx - Enhanced with beautiful animations
+﻿// pages/Auth/LoginPage.tsx - Enhanced with beautiful animations
 import type React from "react"
 
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { Zap, Eye, EyeOff, Loader2, Sparkles, TrendingUp, Users } from "lucide-react"
-import { authAPI } from "../lib/api"
-import { useUser } from "../lib/user-context"
-import { syncProgressFromBackend, unlockAllPages } from "../utils/progressSync"
-import Logo from "../components/Logo"
+import { authAPI } from "../../lib/api"
+import { useUser } from "../../lib/user-context"
+import Logo from "../../components/Logo"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -35,40 +34,7 @@ export default function LoginPage() {
           empowermentScore: response.data.user.empowermentScore,
         })
         
-        // Sync progress from backend to ensure accurate state
-        try {
-          const syncedProgress = await syncProgressFromBackend()
-          
-          // Update progress in context
-          updateProgress('cvCompleted', syncedProgress.cvCompleted)
-          updateProgress('twinCompleted', syncedProgress.twinCompleted)
-          if (syncedProgress.empowermentScore) {
-            updateProgress('empowermentScore', syncedProgress.empowermentScore)
-          }
-          
-          // If user has completed everything, unlock all pages and go to dashboard
-          if (syncedProgress.cvCompleted && syncedProgress.twinCompleted) {
-            unlockAllPages(syncedProgress.empowermentScore || undefined)
-            navigate("/dashboard", { replace: true })
-          } else if (syncedProgress.cvCompleted) {
-            // CV completed but twin not completed
-            navigate("/dashboard/twin", { replace: true })
-          } else {
-            // Nothing completed, start with CV
-            navigate("/dashboard/cv-analyzer", { replace: true })
-          }
-        } catch (error) {
-          console.log('Error syncing progress, using local state:', error)
-          // Fallback to local progress state
-          if (!progress.cvCompleted) {
-            navigate("/dashboard/cv-analyzer", { replace: true })
-          } else if (!progress.twinCompleted) {
-            navigate("/dashboard/twin", { replace: true })
-          } else {
-            unlockAllPages(progress.empowermentScore || undefined)
-            navigate("/dashboard", { replace: true })
-          }
-        }
+        navigate("/dashboard", { replace: true })
       }
     } catch (err: any) {
       setError(err.message || "Login failed. Please check your credentials.")
@@ -206,9 +172,12 @@ export default function LoginPage() {
                   />
                   <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">Remember me</span>
                 </label>
-                <a href="#" className="text-sm text-primary hover:text-primary/80 hover:underline font-medium transition-colors">
+                <Link
+                  to="/forgot-password"
+                  className="text-sm text-primary hover:text-primary/80 hover:underline font-medium transition-colors"
+                >
                   Forgot password?
-                </a>
+                </Link>
               </div>
 
               {error && (
