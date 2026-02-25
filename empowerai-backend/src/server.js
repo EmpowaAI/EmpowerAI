@@ -9,6 +9,10 @@ const { apiLimiter } = require('./middleware/rateLimiter');
 
 const app = express();
 
+// Trust proxy - Required for Render and other hosting platforms
+// This allows Express to correctly identify the client IP from X-Forwarded-For header
+app.set('trust proxy', true);
+
 // Security middleware
 app.use(helmet({
   contentSecurityPolicy: {
@@ -50,8 +54,17 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Apply rate limiting to all API routes
-app.use('/api', apiLimiter);
+// Apply rate limiting to all API routes EXCEPT CV, Auth, and Twin routes
+// CV routes: aiServiceLimiter (currently disabled)
+// Auth routes: authLimiter
+// Twin routes: No rate limiting (OpenAI will rate limit before we do)
+app.use('/api', (req, res, next) => {
+  // Skip general rate limiting for routes that have their own specific limiters or don't need it
+  if (req.path.startsWith('/cv') || req.path.startsWith('/auth') || req.path.startsWith('/twin')) {
+    return next();
+  }
+  return apiLimiter(req, res, next);
+});
 
 // Request logging middleware
 app.use(require('./middleware/requestLogger'));
@@ -113,12 +126,13 @@ async function connectDatabase() {
     mongoose.set('bufferCommands', false);
 
     await mongoose.connect(process.env.MONGODB_URI, {
-      serverSelectionTimeoutMS: 30000,
-      socketTimeoutMS: 45000,
-      connectTimeoutMS: 30000,
+      serverSelectionTimeoutMS: 10000, // Reduced from 30s
+      socketTimeoutMS: 30000, // Reduced from 45s
+      connectTimeoutMS: 10000, // Reduced from 30s
       maxPoolSize: 10,
-      minPoolSize: 5,
+      minPoolSize: 2, // Reduced from 5 for faster startup
       bufferCommands: false, // Disable buffering in connection options
+      readPreference: 'primaryPreferred', // Faster reads
     });
     
     logger.info('MongoDB connected successfully', {
@@ -175,6 +189,7 @@ connectDatabase().then(async (connected) => {
 
   // Routes (set up after database connection attempt)
   app.use('/api/auth', require('./routes/auth'));
+  app.use('/api/account', require('./routes/account')); // Email verification & password reset
   app.use('/api/twin', require('./routes/twin'));
   app.use('/api/opportunities', require('./routes/opportunities'));
   app.use('/api/cv', require('./routes/cv'));
@@ -185,6 +200,25 @@ connectDatabase().then(async (connected) => {
   app.use('/api/account', require('./routes/account'));
   app.use('/api/user', require('./routes/user'));
 
+
+  // Root route handler (for Render health checks and general requests)
+  app.get('/', (req, res) => {
+    res.status(200).json({
+      status: 'ok',
+      message: 'EmpowerAI Backend API',
+      version: process.env.APP_VERSION || '1.0.0',
+      endpoints: {
+        health: '/api/health',
+        auth: '/api/auth',
+        twin: '/api/twin',
+        opportunities: '/api/opportunities',
+        cv: '/api/cv',
+        interview: '/api/interview',
+        chat: '/api/chat',
+      },
+      timestamp: new Date().toISOString(),
+    });
+  });
 
   // 404 handler for undefined routes (must be after all other routes)
   app.use((req, res, next) => {

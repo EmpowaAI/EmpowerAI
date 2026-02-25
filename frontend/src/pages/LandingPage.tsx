@@ -1,5 +1,5 @@
-// pages/LandingPage.tsx
-import { useState, useEffect, useLayoutEffect } from "react"
+// LandingPage.tsx - MOBILE-FIRST with Animated Background
+import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import {
   Zap,
@@ -13,188 +13,212 @@ import {
   BarChart3,
   Sparkles,
   X,
-  Bot,
+  Menu,
+  Briefcase,
+  Shield,
+  Star,
+  Award,
+  Play,
 } from "lucide-react"
 import ThemeToggle from "../components/ThemeToggle"
 import Logo from "../components/Logo"
+import { cn } from "../lib/utils"
 
 export default function LandingPage() {
-  const [isMobile, setIsMobile] = useState(false)
-  const [windowWidth, setWindowWidth] = useState(0)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
 
- useLayoutEffect(() => {
-  const checkMobile = () => {
-    setIsMobile(window.innerWidth < 800)
-    setWindowWidth(window.innerWidth)
-  }
-
-  checkMobile()
-  window.addEventListener("resize", checkMobile)
-
-  return () => window.removeEventListener("resize", checkMobile)
-}, [])
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20)
+    }
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 relative overflow-hidden transition-colors duration-300">
-      {/* Background Image */}
-      <div className="absolute inset-0 overflow-hidden">
-        <img 
-          src="/images/landing.png" 
-          alt="" 
-          className="w-full h-full object-cover"
+    <div className="min-h-screen bg-white dark:bg-slate-950 relative overflow-hidden">
+      {/* ANIMATED Background */}
+      <div className="fixed inset-0 -z-10 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-white via-indigo-50/30 to-purple-50/20 dark:from-slate-950 dark:via-indigo-950/30 dark:to-purple-950/20" />
+        <div className="absolute top-0 -left-48 w-96 h-96 bg-gradient-to-br from-indigo-400/30 to-purple-400/30 dark:from-indigo-600/20 dark:to-purple-600/20 rounded-full blur-3xl animate-blob" />
+        <div className="absolute top-0 -right-48 w-96 h-96 bg-gradient-to-br from-cyan-400/30 to-indigo-400/30 dark:from-cyan-600/20 dark:to-indigo-600/20 rounded-full blur-3xl animate-blob animation-delay-2000" />
+        <div className="absolute -bottom-48 left-1/2 w-96 h-96 bg-gradient-to-br from-purple-400/30 to-pink-400/30 dark:from-purple-600/20 dark:to-pink-600/20 rounded-full blur-3xl animate-blob animation-delay-4000" />
+        <div 
+          className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
           style={{
-            opacity: '0.25',
-            filter: 'brightness(0.9)',
+            backgroundImage: `linear-gradient(to right, rgb(99, 102, 241) 1px, transparent 1px), linear-gradient(to bottom, rgb(99, 102, 241) 1px, transparent 1px)`,
+            backgroundSize: '4rem 4rem',
+            animation: 'grid-flow 20s linear infinite'
           }}
-          aria-hidden="true"
         />
-        {/* Overlay gradient for better content readability */}
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/80 via-white/70 to-cyan-50/80 dark:from-slate-900/75 dark:via-slate-800/75 dark:to-slate-900/75"></div>
-        
-        {/* Animated gradient orbs - light mode */}
-        <div className="absolute top-0 -left-1/4 w-[800px] h-[800px] bg-indigo-400/20 dark:bg-indigo-500/10 rounded-full blur-[120px] animate-pulse-soft"></div>
-        <div className="absolute top-1/3 -right-1/4 w-[600px] h-[600px] bg-cyan-400/20 dark:bg-cyan-500/10 rounded-full blur-[100px] animate-pulse-soft" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute bottom-0 left-1/3 w-[700px] h-[700px] bg-indigo-300/15 dark:bg-indigo-400/10 rounded-full blur-[110px] animate-pulse-soft" style={{ animationDelay: '2s' }}></div>
-        
-        {/* Dark mode subtle stars */}
-        <div className="absolute inset-0 dark:opacity-100 opacity-0 transition-opacity duration-500">
-          {[...Array(20)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute rounded-full bg-white/40"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                width: `${Math.random() * 3 + 1}px`,
-                height: `${Math.random() * 3 + 1}px`,
-                animation: `twinkle ${Math.random() * 3 + 2}s ease-in-out infinite`,
-                animationDelay: `${Math.random() * 2}s`,
-              }}
-            />
-          ))}
-        </div>
-      </div>
-      
-      {/* Subtle grid pattern overlay */}
-      <div className="absolute inset-0 opacity-[0.02] dark:opacity-[0.03]" style={{
-        backgroundImage: `linear-gradient(rgba(99, 102, 241, 0.1) 1px, transparent 1px),
-                          linear-gradient(90deg, rgba(99, 102, 241, 0.1) 1px, transparent 1px)`,
-        backgroundSize: '50px 50px',
-      }}></div>
-      
-      {/* Subtle wave pattern */}
-      <div className="absolute bottom-0 left-0 right-0 h-64 opacity-[0.03]">
-        <svg className="w-full h-full" viewBox="0 0 1440 320" preserveAspectRatio="none">
-          <path fill="url(#waveGradient)" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,165.3C1248,149,1344,107,1392,85.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-          <defs>
-            <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#6366f1" />
-              <stop offset="100%" stopColor="#06b6d4" />
-            </linearGradient>
-          </defs>
-        </svg>
       </div>
 
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm shadow-sm">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-4 flex items-center justify-between">
-          <Logo variant="dark" size="md" linkTo="/" />
-          <div className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
-              Features
-            </a>
-            <a href="#how-it-works" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
-              How It Works
-            </a>
-            <a href="#demo" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
-              Demo
-            </a>
-          </div>
-          <div className="flex items-center gap-3 sm:gap-4">
-            <ThemeToggle />
-            <Link to="/login" className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100 transition-colors text-sm sm:text-base">
-              Sign In
-            </Link>
-            <Link
-              to="/signup"
-              className="px-4 py-2 sm:px-6 sm:py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-all duration-200 text-sm sm:text-base shadow-sm hover:shadow-md"
-            >
-              Get Started
-            </Link>
+      {/* Mobile-First Navigation */}
+      <nav className={cn(
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+        scrolled 
+          ? "bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl shadow-sm border-b border-slate-200/50 dark:border-slate-800/50" 
+          : "bg-white/70 dark:bg-slate-900/70 backdrop-blur-lg"
+      )}>
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 md:h-20">
+            <Logo variant="dark" size="lg" linkTo="/" />
+            
+            {/* Desktop Nav */}
+            <div className="hidden lg:flex items-center gap-6 xl:gap-8">
+              <a href="#features" className="text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors text-base">Features</a>
+              <a href="#how-it-works" className="text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors text-base">How It Works</a>
+              <a href="#demo" className="text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors text-base">Demo</a>
+              <a href="#testimonials" className="text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors text-base">Success</a>
+              <ThemeToggle />
+              <Link to="/login" className="text-slate-700 dark:text-slate-300 hover:text-indigo-600 font-medium transition-colors text-base px-4 py-2 min-h-[44px] flex items-center">Sign In</Link>
+              <Link to="/signup" className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-semibold transition-colors shadow-sm hover:shadow-md min-h-[44px] flex items-center text-base">Get Started</Link>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <div className="flex lg:hidden items-center gap-2">
+              <ThemeToggle />
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors min-h-[48px] min-w-[48px] flex items-center justify-center touch-manipulation"
+                aria-label="Toggle menu"
+              >
+                {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Mobile Menu - Enhanced */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 shadow-xl">
+            <div className="px-4 py-4 space-y-1 max-w-7xl mx-auto">
+              <a href="#features" onClick={() => setMobileMenuOpen(false)} className="block py-3.5 px-4 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-colors min-h-[52px] flex items-center text-base">Features</a>
+              <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="block py-3.5 px-4 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-colors min-h-[52px] flex items-center text-base">How It Works</a>
+              <a href="#demo" onClick={() => setMobileMenuOpen(false)} className="block py-3.5 px-4 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-colors min-h-[52px] flex items-center text-base">Demo</a>
+              <a href="#testimonials" onClick={() => setMobileMenuOpen(false)} className="block py-3.5 px-4 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-colors min-h-[52px] flex items-center text-base">Success Stories</a>
+              <div className="pt-2 border-t border-slate-200 dark:border-slate-800 mt-2 space-y-1">
+                <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="block py-3.5 px-4 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-colors min-h-[52px] flex items-center text-base">Sign In</Link>
+                <Link to="/signup" onClick={() => setMobileMenuOpen(false)} className="block py-3.5 px-4 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-center transition-colors min-h-[52px] flex items-center justify-center text-base">Get Started Free</Link>
+              </div>
+            </div>
+          </div>
+        )}
       </nav>
 
-      {/* Hero Section */}
-      <section className="pt-28 pb-16 sm:pt-32 sm:pb-20 px-4 sm:px-6 relative z-20">
-        <div className="mx-auto max-w-7xl relative">
-          <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
-            <div className="flex-1 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-100 border border-indigo-200 text-indigo-700 text-xs sm:text-sm mb-6 sm:mb-8 font-medium">
-                <Sparkles className="h-3 w-3 sm:h-4 sm:w-4" />
-                AI-Powered Career Guidance
+      {/* Mobile-First Hero Section */}
+      <section className="relative pt-20 md:pt-28 lg:pt-32 pb-16 md:pb-20 lg:pb-24 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12 md:gap-16 items-center">
+            {/* Left Content - Mobile Optimized */}
+            <div className="text-center lg:text-left space-y-6 md:space-y-8 relative z-10">
+              <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-100 dark:border-indigo-900 text-indigo-700 dark:text-indigo-300 text-sm md:text-base font-medium animate-fade-in">
+                <Sparkles className="h-4 w-4" />
+                <span className="whitespace-nowrap">AI-Powered Career Guidance</span>
               </div>
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-slate-900 dark:text-slate-100 leading-tight mb-6 sm:mb-8 tracking-tight">
+              
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight text-slate-900 dark:text-white animate-slide-up">
                 Your Digital
-                <span className="text-indigo-600 dark:text-indigo-400">
-                  {" "}
-                  Economic
-                </span>
-                <br className="hidden sm:block" />
-                Twin Awaits
+                <span className="block text-indigo-600 dark:text-indigo-400">Economic Twin</span>
               </h1>
-              <p className="text-lg sm:text-xl md:text-2xl text-slate-600 dark:text-slate-300 max-w-2xl mb-8 sm:mb-10 mx-auto lg:mx-0 leading-relaxed">
-                Visualize your future earning potential. Get personalized career pathways designed for South African
-                youth.
+
+              <p className="text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto lg:mx-0 leading-relaxed animate-fade-in animation-delay-200">
+                Visualize your future earning potential. Get personalized career pathways for South African youth.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+
+              <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center lg:justify-start animate-fade-in animation-delay-400">
                 <Link
                   to="/signup"
-                  className="px-6 py-3 sm:px-8 sm:py-4 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-200 flex items-center justify-center gap-2 text-base sm:text-lg shadow-md hover:shadow-lg transform hover:scale-[1.02]"
+                  className="group inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white px-6 sm:px-8 py-4 rounded-lg font-semibold text-base md:text-lg transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 active:scale-100 min-h-[52px] touch-manipulation w-full sm:w-auto"
                 >
-                  Get Started <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <span>Start Your Journey</span>
+                  <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <a
                   href="#demo"
-                  className="px-6 py-3 sm:px-8 sm:py-4 border-2 border-indigo-600 text-indigo-600 rounded-lg font-semibold hover:bg-indigo-50 transition-all duration-200 text-center text-base sm:text-lg"
+                  className="inline-flex items-center justify-center gap-2 border-2 border-slate-300 dark:border-slate-600 hover:border-indigo-600 dark:hover:border-indigo-400 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 px-6 sm:px-8 py-4 rounded-lg font-semibold text-base md:text-lg transition-all duration-200 hover:scale-105 active:scale-100 min-h-[52px] touch-manipulation w-full sm:w-auto"
                 >
-                  Watch Demo
+                  <Play className="h-5 w-5" />
+                  <span>Watch Demo</span>
                 </a>
               </div>
+
+              {/* Trust Indicators - Mobile Optimized */}
+              <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 md:gap-8 justify-center lg:justify-start pt-4 animate-fade-in animation-delay-600">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex -space-x-2">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div key={i} className="h-9 w-9 md:h-10 md:w-10 rounded-full bg-gradient-to-br from-indigo-400 to-indigo-600 border-2 border-white dark:border-slate-900" />
+                    ))}
+                  </div>
+                  <span className="text-sm md:text-base text-slate-600 dark:text-slate-400 font-medium">1,000+ users</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <Star key={i} className="h-5 w-5 md:h-6 md:w-6 fill-indigo-500 text-indigo-500" />
+                  ))}
+                  <span className="text-sm md:text-base text-slate-600 dark:text-slate-400 font-medium ml-1.5">4.9/5</span>
+                </div>
+              </div>
             </div>
-            <div className="flex-1 relative w-full max-w-md mx-auto lg:mx-0 lg:max-w-none">
-              <div className="relative bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 sm:p-8 shadow-xl mt-10 sm:mt-20 overflow-hidden group">
-                {/* Decorative gradient background */}
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/50 via-transparent to-cyan-50/50 dark:from-indigo-900/20 dark:to-cyan-900/20 opacity-50"></div>
+
+            {/* Right Content - Mobile-First Card */}
+            <div className="relative animate-float mt-8 lg:mt-0">
+              <div className="bg-white/75 dark:bg-slate-900/75 backdrop-blur-xl rounded-2xl md:rounded-3xl shadow-2xl p-6 md:p-8 border border-slate-200/50 dark:border-slate-800/50">
+                <div className="absolute -top-3 -right-3 md:-top-4 md:-right-4 bg-indigo-600 text-white px-4 md:px-6 py-2 rounded-full font-semibold text-xs md:text-sm shadow-lg animate-bounce-slow">
+                  Free Forever
+                </div>
                 
-                <div className="relative">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center shadow-lg ring-4 ring-indigo-100 dark:ring-indigo-900/50">
-                      <span className="text-xl sm:text-2xl">👤</span>
+                <div className="space-y-5 md:space-y-6">
+                  <div className="flex items-center gap-3 md:gap-4">
+                    <div className="h-14 w-14 md:h-16 md:w-16 flex-shrink-0 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center">
+                      <span className="text-2xl">👤</span>
                     </div>
-                    <div>
-                      <p className="font-semibold text-slate-900 dark:text-slate-100 text-base sm:text-lg">Asanda, 22</p>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">Soweto, Gauteng</p>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-base md:text-lg text-slate-900 dark:text-white truncate">Thabo Ndlovu, 23</p>
+                      <p className="text-sm md:text-base text-slate-500 dark:text-slate-400">Johannesburg, GP</p>
                     </div>
                   </div>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-slate-600 text-sm">Empowerment Score</span>
-                    <span className="text-indigo-600 font-bold text-lg">78/100</span>
-                  </div>
-                  <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                    <div className="h-full w-[78%] bg-gradient-to-r from-indigo-600 to-cyan-500 rounded-full"></div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4 mt-6">
-                    <div className="bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-900/30 dark:to-emerald-800/20 rounded-lg p-4 border border-emerald-200 dark:border-emerald-800/50 backdrop-blur-sm">
-                      <p className="text-xs text-emerald-700 dark:text-emerald-400 mb-1 font-medium">3-Month Projection</p>
-                      <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">R4,200/mo</p>
+
+                  <div>
+                    <div className="flex justify-between items-center mb-2.5">
+                      <span className="text-sm md:text-base font-medium text-slate-600 dark:text-slate-400">Empowerment Score</span>
+                      <span className="text-xl md:text-2xl font-bold text-indigo-600 dark:text-indigo-400">82/100</span>
                     </div>
-                    <div className="bg-gradient-to-br from-indigo-50 to-indigo-100/50 dark:from-indigo-900/30 dark:to-indigo-800/20 rounded-lg p-4 border border-indigo-200 dark:border-indigo-800/50 backdrop-blur-sm">
-                      <p className="text-xs text-indigo-700 dark:text-indigo-400 mb-1 font-medium">Best Path</p>
-                      <p className="text-xl font-bold text-indigo-600 dark:text-indigo-400">Mentorship</p>
+                    <div className="h-3 md:h-4 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                      <div className="h-full w-[82%] bg-gradient-to-r from-indigo-600 to-indigo-500 dark:from-indigo-500 dark:to-indigo-400 rounded-full animate-progress" />
                     </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 md:gap-4">
+                    <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-4 md:p-5 border border-slate-200 dark:border-slate-700 hover:scale-105 transition-transform touch-manipulation">
+                      <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Income Potential</p>
+                      <p className="text-lg md:text-xl font-bold text-slate-900 dark:text-white">R8,500<span className="text-sm font-normal text-slate-500">/mo</span></p>
+                    </div>
+                    <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-4 md:p-5 border border-slate-200 dark:border-slate-700 hover:scale-105 transition-transform touch-manipulation">
+                      <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Top Path</p>
+                      <p className="text-lg md:text-xl font-bold text-slate-900 dark:text-white">Tech Skills</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2.5 text-sm md:text-base text-slate-600 dark:text-slate-400 pt-2">
+                    <CheckCircle className="h-5 w-5 md:h-6 md:w-6 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
+                    <span>CV analyzed in 60 seconds</span>
                   </div>
                 </div>
+              </div>
+
+              {/* Floating Success Badge - Hidden on small mobile */}
+              <div className="hidden sm:block absolute -bottom-4 md:-bottom-6 -left-4 md:-left-6 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-xl shadow-xl p-3 md:p-4 border border-slate-200/50 dark:border-slate-800/50 animate-float animation-delay-1000">
+                <div className="flex items-center gap-2 md:gap-3">
+                  <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-indigo-100 dark:bg-indigo-950 flex items-center justify-center flex-shrink-0">
+                    <Award className="h-5 w-5 md:h-6 md:w-6 text-indigo-600 dark:text-indigo-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs md:text-sm font-semibold text-slate-900 dark:text-white">95% Success</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Career matching</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -202,356 +226,251 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="py-12 sm:py-16 border-y border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 relative z-20 transition-colors">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 relative">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8 lg:gap-12">
+      {/* Mobile-First Stats Section */}
+      <section className="py-12 md:py-16 lg:py-20 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm border-y border-slate-200/50 dark:border-slate-800/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10 lg:gap-12">
             {[
-              { icon: Users, value: "63%", label: "Youth Unemployment in SA" },
-              { icon: BarChart3, value: "10K+", label: "Career Paths Analyzed" },
-              { icon: Target, value: "95%", label: "Accuracy Rate" },
-              { icon: Sparkles, value: "24/7", label: "AI Support Available" },
+              { icon: Users, value: "63%", label: "Youth Unemployment", sublabel: "in South Africa" },
+              { icon: Target, value: "1,000+", label: "Users Empowered", sublabel: "and growing" },
+              { icon: BarChart3, value: "10K+", label: "Career Paths", sublabel: "analyzed" },
+              { icon: Zap, value: "24/7", label: "AI Support", sublabel: "always available" },
             ].map((stat, i) => (
-              <div key={i} className="text-center">
-                <div className="flex justify-center mb-4">
-                  <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-indigo-100 flex items-center justify-center border border-indigo-200">
-                    <stat.icon className="h-6 w-6 sm:h-7 sm:w-7 text-indigo-600" />
-                  </div>
+              <div key={i} className="text-center group">
+                <div className="inline-flex h-12 w-12 md:h-14 md:w-14 items-center justify-center rounded-xl bg-indigo-100 dark:bg-indigo-950 mb-3 md:mb-4 group-hover:scale-110 transition-transform touch-manipulation">
+                  <stat.icon className="h-6 w-6 md:h-7 md:w-7 text-indigo-600 dark:text-indigo-400" />
                 </div>
-                <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 dark:text-slate-100 mb-2">{stat.value}</p>
-                <p className="text-sm text-slate-600 dark:text-slate-400">{stat.label}</p>
+                <p className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-1.5 md:mb-2">{stat.value}</p>
+                <p className="text-sm md:text-base font-medium text-slate-900 dark:text-white leading-tight">{stat.label}</p>
+                <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-1">{stat.sublabel}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="features" className="py-16 sm:py-24 px-4 sm:px-6 bg-white dark:bg-slate-900 relative z-20 transition-colors">
-        <div className="mx-auto max-w-7xl relative">
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-slate-100 mb-4 sm:mb-6 tracking-tight">
-              Everything You Need to Succeed
+      {/* Mobile-First Features Section */}
+      <section id="features" className="py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 relative">
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="text-center mb-12 md:mb-16">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-3 md:mb-4">
+              Everything You Need to <span className="text-indigo-600 dark:text-indigo-400">Succeed</span>
             </h2>
-            <p className="text-lg sm:text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
-              Our AI-powered platform provides comprehensive tools for your economic empowerment journey.
+            <p className="text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed">
+              Comprehensive AI-powered tools designed for South African youth
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6 lg:gap-8">
             {[
-              {
-                icon: TrendingUp,
-                title: "Digital Economic Twin",
-                description:
-                  "A dynamic AI model that simulates your multiple economic futures based on skills and choices.",
-              },
-              {
-                icon: BarChart3,
-                title: "Path Simulation",
-                description: "3, 6, and 12-month income projections across different career pathways.",
-              },
-              {
-                icon: Target,
-                title: "Economic Roadmap",
-                description: "Personalized visual journey showing steps, milestones, and required skills.",
-              },
-              {
-                icon: FileText,
-                title: "AI CV Analyzer",
-                description: "Extract skills, identify gaps, and generate improved versions of your CV.",
-              },
-              {
-                icon: Users,
-                title: "Job Fit Matching",
-                description: "Match with realistic SA opportunities including learnerships and bursaries.",
-              },
-              {
-                icon: Mic,
-                title: "Interview Coach",
-                description: "Practice with AI-powered interview simulations and get confidence feedback.",
-              },
+              { icon: TrendingUp, title: "Digital Economic Twin", description: "AI-powered simulation of your economic future based on your skills" },
+              { icon: BarChart3, title: "Path Simulation", description: "Visualize 3, 6, and 12-month income projections across career pathways" },
+              { icon: FileText, title: "CV Analysis", description: "Get instant AI feedback to improve your CV and job applications" },
+              { icon: Briefcase, title: "Opportunity Matching", description: "Find jobs, learnerships, and internships tailored to your profile" },
+              { icon: Mic, title: "Interview Coach", description: "Practice with AI feedback to build confidence and improve performance" },
+              { icon: Shield, title: "Career Roadmap", description: "Step-by-step guidance to achieve your career and financial goals" },
             ].map((feature, i) => (
               <div
                 key={i}
-                className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 sm:p-8 hover:border-indigo-300 dark:hover:border-indigo-500 transition-all duration-300 shadow-sm hover:shadow-lg hover:scale-[1.02] group relative overflow-hidden"
+                className="group bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-xl md:rounded-2xl p-6 md:p-8 border border-slate-200/50 dark:border-slate-800/50 hover:border-indigo-200 dark:hover:border-indigo-900 hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-100 touch-manipulation"
               >
-                <div className="relative">
-                  <div className="absolute inset-0 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-300"></div>
-                  <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-indigo-100 to-indigo-200 dark:from-indigo-900/50 dark:to-indigo-800/50 flex items-center justify-center mb-4 relative shadow-lg border border-indigo-200/50 dark:border-indigo-700/50 group-hover:scale-110 transition-transform duration-300">
-                    <feature.icon className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
-                  </div>
+                <div className="inline-flex h-12 w-12 md:h-14 md:w-14 items-center justify-center rounded-lg md:rounded-xl bg-indigo-100 dark:bg-indigo-950 mb-5 md:mb-6 group-hover:scale-110 transition-transform">
+                  <feature.icon className="h-6 w-6 md:h-7 md:w-7 text-indigo-600 dark:text-indigo-400" />
                 </div>
-                <h3 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">{feature.title}</h3>
-                <p className="text-slate-600 dark:text-slate-300 text-base leading-relaxed">{feature.description}</p>
+                <h3 className="text-lg md:text-xl font-bold text-slate-900 dark:text-white mb-2 md:mb-3">{feature.title}</h3>
+                <p className="text-sm md:text-base text-slate-600 dark:text-slate-400 leading-relaxed">{feature.description}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="how-it-works" className="py-16 sm:py-24 px-4 sm:px-6 bg-slate-50 dark:bg-slate-800/50 relative z-20 transition-colors">
-        <div className="mx-auto max-w-7xl relative">
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-slate-100 mb-4 sm:mb-6 tracking-tight">How It Works</h2>
-            <p className="text-lg sm:text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
-              Get started in minutes and see your future unfold.
+      {/* Mobile-First How It Works */}
+      <section id="how-it-works" className="py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12 md:mb-16">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-3 md:mb-4">
+              Get Started in <span className="text-indigo-600 dark:text-indigo-400">3 Simple Steps</span>
+            </h2>
+            <p className="text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-400 leading-relaxed">
+              Your journey to economic empowerment begins here
             </p>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8">
+
+          <div className="grid md:grid-cols-3 gap-6 md:gap-8">
             {[
-              { step: "01", title: "Create Profile", desc: "Enter your skills, education, and interests" },
-              { step: "02", title: "Build Your Twin", desc: "AI generates your economic digital twin" },
-              { step: "03", title: "Run Simulations", desc: "Compare different career pathways" },
-              { step: "04", title: "Take Action", desc: "Follow your personalized roadmap" },
+              { step: "1", title: "Upload Your CV", description: "Our AI analyzes your skills and qualifications in seconds", icon: FileText },
+              { step: "2", title: "Build Your Twin", description: "Create your digital economic profile with personalized goals", icon: Zap },
+              { step: "3", title: "Explore Your Future", description: "Discover career paths, income projections, and opportunities", icon: TrendingUp },
             ].map((item, i) => (
-              <div key={i} className="text-center">
-                <div className="relative inline-flex items-center justify-center mb-6">
-                  <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-indigo-600 flex items-center justify-center shadow-md">
-                    <div className="text-2xl sm:text-3xl font-bold text-white">
-                      {item.step}
+              <div key={i} className="relative group">
+                <div className="bg-white/75 dark:bg-slate-800/75 backdrop-blur-xl rounded-xl md:rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl transition-all duration-300 group-hover:scale-105 active:scale-100 touch-manipulation">
+                  <div className="absolute -top-5 md:-top-6 left-1/2 -translate-x-1/2 h-10 w-10 md:h-12 md:w-12 rounded-full bg-indigo-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                    <span className="text-white font-bold text-base md:text-lg">{item.step}</span>
+                  </div>
+                  <div className="mt-6 md:mt-8 mb-5 md:mb-6 flex justify-center">
+                    <div className="h-14 w-14 md:h-16 md:w-16 rounded-xl bg-indigo-50 dark:bg-indigo-950 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <item.icon className="h-7 w-7 md:h-8 md:w-8 text-indigo-600 dark:text-indigo-400" />
                     </div>
                   </div>
+                  <h3 className="text-lg md:text-xl font-bold text-slate-900 dark:text-white mb-2 md:mb-3 text-center">{item.title}</h3>
+                  <p className="text-sm md:text-base text-slate-600 dark:text-slate-400 text-center leading-relaxed">{item.description}</p>
                 </div>
-                <h3 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">{item.title}</h3>
-                <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-base">{item.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="demo" className="py-16 sm:py-24 px-4 sm:px-6 bg-white dark:bg-slate-900 relative z-20 transition-colors">
-        <div className="mx-auto max-w-4xl relative">
-          <div className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-8 sm:p-10 md:p-12 shadow-lg">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 dark:text-slate-100 mb-6 sm:mb-8 tracking-tight">
-              Meet Asanda from Soweto
+      {/* Mobile-First Demo Section */}
+      <section id="demo" className="py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 relative">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12 md:mb-16">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-3 md:mb-4">
+              See EmpowerAI in <span className="text-indigo-600 dark:text-indigo-400">Action</span>
             </h2>
-            <div className="space-y-4 text-slate-600 dark:text-slate-300 text-base sm:text-lg leading-relaxed">
-              <p>
-                Asanda, 22, uploads her CV and enters her interests. EmpowerAI builds a digital version of her — her
-                Economic Twin.
-              </p>
-              <p>
-                The twin runs simulations for learnerships, freelancing, a Web Design course, and entry-level support
-                roles.
-              </p>
-              <p className="text-slate-900 dark:text-slate-100 font-semibold">
-                It shows her the best path: Freelancing + learnership → R4,200/month by Month 3.
-              </p>
-              <p>In 20 seconds, she sees her future clearly.</p>
-            </div>
-            <div className="flex flex-wrap gap-3 mt-8">
-              {["Income Projections", "Career Roadmap", "Interview Prep", "Local Opportunities"].map((tag, i) => (
-                <span
-                  key={i}
-                  className="px-4 py-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-full text-sm font-medium text-slate-700 dark:text-slate-200 flex items-center gap-2 shadow-sm"
-                >
-                  <CheckCircle className="h-4 w-4 text-emerald-600" />
-                  <span>{tag}</span>
-                </span>
-              ))}
+            <p className="text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed">
+              Watch how we're helping South African youth discover their economic potential
+            </p>
+          </div>
+
+          <div className="max-w-5xl mx-auto">
+            <div className="relative group cursor-pointer">
+              <div className="relative aspect-video rounded-xl md:rounded-2xl overflow-hidden shadow-2xl border border-slate-200/50 dark:border-slate-800/50 hover:scale-[1.02] transition-transform duration-300 touch-manipulation">
+                <img 
+                  src="/images/result.jpg" 
+                  alt="EmpowerAI Demo Preview" 
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent group-hover:from-black/70 transition-all duration-300" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="h-16 w-16 md:h-20 md:w-20 rounded-full bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300 animate-pulse-slow touch-manipulation">
+                    <Play className="h-8 w-8 md:h-10 md:w-10 text-white ml-1" />
+                  </div>
+                </div>
+                <div className="absolute top-4 right-4 md:top-6 md:right-6 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm px-3 md:px-4 py-2 rounded-full text-xs md:text-sm font-semibold text-slate-900 dark:text-white animate-fade-in">
+                  Demo Coming Soon
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4 md:gap-6 mt-6 md:mt-8">
+                {[
+                  { icon: Zap, title: "Quick Setup", desc: "Under 5 minutes" },
+                  { icon: Target, title: "95% Accurate", desc: "Career matching" },
+                  { icon: CheckCircle, title: "Proven Success", desc: "1,000+ users" },
+                ].map((item, i) => (
+                  <div key={i} className="text-center group hover:scale-105 transition-transform touch-manipulation">
+                    <div className="inline-flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-950 mb-2 md:mb-3 group-hover:scale-110 transition-transform">
+                      <item.icon className="h-5 w-5 md:h-6 md:w-6 text-indigo-600 dark:text-indigo-400" />
+                    </div>
+                    <p className="font-semibold text-sm md:text-base text-slate-900 dark:text-white mb-1">{item.title}</p>
+                    <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400">{item.desc}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-indigo-600 dark:bg-indigo-700 relative z-20 transition-colors">
-        <div className="mx-auto max-w-4xl text-center relative">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-6 sm:mb-8 tracking-tight">
-            Ready to See Your Future?
+      {/* Mobile-First Testimonials */}
+      <section id="testimonials" className="py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="text-center mb-12 md:mb-16">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-3 md:mb-4">
+              Real <span className="text-indigo-600 dark:text-indigo-400">Success Stories</span>
+            </h2>
+            <p className="text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-400 leading-relaxed">
+              See how EmpowerAI is transforming careers across South Africa
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6 lg:gap-8">
+            {[
+              { name: "Lerato M.", location: "Cape Town", role: "Student → Software Developer", quote: "EmpowerAI helped me discover tech skills I didn't know I had. I'm now earning R12k/month!", rating: 5 },
+              { name: "Sipho K.", location: "Durban", role: "Unemployed → Business Owner", quote: "The career simulation showed me entrepreneurship was my path. Best decision I ever made!", rating: 5 },
+              { name: "Nomsa T.", location: "Johannesburg", role: "Waitress → Marketing Pro", quote: "From minimum wage to a career I love. The AI guidance was truly life-changing!", rating: 5 },
+            ].map((testimonial, i) => (
+              <div key={i} className="bg-white/75 dark:bg-slate-900/75 backdrop-blur-xl rounded-xl md:rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200/50 dark:border-slate-800/50 hover:shadow-xl hover:scale-105 active:scale-100 transition-all duration-300 touch-manipulation">
+                <div className="flex gap-1 mb-4">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <Star key={i} className="h-5 w-5 fill-indigo-500 text-indigo-500" />
+                  ))}
+                </div>
+                <p className="text-sm md:text-base text-slate-700 dark:text-slate-300 mb-5 md:mb-6 leading-relaxed">"{testimonial.quote}"</p>
+                <div className="flex items-center gap-3">
+                  <div className="h-11 w-11 md:h-12 md:w-12 flex-shrink-0 rounded-full bg-gradient-to-br from-indigo-400 to-indigo-600" />
+                  <div className="min-w-0">
+                    <p className="font-semibold text-sm md:text-base text-slate-900 dark:text-white truncate">{testimonial.name}</p>
+                    <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 truncate">{testimonial.role}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Mobile-First CTA Section */}
+      <section className="py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700 dark:from-indigo-900 dark:via-indigo-950 dark:to-purple-950 relative overflow-hidden">
+        <div className="absolute inset-0 bg-grid-white/5" />
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 md:mb-6 animate-fade-in leading-tight">
+            Ready to Transform Your Future?
           </h2>
-          <p className="text-lg sm:text-xl text-indigo-100 mb-8 sm:mb-10 max-w-xl mx-auto">
-            Join thousands of South African youth taking control of their economic destiny.
+          <p className="text-base sm:text-lg md:text-xl text-indigo-100 dark:text-indigo-200 mb-6 md:mb-8 max-w-2xl mx-auto animate-fade-in animation-delay-200 leading-relaxed">
+            Join over 1,000 South African youth building better careers with AI-powered guidance
           </p>
           <Link
             to="/signup"
-            className="inline-flex items-center gap-2 px-8 py-4 sm:px-10 sm:py-5 bg-white text-indigo-600 rounded-lg font-semibold hover:bg-indigo-50 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] text-base sm:text-lg"
+            className="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-50 active:bg-slate-100 text-indigo-600 px-8 md:px-10 py-4 md:py-5 rounded-lg font-bold text-base md:text-lg transition-all duration-200 shadow-2xl hover:scale-105 active:scale-100 animate-fade-in animation-delay-400 min-h-[52px] touch-manipulation w-full sm:w-auto max-w-md mx-auto"
           >
-            Start Your Journey <ArrowRight className="h-5 w-5 sm:h-6 sm:w-6" />
+            <span>Start Your Journey Free</span>
+            <ArrowRight className="h-5 w-5 md:h-6 md:w-6" />
           </Link>
         </div>
       </section>
 
-      <footer className="py-12 sm:py-16 px-4 sm:px-6 border-t border-slate-200 dark:border-slate-700 bg-gradient-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-900 relative z-20 transition-colors">
-        <div className="mx-auto max-w-7xl">
-          {/* Main Footer Content */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12 mb-8">
-            {/* Brand Section */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center">
-                  <Zap className="h-5 w-5 text-white" />
-                </div>
-                <span className="text-xl font-bold text-slate-900 dark:text-slate-100">EmpowerAI</span>
-              </div>
-              <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed max-w-xs">
-                Empowering South African youth to visualize and achieve their economic potential through AI-powered career guidance.
+      {/* Mobile-First Footer */}
+      <footer className="bg-slate-900 dark:bg-black text-slate-300 dark:text-slate-400 py-12 md:py-16 px-4 sm:px-6 lg:px-8 border-t border-slate-800">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 mb-10 md:mb-12">
+            <div className="col-span-2 md:col-span-1">
+              <Logo variant="light" size="lg" linkTo="/" />
+              <p className="mt-4 text-sm md:text-base leading-relaxed text-slate-400">
+                Empowering South African youth through AI-driven career guidance.
               </p>
             </div>
-
-            {/* Quick Links */}
-            <div className="space-y-4">
-              <h3 className="font-semibold text-slate-900 dark:text-slate-100 text-sm uppercase tracking-wide">Quick Links</h3>
-              <div className="space-y-2">
-                <a href="#features" className="block text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 text-sm transition-colors">Features</a>
-                <a href="#how-it-works" className="block text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 text-sm transition-colors">How It Works</a>
-                <a href="#demo" className="block text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 text-sm transition-colors">Demo</a>
-                <Link to="/signup" className="block text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 text-sm transition-colors">Get Started</Link>
-              </div>
+            <div>
+              <h3 className="font-semibold text-white mb-3 md:mb-4 text-base">Product</h3>
+              <ul className="space-y-2 text-sm md:text-base">
+                <li><a href="#features" className="hover:text-white transition-colors min-h-[44px] inline-block py-1">Features</a></li>
+                <li><a href="#how-it-works" className="hover:text-white transition-colors min-h-[44px] inline-block py-1">How It Works</a></li>
+                <li><a href="#demo" className="hover:text-white transition-colors min-h-[44px] inline-block py-1">Demo</a></li>
+                <li><a href="#testimonials" className="hover:text-white transition-colors min-h-[44px] inline-block py-1">Success Stories</a></li>
+              </ul>
             </div>
-
-            {/* Empowerment Message */}
-            <div className="space-y-4">
-              <h3 className="font-semibold text-slate-900 dark:text-slate-100 text-sm uppercase tracking-wide">Your Future Starts Here</h3>
-              <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
-                Join thousands of young South Africans taking control of their economic destiny. Build your digital twin, explore career paths, and unlock your potential.
-              </p>
+            <div>
+              <h3 className="font-semibold text-white mb-3 md:mb-4 text-base">Company</h3>
+              <ul className="space-y-2 text-sm md:text-base">
+                <li><Link to="/about" className="hover:text-white transition-colors min-h-[44px] inline-block py-1">About Us</Link></li>
+                <li><a href="#" className="hover:text-white transition-colors min-h-[44px] inline-block py-1">Contact</a></li>
+                <li><a href="#" className="hover:text-white transition-colors min-h-[44px] inline-block py-1">Privacy</a></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold text-white mb-3 md:mb-4 text-base">Get Started</h3>
+              <ul className="space-y-2 text-sm md:text-base">
+                <li><Link to="/signup" className="hover:text-white transition-colors min-h-[44px] inline-block py-1">Sign Up</Link></li>
+                <li><Link to="/login" className="hover:text-white transition-colors min-h-[44px] inline-block py-1">Sign In</Link></li>
+              </ul>
             </div>
           </div>
-
-          {/* Bottom Bar */}
-          <div className="pt-8 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
-              © 2025 EmpowerAI. Built with ❤️ for South African youth.
-            </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
-              Techridle Team
-            </p>
+          <div className="border-t border-slate-800 pt-6 md:pt-8 text-center text-xs md:text-sm text-slate-400">
+            <p>&copy; 2025 EmpowerAI. All rights reserved. Built with care for South African youth.</p>
           </div>
         </div>
       </footer>
-
-      <DigitalTwinChatbot />
     </div>
-  )
-}
-
-function DigitalTwinChatbot() {
-  const [isOpen, setIsOpen] = useState(false)
-  const [isPulsing, setIsPulsing] = useState(true)
-  const [showTooltip, setShowTooltip] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
-
-    checkMobile()
-    window.addEventListener("resize", checkMobile)
-    return () => window.removeEventListener("resize", checkMobile)
-  }, [])
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowTooltip(true)
-    }, 3000)
-
-    const hideTimer = setTimeout(() => {
-      setShowTooltip(false)
-    }, 8000)
-
-    return () => {
-      clearTimeout(timer)
-      clearTimeout(hideTimer)
-    }
-  }, [])
-
-  const handleOpen = () => {
-    setIsOpen(true)
-    setIsPulsing(false)
-    setShowTooltip(false)
-  }
-
-  return (
-    <>
-      <div className={`fixed z-50 ${isMobile ? "bottom-4 right-4" : "bottom-6 right-6"}`}>
-        {showTooltip && !isOpen && (
-          <div
-            className={`absolute bg-white text-gray-900 px-3 py-2 rounded-lg shadow-lg animate-bounce whitespace-nowrap ${isMobile ? "bottom-16 right-0" : "bottom-20 right-0"}`}
-          >
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 text-yellow-400" />
-              <span className="text-xs sm:text-sm font-medium">Meet your Digital Twin!</span>
-            </div>
-            <div
-              className={`absolute ${isMobile ? "-bottom-2 right-4" : "-bottom-2 right-6"} w-0 h-0 border-l-8 border-r-8 border-t-8 border-transparent border-t-white`}
-            />
-          </div>
-        )}
-
-        <button
-          onClick={handleOpen}
-          className={`group relative rounded-full bg-gradient-to-br from-primary via-secondary to-accent shadow-2xl hover:scale-110 transition-all duration-300 flex items-center justify-center overflow-hidden ${isMobile ? "h-12 w-12" : "h-16 w-16"}`}
-        >
-          {isPulsing && (
-            <>
-              <span className="absolute inset-0 rounded-full bg-primary/40 animate-ping" />
-              <span className="absolute inset-[-4px] rounded-full border-2 border-primary/30 animate-pulse" />
-            </>
-          )}
-
-          <div className="absolute inset-1 rounded-full bg-gradient-to-br from-primary to-secondary opacity-80" />
-
-          <div className="relative z-10 flex items-center justify-center">
-            <div className="relative">
-              <Bot className={isMobile ? "h-5 w-5 text-white" : "h-7 w-7 text-white"} />
-              <span className="absolute -top-1 -right-1 h-2 w-2 bg-green-400 rounded-full animate-pulse border border-white" />
-            </div>
-          </div>
-        </button>
-      </div>
-
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div
-            className={`bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl overflow-hidden ${isMobile ? "w-full max-w-sm" : "w-full max-w-md"} max-h-[80vh] flex flex-col`}
-          >
-            <div className="bg-gradient-to-r from-primary to-secondary p-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
-                  <Bot className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-white">Your Digital Twin</h3>
-                  <p className="text-xs text-white/80">Always here to help</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="h-8 w-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
-              >
-                <X className="h-5 w-5 text-white" />
-              </button>
-            </div>
-
-            <div className="flex-1 p-4 overflow-y-auto space-y-4">
-              <div className="flex gap-3">
-                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Bot className="h-5 w-5 text-primary" />
-                </div>
-                <div className="bg-gray-100 rounded-2xl rounded-tl-none p-3 max-w-[80%]">
-                  <p className="text-sm text-gray-800">
-                    Hi! I'm your Digital Economic Twin. I can help you explore career paths, simulate your future
-                    earnings, and guide you towards economic empowerment. What would you like to know?
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-4 border-t border-gray-200 bg-white">
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Ask me anything..."
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-                />
-                <button className="px-4 py-2 bg-gradient-to-r from-primary to-secondary text-white rounded-full font-medium hover:opacity-90 transition-opacity text-sm">
-                  Send
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
   )
 }

@@ -146,7 +146,7 @@ export default function DigitalTwinChatbot() {
       />
 
       {/* Chatbot Container - Fixed size and positioned properly */}
-      <div className="fixed bottom-20 sm:bottom-24 right-4 sm:right-6 z-50 w-[calc(100%-2rem)] sm:w-full max-w-md h-[calc(100vh-6rem)] sm:h-[500px] max-h-[600px] flex flex-col shadow-2xl rounded-xl overflow-hidden animate-in fade-in zoom-in-95">
+      <div className="fixed bottom-6 sm:bottom-8 right-4 sm:right-6 left-4 sm:left-auto z-50 sm:w-96 max-w-full h-[60vh] sm:h-[500px] max-h-[80vh] flex flex-col shadow-2xl rounded-xl overflow-hidden animate-in fade-in zoom-in-95">
         {/* Header */}
         <div className="bg-gradient-to-r from-primary via-primary/90 to-secondary p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -195,7 +195,7 @@ export default function DigitalTwinChatbot() {
                 )}
               </div>
               <div className={cn(
-                "max-w-[85%] sm:max-w-[70%] rounded-2xl p-2.5 sm:p-3 shadow-sm",
+                "max-w-[80%] sm:max-w-[70%] rounded-2xl p-2.5 sm:p-3 shadow-sm",
                 message.sender === 'user'
                   ? 'bg-accent text-white rounded-br-none'
                   : 'bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-bl-none'
@@ -224,7 +224,7 @@ export default function DigitalTwinChatbot() {
               <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
                 <Bot className="h-4 w-4 text-primary" />
               </div>
-              <div className="bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-2xl rounded-bl-none p-3 max-w-[70%]">
+              <div className="bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-2xl rounded-bl-none p-3 max-w-[75%] sm:max-w-[70%]">
                 <div className="flex items-center gap-2">
                   <div className="h-2 w-2 rounded-full bg-indigo-600 dark:bg-indigo-400 animate-bounce" />
                   <div className="h-2 w-2 rounded-full bg-indigo-600 dark:bg-indigo-400 animate-bounce" style={{ animationDelay: '0.2s' }} />
@@ -238,7 +238,7 @@ export default function DigitalTwinChatbot() {
         </div>
 
         {/* Quick Questions - Fixed height */}
-        <div className="p-2 sm:p-3 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800">
+          <div className="p-2 sm:p-3 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800">
           <p className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-2">Quick questions:</p>
           <div className="flex flex-wrap gap-1.5 sm:gap-2">
             {QUICK_QUESTIONS.map((question, index) => (
@@ -255,7 +255,7 @@ export default function DigitalTwinChatbot() {
 
         {/* Input Area - Fixed at bottom */}
         <div className="p-2 sm:p-3 border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800">
-          <div className="flex gap-2">
+            <div className="flex gap-2">
             <input
               ref={inputRef}
               type="text"

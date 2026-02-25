@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Rate Limiting Middleware
  * Principal Engineer Level: Configurable rate limiting with different rules per endpoint
  */
@@ -23,37 +23,40 @@ const apiLimiter = rateLimit({
 });
 
 /**
- * Strict rate limiter for authentication endpoints
+ * Auth rate limiter - Balanced protection without blocking legitimate users
+ * Allows enough attempts for: typos, forgot password, testing
  */
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Limit each IP to 5 requests per windowMs
-  message: 'Too many authentication attempts, please try again later.',
-  skipSuccessfulRequests: true, // Don't count successful requests
+  windowMs: 5 * 60 * 1000, // 5 minutes (reduced from 15)
+  max: 20, // 20 attempts per 5 minutes (increased from 5)
+  message: 'Too many authentication attempts, please try again in a few minutes.',
+  skipSuccessfulRequests: true, // Don't count successful logins/signups
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req, res) => {
     const { RateLimitError } = require('../utils/errors');
     const { sendError } = require('../utils/response');
-    const error = new RateLimitError('Too many authentication attempts, please try again in 15 minutes.', 15 * 60);
+    const retryAfter = Math.ceil((req.rateLimit?.resetTime - Date.now()) / 1000) || 300;
+    const error = new RateLimitError(
+      'Too many authentication attempts. Please try again in a few minutes.',
+      retryAfter
+    );
     return sendError(res, error, 429);
   },
 });
 
 /**
  * Rate limiter for AI service endpoints (more restrictive)
- * Uses user ID if available, otherwise falls back to IP
+ * Removed custom keyGenerator to fix IPv6 error
  */
 const aiServiceLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
-  max: 30, // Limit to 30 requests per minute (increased from 10)
+  max: 1000, // Very permissive, let OpenAI handle rate limits
   message: 'Too many AI service requests, please try again later.',
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-  // Use user ID for rate limiting if authenticated, otherwise use IP
-  keyGenerator: (req) => {
-    return req.user?.id || req.ip || 'unknown';
-  },
+  skipSuccessfulRequests: true, // Only count failed requests
+  // Removed custom keyGenerator - use default IP-based rate limiting (supports IPv6)
   handler: (req, res) => {
     const { RateLimitError } = require('../utils/errors');
     const { sendError } = require('../utils/response');
@@ -80,4 +83,3 @@ module.exports = {
   authLimiter,
   aiServiceLimiter,
 };
-

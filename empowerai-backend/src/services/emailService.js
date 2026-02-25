@@ -10,19 +10,27 @@ const nodemailer = require('nodemailer');
 
 const { EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASS, FRONTEND_URL, EMAIL_FROM } = process.env;
 
-if (!EMAIL_HOST || !EMAIL_USER || !FRONTEND_URL || !EMAIL_FROM) {
-  throw new Error('Email environment variables not configured');
+// Check if email is configured - make it optional for graceful degradation
+const isEmailConfigured = EMAIL_HOST && EMAIL_USER && FRONTEND_URL && EMAIL_PORT && EMAIL_FROM;
+
+if (!isEmailConfigured) {
+  console.warn('⚠️  Email service not configured. Email features will be disabled.');
+  console.warn('   Set EMAIL_HOST, EMAIL_USER, EMAIL_PASS, and FRONTEND_URL to enable emails.');
 }
 
-const transporter = nodemailer.createTransport({
-  host: EMAIL_HOST,
-  port: Number(EMAIL_PORT),
-  secure: false,
-  auth: {
-    user: EMAIL_USER,
-    pass: EMAIL_PASS,
-  },
-});
+// Create transporter only if configured
+let transporter = null;
+if (isEmailConfigured) {
+  transporter = nodemailer.createTransport({
+    host: EMAIL_HOST,
+    port: Number(EMAIL_PORT) || 587,
+    secure: false,
+    auth: {
+      user: EMAIL_USER,
+      pass: EMAIL_PASS,
+    },
+  });
+}
 
 const baseTemplate = (title, message, buttonText, buttonLink) => {
   return `
@@ -49,12 +57,19 @@ const baseTemplate = (title, message, buttonText, buttonLink) => {
 class EmailService {
 
   async send(to, subject, html) {
+    if (!isEmailConfigured || !transporter) {
+      console.log(`[Email] Would send email to ${to}: ${subject}`);
+      console.log(`[Email] Email service not configured - skipping actual send`);
+      return;
+    }
+    
     await transporter.sendMail({
       from: `"EmpowerAI" <${EMAIL_FROM}>`,
       to,
       subject,
       html,
     });
+    console.log(`[Email] Sent "${subject}" to ${to}`);
   }
 
   async sendVerification(email, token) {

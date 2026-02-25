@@ -22,9 +22,20 @@ async def analyze_cv(request: CVAnalysisRequest):
         )
         return CVAnalysisResponse(**result)
     except RateLimitError as e:
+        # Extract retry_after from OpenAI error if available
+        retry_after = 60  # Default
+        if hasattr(e, 'response') and e.response:
+            retry_after_header = e.response.headers.get('retry-after')
+            if retry_after_header:
+                try:
+                    retry_after = int(retry_after_header)
+                except:
+                    pass
+        
         raise HTTPException(
             status_code=429,
-            detail="OpenAI API rate limit exceeded. Please try again in a few moments."
+            detail="OpenAI API rate limit exceeded. Please try again in a few moments.",
+            headers={"Retry-After": str(retry_after)}
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error analyzing CV: {str(e)}")

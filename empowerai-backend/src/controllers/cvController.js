@@ -1,5 +1,5 @@
 const aiServiceClient = require('../services/aiServiceClient');
-const { AppError, BadRequestError, ServiceUnavailableError } = require('../utils/errors');
+const { AppError, BadRequestError, ServiceUnavailableError, RateLimitError } = require('../utils/errors');
 const FormData = require('form-data');
 const axios = require('axios');
 const fs = require('fs').promises;
@@ -110,7 +110,13 @@ exports.analyzeCV = async (req, res, next) => {
           errorMsg = `Cannot connect to AI service at ${aiServiceUrl}. The service may be down or not accepting connections.`;
           break;
         case 'ECONNABORTED':
-          errorMsg = `AI service request timed out after ${REQUEST_TIMEOUT}ms. The service may be slow or unresponsive.`;
+          // Check if this is a Render cold start
+          const isRender = (process.env.AI_SERVICE_URL || '').includes('render.com') || (process.env.AI_SERVICE_URL || '').includes('onrender.com');
+          if (isRender || error.isRenderColdStart) {
+            errorMsg = `AI service is waking up (Render free tier cold start). Please wait 30-60 seconds and try again.`;
+          } else {
+            errorMsg = `AI service request timed out after ${REQUEST_TIMEOUT}ms. The service may be slow or unresponsive.`;
+          }
           break;
         case 'ENOTFOUND':
           errorMsg = `Cannot resolve AI service hostname. Please check that AI_SERVICE_URL (${aiServiceUrl}) is correct.`;
@@ -200,16 +206,24 @@ exports.analyzeCVFile = async (req, res, next) => {
       code: error.code
     });
     
-    // Check for rate limit errors
+    // Check for rate limit errors (from OpenAI API via AI service)
     const errorMessage = error.message || '';
-    if (error.isRateLimit || errorMessage.toLowerCase().includes('rate limit')) {
-      const retryAfter = error.retryAfter || 60;
-      const message = errorMessage || `AI service is rate limited. Please try again in ${retryAfter} seconds.`;
+    const isOpenAIRateLimit = error.response?.status === 429 && 
+                              (errorMessage.toLowerCase().includes('openai') || 
+                               errorMessage.toLowerCase().includes('rate limit'));
+    
+    if (error.isRateLimit || isOpenAIRateLimit || errorMessage.toLowerCase().includes('rate limit')) {
+      const retryAfter = error.retryAfter || error.response?.data?.retryAfter || 60;
+      // Provide clearer message if it's OpenAI rate limit
+      const message = isOpenAIRateLimit 
+        ? 'OpenAI API rate limit reached. Please wait a moment and try again.'
+        : errorMessage || `AI service is rate limited. Please try again in ${retryAfter} seconds.`;
       return res.status(429).json({
         status: 'error',
         message,
         retryAfter,
-        code: 'RATE_LIMIT'
+        code: 'RATE_LIMIT',
+        source: isOpenAIRateLimit ? 'openai' : 'backend'
       });
     }
     
@@ -226,8 +240,13 @@ exports.analyzeCVFile = async (req, res, next) => {
       
       if (status === 400) {
         return next(new BadRequestError(message));
-      } else if (status === 429 || status === 503) {
-        return next(new ServiceUnavailableError(message));
+      } else if (status === 429) {
+        // Rate limit error - use RateLimitError class
+        const retryAfter = data?.retryAfter || data?.retry_after || 60;
+        const rateLimitMessage = `AI service is currently rate limited. Please wait ${retryAfter} seconds and try again.`;
+        return next(new RateLimitError(rateLimitMessage, retryAfter));
+      } else if (status === 503) {
+        return next(new ServiceUnavailableError(message || 'AI service is temporarily unavailable. Please try again later.'));
       } else if (status >= 500) {
         return next(new ServiceUnavailableError('AI service is temporarily unavailable. Please try again later.'));
       } else {
@@ -235,12 +254,18 @@ exports.analyzeCVFile = async (req, res, next) => {
       }
     }
     
-    // Network errors
+    // Network errors or errors without response
     if (!error.response) {
+      if (error.code === 'ECONNREFUSED' || error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+        return next(new ServiceUnavailableError('AI service is temporarily unavailable. This might be due to the service waking up (Render free tier). Please wait a moment and try again.'));
+      }
       const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
       return next(new ServiceUnavailableError(`AI service is unavailable. Please check if the service is running at ${aiServiceUrl}.`));
     }
     
-    next(error);
+    // If we get here, it's an unexpected error - make it operational so it shows a proper message
+    const unexpectedError = new AppError(error.message || 'Failed to analyze CV file. Please try again.', error.status || 500);
+    unexpectedError.isOperational = true;
+    next(unexpectedError);
   }
 };

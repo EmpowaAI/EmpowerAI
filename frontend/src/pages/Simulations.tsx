@@ -235,37 +235,37 @@ export default function Simulations() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-5 sm:space-y-6 md:space-y-8 -mx-3 sm:mx-0">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-3 sm:px-0">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Income Simulations</h1>
-          <p className="text-muted-foreground">Compare different career pathways and see your earning potential</p>
+          <h1 className="text-2xl sm:text-2xl md:text-3xl font-bold text-foreground">Income Simulations</h1>
+          <p className="text-base sm:text-base text-muted-foreground mt-1 sm:mt-0">Compare different career pathways and see your earning potential</p>
         </div>
-        <div className="flex items-center gap-2 px-4 py-2 bg-secondary/20 text-secondary rounded-lg">
+        <div className="flex items-center gap-2 px-4 py-2.5 sm:py-2 bg-secondary/20 text-secondary rounded-lg text-sm sm:text-base min-h-[44px] touch-manipulation">
           <Zap className="h-5 w-5" />
           <span className="font-medium">
-            Empowerment Score: {empowermentScore ? `${empowermentScore.toFixed(1)}/100` : "—"}
+            Score: {empowermentScore ? `${empowermentScore.toFixed(1)}/100` : "—"}
           </span>
         </div>
       </div>
 
       {/* Path Selection */}
-      <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-foreground mb-4">Select Pathways to Compare</h2>
-        <div className="flex flex-wrap gap-3 mb-4">
+      <div className="bg-card border border-border rounded-none sm:rounded-xl p-5 sm:p-6 shadow-sm mx-3 sm:mx-0">
+        <h2 className="text-lg sm:text-lg md:text-xl font-semibold text-foreground mb-4">Select Pathways to Compare</h2>
+        <div className="flex flex-wrap gap-2.5 sm:gap-3 mb-4">
           {pathsConfig.map((path) => (
             <button
               key={path.id}
               onClick={() => togglePath(path.id)}
               className={cn(
-                "px-4 py-2 rounded-lg border flex items-center gap-2 transition-colors",
+                "px-4 py-2.5 sm:py-2 rounded-lg border flex items-center gap-2 transition-colors min-h-[44px] touch-manipulation text-sm sm:text-base",
                 selectedPaths.includes(path.id)
                   ? "border-primary bg-primary/10"
                   : "border-border bg-background hover:border-primary/50",
               )}
             >
-              <div className="h-3 w-3 rounded-full" style={{ backgroundColor: path.color }} />
+              <div className="h-3 w-3 rounded-full flex-shrink-0" style={{ backgroundColor: path.color }} />
               <span className="text-foreground">{path.label}</span>
             </button>
           ))}
@@ -280,7 +280,7 @@ export default function Simulations() {
         <button
           onClick={runSimulation}
           disabled={selectedPaths.length === 0 || isLoading}
-          className="px-6 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          className="w-full sm:w-auto px-6 py-3 sm:py-2 bg-primary text-white rounded-lg text-base sm:text-base font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[52px] sm:min-h-[44px] touch-manipulation"
         >
           {isLoading ? (
             <>
@@ -312,12 +312,12 @@ export default function Simulations() {
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis 
                       dataKey="month" 
-                      stroke="hsl(var(--muted-foreground))"
-                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                      stroke="hsl(var(--foreground))"
+                      tick={{ fill: 'hsl(var(--foreground))' }}
                     />
                     <YAxis 
-                      stroke="hsl(var(--muted-foreground))"
-                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                      stroke="hsl(var(--foreground))"
+                      tick={{ fill: 'hsl(var(--foreground))' }}
                       tickFormatter={(value) => `R${(value / 1000).toFixed(0)}K`}
                     />
                     <Tooltip
@@ -326,9 +326,10 @@ export default function Simulations() {
                         border: "1px solid hsl(var(--border))",
                         borderRadius: "0.5rem",
                       }}
+                      labelStyle={{ color: 'hsl(var(--foreground))' }}
                       formatter={(value: number) => [`R${value.toLocaleString()}`, ""]}
                     />
-                    <Legend />
+                    <Legend wrapperStyle={{ color: 'hsl(var(--foreground))' }} />
                     {simulations.map((sim) => {
                       const pathConfig = getPathConfig(sim.pathId)
                       const chartKey = mapPathIdToChartKey(sim.pathId)
@@ -390,14 +391,14 @@ export default function Simulations() {
                     <XAxis 
                       type="number" 
                       domain={[0, 100]} 
-                      stroke="hsl(var(--muted-foreground))"
-                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                      stroke="hsl(var(--foreground))"
+                      tick={{ fill: 'hsl(var(--foreground))' }}
                     />
                     <YAxis 
                       type="category" 
                       dataKey="skill" 
-                      stroke="hsl(var(--muted-foreground))"
-                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                      stroke="hsl(var(--foreground))"
+                      tick={{ fill: 'hsl(var(--foreground))' }}
                       width={100} 
                     />
                     <Tooltip
@@ -406,9 +407,10 @@ export default function Simulations() {
                         border: "1px solid hsl(var(--border))",
                         borderRadius: "0.5rem",
                       }}
+                      labelStyle={{ color: 'hsl(var(--foreground))' }}
                       formatter={(value: number) => [`${value}%`, "Score"]}
                     />
-                    <Bar dataKey="score" fill="hsl(var(--secondary))" radius={[0, 4, 4, 0]} />
+                    <Bar dataKey="score" fill="#7C3AED" radius={[0, 4, 4, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
