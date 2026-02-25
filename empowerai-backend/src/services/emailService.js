@@ -8,9 +8,9 @@
 
 const nodemailer = require('nodemailer');
 
-const { EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASS, FRONTEND_URL } = process.env;
+const { EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASS, FRONTEND_URL, EMAIL_FROM } = process.env;
 
-if (!EMAIL_HOST || !EMAIL_USER || !FRONTEND_URL) {
+if (!EMAIL_HOST || !EMAIL_USER || !FRONTEND_URL || !EMAIL_FROM) {
   throw new Error('Email environment variables not configured');
 }
 
@@ -50,7 +50,7 @@ class EmailService {
 
   async send(to, subject, html) {
     await transporter.sendMail({
-      from: `"EmpowerAI" <${EMAIL_USER}>`,
+      from: `"EmpowerAI" <${EMAIL_FROM}>`,
       to,
       subject,
       html,
