@@ -8,14 +8,14 @@
 
 const nodemailer = require('nodemailer');
 
-const { EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASS, FRONTEND_URL } = process.env;
+const { EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASS, EMAIL_FROM, FRONTEND_URL, } = process.env;
 
 // Check if email is configured - make it optional for graceful degradation
-const isEmailConfigured = EMAIL_HOST && EMAIL_USER && FRONTEND_URL;
+const isEmailConfigured = EMAIL_HOST && EMAIL_USER && FRONTEND_URL && EMAIL_PASS && EMAIL_FROM;
 
 if (!isEmailConfigured) {
   console.warn('⚠️  Email service not configured. Email features will be disabled.');
-  console.warn('   Set EMAIL_HOST, EMAIL_USER, EMAIL_PASS, and FRONTEND_URL to enable emails.');
+  console.warn('   Set EMAIL_HOST, EMAIL_USER, EMAIL_PASS, EMAIL_FROM, and FRONTEND_URL to enable emails.');
 }
 
 // Create transporter only if configured
@@ -64,7 +64,7 @@ class EmailService {
     }
     
     await transporter.sendMail({
-      from: `"EmpowerAI" <${EMAIL_USER}>`,
+      from: `"EmpowerAI" <${process.env.EMAIL_FROM}>`,
       to,
       subject,
       html,
