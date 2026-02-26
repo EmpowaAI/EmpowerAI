@@ -8,14 +8,14 @@
 
 const nodemailer = require('nodemailer');
 
-const { EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASS, EMAIL_FROM, FRONTEND_URL, } = process.env;
+const { EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASS, EMAIL_FROM, FRONTEND_URL,BACKEND_URL } = process.env;
 
 // Check if email is configured - make it optional for graceful degradation
-const isEmailConfigured = EMAIL_HOST && EMAIL_USER && FRONTEND_URL && EMAIL_PASS && EMAIL_FROM;
+const isEmailConfigured = EMAIL_HOST && EMAIL_USER && FRONTEND_URL && EMAIL_PASS && EMAIL_FROM && BACKEND_URL;
 
 if (!isEmailConfigured) {
   console.warn('⚠️  Email service not configured. Email features will be disabled.');
-  console.warn('   Set EMAIL_HOST, EMAIL_USER, EMAIL_PASS, EMAIL_FROM, and FRONTEND_URL to enable emails.');
+  console.warn('   Set EMAIL_HOST, EMAIL_USER, EMAIL_PASS, EMAIL_FROM, BACKEND_URL and FRONTEND_URL to enable emails.');
 }
 
 // Create transporter only if configured
@@ -23,8 +23,8 @@ let transporter = null;
 if (isEmailConfigured) {
   transporter = nodemailer.createTransport({
     host: EMAIL_HOST,
-    port: Number(EMAIL_PORT) || 587,
-    secure: false,
+    port: EMAIL_PORT || 465,
+    secure: true, // use SSL
     auth: {
       user: EMAIL_USER,
       pass: EMAIL_PASS,
