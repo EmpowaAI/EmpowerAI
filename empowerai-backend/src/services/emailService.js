@@ -1,36 +1,19 @@
 /**
  * Email Service
- * Sends styled transactional emails
+ * Sends styled transactional emails via Brevo HTTP API.
+ * Using HTTP API instead of SMTP to avoid port blocking on restricted hosting environments.
  * Used by AccountService for sending verification and password reset emails.
- * Can be extended in the future for other email types (e.g. notifications, newsletters).
- * Note: This service is focused on email sending and does not handle token generation or user management, which are responsibilities of AccountService.
  */
 
-const nodemailer = require('nodemailer');
+const { BREVO_API_KEY, EMAIL_FROM, FRONTEND_URL, BACKEND_URL } = process.env;
 
-const { EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASS, EMAIL_FROM, FRONTEND_URL,BACKEND_URL } = process.env;
-
-// Check if email is configured - make it optional for graceful degradation
-const isEmailConfigured = EMAIL_HOST && EMAIL_USER && FRONTEND_URL && EMAIL_PASS && EMAIL_FROM && BACKEND_URL;
+const isEmailConfigured = BREVO_API_KEY && EMAIL_FROM && FRONTEND_URL && BACKEND_URL;
 
 if (!isEmailConfigured) {
   console.warn('⚠️  Email service not configured. Email features will be disabled.');
-  console.warn('   Set EMAIL_HOST, EMAIL_USER, EMAIL_PASS, EMAIL_FROM, BACKEND_URL and FRONTEND_URL to enable emails.');
+  console.warn('   Set BREVO_API_KEY, EMAIL_FROM, FRONTEND_URL, and BACKEND_URL to enable emails.');
 }
 
-// Create transporter only if configured
-let transporter = null;
-if (isEmailConfigured) {
-  transporter = nodemailer.createTransport({
-    host: EMAIL_HOST,
-    port: EMAIL_PORT || 465,
-    secure: true, // use SSL
-    auth: {
-      user: EMAIL_USER,
-      pass: EMAIL_PASS,
-    },
-  });
-}
 
 const baseTemplate = (title, message, buttonText, buttonLink) => {
   return `
@@ -57,30 +40,55 @@ const baseTemplate = (title, message, buttonText, buttonLink) => {
 class EmailService {
 
   async send(to, subject, html) {
-    if (!isEmailConfigured || !transporter) {
+    if (!isEmailConfigured) {
       console.log(`[Email] Would send email to ${to}: ${subject}`);
       console.log(`[Email] Email service not configured - skipping actual send`);
       return;
     }
-    
-    await transporter.sendMail({
-      from: `"EmpowerAI" <${process.env.EMAIL_FROM}>`,
-      to,
-      subject,
-      html,
+
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'api-key': BREVO_API_KEY,
+      },
+      body: JSON.stringify({
+        sender: { name: 'EmpowerAI', email: EMAIL_FROM },
+        to: [{ email: to }],
+        subject,
+        htmlContent: html,
+      }),
     });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(`Brevo API error: ${error.message || response.statusText}`);
+    }
+
     console.log(`[Email] Sent "${subject}" to ${to}`);
   }
 
+
   async sendVerification(email, token) {
-    const link = `${process.env.BACKEND_URL}/api/account/verify-email?token=${token}`;
-    const html = baseTemplate('Verify Your Email', 'Click the button below to verify your account. This link expires in 1 hour.', 'Verify Email', link);
+    const link = `${BACKEND_URL}/api/account/verify-email?token=${token}`;
+    const html = baseTemplate(
+      'Verify Your Email',
+      'Click the button below to verify your account. This link expires in 1 hour.',
+      'Verify Email',
+      link
+    );
     await this.send(email, 'Verify your email', html);
   }
 
+
   async sendReset(email, token) {
-    const link = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
-    const html = baseTemplate('Reset Your Password', 'Click the button below to reset your password. This link expires in 30 minutes.', 'Reset Password', link);
+    const link = `${FRONTEND_URL}/reset-password?token=${token}`;
+    const html = baseTemplate(
+      'Reset Your Password',
+      'Click the button below to reset your password. This link expires in 30 minutes.',
+      'Reset Password',
+      link
+    );
     await this.send(email, 'Reset your password', html);
   }
 
