@@ -13,9 +13,12 @@
 
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
+
 const logger = require('../utils/logger');
 const { NotFoundError, ConflictError } = require('../utils/errors');
 const AuthResponseDto = require('../DTOs/Auth/AuthResponseDto');
+const PendingUser = require('../models/PendingUser');
+const User = require('../models/User');
 
 
 class AuthService {
@@ -31,29 +34,48 @@ class AuthService {
   //---------------------------------
 
   async register(dto, correlationId = null) {
-    logger.info(`Registering user with email: ${dto.email}`, { correlationId });
+    logger.info(`Register attempt for email: ${dto.email}`, { correlationId });
 
-    const existingUser = await this.userRepository.findByEmail(dto.email);
+    // 1️⃣ Check if user already exists in real users
+    const existingUser = await User.findOne({ email: dto.email });
     if (existingUser) {
       logger.warn(`Email already in use: ${dto.email}`, { correlationId });
-      throw new ConflictError('Email already in use');
+      throw new Error('Email already in use');
     }
 
+    // 2️⃣ Check if pending user exists
+    const existingPending = await PendingUser.findOne({ email: dto.email });
+    if (existingPending) {
+      logger.warn(`Pending registration already exists: ${dto.email}`, { correlationId });
+      throw new Error('A verification email has already been sent to this email.');
+    }
+
+    // 3️⃣ Generate email verification token
     const emailToken = crypto.randomBytes(32).toString('hex');
     const emailTokenHash = crypto.createHash('sha256').update(emailToken).digest('hex');
+    const emailTokenExpires = Date.now() + 60 * 60 * 1000; // 1 hour
 
-    const newUser = await this.userRepository.create({
+    // 4️⃣ Save plain password — User model's pre('save') hook will hash it on verification
+    const pendingUser = await PendingUser.create({
       name: dto.name,
       email: dto.email,
       password: dto.password,
       emailToken: emailTokenHash,
-      emailTokenExpires: Date.now() + 60 * 60 * 1000, // 1 hour
+      emailTokenExpires,
     });
 
-    await this.accountService.sendVerificationEmail(newUser.email, emailToken, correlationId);
+    // 5️⃣ Send verification email
+    try {
+      await this.accountService.sendVerificationEmail(dto.email, emailToken, correlationId);
+      logger.info(`Verification email sent to: ${dto.email}`, { correlationId });
+    } catch (err) {
+      logger.error(`Failed to send verification email: ${dto.email}`, { correlationId, error: err.message });
+      // Clean up pending user if email fails
+      await PendingUser.deleteOne({ _id: pendingUser._id });
+      throw new Error('Unable to send verification email. Please try again later.');
+    }
 
-    logger.info(`User registered successfully with email: ${newUser.email}`, { correlationId, userId: newUser._id });
-    return newUser;
+    return { message: 'Registration pending. Please check your email to verify your account.' };
   }
 
 
@@ -64,15 +86,18 @@ class AuthService {
   async login(dto, correlationId = null) {
     logger.info(`Attempting login for email: ${dto.email}`, { correlationId });
 
+    // Check if user is pending verification first
+    const pendingUser = await PendingUser.findOne({ email: dto.email });
+    if (pendingUser) {
+      logger.warn(`User email not verified: ${dto.email}`, { correlationId });
+      throw new ConflictError('Please verify your email before logging in');
+    }
+
+    // Now look for a fully verified user
     const user = await this.userRepository.findByEmailWithPassword(dto.email);
     if (!user) {
       logger.warn(`No user found with email: ${dto.email}`, { correlationId });
       throw new NotFoundError('Invalid email or password');
-    }
-
-    if (!user.isVerified) {
-      logger.warn(`User email not verified: ${dto.email}`, { correlationId });
-      throw new ConflictError('Please verify your email before logging in');
     }
 
     const isMatch = await user.correctPassword(dto.password);
@@ -109,6 +134,7 @@ class AuthService {
     const accessToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '15m' });
 
     logger.info(`Access token refreshed for user: ${user.email}`, { correlationId, userId: user._id });
+
     return { accessToken };
   }
 
@@ -129,6 +155,7 @@ class AuthService {
     await this.userRepository.invalidateRefreshToken(user._id);
 
     logger.info(`Logout successful for user: ${user.email}`, { correlationId, userId: user._id });
+
     return true;
   }
 

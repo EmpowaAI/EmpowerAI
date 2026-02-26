@@ -4,7 +4,8 @@
  * It uses the AccountService to perform the necessary business logic and interacts with the request and response objects.
  * It Uses Account DTO for data transfer and validation.
  */
-
+const PendingUser = require('../models/PendingUser');
+const crypto = require('crypto');
 const AccountService = require('../services/accountService');
 const UserRepository = require('../repositories/UserRepository');
 const User = require('../models/User');
@@ -12,7 +13,7 @@ const { sendSuccess } = require('../utils/response');
 const logger = require('../utils/logger');
 const ForgotPasswordDto = require('../DTOs/Account/ForgotPasswordDto');
 const ResetPasswordDto = require('../DTOs/Account/ResetPasswordDto');
-const VerifyEmailDto = require('../DTOs/Account/VerifyEmailDto');
+
 
 const userRepository = new UserRepository(User);
 const accountService = new AccountService(userRepository);
@@ -24,17 +25,32 @@ const accountService = new AccountService(userRepository);
  * @access Public
  */
 exports.verifyEmail = async (req, res, next) => {
-  const correlationId = req.correlationId;
-  const dto = new VerifyEmailDto({ token: req.query.token });
+  const { token } = req.query;
+  if (!token) return res.status(400).json({ message: 'Verification token is required.' });
 
   try {
-    logger.info('Email verification requested', { correlationId, token: dto.token });
-    await accountService.verifyEmail(dto, correlationId);
-    logger.info('Email verification successful', { correlationId });
-    return res.redirect(`${process.env.FRONTEND_URL}/email-verified?verified=true`);
-  } catch (error) {
-    logger.error('Email verification failed', { correlationId, token: dto.token, error: error.message });
-    return res.redirect(`${process.env.FRONTEND_URL}/login?verified=false`);
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const pendingUser = await PendingUser.findOne({ emailToken: tokenHash });
+
+    if (!pendingUser || pendingUser.emailTokenExpires < Date.now()) {
+      return res.status(400).json({ message: 'Invalid or expired verification token.' });
+    }
+
+    // Move pending user to real users
+    const user = await User.create({
+      name: pendingUser.name,
+      email: pendingUser.email,
+      password: pendingUser.password,
+      isVerified: true,
+    });
+
+    await PendingUser.deleteOne({ _id: pendingUser._id });
+
+   // return res.json({ message: 'Email verified successfully. You can now log in.', user: { id: user._id, email: user.email, name: user.name } });
+    return res.redirect(`${process.env.FRONTEND_URL}/login?verified=true`);
+
+  } catch (err) {
+    next(err);
   }
 };
 
