@@ -1,4 +1,3 @@
-// frontend/src/pages/InterviewCoach.tsx
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -21,7 +20,9 @@ import {
   X,
   AlertCircle,
   CheckCircle,
-  VolumeX
+  VolumeX,
+  Mic,
+  FileText
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useUser } from '../lib/user-context';
@@ -29,16 +30,42 @@ import { useInterview } from '../hooks/useInterview';
 import { TipsPanel } from '../components/interview/TipsPanel';
 
 // Types
-export enum InterviewType {
-  TECH = 'tech',
-  BEHAVIORAL = 'behavioral',
-  NON_TECH = 'non-tech'
+export type InterviewType = 'tech' | 'behavioral' | 'non-tech';
+export type Difficulty = 'easy' | 'medium' | 'hard';
+
+export interface InterviewOptions {
+  company?: string;
+  jobDescription?: string;
 }
 
-export enum Difficulty {
-  EASY = 'easy',
-  MEDIUM = 'medium',
-  HARD = 'hard'
+// Speech recognition types
+interface SpeechRecognitionEvent extends Event {
+  resultIndex: number;
+  results: SpeechRecognitionResultList;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+}
+
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onstart: (event: Event) => void;
+  onerror: (event: SpeechRecognitionErrorEvent) => void;
+  onend: (event: Event) => void;
+  onresult: (event: SpeechRecognitionEvent) => void;
+  start: () => void;
+  stop: () => void;
+  abort: () => void;
+}
+
+declare global {
+  interface Window {
+    SpeechRecognition: new () => SpeechRecognition;
+    webkitSpeechRecognition: new () => SpeechRecognition;
+  }
 }
 
 export default function InterviewCoach() {
@@ -64,23 +91,30 @@ export default function InterviewCoach() {
   } = useInterview();
 
   // Local state
-  const [selectedType, setSelectedType] = useState<InterviewType>(InterviewType.BEHAVIORAL);
-  const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>(Difficulty.MEDIUM);
+  const [selectedType, setSelectedType] = useState<InterviewType>('behavioral');
+  const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>('medium');
   const [company, setCompany] = useState('');
-  const [showCompanyInput, setShowCompanyInput] = useState(false);
+  const [jobDescription, setJobDescription] = useState('');
   const [showResults, setShowResults] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userInput, setUserInput] = useState('');
   const [justSubmitted, setJustSubmitted] = useState(false);
   const [showCompletionMessage, setShowCompletionMessage] = useState(false);
   
-  // Voice state
+  // Voice state (text-to-speech)
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [audioEnabled, setAudioEnabled] = useState(true);
   const completionAnnounced = useRef(false);
 
-  // Convert CV data
-  const cvData = userCVData ? {
+  // Speech recognition state
+  const [isListening, setIsListening] = useState(false);
+  const [interimTranscript, setInterimTranscript] = useState('');
+  const [recognitionSupported, setRecognitionSupported] = useState(true);
+  const [micPermissionDenied, setMicPermissionDenied] = useState(false);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+
+  // Convert CV data for display
+  const cvDisplay = userCVData ? {
     name: userCVData.sections?.about?.split(' ')[0] || 'Candidate',
     role: userCVData.sections?.skills?.slice(0, 2).join('/') || 'Professional',
     skills: userCVData.sections?.skills || [],
@@ -101,6 +135,72 @@ export default function InterviewCoach() {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [currentQuestionIndex]);
+
+  // Set up speech recognition
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      setRecognitionSupported(false);
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => {
+      setIsListening(true);
+      setMicPermissionDenied(false);
+    };
+
+    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+      if (event.error === 'not-allowed') {
+        setMicPermissionDenied(true);
+      }
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
+      let finalTranscript = '';
+      let interim = '';
+
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript + ' ';
+        } else {
+          interim += transcript;
+        }
+      }
+
+      setUserInput((prev) => prev + finalTranscript);
+      setInterimTranscript(interim);
+    };
+
+    recognitionRef.current = recognition;
+
+    return () => {
+      recognitionRef.current?.abort();
+    };
+  }, []);
+
+  const toggleListening = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+    } else {
+      setInterimTranscript('');
+      try {
+        recognitionRef.current?.start();
+      } catch (err) {
+        console.error('Failed to start speech recognition:', err);
+      }
+    }
+  };
 
   // Speak text function
   const speak = (text: string) => {
@@ -149,17 +249,20 @@ export default function InterviewCoach() {
     }
   }, [sessionComplete, averageScore, showResults, audioEnabled]);
 
-  const handleStartInterview = async () => {
-    await backendStartInterview(
-      selectedType,
-      selectedDifficulty,
-      showCompanyInput ? company : undefined
-    );
-    setUserInput('');
-    setJustSubmitted(false);
-    setAudioEnabled(true);
-    completionAnnounced.current = false;
-  };
+  
+ const handleStartInterview = async () => {
+  await backendStartInterview(
+    selectedType,
+    selectedDifficulty,
+    company || undefined,
+    userCVData || undefined,
+    jobDescription || undefined  
+  );
+  setUserInput('');
+  setJustSubmitted(false);
+  setAudioEnabled(true);
+  completionAnnounced.current = false;
+};
 
   const handleSubmitAnswer = async () => {
     if (!currentQuestion || !userInput.trim()) return;
@@ -251,6 +354,7 @@ export default function InterviewCoach() {
             </h1>
             <p className="text-slate-500 dark:text-slate-400 mt-2">
               {backendSession.type} • {backendSession.difficulty} difficulty
+              {company && ` • Target: ${company}`}
             </p>
           </div>
           <button 
@@ -478,11 +582,11 @@ export default function InterviewCoach() {
           <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl px-4 py-2 flex items-center gap-2">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
             <p className="text-xs text-green-700 dark:text-green-300">
-              <span className="font-bold">CV:</span> {cvData?.skills.length || 0} skills
+              <span className="font-bold">CV:</span> {cvDisplay?.skills.length || 0} skills
             </p>
           </div>
 
-          {/* API Status - Only show when connected */}
+          {/* API Status */}
           {apiAvailable && (
             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl px-4 py-2 flex items-center gap-2">
               <Wifi className="h-3 w-3 text-blue-600 dark:text-blue-400" />
@@ -557,9 +661,9 @@ export default function InterviewCoach() {
                   <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-3">Interview Focus</label>
                   <div className="grid grid-cols-3 gap-3">
                     {[
-                      { id: InterviewType.TECH, label: 'Technical', icon: '💻' },
-                      { id: InterviewType.BEHAVIORAL, label: 'Behavioral', icon: '👤' },
-                      { id: InterviewType.NON_TECH, label: 'General', icon: '📋' }
+                      { id: 'tech' as InterviewType, label: 'Technical', icon: '💻' },
+                      { id: 'behavioral' as InterviewType, label: 'Behavioral', icon: '👤' },
+                      { id: 'non-tech' as InterviewType, label: 'General', icon: '📋' }
                     ].map((t) => (
                       <button
                         key={t.id}
@@ -587,7 +691,7 @@ export default function InterviewCoach() {
                 <div>
                   <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-3">Experience Level</label>
                   <div className="flex gap-2">
-                    {[Difficulty.EASY, Difficulty.MEDIUM, Difficulty.HARD].map((d) => (
+                    {(['easy', 'medium', 'hard'] as Difficulty[]).map((d) => (
                       <button
                         key={d}
                         onClick={() => setSelectedDifficulty(d)}
@@ -606,29 +710,34 @@ export default function InterviewCoach() {
 
                 {/* Company (Optional) */}
                 <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                      Target Company
-                    </label>
-                    <button
-                      onClick={() => setShowCompanyInput(!showCompanyInput)}
-                      className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
-                    >
-                      {showCompanyInput ? 'Remove' : 'Add company'}
-                    </button>
-                  </div>
-                  {showCompanyInput && (
-                    <input 
-                      type="text"
-                      value={company}
-                      onChange={(e) => setCompany(e.target.value)}
-                      placeholder="e.g. Google, Microsoft, Startup X"
-                      className="w-full px-4 py-4 rounded-xl border-2 border-slate-100 dark:border-slate-700 focus:border-blue-500 focus:outline-none bg-slate-50 dark:bg-slate-700 font-medium dark:text-white"
-                    />
-                  )}
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
+                    <span>Company (Optional)</span>
+                  </label>
+                  <input 
+                    type="text"
+                    value={company}
+                    onChange={(e) => setCompany(e.target.value)}
+                    placeholder="e.g. Google, Microsoft, Startup X"
+                    className="w-full px-4 py-4 rounded-xl border-2 border-slate-100 dark:border-slate-700 focus:border-blue-500 focus:outline-none bg-slate-50 dark:bg-slate-700 font-medium dark:text-white"
+                  />
                 </div>
 
-                {/* Azure AI Status - Only show when connected */}
+                {/* Job Description (Optional) */}
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    <span>Job Description (Optional)</span>
+                  </label>
+                  <textarea
+                    value={jobDescription}
+                    onChange={(e) => setJobDescription(e.target.value)}
+                    placeholder="Paste the job description here to tailor questions and feedback..."
+                    rows={5}
+                    className="w-full px-4 py-4 rounded-xl border-2 border-slate-100 dark:border-slate-700 focus:border-blue-500 focus:outline-none bg-slate-50 dark:bg-slate-700 font-medium dark:text-white resize-none"
+                  />
+                </div>
+
+                {/* Azure AI Status */}
                 {apiAvailable && (
                   <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-200 dark:border-purple-800">
                     <div className="flex items-center gap-2">
@@ -705,21 +814,54 @@ export default function InterviewCoach() {
                   <div className="space-y-4">
                     <div className="relative">
                       <textarea 
-                        value={userInput}
+                        value={userInput + (isListening ? ' ' + interimTranscript : '')}
                         onChange={(e) => setUserInput(e.target.value)}
                         placeholder="Type your response here... (Use STAR method for best results)"
                         className="w-full bg-slate-50 dark:bg-slate-700 border-2 border-slate-100 dark:border-slate-600 rounded-2xl md:rounded-3xl p-4 md:p-6 h-32 md:h-40 focus:outline-none focus:border-blue-500 transition-all text-slate-800 dark:text-white font-medium resize-none text-sm md:text-base"
                       />
+                      {/* Microphone button */}
+                      <button
+                        type="button"
+                        onClick={toggleListening}
+                        disabled={!recognitionSupported || micPermissionDenied}
+                        className={cn(
+                          "absolute bottom-4 right-4 p-3 rounded-full transition-all",
+                          isListening 
+                            ? 'bg-red-500 text-white animate-pulse' 
+                            : 'bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-500',
+                          (!recognitionSupported || micPermissionDenied) && 'opacity-50 cursor-not-allowed'
+                        )}
+                        aria-label="Use microphone"
+                        title={
+                          !recognitionSupported ? 'Speech recognition not supported in this browser' :
+                          micPermissionDenied ? 'Microphone access denied' :
+                          isListening ? 'Stop listening' : 'Start speaking'
+                        }
+                      >
+                        {isListening ? <Volume2 className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+                      </button>
                     </div>
+
+                    {/* Speech recognition warnings */}
+                    {!recognitionSupported && (
+                      <div className="text-xs text-amber-600 dark:text-amber-400">
+                        Your browser does not support speech recognition. Please use Chrome, Edge, or Safari.
+                      </div>
+                    )}
+                    {micPermissionDenied && (
+                      <div className="text-xs text-rose-600 dark:text-rose-400">
+                        Microphone access denied. Please allow access to use voice input.
+                      </div>
+                    )}
 
                     {/* Word Count Indicator */}
                     <div className="flex justify-between items-center">
                       <span className={cn(
                         "text-xs font-medium",
-                        userInput.split(/\s+/).length < 30 ? 'text-amber-600' : 'text-emerald-600'
+                        userInput.split(/\s+/).filter(Boolean).length < 30 ? 'text-amber-600' : 'text-emerald-600'
                       )}>
-                        {userInput.split(/\s+/).length} words
-                        {userInput.split(/\s+/).length < 30 && ' (aim for 100+)'}
+                        {userInput.split(/\s+/).filter(Boolean).length} words
+                        {userInput.split(/\s+/).filter(Boolean).length < 30 && ' (aim for 100+)'}
                       </span>
                       {justSubmitted && (
                         <span className="text-xs text-blue-600 animate-pulse">

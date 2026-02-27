@@ -127,6 +127,7 @@ class InterviewStartRequest(BaseModel):
     difficulty: str = Field(default="medium", description="easy, medium, or hard")
     company: Optional[str] = Field(None, description="Target company for questions")
     cvData: Optional[CVData] = Field(None, description="User's CV data for personalization")
+    jobDescription: Optional[str] = Field(None, description="Job description for tailored questions")  # 👈 ADDED
     
     @field_validator('type')
     def validate_type(cls, v):
@@ -168,6 +169,7 @@ class InterviewSessionResponse(BaseModel):
     feedback: List[Dict[str, Any]] = []
     startedAt: Optional[datetime] = None
     cvUsed: bool = False
+    jobDescriptionUsed: bool = False  # 👈 ADDED to track if JD was used
 
 class InterviewAnswerRequest(BaseModel):
     sessionId: str

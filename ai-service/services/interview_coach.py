@@ -107,39 +107,62 @@ CANDIDATE PROFILE:
 """
         return context
 
+    def _format_job_description(self, job_description: Optional[str]) -> str:
+        """Format job description for inclusion in prompts"""
+        if not job_description or not job_description.strip():
+            return ""
+        
+        # Truncate if too long (to avoid token limits)
+        max_length = 2000
+        truncated = job_description[:max_length] + "..." if len(job_description) > max_length else job_description
+        
+        return f"""
+JOB DESCRIPTION:
+{truncated}
+
+The questions should be tailored to this specific job description, focusing on the skills and responsibilities mentioned.
+"""
+
     async def generate_question_set(
         self,
         interview_type: str,
         difficulty: str = 'medium',
         num_questions: int = 5,
         company: Optional[str] = None,
-        cv_context: Optional[Dict[str, Any]] = None
+        cv_context: Optional[Dict[str, Any]] = None,
+        job_description: Optional[str] = None  # 👈 NEW parameter
     ) -> List[Dict[str, Any]]:
-        """Async generation of questions using Azure AI."""
+        """Async generation of questions using Azure AI, optionally tailored to job description."""
         questions = []
 
         if self.ai_client and self.ai_client.enabled:
             try:
                 cv_summary = self._format_cv_context(cv_context)
+                job_summary = self._format_job_description(job_description)
                 company_context = f" for {company}" if company else ""
 
                 prompt = f"""Generate {num_questions} {difficulty} difficulty {interview_type} interview questions{company_context}.
 
 {cv_summary}
+{job_summary}
 
 The questions should:
 1. Be highly relevant to the candidate's actual skills and experience listed above
-2. Test both theoretical knowledge and practical application
-3. Include follow-up opportunities
-4. Be challenging but fair
-5. Reference their specific skills and background when possible
+2. Be tailored to the job description provided (if any)
+3. Test both theoretical knowledge and practical application
+4. Include follow-up opportunities
+5. Be challenging but fair
+6. Reference their specific skills and background when possible
+7. If a job description is provided, ensure questions assess the key requirements from that job
 
 Return ONLY the questions, one per line, without numbering.
 Each question must end with a question mark."""
 
-                system_prompt = f"You are an expert interview coach specializing in {interview_type} interviews."
+                system_prompt = f"You are an expert interview coach specializing in {interview_type} interviews. You create personalized questions based on the candidate's CV and the job description."
 
-                logger.info(f"Generating {num_questions} {interview_type} questions with Azure AI")
+                logger.info(f"Generating {num_questions} {interview_type} questions with Azure AI" + 
+                           (" (with job description)" if job_description else ""))
+                
                 ai_questions_text = await self.ai_client.generate_text_async(
                     prompt,
                     system_prompt,
@@ -189,19 +212,20 @@ Each question must end with a question mark."""
         self,
         question: Dict[str, Any],
         response: str,
-        cv_context: Optional[Dict[str, Any]] = None
+        cv_context: Optional[Dict[str, Any]] = None,
+        job_description: Optional[str] = None  # 👈 NEW parameter (optional, for future use)
     ) -> Dict[str, Any]:
         """Async evaluation with Azure AI. Returns AI feedback with strict scoring."""
         word_count = len(response.split())
         logger.info(f"=== evaluate_response called for question {question.get('id')} ===")
         logger.info(f"AI client enabled: {self.ai_client.enabled if self.ai_client else False}")
 
-        # --- EARLY RETURN REMOVED: All answers go to Azure AI (if enabled) ---
-
         # Try Azure AI first
         if self.ai_client and self.ai_client.enabled:
             try:
                 cv_summary = self._format_cv_context(cv_context)
+                job_summary = self._format_job_description(job_description) if job_description else ""
+                
                 skills = []
                 if cv_context and cv_context.get('sections'):
                     skills = cv_context['sections'].get('skills', [])
@@ -230,6 +254,7 @@ QUESTION: {question['question']}
 ANSWER: {response}
 
 {cv_summary}
+{job_summary}
 
 Provide a comprehensive evaluation in this EXACT JSON format:
 {{
@@ -245,7 +270,7 @@ Provide a comprehensive evaluation in this EXACT JSON format:
 Important rules:
 - "strengths" must highlight positive aspects of the answer itself (e.g., specific examples, clarity, structure). If the answer has no strengths, return an empty list [].
 - "improvements" should suggest concrete ways to enhance the answer.
-- Personalize the feedback using the candidate's CV, but only when the answer actually demonstrates or relates to those skills.
+- Personalize the feedback using the candidate's CV and the job description (if provided).
 - For completely inadequate answers (0-10 range), "strengths" MUST be [] and "score" MUST be 0.
 - Use the STAR method in your suggested answer.
 - Return ONLY the JSON object, no other text."""
@@ -253,7 +278,7 @@ Important rules:
                 logger.info(f"Evaluating answer ({word_count} words) with Azure AI")
                 evaluation = await self.ai_client.generate_structured_response_async(
                     prompt=prompt,
-                    system_prompt="You are an expert interview coach providing detailed, personalized feedback based on the candidate's CV. Always return valid JSON.",
+                    system_prompt="You are an expert interview coach providing detailed, personalized feedback based on the candidate's CV and job description. Always return valid JSON.",
                     response_schema={},
                     temperature=0.3,  # lower for consistency
                     max_tokens=1000
@@ -470,14 +495,16 @@ The project successfully [quantifiable result], and I learned valuable lessons a
         interview_type: str,
         difficulty: str = 'medium',
         company: Optional[str] = None,
-        cv_data: Optional[Dict[str, Any]] = None
+        cv_data: Optional[Dict[str, Any]] = None,
+        job_description: Optional[str] = None  # 👈 NEW parameter
     ) -> Dict[str, Any]:
-        """Start a new interview session (async)."""
+        """Start a new interview session (async) with optional job description."""
         questions = await self.generate_question_set(
             interview_type,
             difficulty,
             company=company,
-            cv_context=cv_data
+            cv_context=cv_data,
+            job_description=job_description  # 👈 pass it through
         )
         import random
         return {
@@ -489,5 +516,6 @@ The project successfully [quantifiable result], and I learned valuable lessons a
             'currentQuestionIndex': 0,
             'feedback': [],
             'startedAt': None,
-            'cvUsed': bool(cv_data)
+            'cvUsed': bool(cv_data),
+            'jobDescriptionUsed': bool(job_description)  # 👈 track if JD was used
         }

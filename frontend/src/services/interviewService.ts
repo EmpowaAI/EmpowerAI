@@ -1,3 +1,4 @@
+// frontend/src/services/interviewService.ts
 const API_BASE_URL = import.meta.env.VITE_AI_SERVICE_URL || 'http://127.0.0.1:8000';
 
 export interface ServiceInterviewQuestion {
@@ -17,6 +18,7 @@ export interface ServiceInterviewSession {
   feedback: any[];
   startedAt?: string;
   cvUsed?: boolean;
+  jobDescriptionUsed?: boolean;
 }
 
 export interface ServiceInterviewFeedback {
@@ -49,36 +51,41 @@ class InterviewService {
   private CACHE_DURATION = 60000;
 
   async startInterview(
-    type: string, 
-    difficulty: string = "medium", 
+    type: string,
+    difficulty: string = "medium",
     company?: string,
-    cvData?: CVContext
+    cvData?: CVContext,
+    jobDescription?: string
   ): Promise<ServiceInterviewSession> {
     try {
       const response = await fetch(`${API_BASE_URL}/api/interview/start`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          type, 
-          difficulty, 
+        body: JSON.stringify({
+          type,
+          difficulty,
           company: company || null,
-          cvData
+          cvData,
+          jobDescription
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to start interview');
+        const errorData = await response.text();
+        console.error('Server error:', errorData);
+        throw new Error(`Failed to start interview: ${response.status}`);
       }
 
       return await response.json();
-    } catch {
+    } catch (error) {
+      console.error('Error starting interview:', error);
       throw new Error('Failed to start interview');
     }
   }
 
   async submitAnswer(
-    sessionId: string, 
-    questionId: string, 
+    sessionId: string,
+    questionId: string,
     response: string,
     cvData?: CVContext
   ): Promise<ServiceInterviewFeedback> {
@@ -86,30 +93,35 @@ class InterviewService {
       const apiResponse = await fetch(`${API_BASE_URL}/api/interview/answer`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          sessionId, 
-          questionId, 
+        body: JSON.stringify({
+          sessionId,
+          questionId,
           response,
           cvData
         }),
       });
 
       if (!apiResponse.ok) {
-        throw new Error('Failed to submit answer');
+        const errorData = await apiResponse.text();
+        console.error('Server error:', errorData);
+        throw new Error(`Failed to submit answer: ${apiResponse.status}`);
       }
 
       return await apiResponse.json();
-    } catch {
+    } catch (error) {
+      console.error('Error submitting answer:', error);
       throw new Error('Failed to submit answer');
     }
   }
 
   async testConnection(): Promise<boolean> {
-    if (this.connectionCache.available !== null && 
+    // Use cache if valid
+    if (this.connectionCache.available !== null &&
         Date.now() - this.connectionCache.timestamp < this.CACHE_DURATION) {
       return this.connectionCache.available;
     }
 
+    // Try multiple endpoints
     const endpoints = [
       { url: `${API_BASE_URL}/health`, name: 'main' },
       { url: 'http://127.0.0.1:8000/health', name: '127' },
@@ -123,7 +135,7 @@ class InterviewService {
           headers: { 'Content-Type': 'application/json' },
           signal: AbortSignal.timeout(5000)
         });
-        
+
         if (response.ok) {
           this.connectionCache = {
             available: true,
@@ -132,10 +144,12 @@ class InterviewService {
           return true;
         }
       } catch {
-        // silently continue
+        // Silently continue to next endpoint
+        continue;
       }
     }
-    
+
+    // All endpoints failed
     this.connectionCache = {
       available: false,
       timestamp: Date.now()
@@ -144,4 +158,5 @@ class InterviewService {
   }
 }
 
+// Create and export a single instance
 export const interviewService = new InterviewService();

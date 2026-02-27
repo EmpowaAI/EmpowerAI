@@ -56,8 +56,7 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         
-        {/* Add DebugConnection component - only shows in development mode */}
-        { import.meta.env.DEV && <DebugConnection />}
+        
       </UserProvider>
     </ThemeProvider>
   )
