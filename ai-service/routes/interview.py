@@ -54,16 +54,22 @@ async def start_interview(request: InterviewStartRequest, req: Request):
             logger.info(f"CV data received with {skill_count} skills")
         else:
             logger.info("No CV data provided for this session")
+            
+        if request.jobDescription:
+            logger.info(f"Job description received (length: {len(request.jobDescription)})")
+        else:
+            logger.info("No job description provided for this session")
         
         # Convert CV data to dict for the coach
         cv_data = request.cvData.dict() if request.cvData else None
         
-        # AWAIT the async method
+        # AWAIT the async method with job description
         session = await interview_coach.start_session(
             request.type,
             request.difficulty,
             request.company,
-            cv_data  # Pass CV data to coach
+            cv_data,  # Pass CV data to coach
+            request.jobDescription  # Pass job description to coach 👈 NEW
         )
         
         session['startedAt'] = datetime.now()
@@ -100,6 +106,9 @@ async def submit_answer(answer: InterviewAnswerRequest, req: Request):
         # Convert CV data to dict if provided
         cv_data = answer.cvData.dict() if answer.cvData else None
         
+        # Get job description from session if it exists (for evaluation context)
+        job_description = session.get('jobDescription', None)
+        
         # Log before evaluation
         logger.info(f"Evaluating answer for question {answer.questionId} with Azure: {ai_client.enabled}")
         if cv_data:
@@ -107,8 +116,13 @@ async def submit_answer(answer: InterviewAnswerRequest, req: Request):
         else:
             logger.info("No CV context for this answer")
         
-        # AWAIT the async method
-        feedback_data = await interview_coach.evaluate_response(question, answer.response, cv_data)
+        # AWAIT the async method with job description
+        feedback_data = await interview_coach.evaluate_response(
+            question, 
+            answer.response, 
+            cv_data,
+            job_description  # 👈 Pass job description to evaluation
+        )
         
         # Log after evaluation
         logger.info(f"Evaluation complete - Score: {feedback_data['score']}, Used Azure: {ai_client.enabled}")
