@@ -2,10 +2,10 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { CheckCircle, ChevronRight, ChevronLeft, Sparkles, Loader2 } from "lucide-react"
-import { cn } from "../lib/utils"
-import { twinAPI, progressAPI } from "../lib/api"
-import ProgressTracker from "../components/ProgressTracker"
-import { useUser } from "../lib/user-context"
+import { cn } from "../../lib/utils"
+import { twinService, progressService } from "../../api/Index"
+import ProgressTracker from "../../components/ProgressTracker"
+import { useUser } from "../../context/UserContext"
 
 const steps = ["Personal Info", "Education", "Skills", "Goals"]
 const provinces = [
@@ -192,7 +192,7 @@ export default function TwinBuilder() {
         console.log("Sending twin data:", twinData)
         
         // Save to API - no fallback to demo
-        const response = await twinAPI.create(twinData)
+        const response = await twinService.create(twinData)
         console.log("API Response:", response)
         
         if (response && (response.status === 'success' || response.data?.twin)) {
@@ -243,7 +243,7 @@ export default function TwinBuilder() {
           
           // Try to save progress to API (non-blocking)
           try {
-            await progressAPI.saveTwinCompletion(twinId)
+            await progressService.saveTwinCompletion(twinId)
             console.log("Progress saved to API")
           } catch (progressError) {
             console.log("Local progress saved only:", progressError)

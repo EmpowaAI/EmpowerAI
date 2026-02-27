@@ -4,10 +4,10 @@ import type React from "react"
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { Zap, Eye, EyeOff, Loader2, Sparkles, TrendingUp, Users } from "lucide-react"
-import { authAPI } from "../lib/api"
-import { useUser } from "../lib/user-context"
-import { syncProgressFromBackend, unlockAllPages } from "../utils/progressSync"
-import Logo from "../components/Logo"
+import { authService } from "../../api/Index"
+import { useUser } from "../../context/UserContext"
+import { syncProgressFromBackend, unlockAllPages } from "../../utils/progressSync"
+import Logo from "../../components/Logo"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -26,7 +26,7 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      const response = await authAPI.login(email, password)
+      const response = await authService.login(email, password)
       if (response.status === "success" && response.data?.user) {
         setUser({
           name: response.data.user.name,

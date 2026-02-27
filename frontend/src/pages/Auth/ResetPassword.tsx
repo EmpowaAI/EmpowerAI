@@ -3,8 +3,8 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { Eye, EyeOff, Loader2, CheckCircle, Lock } from "lucide-react"
-import { accountAPI } from "../lib/api"
-import Logo from "../components/Logo"
+import { accountService } from "../../api/Index"
+import Logo from "../../components/Logo"
 
 export default function ResetPassword() {
   const [searchParams] = useSearchParams()
@@ -48,7 +48,7 @@ export default function ResetPassword() {
     setIsLoading(true)
 
     try {
-      const response = await accountAPI.resetPassword(token, password)
+      const response = await accountService.resetPassword(token, password)
       if (response.status === "success") {
         setIsSuccess(true)
         setTimeout(() => navigate('/login'), 3000)

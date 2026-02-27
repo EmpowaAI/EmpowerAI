@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from "recharts"
 import { TrendingUp, Zap, Target, ArrowRight, Loader2, AlertCircle } from "lucide-react"
-import { cn } from "../lib/utils"
-import { twinAPI } from "../lib/api"
+import { cn } from "../../lib/utils"
+import { twinService } from "../../api/Index"
 
 interface SimulationResult {
   income: number
@@ -52,7 +52,7 @@ export default function Simulations() {
     // Fetch twin data to get empowerment score
     const fetchTwin = async () => {
       try {
-        const response = await twinAPI.get()
+        const response = await twinService.get()
         if (response.status === 'success' && response.data?.twin) {
           setEmpowermentScore(response.data.twin.empowermentScore)
         }
@@ -77,7 +77,7 @@ export default function Simulations() {
     setError("")
     
     try {
-      const response = await twinAPI.simulate(selectedPaths)
+      const response = await twinService.simulate(selectedPaths)
       
       if (response.status === 'success' && response.data?.simulations) {
         const simulationResults: PathSimulation[] = response.data.simulations

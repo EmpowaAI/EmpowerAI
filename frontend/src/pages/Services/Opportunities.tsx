@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react"
 import { Search, MapPin, Clock, Briefcase, GraduationCap, Building, Heart, Filter, ExternalLink, Loader2 } from "lucide-react"
-import { cn } from "../lib/utils"
-import { opportunitiesAPI } from "../lib/api"
-import { useUser } from "../lib/user-context"
-import LoadingState from "../components/LoadingState"
-import EmptyState from "../components/EmptyState"
-import ErrorAlert from "../components/ErrorAlert"
+import { cn } from "../../lib/utils"
+import { opportunityService } from "../../api/Index"
+import { useUser } from "../../context/UserContext"
+import LoadingState from "../../components/LoadingState"
+import EmptyState from "../../components/EmptyState"
+import ErrorAlert from "../../components/ErrorAlert"
 
 interface Opportunity {
   id: string
@@ -47,7 +47,7 @@ export default function Opportunities() {
         // Don't auto-apply skills filter - let users see all opportunities first
         // Skills filter can be applied via the search/filter UI
         
-        const response = await opportunitiesAPI.getAll(filters)
+        const response = await opportunityService.getAll(filters)
         
         if (response.status === 'success' && response.data?.opportunities) {
           // Transform backend data to match frontend Opportunity interface

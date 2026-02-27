@@ -1,8 +1,8 @@
 
 import { useState } from "react"
 import { Mic, MessageSquare, Play, RefreshCw, CheckCircle, ChevronRight, Loader2 } from "lucide-react"
-import { cn } from "../lib/utils"
-import { interviewAPI } from "../lib/api"
+import { cn } from "../../lib/utils"
+import { interviewService } from "../../api/Index"
 
 const interviewTypes = [
   { id: "tech", label: "Technical", desc: "IT and development roles" },
@@ -37,7 +37,7 @@ export default function InterviewCoach() {
     setError("")
     setIsLoading(true)
     try {
-      const response = await interviewAPI.start(type, "medium")
+      const response = await interviewService.start(type, "medium")
       if (response.status === 'success' && response.data?.session) {
         setSessionId(response.data.session.sessionId)
         setQuestions(response.data.session.questions || [])
@@ -60,7 +60,7 @@ export default function InterviewCoach() {
     setIsLoading(true)
     try {
       const questionId = questions[currentQuestion].id
-      const response = await interviewAPI.answer(sessionId, questionId, currentResponse)
+      const response = await interviewService.answer(sessionId, questionId, currentResponse)
       
       if (response.status === 'success' && response.data?.feedback) {
         setResponses([...responses, {

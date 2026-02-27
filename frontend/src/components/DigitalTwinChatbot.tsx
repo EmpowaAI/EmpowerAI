@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Bot, X, Send, Sparkles, User, Clock, ThumbsUp, ThumbsDown } from "lucide-react";
 import { cn } from "../lib/utils";
-import { chatAPI } from "../lib/api";
+import { chatService } from "../api/Index";
 
 interface Message {
   id: string;
@@ -71,7 +71,7 @@ export default function DigitalTwinChatbot() {
 
     try {
       // Call the AI service chat endpoint
-      const response = await chatAPI.sendMessage(currentInput);
+      const response = await chatService.sendMessage(currentInput);
       
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),

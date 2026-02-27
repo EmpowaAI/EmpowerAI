@@ -10,7 +10,13 @@ const userSchema = new mongoose.Schema({
   education: { type: String },
   skills: [{ type: String }],
   interests: [{ type: String }],
-  avatar: { type: String }
+  avatar: { type: String },
+
+  resetToken: { type: String, default: null, select: false },
+  resetTokenExpires: { type: Date, default: null },
+
+  refreshToken: { type: String, default: null, select: false },
+  refreshTokenExpires: { type: Date, default: null }, 
 }, { 
   timestamps: true,
   // Optimize queries by excluding password by default

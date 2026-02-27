@@ -1,9 +1,9 @@
 import DigitalTwinChatbot from "../components/DigitalTwinChatbot";
 import { Link } from "react-router-dom"
 import { TrendingUp, Target, Briefcase, FileText, Mic, ArrowRight, Zap, Sparkles, ChevronUp, Clock, Loader2 } from "lucide-react"
-import { useUser } from "../lib/user-context"
+import { useUser } from "../context/UserContext"
 import { cn } from "../lib/utils"
-import { statsAPI, opportunitiesAPI } from "../lib/api"
+import { statsService, opportunityService } from "../api/Index"
 import { useState, useEffect } from "react"
 
 interface DashboardStats {
@@ -36,7 +36,7 @@ export default function Dashboard() {
     const fetchStats = async () => {
       try {
         setLoading(true)
-        const response = await statsAPI.getDashboardStats()
+        const response = await statsService.getDashboardStats()
         if (response.status === 'success' && response.data) {
           setStats(response.data)
         }
@@ -74,7 +74,7 @@ export default function Dashboard() {
           }
         }
         
-        const response = await opportunitiesAPI.getAll(filters)
+        const response = await opportunityService.getAll(filters)
         
         if (response.status === 'success' && response.data?.opportunities) {
           // Get top 3 opportunities sorted by match score

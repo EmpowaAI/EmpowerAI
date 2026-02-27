@@ -4,7 +4,7 @@
  * This is a PERMANENT solution to prevent pages from being locked incorrectly
  */
 
-import { twinAPI } from '../lib/api'
+import { twinService } from '../api/Index'
 
 export interface ProgressData {
   cvCompleted: boolean
@@ -25,7 +25,7 @@ export async function syncProgressFromBackend(): Promise<ProgressData> {
 
   try {
     // Check if twin exists - if it does, user has completed both CV and Twin
-    const twinResponse = await twinAPI.get()
+    const twinResponse = await twinService.get()
     
     if (twinResponse?.status === 'success' && twinResponse.data?.twin) {
       const twin = twinResponse.data.twin

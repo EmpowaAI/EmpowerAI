@@ -1,14 +1,14 @@
 // pages/CVAnalyzer.tsx - Fixed loaders
 import { useState, useCallback, useRef } from "react"
 import { Upload, CheckCircle, Sparkles, Loader2, ArrowRight } from "lucide-react"
-import { cn } from "../lib/utils"
-import { cvAPI } from "../lib/api"
+import { cn } from "../../lib/utils"
+import { cvService } from "../../api/Index"
 import { useNavigate } from "react-router-dom"
-import ProgressTracker from "../components/ProgressTracker"
-import { useUser } from "../lib/user-context"
-import RateLimitAlert from "../components/RateLimitAlert"
-import ErrorAlert from "../components/ErrorAlert"
-import Toast, { useToast } from "../components/Toast"
+import ProgressTracker from "../../components/ProgressTracker"
+import { useUser } from "../../context/UserContext"
+import RateLimitAlert from "../../components/RateLimitAlert"
+import ErrorAlert from "../../components/ErrorAlert"
+import Toast, { useToast } from "../../components/Toast"
 
 interface AnalysisResult {
   extractedSkills?: string[]
@@ -64,10 +64,10 @@ export default function CVAnalyzer() {
       
       if (file) {
         console.log('CV Analysis: Starting file analysis...', { filename: file.name, size: file.size });
-        response = await cvAPI.analyzeFile(file, jobRequirements || undefined)
+        response = await cvService.analyzeFile(file, jobRequirements || undefined)
       } else {
         console.log('CV Analysis: Starting text analysis...', { cvTextLength: cvText.length });
-        response = await cvAPI.analyze(cvText, jobRequirements || undefined)
+        response = await cvService.analyze(cvText, jobRequirements || undefined)
       }
       
       console.log('CV Analysis: Response received', { status: response.status, hasData: !!response.data });
@@ -107,7 +107,16 @@ export default function CVAnalyzer() {
   return (
     <div className="space-y-5 sm:space-y-6 md:space-y-8 -mx-3 sm:mx-0">
       {/* Toast Notifications */}
-      <Toast toasts={toasts} onRemove={removeToast} />
+      <div className="fixed top-4 right-4 z-[9999] flex flex-col gap-2">
+        {toasts.map((toast) => (
+          <Toast
+            key={toast.id}
+            message={toast.message}
+            type={toast.type}
+            onClose={() => removeToast(toast.id)}
+          />
+      ))}
+    </div>
       
       {/* Progress Tracker */}
       <ProgressTracker currentStep="cv" />

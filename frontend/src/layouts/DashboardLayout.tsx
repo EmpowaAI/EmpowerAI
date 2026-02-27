@@ -17,7 +17,7 @@ import {
   Settings,
 } from "lucide-react"
 import { cn } from "../lib/utils"
-import { useUser } from "../lib/user-context"
+import { useUser } from "../context/UserContext"
 import ThemeToggle from "../components/ThemeToggle"
 import Logo from "../components/Logo"
 

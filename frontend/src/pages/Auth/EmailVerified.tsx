@@ -1,10 +1,9 @@
 // pages/EmailVerified.tsx
-import type React from "react"
 import { useState, useEffect } from "react"
 import { useNavigate, useSearchParams, Link } from "react-router-dom"
 import { CheckCircle, Loader2, XCircle } from "lucide-react"
-import { accountAPI } from "../lib/api"
-import Logo from "../components/Logo"
+import { accountService } from "../../api/Index"
+import Logo from "../../components/Logo"
 
 export default function EmailVerified() {
   const [searchParams] = useSearchParams()
@@ -24,7 +23,7 @@ export default function EmailVerified() {
       }
 
       try {
-        const response = await accountAPI.verifyEmail(token)
+        const response = await accountService.verifyEmail(token)
         if (response.status === "success") {
           setIsSuccess(true)
           setTimeout(() => navigate('/login'), 3000)
