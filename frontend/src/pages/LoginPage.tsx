@@ -206,9 +206,9 @@ export default function LoginPage() {
                   />
                   <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">Remember me</span>
                 </label>
-                <a href="#" className="text-sm text-primary hover:text-primary/80 hover:underline font-medium transition-colors">
+                <Link to="/forgot-password" className="text-sm text-primary hover:text-primary/80 hover:underline font-medium transition-colors">
                   Forgot password?
-                </a>
+                </Link>
               </div>
 
               {error && (

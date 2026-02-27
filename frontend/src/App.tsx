@@ -4,6 +4,9 @@ import { ThemeProvider } from './lib/theme'
 import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
+import EmailVerified from './pages/EmailVerified'
 import DashboardLayout from './layouts/DashboardLayout'
 import Dashboard from './pages/Dashboard'
 import TwinBuilder from './pages/TwinBuilder'
@@ -18,10 +21,15 @@ function App() {
     <ThemeProvider>
       <UserProvider>
         <Routes>
+          {/* Public routes */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/email-verified" element={<EmailVerified />} />
           
+          {/* Protected dashboard routes */}
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<Dashboard />} />
             <Route path="twin" element={<TwinBuilder />} />
@@ -32,6 +40,7 @@ function App() {
             <Route path="profile" element={<Profile />} />
           </Route>
 
+          {/* Fallback route */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </UserProvider>
