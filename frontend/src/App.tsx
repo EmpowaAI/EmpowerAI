@@ -25,13 +25,7 @@ import AuthTest from './pages/AuthTest'
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { user } = useUser()
-  
-  // Temporary fix for production - allow dashboard access
-  if (!user && window.location.pathname.startsWith('/dashboard')) {
-    console.warn('Dashboard accessed without user - allowing access for demo')
-    return <>{children}</>
-  }
-  
+
   if (!user) {
     return <Navigate to="/login" replace />
   }
