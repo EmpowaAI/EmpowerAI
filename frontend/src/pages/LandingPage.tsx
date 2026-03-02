@@ -1,5 +1,5 @@
-// LandingPage.tsx - Enhanced Original Design
-import React, { useState, useEffect } from "react"
+// LandingPage.tsx - MOBILE-FIRST with Animated Background
+import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import {
   Zap,
@@ -11,6 +11,7 @@ import {
   ArrowRight,
   CheckCircle,
   BarChart3,
+  Sparkles,
   X,
   Menu,
   Briefcase,
@@ -18,8 +19,6 @@ import {
   Star,
   Award,
   Play,
-  Brain,
-  ArrowUp,
 } from "lucide-react"
 import ThemeToggle from "../components/ThemeToggle"
 import Logo from "../components/Logo"
@@ -37,176 +36,162 @@ export default function LandingPage() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  const testimonials = [
-    {
-      name: "Lerato M.",
-      location: "Cape Town",
-      role: "Student ? Software Developer",
-      quote: "EmpowerAI helped me discover tech skills I didn't know I had. I'm now earning R12k/month!",
-      rating: 5
-    },
-    {
-      name: "Sipho K.",
-      location: "Durban",
-      role: "Unemployed ? Business Owner",
-      quote: "The career simulation showed me entrepreneurship was my path. Best decision I ever made!",
-      rating: 5
-    },
-    {
-      name: "Nomsa T.",
-      location: "Johannesburg",
-      role: "Waitress ? Marketing Pro",
-      quote: "From minimum wage to a career I love. The AI guidance was truly life-changing!",
-      rating: 5
-    }
-  ]
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900 relative overflow-hidden">
-      {/* Hero Background */}
+    <div className="min-h-screen bg-white dark:bg-slate-950 relative overflow-hidden">
+      {/* ANIMATED Background */}
       <div className="fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900" />
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-slate-200/10 to-slate-300/10 dark:from-slate-700/10 dark:to-slate-600/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-br from-slate-300/10 to-slate-400/10 dark:from-slate-600/10 dark:to-slate-500/10 rounded-full blur-3xl animate-pulse animation-delay-2000" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-slate-100/5 dark:bg-slate-800/5 rounded-full blur-3xl animate-pulse animation-delay-4000" />
+        <div className="absolute inset-0 bg-gradient-to-br from-white via-indigo-50/30 to-premium/20 dark:from-slate-950 dark:via-indigo-950/30 dark:to-premium/20" />
+        <div className="absolute top-0 -left-48 w-96 h-96 bg-gradient-to-br from-primary/30 to-premium/30 dark:from-primary/20 dark:to-premium/20 rounded-full blur-3xl animate-blob" />
+        <div className="absolute top-0 -right-48 w-96 h-96 bg-gradient-to-br from-secondary/30 to-primary/30 dark:from-cyan-600/20 dark:to-primary/20 rounded-full blur-3xl animate-blob animation-delay-2000" />
+        <div className="absolute -bottom-48 left-1/2 w-96 h-96 bg-gradient-to-br from-premium/30 to-pink-400/30 dark:from-premium/20 dark:to-pink-600/20 rounded-full blur-3xl animate-blob animation-delay-4000" />
+        <div 
+          className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
+          style={{
+            backgroundImage: `linear-gradient(to right, rgb(99, 102, 241) 1px, transparent 1px), linear-gradient(to bottom, rgb(99, 102, 241) 1px, transparent 1px)`,
+            backgroundSize: '4rem 4rem',
+            animation: 'grid-flow 20s linear infinite'
+          }}
+        />
       </div>
 
-      {/* Navigation */}
+      {/* Mobile-First Navigation */}
       <nav className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
         scrolled 
-          ? "bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-lg border-b border-slate-200/50 dark:border-slate-800/50" 
-          : "bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg"
+          ? "bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl shadow-sm border-b border-slate-200/50 dark:border-slate-800/50" 
+          : "bg-white/70 dark:bg-slate-900/70 backdrop-blur-lg"
       )}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 md:h-20">
             <Logo variant="dark" size="lg" linkTo="/" />
             
             {/* Desktop Nav */}
-            <div className="hidden lg:flex items-center gap-8">
-              <a href="#features" className="text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium transition-all duration-200 text-sm relative group">Features <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-slate-900 group-hover:w-full transition-all duration-200"></span></a>
-              <a href="#how-it-works" className="text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium transition-all duration-200 text-sm relative group">How It Works <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-slate-900 group-hover:w-full transition-all duration-200"></span></a>
-              <a href="#demo" className="text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium transition-all duration-200 text-sm relative group">Demo <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-slate-900 group-hover:w-full transition-all duration-200"></span></a>
-              <a href="#testimonials" className="text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium transition-all duration-200 text-sm relative group">Success Stories <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-slate-900 group-hover:w-full transition-all duration-200"></span></a>
+            <div className="hidden lg:flex items-center gap-6 xl:gap-8">
+              <a href="#features" className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary font-medium transition-colors text-base">Features</a>
+              <a href="#how-it-works" className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary font-medium transition-colors text-base">How It Works</a>
+              <a href="#demo" className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary font-medium transition-colors text-base">Demo</a>
+              <a href="#testimonials" className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary font-medium transition-colors text-base">Success</a>
               <ThemeToggle />
-              <Link to="/login" className="text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium transition-all duration-200 text-sm px-4 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">Sign In</Link>
-              <Link to="/signup" className="bg-slate-900 hover:bg-slate-800 text-white px-6 py-2.5 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 text-sm">Get Started</Link>
+              <Link to="/login" className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary font-medium transition-colors text-base px-4 py-2 min-h-[44px] flex items-center">Sign In</Link>
+              <Link to="/signup" className="bg-primary hover:bg-primary text-white px-6 py-2.5 rounded-lg font-semibold text-base md:text-lg transition-all duration-200 shadow-sm hover:shadow-md hover:scale-105 active:scale-100 min-h-[44px] touch-manipulation w-full sm:w-auto">Get Started</Link>
             </div>
 
             {/* Mobile Menu Button */}
-            <div className="flex lg:hidden items-center gap-3">
+            <div className="flex lg:hidden items-center gap-2">
               <ThemeToggle />
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 h-10 w-10 flex items-center justify-center"
+                className="p-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors min-h-[48px] min-w-[48px] flex items-center justify-center touch-manipulation"
                 aria-label="Toggle menu"
               >
-                {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </button>
             </div>
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu - Enhanced */}
         {mobileMenuOpen && (
-          <div className="lg:hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 shadow-2xl">
-            <div className="px-4 py-6 space-y-2 max-w-7xl mx-auto">
-              <a href="#features" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-all duration-200 text-slate-700 dark:text-slate-300">Features</a>
-              <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-all duration-200 text-slate-700 dark:text-slate-300">How It Works</a>
-              <a href="#demo" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-all duration-200 text-slate-700 dark:text-slate-300">Demo</a>
-              <a href="#testimonials" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-all duration-200 text-slate-700 dark:text-slate-300">Success Stories</a>
-              <div className="pt-4 border-t border-slate-200 dark:border-slate-800 mt-4 space-y-2">
-                <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-all duration-200 text-slate-700 dark:text-slate-300">Sign In</Link>
-                <Link to="/signup" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-center transition-all duration-200">Get Started Free</Link>
+          <div className="lg:hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 shadow-xl">
+            <div className="px-4 py-4 space-y-1 max-w-7xl mx-auto">
+              <a href="#features" onClick={() => setMobileMenuOpen(false)} className="block py-3.5 px-4 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-colors min-h-[52px] flex items-center text-base">Features</a>
+              <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="block py-3.5 px-4 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-colors min-h-[52px] flex items-center text-base">How It Works</a>
+              <a href="#demo" onClick={() => setMobileMenuOpen(false)} className="block py-3.5 px-4 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-colors min-h-[52px] flex items-center text-base">Demo</a>
+              <a href="#testimonials" onClick={() => setMobileMenuOpen(false)} className="block py-3.5 px-4 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-colors min-h-[52px] flex items-center text-base">Success Stories</a>
+              <div className="pt-2 border-t border-slate-200 dark:border-slate-800 mt-2 space-y-1">
+                <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="block py-3.5 px-4 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-colors min-h-[52px] flex items-center text-base">Sign In</Link>
+                <Link to="/signup" onClick={() => setMobileMenuOpen(false)} className="block py-3.5 px-4 rounded-lg bg-primary hover:bg-primary text-white font-semibold text-center transition-colors min-h-[52px] flex items-center justify-center text-base">Get Started Free</Link>
               </div>
             </div>
           </div>
         )}
       </nav>
 
-      {/* Hero Section */}
-      <section className="relative pt-24 md:pt-32 lg:pt-40 pb-20 md:pb-24 lg:pb-32 px-4 sm:px-6 lg:px-8">
+      {/* Mobile-First Hero Section */}
+      <section className="relative pt-20 md:pt-28 lg:pt-32 pb-16 md:pb-20 lg:pb-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-16 md:gap-20 items-center">
-            {/* Left Content */}
-            <div className="text-center lg:text-left space-y-8 relative z-10">
-              {/* Badge */}
-              <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-sm font-semibold animate-fade-in">
-                <div className="w-2 h-2 bg-slate-900 rounded-full animate-pulse" />
-                <span className="whitespace-nowrap">AI-Powered Career Intelligence</span>
+          <div className="grid lg:grid-cols-2 gap-12 md:gap-16 items-center">
+            {/* Left Content - Mobile Optimized */}
+            <div className="text-center lg:text-left space-y-6 md:space-y-8 relative z-10">
+              <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-primary dark:bg-primary/50 border border-primary dark:border-primary text-white text-sm md:text-base font-medium animate-fade-in">
+                <Sparkles className="w-4 h-4 sm:h-5 sm:w-5 text-white animate-pulse" />
+                <span className="whitespace-nowrap">AI-Powered Career Guidance</span>
               </div>
               
-              {/* Main Heading */}
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold leading-tight text-slate-900 dark:text-white animate-slide-up">
-                Transform Your
-                <span className="block text-slate-900 dark:text-white">Career Future</span>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight text-slate-900 dark:text-white animate-slide-up">
+                Your Digital
+                <span className="block text-primary dark:text-primary">Economic Twin</span>
               </h1>
 
-              {/* Subheading */}
-              <p className="text-lg sm:text-xl md:text-2xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto lg:mx-0 leading-relaxed animate-fade-in animation-delay-200">
-                See how EmpowerAI is transforming careers across South Africa
+              <p className="text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto lg:mx-0 leading-relaxed animate-fade-in animation-delay-200">
+                Visualize your future earning potential. Get personalized career pathways for South African youth.
               </p>
 
-              {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start animate-fade-in animation-delay-400">
+              <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center lg:justify-start animate-fade-in animation-delay-400">
                 <Link
                   to="/signup"
-                  className="group inline-flex items-center justify-center gap-3 bg-slate-900 hover:bg-slate-800 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 shadow-xl hover:shadow-2xl hover:scale-105 active:scale-100 w-full sm:w-auto"
+                  className="group inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary active:bg-primary text-white px-6 sm:px-8 py-4 rounded-lg font-semibold text-base md:text-lg transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 active:scale-100 min-h-[52px] touch-manipulation w-full sm:w-auto"
                 >
-                  <span>Start Your Journey</span>
+                  <span>Sign in</span>
                   <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <a
                   href="#demo"
-                  className="inline-flex items-center justify-center gap-3 border-2 border-slate-300 dark:border-slate-600 hover:border-slate-900 dark:hover:border-slate-400 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-400 px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 hover:scale-105 active:scale-100 w-full sm:w-auto"
+                  className="inline-flex items-center justify-center gap-2 border-2 border-slate-300 dark:border-slate-600 hover:border-primary dark:hover:border-primary text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary px-6 sm:px-8 py-4 rounded-lg font-semibold text-base md:text-lg transition-all duration-200 hover:scale-105 active:scale-100 min-h-[52px] touch-manipulation w-full sm:w-auto"
                 >
                   <Play className="h-5 w-5" />
-                  <span>Watch Demo</span>
+                  <span>Learn More</span>
                 </a>
+              </div>
+
+              {/* Trust Indicators - Mobile Optimized */}
+              <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 md:gap-8 justify-center lg:justify-start pt-4 animate-fade-in animation-delay-600">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex -space-x-2">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div key={i} className="h-9 w-9 md:h-10 md:w-10 rounded-full bg-gradient-to-br from-primary to-primary border-2 border-white dark:border-slate-900" />
+                    ))}
+                  </div>
+                  <span className="text-sm md:text-base text-slate-600 dark:text-slate-400 font-medium">1,000+ users</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <Star key={i} className="h-5 w-5 md:h-6 md:w-6 fill-primary text-primary" />
+                  ))}
+                  <span className="text-sm md:text-base text-slate-600 dark:text-slate-400 font-medium ml-1.5">4.9/5</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Shield className="h-5 w-5 text-primary" />
+                  <span className="text-sm md:text-base text-slate-600 dark:text-slate-400 font-medium">Bank-level security</span>
+                </div>
               </div>
             </div>
 
-            {/* Right Content - Demo Visual */}
+            {/* Right Content - Mobile-First Card */}
             <div className="relative animate-float mt-8 lg:mt-0">
-              <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-2xl md:rounded-3xl shadow-2xl p-6 md:p-8 border border-slate-200/50 dark:border-slate-800/50">
-                <div className="absolute -top-3 -right-3 md:-top-4 md:-right-4 bg-slate-900 text-white px-4 md:px-6 py-2 rounded-full font-semibold text-xs md:text-sm shadow-lg animate-bounce-slow">
+              <div className="bg-white/75 dark:bg-slate-900/75 backdrop-blur-xl rounded-2xl md:rounded-3xl shadow-2xl p-6 md:p-8 border border-slate-200/50 dark:border-slate-800/50">
+                <div className="absolute -top-3 -right-3 md:-top-4 md:-right-4 bg-primary text-white px-4 md:px-6 py-2 rounded-full font-semibold text-xs md:text-sm shadow-lg animate-bounce-slow">
                   Free Forever
                 </div>
                 
-                <div className="space-y-6">
-                  {/* User Profile Card */}
-                  <div className="flex items-center gap-4">
-                    <div className="h-16 w-16 flex-shrink-0 rounded-full bg-gradient-to-br from-slate-900 to-slate-700 flex items-center justify-center">
-                      <Users className="h-8 w-8 text-white" />
+                <div className="space-y-5 md:space-y-6">
+                  <div className="flex items-center gap-3 md:gap-4">
+                    <div className="h-14 w-14 md:h-16 md:w-16 flex-shrink-0 rounded-full bg-gradient-to-br from-primary to-primary flex items-center justify-center">
+                      <span className="text-2xl">??</span>
                     </div>
-                    <div>
-                      <p className="font-semibold text-lg text-slate-900 dark:text-white">Sarah Chen</p>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">Software Developer</p>
-                    </div>
-                  </div>
-
-                  {/* Stats */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center p-4 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                      <ArrowUp className="h-6 w-6 text-slate-900 mx-auto mb-2" />
-                      <p className="text-2xl font-bold text-slate-900 dark:text-white">85%</p>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">Career Match</p>
-                    </div>
-                    <div className="text-center p-4 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                      <TrendingUp className="h-6 w-6 text-slate-900 mx-auto mb-2" />
-                      <p className="text-2xl font-bold text-slate-900 dark:text-white">R45K</p>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">Avg. Salary</p>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-base md:text-lg text-slate-900 dark:text-white truncate">Thabo Ndlovu, 23</p>
+                      <p className="text-sm md:text-base text-slate-500 dark:text-slate-400">Johannesburg, GP</p>
                     </div>
                   </div>
 
-                  {/* Progress Bar */}
                   <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Profile Completion</span>
-                      <span className="text-sm font-bold text-slate-900 dark:text-slate-400">92%</span>
+                    <div className="flex justify-between items-center mb-2.5">
+                      <span className="text-sm md:text-base font-medium text-slate-600 dark:text-slate-400">Empowerment Score</span>
+                      <span className="text-xl md:text-2xl font-bold text-primary dark:text-primary">82/100</span>
                     </div>
-                    <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                      <div className="h-full w-[92%] bg-slate-900 dark:bg-slate-400 rounded-full animate-progress" />
+                    <div className="h-3 md:h-4 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                      <div className="h-full w-[82%] bg-gradient-to-r from-primary to-primary dark:from-primary dark:to-primary rounded-full animate-progress" />
                     </div>
                   </div>
                 </div>
@@ -222,18 +207,18 @@ export default function LandingPage() {
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-4">
               Powerful Features for
-              <span className="block text-slate-900 dark:text-white">Career Success</span>
+              <span className="block text-primary dark:text-primary">Career Success</span>
             </h2>
             <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto">
               Everything you need to accelerate your career journey in one platform
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6 lg:gap-8">
             {/* Feature 1 */}
-            <div className="group p-8 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:shadow-xl transition-all duration-300 hover:scale-105">
-              <div className="h-14 w-14 bg-slate-900 dark:bg-slate-100 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <Brain className="h-7 w-7 text-white dark:text-slate-900" />
+            <div className="group p-6 md:p-8 rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 dark:from-primary/20 dark:to-secondary/20 border border-primary/20 dark:border-primary/20 hover:shadow-xl transition-all duration-300 hover:scale-105">
+              <div className="h-12 w-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <Brain className="h-6 w-6 text-white" />
               </div>
               <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">AI Career Analysis</h3>
               <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
@@ -242,9 +227,9 @@ export default function LandingPage() {
             </div>
 
             {/* Feature 2 */}
-            <div className="group p-8 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:shadow-xl transition-all duration-300 hover:scale-105">
-              <div className="h-14 w-14 bg-slate-900 dark:bg-slate-100 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <Target className="h-7 w-7 text-white dark:text-slate-900" />
+            <div className="group p-6 md:p-8 rounded-2xl bg-gradient-to-br from-secondary/10 to-accent/10 dark:from-secondary/20 dark:to-accent/20 border border-secondary/20 dark:border-secondary/20 hover:shadow-xl transition-all duration-300 hover:scale-105">
+              <div className="h-12 w-12 bg-gradient-to-br from-secondary to-accent rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <Target className="h-6 w-6 text-white" />
               </div>
               <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">Salary Predictions</h3>
               <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
@@ -253,9 +238,9 @@ export default function LandingPage() {
             </div>
 
             {/* Feature 3 */}
-            <div className="group p-8 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:shadow-xl transition-all duration-300 hover:scale-105">
-              <div className="h-14 w-14 bg-slate-900 dark:bg-slate-100 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <FileText className="h-7 w-7 text-white dark:text-slate-900" />
+            <div className="group p-6 md:p-8 rounded-2xl bg-gradient-to-br from-accent/10 to-primary/10 dark:from-accent/20 dark:to-primary/20 border border-accent/20 dark:border-accent/20 hover:shadow-xl transition-all duration-300 hover:scale-105">
+              <div className="h-12 w-12 bg-gradient-to-br from-accent to-primary rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <FileText className="h-6 w-6 text-white" />
               </div>
               <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">CV Optimization</h3>
               <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
@@ -264,9 +249,9 @@ export default function LandingPage() {
             </div>
 
             {/* Feature 4 */}
-            <div className="group p-8 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:shadow-xl transition-all duration-300 hover:scale-105">
-              <div className="h-14 w-14 bg-slate-900 dark:bg-slate-100 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <Mic className="h-7 w-7 text-white dark:text-slate-900" />
+            <div className="group p-6 md:p-8 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 dark:from-primary/20 dark:to-accent/20 border border-primary/20 dark:border-accent/20 hover:shadow-xl transition-all duration-300 hover:scale-105">
+              <div className="h-12 w-12 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <Mic className="h-6 w-6 text-white" />
               </div>
               <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">Interview Coach</h3>
               <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
@@ -275,9 +260,9 @@ export default function LandingPage() {
             </div>
 
             {/* Feature 5 */}
-            <div className="group p-8 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:shadow-xl transition-all duration-300 hover:scale-105">
-              <div className="h-14 w-14 bg-slate-900 dark:bg-slate-100 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <BarChart3 className="h-7 w-7 text-white dark:text-slate-900" />
+            <div className="group p-6 md:p-8 rounded-2xl bg-gradient-to-br from-secondary/10 to-accent/10 dark:from-secondary/20 dark:to-accent/20 border border-secondary/20 dark:border-secondary/20 hover:shadow-xl transition-all duration-300 hover:scale-105">
+              <div className="h-12 w-12 bg-gradient-to-br from-secondary to-accent rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <BarChart3 className="h-6 w-6 text-white" />
               </div>
               <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">Market Insights</h3>
               <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
@@ -286,9 +271,9 @@ export default function LandingPage() {
             </div>
 
             {/* Feature 6 */}
-            <div className="group p-8 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:shadow-xl transition-all duration-300 hover:scale-105">
-              <div className="h-14 w-14 bg-slate-900 dark:bg-slate-100 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <Award className="h-7 w-7 text-white dark:text-slate-900" />
+            <div className="group p-6 md:p-8 rounded-2xl bg-gradient-to-br from-accent/10 to-primary/10 dark:from-accent/20 dark:to-primary/20 border border-accent/20 dark:border-accent/20 hover:shadow-xl transition-all duration-300 hover:scale-105">
+              <div className="h-12 w-12 bg-gradient-to-br from-accent to-primary rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <Award className="h-6 w-6 text-white" />
               </div>
               <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">Skill Tracking</h3>
               <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
@@ -305,7 +290,7 @@ export default function LandingPage() {
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-4">
               Success Stories from
-              <span className="block text-slate-900 dark:text-white">South African Youth</span>
+              <span className="block text-primary dark:text-primary">South African Youth</span>
             </h2>
             <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto">
               Real stories from real users who transformed their careers with EmpowerAI
@@ -313,16 +298,20 @@ export default function LandingPage() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6 lg:gap-8">
-            {testimonials.map((testimonial, i) => (
+            {[
+              { name: "Lerato M.", location: "Cape Town", role: "Student ? Software Developer", quote: "EmpowerAI helped me discover tech skills I didn't know I had. I'm now earning R12k/month!", rating: 5 },
+              { name: "Sipho K.", location: "Durban", role: "Unemployed ? Business Owner", quote: "The career simulation showed me entrepreneurship was my path. Best decision I ever made!", rating: 5 },
+              { name: "Nomsa T.", location: "Johannesburg", role: "Waitress ? Marketing Pro", quote: "From minimum wage to a career I love. The AI guidance was truly life-changing!", rating: 5 },
+            ].map((testimonial, i) => (
               <div key={i} className="bg-white/75 dark:bg-slate-900/75 backdrop-blur-xl rounded-xl md:rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200/50 dark:border-slate-800/50 hover:shadow-xl hover:scale-105 active:scale-100 transition-all duration-300 touch-manipulation">
                 <div className="flex gap-1 mb-4">
                   {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 fill-slate-900 dark:fill-slate-100" />
+                    <Star key={i} className="h-5 w-5 fill-primary text-primary" />
                   ))}
                 </div>
                 <p className="text-base sm:text-lg md:text-xl text-slate-700 dark:text-slate-300 mb-5 md:mb-6 leading-relaxed">"{testimonial.quote}"</p>
                 <div className="flex items-center gap-3">
-                  <div className="h-11 w-11 md:h-12 md:w-12 flex-shrink-0 rounded-full bg-slate-900 dark:bg-slate-100" />
+                  <div className="h-11 w-11 md:h-12 md:w-12 flex-shrink-0 rounded-full bg-gradient-to-br from-primary to-primary" />
                   <div className="min-w-0">
                     <p className="font-semibold text-sm md:text-base text-slate-900 dark:text-white truncate">{testimonial.name}</p>
                     <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 truncate">{testimonial.role}</p>
@@ -334,19 +323,19 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-slate-900 dark:bg-slate-950 relative overflow-hidden">
+      {/* Mobile-First CTA Section */}
+      <section className="py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-primary via-indigo-700 to-premium dark:from-primary dark:via-indigo-950 dark:to-premium relative overflow-hidden">
         <div className="absolute inset-0 bg-grid-white/5" />
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 md:mb-6 animate-fade-in leading-tight">
             Ready to Transform Your Future?
           </h2>
-          <p className="text-base sm:text-lg md:text-xl text-slate-300 mb-6 md:mb-8 max-w-2xl mx-auto animate-fade-in animation-delay-200 leading-relaxed">
+          <p className="text-base sm:text-lg md:text-xl text-primary mb-6 md:mb-8 max-w-2xl mx-auto animate-fade-in animation-delay-200 leading-relaxed">
             Join over 1,000 South African youth building better careers with AI-powered guidance
           </p>
           <Link
             to="/signup"
-            className="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-900 px-8 md:px-10 py-4 md:py-5 rounded-lg font-bold text-base md:text-lg transition-all duration-200 shadow-2xl hover:scale-105 active:scale-100 animate-fade-in animation-delay-400 min-h-[52px] touch-manipulation w-full sm:w-auto max-w-md mx-auto"
+            className="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-50 active:bg-slate-100 text-primary px-8 md:px-10 py-4 md:py-5 rounded-lg font-bold text-base md:text-lg transition-all duration-200 shadow-2xl hover:scale-105 active:scale-100 animate-fade-in animation-delay-400 min-h-[52px] touch-manipulation w-full sm:w-auto max-w-md mx-auto"
           >
             <span>Start Your Journey Free</span>
             <ArrowRight className="h-5 w-5 md:h-6 md:w-6" />
@@ -354,8 +343,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-slate-900 dark:bg-slate-950 text-slate-300 dark:text-slate-400 py-12 md:py-16 px-4 sm:px-6 lg:px-8 border-t border-slate-800">
+      {/* Mobile-First Footer */}
+      <footer className="bg-slate-900 dark:bg-black text-slate-300 dark:text-slate-400 py-12 md:py-16 px-4 sm:px-6 lg:px-8 border-t border-slate-800">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 mb-10 md:mb-12">
             <div className="col-span-2 md:col-span-1">
