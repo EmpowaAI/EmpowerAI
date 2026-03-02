@@ -1,6 +1,6 @@
+import React, { useState } from "react"
 import { AlertCircle, X } from "lucide-react"
 import { cn } from "../lib/utils"
-import { useState } from "react"
 
 interface ErrorAlertProps {
   message: string
