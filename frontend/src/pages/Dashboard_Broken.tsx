@@ -1,9 +1,33 @@
-import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { Sparkles, ChevronUp, Loader2, TrendingUp, Briefcase, FileText, Mic, Target, Zap, ArrowRight } from 'lucide-react'
-import { useUser } from '../lib/user-context'
-import { cn } from '../lib/utils'
-import { statsAPI, opportunitiesAPI } from '../lib/api'
+import DigitalTwinChatbot from "../components/DigitalTwinChatbot";
+import { Link } from "react-router-dom"
+import { TrendingUp, Briefcase, FileText, Mic, Target, Zap, Brain, Sparkles } from "lucide-react"
+import { useUser } from "../lib/user-context"
+import { useDashboardData } from "../hooks/useDashboardData"
+
+// Import modular components
+import WelcomeHero from "../components/dashboard/WelcomeHero"
+import StatsGrid from "../components/dashboard/StatsGrid"
+import NextSteps from "../components/dashboard/NextSteps"
+import CareerSnapshot from "../components/dashboard/CareerSnapshot"
+import FutureTimeline from "../components/dashboard/FutureTimeline"
+import SkillGapRadar from "../components/dashboard/SkillGapRadar"
+import QuickActions from "../components/dashboard/QuickActions"
+import RecommendedOpportunities from "../components/dashboard/RecommendedOpportunities"
+import ProjectionAssumptions from "../components/ProjectionAssumptions"
+import DigitalTwinChatbot from "../components/DigitalTwinChatbot"
+import ProgressChart from "../components/dashboard/ProgressChart"
+import SkillsDistribution from "../components/dashboard/SkillsDistribution"
+import PerformanceMonitor from "../components/dashboard/PerformanceMonitor"
+import DashboardErrorBoundary from "../components/dashboard/DashboardErrorBoundary"
+
+// Import new Neural Fusion components
+import HolographicButton from "../components/ui/HolographicButton"
+import NeuralCard from "../components/ui/NeuralCard"
+import AIAvatar from "../components/ui/AIAvatar"
+import CVAnalyzer8D from "../components/features/CVAnalyzer8D"
+import VoiceInterviewCoach from "../components/features/VoiceInterviewCoach"
+
+import { useState, useEffect } from "react"
 
 interface DashboardStats {
   empowermentScore: number
@@ -41,6 +65,7 @@ export default function Dashboard() {
         }
       } catch (error) {
         console.error('Failed to load dashboard stats:', error)
+        // Don't set fallback values - show loading/empty state instead
       } finally {
         setLoading(false)
       }
@@ -53,6 +78,7 @@ export default function Dashboard() {
     const fetchRecommendedJobs = async () => {
       try {
         setJobsLoading(true)
+        // Get user's province and skills for filtering
         const filters: { province?: string; skills?: string } = {}
         const userProvince = (user as any)?.province || localStorage.getItem('userProvince')
         if (userProvince) {
@@ -74,6 +100,7 @@ export default function Dashboard() {
         const response = await opportunitiesAPI.getAll(filters)
         
         if (response.status === 'success' && response.data?.opportunities) {
+          // Get top 3 opportunities sorted by match score
           const opportunities = response.data.opportunities
             .map((opp: any) => ({
               id: opp._id || opp.id,
@@ -92,6 +119,7 @@ export default function Dashboard() {
         }
       } catch (error) {
         console.error('Failed to load recommended jobs:', error)
+        // Don't show hardcoded fallback - just leave empty
       } finally {
         setJobsLoading(false)
       }
@@ -101,7 +129,8 @@ export default function Dashboard() {
   }, [user])
 
   const calculateMatchScore = (opp: any, user: any): number => {
-    let score = 50
+    // Calculate match score based on skills, location, etc.
+    let score = 50 // Base score
     
     const cvSkills = localStorage.getItem('cvSkills')
     if (cvSkills && opp.skills) {
@@ -125,18 +154,19 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
-      {/* Welcome Section */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-indigo-600 to-indigo-700 rounded-xl p-6 md:p-8 shadow-xl border border-indigo-500/20">
-        <div className="absolute inset-0 opacity-[0.03]">
+      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-indigo-600 to-indigo-700 dark:from-indigo-700 dark:via-indigo-800 dark:to-indigo-900 rounded-xl p-6 md:p-8 shadow-xl border border-indigo-500/20 dark:border-indigo-600/20">
+        {/* Background image overlay - subtle */}
+        <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]">
           <img 
             src="/images/result.jpg" 
             alt="" 
             className="w-full h-full object-cover"
             aria-hidden="true"
           />
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/80 to-indigo-700/80"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/80 to-indigo-700/80 dark:from-indigo-800/90 dark:to-indigo-900/90"></div>
         </div>
         
+        {/* Decorative pattern */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0" style={{
             backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
@@ -144,22 +174,22 @@ export default function Dashboard() {
           }}></div>
         </div>
         
-        <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-6 animate-in fade-in-up">
           <div className="space-y-4">
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-2 animate-in fade-in-up" style={{ animationDelay: '0.1s' }}>
               <span className="px-3 sm:px-4 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-xs font-semibold text-white flex items-center gap-1.5 border border-white/30 shadow-lg">
                 <Sparkles className="h-3.5 w-3.5" /> AI-Powered
               </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight leading-tight">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight leading-tight animate-in fade-in-up" style={{ animationDelay: '0.2s' }}>
               Welcome back, <span className="bg-gradient-to-r from-white to-indigo-100 bg-clip-text text-transparent">{displayName}</span>!
             </h1>
-            <p className="text-indigo-100 text-sm sm:text-base md:text-lg max-w-md leading-relaxed">
+            <p className="text-indigo-100 text-sm sm:text-base md:text-lg max-w-md leading-relaxed animate-in fade-in-up" style={{ animationDelay: '0.3s' }}>
               Your economic twin is ready. Let's build your future today.
             </p>
           </div>
 
-          <div className="flex items-center gap-4 sm:gap-6 md:gap-8">
+          <div className="flex items-center gap-4 sm:gap-6 md:gap-8 animate-in fade-in-up" style={{ animationDelay: '0.4s' }}>
             <div className="text-center p-4 sm:p-5 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 shadow-lg hover:bg-white/15 transition-all duration-300 hover:scale-105">
               <div className="flex items-center justify-center gap-2 mb-2">
                 {loading ? (
@@ -190,7 +220,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { 
@@ -234,24 +263,25 @@ export default function Dashboard() {
               <div
                 className={cn(
                   "h-9 w-9 rounded-lg flex items-center justify-center transition-all duration-300 group-hover:scale-110 shadow-md",
-                  stat.color === "primary" && "bg-primary/10 text-primary border border-primary/30",
-                  stat.color === "secondary" && "bg-secondary/10 text-secondary border border-secondary/30",
-                  stat.color === "warning" && "bg-warning/10 text-warning border border-warning/30",
-                  stat.color === "accent" && "bg-accent/10 text-accent border border-accent/30",
+                  stat.color === "primary" && "bg-gradient-to-br from-indigo-100 to-indigo-200 dark:from-indigo-900/40 dark:to-indigo-800/40 text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-700/50",
+                  stat.color === "secondary" && "bg-gradient-to-br from-cyan-100 to-cyan-200 dark:from-cyan-900/40 dark:to-cyan-800/40 text-cyan-600 dark:text-cyan-400 border border-cyan-200/50 dark:border-cyan-700/50",
+                  stat.color === "warning" && "bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-900/40 dark:to-amber-800/40 text-amber-600 dark:text-amber-400 border border-amber-200/50 dark:border-amber-700/50",
+                  stat.color === "accent" && "bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-emerald-900/40 dark:to-emerald-800/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-700/50",
                 )}
               >
-                {stat.trend === "up" ? <TrendingUp className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                {stat.trend === "up" ? <TrendingUp className="h-4 w-4" /> : <Clock className="h-4 w-4" />}
               </div>
             </div>
             <p className="text-2xl sm:text-3xl font-bold text-foreground mb-2">{stat.value}</p>
-            <p className={cn("text-sm font-medium", stat.trend === "up" ? "text-accent" : "text-muted-foreground")}>
+            <p
+              className={cn("text-sm font-medium", stat.trend === "up" ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground")}
+            >
               {stat.change}
             </p>
           </div>
         ))}
       </div>
 
-      {/* Quick Actions */}
       <div className="animate-in fade-in-up" style={{ animationDelay: '0.5s' }}>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-6">
           <h2 className="text-xl font-semibold text-foreground">Quick Actions</h2>
@@ -264,60 +294,81 @@ export default function Dashboard() {
               title: "Run Simulation",
               desc: "Compare career pathways",
               path: "/dashboard/simulations",
+              gradient: "from-primary to-primary/70",
+              bgColor: "bg-primary/5",
             },
             {
               icon: Briefcase,
               title: "Browse Opportunities",
               desc: "Find jobs and learnerships",
               path: "/dashboard/opportunities",
+              gradient: "from-accent to-accent/70",
+              bgColor: "bg-accent/5",
             },
             {
               icon: FileText,
               title: "Analyze CV",
               desc: "Get AI-powered feedback",
               path: "/dashboard/cv-analyzer",
+              gradient: "from-secondary to-secondary/70",
+              bgColor: "bg-secondary/5",
             },
             {
               icon: Mic,
               title: "Practice Interview",
               desc: "Build your confidence",
-              path: "/dashboard/interview-coach",
+              path: "/dashboard/interview",
+              gradient: "from-warning to-warning/70",
+              bgColor: "bg-warning/5",
             },
             {
               icon: Target,
               title: "View Roadmap",
               desc: "Track your progress",
               path: "/dashboard/twin",
+              gradient: "from-destructive to-destructive/70",
+              bgColor: "bg-destructive/5",
             },
             {
               icon: Zap,
-              title: "Neural Fusion",
-              desc: "Experience AI features",
-              path: "/neural-fusion",
+              title: "Update Twin",
+              desc: "Add new skills",
+              path: "/dashboard/twin",
+              gradient: "from-primary to-secondary",
+              bgColor: "bg-primary/5",
             },
           ].map((action, i) => (
             <Link
               key={i}
               to={action.path}
-              className="bg-card border border-border rounded-xl p-4 sm:p-6 transition-all duration-300 group relative overflow-hidden animate-in fade-in-up hover:scale-105 hover:-translate-y-1 hover:shadow-lg hover:border-primary/40"
+              className={cn(
+              "group bg-card border border-border rounded-xl p-4 sm:p-6 hover:shadow-lg hover:border-primary/40 transition-all duration-300 relative overflow-hidden animate-in fade-in-up hover:scale-105 hover:-translate-y-1"
+              )}
               style={{ animationDelay: `${(i + 4) * 0.1}s` }}
             >
               <div className="flex items-start justify-between mb-4">
                 <div
-                  className="h-12 w-12 rounded-lg flex items-center justify-center transition-all duration-300 group-hover:scale-110 shadow-md bg-primary/10 text-primary border border-primary/30"
+                  className={cn(
+                    "h-12 w-12 rounded-lg flex items-center justify-center transition-all duration-300 group-hover:scale-110 shadow-md",
+                    i === 0 && "bg-gradient-to-br from-indigo-100 to-indigo-200 dark:from-indigo-900/40 dark:to-indigo-800/40 text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-700/50",
+                    i === 1 && "bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-emerald-900/40 dark:to-emerald-800/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-700/50",
+                    i === 2 && "bg-gradient-to-br from-cyan-100 to-cyan-200 dark:from-cyan-900/40 dark:to-cyan-800/40 text-cyan-600 dark:text-cyan-400 border border-cyan-200/50 dark:border-cyan-700/50",
+                    i === 3 && "bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-900/40 dark:to-amber-800/40 text-amber-600 dark:text-amber-400 border border-amber-200/50 dark:border-amber-700/50",
+                    i === 4 && "bg-gradient-to-br from-indigo-100 to-indigo-200 dark:from-indigo-900/40 dark:to-indigo-800/40 text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-700/50",
+                    i === 5 && "bg-gradient-to-br from-cyan-100 to-cyan-200 dark:from-cyan-900/40 dark:to-cyan-800/40 text-cyan-600 dark:text-cyan-400 border border-cyan-200/50 dark:border-cyan-700/50",
+                  )}
                 >
                   <action.icon className="h-6 w-6" />
                 </div>
-                <ArrowRight className="h-5 w-5 text-slate-400 group-hover:text-primary transition-colors" />
+                <ArrowRight className="h-5 w-5 text-slate-400 dark:text-slate-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" />
               </div>
-              <h3 className="font-semibold text-foreground text-base mb-1">{action.title}</h3>
-              <p className="text-sm text-muted-foreground">{action.desc}</p>
+            <h3 className="font-semibold text-foreground text-base mb-1">{action.title}</h3>
+            <p className="text-sm text-muted-foreground">{action.desc}</p>
             </Link>
           ))}
         </div>
       </div>
 
-      {/* Recommended Opportunities */}
       <div className="animate-in fade-in-up" style={{ animationDelay: '0.6s' }}>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-6">
           <div>
@@ -332,32 +383,31 @@ export default function Dashboard() {
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
-        
         {jobsLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[1, 2, 3].map((i) => (
               <div key={i} className="bg-card border border-border rounded-xl p-4 sm:p-6 animate-pulse">
-                <div className="h-4 w-20 bg-muted rounded mb-4" />
-                <div className="h-6 bg-muted rounded mb-2" />
-                <div className="h-4 bg-muted rounded mb-4" />
-                <div className="h-8 bg-muted rounded" />
+                <div className="h-12 w-12 rounded-lg bg-muted mb-4" />
+                <div className="h-4 bg-muted rounded w-3/4 mb-2" />
+                <div className="h-3 bg-muted rounded w-1/2" />
               </div>
             ))}
           </div>
         ) : recommendedJobs.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {recommendedJobs.map((job) => (
+            {recommendedJobs.map((job, i) => (
               <Link
                 key={job.id}
                 to={`/dashboard/opportunities#${job.id}`}
-                className="bg-card border border-border rounded-xl p-4 sm:p-6 transition-all duration-200 group animate-in fade-in-up hover:scale-[1.02] hover:-translate-y-1 hover:shadow-md hover:border-primary/40"
+                className="bg-card border border-border rounded-xl p-4 sm:p-6 hover:shadow-md hover:border-primary/40 transition-all duration-200 group animate-in fade-in-up hover:scale-[1.02] hover:-translate-y-1"
+                style={{ animationDelay: `${(i + 10) * 0.1}s` }}
               >
                 <div className="flex items-start justify-between mb-4">
-                  <div className="h-12 w-12 rounded-lg bg-accent/10 flex items-center justify-center">
-                    <Briefcase className="h-6 w-6 text-accent" />
+                  <div className="h-12 w-12 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                    <Briefcase className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
                   </div>
                   <div className="flex flex-col items-end gap-1">
-                    <span className="px-3 py-1 bg-accent/10 text-accent text-xs rounded-full font-semibold">
+                    <span className="px-3 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs rounded-full font-semibold">
                       {job.match}% match
                     </span>
                     <span className="text-xs text-muted-foreground">{job.posted}</span>
@@ -380,7 +430,9 @@ export default function Dashboard() {
           <div className="bg-card border border-border rounded-xl p-8 text-center">
             <Briefcase className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-foreground mb-2">No Opportunities Available</h3>
-            <p className="text-muted-foreground mb-4">Check back later or browse all opportunities to find matches.</p>
+            <p className="text-muted-foreground mb-4">
+              Check back later or browse all opportunities to find matches.
+            </p>
             <Link
               to="/dashboard/opportunities"
               className="inline-flex items-center gap-2 text-primary hover:underline font-medium"
@@ -390,6 +442,7 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+      <DigitalTwinChatbot />
     </div>
   )
 }
