@@ -1,0 +1,190 @@
+/* ============================================
+   EMPOWERAI - DEFINITIVE COLOR SYSTEM
+   ============================================
+   Single Source of Truth for All Components
+   ============================================ */
+
+:root {
+  /* ============================================
+     BRAND COLORS - Professional & Clean
+     ============================================ */
+  --primary: #2563eb;                    /* Professional Blue - Trust, Intelligence */
+  --primary-foreground: #ffffff;            /* White text on primary */
+  --primary-hover: #1d4ed8;                /* Darker blue for hover */
+  --primary-light: #dbeafe;                 /* Light blue for backgrounds */
+  
+  --secondary: #64748b;                  /* Professional Gray - Neutral, Sophisticated */
+  --secondary-foreground: #ffffff;          /* White text on secondary */
+  --secondary-hover: #475569;              /* Darker gray for hover */
+  
+  --accent: #059669;                     /* Success Green - Growth, Achievement */
+  --accent-foreground: #ffffff;              /* White text on accent */
+  --accent-hover: #047857;                /* Darker green for hover */
+  
+  /* ============================================
+     NEUTRAL COLORS - Clean Palette
+     ============================================ */
+  --background: #ffffff;                   /* Clean White - Professional */
+  --foreground: #1e293b;                 /* Dark Text - High Contrast */
+  --muted: #f8fafc;                       /* Light Background - Subtle */
+  --muted-foreground: #64748b;           /* Gray Text - Secondary */
+  --border: #e2e8f0;                     /* Light Border - Clean */
+  --border-hover: #cbd5e1;                 /* Medium Border - Interactive */
+  
+  /* ============================================
+     SEMANTIC COLORS - Clear Meaning
+     ============================================ */
+  --success: #10b981;                    /* Green - Success, Complete */
+  --success-foreground: #ffffff;
+  --warning: #f59e0b;                    /* Amber - Warning, Attention */
+  --warning-foreground: #ffffff;
+  --error: #ef4444;                      /* Red - Error, Critical */
+  --error-foreground: #ffffff;
+  --info: #3b82f6;                       /* Blue - Information, Help */
+  --info-foreground: #ffffff;
+  
+  /* ============================================
+     RADIUS & SPACING - Consistent Design
+     ============================================ */
+  --radius: 0.5rem;                      /* 8px - Professional */
+  --radius-sm: 0.375rem;                  /* 6px - Small elements */
+  --radius-lg: 0.75rem;                   /* 12px - Large elements */
+  
+  --spacing-xs: 0.25rem;                  /* 4px */
+  --spacing-sm: 0.5rem;                   /* 8px */
+  --spacing-md: 1rem;                     /* 16px */
+  --spacing-lg: 1.5rem;                    /* 24px */
+  --spacing-xl: 2rem;                     /* 32px */
+  
+  /* ============================================
+     TYPOGRAPHY - Professional & Readable
+     ============================================ */
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+  --font-display: "Inter", system-ui, sans-serif;
+  
+  --text-xs: 0.75rem;                     /* 12px */
+  --text-sm: 0.875rem;                    /* 14px */
+  --text-base: 1rem;                      /* 16px */
+  --text-lg: 1.125rem;                    /* 18px */
+  --text-xl: 1.25rem;                     /* 20px */
+  --text-2xl: 1.5rem;                     /* 24px */
+  --text-3xl: 1.875rem;                    /* 30px */
+  --text-4xl: 2.25rem;                    /* 36px */
+  
+  /* ============================================
+     SHADOWS - Subtle & Professional
+     ============================================ */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  
+  /* ============================================
+     ANIMATIONS - Subtle & Purposeful
+     ============================================ */
+  --duration-fast: 150ms;                 /* Quick interactions */
+  --duration-normal: 200ms;               /* Standard transitions */
+  --duration-slow: 300ms;                 /* Thoughtful animations */
+  
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================
+   DARK MODE - Professional Dark Theme
+   ============================================ */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Dark Mode Colors */
+    --background: #0f172a;               /* Deep Space Black */
+    --foreground: #f8fafc;                 /* Clean White */
+    --muted: #1e293b;                     /* Dark Gray */
+    --muted-foreground: #94a3b8;           /* Light Gray */
+    --border: #334155;                     /* Medium Gray */
+    --border-hover: #475569;                 /* Light Gray */
+    
+    /* Adjust semantic colors for dark mode */
+    --success: #059669;                    /* Brighter Green */
+    --warning: #d97706;                    /* Brighter Amber */
+    --error: #dc2626;                      /* Brighter Red */
+    --info: #0ea5e9;                       /* Brighter Blue */
+  }
+}
+
+/* ============================================
+   UTILITY CLASSES - Consistent Usage
+   ============================================ */
+
+/* Focus & Accessibility */
+.focus-ring {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Screen Reader Only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============================================
+   COMPONENT OVERRIDES - Clean Implementation
+   ============================================ */
+
+/* Remove all conflicting styles from other CSS files */
+.neural-button,
+.neural-card,
+.ai-avatar,
+.voice-visualizer,
+.neural-loading {
+  /* Use definitive color system */
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  border-color: var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  transition: all var(--duration-normal) var(--ease-in-out);
+}
+
+/* Professional hover states */
+.neural-button:hover {
+  background-color: var(--primary-hover);
+  border-color: var(--border-hover);
+}
+
+.neural-card:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Clean focus states */
+.neural-button:focus,
+.neural-card:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
