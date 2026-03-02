@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react'
+import React, { useState, useCallback, useRef } from 'react'
 import { Upload, FileText, CheckCircle, TrendingUp, AlertCircle, Download, Share2, Brain, Target, Award, BarChart3, Zap } from "lucide-react"
 import { cn } from "../../lib/utils"
 import { cvAPI } from "../../lib/api"
