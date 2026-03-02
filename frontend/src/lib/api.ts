@@ -4,6 +4,32 @@ const getToken = (): string | null => localStorage.getItem('empowerai-token');
 const setToken = (token: string): void => localStorage.setItem('empowerai-token', token);
 const removeToken = (): void => localStorage.removeItem('empowerai-token');
 
+const extractTokenFromResponse = (response: any): string | null => {
+  const candidates = [
+    response?.data?.token,
+    response?.token,
+    response?.data?.accessToken,
+    response?.accessToken,
+    response?.data?.jwt,
+    response?.jwt,
+    response?.data?.authToken,
+    response?.authToken,
+    response?.data?.user?.token,
+    response?.data?.data?.token,
+    response?.data?.data?.accessToken,
+    response?.data?.session?.token,
+    response?.session?.token,
+  ];
+
+  for (const value of candidates) {
+    if (typeof value === 'string' && value.trim().length > 0) {
+      return value;
+    }
+  }
+
+  return null;
+};
+
 const request = async <T>(endpoint: string, options: RequestInit = {}): Promise<T> => {
   const token = getToken();
   const headers = new Headers(options.headers);
@@ -72,38 +98,29 @@ const request = async <T>(endpoint: string, options: RequestInit = {}): Promise<
 export const authAPI = {
   register: async (data: any) => {
     const response = await request<any>('/auth/register', { method: 'POST', body: JSON.stringify(data) });
-    // Backend returns token in response.data.token
-    if (response.data?.token) {
-      setToken(response.data.token);
-    } else if (response.token) {
-      // Fallback for legacy format
-      setToken(response.token);
+    const token = extractTokenFromResponse(response);
+    if (token) {
+      setToken(token);
     }
     return response;
   },
   login: async (email: string, password: string) => {
-    console.log('🔐 LOGIN: Starting login process...');
+    console.log('LOGIN: Starting login process...');
     const response = await request<any>('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
-    console.log('🔐 LOGIN: Response received:', { status: response.status, hasDataToken: !!response.data?.token, hasToken: !!response.token });
-    
-    // Backend returns token in response.data.token
-    if (response.data?.token) {
-      console.log('🔐 LOGIN: Setting token from response.data.token');
-      setToken(response.data.token);
-      console.log('🔐 LOGIN: Token stored! Preview:', response.data.token.substring(0, 20) + '...');
-    } else if (response.token) {
-      // Fallback for legacy format
-      console.log('🔐 LOGIN: Setting token from response.token (legacy)');
-      setToken(response.token);
-      console.log('🔐 LOGIN: Token stored! Preview:', response.token.substring(0, 20) + '...');
+    const token = extractTokenFromResponse(response);
+    console.log('LOGIN: Response received:', { status: response.status, hasToken: !!token });
+
+    if (token) {
+      setToken(token);
+      console.log('LOGIN: Token stored.');
     } else {
-      console.error('🔐 LOGIN: ❌ NO TOKEN IN RESPONSE!', response);
+      console.error('LOGIN: No token in response.', response);
+      throw new Error('Login succeeded but no auth token was returned by the server. Please contact support.');
     }
-    
-    // Verify token was stored
+
     const storedToken = getToken();
-    console.log('🔐 LOGIN: Verification - Token in localStorage:', storedToken ? 'YES ✅' : 'NO ❌');
-    
+    console.log('LOGIN: Verification - Token in localStorage:', storedToken ? 'YES' : 'NO');
+
     return response;
   },
   logout: () => removeToken(),
@@ -529,3 +546,4 @@ export const twinAPIDemo = {
 };
 
 export { getToken, setToken, removeToken, calculateEmpowermentScoreLocal as calculateEmpowermentScore };
+

@@ -3,7 +3,7 @@ import type React from "react"
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { Eye, EyeOff, Loader2, TrendingUp, Users } from "lucide-react"
-import { authAPI } from "../lib/api"
+import { authAPI, getToken } from "../lib/api"
 import { useUser } from "../lib/user-context"
 import Logo from "../components/Logo"
 
@@ -25,6 +25,13 @@ export default function LoginPage() {
 
     try {
       const response = await authAPI.login(email, password)
+      const token = getToken()
+
+      if (!token) {
+        setError("Login failed: no authentication token returned. Please try again.")
+        return
+      }
+
       if (response.status === "success" && response.data?.user) {
         setUser({
           name: response.data.user.name,
