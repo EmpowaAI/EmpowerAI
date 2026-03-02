@@ -1,4 +1,4 @@
-﻿import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import { UserProvider, useUser } from './lib/user-context'
 import { ThemeProvider } from './lib/theme'
 import LandingPage from './pages/LandingPage'
@@ -13,7 +13,7 @@ import CVAnalyzer from './pages/CVAnalyzer'
 import InterviewCoach from './pages/InterviewCoach'
 import AboutPage from './pages/AboutPage'
 import Profile from './pages/Profile'
-import NeuralFusionShowcase from './pages/NeuralFusionShowcase'
+import AuthTest from './pages/AuthTest'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user } = useUser()
@@ -32,10 +32,10 @@ function App() {
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<LandingPage />} />
-          <Route path="/neural-fusion" element={<NeuralFusionShowcase />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/signup" element={<SignupPage />} />
+              <Route path="/auth-test" element={<AuthTest />} />
           
           {/* Protected dashboard routes */}
           <Route path="/dashboard" element={
