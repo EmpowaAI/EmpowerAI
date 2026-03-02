@@ -96,6 +96,41 @@ export const authAPI = {
   validate: async () => request<any>('/auth/validate'),
 };
 
+export const accountAPI = {
+
+forgotPassword: async (email: string) => {
+
+return request<any>(
+"/account/forgot-password",
+{
+method:"POST",
+body: JSON.stringify({email})
+}
+)
+
+},
+
+
+resetPassword: async (token:string,password:string)=>{
+
+return request<any>(`/account/reset-password`, {
+  method: "POST",
+  body: JSON.stringify({ token, newPassword: password })
+})
+
+},
+
+
+verifyEmail: async (token:string)=>{
+
+return request<any>(
+`/account/verify-email/${token}`
+)
+
+}
+
+}
+
 // Helper function to calculate empowerment score
 const calculateEmpowermentScoreLocal = (data: any): number => {
   let score = 50; // Base score
