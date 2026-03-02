@@ -1,26 +1,21 @@
-// pages/LoginPage.tsx - Enhanced with beautiful animations
-import type React from "react"
-
-import { useState } from "react"
+﻿import { useState, FormEvent } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { Zap, Eye, EyeOff, Loader2, Sparkles, TrendingUp, Users } from "lucide-react"
+import { Eye, EyeOff, Mail, Lock, ArrowLeft, Loader2, AlertCircle } from "lucide-react"
 import { authAPI } from "../lib/api"
 import { useUser } from "../lib/user-context"
-import { syncProgressFromBackend, unlockAllPages } from "../utils/progressSync"
 import Logo from "../components/Logo"
+import { cn } from "../lib/utils"
 
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [emailFocused, setEmailFocused] = useState(false)
-  const [passwordFocused, setPasswordFocused] = useState(false)
   const navigate = useNavigate()
-  const { setUser, progress, updateProgress } = useUser()
+  const { setUser } = useUser()
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setError("")
     setIsLoading(true)
@@ -28,49 +23,11 @@ export default function LoginPage() {
     try {
       const response = await authAPI.login(email, password)
       if (response.status === "success" && response.data?.user) {
-        setUser({
-          name: response.data.user.name,
-          email: response.data.user.email,
-          id: response.data.user.id || response.data.user._id,
-          empowermentScore: response.data.user.empowermentScore,
-        })
-        
-        // Sync progress from backend to ensure accurate state
-        try {
-          const syncedProgress = await syncProgressFromBackend()
-          
-          // Update progress in context
-          updateProgress('cvCompleted', syncedProgress.cvCompleted)
-          updateProgress('twinCompleted', syncedProgress.twinCompleted)
-          if (syncedProgress.empowermentScore) {
-            updateProgress('empowermentScore', syncedProgress.empowermentScore)
-          }
-          
-          // If user has completed everything, unlock all pages and go to dashboard
-          if (syncedProgress.cvCompleted && syncedProgress.twinCompleted) {
-            unlockAllPages(syncedProgress.empowermentScore || undefined)
-            navigate("/dashboard", { replace: true })
-          } else if (syncedProgress.cvCompleted) {
-            // CV completed but twin not completed
-            navigate("/dashboard/twin", { replace: true })
-          } else {
-            // Nothing completed, start with CV
-            navigate("/dashboard/cv-analyzer", { replace: true })
-          }
-        } catch (error) {
-          console.log('Error syncing progress, using local state:', error)
-          // Fallback to local progress state
-          if (!progress.cvCompleted) {
-            navigate("/dashboard/cv-analyzer", { replace: true })
-          } else if (!progress.twinCompleted) {
-            navigate("/dashboard/twin", { replace: true })
-          } else {
-            unlockAllPages(progress.empowermentScore || undefined)
-            navigate("/dashboard", { replace: true })
-          }
-        }
+        setUser(response.data.user)
+        navigate("/dashboard")
       }
     } catch (err: any) {
+      console.error("Login error:", err)
       setError(err.message || "Login failed. Please check your credentials.")
     } finally {
       setIsLoading(false)
@@ -78,169 +35,140 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-primary/5 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 flex flex-col sm:flex-row animate-fade-in">
-      {/* Left Panel */}
-      <div className="hidden lg:flex flex-1 relative p-12 flex-col justify-between overflow-hidden">
-        {/* Background Image */}
-        <div
-          className="absolute inset-0 bg-cover bg-center transition-transform duration-700 hover:scale-105"
-          style={{
-            backgroundImage: "url(/images/result.jpg)",
-          }}
-        />
-        {/* Dark overlay for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/60 to-black/70 backdrop-blur-sm" />
+    <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
+      {/* Back Button */}
+      <Link
+        to="/"
+        className="absolute top-6 left-6 flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back
+      </Link>
 
-        {/* Animated gradient accent */}
-        <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 via-transparent to-primary/20 opacity-50" />
-
-        {/* Content with higher z-index */}
-        <div className="relative z-10 animate-slide-up">
-          <Logo variant="light" size="md" linkTo="/" />
-        </div>
-
-        <div className="relative z-10 space-y-6 animate-slide-up" style={{ animationDelay: '0.1s' }}>
-          <h1 className="text-4xl font-bold text-white mb-4 drop-shadow-lg">Welcome back to your economic future</h1>
-          <p className="text-white/90 text-lg drop-shadow-md">
-            Continue building your path to success with AI-powered guidance.
-          </p>
-          
-          {/* Trust indicators */}
-          <div className="flex items-center gap-6 pt-4">
-            <div className="flex items-center gap-2 text-white/90">
-              <Users className="h-5 w-5 text-secondary" />
-              <span className="text-sm font-medium">10,000+ Users</span>
+      {/* Login Card */}
+      <div className="w-full max-w-md px-6">
+        <div className="bg-card text-card-foreground border border-border rounded-xl shadow-sm p-8">
+          {/* Logo & Header */}
+          <div className="text-center mb-8">
+            <div className="flex justify-center mb-6">
+              <Logo variant="dark" size="xl" />
             </div>
-            <div className="flex items-center gap-2 text-white/90">
-              <TrendingUp className="h-5 w-5 text-emerald-400" />
-              <span className="text-sm font-medium">AI-Powered</span>
-            </div>
+            <h1 className="text-2xl font-bold mb-2 text-foreground">Welcome back</h1>
+            <p className="text-sm text-muted-foreground">Sign in to your account to continue</p>
           </div>
-        </div>
 
-        <p className="text-sm text-white/80 relative z-10 drop-shadow-md animate-slide-up" style={{ animationDelay: '0.2s' }}>
-          Youth Economic Digital Twin Platform
-        </p>
-      </div>
-
-      {/* Right Panel - Form */}
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8">
-        <div className="w-full max-w-md animate-slide-up" style={{ animationDelay: '0.15s' }}>
-          <div className="bg-card/80 dark:bg-card/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl p-6 sm:p-7 md:p-9 hover:shadow-3xl transition-all duration-300">
-            <div className="lg:hidden mb-6 sm:mb-8">
-              <Logo variant="default" size="md" linkTo="/" />
+          {/* Error Alert */}
+          {error && (
+            <div className="mb-6 p-4 rounded-lg bg-destructive/10 border border-destructive/20 flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+              <p className="text-sm font-medium text-destructive">{error}</p>
             </div>
+          )}
 
-            {/* Header with gradient accent */}
-            <div className="mb-8">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 dark:bg-primary/20 rounded-full mb-4">
-                <Sparkles className="h-3.5 w-3.5 text-primary" />
-                <span className="text-xs font-semibold text-primary">Secure Login</span>
-              </div>
-              <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-2 tracking-tight">Sign in</h2>
-              <p className="text-sm sm:text-base text-muted-foreground">
-                Don't have an account?{" "}
-                <Link to="/signup" className="text-primary hover:text-primary/80 font-semibold hover:underline transition-colors">
-                  Sign up
-                </Link>
-              </p>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Email Input with floating effect */}
+          {/* Login Form */}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Email */}
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium mb-2 text-foreground">
+                Email address
+              </label>
               <div className="relative">
-                <label 
-                  className={`absolute left-4 transition-all duration-200 pointer-events-none ${
-                    emailFocused || email ? 'text-xs -top-2.5 bg-card px-2 text-primary' : 'top-4 text-base text-muted-foreground'
-                  }`}
-                >
-                  Email Address
-                </label>
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  <Mail className="h-5 w-5" />
+                </div>
                 <input
+                  id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  onFocus={() => setEmailFocused(true)}
-                  onBlur={() => setEmailFocused(false)}
-                  className={`w-full px-4 py-4 bg-background border-2 rounded-xl text-base text-foreground focus:outline-none transition-all min-h-[56px] ${
-                    emailFocused ? 'border-primary shadow-lg shadow-primary/10' : 'border-border hover:border-border/80'
-                  }`}
                   required
+                  className="w-full pl-11 pr-4 py-2.5 text-sm bg-background text-foreground border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                  placeholder="you@example.com"
+                  autoComplete="email"
                 />
               </div>
+            </div>
 
-              {/* Password Input with floating effect */}
+            {/* Password */}
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium mb-2 text-foreground">
+                Password
+              </label>
               <div className="relative">
-                <label 
-                  className={`absolute left-4 transition-all duration-200 pointer-events-none ${
-                    passwordFocused || password ? 'text-xs -top-2.5 bg-card px-2 text-primary' : 'top-4 text-base text-muted-foreground'
-                  }`}
-                >
-                  Password
-                </label>
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  <Lock className="h-5 w-5" />
+                </div>
                 <input
+                  id="password"
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  onFocus={() => setPasswordFocused(true)}
-                  onBlur={() => setPasswordFocused(false)}
-                  className={`w-full px-4 py-4 pr-12 bg-background border-2 rounded-xl text-base text-foreground focus:outline-none transition-all min-h-[56px] ${
-                    passwordFocused ? 'border-primary shadow-lg shadow-primary/10' : 'border-border hover:border-border/80'
-                  }`}
                   required
+                  className="w-full pl-11 pr-11 py-2.5 text-sm bg-background text-foreground border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                  placeholder="••••••••"
+                  autoComplete="current-password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors min-w-[48px] min-h-[48px] flex items-center justify-center rounded-lg hover:bg-background"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
+            </div>
 
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-2 pt-1">
-                <label className="flex items-center gap-2.5 cursor-pointer group">
-                  <input 
-                    type="checkbox" 
-                    className="rounded border-2 border-border text-primary focus:ring-2 focus:ring-primary/30 w-4 h-4 transition-all cursor-pointer" 
-                  />
-                  <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">Remember me</span>
-                </label>
-                <a href="#" className="text-sm text-primary hover:text-primary/80 hover:underline font-medium transition-colors">
-                  Forgot password?
-                </a>
-              </div>
+            {/* Remember & Forgot */}
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" className="w-4 h-4 rounded border-border text-primary focus:ring-2 focus:ring-primary/20" />
+                <span className="text-sm text-muted-foreground">Remember me</span>
+              </label>
+              <Link to="/forgot-password" className="text-sm font-medium text-primary hover:text-primary/80 transition-colors">
+                Forgot password?
+              </Link>
+            </div>
 
-              {error && (
-                <div className="p-4 bg-destructive/10 border-2 border-destructive/30 rounded-xl text-sm text-destructive animate-slide-up">
-                  <div className="flex items-start gap-2">
-                    <svg className="h-5 w-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                    </svg>
-                    <span>{error}</span>
-                  </div>
-                </div>
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={isLoading}
+              className={cn(
+                "w-full flex items-center justify-center px-5 py-2.5 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors",
+                isLoading && "opacity-50 cursor-not-allowed"
               )}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                  Signing in...
+                </>
+              ) : (
+                "Sign in"
+              )}
+            </button>
+          </form>
 
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full py-4 bg-primary hover:bg-primary/90 text-white rounded-xl font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-100 min-h-[56px] text-base touch-manipulation group"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    <span>Signing in...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>Sign in</span>
-                    <Sparkles className="h-5 w-5 group-hover:rotate-12 transition-transform" />
-                  </>
-                )}
-              </button>
-            </form>
+          {/* Divider */}
+          <hr className="border-border my-6" />
+
+          {/* Sign Up Link */}
+          <div className="text-center">
+            <p className="text-sm text-muted-foreground">
+              Don't have an account?{" "}
+              <Link to="/signup" className="font-medium text-primary hover:text-primary/80 transition-colors">
+                Sign up
+              </Link>
+            </p>
           </div>
+        </div>
+
+        {/* Security Badge */}
+        <div className="mt-6 text-center">
+          <p className="text-xs text-muted-foreground flex items-center justify-center gap-2">
+            <Lock className="h-3 w-3" />
+            Your data is encrypted and secure
+          </p>
         </div>
       </div>
     </div>
