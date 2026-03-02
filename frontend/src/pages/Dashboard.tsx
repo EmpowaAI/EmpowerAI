@@ -1,9 +1,15 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Sparkles, ChevronUp, Loader2, TrendingUp, Briefcase, FileText, Mic, Target, Zap, ArrowRight } from 'lucide-react'
+import { TrendingUp, Briefcase, FileText, Mic, Target, ArrowRight, Brain, Users, Award, Calendar, BarChart3 } from 'lucide-react'
 import { useUser } from '../lib/user-context'
 import { cn } from '../lib/utils'
 import { statsAPI, opportunitiesAPI } from '../lib/api'
+
+// Clean Components
+import Button from '../components/ui/Button'
+import Card from '../components/ui/Card'
+import Avatar from '../components/ui/Avatar'
+import Loading from '../components/ui/Loading'
 
 interface DashboardStats {
   empowermentScore: number
