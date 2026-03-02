@@ -6,16 +6,20 @@ import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
 import DashboardLayout from './layouts/DashboardLayout'
 import Dashboard from './pages/Dashboard'
+import DashboardEnhanced from './pages/Dashboard_Enhanced'
 import TwinBuilder from './pages/TwinBuilder'
 import Simulations from './pages/Simulations'
 import Opportunities from './pages/Opportunities'
 import CVAnalyzer from './pages/CVAnalyzer'
+import CVAnalyzerSpectacular from './pages/CVAnalyzer_Spectacular'
 import InterviewCoach from './pages/InterviewCoach'
+import InterviewCoachSpectacular from './pages/InterviewCoach_Spectacular'
 import AboutPage from './pages/AboutPage'
 import Profile from './pages/Profile'
 import NeuralFusionShowcase from './pages/NeuralFusionShowcase'
 import VisionBlueprintShowcase from './pages/VisionBlueprintShowcase'
 import CleanShowcase from './pages/CleanShowcase'
+import TestPage from './pages/TestPage'
 import AuthTest from './pages/AuthTest'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -41,6 +45,7 @@ function App() {
           <Route path="/neural-fusion" element={<NeuralFusionShowcase />} />
           <Route path="/vision-showcase" element={<VisionBlueprintShowcase />} />
           <Route path="/clean-showcase" element={<CleanShowcase />} />
+          <Route path="/test" element={<TestPage />} />
           
           {/* Protected dashboard routes */}
           <Route path="/dashboard" element={
@@ -49,11 +54,14 @@ function App() {
             </ProtectedRoute>
           }>
             <Route index element={<Dashboard />} />
+            <Route path="enhanced" element={<DashboardEnhanced />} />
             <Route path="cv-analyzer" element={<CVAnalyzer />} />
+            <Route path="cv-analyzer-pro" element={<CVAnalyzerSpectacular />} />
             <Route path="twin" element={<TwinBuilder />} />
             <Route path="simulations" element={<Simulations />} />
             <Route path="opportunities" element={<Opportunities />} />
             <Route path="interview-coach" element={<InterviewCoach />} />
+            <Route path="interview-coach-pro" element={<InterviewCoachSpectacular />} />
             <Route path="profile" element={<Profile />} />
           </Route>
           
