@@ -9,6 +9,10 @@ import { useUser } from "../lib/user-context"
 import RateLimitAlert from "../components/RateLimitAlert"
 import ErrorAlert from "../components/ErrorAlert"
 import Toast, { useToast } from "../components/Toast"
+// Neural Fusion Components
+import NeuralCard from "../components/ui/NeuralCard"
+import AIAvatar from "../components/ui/AIAvatar"
+import NeuralLoading from "../components/ui/NeuralLoading"
 
 interface AnalysisResult {
   extractedSkills?: string[]
@@ -31,6 +35,20 @@ export default function CVAnalyzer() {
   const navigate = useNavigate()
   const { updateProgress } = useUser()
   const { toasts, success, removeToast } = useToast()
+
+  // Check authentication on mount
+  React.useEffect(() => {
+    const token = localStorage.getItem('empowerai-token')
+    if (!token) {
+      console.error('🔐 CV Analyzer: No token found! Redirecting to login...')
+      setError("Please log in to use the CV Analyzer")
+      setTimeout(() => {
+        navigate('/login', { replace: true })
+      }, 2000)
+    } else {
+      console.log('🔐 CV Analyzer: Token found ✅')
+    }
+  }, [])
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -124,42 +142,20 @@ export default function CVAnalyzer() {
 
       {!result ? (
         <div className="max-w-2xl mx-auto space-y-4 sm:space-y-4 md:space-y-6 px-3 sm:px-0">
-          {/* Simple Loading Overlay */}
+          {/* Neural Fusion Loading State */}
           {isAnalyzing && (
-            <div className="bg-card border border-border rounded-xl sm:rounded-xl p-8 md:p-12 text-center animate-fade-in">
+            <NeuralCard className="text-center p-8 md:p-12 animate-fade-in">
               <div className="max-w-md mx-auto space-y-6">
-                <div className="relative inline-block">
-                  <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl animate-pulse" />
-                  <div className="relative h-20 w-20 md:h-24 md:w-24 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-2xl mx-auto">
-                    <Sparkles className="h-10 w-10 md:h-12 md:w-12 text-white animate-pulse" />
-                  </div>
-                </div>
-                
-                <div className="space-y-3">
-                  <h3 className="text-xl md:text-2xl font-bold text-foreground">
-                    Analyzing Your CV...
-                  </h3>
-                  <p className="text-sm md:text-base text-muted-foreground">
-                    Our AI is carefully reviewing your CV and extracting skills
-                  </p>
-                </div>
-
-                {/* Animated dots */}
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                </div>
-
-                {/* Progress bar */}
-                <div className="space-y-2">
-                  <div className="h-2 bg-muted rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-primary to-secondary rounded-full animate-pulse" style={{ width: '70%' }} />
-                  </div>
-                  <p className="text-xs text-muted-foreground">This usually takes 10-30 seconds...</p>
-                </div>
+                <AIAvatar size="xl" variant="processing" className="mx-auto" />
+                <NeuralLoading size="lg" text="Analyzing your CV..." />
+                <p className="text-sm text-muted-foreground">
+                  Our AI is carefully reviewing your CV and extracting skills
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  This usually takes 10-30 seconds...
+                </p>
               </div>
-            </div>
+            </NeuralCard>
           )}
 
           {/* Form - Only hidden when analyzing */}
