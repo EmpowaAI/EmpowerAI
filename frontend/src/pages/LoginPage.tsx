@@ -2,7 +2,7 @@
 import type React from "react"
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { Eye, EyeOff, Loader2, Sparkles, TrendingUp, Users } from "lucide-react"
+import { Eye, EyeOff, Loader2, TrendingUp, Users } from "lucide-react"
 import { authAPI } from "../lib/api"
 import { useUser } from "../lib/user-context"
 import Logo from "../components/Logo"
@@ -97,9 +97,9 @@ export default function LoginPage() {
 
             {/* Header */}
             <div className="mb-8">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-full mb-4">
-                <Sparkles className="h-3.5 w-3.5 text-primary" />
-                <span className="text-xs font-semibold text-primary">Secure Login</span>
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-primary/50 border border-white/30 shadow-lg">
+                <Users className="h-3.5 w-3.5 text-primary" />
+                <span className="whitespace-nowrap text-xs font-semibold text-primary">Secure Login</span>
               </div>
               <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-2 tracking-tight">Sign in</h2>
               <p className="text-sm sm:text-base text-muted-foreground">
@@ -199,7 +199,6 @@ export default function LoginPage() {
                 ) : (
                   <>
                     <span>Sign in</span>
-                    <Sparkles className="h-5 w-5 group-hover:rotate-12 transition-transform" />
                   </>
                 )}
               </button>
