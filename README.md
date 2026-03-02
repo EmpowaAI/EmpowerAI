@@ -196,7 +196,7 @@ EmpowerAI/
 
 ---
 
-## 👥 The Team
+## 👥 Team Tech Bridle
 
 ### 🎯 Nicolette (Team Lead & AI Architect)
 **The Visionary** | Building the AI brain that powers everything
@@ -218,6 +218,17 @@ EmpowerAI/
 - 📱 Responsive layouts
 - 📊 Data visualizations
 - ⚡ Performance optimization
+
+### 🔧 Khuliso John Thavhiwa (Backend Engineer & Systems Architect)
+**The Integrator** | Building secure, scalable backend systems
+- 🔐 Email authentication & verification system
+- 🔑 Password reset & account management
+- 🏗️ Clean architecture (DTOs, Services, Repositories)
+- 🐛 Bug fixes & code optimization
+- 🤖 AI chatbot integration
+- 📧 Brevo email service integration
+- 🔄 Frontend service layer refactoring
+- 📁 Professional page organization & structure
 
 ---
 
