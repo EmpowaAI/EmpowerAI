@@ -57,6 +57,20 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
             cvAnalyzed: false
           }
         }
+        
+        // Production API bypass - prevent API calls
+        if (window.location.hostname.includes('github.io')) {
+          console.log('Production mode - disabling API calls')
+          // Override syncProgress to prevent API calls in production
+          window.syncProgressFromBackend = async () => {
+            console.log('Production mode - API calls disabled')
+            return {
+              cvCompleted: false,
+              twinCompleted: false,
+              empowermentScore: null
+            }
+          }
+        }
       }
     } catch (error) {
       console.error('Error reading user from localStorage:', error)
