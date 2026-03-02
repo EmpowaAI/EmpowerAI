@@ -82,14 +82,28 @@ export const authAPI = {
     return response;
   },
   login: async (email: string, password: string) => {
+    console.log('🔐 LOGIN: Starting login process...');
     const response = await request<any>('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
+    console.log('🔐 LOGIN: Response received:', { status: response.status, hasDataToken: !!response.data?.token, hasToken: !!response.token });
+    
     // Backend returns token in response.data.token
     if (response.data?.token) {
+      console.log('🔐 LOGIN: Setting token from response.data.token');
       setToken(response.data.token);
+      console.log('🔐 LOGIN: Token stored! Preview:', response.data.token.substring(0, 20) + '...');
     } else if (response.token) {
       // Fallback for legacy format
+      console.log('🔐 LOGIN: Setting token from response.token (legacy)');
       setToken(response.token);
+      console.log('🔐 LOGIN: Token stored! Preview:', response.token.substring(0, 20) + '...');
+    } else {
+      console.error('🔐 LOGIN: ❌ NO TOKEN IN RESPONSE!', response);
     }
+    
+    // Verify token was stored
+    const storedToken = getToken();
+    console.log('🔐 LOGIN: Verification - Token in localStorage:', storedToken ? 'YES ✅' : 'NO ❌');
+    
     return response;
   },
   logout: () => removeToken(),
