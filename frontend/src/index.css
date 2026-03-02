@@ -12,17 +12,22 @@
     --color-card: #ffffff;
     --color-card-foreground: #0f172a;
     
-    /* Primary: Neural Blue - Clean Professional */
+    /* VISION_BLUEPRINT Neural Fusion Design System */
+    /* Primary: Neural Blue - Trust, Intelligence */
     --color-primary: #3b82f6;
     --color-primary-foreground: #ffffff;
     
-    /* Secondary: Same as primary for consistency - no rainbow gradients */
-    --color-secondary: #3b82f6;
+    /* Secondary: Cyber Cyan - Technology, Future */
+    --color-secondary: #06b6d4;
     --color-secondary-foreground: #ffffff;
     
-    /* Accent: Slightly darker blue for subtle variation */
-    --color-accent: #2563eb;
+    /* Accent: AI Green - Success, Growth */
+    --color-accent: #10b981;
     --color-accent-foreground: #ffffff;
+    
+    /* Premium: Quantum Purple - Innovation */
+    --color-premium: #8b5cf6;
+    --color-premium-foreground: #ffffff;
     
     /* Neutrals - Professional grays */
     --color-muted: #f1f5f9;
@@ -48,17 +53,22 @@
     --color-card: #1e293b;
     --color-card-foreground: #f8fafc;
     
-    /* Primary: Neural Blue - Clean Professional (dark mode) */
+    /* VISION_BLUEPRINT Dark Mode */
+    /* Primary: Brighter Neural Blue */
     --color-primary: #60a5fa;
     --color-primary-foreground: #ffffff;
     
-    /* Secondary: Same as primary - no gradients */
-    --color-secondary: #60a5fa;
-    --color-secondary-foreground: #ffffff;
+    /* Secondary: Brighter Cyber Cyan */
+    --color-secondary: #22d3ee;
+    --color-secondary-foreground: #000000;
     
-    /* Accent: Slightly lighter for contrast */
-    --color-accent: #3b82f6;
-    --color-accent-foreground: #ffffff;
+    /* Accent: Brighter AI Green */
+    --color-accent: #34d399;
+    --color-accent-foreground: #000000;
+    
+    /* Premium: Brighter Quantum Purple */
+    --color-premium: #a78bfa;
+    --color-premium-foreground: #ffffff;
     
     /* Neutrals - Dark mode grays */
     --color-muted: #1e293b;
