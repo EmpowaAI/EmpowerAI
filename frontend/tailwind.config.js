@@ -23,11 +23,11 @@ export default {
           foreground: "#0f172a",
         },
         primary: {
-          DEFAULT: "#3b82f6", // Neural Blue - Clean Professional
+          DEFAULT: "#3b82f6", // Neural Blue (from VISION_BLUEPRINT)
           foreground: "#ffffff",
         },
         secondary: {
-          DEFAULT: "#3b82f6", // Same as primary - NO RAINBOW
+          DEFAULT: "#06b6d4", // Cyber Cyan (from VISION_BLUEPRINT)
           foreground: "#ffffff",
         },
         muted: {
@@ -35,7 +35,11 @@ export default {
           foreground: "#64748b",
         },
         accent: {
-          DEFAULT: "#2563eb", // Slightly darker blue
+          DEFAULT: "#10b981", // AI Green (from VISION_BLUEPRINT)
+          foreground: "#ffffff",
+        },
+        premium: {
+          DEFAULT: "#8b5cf6", // Quantum Purple (from VISION_BLUEPRINT)
           foreground: "#ffffff",
         },
         border: "#e2e8f0",
