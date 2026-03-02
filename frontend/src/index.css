@@ -5,20 +5,29 @@
 @layer base {
   :root {
     --font-sans: "Inter", system-ui, sans-serif;
+    
+    /* NEURAL FUSION COLOR SYSTEM - AI-First Design */
     --color-background: #ffffff;
-    --color-foreground: #1e293b;
+    --color-foreground: #0f172a;
     --color-card: #ffffff;
-    --color-card-foreground: #1e293b;
-    --color-primary: #6366f1;
+    --color-card-foreground: #0f172a;
+    
+    /* Primary: Neural Blue - Trust, Intelligence */
+    --color-primary: #3b82f6;
     --color-primary-foreground: #ffffff;
-    --color-secondary: #0ea5e9;
+    
+    /* Secondary: Cyber Cyan - Technology, Future */
+    --color-secondary: #06b6d4;
     --color-secondary-foreground: #ffffff;
-    --color-muted: #f1f5f9;
-    --color-muted-foreground: #64748b;
+    
+    /* Accent: AI Green - Success, Growth */
     --color-accent: #10b981;
     --color-accent-foreground: #ffffff;
+    
+    --color-muted: #f1f5f9;
+    --color-muted-foreground: #64748b;
     --color-border: #e2e8f0;
-    --color-ring: #6366f1;
+    --color-ring: #3b82f6;
     --color-success: #10b981;
     --color-warning: #f59e0b;
     --color-destructive: #ef4444;
@@ -29,20 +38,28 @@
   }
 
   .dark {
-    --color-background: #0f172a;
-    --color-foreground: #f1f5f9;
-    --color-card: #1e293b;
-    --color-card-foreground: #f1f5f9;
-    --color-primary: #818cf8;
+    /* Dark Mode: Deep Space Black + Neural Colors */
+    --color-background: #0a0a0f;
+    --color-foreground: #ffffff;
+    --color-card: #1a1a2e;
+    --color-card-foreground: #ffffff;
+    
+    /* Primary: Brighter Neural Blue for dark mode */
+    --color-primary: #60a5fa;
     --color-primary-foreground: #ffffff;
-    --color-secondary: #38bdf8;
-    --color-secondary-foreground: #ffffff;
-    --color-muted: #1e293b;
-    --color-muted-foreground: #94a3b8;
+    
+    /* Secondary: Brighter Cyber Cyan for dark mode */
+    --color-secondary: #22d3ee;
+    --color-secondary-foreground: #000000;
+    
+    /* Accent: Brighter AI Green for dark mode */
     --color-accent: #34d399;
-    --color-accent-foreground: #ffffff;
+    --color-accent-foreground: #000000;
+    
+    --color-muted: #1a1a2e;
+    --color-muted-foreground: #94a3b8;
     --color-border: #334155;
-    --color-ring: #818cf8;
+    --color-ring: #60a5fa;
     --color-success: #34d399;
     --color-warning: #fbbf24;
     --color-destructive: #f87171;
