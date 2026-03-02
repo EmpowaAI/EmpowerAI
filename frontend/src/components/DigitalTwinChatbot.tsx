@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Bot, X, Send, User, Clock, ThumbsUp, ThumbsDown } from "lucide-react";
 import { cn } from "../lib/utils";
 import { chatAPI } from "../lib/api";

@@ -1,4 +1,5 @@
 // components/ProgressTracker.tsx
+import React from 'react'
 import { CheckCircle, Circle, Lock } from "lucide-react"
 import { cn } from "../lib/utils"
 
