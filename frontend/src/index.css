@@ -1,9 +1,9 @@
-﻿@tailwind base;
+﻿/* Import Neural Fusion Design System */
+@import './styles/neural-fusion.css';
+
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Import Neural Fusion Design System */
-@import './styles/neural-fusion.css';
 
 @layer base {
   :root {
