@@ -203,6 +203,9 @@ export const cvAPI = {
   analyzeFile: async (file: File, jobRequirements?: string) => {
     try {
       const token = getToken();
+      console.log('🔐 CV Analyzer - Token check:', token ? 'Token EXISTS ✅' : 'Token MISSING ❌');
+      console.log('🔐 Token preview:', token ? `${token.substring(0, 20)}...` : 'No token');
+      
       const formData = new FormData();
       formData.append('cvFile', file);
       if (jobRequirements) {
@@ -212,6 +215,9 @@ export const cvAPI = {
       const headers: HeadersInit = {};
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
+        console.log('🔐 Authorization header set ✅');
+      } else {
+        console.error('🔐 No token available - user needs to log in again!');
       }
       // Don't set Content-Type - browser will set it with boundary for FormData
       
