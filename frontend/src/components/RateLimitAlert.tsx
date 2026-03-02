@@ -1,5 +1,5 @@
+import React, { useState, useEffect } from "react"
 import { AlertCircle, RefreshCw, Clock } from "lucide-react"
-import { useState, useEffect } from "react"
 import { cn } from "../lib/utils"
 
 interface RateLimitAlertProps {
