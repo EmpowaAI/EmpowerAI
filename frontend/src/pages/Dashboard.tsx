@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { BarChart3, Users, TrendingUp, Briefcase, Target, Award, Clock } from "lucide-react"
+import { BarChart3, Users, TrendingUp, Briefcase, Target, Award, Clock, Loader2, ChevronUp, Mic, FileText, Zap, ArrowRight } from "lucide-react"
 import { useUser } from '../lib/user-context'
 import { cn } from '../lib/utils'
 import { statsAPI, opportunitiesAPI } from '../lib/api'
