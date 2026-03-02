@@ -114,9 +114,9 @@ export default function SignupPage() {
 
             {/* Header */}
             <div className="mb-8">
-              <div className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-primary/10 dark:bg-primary/20 border border-primary/30 shadow-lg hover:shadow-xl transition-all duration-300">
-                <Shield className="h-3.5 w-3.5 text-primary" />
-                <span className="whitespace-nowrap text-xs font-semibold text-primary">Secure Signup</span>
+              <div className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-primary dark:bg-primary/50 border border-primary dark:border-primary text-white shadow-lg hover:shadow-xl transition-all duration-300">
+                <Shield className="h-3.5 w-3.5 text-white" />
+                <span className="whitespace-nowrap text-xs font-semibold text-white">Secure Signup</span>
               </div>
               <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight">Create account</h2>
               <p className="text-sm sm:text-base text-muted-foreground">
@@ -256,7 +256,7 @@ export default function SignupPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-4 bg-primary hover:bg-primary/90 text-white rounded-xl font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-100 min-h-[56px] text-base touch-manipulation group"
+                className="w-full py-4 bg-primary hover:bg-primary/90 active:bg-primary/80 text-white rounded-xl font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-100 min-h-[56px] text-base touch-manipulation group"
               >
                 {isLoading ? (
                   <>
