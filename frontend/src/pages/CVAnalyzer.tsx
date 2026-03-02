@@ -1,5 +1,5 @@
 // pages/CVAnalyzer.tsx - Fixed loaders
-import { useState, useCallback, useRef } from "react"
+import { useState, useCallback, useRef, useEffect, type ChangeEvent, type DragEvent } from "react"
 import { Upload, CheckCircle, Loader2, ArrowRight } from "lucide-react"
 import { cn } from "../lib/utils"
 import { cvAPI } from "../lib/api"
@@ -37,7 +37,7 @@ export default function CVAnalyzer() {
   const { toasts, success, removeToast } = useToast()
 
   // Check authentication on mount
-  React.useEffect(() => {
+  useEffect(() => {
     const token = localStorage.getItem('empowerai-token')
     if (!token) {
       console.error('🔐 CV Analyzer: No token found! Redirecting to login...')
@@ -50,7 +50,7 @@ export default function CVAnalyzer() {
     }
   }, [])
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
+  const handleDrop = useCallback((e: DragEvent) => {
     e.preventDefault()
     setIsDragging(false)
     const droppedFile = e.dataTransfer.files[0]
@@ -60,7 +60,7 @@ export default function CVAnalyzer() {
     }
   }, [success])
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0]
     if (selectedFile) {
       setFile(selectedFile)

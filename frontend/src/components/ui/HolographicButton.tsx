@@ -1,7 +1,8 @@
+import type { ReactNode } from "react"
 import { cn } from "../../lib/utils"
 
 interface HolographicButtonProps {
-  children: React.ReactNode
+  children: ReactNode
   onClick?: () => void
   variant?: 'primary' | 'secondary' | 'accent'
   size?: 'sm' | 'md' | 'lg'

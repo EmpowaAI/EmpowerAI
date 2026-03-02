@@ -1,5 +1,5 @@
 // pages/CVAnalyzer.tsx - Enhanced with Neural Fusion 8D Analysis
-import { useState, useCallback, useRef } from "react"
+import { useState, useCallback, useRef, type ChangeEvent, type DragEvent } from "react"
 import { Upload, CheckCircle, Sparkles, Loader2, ArrowRight, TrendingUp, Award, Target, Shield } from "lucide-react"
 import { cn } from "../lib/utils"
 import { cvAPI } from "../lib/api"
@@ -38,7 +38,7 @@ export default function CVAnalyzer() {
   const { updateProgress } = useUser()
   const { toasts, success, removeToast } = useToast()
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
+  const handleDrop = useCallback((e: DragEvent) => {
     e.preventDefault()
     setIsDragging(false)
     const droppedFile = e.dataTransfer.files[0]
@@ -48,7 +48,7 @@ export default function CVAnalyzer() {
     }
   }, [success])
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0]
     if (selectedFile) {
       setFile(selectedFile)

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { UserProvider, useUser } from './lib/user-context'
 import { ThemeProvider } from './lib/theme'
@@ -22,7 +23,7 @@ import CleanShowcase from './pages/CleanShowcase'
 import TestPage from './pages/TestPage'
 import AuthTest from './pages/AuthTest'
 
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
+function ProtectedRoute({ children }: { children: ReactNode }) {
   const { user } = useUser()
   
   // Temporary fix for production - allow dashboard access
