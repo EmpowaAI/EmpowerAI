@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import Neural Fusion Design System */
+@import './styles/neural-fusion.css';
+
 @layer base {
   :root {
     --font-sans: "Inter", system-ui, sans-serif;

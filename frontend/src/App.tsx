@@ -13,6 +13,7 @@ import CVAnalyzer from './pages/CVAnalyzer'
 import InterviewCoach from './pages/InterviewCoach'
 import AboutPage from './pages/AboutPage'
 import Profile from './pages/Profile'
+import NeuralFusionShowcase from './pages/NeuralFusionShowcase'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user } = useUser()
@@ -31,6 +32,7 @@ function App() {
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<LandingPage />} />
+          <Route path="/neural-fusion" element={<NeuralFusionShowcase />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />

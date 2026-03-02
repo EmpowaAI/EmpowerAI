@@ -21,6 +21,11 @@ import { useUser } from "../lib/user-context"
 import ThemeToggle from "../components/ThemeToggle"
 import Logo from "../components/Logo"
 
+// Import Neural Fusion components for enhancement
+import AIAvatar from "../components/ui/AIAvatar"
+import NeuralLoading from "../components/ui/NeuralLoading"
+import HolographicButton from "../components/ui/HolographicButton"
+
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
   { icon: User, label: "My Twin", path: "/dashboard/twin" },
@@ -51,15 +56,14 @@ export default function DashboardLayout() {
     navigate("/")
   }
 
-  // Show loading while checking
+  // Show loading while checking - Enhanced with Neural Fusion
   if (isChecking) {
     return (
       <div className="h-screen w-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center mx-auto animate-pulse">
-            <Zap className="h-6 w-6 text-white" />
-          </div>
-          <p className="text-muted-foreground">Checking your progress...</p>
+        <div className="text-center space-y-6">
+          <AIAvatar size="xl" variant="processing" />
+          <NeuralLoading size="lg" text="Checking your progress..." />
+          <p className="text-sm text-muted-foreground">Preparing your personalized experience</p>
         </div>
       </div>
     )
@@ -141,16 +145,14 @@ export default function DashboardLayout() {
             })}
           </nav>
 
-          {/* User Section */}
+          {/* User Section - Enhanced with Neural Fusion */}
           <div className="p-3 border-t border-border space-y-2">
             <Link
               to="/dashboard/profile"
               onClick={() => setSidebarOpen(false)}
               className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/50 hover:bg-muted transition-colors group"
             >
-              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0 shadow-md">
-                <span className="text-sm font-semibold text-white">{initials}</span>
-              </div>
+              <AIAvatar size="md" variant="default" />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-foreground truncate">{displayName}</p>
                 <p className="text-xs text-muted-foreground truncate">{displayEmail}</p>
