@@ -126,7 +126,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-8">
       {/* Welcome Section */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-indigo-600 to-indigo-700 rounded-xl p-6 md:p-8 shadow-xl border border-indigo-500/20">
+      <div className="relative overflow-hidden bg-primary rounded-xl p-6 md:p-8 shadow-xl border border-primary/20">
         <div className="absolute inset-0 opacity-[0.03]">
           <img 
             src="/images/result.jpg" 
@@ -134,7 +134,7 @@ export default function Dashboard() {
             className="w-full h-full object-cover"
             aria-hidden="true"
           />
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/80 to-indigo-700/80"></div>
+          <div className="absolute inset-0 bg-primary/80"></div>
         </div>
         
         <div className="absolute inset-0 opacity-10">
@@ -152,9 +152,9 @@ export default function Dashboard() {
               </span>
             </div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight leading-tight">
-              Welcome back, <span className="bg-gradient-to-r from-white to-indigo-100 bg-clip-text text-transparent">{displayName}</span>!
+              Welcome back, <span className="text-white">{displayName}</span>!
             </h1>
-            <p className="text-indigo-100 text-sm sm:text-base md:text-lg max-w-md leading-relaxed">
+            <p className="text-white/90 text-sm sm:text-base md:text-lg max-w-md leading-relaxed">
               Your economic twin is ready. Let's build your future today.
             </p>
           </div>
@@ -173,7 +173,7 @@ export default function Dashboard() {
                   </>
                 )}
               </div>
-              <p className="text-xs font-medium text-indigo-100 uppercase tracking-wide">Empowerment Score</p>
+               <p className="text-xs font-medium text-white/80 uppercase tracking-wide">Empowerment Score</p>
             </div>
             <div className="h-12 sm:h-16 w-px bg-white/30 hidden sm:block"></div>
             <div className="text-center p-4 sm:p-5 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 shadow-lg hover:bg-white/15 transition-all duration-300 hover:scale-105">
@@ -184,7 +184,7 @@ export default function Dashboard() {
                   R{((stats?.threeMonthProjection || 0) / 1000).toFixed(1)}K
                 </p>
               )}
-              <p className="text-xs font-medium text-indigo-100 uppercase tracking-wide">3-Month Projection</p>
+               <p className="text-xs font-medium text-white/80 uppercase tracking-wide">3-Month Projection</p>
             </div>
           </div>
         </div>
