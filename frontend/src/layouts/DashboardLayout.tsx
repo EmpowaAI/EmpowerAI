@@ -21,7 +21,6 @@ import { useUser } from "../lib/user-context"
 import ThemeToggle from "../components/ThemeToggle"
 import Logo from "../components/Logo"
 // Clean Components - Using Definitive System
-import Button from "../components/ui/Button"
 import Avatar from "../components/ui/Avatar"
 import Loading from "../components/ui/Loading"
 
