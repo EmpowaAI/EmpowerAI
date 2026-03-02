@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Bot, X, Send, Sparkles, User, Clock, ThumbsUp, ThumbsDown } from "lucide-react";
+import { Bot, X, Send, User, Clock, ThumbsUp, ThumbsDown } from "lucide-react";
 import { cn } from "../lib/utils";
 import { chatAPI } from "../lib/api";
 
@@ -130,7 +130,7 @@ export default function DigitalTwinChatbot() {
           {/* Main button */}
           <div className="relative h-14 w-14 rounded-full bg-gradient-to-br from-primary via-secondary to-accent shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 flex items-center justify-center">
             <Bot className="h-7 w-7 text-white" />
-            <Sparkles className="absolute -top-1 -right-1 h-4 w-4 text-yellow-300 animate-pulse" />
+            <div className="absolute -top-1 -right-1 h-4 w-4 bg-yellow-300 rounded-full animate-pulse" />
           </div>
         </div>
       </button>

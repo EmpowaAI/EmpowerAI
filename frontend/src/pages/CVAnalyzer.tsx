@@ -1,6 +1,6 @@
 // pages/CVAnalyzer.tsx - Fixed loaders
 import { useState, useCallback, useRef } from "react"
-import { Upload, CheckCircle, Sparkles, Loader2, ArrowRight } from "lucide-react"
+import { Upload, CheckCircle, Loader2, ArrowRight } from "lucide-react"
 import { cn } from "../lib/utils"
 import { cvAPI } from "../lib/api"
 import { useNavigate } from "react-router-dom"
@@ -257,7 +257,7 @@ export default function CVAnalyzer() {
                 </>
               ) : (
                 <>
-                  <Sparkles className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <div className="w-4 h-4 sm:h-5 sm:w-5 bg-primary rounded-full animate-pulse" />
                   <span>Analyze CV & Continue</span>
                 </>
               )}
@@ -303,7 +303,7 @@ export default function CVAnalyzer() {
           {result.suggestions && result.suggestions.length > 0 && (
             <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
               <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-primary" />
+                <div className="w-5 h-5 bg-primary rounded-full animate-pulse" />
                 AI Suggestions
               </h3>
               <ul className="space-y-3">
