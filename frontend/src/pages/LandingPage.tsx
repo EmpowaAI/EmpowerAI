@@ -238,7 +238,7 @@ export default function LandingPage() {
             ].map((stat, i) => (
               <div key={i} className="text-center group">
                 <div className="inline-flex h-12 w-12 md:h-14 md:w-14 items-center justify-center rounded-xl bg-primary dark:bg-primary mb-3 md:mb-4 group-hover:scale-110 transition-transform touch-manipulation">
-                  <stat.icon className="h-6 w-6 md:h-7 md:w-7 text-primary dark:text-primary" />
+                  <stat.icon className="h-6 w-6 md:h-7 md:w-7 text-white" />
                 </div>
                 <p className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-1.5 md:mb-2">{stat.value}</p>
                 <p className="text-sm md:text-base font-medium text-slate-900 dark:text-white leading-tight">{stat.label}</p>
@@ -275,7 +275,7 @@ export default function LandingPage() {
                 className="group bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-xl md:rounded-2xl p-6 md:p-8 border border-slate-200/50 dark:border-slate-800/50 hover:border-primary dark:hover:border-primary hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-100 touch-manipulation"
               >
                 <div className="inline-flex h-12 w-12 md:h-14 md:w-14 items-center justify-center rounded-lg md:rounded-xl bg-primary dark:bg-primary mb-5 md:mb-6 group-hover:scale-110 transition-transform">
-                  <feature.icon className="h-6 w-6 md:h-7 md:w-7 text-primary dark:text-primary" />
+                  <feature.icon className="h-6 w-6 md:h-7 md:w-7 text-white" />
                 </div>
                 <h3 className="text-lg md:text-xl font-bold text-slate-900 dark:text-white mb-2 md:mb-3">{feature.title}</h3>
                 <p className="text-sm md:text-base text-slate-600 dark:text-slate-400 leading-relaxed">{feature.description}</p>
