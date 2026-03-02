@@ -82,11 +82,17 @@ export default function Profile() {
     : "U"
 
   return (
-    <div className="space-y-6 -mx-3 sm:mx-0">
+    <div className="space-y-8 animate-fade-in">
       {/* Header */}
-      <div className="px-3 sm:px-0">
-        <h1 className="text-2xl sm:text-3xl font-bold text-foreground">My Profile</h1>
-        <p className="text-base text-muted-foreground mt-1">Manage your account information</p>
+      <div className="text-center space-y-4">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary mb-4">
+          <User className="h-4 w-4" />
+          <span className="text-sm font-semibold">My Profile</span>
+        </div>
+        <h1 className="text-3xl md:text-4xl font-bold text-foreground">My Profile</h1>
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          Manage your account information and track your career journey
+        </p>
       </div>
 
       {/* Save Message */}
