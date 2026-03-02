@@ -107,28 +107,31 @@ export default function SignupPage() {
       {/* Right Panel - Form */}
       <div className="flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8">
         <div className="w-full max-w-md animate-slide-up" style={{ animationDelay: '0.15s' }}>
-          <div className="bg-card/80 dark:bg-card/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl p-6 sm:p-7 md:p-9 hover:shadow-3xl transition-all duration-300">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl p-8 sm:p-10 md:p-12 hover:shadow-3xl transition-all duration-300">
             <div className="lg:hidden mb-6 sm:mb-8">
               <Logo variant="default" size="md" linkTo="/" />
             </div>
 
             {/* Header */}
-            <div className="mb-8">
-              <div className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-primary dark:bg-primary/50 border border-primary dark:border-primary text-white shadow-lg hover:shadow-xl transition-all duration-300">
-                <Shield className="h-3.5 w-3.5 text-white" />
-                <span className="whitespace-nowrap text-xs font-semibold text-white">Secure Signup</span>
+            <div className="mb-10">
+              <div className="flex items-center gap-3 px-5 py-3 rounded-full bg-primary dark:bg-primary/50 border border-primary dark:border-primary text-white shadow-xl hover:shadow-2xl transition-all duration-300 mb-6">
+                <Shield className="h-4 w-4 text-white" />
+                <span className="whitespace-nowrap text-sm font-bold text-white">Secure Signup</span>
               </div>
-              <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight">Create account</h2>
-              <p className="text-sm sm:text-base text-muted-foreground">
+              <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">Create account</h2>
+              <p className="text-lg text-slate-600 dark:text-slate-400 mb-6">
+                Join thousands of South African youth building their future with AI-powered career guidance.
+              </p>
+              <p className="text-base text-slate-500 dark:text-slate-500">
                 Already have an account?{" "}
-                <Link to="/login" className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary font-semibold hover:underline transition-all duration-200 relative group">
+                <Link to="/login" className="text-primary hover:text-primary/80 font-semibold hover:underline transition-all duration-200 relative group">
                   Sign in
                   <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-200"></span>
                 </Link>
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-6">
               {/* Name Input with floating label */}
               <div className="relative">
                 <label 
@@ -144,8 +147,8 @@ export default function SignupPage() {
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   onFocus={() => setFocusedField('name')}
                   onBlur={() => setFocusedField(null)}
-                  className={`w-full px-4 py-4 bg-background border-2 rounded-xl text-base text-foreground focus:outline-none transition-all min-h-[56px] ${
-                    focusedField === 'name' ? 'border-primary shadow-lg shadow-primary/10' : 'border-border hover:border-border/80'
+                  className={`w-full px-5 py-4 bg-white dark:bg-slate-800 border-2 rounded-xl text-base text-slate-900 dark:text-white focus:outline-none transition-all min-h-[60px] font-medium ${
+                    focusedField === 'name' ? 'border-primary shadow-lg shadow-primary/20 ring-4 ring-primary/10' : 'border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500'
                   }`}
                   required
                 />
@@ -166,8 +169,8 @@ export default function SignupPage() {
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   onFocus={() => setFocusedField('email')}
                   onBlur={() => setFocusedField(null)}
-                  className={`w-full px-4 py-4 bg-background border-2 rounded-xl text-base text-foreground focus:outline-none transition-all min-h-[56px] ${
-                    focusedField === 'email' ? 'border-primary shadow-lg shadow-primary/10' : 'border-border hover:border-border/80'
+                  className={`w-full px-5 py-4 bg-white dark:bg-slate-800 border-2 rounded-xl text-base text-slate-900 dark:text-white focus:outline-none transition-all min-h-[60px] font-medium ${
+                    focusedField === 'email' ? 'border-primary shadow-lg shadow-primary/20 ring-4 ring-primary/10' : 'border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500'
                   }`}
                   required
                 />
@@ -188,15 +191,15 @@ export default function SignupPage() {
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   onFocus={() => setFocusedField('password')}
                   onBlur={() => setFocusedField(null)}
-                  className={`w-full px-4 py-4 pr-12 bg-background border-2 rounded-xl text-base text-foreground focus:outline-none transition-all min-h-[56px] ${
-                    focusedField === 'password' ? 'border-primary shadow-lg shadow-primary/10' : 'border-border hover:border-border/80'
+                  className={`w-full px-5 py-4 pr-14 bg-white dark:bg-slate-800 border-2 rounded-xl text-base text-slate-900 dark:text-white focus:outline-none transition-all min-h-[60px] font-medium ${
+                    focusedField === 'password' ? 'border-primary shadow-lg shadow-primary/20 ring-4 ring-primary/10' : 'border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500'
                   }`}
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors min-w-[48px] min-h-[48px] flex items-center justify-center rounded-lg hover:bg-background"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors min-w-[48px] min-h-[48px] flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700"
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
@@ -256,7 +259,7 @@ export default function SignupPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-4 bg-primary hover:bg-primary/90 active:bg-primary/80 text-white rounded-xl font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-100 min-h-[56px] text-base touch-manipulation group"
+                className="w-full py-5 bg-primary hover:bg-primary/90 active:bg-primary/80 text-white rounded-xl font-bold text-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-xl hover:shadow-2xl hover:scale-[1.02] active:scale-100 min-h-[64px] touch-manipulation group"
               >
                 {isLoading ? (
                   <>
