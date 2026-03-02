@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from "recharts"
 import { TrendingUp, Zap, Target, ArrowRight, Loader2, AlertCircle } from "lucide-react"
 import { cn } from "../lib/utils"
