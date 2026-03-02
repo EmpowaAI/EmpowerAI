@@ -114,7 +114,7 @@ export default function LandingPage() {
             {/* Left Content - Mobile Optimized */}
             <div className="text-center lg:text-left space-y-6 md:space-y-8 relative z-10">
               <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-primary dark:bg-primary/50 border border-primary dark:border-primary text-white text-sm md:text-base font-medium animate-fade-in">
-                <Sparkles className="h-4 w-4" />
+                <div className="w-4 h-4 bg-white rounded-full animate-pulse" />
                 <span className="whitespace-nowrap">AI-Powered Career Guidance</span>
               </div>
               

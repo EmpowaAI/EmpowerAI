@@ -1,7 +1,7 @@
 // TwinBuilder.tsx
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { CheckCircle, ChevronRight, ChevronLeft, Sparkles, Loader2 } from "lucide-react"
+import { CheckCircle, ChevronRight, ChevronLeft, Loader2 } from "lucide-react"
 import { cn } from "../lib/utils"
 import { twinAPI, progressAPI } from "../lib/api"
 import ProgressTracker from "../components/ProgressTracker"
@@ -450,8 +450,8 @@ export default function TwinBuilder() {
       {isLoading && (
         <div className="mb-4 p-3 bg-accent/10 border border-accent/20 rounded-lg text-sm text-accent">
           <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 animate-pulse" />
-            Creating your Digital Twin and calculating your Empowerment Score...
+            <div className="w-4 h-4 bg-primary rounded-full animate-pulse" />
+            <span>Creating your Digital Twin and calculating your Empowerment Score...</span>
           </div>
           <div className="mt-2 text-xs">
             You will be redirected to the dashboard shortly...
@@ -486,7 +486,7 @@ export default function TwinBuilder() {
             </>
           ) : currentStep === steps.length - 1 ? (
             <>
-              <Sparkles className="h-5 w-5" /> Generate Twin
+              Generate Twin
             </>
           ) : (
             <>

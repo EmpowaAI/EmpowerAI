@@ -2,7 +2,7 @@
 import type React from "react"
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { Eye, EyeOff, CheckCircle, Loader2, Sparkles, Shield, Zap } from "lucide-react"
+import { Eye, EyeOff, CheckCircle, Loader2, Shield, Zap } from "lucide-react"
 import { authAPI } from "../lib/api"
 import Logo from "../components/Logo"
 
@@ -84,7 +84,7 @@ export default function SignupPage() {
           </h1>
           <ul className="space-y-4">
             {[
-              { text: "Build your Digital Economic Twin", icon: Sparkles },
+              { text: "Build your Digital Economic Twin", icon: Shield },
               { text: "Visualize your earning potential", icon: Zap },
               { text: "Get personalized career guidance", icon: CheckCircle },
               { text: "Access SA-specific opportunities", icon: Shield },
@@ -114,9 +114,9 @@ export default function SignupPage() {
 
             {/* Header */}
             <div className="mb-8">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-100 dark:bg-emerald-950/50 rounded-full mb-4">
-                <Shield className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-                <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Free Account</span>
+              <div className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-white dark:bg-primary/50 border border-white/30 shadow-lg">
+                <Shield className="h-3.5 w-3.5 text-primary" />
+                <span className="whitespace-nowrap text-xs font-semibold text-primary">Secure Signup</span>
               </div>
               <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-2 tracking-tight">Create account</h2>
               <p className="text-sm sm:text-base text-muted-foreground">
@@ -265,7 +265,6 @@ export default function SignupPage() {
                 ) : (
                   <>
                     <span>Create account</span>
-                    <Sparkles className="h-5 w-5 group-hover:rotate-12 transition-transform" />
                   </>
                 )}
               </button>
