@@ -23,7 +23,7 @@ export default {
           foreground: "#0f172a",
         },
         primary: {
-          DEFAULT: "#3b82f6", // Neural Blue - HARDCODED
+          DEFAULT: "#3b82f6", // Neural Blue - Clean Professional
           foreground: "#ffffff",
         },
         secondary: {
