@@ -16,33 +16,33 @@ export default {
     },
     extend: {
       colors: {
-        background: "var(--color-background)",
-        foreground: "var(--color-foreground)",
+        background: "#ffffff",
+        foreground: "#0f172a",
         card: {
-          DEFAULT: "var(--color-card)",
-          foreground: "var(--color-card-foreground)",
+          DEFAULT: "#ffffff",
+          foreground: "#0f172a",
         },
         primary: {
-          DEFAULT: "var(--color-primary)",
-          foreground: "var(--color-primary-foreground)",
+          DEFAULT: "#3b82f6", // Neural Blue - HARDCODED
+          foreground: "#ffffff",
         },
         secondary: {
-          DEFAULT: "var(--color-secondary)",
-          foreground: "var(--color-secondary-foreground)",
+          DEFAULT: "#3b82f6", // Same as primary - NO RAINBOW
+          foreground: "#ffffff",
         },
         muted: {
-          DEFAULT: "var(--color-muted)",
-          foreground: "var(--color-muted-foreground)",
+          DEFAULT: "#f1f5f9",
+          foreground: "#64748b",
         },
         accent: {
-          DEFAULT: "var(--color-accent)",
-          foreground: "var(--color-accent-foreground)",
+          DEFAULT: "#2563eb", // Slightly darker blue
+          foreground: "#ffffff",
         },
-        border: "var(--color-border)",
-        ring: "var(--color-ring)",
-        success: "var(--color-success)",
-        warning: "var(--color-warning)",
-        destructive: "var(--color-destructive)",
+        border: "#e2e8f0",
+        ring: "#3b82f6",
+        success: "#10b981",
+        warning: "#f59e0b",
+        destructive: "#ef4444",
       },
       borderRadius: {
         sm: "var(--radius-sm)",
