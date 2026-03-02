@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { TrendingUp, Briefcase, FileText, Mic, Target, ArrowRight, Brain, Users, Award, Calendar, BarChart3 } from 'lucide-react'
+import { BarChart3, Users, TrendingUp, Briefcase, Target, Award, Clock } from "lucide-react"
 import { useUser } from '../lib/user-context'
 import { cn } from '../lib/utils'
 import { statsAPI, opportunitiesAPI } from '../lib/api'
@@ -154,7 +154,7 @@ export default function Dashboard() {
           <div className="space-y-4">
             <div className="flex items-center gap-2 mb-2">
               <span className="px-3 sm:px-4 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-xs font-semibold text-white flex items-center gap-1.5 border border-white/30 shadow-lg">
-                <Sparkles className="h-3.5 w-3.5" /> AI-Powered
+                <div className="w-3.5 h-3.5 bg-white rounded-full animate-pulse" /> AI-Powered
               </span>
             </div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight leading-tight">
