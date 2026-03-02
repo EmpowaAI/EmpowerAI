@@ -73,7 +73,7 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-background to-cyan-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 flex flex-col sm:flex-row animate-fade-in">
+    <div className="min-h-screen bg-gradient-to-br from-primary via-background to-secondary dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 flex flex-col sm:flex-row animate-fade-in">
       {/* Left Panel */}
       <div className="hidden lg:flex flex-1 relative p-12 flex-col justify-between overflow-hidden">
         {/* Background Image */}
@@ -87,7 +87,7 @@ export default function SignupPage() {
         <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/60 to-black/70 backdrop-blur-sm" />
 
         {/* Animated gradient accent */}
-        <div className="absolute inset-0 bg-gradient-to-tl from-indigo-600/20 via-transparent to-emerald-600/20 opacity-50" />
+        <div className="absolute inset-0 bg-gradient-to-tl from-primary/20 via-transparent to-emerald-600/20 opacity-50" />
 
         {/* Content with higher z-index */}
         <div className="relative z-10 animate-slide-up">
@@ -107,7 +107,7 @@ export default function SignupPage() {
             ].map((item, i) => (
               <li key={i} className="flex items-center gap-3 text-white drop-shadow-md animate-slide-up" style={{ animationDelay: `${0.2 + i * 0.1}s` }}>
                 <div className="h-8 w-8 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
-                  <item.icon className="h-4 w-4 text-cyan-400" />
+                  <item.icon className="h-4 w-4 text-secondary" />
                 </div>
                 <span className="text-base">{item.text}</span>
               </li>
@@ -271,7 +271,7 @@ export default function SignupPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-4 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white rounded-xl font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-100 min-h-[56px] text-base touch-manipulation group"
+                className="w-full py-4 bg-gradient-to-r from-primary to-primary hover:from-primary hover:to-primary text-white rounded-xl font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-100 min-h-[56px] text-base touch-manipulation group"
               >
                 {isLoading ? (
                   <>

@@ -1,4 +1,4 @@
-﻿// pages/LoginPage.tsx - Enhanced with beautiful animations
+// pages/LoginPage.tsx - Enhanced with beautiful animations
 import type React from "react"
 
 import { useState } from "react"
@@ -108,7 +108,7 @@ export default function LoginPage() {
           {/* Trust indicators */}
           <div className="flex items-center gap-6 pt-4">
             <div className="flex items-center gap-2 text-white/90">
-              <Users className="h-5 w-5 text-cyan-400" />
+              <Users className="h-5 w-5 text-secondary" />
               <span className="text-sm font-medium">10,000+ Users</span>
             </div>
             <div className="flex items-center gap-2 text-white/90">

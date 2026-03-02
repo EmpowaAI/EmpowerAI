@@ -3,7 +3,7 @@ import { Link } from "react-router-dom"
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-primary via-white to-secondary dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
       <div className="max-w-4xl mx-auto px-4 py-12">
         {/* Header */}
         <div className="text-center mb-12">
@@ -18,7 +18,7 @@ export default function AboutPage() {
         {/* Mission */}
         <section className="bg-white dark:bg-slate-800 rounded-2xl p-8 mb-8 shadow-lg">
           <div className="flex items-start gap-4 mb-6">
-            <Target className="h-8 w-8 text-indigo-600 dark:text-indigo-400 flex-shrink-0 mt-1" />
+            <Target className="h-8 w-8 text-primary dark:text-primary flex-shrink-0 mt-1" />
             <div>
               <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
                 Our Mission
@@ -36,7 +36,7 @@ export default function AboutPage() {
         {/* Problem We Solve */}
         <section className="bg-white dark:bg-slate-800 rounded-2xl p-8 mb-8 shadow-lg">
           <div className="flex items-start gap-4 mb-6">
-            <Users className="h-8 w-8 text-indigo-600 dark:text-indigo-400 flex-shrink-0 mt-1" />
+            <Users className="h-8 w-8 text-primary dark:text-primary flex-shrink-0 mt-1" />
             <div>
               <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
                 The Challenge
@@ -58,7 +58,7 @@ export default function AboutPage() {
         {/* Our Solution */}
         <section className="bg-white dark:bg-slate-800 rounded-2xl p-8 mb-8 shadow-lg">
           <div className="flex items-start gap-4 mb-6">
-            <Award className="h-8 w-8 text-indigo-600 dark:text-indigo-400 flex-shrink-0 mt-1" />
+            <Award className="h-8 w-8 text-primary dark:text-primary flex-shrink-0 mt-1" />
             <div>
               <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
                 How We Help
@@ -106,7 +106,7 @@ export default function AboutPage() {
         {/* Values */}
         <section className="bg-white dark:bg-slate-800 rounded-2xl p-8 mb-8 shadow-lg">
           <div className="flex items-start gap-4 mb-6">
-            <Heart className="h-8 w-8 text-indigo-600 dark:text-indigo-400 flex-shrink-0 mt-1" />
+            <Heart className="h-8 w-8 text-primary dark:text-primary flex-shrink-0 mt-1" />
             <div>
               <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
                 Our Values
@@ -134,7 +134,7 @@ export default function AboutPage() {
         </section>
 
         {/* Contact */}
-        <section className="bg-gradient-to-r from-indigo-600 to-cyan-600 rounded-2xl p-8 text-white">
+        <section className="bg-gradient-to-r from-primary to-cyan-600 rounded-2xl p-8 text-white">
           <h2 className="text-2xl font-bold mb-4">Get in Touch</h2>
           <p className="mb-6 opacity-90">
             Have questions? Want to partner with us? We'd love to hear from you.
@@ -142,7 +142,7 @@ export default function AboutPage() {
           <div className="flex flex-col sm:flex-row gap-4">
             <a 
               href="mailto:support@empowerai.co.za" 
-              className="flex items-center gap-2 bg-white text-indigo-600 px-6 py-3 rounded-lg font-semibold hover:bg-indigo-50 transition-colors"
+              className="flex items-center gap-2 bg-white text-primary px-6 py-3 rounded-lg font-semibold hover:bg-primary transition-colors"
             >
               <Mail className="h-5 w-5" />
               support@empowerai.co.za
@@ -158,7 +158,7 @@ export default function AboutPage() {
         <div className="text-center mt-8">
           <Link 
             to="/" 
-            className="text-indigo-600 dark:text-indigo-400 hover:underline font-semibold"
+            className="text-primary dark:text-primary hover:underline font-semibold"
           >
             ← Back to Home
           </Link>
