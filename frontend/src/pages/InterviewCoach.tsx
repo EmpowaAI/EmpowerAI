@@ -1,5 +1,5 @@
 
-import { useState } from "react"
+import React, { useState } from "react"
 import { Mic, MessageSquare, Play, RefreshCw, CheckCircle, ChevronRight, Loader2 } from "lucide-react"
 import { cn } from "../lib/utils"
 import { interviewAPI } from "../lib/api"
