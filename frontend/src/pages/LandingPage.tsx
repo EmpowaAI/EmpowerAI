@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import {
-  Zap,
   TrendingUp,
   Target,
   Users,
@@ -19,6 +18,7 @@ import {
   Star,
   Award,
   Play,
+  Zap,
 } from "lucide-react"
 import ThemeToggle from "../components/ThemeToggle"
 import Logo from "../components/Logo"
@@ -67,13 +67,13 @@ export default function LandingPage() {
             
             {/* Desktop Nav */}
             <div className="hidden lg:flex items-center gap-6 xl:gap-8">
-              <a href="#features" className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary font-medium transition-colors text-base">Features</a>
-              <a href="#how-it-works" className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary font-medium transition-colors text-base">How It Works</a>
-              <a href="#demo" className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary font-medium transition-colors text-base">Demo</a>
-              <a href="#testimonials" className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary font-medium transition-colors text-base">Success</a>
+              <a href="#features" className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary font-medium transition-all duration-200 text-base relative group">Features <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-200"></span></a>
+              <a href="#how-it-works" className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary font-medium transition-all duration-200 text-base relative group">How It Works <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-200"></span></a>
+              <a href="#demo" className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary font-medium transition-all duration-200 text-base relative group">Demo <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-200"></span></a>
+              <a href="#testimonials" className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary font-medium transition-all duration-200 text-base relative group">Success <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-200"></span></a>
               <ThemeToggle />
-              <Link to="/login" className="text-slate-700 dark:text-slate-300 hover:text-primary font-medium transition-colors text-base px-4 py-2 min-h-[44px] flex items-center">Sign In</Link>
-              <Link to="/signup" className="bg-primary hover:bg-primary text-white px-6 py-2.5 rounded-lg font-semibold transition-colors shadow-sm hover:shadow-md min-h-[44px] flex items-center text-base">Get Started</Link>
+              <Link to="/login" className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary font-medium transition-all duration-200 text-base px-4 py-2 min-h-[44px] flex items-center hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg">Sign In</Link>
+              <Link to="/signup" className="bg-primary hover:bg-primary/90 text-white px-6 py-2.5 rounded-lg font-semibold transition-all duration-200 shadow-sm hover:shadow-md hover:scale-105 active:scale-100 min-h-[44px] flex items-center text-base">Get Started</Link>
             </div>
 
             {/* Mobile Menu Button */}
@@ -130,14 +130,14 @@ export default function LandingPage() {
               <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center lg:justify-start animate-fade-in animation-delay-400">
                 <Link
                   to="/signup"
-                  className="group inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary active:bg-primary text-white px-6 sm:px-8 py-4 rounded-lg font-semibold text-base md:text-lg transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 active:scale-100 min-h-[52px] touch-manipulation w-full sm:w-auto"
+                  className="group inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 active:bg-primary/80 text-white px-6 sm:px-8 py-4 rounded-lg font-semibold text-base md:text-lg transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 active:scale-100 min-h-[52px] touch-manipulation w-full sm:w-auto"
                 >
                   <span>Start Your Journey</span>
                   <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <a
                   href="#demo"
-                  className="inline-flex items-center justify-center gap-2 border-2 border-slate-300 dark:border-slate-600 hover:border-primary dark:hover:border-primary text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary px-6 sm:px-8 py-4 rounded-lg font-semibold text-base md:text-lg transition-all duration-200 hover:scale-105 active:scale-100 min-h-[52px] touch-manipulation w-full sm:w-auto"
+                  className="inline-flex items-center justify-center gap-2 border-2 border-slate-300 dark:border-slate-600 hover:border-primary dark:hover:border-primary text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary px-6 sm:px-8 py-4 rounded-lg font-semibold text-base md:text-lg transition-all duration-200 hover:scale-105 active:scale-100 hover:bg-slate-50 dark:hover:bg-slate-800 min-h-[52px] touch-manipulation w-full sm:w-auto"
                 >
                   <Play className="h-5 w-5" />
                   <span>Watch Demo</span>
@@ -399,7 +399,9 @@ export default function LandingPage() {
                 </div>
                 <p className="text-sm md:text-base text-slate-700 dark:text-slate-300 mb-5 md:mb-6 leading-relaxed">"{testimonial.quote}"</p>
                 <div className="flex items-center gap-3">
-                  <div className="h-11 w-11 md:h-12 md:w-12 flex-shrink-0 rounded-full bg-gradient-to-br from-primary to-primary" />
+                  <div className="h-11 w-11 md:h-12 md:w-12 flex-shrink-0 rounded-full bg-gradient-to-br from-primary to-primary flex items-center justify-center text-white font-bold text-sm md:text-base">
+                    {testimonial.name.split(' ').map(n => n[0]).join('')}
+                  </div>
                   <div className="min-w-0">
                     <p className="font-semibold text-sm md:text-base text-slate-900 dark:text-white truncate">{testimonial.name}</p>
                     <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 truncate">{testimonial.role}</p>
@@ -423,7 +425,7 @@ export default function LandingPage() {
           </p>
           <Link
             to="/signup"
-            className="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-50 active:bg-slate-100 text-primary px-8 md:px-10 py-4 md:py-5 rounded-lg font-bold text-base md:text-lg transition-all duration-200 shadow-2xl hover:scale-105 active:scale-100 animate-fade-in animation-delay-400 min-h-[52px] touch-manipulation w-full sm:w-auto max-w-md mx-auto"
+            className="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-50 active:bg-slate-100 text-primary px-8 md:px-10 py-4 md:py-5 rounded-lg font-bold text-base md:text-lg transition-all duration-200 shadow-2xl hover:shadow-3xl hover:scale-105 active:scale-100 animate-fade-in animation-delay-400 min-h-[52px] touch-manipulation w-full sm:w-auto max-w-md mx-auto"
           >
             <span>Start Your Journey Free</span>
             <ArrowRight className="h-5 w-5 md:h-6 md:w-6" />
