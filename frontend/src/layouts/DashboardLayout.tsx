@@ -40,66 +40,11 @@ export default function DashboardLayout() {
   const isSubPage = location.pathname !== "/dashboard"
   const currentPage = navItems.find((item) => item.path === location.pathname)
 
-  // Check progress and redirect with proper loading state
+  // No more progress checking - all logged-in users have full access
   useEffect(() => {
-    const checkProgressAndRedirect = async () => {
-      setIsChecking(true)
-      
-      // Wait a bit to prevent immediate redirect flash
-      await new Promise(resolve => setTimeout(resolve, 100))
-      
-      // Sync progress from localStorage to ensure it's up to date
-      const cvCompleted = localStorage.getItem('cvCompleted') === 'true'
-      const twinCompleted = localStorage.getItem('twinCompleted') === 'true'
-      
-      // Update progress if it's different from localStorage
-      if (cvCompleted !== progress.cvCompleted || twinCompleted !== progress.twinCompleted) {
-        // Progress will be synced by UserContext, just wait a tick
-        await new Promise(resolve => setTimeout(resolve, 50))
-        setIsChecking(false)
-        return
-      }
-      
-      // Don't redirect if already on correct path
-      const currentPath = location.pathname
-      
-      // Allow access to these paths regardless of progress
-      const alwaysAllowed = [
-        "/dashboard/cv-analyzer",
-        "/dashboard",
-        "/dashboard/twin"
-      ]
-      
-      if (alwaysAllowed.includes(currentPath)) {
-        setIsChecking(false)
-        return
-      }
-      
-      // Define allowed paths based on progress
-      const allowedPaths = {
-        "/dashboard/simulations": progress.cvCompleted && progress.twinCompleted,
-        "/dashboard/opportunities": progress.cvCompleted && progress.twinCompleted,
-        "/dashboard/interview-coach": progress.cvCompleted && progress.twinCompleted,
-      }
-      
-      const isAllowed = allowedPaths[currentPath] || false
-      
-      if (!isAllowed) {
-        // Determine where to redirect
-        if (!progress.cvCompleted) {
-          navigate("/dashboard/cv-analyzer", { replace: true })
-        } else if (!progress.twinCompleted) {
-          navigate("/dashboard/twin", { replace: true })
-        } else {
-          navigate("/dashboard", { replace: true })
-        }
-      } else {
-        setIsChecking(false)
-      }
-    }
-    
-    checkProgressAndRedirect()
-  }, [location.pathname, progress, navigate])
+    // Just ensure loading state is cleared
+    setIsChecking(false)
+  }, [])
 
   const handleLogout = () => {
     logout()
@@ -167,53 +112,29 @@ export default function DashboardLayout() {
             <p className="px-3 mb-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Menu</p>
             {navItems.map((item, index) => {
               const isActive = location.pathname === item.path
-              const isDisabled = !progress.cvCompleted || !progress.twinCompleted
-              
-              // Determine if item should be disabled
-              const shouldDisable = !(
-                item.path === "/dashboard/cv-analyzer" ||
-                (item.path === "/dashboard/twin" && progress.cvCompleted) ||
-                (progress.cvCompleted && progress.twinCompleted)
-              )
               
               return (
                 <Link
                   key={item.path}
-                  to={shouldDisable ? "#" : item.path}
-                  onClick={(e) => {
-                    if (shouldDisable) {
-                      e.preventDefault()
-                      if (!progress.cvCompleted) {
-                        navigate("/dashboard/cv-analyzer")
-                      } else if (!progress.twinCompleted) {
-                        navigate("/dashboard/twin")
-                      }
-                    } else {
-                      setSidebarOpen(false)
-                    }
-                  }}
+                  to={item.path}
+                  onClick={() => setSidebarOpen(false)}
                   className={cn(
                     "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 text-sm font-medium group relative overflow-hidden",
                     isActive
                       ? "bg-gradient-to-r from-primary to-primary/90 text-white shadow-lg shadow-primary/25"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                    shouldDisable && "opacity-50 cursor-not-allowed hover:bg-transparent hover:text-muted-foreground"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   )}
                   style={{ animationDelay: `${index * 0.05}s` }}
                 >
                   <div
                     className={cn(
                       "h-9 w-9 rounded-lg flex items-center justify-center transition-colors",
-                      isActive ? "bg-white/20" : "bg-muted group-hover:bg-background",
-                      shouldDisable && "group-hover:bg-muted"
+                      isActive ? "bg-white/20" : "bg-muted group-hover:bg-background"
                     )}
                   >
                     <item.icon className="h-4 w-4" />
                   </div>
                   <span className="flex-1">{item.label}</span>
-                  {shouldDisable && !isActive && (
-                    <span className="text-xs bg-muted px-2 py-1 rounded">Locked</span>
-                  )}
                   {isActive && <ChevronRight className="h-4 w-4 opacity-70" />}
                 </Link>
               )
@@ -260,15 +181,7 @@ export default function DashboardLayout() {
 
           {isSubPage && (
             <button
-              onClick={() => {
-                if (progress.cvCompleted && progress.twinCompleted) {
-                  navigate("/dashboard")
-                } else if (progress.cvCompleted) {
-                  navigate("/dashboard/twin")
-                } else {
-                  navigate("/dashboard/cv-analyzer")
-                }
-              }}
+              onClick={() => navigate("/dashboard")}
               className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors px-3 py-2 hover:bg-muted rounded-lg"
             >
               <ArrowLeft className="h-4 w-4" />
