@@ -1,4 +1,3 @@
-// LandingPage.tsx - MOBILE-FIRST with Animated Background
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import {
@@ -19,6 +18,7 @@ import {
   Star,
   Award,
   Play,
+  ChevronRight,
 } from "lucide-react"
 import ThemeToggle from "../components/ThemeToggle"
 import Logo from "../components/Logo"
@@ -37,284 +37,261 @@ export default function LandingPage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 relative overflow-hidden">
-      {/* ANIMATED Background */}
-      <div className="fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-white via-indigo-50/30 to-premium/20 dark:from-slate-950 dark:via-indigo-950/30 dark:to-premium/20" />
-        <div className="absolute top-0 -left-48 w-96 h-96 bg-gradient-to-br from-primary/30 to-premium/30 dark:from-primary/20 dark:to-premium/20 rounded-full blur-3xl animate-blob" />
-        <div className="absolute top-0 -right-48 w-96 h-96 bg-gradient-to-br from-secondary/30 to-primary/30 dark:from-cyan-600/20 dark:to-primary/20 rounded-full blur-3xl animate-blob animation-delay-2000" />
-        <div className="absolute -bottom-48 left-1/2 w-96 h-96 bg-gradient-to-br from-premium/30 to-pink-400/30 dark:from-premium/20 dark:to-pink-600/20 rounded-full blur-3xl animate-blob animation-delay-4000" />
+    <div className="min-h-screen bg-white dark:bg-[#0a0a0a] relative overflow-hidden">
+      {/* Subtle Grid Background */}
+      <div className="fixed inset-0 -z-10">
         <div 
-          className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
+          className="absolute inset-0 opacity-[0.02] dark:opacity-[0.03]"
           style={{
-            backgroundImage: `linear-gradient(to right, rgb(99, 102, 241) 1px, transparent 1px), linear-gradient(to bottom, rgb(99, 102, 241) 1px, transparent 1px)`,
+            backgroundImage: `linear-gradient(to right, #d4d4d4 1px, transparent 1px), linear-gradient(to bottom, #d4d4d4 1px, transparent 1px)`,
             backgroundSize: '4rem 4rem',
-            animation: 'grid-flow 20s linear infinite'
           }}
         />
       </div>
 
-      {/* Mobile-First Navigation */}
+      {/* Navigation - Premium */}
       <nav className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b",
         scrolled 
-          ? "bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl shadow-sm border-b border-slate-200/50 dark:border-slate-800/50" 
-          : "bg-white/70 dark:bg-slate-900/70 backdrop-blur-lg"
+          ? "bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur-xl border-[#e5e5e5] dark:border-[#262626]" 
+          : "bg-transparent border-transparent"
       )}>
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 md:h-20">
+        <div className="premium-container">
+          <div className="flex items-center justify-between h-16">
             <Logo variant="dark" size="lg" linkTo="/" />
             
             {/* Desktop Nav */}
-            <div className="hidden lg:flex items-center gap-6 xl:gap-8">
-              <a href="#features" className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary font-medium transition-colors text-base">Features</a>
-              <a href="#how-it-works" className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary font-medium transition-colors text-base">How It Works</a>
-              <a href="#demo" className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary font-medium transition-colors text-base">Demo</a>
-              <a href="#testimonials" className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary font-medium transition-colors text-base">Success</a>
+            <div className="hidden lg:flex items-center gap-8">
+              <a href="#features" className="text-sm font-medium text-[#525252] dark:text-[#a3a3a3] hover:text-[#0a0a0a] dark:hover:text-[#fafafa] transition-colors">Features</a>
+              <a href="#how-it-works" className="text-sm font-medium text-[#525252] dark:text-[#a3a3a3] hover:text-[#0a0a0a] dark:hover:text-[#fafafa] transition-colors">How It Works</a>
+              <a href="#testimonials" className="text-sm font-medium text-[#525252] dark:text-[#a3a3a3] hover:text-[#0a0a0a] dark:hover:text-[#fafafa] transition-colors">Success</a>
               <ThemeToggle />
-              <Link to="/login" className="text-slate-700 dark:text-slate-300 hover:text-primary font-medium transition-colors text-base px-4 py-2 min-h-[44px] flex items-center">Sign In</Link>
-              <Link to="/signup" className="bg-primary hover:bg-primary text-white px-6 py-2.5 rounded-lg font-semibold transition-colors shadow-sm hover:shadow-md min-h-[44px] flex items-center text-base">Get Started</Link>
+              <Link to="/login" className="text-sm font-medium text-[#525252] dark:text-[#a3a3a3] hover:text-[#0a0a0a] dark:hover:text-[#fafafa] transition-colors">Sign In</Link>
+              <Link to="/signup" className="premium-btn premium-btn-primary">
+                Get Started
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
             </div>
 
             {/* Mobile Menu Button */}
-            <div className="flex lg:hidden items-center gap-2">
+            <div className="flex lg:hidden items-center gap-3">
               <ThemeToggle />
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors min-h-[48px] min-w-[48px] flex items-center justify-center touch-manipulation"
+                className="p-2 rounded-md hover:bg-[#f5f5f5] dark:hover:bg-[#262626] transition-colors"
                 aria-label="Toggle menu"
               >
-                {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               </button>
             </div>
           </div>
         </div>
 
-        {/* Mobile Menu - Enhanced */}
+        {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 shadow-xl">
-            <div className="px-4 py-4 space-y-1 max-w-7xl mx-auto">
-              <a href="#features" onClick={() => setMobileMenuOpen(false)} className="block py-3.5 px-4 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-colors min-h-[52px] flex items-center text-base">Features</a>
-              <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="block py-3.5 px-4 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-colors min-h-[52px] flex items-center text-base">How It Works</a>
-              <a href="#demo" onClick={() => setMobileMenuOpen(false)} className="block py-3.5 px-4 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-colors min-h-[52px] flex items-center text-base">Demo</a>
-              <a href="#testimonials" onClick={() => setMobileMenuOpen(false)} className="block py-3.5 px-4 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-colors min-h-[52px] flex items-center text-base">Success Stories</a>
-              <div className="pt-2 border-t border-slate-200 dark:border-slate-800 mt-2 space-y-1">
-                <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="block py-3.5 px-4 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-colors min-h-[52px] flex items-center text-base">Sign In</Link>
-                <Link to="/signup" onClick={() => setMobileMenuOpen(false)} className="block py-3.5 px-4 rounded-lg bg-primary hover:bg-primary text-white font-semibold text-center transition-colors min-h-[52px] flex items-center justify-center text-base">Get Started Free</Link>
+          <div className="lg:hidden bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur-xl border-t border-[#e5e5e5] dark:border-[#262626]">
+            <div className="premium-container py-4 space-y-2">
+              <a href="#features" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 rounded-lg hover:bg-[#f5f5f5] dark:hover:bg-[#262626] font-medium transition-colors">Features</a>
+              <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 rounded-lg hover:bg-[#f5f5f5] dark:hover:bg-[#262626] font-medium transition-colors">How It Works</a>
+              <a href="#testimonials" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 rounded-lg hover:bg-[#f5f5f5] dark:hover:bg-[#262626] font-medium transition-colors">Success Stories</a>
+              <div className="pt-4 space-y-2 border-t border-[#e5e5e5] dark:border-[#262626]">
+                <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 text-center rounded-lg hover:bg-[#f5f5f5] dark:hover:bg-[#262626] font-medium transition-colors">Sign In</Link>
+                <Link to="/signup" onClick={() => setMobileMenuOpen(false)} className="premium-btn premium-btn-primary w-full">Get Started</Link>
               </div>
             </div>
           </div>
         )}
       </nav>
 
-      {/* Mobile-First Hero Section */}
-      <section className="relative pt-20 md:pt-28 lg:pt-32 pb-16 md:pb-20 lg:pb-24 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 md:gap-16 items-center">
-            {/* Left Content - Mobile Optimized */}
-            <div className="text-center lg:text-left space-y-6 md:space-y-8 relative z-10">
-              <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-primary dark:bg-primary/50 border border-primary dark:border-primary text-white text-sm md:text-base font-medium animate-fade-in">
-                <Sparkles className="h-4 w-4" />
-                <span className="whitespace-nowrap">AI-Powered Career Guidance</span>
-              </div>
-              
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight text-slate-900 dark:text-white animate-slide-up">
-                Your Digital
-                <span className="block text-primary dark:text-primary">Economic Twin</span>
-              </h1>
-
-              <p className="text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto lg:mx-0 leading-relaxed animate-fade-in animation-delay-200">
-                Visualize your future earning potential. Get personalized career pathways for South African youth.
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center lg:justify-start animate-fade-in animation-delay-400">
-                <Link
-                  to="/signup"
-                  className="group inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary active:bg-primary text-white px-6 sm:px-8 py-4 rounded-lg font-semibold text-base md:text-lg transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 active:scale-100 min-h-[52px] touch-manipulation w-full sm:w-auto"
-                >
-                  <span>Start Your Journey</span>
-                  <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                </Link>
-                <a
-                  href="#demo"
-                  className="inline-flex items-center justify-center gap-2 border-2 border-slate-300 dark:border-slate-600 hover:border-primary dark:hover:border-primary text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary px-6 sm:px-8 py-4 rounded-lg font-semibold text-base md:text-lg transition-all duration-200 hover:scale-105 active:scale-100 min-h-[52px] touch-manipulation w-full sm:w-auto"
-                >
-                  <Play className="h-5 w-5" />
-                  <span>Watch Demo</span>
-                </a>
-              </div>
-
-              {/* Trust Indicators - Mobile Optimized */}
-              <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 md:gap-8 justify-center lg:justify-start pt-4 animate-fade-in animation-delay-600">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex -space-x-2">
-                    {[1, 2, 3, 4].map((i) => (
-                      <div key={i} className="h-9 w-9 md:h-10 md:w-10 rounded-full bg-gradient-to-br from-primary to-primary border-2 border-white dark:border-slate-900" />
-                    ))}
-                  </div>
-                  <span className="text-sm md:text-base text-slate-600 dark:text-slate-400 font-medium">1,000+ users</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <Star key={i} className="h-5 w-5 md:h-6 md:w-6 fill-primary text-primary" />
-                  ))}
-                  <span className="text-sm md:text-base text-slate-600 dark:text-slate-400 font-medium ml-1.5">4.9/5</span>
-                </div>
-              </div>
+      {/* Hero Section - World-Class */}
+      <section className="premium-section pt-32 md:pt-40">
+        <div className="premium-container">
+          <div className="max-w-4xl mx-auto text-center premium-animate-in">
+            {/* Premium Badge */}
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#fafafa] dark:bg-[#171717] border border-[#e5e5e5] dark:border-[#262626] mb-6">
+              <Sparkles className="h-3.5 w-3.5 text-[#2563eb]" />
+              <span className="text-xs font-medium text-[#525252] dark:text-[#a3a3a3]">Empowering SA Youth Since 2024</span>
             </div>
 
-            {/* Right Content - Mobile-First Card */}
-            <div className="relative animate-float mt-8 lg:mt-0">
-              <div className="bg-white/75 dark:bg-slate-900/75 backdrop-blur-xl rounded-2xl md:rounded-3xl shadow-2xl p-6 md:p-8 border border-slate-200/50 dark:border-slate-800/50">
-                <div className="absolute -top-3 -right-3 md:-top-4 md:-right-4 bg-primary text-white px-4 md:px-6 py-2 rounded-full font-semibold text-xs md:text-sm shadow-lg animate-bounce-slow">
-                  Free Forever
-                </div>
-                
-                <div className="space-y-5 md:space-y-6">
-                  <div className="flex items-center gap-3 md:gap-4">
-                    <div className="h-14 w-14 md:h-16 md:w-16 flex-shrink-0 rounded-full bg-gradient-to-br from-primary to-primary flex items-center justify-center">
-                      <span className="text-2xl">??</span>
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-semibold text-base md:text-lg text-slate-900 dark:text-white truncate">Thabo Ndlovu, 23</p>
-                      <p className="text-sm md:text-base text-slate-500 dark:text-slate-400">Johannesburg, GP</p>
-                    </div>
-                  </div>
+            {/* Hero Heading */}
+            <h1 className="premium-heading-1 mb-6">
+              Your AI-Powered Path to{" "}
+              <span className="premium-gradient-text">Economic Freedom</span>
+            </h1>
 
-                  <div>
-                    <div className="flex justify-between items-center mb-2.5">
-                      <span className="text-sm md:text-base font-medium text-slate-600 dark:text-slate-400">Empowerment Score</span>
-                      <span className="text-xl md:text-2xl font-bold text-primary dark:text-primary">82/100</span>
-                    </div>
-                    <div className="h-3 md:h-4 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                      <div className="h-full w-[82%] bg-gradient-to-r from-primary to-primary dark:from-primary dark:to-primary rounded-full animate-progress" />
-                    </div>
-                  </div>
+            {/* Hero Description */}
+            <p className="premium-body-large max-w-2xl mx-auto mb-8">
+              Transform your career with AI-driven CV analysis, interview coaching, and personalized career guidance. Built for South African youth.
+            </p>
 
-                  <div className="grid grid-cols-2 gap-3 md:gap-4">
-                    <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-4 md:p-5 border border-slate-200 dark:border-slate-700 hover:scale-105 transition-transform touch-manipulation">
-                      <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Income Potential</p>
-                      <p className="text-lg md:text-xl font-bold text-slate-900 dark:text-white">R8,500<span className="text-sm font-normal text-slate-500">/mo</span></p>
-                    </div>
-                    <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-4 md:p-5 border border-slate-200 dark:border-slate-700 hover:scale-105 transition-transform touch-manipulation">
-                      <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Top Path</p>
-                      <p className="text-lg md:text-xl font-bold text-slate-900 dark:text-white">Tech Skills</p>
-                    </div>
-                  </div>
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+              <Link to="/signup" className="premium-btn premium-btn-primary premium-hover-lift px-8 py-3 text-base">
+                Start Your Journey
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+              <button className="premium-btn premium-btn-secondary px-8 py-3 text-base">
+                <Play className="mr-2 h-5 w-5" />
+                Watch Demo
+              </button>
+            </div>
 
-                  <div className="flex items-center gap-2.5 text-sm md:text-base text-slate-600 dark:text-slate-400 pt-2">
-                    <CheckCircle className="h-5 w-5 md:h-6 md:w-6 text-primary dark:text-primary flex-shrink-0" />
-                    <span>CV analyzed in 60 seconds</span>
-                  </div>
-                </div>
+            {/* Social Proof */}
+            <div className="flex flex-wrap items-center justify-center gap-8 text-sm text-[#737373] dark:text-[#737373]">
+              <div className="flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                <span>1,000+ Users</span>
               </div>
-
-              {/* Floating Success Badge - Hidden on small mobile */}
-              <div className="hidden sm:block absolute -bottom-4 md:-bottom-6 -left-4 md:-left-6 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-xl shadow-xl p-3 md:p-4 border border-slate-200/50 dark:border-slate-800/50 animate-float animation-delay-1000">
-                <div className="flex items-center gap-2 md:gap-3">
-                  <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-primary dark:bg-primary flex items-center justify-center flex-shrink-0">
-                    <Award className="h-5 w-5 md:h-6 md:w-6 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-xs md:text-sm font-semibold text-slate-900 dark:text-white">95% Success</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">Career matching</p>
-                  </div>
-                </div>
+              <div className="flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                <span>10K+ CVs Analyzed</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Award className="h-4 w-4" />
+                <span>95% Success Rate</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Mobile-First Stats Section */}
-      <section className="py-12 md:py-16 lg:py-20 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm border-y border-slate-200/50 dark:border-slate-800/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10 lg:gap-12">
-            {[
-              { icon: Users, value: "63%", label: "Youth Unemployment", sublabel: "in South Africa" },
-              { icon: Target, value: "1,000+", label: "Users Empowered", sublabel: "and growing" },
-              { icon: BarChart3, value: "10K+", label: "Career Paths", sublabel: "analyzed" },
-              { icon: Zap, value: "24/7", label: "AI Support", sublabel: "always available" },
-            ].map((stat, i) => (
-              <div key={i} className="text-center group">
-                <div className="inline-flex h-12 w-12 md:h-14 md:w-14 items-center justify-center rounded-xl bg-primary dark:bg-primary mb-3 md:mb-4 group-hover:scale-110 transition-transform touch-manipulation">
-                  <stat.icon className="h-6 w-6 md:h-7 md:w-7 text-white" />
-                </div>
-                <p className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-1.5 md:mb-2">{stat.value}</p>
-                <p className="text-sm md:text-base font-medium text-slate-900 dark:text-white leading-tight">{stat.label}</p>
-                <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-1">{stat.sublabel}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Mobile-First Features Section */}
-      <section id="features" className="py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 relative">
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-3 md:mb-4">
-              Everything You Need to <span className="text-primary dark:text-primary">Succeed</span>
-            </h2>
-            <p className="text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed">
-              Comprehensive AI-powered tools designed for South African youth
+      {/* Features Section - Premium Grid */}
+      <section id="features" className="premium-section">
+        <div className="premium-container">
+          <div className="text-center mb-16">
+            <div className="premium-badge premium-badge-primary mb-4">Features</div>
+            <h2 className="premium-heading-2 mb-4">Everything You Need to Succeed</h2>
+            <p className="premium-body-large max-w-2xl mx-auto">
+              Powerful AI tools designed specifically for South African job seekers
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
-              { icon: TrendingUp, title: "Digital Economic Twin", description: "AI-powered simulation of your economic future based on your skills" },
-              { icon: BarChart3, title: "Path Simulation", description: "Visualize 3, 6, and 12-month income projections across career pathways" },
-              { icon: FileText, title: "CV Analysis", description: "Get instant AI feedback to improve your CV and job applications" },
-              { icon: Briefcase, title: "Opportunity Matching", description: "Find jobs, learnerships, and internships tailored to your profile" },
-              { icon: Mic, title: "Interview Coach", description: "Practice with AI feedback to build confidence and improve performance" },
-              { icon: Shield, title: "Career Roadmap", description: "Step-by-step guidance to achieve your career and financial goals" },
-            ].map((feature, i) => (
+              {
+                icon: FileText,
+                title: "AI CV Analyzer",
+                description: "Get instant feedback on your CV with ATS compatibility, keyword optimization, and SA market insights.",
+                color: "#2563eb"
+              },
+              {
+                icon: Mic,
+                title: "Interview Coach",
+                description: "Practice with AI-powered mock interviews. Get real-time feedback and improve your confidence.",
+                color: "#06b6d4"
+              },
+              {
+                icon: Users,
+                title: "Digital Twin",
+                description: "Create your digital career profile and simulate different career paths with AI predictions.",
+                color: "#10b981"
+              },
+              {
+                icon: BarChart3,
+                title: "Career Simulations",
+                description: "Explore potential career paths, salary projections, and skills needed for your dream job.",
+                color: "#f59e0b"
+              },
+              {
+                icon: Briefcase,
+                title: "SA Job Matching",
+                description: "Find opportunities matched to your skills across all 9 provinces with real salary data.",
+                color: "#8b5cf6"
+              },
+              {
+                icon: Shield,
+                title: "24/7 AI Support",
+                description: "Get career guidance anytime with our AI mentor. Available in 11 South African languages.",
+                color: "#ef4444"
+              },
+            ].map((feature, index) => (
               <div
-                key={i}
-                className="group bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-xl md:rounded-2xl p-6 md:p-8 border border-slate-200/50 dark:border-slate-800/50 hover:border-primary dark:hover:border-primary hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-100 touch-manipulation"
+                key={index}
+                className="premium-card premium-card-interactive premium-animate-in"
+                style={{ animationDelay: `${index * 100}ms` }}
               >
-                <div className="inline-flex h-12 w-12 md:h-14 md:w-14 items-center justify-center rounded-lg md:rounded-xl bg-primary dark:bg-primary mb-5 md:mb-6 group-hover:scale-110 transition-transform">
-                  <feature.icon className="h-6 w-6 md:h-7 md:w-7 text-white" />
+                <div className="p-3 rounded-lg w-fit mb-4" style={{ backgroundColor: `${feature.color}15` }}>
+                  <feature.icon className="h-6 w-6" style={{ color: feature.color }} />
                 </div>
-                <h3 className="text-lg md:text-xl font-bold text-slate-900 dark:text-white mb-2 md:mb-3">{feature.title}</h3>
-                <p className="text-sm md:text-base text-slate-600 dark:text-slate-400 leading-relaxed">{feature.description}</p>
+                <h3 className="text-lg font-semibold mb-2 text-[#0a0a0a] dark:text-[#fafafa]">{feature.title}</h3>
+                <p className="premium-body-small">{feature.description}</p>
+                <button className="mt-4 text-sm font-medium flex items-center gap-1 group" style={{ color: feature.color }}>
+                  Learn more
+                  <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </button>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Mobile-First How It Works */}
-      <section id="how-it-works" className="py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-3 md:mb-4">
-              Get Started in <span className="text-primary dark:text-primary">3 Simple Steps</span>
-            </h2>
-            <p className="text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-400 leading-relaxed">
-              Your journey to economic empowerment begins here
+      {/* Stats Section - Clean */}
+      <section className="premium-section bg-[#fafafa] dark:bg-[#171717]">
+        <div className="premium-container">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {[
+              { number: "63%", label: "Youth Unemployment in SA" },
+              { number: "1,000+", label: "Users Empowered" },
+              { number: "10K+", label: "Career Paths Analyzed" },
+              { number: "24/7", label: "AI Support" },
+            ].map((stat, index) => (
+              <div key={index} className="text-center">
+                <div className="premium-heading-2 mb-2 premium-gradient-text">{stat.number}</div>
+                <div className="premium-body-small">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works - Simple Steps */}
+      <section id="how-it-works" className="premium-section">
+        <div className="premium-container">
+          <div className="text-center mb-16">
+            <div className="premium-badge premium-badge-primary mb-4">How It Works</div>
+            <h2 className="premium-heading-2 mb-4">Your Journey to Success</h2>
+            <p className="premium-body-large max-w-2xl mx-auto">
+              Three simple steps to transform your career prospects
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 md:gap-8">
+          <div className="max-w-4xl mx-auto space-y-12">
             {[
-              { step: "1", title: "Upload Your CV", description: "Our AI analyzes your skills and qualifications in seconds", icon: FileText },
-              { step: "2", title: "Build Your Twin", description: "Create your digital economic profile with personalized goals", icon: Zap },
-              { step: "3", title: "Explore Your Future", description: "Discover career paths, income projections, and opportunities", icon: TrendingUp },
-            ].map((item, i) => (
-              <div key={i} className="relative group">
-                <div className="bg-white/75 dark:bg-slate-800/75 backdrop-blur-xl rounded-xl md:rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl transition-all duration-300 group-hover:scale-105 active:scale-100 touch-manipulation">
-                  <div className="absolute -top-5 md:-top-6 left-1/2 -translate-x-1/2 h-10 w-10 md:h-12 md:w-12 rounded-full bg-primary flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                    <span className="text-white font-bold text-base md:text-lg">{item.step}</span>
+              {
+                step: "01",
+                title: "Upload Your CV",
+                description: "Our AI analyzes your skills, experience, and qualifications in seconds. Get instant feedback on ATS compatibility and keyword optimization.",
+                icon: FileText,
+              },
+              {
+                step: "02",
+                title: "Build Your Digital Twin",
+                description: "Create your personalized career profile with goals, preferences, and aspirations. Our AI learns about you to provide tailored guidance.",
+                icon: Users,
+              },
+              {
+                step: "03",
+                title: "Explore & Grow",
+                description: "Discover career paths, practice interviews, and find opportunities. Get real-time guidance from your AI mentor as you grow.",
+                icon: TrendingUp,
+              },
+            ].map((step, index) => (
+              <div key={index} className="flex gap-8 items-start">
+                <div className="hidden md:block">
+                  <div className="w-12 h-12 rounded-lg bg-[#2563eb] flex items-center justify-center text-white font-bold text-sm">
+                    {step.step}
                   </div>
-                  <div className="mt-6 md:mt-8 mb-5 md:mb-6 flex justify-center">
-                    <div className="h-14 w-14 md:h-16 md:w-16 rounded-xl bg-primary dark:bg-primary flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <item.icon className="h-7 w-7 md:h-8 md:w-8 text-white" />
+                </div>
+                <div className="flex-1 premium-card">
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 rounded-lg bg-[#2563eb]/10">
+                      <step.icon className="h-6 w-6 text-[#2563eb]" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-semibold mb-2 text-[#0a0a0a] dark:text-[#fafafa]">{step.title}</h3>
+                      <p className="premium-body">{step.description}</p>
                     </div>
                   </div>
-                  <h3 className="text-lg md:text-xl font-bold text-slate-900 dark:text-white mb-2 md:mb-3 text-center">{item.title}</h3>
-                  <p className="text-sm md:text-base text-slate-600 dark:text-slate-400 text-center leading-relaxed">{item.description}</p>
                 </div>
               </div>
             ))}
@@ -322,87 +299,52 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Mobile-First Demo Section */}
-      <section id="demo" className="py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 relative">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-3 md:mb-4">
-              See EmpowerAI in <span className="text-primary dark:text-primary">Action</span>
-            </h2>
-            <p className="text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed">
-              Watch how we're helping South African youth discover their economic potential
-            </p>
+      {/* Social Proof - Testimonials */}
+      <section id="testimonials" className="premium-section bg-[#fafafa] dark:bg-[#171717]">
+        <div className="premium-container">
+          <div className="text-center mb-16">
+            <div className="premium-badge premium-badge-success mb-4">Success Stories</div>
+            <h2 className="premium-heading-2 mb-4">Transforming Lives Across South Africa</h2>
           </div>
 
-          <div className="max-w-5xl mx-auto">
-            <div className="relative group cursor-pointer">
-              <div className="relative aspect-video rounded-xl md:rounded-2xl overflow-hidden shadow-2xl border border-slate-200/50 dark:border-slate-800/50 hover:scale-[1.02] transition-transform duration-300 touch-manipulation">
-                <img 
-                  src="/images/result.jpg" 
-                  alt="EmpowerAI Demo Preview" 
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent group-hover:from-black/70 transition-all duration-300" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="h-16 w-16 md:h-20 md:w-20 rounded-full bg-primary hover:bg-primary active:bg-primary flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300 animate-pulse-slow touch-manipulation">
-                    <Play className="h-8 w-8 md:h-10 md:w-10 text-white ml-1" />
-                  </div>
-                </div>
-                <div className="absolute top-4 right-4 md:top-6 md:right-6 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm px-3 md:px-4 py-2 rounded-full text-xs md:text-sm font-semibold text-slate-900 dark:text-white animate-fade-in">
-                  Demo Coming Soon
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4 md:gap-6 mt-6 md:mt-8">
-                {[
-                  { icon: Zap, title: "Quick Setup", desc: "Under 5 minutes" },
-                  { icon: Target, title: "95% Accurate", desc: "Career matching" },
-                  { icon: CheckCircle, title: "Proven Success", desc: "1,000+ users" },
-                ].map((item, i) => (
-                  <div key={i} className="text-center group hover:scale-105 transition-transform touch-manipulation">
-                    <div className="inline-flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-lg bg-primary dark:bg-primary mb-2 md:mb-3 group-hover:scale-110 transition-transform">
-                      <item.icon className="h-5 w-5 md:h-6 md:w-6 text-white" />
-                    </div>
-                    <p className="font-semibold text-sm md:text-base text-slate-900 dark:text-white mb-1">{item.title}</p>
-                    <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400">{item.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Mobile-First Testimonials */}
-      <section id="testimonials" className="py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-3 md:mb-4">
-              Real <span className="text-primary dark:text-primary">Success Stories</span>
-            </h2>
-            <p className="text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-400 leading-relaxed">
-              See how EmpowerAI is transforming careers across South Africa
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
-              { name: "Lerato M.", location: "Cape Town", role: "Student ? Software Developer", quote: "EmpowerAI helped me discover tech skills I didn't know I had. I'm now earning R12k/month!", rating: 5 },
-              { name: "Sipho K.", location: "Durban", role: "Unemployed ? Business Owner", quote: "The career simulation showed me entrepreneurship was my path. Best decision I ever made!", rating: 5 },
-              { name: "Nomsa T.", location: "Johannesburg", role: "Waitress ? Marketing Pro", quote: "From minimum wage to a career I love. The AI guidance was truly life-changing!", rating: 5 },
-            ].map((testimonial, i) => (
-              <div key={i} className="bg-white/75 dark:bg-slate-900/75 backdrop-blur-xl rounded-xl md:rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200/50 dark:border-slate-800/50 hover:shadow-xl hover:scale-105 active:scale-100 transition-all duration-300 touch-manipulation">
+              {
+                name: "Thabo M.",
+                role: "Software Developer",
+                location: "Gauteng",
+                quote: "EmpowerAI helped me land my first dev job. The CV analyzer was a game-changer!",
+                rating: 5,
+              },
+              {
+                name: "Lindiwe K.",
+                role: "Marketing Manager",
+                location: "Western Cape",
+                quote: "The interview coach gave me the confidence I needed. Now earning 30% more!",
+                rating: 5,
+              },
+              {
+                name: "Sipho N.",
+                role: "Data Analyst",
+                location: "KZN",
+                quote: "Went from unemployed to employed in 3 months. This platform is incredible!",
+                rating: 5,
+              },
+            ].map((testimonial, index) => (
+              <div key={index} className="premium-card">
                 <div className="flex gap-1 mb-4">
                   {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 fill-primary text-primary" />
+                    <Star key={i} className="h-4 w-4 fill-[#f59e0b] text-[#f59e0b]" />
                   ))}
                 </div>
-                <p className="text-sm md:text-base text-slate-700 dark:text-slate-300 mb-5 md:mb-6 leading-relaxed">"{testimonial.quote}"</p>
+                <p className="premium-body mb-4">"{testimonial.quote}"</p>
                 <div className="flex items-center gap-3">
-                  <div className="h-11 w-11 md:h-12 md:w-12 flex-shrink-0 rounded-full bg-gradient-to-br from-primary to-primary" />
-                  <div className="min-w-0">
-                    <p className="font-semibold text-sm md:text-base text-slate-900 dark:text-white truncate">{testimonial.name}</p>
-                    <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 truncate">{testimonial.role}</p>
+                  <div className="w-10 h-10 rounded-full bg-[#2563eb] flex items-center justify-center text-white font-semibold text-sm">
+                    {testimonial.name.charAt(0)}
+                  </div>
+                  <div>
+                    <div className="font-semibold text-sm text-[#0a0a0a] dark:text-[#fafafa]">{testimonial.name}</div>
+                    <div className="text-xs text-[#737373]">{testimonial.role} • {testimonial.location}</div>
                   </div>
                 </div>
               </div>
@@ -411,63 +353,75 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Mobile-First CTA Section */}
-      <section className="py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-primary via-indigo-700 to-premium dark:from-primary dark:via-indigo-950 dark:to-premium relative overflow-hidden">
-        <div className="absolute inset-0 bg-grid-white/5" />
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 md:mb-6 animate-fade-in leading-tight">
-            Ready to Transform Your Future?
-          </h2>
-          <p className="text-base sm:text-lg md:text-xl text-primary dark:text-primary mb-6 md:mb-8 max-w-2xl mx-auto animate-fade-in animation-delay-200 leading-relaxed">
-            Join over 1,000 South African youth building better careers with AI-powered guidance
-          </p>
-          <Link
-            to="/signup"
-            className="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-50 active:bg-slate-100 text-primary px-8 md:px-10 py-4 md:py-5 rounded-lg font-bold text-base md:text-lg transition-all duration-200 shadow-2xl hover:scale-105 active:scale-100 animate-fade-in animation-delay-400 min-h-[52px] touch-manipulation w-full sm:w-auto max-w-md mx-auto"
-          >
-            <span>Start Your Journey Free</span>
-            <ArrowRight className="h-5 w-5 md:h-6 md:w-6" />
-          </Link>
+      {/* Final CTA - Premium */}
+      <section className="premium-section">
+        <div className="premium-container">
+          <div className="premium-card max-w-4xl mx-auto text-center p-12 premium-gradient">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">
+              Ready to Transform Your Career?
+            </h2>
+            <p className="text-lg mb-8 text-white/90 max-w-2xl mx-auto">
+              Join thousands of South African youth who are building better futures with AI-powered career guidance.
+            </p>
+            <Link to="/signup" className="premium-btn bg-white text-[#2563eb] hover:bg-white/90 px-8 py-3 text-base font-semibold">
+              Get Started Free
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* Mobile-First Footer */}
-      <footer className="bg-slate-900 dark:bg-black text-slate-300 dark:text-slate-400 py-12 md:py-16 px-4 sm:px-6 lg:px-8 border-t border-slate-800">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 mb-10 md:mb-12">
-            <div className="col-span-2 md:col-span-1">
-              <Logo variant="light" size="lg" linkTo="/" />
-              <p className="mt-4 text-sm md:text-base leading-relaxed text-slate-400">
-                Empowering South African youth through AI-driven career guidance.
-              </p>
-            </div>
+      {/* Footer - Clean */}
+      <footer className="border-t border-[#e5e5e5] dark:border-[#262626] py-12">
+        <div className="premium-container">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
             <div>
-              <h3 className="font-semibold text-white mb-3 md:mb-4 text-base">Product</h3>
-              <ul className="space-y-2 text-sm md:text-base">
-                <li><a href="#features" className="hover:text-white transition-colors min-h-[44px] inline-block py-1">Features</a></li>
-                <li><a href="#how-it-works" className="hover:text-white transition-colors min-h-[44px] inline-block py-1">How It Works</a></li>
-                <li><a href="#demo" className="hover:text-white transition-colors min-h-[44px] inline-block py-1">Demo</a></li>
-                <li><a href="#testimonials" className="hover:text-white transition-colors min-h-[44px] inline-block py-1">Success Stories</a></li>
+              <h4 className="font-semibold mb-4 text-sm text-[#0a0a0a] dark:text-[#fafafa]">Product</h4>
+              <ul className="space-y-2">
+                <li><a href="#features" className="text-sm text-[#737373] hover:text-[#0a0a0a] dark:hover:text-[#fafafa] transition-colors">Features</a></li>
+                <li><a href="#" className="text-sm text-[#737373] hover:text-[#0a0a0a] dark:hover:text-[#fafafa] transition-colors">Pricing</a></li>
+                <li><a href="#" className="text-sm text-[#737373] hover:text-[#0a0a0a] dark:hover:text-[#fafafa] transition-colors">API</a></li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold text-white mb-3 md:mb-4 text-base">Company</h3>
-              <ul className="space-y-2 text-sm md:text-base">
-                <li><Link to="/about" className="hover:text-white transition-colors min-h-[44px] inline-block py-1">About Us</Link></li>
-                <li><a href="#" className="hover:text-white transition-colors min-h-[44px] inline-block py-1">Contact</a></li>
-                <li><a href="#" className="hover:text-white transition-colors min-h-[44px] inline-block py-1">Privacy</a></li>
+              <h4 className="font-semibold mb-4 text-sm text-[#0a0a0a] dark:text-[#fafafa]">Company</h4>
+              <ul className="space-y-2">
+                <li><Link to="/about" className="text-sm text-[#737373] hover:text-[#0a0a0a] dark:hover:text-[#fafafa] transition-colors">About</Link></li>
+                <li><a href="#" className="text-sm text-[#737373] hover:text-[#0a0a0a] dark:hover:text-[#fafafa] transition-colors">Careers</a></li>
+                <li><a href="#" className="text-sm text-[#737373] hover:text-[#0a0a0a] dark:hover:text-[#fafafa] transition-colors">Contact</a></li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold text-white mb-3 md:mb-4 text-base">Get Started</h3>
-              <ul className="space-y-2 text-sm md:text-base">
-                <li><Link to="/signup" className="hover:text-white transition-colors min-h-[44px] inline-block py-1">Sign Up</Link></li>
-                <li><Link to="/login" className="hover:text-white transition-colors min-h-[44px] inline-block py-1">Sign In</Link></li>
+              <h4 className="font-semibold mb-4 text-sm text-[#0a0a0a] dark:text-[#fafafa]">Resources</h4>
+              <ul className="space-y-2">
+                <li><a href="#" className="text-sm text-[#737373] hover:text-[#0a0a0a] dark:hover:text-[#fafafa] transition-colors">Blog</a></li>
+                <li><a href="#" className="text-sm text-[#737373] hover:text-[#0a0a0a] dark:hover:text-[#fafafa] transition-colors">Docs</a></li>
+                <li><a href="#" className="text-sm text-[#737373] hover:text-[#0a0a0a] dark:hover:text-[#fafafa] transition-colors">Support</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4 text-sm text-[#0a0a0a] dark:text-[#fafafa]">Legal</h4>
+              <ul className="space-y-2">
+                <li><a href="#" className="text-sm text-[#737373] hover:text-[#0a0a0a] dark:hover:text-[#fafafa] transition-colors">Privacy</a></li>
+                <li><a href="#" className="text-sm text-[#737373] hover:text-[#0a0a0a] dark:hover:text-[#fafafa] transition-colors">Terms</a></li>
+                <li><a href="#" className="text-sm text-[#737373] hover:text-[#0a0a0a] dark:hover:text-[#fafafa] transition-colors">Security</a></li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-slate-800 pt-6 md:pt-8 text-center text-xs md:text-sm text-slate-400">
-            <p>&copy; 2025 EmpowerAI. All rights reserved. Built with care for South African youth.</p>
+          <div className="pt-8 border-t border-[#e5e5e5] dark:border-[#262626] flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-sm text-[#737373]">
+              © 2024 EmpowerAI. Built by Team Tech Bridle.
+            </p>
+            <div className="flex gap-6">
+              <a href="#" className="text-[#737373] hover:text-[#0a0a0a] dark:hover:text-[#fafafa] transition-colors">
+                <span className="sr-only">Twitter</span>
+                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" /></svg>
+              </a>
+              <a href="#" className="text-[#737373] hover:text-[#0a0a0a] dark:hover:text-[#fafafa] transition-colors">
+                <span className="sr-only">LinkedIn</span>
+                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" /></svg>
+              </a>
+            </div>
           </div>
         </div>
       </footer>
