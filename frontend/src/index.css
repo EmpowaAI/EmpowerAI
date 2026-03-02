@@ -1,4 +1,6 @@
-﻿@tailwind base;
+﻿@import './styles/theme.css';
+
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
@@ -6,37 +8,24 @@
   :root {
     --font-sans: "Inter", system-ui, sans-serif;
     
-    /* CLEAN PROFESSIONAL PALETTE - 2 Core Colors + Neutrals */
-    --color-background: #ffffff;
-    --color-foreground: #0f172a;
-    --color-card: #ffffff;
-    --color-card-foreground: #0f172a;
-    
-    /* VISION_BLUEPRINT Neural Fusion Design System */
-    /* Primary: Neural Blue - Trust, Intelligence */
-    --color-primary: #3b82f6;
+    /* Clean Color Palette - Minimal & Professional */
+    --color-primary: #2563eb;           /* Clean blue */
     --color-primary-foreground: #ffffff;
-    
-    /* Secondary: Cyber Cyan - Technology, Future */
-    --color-secondary: #06b6d4;
+    --color-secondary: #64748b;         /* Clean gray */
     --color-secondary-foreground: #ffffff;
-    
-    /* Accent: AI Green - Success, Growth */
-    --color-accent: #10b981;
+    --color-accent: #059669;            /* Clean green */
     --color-accent-foreground: #ffffff;
-    
-    /* Premium: Quantum Purple - Innovation */
-    --color-premium: #8b5cf6;
-    --color-premium-foreground: #ffffff;
-    
-    /* Neutrals - Professional grays */
-    --color-muted: #f1f5f9;
+    --color-muted: #f8fafc;             /* Light background */
     --color-muted-foreground: #64748b;
-    --color-border: #e2e8f0;
-    --color-ring: #3b82f6;
+    --color-background: #ffffff;        /* Clean white */
+    --color-foreground: #1e293b;        /* Dark text */
+    --color-card: #ffffff;
+    --color-card-foreground: #1e293b;
+    --color-border: #e2e8f0;            /* Light border */
+    --color-ring: #2563eb;              /* Focus ring */
     
-    /* Semantic colors - only when needed (success, warning, error) */
-    --color-success: #10b981;
+    /* Semantic colors */
+    --color-success: #059669;
     --color-warning: #f59e0b;
     --color-destructive: #ef4444;
     
@@ -47,39 +36,28 @@
   }
 
   .dark {
-    /* Dark Mode: Clean & Professional */
+    /* Dark Mode - Clean & Minimal */
     --color-background: #0f172a;
     --color-foreground: #f8fafc;
     --color-card: #1e293b;
     --color-card-foreground: #f8fafc;
-    
-    /* VISION_BLUEPRINT Dark Mode */
-    /* Primary: Brighter Neural Blue */
-    --color-primary: #60a5fa;
-    --color-primary-foreground: #ffffff;
-    
-    /* Secondary: Brighter Cyber Cyan */
-    --color-secondary: #22d3ee;
-    --color-secondary-foreground: #000000;
-    
-    /* Accent: Brighter AI Green */
-    --color-accent: #34d399;
-    --color-accent-foreground: #000000;
-    
-    /* Premium: Brighter Quantum Purple */
-    --color-premium: #a78bfa;
-    --color-premium-foreground: #ffffff;
-    
-    /* Neutrals - Dark mode grays */
     --color-muted: #1e293b;
     --color-muted-foreground: #94a3b8;
     --color-border: #334155;
-    --color-ring: #60a5fa;
+    --color-ring: #2563eb;
     
-    /* Semantic colors - dark mode versions */
-    --color-success: #34d399;
-    --color-warning: #fbbf24;
-    --color-destructive: #f87171;
+    /* Same clean colors for dark mode */
+    --color-primary: #2563eb;
+    --color-primary-foreground: #ffffff;
+    --color-secondary: #64748b;
+    --color-secondary-foreground: #ffffff;
+    --color-accent: #059669;
+    --color-accent-foreground: #ffffff;
+    
+    /* Semantic colors */
+    --color-success: #059669;
+    --color-warning: #f59e0b;
+    --color-destructive: #ef4444;
   }
 }
 
