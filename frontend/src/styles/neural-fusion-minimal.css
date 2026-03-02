@@ -1,0 +1,238 @@
+/* Minimal Neural Fusion Design System - Clean & Professional */
+/* Reduced visual noise, subtle animations, professional appearance */
+
+:root {
+  /* Minimal Color Palette */
+  --primary: #3b82f6;
+  --secondary: #64748b;
+  --accent: #10b981;
+  --muted: #f8fafc;
+  --background: #ffffff;
+  --foreground: #1e293b;
+  --border: #e2e8f0;
+  --ring: #3b82f6;
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0f172a;
+    --foreground: #f8fafc;
+    --muted: #1e293b;
+    --border: #334155;
+  }
+}
+
+/* Minimal Animations - Subtle & Professional */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Clean Components - Minimal Design */
+
+.neural-button {
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.neural-button:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.neural-button:disabled {
+  background: var(--muted);
+  color: var(--secondary);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.neural-card {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.neural-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.ai-avatar {
+  width: 48px;
+  height: 48px;
+  background: var(--primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.ai-avatar.processing {
+  animation: pulse-subtle 2s infinite;
+}
+
+.voice-visualizer {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+  height: 16px;
+}
+
+.voice-visualizer span {
+  width: 2px;
+  background: var(--accent);
+  border-radius: 1px;
+  animation: wave 1s infinite;
+}
+
+@keyframes wave {
+  0%, 100% { height: 4px; }
+  50% { height: 12px; }
+}
+
+.voice-visualizer span:nth-child(2) { animation-delay: 0.1s; }
+.voice-visualizer span:nth-child(3) { animation-delay: 0.2s; }
+.voice-visualizer span:nth-child(4) { animation-delay: 0.3s; }
+.voice-visualizer span:nth-child(5) { animation-delay: 0.4s; }
+
+.neural-loading {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.neural-loading span {
+  width: 6px;
+  height: 6px;
+  background: var(--primary);
+  border-radius: 50%;
+  animation: pulse-subtle 1.5s infinite;
+}
+
+.neural-loading span:nth-child(2) { animation-delay: 0.2s; }
+.neural-loading span:nth-child(3) { animation-delay: 0.4s; }
+.neural-loading span:nth-child(4) { animation-delay: 0.6s; }
+.neural-loading span:nth-child(5) { animation-delay: 0.8s; }
+
+.neural-progress {
+  width: 100%;
+  height: 6px;
+  background: var(--muted);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.neural-progress-bar {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+/* Utility Classes */
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+.hover-lift {
+  transition: transform 0.2s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+}
+
+/* Professional Color Usage */
+.text-primary { color: var(--primary); }
+.text-secondary { color: var(--secondary); }
+.text-accent { color: var(--accent); }
+.text-muted { color: var(--secondary); }
+.bg-primary { background: var(--primary); }
+.bg-secondary { background: var(--secondary); }
+.bg-accent { background: var(--accent); }
+.bg-muted { background: var(--muted); }
+.bg-background { background: var(--background); }
+
+/* Minimal Success/Error States */
+.bg-success { background: #10b981; }
+.bg-warning { background: #f59e0b; }
+.bg-error { background: #ef4444; }
+.text-success { color: #10b981; }
+.text-warning { color: #f59e0b; }
+.text-error { color: #ef4444; }
+
+/* Clean Typography */
+.font-display { font-family: system-ui, -apple-system, sans-serif; }
+.font-mono { font-family: 'SF Mono', Monaco, monospace; }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .neural-card {
+    padding: 16px;
+    margin: 8px;
+  }
+  
+  .neural-button {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus States */
+.neural-button:focus,
+.neural-card:focus {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Clean Loading States */
+.loading-skeleton {
+  background: var(--muted);
+  border-radius: 4px;
+  animation: pulse-subtle 2s infinite;
+}
+
+/* Professional Status Indicators */
+.status-online { color: #10b981; }
+.status-offline { color: #64748b; }
+.status-busy { color: #f59e0b; }

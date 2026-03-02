@@ -13,6 +13,9 @@ import CVAnalyzer from './pages/CVAnalyzer'
 import InterviewCoach from './pages/InterviewCoach'
 import AboutPage from './pages/AboutPage'
 import Profile from './pages/Profile'
+import NeuralFusionShowcase from './pages/NeuralFusionShowcase'
+import VisionBlueprintShowcase from './pages/VisionBlueprintShowcase'
+import CleanShowcase from './pages/CleanShowcase'
 import AuthTest from './pages/AuthTest'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -32,10 +35,12 @@ function App() {
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<LandingPage />} />
-              <Route path="/about" element={<AboutPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/signup" element={<SignupPage />} />
-              <Route path="/auth-test" element={<AuthTest />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/neural-fusion" element={<NeuralFusionShowcase />} />
+          <Route path="/vision-showcase" element={<VisionBlueprintShowcase />} />
+          <Route path="/clean-showcase" element={<CleanShowcase />} />
           
           {/* Protected dashboard routes */}
           <Route path="/dashboard" element={

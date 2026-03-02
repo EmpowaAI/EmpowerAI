@@ -20,9 +20,10 @@ import { cn } from "../lib/utils"
 import { useUser } from "../lib/user-context"
 import ThemeToggle from "../components/ThemeToggle"
 import Logo from "../components/Logo"
-// Neural Fusion Components
-import AIAvatar from "../components/ui/AIAvatar"
-import NeuralLoading from "../components/ui/NeuralLoading"
+// Clean Components - Using Definitive System
+import Button from "../components/ui/Button"
+import Avatar from "../components/ui/Avatar"
+import Loading from "../components/ui/Loading"
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
@@ -59,8 +60,8 @@ export default function DashboardLayout() {
     return (
       <div className="h-screen w-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-6">
-          <AIAvatar size="xl" variant="processing" />
-          <NeuralLoading size="lg" text="Checking your progress..." />
+          <Avatar size="xl" variant="processing" />
+          <Loading size="lg" text="Checking your progress..." />
           <p className="text-sm text-muted-foreground">Preparing your personalized experience</p>
         </div>
       </div>
@@ -150,7 +151,7 @@ export default function DashboardLayout() {
               onClick={() => setSidebarOpen(false)}
               className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/50 hover:bg-muted transition-colors group"
             >
-              <AIAvatar size="md" variant="default" className="flex-shrink-0" />
+              <Avatar size="md" variant="default" className="flex-shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-foreground truncate">{displayName}</p>
                 <p className="text-xs text-muted-foreground truncate">{displayEmail}</p>
