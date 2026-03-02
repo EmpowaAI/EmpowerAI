@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react"
+import React, { useState, useRef, useEffect } from "react"
 import { Mic, Play, Pause, Square, RefreshCw, CheckCircle, ChevronRight, Clock, Target, BarChart3, Download, Share2, Brain, TrendingUp, Award } from "lucide-react"
 import { cn } from "../lib/utils"
 import { useUser } from "../lib/user-context"
