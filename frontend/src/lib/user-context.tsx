@@ -37,7 +37,26 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     try {
       if (typeof window !== 'undefined' && window.localStorage) {
         const saved = localStorage.getItem('user')
-        return saved ? JSON.parse(saved) : null
+        if (saved) {
+          return JSON.parse(saved)
+        }
+        
+        // Mock user for production demo
+        if (window.location.hostname.includes('github.io')) {
+          console.log('Production demo - using mock user')
+          return {
+            id: 'demo-user',
+            name: 'Demo User',
+            email: 'demo@empowerai.com',
+            phone: '+27 12 345 6789',
+            location: 'Johannesburg, South Africa',
+            occupation: 'Software Developer',
+            education: 'BSc Computer Science',
+            bio: 'Passionate about technology and career development',
+            createdAt: new Date().toISOString(),
+            cvAnalyzed: false
+          }
+        }
       }
     } catch (error) {
       console.error('Error reading user from localStorage:', error)
