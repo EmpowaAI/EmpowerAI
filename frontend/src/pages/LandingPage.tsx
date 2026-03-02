@@ -36,13 +36,13 @@ export default function LandingPage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-950 dark:to-blue-950 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900 relative overflow-hidden">
       {/* Hero Background */}
       <div className="fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-slate-900 dark:via-slate-950 dark:to-indigo-950" />
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-blue-400/10 to-purple-400/10 dark:from-blue-600/20 dark:to-purple-600/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-br from-indigo-400/10 to-pink-400/10 dark:from-indigo-600/20 dark:to-pink-600/20 rounded-full blur-3xl animate-pulse animation-delay-2000" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 dark:from-blue-600/10 dark:via-purple-600/10 dark:to-pink-600/10 rounded-full blur-3xl animate-pulse animation-delay-4000" />
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-slate-200/10 to-slate-300/10 dark:from-slate-700/10 dark:to-slate-600/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-br from-slate-300/10 to-slate-400/10 dark:from-slate-600/10 dark:to-slate-500/10 rounded-full blur-3xl animate-pulse animation-delay-2000" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-slate-100/5 dark:bg-slate-800/5 rounded-full blur-3xl animate-pulse animation-delay-4000" />
       </div>
 
       {/* Navigation */}
@@ -58,13 +58,13 @@ export default function LandingPage() {
             
             {/* Desktop Nav */}
             <div className="hidden lg:flex items-center gap-8">
-              <a href="#features" className="text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-all duration-200 text-sm relative group">Features <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-200"></span></a>
-              <a href="#how-it-works" className="text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-all duration-200 text-sm relative group">How It Works <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-200"></span></a>
-              <a href="#demo" className="text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-all duration-200 text-sm relative group">Demo <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-200"></span></a>
-              <a href="#testimonials" className="text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-all duration-200 text-sm relative group">Success <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-200"></span></a>
+              <a href="#features" className="text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium transition-all duration-200 text-sm relative group">Features <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-slate-900 group-hover:w-full transition-all duration-200"></span></a>
+              <a href="#how-it-works" className="text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium transition-all duration-200 text-sm relative group">How It Works <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-slate-900 group-hover:w-full transition-all duration-200"></span></a>
+              <a href="#demo" className="text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium transition-all duration-200 text-sm relative group">Demo <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-slate-900 group-hover:w-full transition-all duration-200"></span></a>
+              <a href="#testimonials" className="text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium transition-all duration-200 text-sm relative group">Success <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-slate-900 group-hover:w-full transition-all duration-200"></span></a>
               <ThemeToggle />
-              <Link to="/login" className="text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-all duration-200 text-sm px-4 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">Sign In</Link>
-              <Link to="/signup" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-2.5 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 text-sm">Get Started</Link>
+              <Link to="/login" className="text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium transition-all duration-200 text-sm px-4 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">Sign In</Link>
+              <Link to="/signup" className="bg-slate-900 hover:bg-slate-800 text-white px-6 py-2.5 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 text-sm">Get Started</Link>
             </div>
 
             {/* Mobile Menu Button */}
@@ -105,15 +105,15 @@ export default function LandingPage() {
             {/* Left Content */}
             <div className="text-center lg:text-left space-y-8 relative z-10">
               {/* Badge */}
-              <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-sm font-semibold animate-fade-in">
-                <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" />
+              <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-sm font-semibold animate-fade-in">
+                <div className="w-2 h-2 bg-slate-900 rounded-full animate-pulse" />
                 <span className="whitespace-nowrap">AI-Powered Career Intelligence</span>
               </div>
               
               {/* Main Heading */}
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold leading-tight text-slate-900 dark:text-white animate-slide-up">
                 Transform Your
-                <span className="block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Career Future</span>
+                <span className="block text-slate-900 dark:text-white">Career Future</span>
               </h1>
 
               {/* Subheading */}
@@ -125,7 +125,7 @@ export default function LandingPage() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start animate-fade-in animation-delay-400">
                 <Link
                   to="/signup"
-                  className="group inline-flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 active:from-blue-800 active:to-purple-800 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 shadow-xl hover:shadow-2xl hover:scale-105 active:scale-100 w-full sm:w-auto"
+                  className="group inline-flex items-center justify-center gap-3 bg-slate-900 hover:bg-slate-800 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 shadow-xl hover:shadow-2xl hover:scale-105 active:scale-100 w-full sm:w-auto"
                 >
                   <span>Start Your Journey</span>
                   <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
@@ -212,7 +212,7 @@ export default function LandingPage() {
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-4">
               Powerful Features for
-              <span className="block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Career Success</span>
+              <span className="block text-slate-900 dark:text-white">Career Success</span>
             </h2>
             <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto">
               Everything you need to accelerate your career journey in one platform
@@ -221,9 +221,9 @@ export default function LandingPage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* Feature 1 */}
-            <div className="group p-8 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 hover:shadow-xl transition-all duration-300 hover:scale-105">
-              <div className="h-14 w-14 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <Brain className="h-7 w-7 text-white" />
+            <div className="group p-8 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:shadow-xl transition-all duration-300 hover:scale-105">
+              <div className="h-14 w-14 bg-slate-900 dark:bg-slate-100 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <Brain className="h-7 w-7 text-white dark:text-slate-900" />
               </div>
               <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">AI Career Analysis</h3>
               <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
@@ -290,25 +290,25 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 md:py-24 lg:py-32 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-600 to-purple-600">
+      <section className="py-20 md:py-24 lg:py-32 px-4 sm:px-6 lg:px-8 bg-slate-900 dark:bg-slate-950">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
             Ready to Transform Your Career?
           </h2>
-          <p className="text-xl md:text-2xl text-blue-100 mb-8 max-w-2xl mx-auto">
+          <p className="text-xl md:text-2xl text-slate-300 mb-8 max-w-2xl mx-auto">
             Join thousands of South African youth who are already building their dream careers with EmpowerAI.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               to="/signup"
-              className="inline-flex items-center justify-center gap-3 bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 shadow-xl hover:shadow-2xl hover:scale-105 w-full sm:w-auto"
+              className="inline-flex items-center justify-center gap-3 bg-white text-slate-900 px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 shadow-xl hover:shadow-2xl hover:scale-105 w-full sm:w-auto"
             >
               <span>Get Started Free</span>
               <ArrowRight className="h-5 w-5" />
             </Link>
             <a
               href="#demo"
-              className="inline-flex items-center justify-center gap-3 border-2 border-white text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 hover:bg-white/10 w-full sm:w-auto"
+              className="inline-flex items-center justify-center gap-3 border-2 border-white text-slate-300 px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 hover:bg-white/10 w-full sm:w-auto"
             >
               <Play className="h-5 w-5" />
               <span>Watch Demo</span>
@@ -353,7 +353,7 @@ export default function LandingPage() {
           </div>
           <div className="border-t border-slate-800 mt-8 pt-8 text-center">
             <p className="text-slate-400 dark:text-slate-500">
-              © 2024 EmpowerAI. All rights reserved. Made with ❤️ in South Africa.
+              © 2025 EmpowerAI. All rights reserved. Made with ❤️ in South Africa.
             </p>
           </div>
         </div>
