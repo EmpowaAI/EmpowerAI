@@ -113,7 +113,7 @@ export default function LandingPage() {
           <div className="grid lg:grid-cols-2 gap-12 md:gap-16 items-center">
             {/* Left Content - Mobile Optimized */}
             <div className="text-center lg:text-left space-y-6 md:space-y-8 relative z-10">
-              <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-primary dark:bg-primary/50 border border-primary dark:border-primary text-primary dark:text-primary text-sm md:text-base font-medium animate-fade-in">
+              <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-primary dark:bg-primary/50 border border-primary dark:border-primary text-white text-sm md:text-base font-medium animate-fade-in">
                 <Sparkles className="h-4 w-4" />
                 <span className="whitespace-nowrap">AI-Powered Career Guidance</span>
               </div>
@@ -213,7 +213,7 @@ export default function LandingPage() {
               <div className="hidden sm:block absolute -bottom-4 md:-bottom-6 -left-4 md:-left-6 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-xl shadow-xl p-3 md:p-4 border border-slate-200/50 dark:border-slate-800/50 animate-float animation-delay-1000">
                 <div className="flex items-center gap-2 md:gap-3">
                   <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-primary dark:bg-primary flex items-center justify-center flex-shrink-0">
-                    <Award className="h-5 w-5 md:h-6 md:w-6 text-primary dark:text-primary" />
+                    <Award className="h-5 w-5 md:h-6 md:w-6 text-white" />
                   </div>
                   <div>
                     <p className="text-xs md:text-sm font-semibold text-slate-900 dark:text-white">95% Success</p>
@@ -310,7 +310,7 @@ export default function LandingPage() {
                   </div>
                   <div className="mt-6 md:mt-8 mb-5 md:mb-6 flex justify-center">
                     <div className="h-14 w-14 md:h-16 md:w-16 rounded-xl bg-primary dark:bg-primary flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <item.icon className="h-7 w-7 md:h-8 md:w-8 text-primary dark:text-primary" />
+                      <item.icon className="h-7 w-7 md:h-8 md:w-8 text-white" />
                     </div>
                   </div>
                   <h3 className="text-lg md:text-xl font-bold text-slate-900 dark:text-white mb-2 md:mb-3 text-center">{item.title}</h3>
@@ -361,7 +361,7 @@ export default function LandingPage() {
                 ].map((item, i) => (
                   <div key={i} className="text-center group hover:scale-105 transition-transform touch-manipulation">
                     <div className="inline-flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-lg bg-primary dark:bg-primary mb-2 md:mb-3 group-hover:scale-110 transition-transform">
-                      <item.icon className="h-5 w-5 md:h-6 md:w-6 text-primary dark:text-primary" />
+                      <item.icon className="h-5 w-5 md:h-6 md:w-6 text-white" />
                     </div>
                     <p className="font-semibold text-sm md:text-base text-slate-900 dark:text-white mb-1">{item.title}</p>
                     <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400">{item.desc}</p>
