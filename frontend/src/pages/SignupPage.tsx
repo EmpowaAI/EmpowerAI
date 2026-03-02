@@ -114,16 +114,16 @@ export default function SignupPage() {
 
             {/* Header */}
             <div className="mb-8">
-              <div className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-to-r from-primary/10 to-accent/10 dark:from-primary/20 dark:to-accent/20 border border-primary/30 shadow-lg backdrop-blur-sm hover:shadow-xl transition-all duration-300">
-                <Shield className="h-3.5 w-3.5 text-primary" />
-                <span className="whitespace-nowrap text-xs font-semibold text-primary">Secure Signup</span>
+              <div className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 shadow-lg hover:shadow-xl transition-all duration-300">
+                <Shield className="h-3.5 w-3.5 text-slate-900 dark:text-slate-100" />
+                <span className="whitespace-nowrap text-xs font-semibold text-slate-900 dark:text-slate-100">Secure Signup</span>
               </div>
-              <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-2 tracking-tight bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Create account</h2>
+              <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight">Create account</h2>
               <p className="text-sm sm:text-base text-muted-foreground">
                 Already have an account?{" "}
-                <Link to="/login" className="text-primary hover:text-primary/70 font-semibold hover:underline transition-all duration-200 relative group">
+                <Link to="/login" className="text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-semibold hover:underline transition-all duration-200 relative group">
                   Sign in
-                  <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-200"></span>
+                  <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-slate-900 dark:bg-white group-hover:w-full transition-all duration-200"></span>
                 </Link>
               </p>
             </div>
@@ -256,7 +256,7 @@ export default function SignupPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-4 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white rounded-xl font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-100 min-h-[56px] text-base touch-manipulation group"
+                className="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-100 min-h-[56px] text-base touch-manipulation group"
               >
                 {isLoading ? (
                   <>
