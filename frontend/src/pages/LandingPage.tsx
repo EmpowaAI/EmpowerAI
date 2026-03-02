@@ -19,6 +19,7 @@ import {
   Star,
   Award,
   Play,
+  Brain,
 } from "lucide-react"
 import ThemeToggle from "../components/ThemeToggle"
 import Logo from "../components/Logo"
