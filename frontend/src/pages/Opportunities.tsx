@@ -134,12 +134,14 @@ export default function Opportunities() {
 
   const trackApplication = async (opportunityId: string) => {
     try {
-      // Send to your backend to track applications
-      await fetch('/api/applications', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ opportunityId })
-      })
+      // Persist lightweight tracking locally until backend route exists
+      const key = 'appliedOpportunityIds'
+      const existing = localStorage.getItem(key)
+      const appliedIds: string[] = existing ? JSON.parse(existing) : []
+      if (!appliedIds.includes(opportunityId)) {
+        appliedIds.push(opportunityId)
+        localStorage.setItem(key, JSON.stringify(appliedIds))
+      }
     } catch (error) {
       console.error('Failed to track application:', error)
     }
