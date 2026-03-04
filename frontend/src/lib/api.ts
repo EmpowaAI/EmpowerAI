@@ -132,7 +132,7 @@ export const accountAPI = {
 forgotPassword: async (email: string) => {
 
 return request<any>(
-"/account/forgot-password",
+"/account/forgot",
 {
 method:"POST",
 body: JSON.stringify({email})
@@ -144,7 +144,7 @@ body: JSON.stringify({email})
 
 resetPassword: async (token:string,password:string)=>{
 
-return request<any>(`/account/reset-password`, {
+return request<any>(`/account/reset`, {
   method: "POST",
   body: JSON.stringify({ token, newPassword: password })
 })
@@ -155,7 +155,7 @@ return request<any>(`/account/reset-password`, {
 verifyEmail: async (token:string)=>{
 
 return request<any>(
-`/account/verify-email/${token}`
+`/account/verify?token=${encodeURIComponent(token)}`
 )
 
 }
@@ -339,7 +339,7 @@ export const interviewAPI = {
   
   getResults: async (sessionId: string) => {
     try {
-      return await request<any>(`/interview/${sessionId}/results`);
+      return await request<any>(`/interview/${sessionId}`);
     } catch (error) {
       console.error('Failed to get interview results:', error);
       throw error;
@@ -369,6 +369,30 @@ export const opportunitiesAPI = {
       return await request<any>(`/opportunities/${id}`);
     } catch (error) {
       console.error('Failed to get opportunity:', error);
+      throw error;
+    }
+  },
+
+  getRecommendedJobs: async () => {
+    try {
+      const response = await request<any>('/opportunities');
+      const opportunities = response?.data?.opportunities || [];
+
+      return {
+        status: 'success',
+        data: opportunities.map((item: any) => ({
+          id: item._id || item.id,
+          title: item.title,
+          company: item.company || 'Company Not Specified',
+          type: item.type || 'Opportunity',
+          match: Math.min(95, Math.max(60, item.matchScore || 78)),
+          posted: item.createdAt || item.postedDate || '',
+          salary: item.salaryRange || item.salary || undefined,
+          location: item.province || item.location || undefined,
+        })),
+      };
+    } catch (error) {
+      console.error('Failed to get recommended jobs:', error);
       throw error;
     }
   },
@@ -409,41 +433,6 @@ export const statsAPI = {
       throw error;
     }
   },
-};
-
-export const progressAPI = {
-  saveTwinCompletion: async (twinId: string) => {
-    try {
-      return await request<any>('/progress/twin-completed', {
-        method: 'POST',
-        body: JSON.stringify({ twinId })
-      });
-    } catch (error) {
-      console.error('Failed to save twin completion:', error);
-      throw error;
-    }
-  },
-  
-  getProgress: async () => {
-    try {
-      return await request<any>('/progress/my-progress');
-    } catch (error) {
-      console.error('Failed to get progress:', error);
-      throw error;
-    }
-  },
-  
-  updateProgress: async (module: string, completed: boolean, score?: number) => {
-    try {
-      return await request<any>('/progress/update', {
-        method: 'POST',
-        body: JSON.stringify({ module, completed, score })
-      });
-    } catch (error) {
-      console.error('Failed to update progress:', error);
-      throw error;
-    }
-  }
 };
 
 // Chat API - calls the backend, which proxies to AI service

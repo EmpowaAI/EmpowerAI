@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { CheckCircle, ChevronRight, ChevronLeft, Loader2 } from "lucide-react"
 import { cn } from "../lib/utils"
-import { twinAPI, progressAPI } from "../lib/api"
+import { twinAPI } from "../lib/api"
 import ProgressTracker from "../components/ProgressTracker"
 import { useUser } from "../lib/user-context"
 
@@ -239,15 +239,6 @@ export default function TwinBuilder() {
               twinId
             }
             localStorage.setItem('user', JSON.stringify(updatedUser))
-          }
-          
-          // Try to save progress to API (non-blocking)
-          try {
-            await progressAPI.saveTwinCompletion(twinId)
-            console.log("Progress saved to API")
-          } catch (progressError) {
-            console.log("Local progress saved only:", progressError)
-            // Continue even if API progress save fails
           }
           
           // Redirect to dashboard after short delay
