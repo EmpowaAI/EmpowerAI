@@ -288,13 +288,13 @@ EmpowerAI/
         <b>Nicolette Mashabela</b>
       </a>
       <br/>
-      <sub>🎯 Founder & Product Lead</sub>
+      <sub>💻 Full Stack Engineer · AI Integration Lead</sub>
       <br/><br/>
       <a href="https://github.com/NickiMash17">
         <img src="https://img.shields.io/badge/@NickiMash17-181717?style=flat-square&logo=github&logoColor=white"/>
       </a>
       <br/><br/>
-      <sub>Digital Twin Algorithms · Simulation Engine · AI Integration · Product Strategy</sub>
+      <sub>Full Stack Development · Digital Twin Algorithms · Simulation Engine · AI Integration</sub>
       <br/><br/>
       <img src="https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white"/>
       <img src="https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white"/>
