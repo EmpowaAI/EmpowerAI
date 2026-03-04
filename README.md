@@ -301,16 +301,16 @@ EmpowerAI/
       <img src="https://img.shields.io/badge/OpenAI-412991?style=flat-square&logo=openai&logoColor=white"/>
     </td>
     <td align="center" width="220">
-      <a href="https://github.com/Lunga-Masondo">
-        <img src="https://github.com/Lunga-Masondo.png" width="100px" style="border-radius:50%" alt="Lunga"/>
+      <a href="https://github.com/Lunga-Mashaba">
+        <img src="https://github.com/Lunga-Mashaba.png" width="100px" style="border-radius:50%" alt="Lunga"/>
         <br/><br/>
         <b>Lunga</b>
       </a>
       <br/>
       <sub>💻 Senior Backend Engineer</sub>
       <br/><br/>
-      <a href="https://github.com/Lunga-Masondo">
-        <img src="https://img.shields.io/badge/@Lunga--Masondo-181717?style=flat-square&logo=github&logoColor=white"/>
+      <a href="https://github.com/Lunga-Mashaba">
+        <img src="https://img.shields.io/badge/@Lunga--Mashaba-181717?style=flat-square&logo=github&logoColor=white"/>
       </a>
       <br/><br/>
       <sub>Authentication · Database Architecture · RESTful APIs · Performance Optimization</sub>
@@ -320,16 +320,16 @@ EmpowerAI/
       <img src="https://img.shields.io/badge/Express-000000?style=flat-square&logo=express&logoColor=white"/>
     </td>
     <td align="center" width="220">
-      <a href="https://github.com/siyanda-vela">
-        <img src="https://github.com/siyanda-vela.png" width="100px" style="border-radius:50%" alt="Siyanda"/>
+      <a href="https://github.com/Siya-tec">
+        <img src="https://github.com/Siya-tec.png" width="100px" style="border-radius:50%" alt="Siyanda"/>
         <br/><br/>
         <b>Siyanda (Siya)</b>
       </a>
       <br/>
       <sub>🎨 Lead Frontend & UI/UX</sub>
       <br/><br/>
-      <a href="https://github.com/siyanda-vela">
-        <img src="https://img.shields.io/badge/@siyanda--vela-181717?style=flat-square&logo=github&logoColor=white"/>
+      <a href="https://github.com/Siya-tec">
+        <img src="https://img.shields.io/badge/@Siya--tec-181717?style=flat-square&logo=github&logoColor=white"/>
       </a>
       <br/><br/>
       <sub>UI/UX Design · Responsive Layouts · Data Visualizations · Design System</sub>
