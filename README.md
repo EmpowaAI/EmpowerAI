@@ -283,9 +283,9 @@ EmpowerAI/
   <tr>
     <td align="center" width="220">
       <a href="https://github.com/NickiMash17">
-        <img src="https://github.com/NickiMash17.png" width="100px" style="border-radius:50%" alt="Nicolette Mashabela"/>
+        <img src="https://github.com/NickiMash17.png" width="100px" style="border-radius:50%" alt="Nicolette"/>
         <br/><br/>
-        <b>Nicolette Mashabela</b>
+        <b>Nicolette</b>
       </a>
       <br/>
       <sub>💻 Full Stack Engineer · AI Integration Lead</sub>
@@ -323,7 +323,7 @@ EmpowerAI/
       <a href="https://github.com/Siya-tec">
         <img src="https://github.com/Siya-tec.png" width="100px" style="border-radius:50%" alt="Siyanda"/>
         <br/><br/>
-        <b>Siyanda (Siya)</b>
+        <b>Siyanda</b>
       </a>
       <br/>
       <sub>🎨 Lead Frontend & UI/UX</sub>
@@ -340,9 +340,9 @@ EmpowerAI/
     </td>
     <td align="center" width="220">
       <a href="https://github.com/khulisojohn">
-        <img src="https://github.com/khulisojohn.png" width="100px" style="border-radius:50%" alt="Khuliso John Thavhiwa"/>
+        <img src="https://github.com/khulisojohn.png" width="100px" style="border-radius:50%" alt="Khuliso"/>
         <br/><br/>
-        <b>Khuliso John Thavhiwa</b>
+        <b>Khuliso</b>
       </a>
       <br/>
       <sub>🔧 Backend & Systems Architect</sub>
