@@ -42,10 +42,10 @@ class CVAnalyzer:
         if self.ai_client and self.ai_client.enabled:
             try:
                 ai_skills = self.ai_client.extract_skills(cv_text)
-            except RateLimitError:
-                # Re-raise rate limit errors so they can be handled at the route level
-                # Don't fall back silently - let the route return 429 properly
-                raise
+            except RateLimitError as e:
+                print(f"AI extraction rate-limited: {e}. Falling back to keyword extraction.")
+                # Degrade gracefully: return deterministic keyword skills instead of failing the whole CV upload.
+                ai_skills = []
             except Exception as e:
                 print(f"AI extraction error: {e}, using keyword fallback")
                 # On non-rate-limit errors, continue with keyword fallback
