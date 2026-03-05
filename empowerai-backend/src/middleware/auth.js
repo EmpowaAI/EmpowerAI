@@ -6,23 +6,31 @@ module.exports = async (req, res, next) => {
   try {
     // Check JWT_SECRET is configured
     if (!process.env.JWT_SECRET) {
+      console.error('🔐 AUTH: JWT_SECRET not configured!');
       return res.status(500).json({
         status: 'error',
         message: 'Server configuration error'
       });
     }
 
+    console.log('🔐 AUTH: Checking authorization header...');
+    console.log('🔐 AUTH: Headers:', req.headers.authorization ? 'Authorization header EXISTS ✅' : 'NO Authorization header ❌');
+    
     let token;
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
       token = req.headers.authorization.split(' ')[1];
+      console.log('🔐 AUTH: Token extracted:', token ? token.substring(0, 20) + '...' : 'EMPTY');
     }
 
     if (!token) {
+      console.error('🔐 AUTH: ❌ NO TOKEN - Rejecting request');
       return res.status(401).json({
         status: 'error',
         message: 'Please log in to access this resource'
       });
     }
+    
+    console.log('🔐 AUTH: Token found, verifying...');
 
     // Verify token
     let decoded;

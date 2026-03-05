@@ -4,6 +4,7 @@
   "description": "EmpowerAI Backend API - Node.js Express server for Youth Economic Digital Twin Platform",
   "main": "src/server.js",
   "scripts": {
+    "build": "echo \"No build step required for backend\"",
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "test": "jest",

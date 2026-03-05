@@ -12,7 +12,8 @@
     "@google/genai": "^1.41.0",
     "axios": "^1.13.2",
     "clsx": "^2.0.0",
-    "lucide-react": "^0.263.1",
+    "framer-motion": "^12.35.0",
+    "lucide-react": "^0.577.0",
     "microsoft-cognitiveservices-speech-sdk": "^1.48.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -24,8 +25,8 @@
     "winston-daily-rotate-file": "^5.0.0"
   },
   "devDependencies": {
-    "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0",
+    "@types/react": "^18.3.28",
+    "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.20",
     "baseline-browser-mapping": "^2.9.19",

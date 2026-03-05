@@ -141,7 +141,7 @@ export default function SignupPage() {
         <div
           className="absolute inset-0 bg-cover bg-center transition-transform duration-700 hover:scale-105"
           style={{
-            backgroundImage: "url(/images/result.jpg)",
+            backgroundImage: "url(/images/empowersignin.jpg)",
           }}
         />
         {/* Dark overlay for text readability */}
