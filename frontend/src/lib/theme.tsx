@@ -1,4 +1,5 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 
 type Theme = 'light' | 'dark'
 
@@ -14,15 +15,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
     try {
       if (typeof window !== 'undefined' && window.localStorage) {
-        // Check localStorage first
         const saved = localStorage.getItem('theme') as Theme
         if (saved === 'light' || saved === 'dark') return saved
       }
     } catch (error) {
       console.error('Error reading theme from localStorage:', error)
     }
-    
-    // Default to light mode (not system preference)
     return 'light'
   })
 
@@ -64,4 +62,3 @@ export function useTheme() {
   }
   return context
 }
-

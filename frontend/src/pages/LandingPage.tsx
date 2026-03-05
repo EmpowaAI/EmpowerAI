@@ -1,480 +1,621 @@
-// LandingPage.tsx - MOBILE-FIRST with Animated Background
-import { useState, useEffect } from "react"
-import { Link } from "react-router-dom"
+"use client";
+
+import { useState, useEffect } from "react";
+import { motion} from "framer-motion"; // Added AnimatePresence
 import {
-  Zap,
-  TrendingUp,
-  Target,
-  Users,
-  FileText,
-  Mic,
   ArrowRight,
-  CheckCircle,
-  BarChart3,
+  Play,
+  Star,
+  Users,
   Sparkles,
   X,
   Menu,
+  Brain,
+  TrendingUp,
+  FileText,
   Briefcase,
-  Shield,
-  Star,
-  Award,
-  Play,
-} from "lucide-react"
-import ThemeToggle from "../components/ThemeToggle"
-import Logo from "../components/Logo"
-import { cn } from "../lib/utils"
+  MessageSquare,
+  Map,
+  Heart,
+  Target,
+  BarChart3,
+} from "lucide-react";
+import ThemeToggle from "../components/ThemeToggle";
+import { useLanguageRotation } from "../hooks/use-language-rotation"; // Fixed path
+import RotatingText from "../components/RotatingText"; // Fixed path
+// Remove the next/image import
+
+const navLinks = [
+  { label: "Features", href: "#features" },
+  { label: "How It Works", href: "#how-it-works" },
+  { label: "Ubuntu Stories", href: "#success" },
+  { label: "Demo", href: "#demo" },
+];
 
 export default function LandingPage() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const { t, currentLanguage, langIndex } = useLanguageRotation();
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20)
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Helper function to format language names
+  const getLanguageDisplay = (lang: string) => {
+    switch(lang) {
+      case "Sesotho sa Leboa": return "Sesotho sa Leboa";
+      default: return lang;
     }
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+  };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 relative overflow-hidden">
-      {/* ANIMATED Background */}
+    <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
+      {/* Animated Background */}
       <div className="fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-white via-primary/10 to-secondary/10 dark:from-slate-950 dark:via-primary/20 dark:to-secondary/30" />
-        <div className="absolute top-0 -left-48 w-96 h-96 bg-gradient-to-br from-primary/30 to-secondary/30 dark:from-primary/20 dark:to-secondary/20 rounded-full blur-3xl animate-blob" />
-        <div className="absolute top-0 -right-48 w-96 h-96 bg-gradient-to-br from-secondary/30 to-primary/30 dark:from-secondary/20 dark:to-primary/20 rounded-full blur-3xl animate-blob animation-delay-2000" />
-        <div className="absolute -bottom-48 left-1/2 w-96 h-96 bg-gradient-to-br from-secondary/30 to-pink-400/30 dark:from-secondary/20 dark:to-pink-600/20 rounded-full blur-3xl animate-blob animation-delay-4000" />
-        <div 
-          className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
-          style={{
-            backgroundImage: `linear-gradient(to right, rgb(99, 102, 241) 1px, transparent 1px), linear-gradient(to bottom, rgb(99, 102, 241) 1px, transparent 1px)`,
-            backgroundSize: '4rem 4rem',
-            animation: 'grid-flow 20s linear infinite'
-          }}
-        />
+        <div className="absolute inset-0 bg-gradient-to-br from-background via-sa-gold/5 to-sa-green/5" />
+        <div className="absolute top-0 -left-48 w-96 h-96 bg-gradient-to-br from-sa-gold/20 to-sa-terracotta/20 rounded-full blur-3xl animate-blob" />
+        <div className="absolute top-0 -right-48 w-96 h-96 bg-gradient-to-br from-sa-green/15 to-sa-gold/15 rounded-full blur-3xl animate-blob animation-delay-2000" />
+        <div className="absolute -bottom-48 left-1/2 w-96 h-96 bg-gradient-to-br from-sa-terracotta/15 to-sa-red/10 rounded-full blur-3xl animate-blob animation-delay-4000" />
       </div>
 
-      {/* Mobile-First Navigation */}
-      <nav className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-        scrolled 
-          ? "bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl shadow-sm border-b border-slate-200/50 dark:border-slate-800/50" 
-          : "bg-white/70 dark:bg-slate-900/70 backdrop-blur-lg"
-      )}>
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 md:h-20">
-            <Logo variant="dark" size="lg" linkTo="/" />
-            
-            {/* Desktop Nav */}
-            <div className="hidden lg:flex items-center gap-6 xl:gap-8">
-              <a href="#features" className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary font-medium transition-colors text-base">Features</a>
-              <a href="#how-it-works" className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary font-medium transition-colors text-base">How It Works</a>
-              <a href="#demo" className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary font-medium transition-colors text-base">Demo</a>
-              <a href="#testimonials" className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary font-medium transition-colors text-base">Success</a>
-              <ThemeToggle />
-              <Link to="/login" className="text-slate-700 dark:text-slate-300 hover:text-primary font-medium transition-colors text-base px-4 py-2 min-h-[44px] flex items-center">Sign In</Link>
-              <Link to="/signup" className="bg-primary hover:bg-primary/90 text-white px-6 py-2.5 rounded-lg font-semibold transition-colors shadow-sm hover:shadow-md min-h-[44px] flex items-center text-base">Get Started</Link>
+      {/* Navigation */}
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled
+          ? "bg-background/80 backdrop-blur-xl shadow-sm border-b border-border"
+          : "bg-transparent"
+      }`}>
+        <div className="container mx-auto px-4 flex items-center justify-between h-16 md:h-20">
+          {/* Logo - Updated with regular img tag */}
+          <a href="/" className="flex items-center gap-2 font-bold text-xl">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-sa-gold via-sa-green to-sa-blue flex items-center justify-center shadow-md overflow-hidden">
+              {/* Replace with your logo image using regular img tag */}
+              <img 
+                src="/images/empowerLogo.jpg" // Update this path to your logo location
+                alt="EmpowerAI Logo"
+                className="w-full h-full object-contain"
+              />
             </div>
+            <span className="font-display">{"Empower"}<span className="text-sa-gold">AI</span></span>
+          </a>
 
-            {/* Mobile Menu Button */}
-            <div className="flex lg:hidden items-center gap-2">
-              <ThemeToggle />
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors min-h-[48px] min-w-[48px] flex items-center justify-center touch-manipulation"
-                aria-label="Toggle menu"
+          {/* Desktop Nav */}
+          <div className="hidden md:flex items-center gap-8">
+            {navLinks.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
               >
-                {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-              </button>
-            </div>
+                {link.label}
+              </a>
+            ))}
+          </div>
+
+          <div className="hidden md:flex items-center gap-2">
+            <a
+              href="/login"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-2"
+            >
+              Sign In
+            </a>
+            <ThemeToggle />
+            <a
+              href="/signup"
+              className="bg-sa-gold hover:bg-sa-gold/90 text-primary-foreground px-5 py-2.5 rounded-xl font-semibold transition-colors shadow-lg hover:shadow-xl text-sm"
+            >
+              Get Started
+            </a>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <div className="md:hidden flex items-center gap-1">
+            <ThemeToggle />
+            <button
+              className="p-2 hover:bg-secondary rounded-lg transition-colors"
+              onClick={() => setMobileOpen(!mobileOpen)}
+              aria-label="Toggle menu"
+            >
+              {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
           </div>
         </div>
 
-        {/* Mobile Menu - Enhanced */}
-        {mobileMenuOpen && (
-          <div className="lg:hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 shadow-xl">
-            <div className="px-4 py-4 space-y-1 max-w-7xl mx-auto">
-              <a href="#features" onClick={() => setMobileMenuOpen(false)} className="block py-3.5 px-4 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-colors min-h-[52px] flex items-center text-base">Features</a>
-              <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="block py-3.5 px-4 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-colors min-h-[52px] flex items-center text-base">How It Works</a>
-              <a href="#demo" onClick={() => setMobileMenuOpen(false)} className="block py-3.5 px-4 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-colors min-h-[52px] flex items-center text-base">Demo</a>
-              <a href="#testimonials" onClick={() => setMobileMenuOpen(false)} className="block py-3.5 px-4 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-colors min-h-[52px] flex items-center text-base">Success Stories</a>
-              <div className="pt-2 border-t border-slate-200 dark:border-slate-800 mt-2 space-y-1">
-                <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="block py-3.5 px-4 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition-colors min-h-[52px] flex items-center text-base">Sign In</Link>
-                <Link to="/signup" onClick={() => setMobileMenuOpen(false)} className="block py-3.5 px-4 rounded-lg bg-primary hover:bg-primary/90 text-white font-semibold text-center transition-colors min-h-[52px] flex items-center justify-center text-base">Get Started Free</Link>
-              </div>
+        {/* Mobile Menu */}
+        {mobileOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden border-t border-border bg-background"
+          >
+            <div className="container mx-auto px-4 py-4 flex flex-col gap-3">
+              {navLinks.map((link) => (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  className="text-sm font-medium text-muted-foreground py-2 hover:text-foreground transition-colors"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  {link.label}
+                </a>
+              ))}
+              <a
+                href="/signup"
+                className="bg-sa-gold hover:bg-sa-gold/90 text-primary-foreground px-5 py-2.5 rounded-xl font-semibold text-center transition-colors mt-2"
+                onClick={() => setMobileOpen(false)}
+              >
+                Get Started
+              </a>
             </div>
-          </div>
+          </motion.div>
         )}
       </nav>
 
-      {/* Mobile-First Hero Section */}
-      <section className="relative pt-20 md:pt-28 lg:pt-32 pb-16 md:pb-20 lg:pb-24 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 md:gap-16 items-center">
-            {/* Left Content - Mobile Optimized */}
-            <div className="text-center lg:text-left space-y-6 md:space-y-8 relative z-10">
-              <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-primary/10 dark:bg-primary/10 border border-primary/10 dark:border-primary/30 text-primary dark:text-primary text-sm md:text-base font-medium animate-fade-in">
-                <Sparkles className="h-4 w-4" />
-                <span className="whitespace-nowrap">AI-Powered Career Guidance</span>
-              </div>
-              
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight text-slate-900 dark:text-white animate-slide-up">
-                Your Digital
-                <span className="block text-primary dark:text-primary">Economic Twin</span>
+      {/* Hero Section */}
+      <section className="relative pt-28 pb-16 md:pt-36 md:pb-24 overflow-hidden">
+        <div className="absolute inset-0 sa-pattern -z-10" />
+        <div className="absolute inset-0 bg-gradient-to-br from-sa-gold/10 via-background to-sa-green/5 -z-10" />
+
+        <div className="container mx-auto px-4">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left */}
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              <span className="inline-flex items-center gap-2 bg-sa-gold/10 text-sa-gold text-sm font-semibold px-4 py-1.5 rounded-full mb-6 border border-sa-gold/20">
+                <Sparkles className="w-4 h-4" />
+                <RotatingText text={t("poweredBy")} langKey={langIndex} /> {"\u{1F1FF}\u{1F1E6}"}
+              </span>
+
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight mb-6 font-display">
+                Your Digital{" "}
+                <span className="bg-gradient-to-r from-sa-gold via-sa-terracotta to-sa-red bg-clip-text text-transparent">
+                  Economic Twin
+                </span>
               </h1>
 
-              <p className="text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto lg:mx-0 leading-relaxed animate-fade-in animation-delay-200">
-                Visualize your future earning potential. Get personalized career pathways for South African youth.
+              <p className="text-lg text-muted-foreground max-w-lg mb-4">
+                <RotatingText text={`"${t("ubuntuProverb")}"`} langKey={langIndex} as="em" languageLabel={getLanguageDisplay(currentLanguage)} />
+                {" — A person is a person through other people."}
+              </p>
+              <p className="text-base text-muted-foreground max-w-lg mb-8">
+                {"AI-powered career pathways rooted in South African values. From Limpopo to the Western Cape, we're building futures together."}
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center lg:justify-start animate-fade-in animation-delay-400">
-                <Link
-                  to="/signup"
-                  className="group inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 active:bg-primary/80 text-white px-6 sm:px-8 py-4 rounded-lg font-semibold text-base md:text-lg transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 active:scale-100 min-h-[52px] touch-manipulation w-full sm:w-auto"
+              <div className="flex flex-wrap gap-4 mb-8">
+                <a
+                  href="/signup"
+                  className="inline-flex items-center justify-center gap-2 bg-sa-gold hover:bg-sa-gold/90 text-primary-foreground px-6 py-3 rounded-xl font-semibold text-base transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105"
                 >
-                  <span>Start Your Journey</span>
-                  <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                </Link>
+                  {"Start Your Journey"} <ArrowRight className="w-4 h-4" />
+                </a>
                 <a
                   href="#demo"
-                  className="inline-flex items-center justify-center gap-2 border-2 border-slate-300 dark:border-slate-600 hover:border-primary dark:hover:border-primary text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary px-6 sm:px-8 py-4 rounded-lg font-semibold text-base md:text-lg transition-all duration-200 hover:scale-105 active:scale-100 min-h-[52px] touch-manipulation w-full sm:w-auto"
+                  className="inline-flex items-center justify-center gap-2 border-2 border-border hover:border-sa-gold text-foreground hover:text-sa-gold px-6 py-3 rounded-xl font-semibold text-base transition-all duration-200 hover:scale-105"
                 >
-                  <Play className="h-5 w-5" />
-                  <span>Watch Demo</span>
+                  <Play className="w-4 h-4" /> Watch Demo
                 </a>
               </div>
 
-              {/* Trust Indicators - Mobile Optimized */}
-              <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 md:gap-8 justify-center lg:justify-start pt-4 animate-fade-in animation-delay-600">
-                <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
                   <div className="flex -space-x-2">
-                    {[1, 2, 3, 4].map((i) => (
-                      <div key={i} className="h-9 w-9 md:h-10 md:w-10 rounded-full bg-gradient-to-br from-primary to-primary border-2 border-white dark:border-slate-900" />
+                    {["\u{1F1FF}\u{1F1E6}", "\u{270A}\u{1F3FE}", "\u{1F30D}", "\u{1F49B}"].map((emoji, i) => (
+                      <div
+                        key={i}
+                        className="w-8 h-8 rounded-full bg-gradient-to-br from-sa-gold/20 to-sa-green/20 border-2 border-background flex items-center justify-center text-sm"
+                      >
+                        {emoji}
+                      </div>
                     ))}
                   </div>
-                  <span className="text-sm md:text-base text-slate-600 dark:text-slate-400 font-medium">1,000+ users</span>
+                  <span className="font-medium">{"1,000+ youth empowered"}</span>
                 </div>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1">
                   {[1, 2, 3, 4, 5].map((i) => (
-                    <Star key={i} className="h-5 w-5 md:h-6 md:w-6 fill-primary text-primary" />
+                    <Star key={i} className="w-4 h-4 fill-sa-gold text-sa-gold" />
                   ))}
-                  <span className="text-sm md:text-base text-slate-600 dark:text-slate-400 font-medium ml-1.5">4.9/5</span>
+                  <span className="font-medium ml-1">4.9/5</span>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
-            {/* Right Content - Mobile-First Card */}
-            <div className="relative animate-float mt-8 lg:mt-0">
-              <div className="bg-white/75 dark:bg-slate-900/75 backdrop-blur-xl rounded-2xl md:rounded-3xl shadow-2xl p-6 md:p-8 border border-slate-200/50 dark:border-slate-800/50">
-                <div className="absolute -top-3 -right-3 md:-top-4 md:-right-4 bg-primary text-white px-4 md:px-6 py-2 rounded-full font-semibold text-xs md:text-sm shadow-lg animate-bounce-slow">
-                  Free Forever
-                </div>
-                
-                <div className="space-y-5 md:space-y-6">
-                  <div className="flex items-center gap-3 md:gap-4">
-                    <div className="h-14 w-14 md:h-16 md:w-16 flex-shrink-0 rounded-full bg-gradient-to-br from-primary to-primary flex items-center justify-center">
-                      <span className="text-2xl">??</span>
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-semibold text-base md:text-lg text-slate-900 dark:text-white truncate">Thabo Ndlovu, 23</p>
-                      <p className="text-sm md:text-base text-slate-500 dark:text-slate-400">Johannesburg, GP</p>
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="flex justify-between items-center mb-2.5">
-                      <span className="text-sm md:text-base font-medium text-slate-600 dark:text-slate-400">Empowerment Score</span>
-                      <span className="text-xl md:text-2xl font-bold text-primary dark:text-primary">82/100</span>
-                    </div>
-                    <div className="h-3 md:h-4 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                      <div className="h-full w-[82%] bg-gradient-to-r from-primary to-primary dark:from-primary dark:to-primary rounded-full animate-progress" />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3 md:gap-4">
-                    <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-4 md:p-5 border border-slate-200 dark:border-slate-700 hover:scale-105 transition-transform touch-manipulation">
-                      <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Income Potential</p>
-                      <p className="text-lg md:text-xl font-bold text-slate-900 dark:text-white">R8,500<span className="text-sm font-normal text-slate-500">/mo</span></p>
-                    </div>
-                    <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-4 md:p-5 border border-slate-200 dark:border-slate-700 hover:scale-105 transition-transform touch-manipulation">
-                      <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Top Path</p>
-                      <p className="text-lg md:text-xl font-bold text-slate-900 dark:text-white">Tech Skills</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2.5 text-sm md:text-base text-slate-600 dark:text-slate-400 pt-2">
-                    <CheckCircle className="h-5 w-5 md:h-6 md:w-6 text-primary dark:text-primary flex-shrink-0" />
-                    <span>CV analyzed in 60 seconds</span>
-                  </div>
-                </div>
+            {/* Right – Profile Card */}
+            <motion.div
+              initial={{ opacity: 0, x: 40 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7, delay: 0.2 }}
+              className="relative"
+            >
+              <div className="absolute -top-4 right-0 bg-sa-green text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg z-10 animate-bounce-slow">
+                <RotatingText text={t("mahala")} langKey={langIndex} /> {" Forever \u{1F193}"}
               </div>
 
-              {/* Floating Success Badge - Hidden on small mobile */}
-              <div className="hidden sm:block absolute -bottom-4 md:-bottom-6 -left-4 md:-left-6 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-xl shadow-xl p-3 md:p-4 border border-slate-200/50 dark:border-slate-800/50 animate-float animation-delay-1000">
-                <div className="flex items-center gap-2 md:gap-3">
-                  <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-primary/10 dark:bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <Award className="h-5 w-5 md:h-6 md:w-6 text-primary dark:text-primary" />
+              <div className="bg-card rounded-2xl shadow-xl border border-border p-6 max-w-md mx-auto lg:ml-auto">
+                <div className="flex items-center gap-4 mb-5">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-sa-gold/30 to-sa-green/30 flex items-center justify-center text-xl">
+                    {"\u{270A}\u{1F3FE}"}
                   </div>
                   <div>
-                    <p className="text-xs md:text-sm font-semibold text-slate-900 dark:text-white">95% Success</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">Career matching</p>
+                    <p className="font-bold text-card-foreground">{"Siyanda Nkosi, 22"}</p>
+                    <p className="text-sm text-muted-foreground">{"Boksburg, Gauteng \u{1F4CD}"}</p>
+                  </div>
+                </div>
+
+                <div className="mb-5">
+                  <div className="flex justify-between text-sm mb-1.5">
+                    <span className="text-muted-foreground">Empowerment Score</span>
+                    <span className="font-bold text-sa-gold">78/100</span>
+                  </div>
+                  <div className="h-2.5 bg-secondary rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: "78%" }}
+                      transition={{ duration: 1.2, delay: 0.5 }}
+                      className="h-full bg-gradient-to-r from-sa-gold to-sa-green rounded-full"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 mb-5">
+                  <div className="bg-secondary/50 rounded-xl p-3">
+                    <p className="text-xs text-muted-foreground mb-1">Income Potential</p>
+                    <p className="font-bold text-lg text-card-foreground">{"R8,500"}<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
+                  </div>
+                  <div className="bg-secondary/50 rounded-xl p-3">
+                    <p className="text-xs text-muted-foreground mb-1">Top Path</p>
+                    <p className="font-bold text-lg text-card-foreground">Tech Skills</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 bg-accent rounded-xl p-3">
+                  <div className="w-10 h-10 rounded-full bg-sa-green/10 flex items-center justify-center text-lg">
+                    {"\u{1F3C6}"}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm text-card-foreground">{"95% Match Rate"}</p>
+                    <p className="text-xs text-muted-foreground">Career pathways</p>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Mobile-First Stats Section */}
-      <section className="py-12 md:py-16 lg:py-20 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm border-y border-slate-200/50 dark:border-slate-800/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10 lg:gap-12">
-            {[
-              { icon: Users, value: "63%", label: "Youth Unemployment", sublabel: "in South Africa" },
-              { icon: Target, value: "1,000+", label: "Users Empowered", sublabel: "and growing" },
-              { icon: BarChart3, value: "10K+", label: "Career Paths", sublabel: "analyzed" },
-              { icon: Zap, value: "24/7", label: "AI Support", sublabel: "always available" },
-            ].map((stat, i) => (
-              <div key={i} className="text-center group">
-                <div className="inline-flex h-12 w-12 md:h-14 md:w-14 items-center justify-center rounded-xl bg-primary/10 dark:bg-primary/10 mb-3 md:mb-4 group-hover:scale-110 transition-transform touch-manipulation">
-                  <stat.icon className="h-6 w-6 md:h-7 md:w-7 text-primary dark:text-primary" />
-                </div>
-                <p className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-1.5 md:mb-2">{stat.value}</p>
-                <p className="text-sm md:text-base font-medium text-slate-900 dark:text-white leading-tight">{stat.label}</p>
-                <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-1">{stat.sublabel}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Mobile-First Features Section */}
-      <section id="features" className="py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 relative">
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-3 md:mb-4">
-              Everything You Need to <span className="text-primary dark:text-primary">Succeed</span>
-            </h2>
-            <p className="text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed">
-              Comprehensive AI-powered tools designed for South African youth
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6 lg:gap-8">
-            {[
-              { icon: TrendingUp, title: "Digital Economic Twin", description: "AI-powered simulation of your economic future based on your skills" },
-              { icon: BarChart3, title: "Path Simulation", description: "Visualize 3, 6, and 12-month income projections across career pathways" },
-              { icon: FileText, title: "CV Analysis", description: "Get instant AI feedback to improve your CV and job applications" },
-              { icon: Briefcase, title: "Opportunity Matching", description: "Find jobs, learnerships, and internships tailored to your profile" },
-              { icon: Mic, title: "Interview Coach", description: "Practice with AI feedback to build confidence and improve performance" },
-              { icon: Shield, title: "Career Roadmap", description: "Step-by-step guidance to achieve your career and financial goals" },
-            ].map((feature, i) => (
-              <div
-                key={i}
-                className="group bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-xl md:rounded-2xl p-6 md:p-8 border border-slate-200/50 dark:border-slate-800/50 hover:border-primary/30 dark:hover:border-primary/30 hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-100 touch-manipulation"
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8 }}
+                className="absolute -bottom-4 left-4 lg:left-0 bg-card border border-border rounded-xl shadow-lg px-4 py-2 text-sm"
               >
-                <div className="inline-flex h-12 w-12 md:h-14 md:w-14 items-center justify-center rounded-lg md:rounded-xl bg-primary/10 dark:bg-primary/10 mb-5 md:mb-6 group-hover:scale-110 transition-transform">
-                  <feature.icon className="h-6 w-6 md:h-7 md:w-7 text-primary dark:text-primary" />
-                </div>
-                <h3 className="text-lg md:text-xl font-bold text-slate-900 dark:text-white mb-2 md:mb-3">{feature.title}</h3>
-                <p className="text-sm md:text-base text-slate-600 dark:text-slate-400 leading-relaxed">{feature.description}</p>
-              </div>
-            ))}
+                <span className="text-muted-foreground">{"CV analyzed in "}</span>
+                <span className="font-bold text-sa-gold">{"60 seconds \u{26A1}"}</span>
+              </motion.div>
+            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Mobile-First How It Works */}
-      <section id="how-it-works" className="py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-3 md:mb-4">
-              Get Started in <span className="text-primary dark:text-primary">3 Simple Steps</span>
-            </h2>
-            <p className="text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-400 leading-relaxed">
-              Your journey to economic empowerment begins here
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6 md:gap-8">
+      {/* Stats Section */}
+      <section className="py-16 border-y border-border bg-gradient-to-r from-sa-gold/5 via-background to-sa-green/5">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
-              { step: "1", title: "Upload Your CV", description: "Our AI analyzes your skills and qualifications in seconds", icon: FileText },
-              { step: "2", title: "Build Your Twin", description: "Create your digital economic profile with personalized goals", icon: Zap },
-              { step: "3", title: "Explore Your Future", description: "Discover career paths, income projections, and opportunities", icon: TrendingUp },
-            ].map((item, i) => (
-              <div key={i} className="relative group">
-                <div className="bg-white/75 dark:bg-slate-800/75 backdrop-blur-xl rounded-xl md:rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl transition-all duration-300 group-hover:scale-105 active:scale-100 touch-manipulation">
-                  <div className="absolute -top-5 md:-top-6 left-1/2 -translate-x-1/2 h-10 w-10 md:h-12 md:w-12 rounded-full bg-primary flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                    <span className="text-white font-bold text-base md:text-lg">{item.step}</span>
-                  </div>
-                  <div className="mt-6 md:mt-8 mb-5 md:mb-6 flex justify-center">
-                    <div className="h-14 w-14 md:h-16 md:w-16 rounded-xl bg-primary/10 dark:bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <item.icon className="h-7 w-7 md:h-8 md:w-8 text-primary dark:text-primary" />
-                    </div>
-                  </div>
-                  <h3 className="text-lg md:text-xl font-bold text-slate-900 dark:text-white mb-2 md:mb-3 text-center">{item.title}</h3>
-                  <p className="text-sm md:text-base text-slate-600 dark:text-slate-400 text-center leading-relaxed">{item.description}</p>
+              { icon: Users, value: "63%", label: "Youth Unemployment", sub: "We're changing this", color: "text-sa-red" },
+              { icon: Target, value: "1,000+", label: "Youth Empowered", sub: "across all 9 provinces", color: "text-sa-gold" },
+              { icon: BarChart3, value: "10K+", label: "Career Paths", sub: "analyzed by AI", color: "text-sa-green" },
+              { icon: Heart, value: "ubuntu", label: "Community First", sub: "together we rise", color: "text-sa-terracotta" },
+            ].map((s, i) => (
+              <motion.div
+                key={s.label}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="text-center"
+              >
+                <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center mx-auto mb-3">
+                  <s.icon className={`w-6 h-6 ${s.color}`} />
                 </div>
-              </div>
+                <p className="text-3xl md:text-4xl font-extrabold mb-1 font-display text-foreground">
+                  {s.value === "ubuntu" ? <RotatingText text={t("ubuntu")} langKey={langIndex} /> : s.value}
+                </p>
+                <p className="font-semibold text-sm text-foreground">{s.label}</p>
+                <p className="text-xs text-muted-foreground">{s.sub}</p>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Mobile-First Demo Section */}
-      <section id="demo" className="py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 relative">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-3 md:mb-4">
-              See EmpowerAI in <span className="text-primary dark:text-primary">Action</span>
-            </h2>
-            <p className="text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed">
-              Watch how we're helping South African youth discover their economic potential
+      {/* Features Section */}
+      <section id="features" className="py-20 md:py-28 sa-pattern">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-14">
+            <span className="text-sa-gold text-sm font-semibold uppercase tracking-wider mb-3 block">
+              <RotatingText text={t("ourTools")} langKey={langIndex} languageLabel={getLanguageDisplay(currentLanguage)} />{" \u2014 Our Tools"}
+            </span>
+            <h2 className="text-3xl md:text-4xl font-extrabold mb-3 font-display text-foreground">Everything You Need to Succeed</h2>
+            <p className="text-muted-foreground max-w-md mx-auto">
+              Built by South Africans, for South Africans. AI tools that understand our unique economy.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              { icon: Brain, title: "Digital Economic Twin", desc: "AI-powered simulation of your economic future, rooted in South African market realities", color: "from-sa-gold/20 to-sa-gold/5" },
+              { icon: TrendingUp, title: "Path Simulation", desc: "Visualize income projections across career paths \u2014 from SMMEs to corporate", color: "from-sa-green/20 to-sa-green/5" },
+              { icon: FileText, title: "CV Analysis", desc: "Get instant AI feedback tailored for SA employers and the B-BBEE landscape", color: "from-sa-blue/20 to-sa-blue/5" },
+              { icon: Briefcase, title: "Opportunity Matching", desc: "Find jobs, learnerships, and YES4Youth programmes matched to your profile", color: "from-sa-terracotta/20 to-sa-terracotta/5" },
+              { icon: MessageSquare, title: "Interview Coach", desc: "Practice interviews with AI \u2014 from panel discussions to one-on-ones", color: "from-sa-red/20 to-sa-red/5" },
+              { icon: Map, title: "Career Roadmap", desc: "Step-by-step guidance from matric to your dream career, wherever you are in SA", color: "from-sa-gold/20 to-sa-green/5" },
+            ].map((f, i) => (
+              <motion.div
+                key={f.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.08 }}
+                className="group bg-card border border-border rounded-2xl p-6 hover:shadow-lg hover:border-sa-gold/30 transition-all duration-300"
+              >
+                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${f.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                  <f.icon className="w-6 h-6 text-foreground" />
+                </div>
+                <h3 className="font-bold text-lg mb-2 text-card-foreground">{f.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section id="how-it-works" className="py-20 md:py-28 bg-gradient-to-b from-secondary/30 to-background">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-14">
+            <span className="text-sa-green text-sm font-semibold uppercase tracking-wider mb-3 block">
+              <RotatingText text={t("thePath")} langKey={langIndex} languageLabel={getLanguageDisplay(currentLanguage)} />{" \u2014 The Path"}
+            </span>
+            <h2 className="text-3xl md:text-4xl font-extrabold mb-3 font-display text-foreground">Get Started in 3 Simple Steps</h2>
+            <p className="text-muted-foreground">
+              {"Your journey to economic empowerment begins here \u2014 "}
+              <RotatingText text={t("letsBegin")} langKey={langIndex} as="em" />
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            {[
+              { icon: FileText, num: "1", title: "Upload Your CV", desc: "Our AI analyzes your skills, matric results, and qualifications in seconds" },
+              { icon: Brain, num: "2", title: "Build Your Twin", desc: "Create your digital economic profile with goals tailored to SA opportunities" },
+              { icon: TrendingUp, num: "3", title: "Explore Your Future", desc: "Discover career paths, income projections, and opportunities across Mzansi" },
+            ].map((s, i) => (
+              <motion.div
+                key={s.num}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.15 }}
+                className="relative text-center"
+              >
+                <div className="w-16 h-16 rounded-2xl bg-sa-blue text-white flex items-center justify-center mx-auto mb-5 shadow-lg">
+                  <s.icon className="w-7 h-7" />
+                </div>
+                <span className="absolute top-0 right-1/2 translate-x-12 -translate-y-2 bg-gradient-to-br from-sa-green to-sa-terracotta text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center">
+                  {s.num}
+                </span>
+                <h3 className="font-bold text-lg mb-2 text-foreground">{s.title}</h3>
+                <p className="text-sm text-muted-foreground">{s.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Demo Section */}
+      <section id="demo" className="py-20 md:py-28 sa-pattern">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-14">
+            <span className="text-sa-terracotta text-sm font-semibold uppercase tracking-wider mb-3 block">
+              <RotatingText text={t("watch")} langKey={langIndex} languageLabel={getLanguageDisplay(currentLanguage)} />{" \u2014 Watch"}
+            </span>
+            <h2 className="text-3xl md:text-4xl font-extrabold mb-3 font-display text-foreground">{"See EmpowerAI in Action"}</h2>
+            <p className="text-muted-foreground max-w-3xl mx-auto">
+              {"Watch how we're helping South African youth discover their economic potential"}
             </p>
           </div>
 
-          <div className="max-w-5xl mx-auto">
-            <div className="relative group cursor-pointer">
-              <div className="relative aspect-video rounded-xl md:rounded-2xl overflow-hidden shadow-2xl border border-slate-200/50 dark:border-slate-800/50 hover:scale-[1.02] transition-transform duration-300 touch-manipulation">
-                <img 
-                  src="/images/result.jpg" 
-                  alt="EmpowerAI Demo Preview" 
+          <div className="max-w-4xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="relative group cursor-pointer"
+            >
+              <div className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl border border-border hover:scale-[1.02] transition-transform duration-300">
+                <img
+                  src="images/empoweraidemo.png"
+                  alt="EmpowerAI Demo Preview"
                   className="w-full h-full object-cover"
+                  crossOrigin="anonymous"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent group-hover:from-black/70 transition-all duration-300" />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="h-16 w-16 md:h-20 md:w-20 rounded-full bg-primary hover:bg-primary/90 active:bg-primary/80 flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300 animate-pulse-slow touch-manipulation">
-                    <Play className="h-8 w-8 md:h-10 md:w-10 text-white ml-1" />
+                  <div className="h-16 w-16 rounded-full bg-sa-gold flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300 animate-pulse-slow">
+                    <Play className="h-6 w-6 text-primary-foreground ml-1" />
                   </div>
                 </div>
-                <div className="absolute top-4 right-4 md:top-6 md:right-6 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm px-3 md:px-4 py-2 rounded-full text-xs md:text-sm font-semibold text-slate-900 dark:text-white animate-fade-in">
+                <div className="absolute top-4 right-4 bg-card/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-semibold text-card-foreground">
                   Demo Coming Soon
                 </div>
               </div>
-
-              <div className="grid grid-cols-3 gap-4 md:gap-6 mt-6 md:mt-8">
-                {[
-                  { icon: Zap, title: "Quick Setup", desc: "Under 5 minutes" },
-                  { icon: Target, title: "95% Accurate", desc: "Career matching" },
-                  { icon: CheckCircle, title: "Proven Success", desc: "1,000+ users" },
-                ].map((item, i) => (
-                  <div key={i} className="text-center group hover:scale-105 transition-transform touch-manipulation">
-                    <div className="inline-flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-lg bg-primary/10 dark:bg-primary/10 mb-2 md:mb-3 group-hover:scale-110 transition-transform">
-                      <item.icon className="h-5 w-5 md:h-6 md:w-6 text-primary dark:text-primary" />
-                    </div>
-                    <p className="font-semibold text-sm md:text-base text-slate-900 dark:text-white mb-1">{item.title}</p>
-                    <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400">{item.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Mobile-First Testimonials */}
-      <section id="testimonials" className="py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-3 md:mb-4">
-              Real <span className="text-primary dark:text-primary">Success Stories</span>
-            </h2>
-            <p className="text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-400 leading-relaxed">
-              See how EmpowerAI is transforming careers across South Africa
-            </p>
+            </motion.div>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6 lg:gap-8">
+          {/* Stats row under demo */}
+          <div className="grid grid-cols-3 gap-4 max-w-3xl mx-auto mt-10">
             {[
-              { name: "Lerato M.", location: "Cape Town", role: "Student ? Software Developer", quote: "EmpowerAI helped me discover tech skills I didn't know I had. I'm now earning R12k/month!", rating: 5 },
-              { name: "Sipho K.", location: "Durban", role: "Unemployed ? Business Owner", quote: "The career simulation showed me entrepreneurship was my path. Best decision I ever made!", rating: 5 },
-              { name: "Nomsa T.", location: "Johannesburg", role: "Waitress ? Marketing Pro", quote: "From minimum wage to a career I love. The AI guidance was truly life-changing!", rating: 5 },
-            ].map((testimonial, i) => (
-              <div key={i} className="bg-white/75 dark:bg-slate-900/75 backdrop-blur-xl rounded-xl md:rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200/50 dark:border-slate-800/50 hover:shadow-xl hover:scale-105 active:scale-100 transition-all duration-300 touch-manipulation">
-                <div className="flex gap-1 mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 fill-primary text-primary" />
-                  ))}
+              { icon: "clock", label: "Quick Setup", sub: "Under 5 minutes" },
+              { icon: "target", label: "95% Accurate", sub: "Career matching" },
+              { icon: "users", label: "All 9 Provinces", sub: "Across Mzansi" },
+            ].map((item) => (
+              <div
+                key={item.label}
+                className="bg-card border border-border rounded-xl p-4 text-center"
+              >
+                <div className="w-8 h-8 mx-auto mb-2 rounded-lg bg-secondary flex items-center justify-center">
+                  {item.icon === "clock" && (
+                    <svg className="w-4 h-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M12 6v6l4 2" />
+                    </svg>
+                  )}
+                  {item.icon === "target" && <Target className="w-4 h-4 text-sa-gold" />}
+                  {item.icon === "users" && <Users className="w-4 h-4 text-muted-foreground" />}
                 </div>
-                <p className="text-sm md:text-base text-slate-700 dark:text-slate-300 mb-5 md:mb-6 leading-relaxed">"{testimonial.quote}"</p>
-                <div className="flex items-center gap-3">
-                  <div className="h-11 w-11 md:h-12 md:w-12 flex-shrink-0 rounded-full bg-gradient-to-br from-primary to-primary" />
-                  <div className="min-w-0">
-                    <p className="font-semibold text-sm md:text-base text-slate-900 dark:text-white truncate">{testimonial.name}</p>
-                    <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 truncate">{testimonial.role}</p>
-                  </div>
-                </div>
+                <p className="font-bold text-sm text-card-foreground">{item.label}</p>
+                <p className="text-xs text-muted-foreground">{item.sub}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Mobile-First CTA Section */}
-      <section className="py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-primary via-primary to-secondary dark:from-primary/30 dark:via-primary/20 dark:to-secondary/30 relative overflow-hidden">
-        <div className="absolute inset-0 bg-grid-white/5" />
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 md:mb-6 animate-fade-in leading-tight">
-            Ready to Transform Your Future?
-          </h2>
-          <p className="text-base sm:text-lg md:text-xl text-white/80 dark:text-white/80 mb-6 md:mb-8 max-w-2xl mx-auto animate-fade-in animation-delay-200 leading-relaxed">
-            Join over 1,000 South African youth building better careers with AI-powered guidance
-          </p>
-          <Link
-            to="/signup"
-            className="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-50 active:bg-slate-100 text-primary px-8 md:px-10 py-4 md:py-5 rounded-lg font-bold text-base md:text-lg transition-all duration-200 shadow-2xl hover:scale-105 active:scale-100 animate-fade-in animation-delay-400 min-h-[52px] touch-manipulation w-full sm:w-auto max-w-md mx-auto"
-          >
-            <span>Start Your Journey Free</span>
-            <ArrowRight className="h-5 w-5 md:h-6 md:w-6" />
-          </Link>
+      {/* Testimonials */}
+      <section id="success" className="py-20 md:py-28 bg-gradient-to-b from-secondary/30 to-background">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-14">
+            <span className="text-sa-terracotta text-sm font-semibold uppercase tracking-wider mb-3 block">
+              <RotatingText text={t("successStories")} langKey={langIndex} languageLabel={getLanguageDisplay(currentLanguage)} />{" \u2014 Ubuntu Stories"}
+            </span>
+            <h2 className="text-3xl md:text-4xl font-extrabold mb-3 font-display text-foreground">Real Success Stories from Mzansi</h2>
+            <p className="text-muted-foreground">{"See how EmpowerAI is transforming careers across all 9 provinces"}</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            {[
+              {
+                quote: "EmpowerAI helped me discover tech skills I didn't know I had. From Khayelitsha to a R12k/month developer role. Siyabonga!",
+                name: "Lerato Mokoena",
+                initials: "LM",
+                role: "Student \u2192 Software Developer",
+                location: "Cape Town, WC",
+              },
+              {
+                quote: "The career simulation showed me entrepreneurship was my path. Now running my own spaza shop and digital marketing agency!",
+                name: "Sipho Khumalo",
+                initials: "SK",
+                role: "Unemployed \u2192 Business Owner",
+                location: "Durban, KZN",
+              },
+              {
+                quote: "From minimum wage to a career I love. The AI guidance understood my reality as a young South African. Truly life-changing!",
+                name: "Nomsa Tshabalala",
+                initials: "NT",
+                role: "Waitress \u2192 Marketing Pro",
+                location: "Johannesburg, GP",
+              },
+            ].map((t, i) => (
+              <motion.div
+                key={t.name}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="bg-card border border-border rounded-2xl p-6 hover:border-sa-gold/30 transition-colors"
+              >
+                <div className="flex gap-1 mb-4">
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <Star key={s} className="w-4 h-4 fill-sa-gold text-sa-gold" />
+                  ))}
+                </div>
+                <p className="text-sm leading-relaxed mb-6 italic text-muted-foreground">{`"${t.quote}"`}</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-sa-gold/20 to-sa-green/20 flex items-center justify-center font-bold text-xs text-foreground">
+                    {t.initials}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm text-card-foreground">{t.name}</p>
+                    <p className="text-xs text-muted-foreground">{t.role}</p>
+                    <p className="text-xs text-sa-gold">{t.location}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Mobile-First Footer */}
-      <footer className="bg-slate-900 dark:bg-black text-slate-300 dark:text-slate-400 py-12 md:py-16 px-4 sm:px-6 lg:px-8 border-t border-slate-800">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 mb-10 md:mb-12">
-            <div className="col-span-2 md:col-span-1">
-              <Logo variant="light" size="lg" linkTo="/" />
-              <p className="mt-4 text-sm md:text-base leading-relaxed text-slate-400">
-                Empowering South African youth through AI-driven career guidance.
+      {/* CTA Section */}
+      <section className="py-20 md:py-28 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-sa-gold via-sa-terracotta to-sa-red" />
+        <div className="absolute inset-0 sa-pattern opacity-20" />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="container mx-auto px-4 text-center relative z-10"
+        >
+          <p className="text-white/70 text-sm font-semibold uppercase tracking-wider mb-4">
+            <RotatingText text={t("letsBegin")} langKey={langIndex} className="text-white/70" />{" \u2014 Let's Begin"}
+          </p>
+          <h2 className="text-3xl md:text-5xl font-extrabold text-white mb-4 font-display">
+            Ready to Transform Your Future?
+          </h2>
+          <p className="text-white/80 max-w-lg mx-auto mb-8 text-lg">
+            {"Join over 1,000 young South Africans building better careers with AI-powered guidance. Together, we rise. \u{1F1FF}\u{1F1E6}"}
+          </p>
+          <a
+            href="/signup"
+            className="inline-flex items-center justify-center gap-2 bg-white hover:bg-white/90 text-sa-terracotta px-8 py-4 rounded-xl font-bold text-base transition-all duration-200 shadow-2xl hover:scale-105"
+          >
+            {"Get Started \u2014 It's "}<RotatingText text={t("mahala")} langKey={langIndex} /> <ArrowRight className="w-4 h-4" />
+          </a>
+        </motion.div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-border py-12 bg-secondary/20">
+        <div className="container mx-auto px-4">
+          <div className="grid md:grid-cols-3 gap-8 items-center">
+            <div>
+              <a href="/" className="flex items-center gap-2 font-bold text-lg mb-3">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sa-gold via-sa-green to-sa-blue flex items-center justify-center shadow-sm overflow-hidden">
+                  {/* Replace with your logo image in footer too */}
+                  <img 
+                    src="/images/empowerLogo.jpg" // Update this path to your logo location
+                    alt="EmpowerAI Logo"
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <span className="font-display text-foreground">{"Empower"}<span className="text-sa-gold">AI</span></span>
+              </a>
+              <p className="text-sm text-muted-foreground max-w-xs">
+                {"AI-powered career guidance for South African youth. Built with Ubuntu values \u2014 because together, we rise."}
               </p>
             </div>
-            <div>
-              <h3 className="font-semibold text-white mb-3 md:mb-4 text-base">Product</h3>
-              <ul className="space-y-2 text-sm md:text-base">
-                <li><a href="#features" className="hover:text-white transition-colors min-h-[44px] inline-block py-1">Features</a></li>
-                <li><a href="#how-it-works" className="hover:text-white transition-colors min-h-[44px] inline-block py-1">How It Works</a></li>
-                <li><a href="#demo" className="hover:text-white transition-colors min-h-[44px] inline-block py-1">Demo</a></li>
-                <li><a href="#testimonials" className="hover:text-white transition-colors min-h-[44px] inline-block py-1">Success Stories</a></li>
-              </ul>
+
+            <div className="flex flex-col items-center gap-3">
+              <div className="flex gap-6 text-sm text-muted-foreground">
+                <a href="#features" className="hover:text-foreground transition-colors">Features</a>
+                <a href="#how-it-works" className="hover:text-foreground transition-colors">How It Works</a>
+                <a href="#success" className="hover:text-foreground transition-colors">Ubuntu Stories</a>
+              </div>
+              <div className="flex items-center gap-2 text-2xl">
+                {"\u{1F1FF}\u{1F1E6}"}
+              </div>
             </div>
-            <div>
-              <h3 className="font-semibold text-white mb-3 md:mb-4 text-base">Company</h3>
-              <ul className="space-y-2 text-sm md:text-base">
-                <li><Link to="/about" className="hover:text-white transition-colors min-h-[44px] inline-block py-1">About Us</Link></li>
-                <li><a href="#" className="hover:text-white transition-colors min-h-[44px] inline-block py-1">Contact</a></li>
-                <li><a href="#" className="hover:text-white transition-colors min-h-[44px] inline-block py-1">Privacy</a></li>
-              </ul>
+
+            <div className="flex flex-col items-end gap-3">
+              <ThemeToggle />
+              <p className="text-xs text-muted-foreground">{"\u00A9 2026 EmpowerAI. Made in Mzansi \u{1F1FF}\u{1F1E6}"}</p>
+              <p className="text-xs text-muted-foreground italic">
+                <RotatingText text={`"${t("ubuntuProverb")}"`} langKey={langIndex} languageLabel={getLanguageDisplay(currentLanguage)} />
+              </p>
             </div>
-            <div>
-              <h3 className="font-semibold text-white mb-3 md:mb-4 text-base">Get Started</h3>
-              <ul className="space-y-2 text-sm md:text-base">
-                <li><Link to="/signup" className="hover:text-white transition-colors min-h-[44px] inline-block py-1">Sign Up</Link></li>
-                <li><Link to="/login" className="hover:text-white transition-colors min-h-[44px] inline-block py-1">Sign In</Link></li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-slate-800 pt-6 md:pt-8 text-center text-xs md:text-sm text-slate-400">
-            <p>&copy; 2025 EmpowerAI. All rights reserved. Built with care for South African youth.</p>
           </div>
         </div>
       </footer>
     </div>
-  )
+  );
 }
-
-
-
-

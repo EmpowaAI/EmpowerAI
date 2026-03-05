@@ -3,9 +3,14 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { UserProvider } from './lib/user-context'
 import { ThemeProvider } from './lib/theme'
 import ProtectedRoute from './components/ProtectedRoute'
+
 import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
+import EmailVerified from './pages/EmailVerified'
+
 import DashboardLayout from './layouts/DashboardLayout'
 import Dashboard from './pages/Dashboard'
 import TwinBuilder from './pages/TwinBuilder'
@@ -17,24 +22,31 @@ import Applications from './pages/Applications'
 import Profile from './pages/Profile'
 import Chat from './pages/Chat'
 import AdminPanel from './pages/AdminPanel'
-import { DebugConnection } from './components/DebugConnection'  // Add this import
 
 function App() {
   return (
     <ThemeProvider>
-      <UserProvider> {/* UserProvider wraps everything */}
+      <UserProvider>
         <Routes>
+
+          {/* Public routes */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
-          
-          <Route path="/dashboard" element={
-            <ProtectedRoute>
-              <DashboardLayout /> {/* DashboardLayout can now use useUser() */}
-            </ProtectedRoute>
-          }>
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/email-verified" element={<EmailVerified />} />
+
+          {/* Protected dashboard routes */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout />
+              </ProtectedRoute>
+            }
+          >
             <Route index element={<Dashboard />} />
-          
             <Route path="cv-analyzer" element={<CVAnalyzer />} />
             <Route path="twin" element={<TwinBuilder />} />
             <Route path="opportunities" element={<Opportunities />} />
@@ -53,10 +65,10 @@ function App() {
             />
           </Route>
 
+          {/* Fallback route */}
           <Route path="*" element={<Navigate to="/" replace />} />
+
         </Routes>
-        
-        
       </UserProvider>
     </ThemeProvider>
   )

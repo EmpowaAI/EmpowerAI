@@ -89,9 +89,9 @@ export default function LoginPage() {
       <div className="hidden lg:flex flex-1 relative p-12 flex-col justify-between overflow-hidden">
         {/* Background Image */}
         <div
-          className="absolute inset-0 bg-cover bg-center transition-transform duration-700 hover:scale-105"
+          className="absolute inset-0 bg-cover bg-center transition-transform duration-700 "
           style={{
-            backgroundImage: "url(/images/result.jpg)",
+            backgroundImage: "url(/images/empowerlogin.png)",
           }}
         />
         {/* Dark overlay for text readability */}
@@ -105,25 +105,7 @@ export default function LoginPage() {
           <Logo variant="light" size="md" linkTo="/" />
         </div>
 
-        <div className="relative z-10 space-y-6 animate-slide-up" style={{ animationDelay: '0.1s' }}>
-          <h1 className="text-4xl font-bold text-white mb-4 drop-shadow-lg">Welcome back to your economic future</h1>
-          <p className="text-white/90 text-lg drop-shadow-md">
-            Continue building your path to success with AI-powered guidance.
-          </p>
-          
-          {/* Trust indicators */}
-          <div className="flex items-center gap-6 pt-4">
-            <div className="flex items-center gap-2 text-white/90">
-              <Users className="h-5 w-5 text-secondary" />
-              <span className="text-sm font-medium">10,000+ Users</span>
-            </div>
-            <div className="flex items-center gap-2 text-white/90">
-              <TrendingUp className="h-5 w-5 text-emerald-400" />
-              <span className="text-sm font-medium">AI-Powered</span>
-            </div>
-          </div>
-        </div>
-
+       
         <p className="text-sm text-white/80 relative z-10 drop-shadow-md animate-slide-up" style={{ animationDelay: '0.2s' }}>
           Youth Economic Digital Twin Platform
         </p>
@@ -212,9 +194,9 @@ export default function LoginPage() {
                   />
                   <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">Remember me</span>
                 </label>
-                <a href="#" className="text-sm text-primary hover:text-primary/80 hover:underline font-medium transition-colors">
+                <Link to="/forgot-password" className="text-sm text-primary hover:text-primary/80 hover:underline font-medium transition-colors">
                   Forgot password?
-                </a>
+                </Link>
               </div>
 
               {error && (

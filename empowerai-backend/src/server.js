@@ -38,6 +38,7 @@ const allowedOrigins = [
   'http://localhost:5174',
   'https://empower-ai-gamma.vercel.app',
   'https://empowerai.onrender.com',
+  'https://www.empowa.org',
   process.env.FRONTEND_URL,
   process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
 ].filter(Boolean);
@@ -257,6 +258,7 @@ connectDatabase().then(async (connected) => {
   app.use('/api/account', require('./routes/account'));
   app.use('/api/user', require('./routes/user'));
   app.use('/api/applications', require('./routes/applications'));
+
 
 
   // Root route handler (for Render health checks and general requests)
