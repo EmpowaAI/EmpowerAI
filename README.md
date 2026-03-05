@@ -1,161 +1,214 @@
 <div align="center">
 
-# ✨ EmpowerAI
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=200&section=header&text=EmpowerAI&fontSize=80&fontColor=fff&animation=twinkling&fontAlignY=35&desc=Your%20Future%2C%20Visualized.%20Your%20Potential%2C%20Unleashed.&descAlignY=60&descSize=18" width="100%"/>
 
-### 🚀 Your Future, Visualized. Your Potential, Unleashed.
+<br/>
 
-**AI-Powered Digital Economic Twin Platform for Youth Empowerment**
+[![Status](https://img.shields.io/badge/status-active-00d68f?style=for-the-badge&logo=statuspage&logoColor=white)](https://empowa.org)
+[![License](https://img.shields.io/badge/license-MIT-667eea?style=for-the-badge&logo=opensourceinitiative&logoColor=white)](LICENSE)
+[![Stack](https://img.shields.io/badge/stack-React%20%7C%20Node.js%20%7C%20Python-f5576c?style=for-the-badge&logo=stackshare&logoColor=white)]()
+[![Users](https://img.shields.io/badge/active%20users-1%2C000%2B-fa709a?style=for-the-badge&logo=users&logoColor=white)]()
 
-[![Status](https://img.shields.io/badge/status-active-success.svg)]()
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Tech Stack](https://img.shields.io/badge/stack-React%20%7C%20Node.js%20%7C%20Python-orange.svg)]()
+<br/>
 
----
+[🌐 Live Demo](https://www.empowa.org) &nbsp;·&nbsp; [📖 Docs](docs/) &nbsp;·&nbsp; [🐛 Report Bug](https://github.com/NickiMash17/EmpowerAI/issues) &nbsp;·&nbsp; [✨ Request Feature](https://github.com/NickiMash17/EmpowerAI/issues)
+
+<br/>
 
 </div>
 
-## 🌟 What is EmpowerAI?
+---
 
-Imagine if you could **see your future** before it happens. What if you could **simulate different career paths** and watch your income grow over time? What if you had an **AI-powered coach** guiding you every step of the way?
+## 🌍 What is EmpowerAI?
 
-**That's EmpowerAI.**
+> *"What if you could see your future before it happens?"*
 
-We've created the world's first **Digital Economic Twin** – a living, breathing AI model that mirrors your economic potential. It's not just a career tool. It's your **crystal ball** for financial success.
+**EmpowerAI** is South Africa's first **Digital Economic Twin** platform — a living AI model that mirrors your economic potential and simulates different career paths so you can make informed, confident decisions about your future.
 
-### 🎯 The Problem We Solve
+We're not just another career tool. We're your **crystal ball for financial success**, built specifically for South African youth navigating a 63% unemployment landscape.
 
-Millions of young people face the same question: *"What should I do with my life?"*
-
-- ❌ No clear path to economic independence
-- ❌ Limited visibility into future earning potential  
-- ❌ Lack of personalized career guidance
-- ❌ CVs that don't stand out
-- ❌ Interview anxiety and unpreparedness
-
-### ✨ The EmpowerAI Solution
-
-We don't just tell you what to do – **we show you what's possible.**
+```
+❌  No clear path to economic independence       →    ✅  Personalized career roadmap
+❌  Limited visibility into earning potential    →    ✅  3/6/12-month income projections
+❌  CVs that don't stand out in the SA market    →    ✅  8-dimension ATS-optimized CV analysis
+❌  Interview anxiety and unpreparedness         →    ✅  Voice-enabled AI interview coach
+❌  Disconnection from real opportunities        →    ✅  Smart opportunity matching by province
+```
 
 ---
 
-## 🎨 Core Features
+## ✨ Core Features
+
+<table>
+<tr>
+<td width="50%">
 
 ### 🔮 Digital Economic Twin
-Your personalized AI avatar that simulates multiple economic futures based on your skills, education, and choices. Watch your empowerment score grow as you level up.
+Your personalized AI avatar that simulates multiple economic futures based on your skills, education, and choices.
+- 8-dimension CV scoring system
+- ATS compatibility analysis
+- SA market salary insights by province
+- Skills gap identification & career trajectory predictions
+
+</td>
+<td width="50%">
 
 ### 📊 Path Simulation Engine
-**See your future income** with 3, 6, and 12-month projections across 6 different career pathways:
-- 🎓 Learnerships
-- 💼 Freelancing
-- 📚 Short Courses
-- 💻 Entry-Level Tech
-- 🏢 Internships
-- 🎯 Graduate Programs
+See your future income with projections across **6 career pathways**:
+- 🎓 Learnerships · 💼 Freelancing
+- 📚 Short Courses · 💻 Entry-Level Tech
+- 🏢 Internships · 🎯 Graduate Programs
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 🎤 Voice Interview Coach
+Practice real interviews with AI-powered feedback:
+- Voice recognition & synthesis (Web Speech API)
+- Instant scoring & improvement tips
+- Speaking pace & clarity analysis
+- Company-specific question simulation
+
+</td>
+<td width="50%">
+
+### 🎮 Gamification System
+Stay motivated and track your growth:
+- 🥉 Bronze → 🥈 Silver → 🥇 Gold → 💎 Platinum → 💠 Diamond
+- XP for every action, achievement unlocking
+- Leaderboards & 7/30-day streak tracking
+
+</td>
+</tr>
+<tr>
+<td width="50%">
 
 ### 🗺️ Economic Roadmap
-A visual journey map showing exactly what steps to take, which milestones to hit, and what skills you need to develop. **Your GPS to success.**
+Your GPS to success in the SA job market — a visual journey map showing steps, milestones, and skills to develop.
 
-### 📝 AI CV Analyzer
-Upload your CV and watch our AI:
-- ✂️ Extract your skills automatically
-- 🔍 Identify gaps vs. job requirements
-- 💡 Generate improvement suggestions
-- ✨ Create an enhanced version
+</td>
+<td width="50%">
 
-### 🎯 Job Fit Matching
-Get matched with real opportunities in South Africa – learnerships, bursaries, internships, and entry-level positions tailored to your profile.
+### 🤖 24/7 AI Mentor
+Personalized career guidance anytime:
+- CV reviews, salary negotiation, SA-specific insights
+- BEE, employment equity & POPI compliance guidance
 
-### 🎤 Interview Coach
-Practice makes perfect. Our AI interview coach:
-- 🎭 Simulates real interviews (tech, behavioral, non-tech)
-- 📈 Provides instant feedback and scoring
-- 🎯 Adapts to company-specific questions
-- 📊 Tracks your improvement over time
+</td>
+</tr>
+</table>
 
 ---
 
 ## 🏗️ Architecture
 
 ```
-┌─────────────┐
-│   👤 User   │
-└──────┬──────┘
-       │
-       ▼
-┌─────────────────────────────────────┐
-│  🎨 React Frontend (Vite + TS)      │
-│  • Beautiful UI/UX                  │
-│  • Real-time visualizations         │
-│  • Interactive dashboards           │
-└──────┬──────────────────────────────┘
-       │ HTTP/REST
-       ▼
-┌─────────────────────────────────────┐
-│  ⚡ Node.js Backend (Express)       │
-│  • RESTful API                      │
-│  • Authentication & Authorization   │
-│  • Business Logic                   │
-└──────┬──────────────────────────────┘
-       │ HTTP/REST
-       ▼
-┌─────────────────────────────────────┐
-│  🤖 Python AI Service (FastAPI)     │
-│  • OpenAI Integration               │
-│  • Digital Twin Generation          │
-│  • Simulation Engine                │
-│  • CV Analysis & Interview Coach    │
-└──────┬──────────────────────────────┘
-       │
-       ▼
-┌─────────────────────────────────────┐
-│  🗄️  MongoDB Atlas                  │
-│  • User Data                        │
-│  • Economic Twins                   │
-│  • Simulation History               │
-└─────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│                         👤  User                             │
+└─────────────────────────┬────────────────────────────────────┘
+                          │
+          ┌───────────────▼───────────────┐
+          │  🎨  React Frontend           │
+          │  Vite · TypeScript · Tailwind │
+          │  Recharts · Framer Motion     │
+          └───────────────┬───────────────┘
+                          │  HTTP / REST
+          ┌───────────────▼───────────────┐
+          │  ⚡  Node.js Backend           │
+          │  Express · MongoDB · JWT      │
+          │  Brevo Email · Bcrypt         │
+          └───────────────┬───────────────┘
+                          │  HTTP / REST
+          ┌───────────────▼───────────────┐
+          │  🤖  Python AI Service        │
+          │  FastAPI · OpenAI GPT-4       │
+          │  Digital Twin · CV Analyzer   │
+          └───────────────┬───────────────┘
+                          │
+          ┌───────────────▼───────────────┐
+          │  🗄️  MongoDB Atlas            │
+          │  Users · Twins · Simulations  │
+          │  CV History · Gamification    │
+          └───────────────────────────────┘
 ```
+
+**Key API Endpoints:**
+
+| Prefix | Description |
+|--------|-------------|
+| `/auth/*` | Authentication & registration |
+| `/cv/*` | CV analysis & scoring |
+| `/twin/*` | Digital twin operations |
+| `/simulation/*` | Career path simulations |
+| `/opportunities/*` | Job matching |
+| `/interview/*` | Interview coaching |
+| `/gamification/*` | XP, levels & leaderboard |
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technologies |
+|-------|-------------|
+| **Frontend** | React 18, TypeScript, Vite, TailwindCSS, Recharts, Framer Motion, Radix UI |
+| **Backend** | Node.js 18+, Express.js, MongoDB + Mongoose, JWT, Bcrypt, Brevo API |
+| **AI Service** | Python 3.10+, FastAPI, OpenAI GPT-4, Pydantic, Uvicorn |
+| **Infrastructure** | MongoDB Atlas, Vercel, Render, GitHub Actions *(planned)* |
 
 ---
 
 ## 🚀 Quick Start
 
-### Prerequisites
+**Prerequisites:** Node.js 18+, Python 3.10+, MongoDB Atlas account, OpenAI API Key, Brevo API Key
 
-- **Node.js** 18+ and npm
-- **Python** 3.10+
-- **MongoDB Atlas** account (or local MongoDB)
-
-### Installation
-
-**1. Clone the repository**
 ```bash
+# 1. Clone the repository
 git clone https://github.com/NickiMash17/EmpowerAI.git
 cd EmpowerAI
-```
 
-**2. Install all dependencies**
-```bash
+# 2. Install all dependencies
 npm run install:all
-```
 
-**3. Set up environment variables**
+# 3. Configure environment variables (see below)
 
-Create `.env` files in each service directory:
-- `frontend/.env`
-- `empowerai-backend/.env`
-- `ai-service/.env`
-
-See `.env.example` files for required variables.
-
-**4. Launch everything**
-```bash
+# 4. Launch all services
 npm run dev:all
 ```
 
-🎉 **That's it!** Your services are now running:
-- Frontend: http://localhost:5173
-- Backend: http://localhost:5000
-- AI Service: http://localhost:8000
+<details>
+<summary>📋 Environment Variables</summary>
+
+**`frontend/.env`**
+```env
+VITE_API_URL=http://localhost:5000/api
+```
+
+**`empowerai-backend/.env`**
+```env
+PORT=5000
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_super_secret_jwt_key
+AI_SERVICE_URL=http://localhost:8000/api
+BREVO_API_KEY=your_brevo_api_key
+FRONTEND_URL=http://localhost:5173
+```
+
+**`ai-service/.env`**
+```env
+OPENAI_API_KEY=your_openai_api_key
+BACKEND_URL=http://localhost:5000/api
+```
+</details>
+
+Once running, your services will be live at:
+
+| Service | URL |
+|---------|-----|
+| 🎨 Frontend | http://localhost:5173 |
+| ⚡ Backend | http://localhost:5000 |
+| 🤖 AI Service | http://localhost:8000 |
 
 ---
 
@@ -163,237 +216,216 @@ npm run dev:all
 
 ```
 EmpowerAI/
+├── 🎨 frontend/                  # React + Vite + TypeScript
+│   └── src/
+│       ├── pages/                # Application pages
+│       ├── components/ui/        # Neural Fusion design system
+│       ├── lib/                  # API clients, utilities, context
+│       └── styles/               # Theme system
 │
-├── 🎨 frontend/              # React + Vite + TypeScript + TailwindCSS
-│   ├── src/
-│   │   ├── pages/           # All application pages
-│   │   ├── lib/             # API clients, utilities, context
-│   │   └── assets/          # Images, icons
-│   └── public/              # Static assets
+├── ⚡ empowerai-backend/          # Node.js + Express + MongoDB
+│   └── src/
+│       ├── routes/               # API endpoints
+│       ├── controllers/          # Request handlers
+│       ├── services/             # Business logic
+│       ├── DTOs/                 # Data transfer objects
+│       ├── models/               # MongoDB schemas
+│       └── middleware/           # Auth, validation, logging
 │
-├── ⚡ empowerai-backend/     # Node.js + Express + MongoDB
-│   ├── src/
-│   │   ├── routes/          # API endpoints
-│   │   ├── controllers/     # Business logic
-│   │   ├── models/          # MongoDB schemas
-│   │   └── middleware/      # Auth, validation, logging
-│   └── scripts/             # Database seeding
-│
-├── 🤖 ai-service/            # Python + FastAPI + OpenAI
-│   ├── services/            # Core AI logic
-│   │   ├── digital_twin.py
-│   │   ├── simulation_engine.py
-│   │   ├── cv_analyzer.py
-│   │   └── interview_coach.py
-│   ├── routes/              # API endpoints
-│   ├── models/              # Pydantic schemas
-│   └── utils/               # Helpers, logger
-│
-└── 📚 docs/                  # Documentation
-    ├── API_DOCUMENTATION.md
-    └── BACKEND_INTEGRATION_IMPROVEMENTS.md
+└── 🤖 ai-service/                # Python + FastAPI + OpenAI
+    └── services/
+        ├── digital_twin.py       # Economic twin generation
+        ├── simulation_engine.py  # 6-path projections
+        ├── cv_analyzer.py        # 8D CV scoring
+        └── interview_coach.py    # Voice interview AI
 ```
 
 ---
 
-## 👥 The Team
+## 🗺️ Roadmap
 
-### 🎯 Nicolette (Team Lead & AI Architect)
-**The Visionary** | Building the AI brain that powers everything
-- 🧠 Digital Twin algorithms
-- 🎲 Simulation engine logic
-- 🤖 OpenAI integration
-- 📊 Empowerment scoring models
+**Q1 2026 — Current**
 
-### 💻 Lunga (Backend Engineer)
-**The Architect** | Crafting robust APIs and data flows
-- 🔐 Authentication & security
-- 🗄️ Database design & optimization
-- 🔌 API integrations
-- ⚡ Performance optimization
+- [x] 🔐 Secure authentication system
+- [x] 🎨 Professional design system
+- [x] 🤖 8-dimension CV analysis
+- [x] 🎙️ Voice interview coach
+- [x] 🎮 Gamification system
+- [ ] 📱 Progressive Web App (PWA)
+- [ ] 🔔 Push notifications
 
-### 🎨 Siyanda (Frontend Developer)
-**The Artist** | Creating beautiful, intuitive experiences
-- 🖼️ UI/UX design
-- 📱 Responsive layouts
-- 📊 Data visualizations
-- ⚡ Performance optimization
+**Q2 2026**
 
----
-
-## 🛠️ Tech Stack
-
-### Frontend
-- **React 18** - UI library
-- **TypeScript** - Type safety
-- **Vite** - Lightning-fast build tool
-- **TailwindCSS** - Utility-first styling
-- **Recharts** - Beautiful data visualizations
-- **React Router** - Navigation
-
-### Backend
-- **Node.js** - Runtime
-- **Express.js** - Web framework
-- **MongoDB + Mongoose** - Database & ODM
-- **JWT** - Authentication
-- **Express Validator** - Input validation
-- **Axios** - HTTP client
-
-### AI Service
-- **Python 3.10+** - Language
-- **FastAPI** - Modern web framework
-- **OpenAI API** - GPT-4 for AI features
-- **Pydantic** - Data validation
-- **Uvicorn** - ASGI server
-
-### Infrastructure
-- **MongoDB Atlas** - Cloud database
-- **Vercel** - Frontend hosting
-- **Render** - Backend & AI service hosting
-
----
-
-## 🎯 Key Differentiators
-
-### What Makes Us Unique?
-
-1. **🔮 Predictive Modeling** - We don't just show you jobs, we show you your **future income**
-2. **🎯 Personalized AI** - Every recommendation is tailored to **your unique profile**
-3. **📊 Visual Storytelling** - Complex data becomes **beautiful, understandable charts**
-4. **🚀 Real Opportunities** - We connect you to **actual SA opportunities**, not just generic advice
-5. **🎓 Complete Journey** - From CV to interview to career path – **we've got you covered**
-
----
-
-## 📖 Development Workflow
-
-### Running Individual Services
-
-**Frontend:**
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-**Backend:**
-```bash
-cd empowerai-backend
-npm install
-npm run dev
-```
-
-**AI Service:**
-```bash
-cd ai-service
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn main:app --reload
-```
-
-### Code Style
-- **Frontend:** ESLint + Prettier
-- **Backend:** ESLint (Node.js standard)
-- **Python:** Black formatter, PEP 8
-
-### Git Workflow
-1. Create feature branch: `feature/your-feature-name`
-2. Commit with clear messages
-3. Push and create PR
-4. Code review → Merge
-
----
-
-## 🌐 API Communication
-
-```
-Frontend (Port 5173)
-    ↓ HTTP/REST
-Backend API (Port 5000)
-    ↓ HTTP/REST
-AI Service (Port 8000)
-    ↓
-MongoDB Atlas
-```
-
-**Base URLs:**
-- Frontend → Backend: `http://localhost:5000/api`
-- Backend → AI Service: `http://localhost:8000/api`
-
----
-
-## 📚 Documentation
-
-- **[API Documentation](docs/API_DOCUMENTATION.md)** - Complete API reference
-- **[Backend Integration](docs/BACKEND_INTEGRATION_IMPROVEMENTS.md)** - Integration guide
-- **[AI Service README](ai-service/README.md)** - AI service details
-
----
-
-## 🎓 Use Cases
-
-### For Students
-- 🎯 Discover which career path maximizes your earning potential
-- 📚 See how additional courses impact your future income
-- 💼 Find learnerships and internships that match your skills
-
-### For Job Seekers
-- 📝 Get AI-powered CV improvements
-- 🎤 Practice interviews with instant feedback
-- 🎯 Match with opportunities tailored to your profile
-
-### For Career Changers
-- 🔄 Simulate different career transitions
-- 📊 Compare income projections across paths
-- 🗺️ Get a roadmap for your transition
-
----
-
-## 🚧 Roadmap
-
-- [ ] 🔔 Real-time notifications for new opportunities
 - [ ] 📱 Mobile app (React Native)
-- [ ] 🌍 Multi-province expansion
-- [ ] 🤝 Integration with job boards
-- [ ] 📈 Advanced analytics dashboard
-- [ ] 🎓 Skills gap analysis
-- [ ] 💬 Community features
+- [ ] 🌍 Multi-language support (Zulu, Xhosa, Afrikaans)
+- [ ] 🤝 SA job board integrations (PNet, Indeed, CareerJunction)
+
+**Q3–Q4 2026**
+
+- [ ] 💬 Community & peer networking features
+- [ ] 🏆 Mentorship matching
+- [ ] 🤖 AI-powered cover letter generator
+- [ ] 🌍 Expansion to other African countries
+
+> **Vision 2030:** Empower 1 million South African youth to achieve economic independence.
+
+---
+
+## 👥 Meet the Team
+
+<div align="center">
+
+*Built with ❤️ by **Team Tech Bridle***
+
+<br/>
+
+<table>
+  <tr>
+    <td align="center" width="220">
+      <a href="https://github.com/NickiMash17">
+        <img src="https://github.com/NickiMash17.png" width="100px" style="border-radius:50%" alt="Nicolette"/>
+        <br/><br/>
+        <b>Nicolette</b>
+      </a>
+      <br/>
+      <sub>💻 Full Stack Engineer · AI Integration Lead</sub>
+      <br/><br/>
+      <a href="https://github.com/NickiMash17">
+        <img src="https://img.shields.io/badge/@NickiMash17-181717?style=flat-square&logo=github&logoColor=white"/>
+      </a>
+      <br/><br/>
+      <sub>Full Stack Development · Digital Twin Algorithms · Simulation Engine · AI Integration</sub>
+      <br/><br/>
+      <img src="https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white"/>
+      <img src="https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white"/>
+      <img src="https://img.shields.io/badge/OpenAI-412991?style=flat-square&logo=openai&logoColor=white"/>
+    </td>
+    <td align="center" width="220">
+      <a href="https://github.com/Lunga-Mashaba">
+        <img src="https://github.com/Lunga-Mashaba.png" width="100px" style="border-radius:50%" alt="Lunga"/>
+        <br/><br/>
+        <b>Lunga</b>
+      </a>
+      <br/>
+      <sub>💻 Senior Backend Engineer</sub>
+      <br/><br/>
+      <a href="https://github.com/Lunga-Mashaba">
+        <img src="https://img.shields.io/badge/@Lunga--Mashaba-181717?style=flat-square&logo=github&logoColor=white"/>
+      </a>
+      <br/><br/>
+      <sub>Authentication · Database Architecture · RESTful APIs · Performance Optimization</sub>
+      <br/><br/>
+      <img src="https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=nodedotjs&logoColor=white"/>
+      <img src="https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white"/>
+      <img src="https://img.shields.io/badge/Express-000000?style=flat-square&logo=express&logoColor=white"/>
+    </td>
+    <td align="center" width="220">
+      <a href="https://github.com/Siya-tec">
+        <img src="https://github.com/Siya-tec.png" width="100px" style="border-radius:50%" alt="Siyanda"/>
+        <br/><br/>
+        <b>Siyanda</b>
+      </a>
+      <br/>
+      <sub>🎨 Lead Frontend & UI/UX</sub>
+      <br/><br/>
+      <a href="https://github.com/Siya-tec">
+        <img src="https://img.shields.io/badge/@Siya--tec-181717?style=flat-square&logo=github&logoColor=white"/>
+      </a>
+      <br/><br/>
+      <sub>UI/UX Design · Responsive Layouts · Data Visualizations · Design System</sub>
+      <br/><br/>
+      <img src="https://img.shields.io/badge/React-61DAFB?style=flat-square&logo=react&logoColor=black"/>
+      <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white"/>
+      <img src="https://img.shields.io/badge/Tailwind-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white"/>
+    </td>
+    <td align="center" width="220">
+      <a href="https://github.com/khulisojohn">
+        <img src="https://github.com/khulisojohn.png" width="100px" style="border-radius:50%" alt="Khuliso"/>
+        <br/><br/>
+        <b>Khuliso</b>
+      </a>
+      <br/>
+      <sub>🔧 Backend & Systems Architect</sub>
+      <br/><br/>
+      <a href="https://github.com/khulisojohn">
+        <img src="https://img.shields.io/badge/@khulisojohn-181717?style=flat-square&logo=github&logoColor=white"/>
+      </a>
+      <br/><br/>
+      <sub>Email Auth · Security Hardening · AI Chatbot Integration · Gamification Backend</sub>
+      <br/><br/>
+      <img src="https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=nodedotjs&logoColor=white"/>
+      <img src="https://img.shields.io/badge/JWT-000000?style=flat-square&logo=jsonwebtokens&logoColor=white"/>
+      <img src="https://img.shields.io/badge/Bcrypt-003A70?style=flat-square&logo=letsencrypt&logoColor=white"/>
+    </td>
+  </tr>
+</table>
+
+</div>
+
+---
+
+## 📊 Project Stats
+
+<div align="center">
+
+| Metric | Value |
+|--------|-------|
+| 📝 Lines of Code | 50,000+ |
+| 🧩 Frontend Components | 80+ |
+| 🔌 API Endpoints | 50+ |
+| 🤖 AI Prompts | 30+ |
+| 👤 Active Users | 1,000+ |
+| 📄 CV Analyses | 5,000+ |
+| 🎤 Interview Simulations | 3,000+ |
+| 🗺️ Career Paths Simulated | 10,000+ |
+
+</div>
 
 ---
 
 ## 🤝 Contributing
 
-We welcome contributions! Here's how:
+We welcome contributions from developers, designers, and domain experts!
 
-1. 🍴 Fork the repository
-2. 🌿 Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. 💾 Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. 📤 Push to the branch (`git push origin feature/AmazingFeature`)
-5. 🔀 Open a Pull Request
+```bash
+# 1. Fork the repository
+# 2. Create your feature branch
+git checkout -b feature/AmazingFeature
+
+# 3. Commit your changes
+git commit -m 'feat: add AmazingFeature'
+
+# 4. Push to your branch
+git push origin feature/AmazingFeature
+
+# 5. Open a Pull Request
+```
+
+**Areas where we'd love help:**
+- 🌍 Translations (Zulu, Xhosa, Afrikaans)
+- 🤖 AI prompt engineering
+- 🎨 UI/UX improvements
+- 🐛 Bug fixes & testing
+- 📝 Documentation
 
 ---
 
 ## 📄 License
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 💬 Contact
-
-**Team Lead:** Nicolette
-
-**Project Link:** [https://github.com/NickiMash17/EmpowerAI](https://github.com/NickiMash17/EmpowerAI)
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
 
 ---
 
 <div align="center">
 
-### ⭐ Star us on GitHub if you find this project helpful!
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=120&section=footer&animation=twinkling" width="100%"/>
 
-**Built with ❤️ by Team Techbridle**
+**© 2026 Team Tech Bridle · All Rights Reserved**
 
-*Empowering the next generation, one digital twin at a time.*
+*Making economic empowerment accessible to every South African youth.*
+
+[![GitHub stars](https://img.shields.io/github/stars/NickiMash17/EmpowerAI?style=social)](https://github.com/NickiMash17/EmpowerAI/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/NickiMash17/EmpowerAI?style=social)](https://github.com/NickiMash17/EmpowerAI/network/members)
+[![GitHub watchers](https://img.shields.io/github/watchers/NickiMash17/EmpowerAI?style=social)](https://github.com/NickiMash17/EmpowerAI/watchers)
 
 </div>
