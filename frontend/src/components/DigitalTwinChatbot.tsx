@@ -13,25 +13,25 @@ interface Message {
 const INITIAL_MESSAGES: Message[] = [
   {
     id: '1',
-    text: "Hi! I'm your Digital Economic Twin 🤖 I can help you explore career paths, analyze opportunities, and plan your financial future. What would you like to know?",
+    text: "Hi! I am your Digital Economic Twin. I can map career options, compare income outcomes, and suggest your next best move. What should we plan first?",
     sender: 'ai',
     timestamp: new Date(),
   },
   {
     id: '2',
-    text: "You can ask me things like: 'What career paths match my skills?', 'How can I increase my earning potential?', or 'What skills should I learn next?'",
+    text: "Try asking: 'What path matches my skills in Gauteng?', 'How do I raise my salary potential in 6 months?', or 'Which 3 skills should I learn next?'",
     sender: 'ai',
     timestamp: new Date(Date.now() + 1000),
   },
 ];
 
 const QUICK_QUESTIONS = [
-  "Best career for my skills?",
-  "Show income projections",
-  "Skills I should learn",
-  "Job opportunities near me",
-  "Interview tips",
-  "Update my twin"
+  "Best career path for my profile?",
+  "Show 3/6/12-month income projection",
+  "Top 3 skills to learn next",
+  "Best opportunities by province",
+  "Interview answer improvement tips",
+  "Refresh my digital twin"
 ];
 
 export default function DigitalTwinChatbot() {
