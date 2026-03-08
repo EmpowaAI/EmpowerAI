@@ -56,6 +56,13 @@ const cvAnalysisSchema = z.object({
 });
 
 /**
+ * Chat message validation schema
+ */
+const chatMessageSchema = z.object({
+  message: z.string().min(1, 'Message is required').max(2000, 'Message is too long'),
+});
+
+/**
  * Interview start validation schema
  */
 const interviewStartSchema = z.object({
@@ -103,6 +110,7 @@ module.exports = {
   cvAnalysisSchema,
   interviewStartSchema,
   interviewAnswerSchema,
+  chatMessageSchema,
   validate,
 };
 
