@@ -35,6 +35,12 @@ const QUICK_QUESTIONS = [
   "Refresh my digital twin"
 ];
 
+const createMessageId = () => {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+};
 export default function DigitalTwinChatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
@@ -59,7 +65,7 @@ export default function DigitalTwinChatbot() {
     if (!inputText.trim() || isLoading) return;
 
     const userMessage: Message = {
-      id: Date.now().toString(),
+      id: createMessageId(),
       text: inputText,
       sender: 'user',
       timestamp: new Date(),
@@ -75,7 +81,7 @@ export default function DigitalTwinChatbot() {
       const response = await chatAPI.sendMessage(currentInput);
       
       const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
+        id: createMessageId(),
         text: response.reply || "I'm sorry, I couldn't process your request. Please try again.",
         sender: 'ai',
         timestamp: new Date(),
@@ -87,7 +93,7 @@ export default function DigitalTwinChatbot() {
       
       // Fallback error message
       const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
+        id: createMessageId(),
         text: error.message || "I'm having trouble connecting to the AI service. Please try again in a moment.",
         sender: 'ai',
         timestamp: new Date(),
