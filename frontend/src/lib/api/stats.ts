@@ -1,6 +1,26 @@
 import { opportunitiesAPI } from './opportunities';
 import { twinAPI } from './twin';
 
+const getStoredCvScore = (): number => {
+  try {
+    const comprehensive = localStorage.getItem('comprehensiveCVAnalysis');
+    if (comprehensive) {
+      const parsed = JSON.parse(comprehensive);
+      const score = Number(parsed?.score);
+      if (Number.isFinite(score) && score >= 0) return Math.round(score);
+    }
+
+    const cvScore = localStorage.getItem('cvScore');
+    if (cvScore) {
+      const score = Number(cvScore);
+      if (Number.isFinite(score) && score >= 0) return Math.round(score);
+    }
+  } catch (error) {
+    console.warn('Failed to parse stored CV score:', error);
+  }
+  return 0;
+};
+
 export const statsAPI = {
   getDashboardStats: async () => {
     try {
@@ -23,7 +43,7 @@ export const statsAPI = {
           skillsMatched: cvSkills.length || 0,
           opportunitiesCount: opportunities.length,
           interviewsPracticed: 0,
-          cvScore: 72,
+          cvScore: getStoredCvScore(),
         },
       };
     } catch (error) {
@@ -32,4 +52,3 @@ export const statsAPI = {
     }
   },
 };
-

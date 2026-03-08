@@ -1,12 +1,32 @@
 // frontend/src/lib/api.ts
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'; // Frontend API base URL
 
-// Set this to true to use demo mode when backend is unavailable
-const USE_DEMO_MODE = true; // Set to false when backend is fixed
+// Demo mode is opt-in via env var; real APIs are used by default.
+const USE_DEMO_MODE = import.meta.env.VITE_USE_DEMO_MODE === 'true';
 
 const getToken = (): string | null => localStorage.getItem('empowerai-token');
 const setToken = (token: string): void => localStorage.setItem('empowerai-token', token);
 const removeToken = (): void => localStorage.removeItem('empowerai-token');
+
+const getStoredCvScore = (): number => {
+  try {
+    const comprehensive = localStorage.getItem('comprehensiveCVAnalysis');
+    if (comprehensive) {
+      const parsed = JSON.parse(comprehensive);
+      const score = Number(parsed?.score);
+      if (Number.isFinite(score) && score >= 0) return Math.round(score);
+    }
+
+    const cvScore = localStorage.getItem('cvScore');
+    if (cvScore) {
+      const score = Number(cvScore);
+      if (Number.isFinite(score) && score >= 0) return Math.round(score);
+    }
+  } catch (error) {
+    console.warn('Failed to parse stored CV score:', error);
+  }
+  return 0;
+};
 
 const request = async <T>(endpoint: string, options: RequestInit = {}): Promise<T> => {
   const token = getToken();
@@ -1092,7 +1112,7 @@ export const statsAPIReal = {
           skillsMatched: cvSkills.length || 0,
           opportunitiesCount: typeof totalOpportunities === 'number' ? totalOpportunities : opportunities.length,
           interviewsPracticed: 0,
-          cvScore: 72,
+          cvScore: getStoredCvScore(),
         },
       };
     } catch (error) {
