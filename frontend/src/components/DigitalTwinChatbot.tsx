@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Bot, X, Send, Sparkles, User, Clock, ThumbsUp, ThumbsDown } from "lucide-react";
 import { cn } from "../lib/utils";
+import StatusPill from "./ui/StatusPill";
 import { chatAPI } from "../lib/api";
 
 interface Message {
@@ -157,7 +158,8 @@ export default function DigitalTwinChatbot() {
               <h3 className="font-bold text-white">Digital Economic Twin</h3>
               <p className="text-xs text-white/80 flex items-center gap-1">
                 <span className="h-2 w-2 rounded-full bg-green-400 animate-pulse"></span>
-                AI Assistant • Online
+                AI Assistant
+                <StatusPill label="Online" tone="success" />
               </p>
             </div>
           </div>
