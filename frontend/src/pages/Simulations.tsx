@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { Link } from "react-router-dom"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from "recharts"
 import { TrendingUp, Zap, Target, ArrowRight, Loader2, AlertCircle } from "lucide-react"
 import { cn } from "../lib/utils"
@@ -38,6 +39,10 @@ const pathsConfig = [
   { id: "internship", label: "Internship", color: "#EC4899" },
   { id: "graduate_program", label: "Graduate Program", color: "#14B8A6" },
 ]
+
+const normalizePathId = (pathId: string): string => {
+  return pathId.trim().toLowerCase().replace(/[-\s]+/g, "_")
+}
 
 export default function Simulations() {
   const [selectedPaths, setSelectedPaths] = useState<string[]>([])
@@ -154,6 +159,7 @@ export default function Simulations() {
    * Map path IDs from backend to chart-friendly keys
    */
   const mapPathIdToChartKey = (pathId: string): string => {
+    const normalizedPathId = normalizePathId(pathId)
     const mapping: Record<string, string> = {
       'freelancing': 'freelance',
       'learnership': 'learnership',
@@ -162,7 +168,7 @@ export default function Simulations() {
       'internship': 'internship',
       'graduate_program': 'graduate'
     }
-    return mapping[pathId] || pathId
+    return mapping[normalizedPathId] || normalizedPathId
   }
 
   /**
@@ -197,6 +203,7 @@ export default function Simulations() {
    * Map path IDs to skill categories for employability chart
    */
   const mapPathToSkillCategory = (pathId: string): string => {
+    const normalizedPathId = normalizePathId(pathId)
     const mapping: Record<string, string> = {
       'freelancing': 'Technical',
       'learnership': 'Communication',
@@ -205,14 +212,15 @@ export default function Simulations() {
       'internship': 'Teamwork',
       'graduate_program': 'Leadership'
     }
-    return mapping[pathId] || 'Other'
+    return mapping[normalizedPathId] || 'Other'
   }
 
   /**
    * Get path configuration from pathId
    */
   const getPathConfig = (pathId: string) => {
-    return pathsConfig.find(p => p.id === pathId) || { id: pathId, label: pathId, color: "#6366f1" }
+    const normalizedPathId = normalizePathId(pathId)
+    return pathsConfig.find(p => p.id === normalizedPathId) || { id: normalizedPathId, label: pathId, color: "#6366f1" }
   }
 
   /**
@@ -239,20 +247,23 @@ export default function Simulations() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-3 sm:px-0">
         <div>
-          <h1 className="text-2xl sm:text-2xl md:text-3xl font-bold text-foreground">Income Simulations</h1>
-          <p className="text-base sm:text-base text-muted-foreground mt-1 sm:mt-0">Compare different career pathways and see your earning potential</p>
+          <h1 className="text-2xl sm:text-2xl md:text-3xl font-bold text-foreground">Career Path Simulations</h1>
+          <p className="text-base sm:text-base text-muted-foreground mt-1 sm:mt-0">Compare career pathways and preview realistic income growth over 12 months</p>
         </div>
         <div className="flex items-center gap-2 px-4 py-2.5 sm:py-2 bg-secondary/20 text-secondary rounded-lg text-sm sm:text-base min-h-[44px] touch-manipulation">
           <Zap className="h-5 w-5" />
           <span className="font-medium">
-            Score: {empowermentScore ? `${empowermentScore.toFixed(1)}/100` : "—"}
+            Empowerment Score: {empowermentScore !== null ? `${empowermentScore.toFixed(1)}/100` : "--"}
           </span>
         </div>
       </div>
 
       {/* Path Selection */}
       <div className="bg-card border border-border rounded-none sm:rounded-xl p-5 sm:p-6 shadow-sm mx-3 sm:mx-0">
-        <h2 className="text-lg sm:text-lg md:text-xl font-semibold text-foreground mb-4">Select Pathways to Compare</h2>
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <h2 className="text-lg sm:text-lg md:text-xl font-semibold text-foreground">Select Pathways to Compare</h2>
+          <span className="text-xs sm:text-sm text-muted-foreground">{selectedPaths.length} selected</span>
+        </div>
         <div className="flex flex-wrap gap-2.5 sm:gap-3 mb-4">
           {pathsConfig.map((path) => (
             <button
@@ -290,7 +301,7 @@ export default function Simulations() {
           ) : (
             <>
               <Zap className="h-4 w-4" />
-              Run Simulation
+              Run Simulation ({selectedPaths.length})
             </>
           )}
         </button>
@@ -424,8 +435,24 @@ export default function Simulations() {
             <Target className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-foreground mb-2">No Simulation Results Yet</h3>
             <p className="text-muted-foreground mb-6">
-              Select one or more career paths above and click "Run Simulation" to see income projections.
+              Select one or more pathways above, then run a simulation to get income, skills, and employability projections.
             </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <button
+                onClick={runSimulation}
+                disabled={selectedPaths.length === 0 || isLoading}
+                className="w-full sm:w-auto px-5 py-2.5 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                <Zap className="h-4 w-4" />
+                Run Simulation
+              </button>
+              <Link
+                to="/dashboard/twin"
+                className="w-full sm:w-auto px-5 py-2.5 border border-border rounded-lg text-sm font-medium text-foreground hover:bg-muted transition-colors"
+              >
+                Update Digital Twin
+              </Link>
+            </div>
           </div>
         )
       )}
@@ -474,6 +501,7 @@ export default function Simulations() {
     </div>
   )
 }
+
 
 
 
