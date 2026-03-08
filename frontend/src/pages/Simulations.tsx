@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from "recharts"
-import { TrendingUp, Zap, Target, ArrowRight, Loader2, AlertCircle } from "lucide-react"
+import { TrendingUp, Zap, Target, ArrowRight, Loader2, AlertCircle, CheckCircle2 } from "lucide-react"
 import { cn } from "../lib/utils"
 import { twinAPI } from "../lib/api"
 
@@ -40,6 +40,17 @@ const pathsConfig = [
   { id: "graduate_program", label: "Graduate Program", color: "#14B8A6" },
 ]
 
+const MAX_SELECTED_PATHS = 3
+
+const pathMeta: Record<string, { duration: string; difficulty: "Low" | "Medium" | "High"; starterIncome: string; recommended?: boolean }> = {
+  freelancing: { duration: "1-2 months", difficulty: "Medium", starterIncome: "R3K-R12K", recommended: true },
+  learnership: { duration: "6-12 months", difficulty: "Low", starterIncome: "R2K-R6K" },
+  short_course: { duration: "2-4 months", difficulty: "Low", starterIncome: "R4K-R10K" },
+  entry_tech: { duration: "3-6 months", difficulty: "Medium", starterIncome: "R8K-R18K", recommended: true },
+  internship: { duration: "3-12 months", difficulty: "Medium", starterIncome: "R4K-R9K" },
+  graduate_program: { duration: "12-24 months", difficulty: "High", starterIncome: "R10K-R20K" },
+}
+
 const normalizePathId = (pathId: string): string => {
   return pathId.trim().toLowerCase().replace(/[-\s]+/g, "_")
 }
@@ -52,6 +63,7 @@ export default function Simulations() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [empowermentScore, setEmpowermentScore] = useState<number | null>(null)
+  const [visibleChartPathIds, setVisibleChartPathIds] = useState<string[]>([])
 
   useEffect(() => {
     // Fetch twin data to get empowerment score
@@ -69,7 +81,15 @@ export default function Simulations() {
   }, [])
 
   const togglePath = (id: string) => {
-    setSelectedPaths((prev) => (prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]))
+    setSelectedPaths((prev) => {
+      if (prev.includes(id)) return prev.filter((p) => p !== id)
+      if (prev.length >= MAX_SELECTED_PATHS) {
+        setError(`You can compare up to ${MAX_SELECTED_PATHS} pathways at a time`)
+        return prev
+      }
+      setError("")
+      return [...prev, id]
+    })
   }
 
   const runSimulation = async () => {
@@ -88,6 +108,7 @@ export default function Simulations() {
         const simulationResults: PathSimulation[] = response.data.simulations
         
         setSimulations(simulationResults)
+        setVisibleChartPathIds(simulationResults.map((sim) => sim.pathId))
         
         // Transform simulation results into chart data
         const chartData = transformSimulationsToChartData(simulationResults)
@@ -242,8 +263,34 @@ export default function Simulations() {
     return "TBD"
   }
 
+  const getTwelveMonthIncome = (sim: PathSimulation): number => sim.projections.twelveMonth?.income || 0
+
+  const getSimulationConfidence = (sim: PathSimulation): "High" | "Medium" | "Early Estimate" => {
+    const points = [sim.projections.threeMonth, sim.projections.sixMonth, sim.projections.twelveMonth]
+      .filter((p) => (p?.income || 0) > 0).length
+    if (points >= 3) return "High"
+    if (points === 2) return "Medium"
+    return "Early Estimate"
+  }
+
+  const setTopThreeVisible = () => {
+    const topThree = [...simulations]
+      .sort((a, b) => getTwelveMonthIncome(b) - getTwelveMonthIncome(a))
+      .slice(0, 3)
+      .map((sim) => sim.pathId)
+    setVisibleChartPathIds(topThree)
+  }
+
+  const topPath = simulations.length
+    ? simulations.reduce((best, current) => (getTwelveMonthIncome(current) > getTwelveMonthIncome(best) ? current : best), simulations[0])
+    : null
+  const bestProjectedIncome = topPath ? getTwelveMonthIncome(topPath) : 0
+  const avgEmployability = employabilityData.length
+    ? Math.round(employabilityData.reduce((total, item) => total + (item.score || 0), 0) / employabilityData.length)
+    : null
+
   return (
-    <div className="space-y-5 sm:space-y-6 md:space-y-8 -mx-3 sm:mx-0">
+    <div className="space-y-5 sm:space-y-6 md:space-y-8 -mx-3 sm:mx-0 pb-24 md:pb-0">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-3 sm:px-0">
         <div>
@@ -258,26 +305,62 @@ export default function Simulations() {
         </div>
       </div>
 
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 px-3 sm:px-0">
+        <div className="bg-card border border-border rounded-lg p-3">
+          <p className="text-xs text-muted-foreground">Paths selected</p>
+          <p className="text-lg font-semibold text-foreground">{selectedPaths.length}/{MAX_SELECTED_PATHS}</p>
+        </div>
+        <div className="bg-card border border-border rounded-lg p-3">
+          <p className="text-xs text-muted-foreground">Top path</p>
+          <p className="text-lg font-semibold text-foreground">{topPath ? (topPath.pathName || getPathConfig(topPath.pathId).label) : "--"}</p>
+        </div>
+        <div className="bg-card border border-border rounded-lg p-3">
+          <p className="text-xs text-muted-foreground">Projected max income</p>
+          <p className="text-lg font-semibold text-foreground">{bestProjectedIncome > 0 ? `R${bestProjectedIncome.toLocaleString()}/mo` : "--"}</p>
+        </div>
+        <div className="bg-card border border-border rounded-lg p-3">
+          <p className="text-xs text-muted-foreground">Avg employability</p>
+          <p className="text-lg font-semibold text-foreground">{avgEmployability !== null ? `${avgEmployability}%` : "--"}</p>
+        </div>
+      </div>
+
       {/* Path Selection */}
       <div className="bg-card border border-border rounded-none sm:rounded-xl p-5 sm:p-6 shadow-sm mx-3 sm:mx-0">
         <div className="mb-4 flex items-start justify-between gap-3">
           <h2 className="text-lg sm:text-lg md:text-xl font-semibold text-foreground">Select Pathways to Compare</h2>
           <span className="text-xs sm:text-sm text-muted-foreground">{selectedPaths.length} selected</span>
         </div>
-        <div className="flex flex-wrap gap-2.5 sm:gap-3 mb-4">
+        <p className="text-xs sm:text-sm text-muted-foreground mb-4">
+          Compare up to {MAX_SELECTED_PATHS} pathways. Choose fewer for a clearer chart.
+        </p>
+        <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3 mb-4">
           {pathsConfig.map((path) => (
             <button
               key={path.id}
               onClick={() => togglePath(path.id)}
               className={cn(
-                "px-4 py-2.5 sm:py-2 rounded-lg border flex items-center gap-2 transition-colors min-h-[44px] touch-manipulation text-sm sm:text-base",
+                "p-4 rounded-lg border text-left transition-colors min-h-[108px] touch-manipulation",
                 selectedPaths.includes(path.id)
                   ? "border-primary bg-primary/10"
-                  : "border-border bg-background hover:border-primary/50",
+                  : "border-border bg-background hover:border-primary/50 hover:bg-muted/40",
               )}
             >
-              <div className="h-3 w-3 rounded-full flex-shrink-0" style={{ backgroundColor: path.color }} />
-              <span className="text-foreground">{path.label}</span>
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="h-3 w-3 rounded-full flex-shrink-0" style={{ backgroundColor: path.color }} />
+                    <span className="text-foreground font-medium">{path.label}</span>
+                    {pathMeta[path.id]?.recommended && (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-secondary/20 text-secondary">Recommended</span>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Duration: {pathMeta[path.id]?.duration || "--"} | Difficulty: {pathMeta[path.id]?.difficulty || "--"}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">Typical start: {pathMeta[path.id]?.starterIncome || "--"}/mo</p>
+                </div>
+                {selectedPaths.includes(path.id) && <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0" />}
+              </div>
             </button>
           ))}
         </div>
@@ -291,7 +374,7 @@ export default function Simulations() {
         <button
           onClick={runSimulation}
           disabled={selectedPaths.length === 0 || isLoading}
-          className="w-full sm:w-auto px-6 py-3 sm:py-2 bg-primary text-white rounded-lg text-base sm:text-base font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[52px] sm:min-h-[44px] touch-manipulation"
+          className="hidden md:flex w-full sm:w-auto px-6 py-3 sm:py-2 bg-primary text-white rounded-lg text-base sm:text-base font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed items-center justify-center gap-2 min-h-[52px] sm:min-h-[44px] touch-manipulation"
         >
           {isLoading ? (
             <>
@@ -305,6 +388,9 @@ export default function Simulations() {
             </>
           )}
         </button>
+        {selectedPaths.length === 0 && (
+          <p className="mt-3 text-xs text-muted-foreground">Select at least one pathway to enable simulation.</p>
+        )}
       </div>
 
       {/* Charts - Only show if simulations have been run */}
@@ -312,9 +398,45 @@ export default function Simulations() {
         <>
           {/* Income Projection Chart */}
           <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-            <div className="flex items-center gap-2 mb-6">
-              <TrendingUp className="h-5 w-5 text-primary" />
-              <h2 className="text-lg font-semibold text-foreground">12-Month Income Projection</h2>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-primary" />
+                <h2 className="text-lg font-semibold text-foreground">12-Month Income Projection</h2>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setVisibleChartPathIds(simulations.map((sim) => sim.pathId))}
+                  className="px-3 py-1.5 text-xs rounded-md border border-border hover:bg-muted"
+                >
+                  Show all
+                </button>
+                <button
+                  onClick={setTopThreeVisible}
+                  className="px-3 py-1.5 text-xs rounded-md border border-border hover:bg-muted"
+                >
+                  Top 3
+                </button>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {simulations.map((sim) => {
+                const pathConfig = getPathConfig(sim.pathId)
+                const active = visibleChartPathIds.includes(sim.pathId)
+                return (
+                  <button
+                    key={`toggle-${sim.pathId}`}
+                    onClick={() => setVisibleChartPathIds((prev) => (
+                      prev.includes(sim.pathId) ? prev.filter((id) => id !== sim.pathId) : [...prev, sim.pathId]
+                    ))}
+                    className={cn(
+                      "px-3 py-1.5 text-xs rounded-full border",
+                      active ? "border-primary bg-primary/10 text-foreground" : "border-border text-muted-foreground",
+                    )}
+                  >
+                    {sim.pathName || pathConfig.label}
+                  </button>
+                )
+              })}
             </div>
             {incomeChartData.length > 0 ? (
               <div className="h-80">
@@ -337,13 +459,16 @@ export default function Simulations() {
                         border: "1px solid hsl(var(--border))",
                         borderRadius: "0.5rem",
                       }}
-                      formatter={(value: number) => [`R${value.toLocaleString()}`, ""]}
+                      formatter={(value: number, _name: string, item: any) => [`R${value.toLocaleString()} / month`, item?.name || "Path"]}
+                      labelFormatter={(label) => `Month: ${label}`}
                       labelStyle={{ color: 'var(--color-foreground)' }}
                     />
                     <Legend wrapperStyle={{ color: 'var(--color-foreground)' }} />
                     {simulations.map((sim) => {
                       const pathConfig = getPathConfig(sim.pathId)
                       const chartKey = mapPathIdToChartKey(sim.pathId)
+                      const isVisible = visibleChartPathIds.includes(sim.pathId)
+                      if (!isVisible) return null
                       return (
                         <Line
                           key={sim.pathId}
@@ -371,17 +496,26 @@ export default function Simulations() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {simulations.map((sim) => {
               const pathConfig = getPathConfig(sim.pathId)
+              const baseline = Math.min(...simulations.map((item) => getTwelveMonthIncome(item)))
+              const delta = getTwelveMonthIncome(sim) - baseline
+              const confidence = getSimulationConfidence(sim)
               return (
                 <div
                   key={sim.pathId}
                   className="bg-card border border-primary rounded-xl p-5 transition-colors shadow-sm"
                 >
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="h-3 w-3 rounded-full" style={{ backgroundColor: pathConfig.color }} />
-                    <span className="font-medium text-foreground">{sim.pathName || pathConfig.label}</span>
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="h-3 w-3 rounded-full" style={{ backgroundColor: pathConfig.color }} />
+                      <span className="font-medium text-foreground">{sim.pathName || pathConfig.label}</span>
+                    </div>
+                    <span className="text-[11px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{confidence}</span>
                   </div>
                   <p className="text-2xl font-bold text-foreground mb-1">{getProjectionDisplay(sim)}</p>
                   <p className="text-sm text-muted-foreground mb-2">12-month projection</p>
+                  <p className={cn("text-xs mb-2", delta >= 0 ? "text-secondary" : "text-muted-foreground")}>
+                    {delta >= 0 ? "+" : ""}R{delta.toLocaleString()} vs baseline pathway
+                  </p>
                   <p className="text-xs text-muted-foreground line-clamp-2">{sim.description}</p>
                 </div>
               )
@@ -498,6 +632,26 @@ export default function Simulations() {
           </div>
         )
       })()}
+
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur border-t border-border p-3 z-30">
+        <button
+          onClick={runSimulation}
+          disabled={selectedPaths.length === 0 || isLoading}
+          className="w-full px-5 py-3 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Running...
+            </>
+          ) : (
+            <>
+              <Zap className="h-4 w-4" />
+              Run Simulation ({selectedPaths.length}/{MAX_SELECTED_PATHS})
+            </>
+          )}
+        </button>
+      </div>
     </div>
   )
 }
