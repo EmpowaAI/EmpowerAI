@@ -117,7 +117,14 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const loadUserFromBackend = async () => {
       const token = localStorage.getItem('empowerai-token')
-      if (token && !user) {
+      const shouldValidate =
+        !!token &&
+        (!user ||
+          String(user.id || '').startsWith('demo-') ||
+          user.email === 'demo@example.com' ||
+          user.name?.toLowerCase().includes('demo'))
+
+      if (shouldValidate) {
         try {
           const response = await fetch(
             `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/validate`,
@@ -137,6 +144,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
             }
           } else if (response.status === 401) {
             localStorage.removeItem('empowerai-token')
+            localStorage.removeItem('user')
+            setUser(null)
           }
         } catch (error) {
           console.warn('Failed to validate token:', error)
