@@ -1,4 +1,7 @@
-export const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+export const API_BASE =
+  import.meta.env.VITE_API_BASE_URL ||
+  import.meta.env.VITE_API_URL ||
+  'http://localhost:5000/api';
 
 export const getToken = (): string | null => localStorage.getItem('empowerai-token');
 export const setToken = (token: string): void => localStorage.setItem('empowerai-token', token);
@@ -67,4 +70,3 @@ export const request = async <T>(endpoint: string, options: RequestInit = {}): P
     throw error;
   }
 };
-
