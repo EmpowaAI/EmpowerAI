@@ -1,5 +1,5 @@
 // frontend/src/lib/user-context.tsx
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { syncProgressFromBackend } from '../utils/progressSync'
 
 interface User {
@@ -112,7 +112,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   }
 
   const [progress, setProgress] = useState(getProgressFromStorage)
-  const initialLoadDone = useRef(false);
 
   useEffect(() => {
     const loadUserFromBackend = async () => {
@@ -156,30 +155,26 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     loadUserFromBackend()
   }, [])
 
-  // Only sync progress once on mount
   useEffect(() => {
-    if (initialLoadDone.current) return;
-    initialLoadDone.current = true;
-    
+    if (!user) return
+
     const syncProgress = async () => {
-      if (user) {
-        try {
-          const syncedProgress = await syncProgressFromBackend()
-          setProgress(syncedProgress)
-          
-          if (syncedProgress.cvCompleted && syncedProgress.twinCompleted) {
-            localStorage.setItem('cvCompleted', 'true')
-            localStorage.setItem('twinCompleted', 'true')
-            if (syncedProgress.empowermentScore) {
-              localStorage.setItem('empowermentScore', String(syncedProgress.empowermentScore))
-            }
+      try {
+        const syncedProgress = await syncProgressFromBackend()
+        setProgress(syncedProgress)
+
+        if (syncedProgress.cvCompleted && syncedProgress.twinCompleted) {
+          localStorage.setItem('cvCompleted', 'true')
+          localStorage.setItem('twinCompleted', 'true')
+          if (syncedProgress.empowermentScore) {
+            localStorage.setItem('empowermentScore', String(syncedProgress.empowermentScore))
           }
-        } catch (error) {
-          console.log('Error syncing progress, using localStorage:', error)
         }
+      } catch (error) {
+        console.log('Error syncing progress, using localStorage:', error)
       }
     }
-    
+
     syncProgress()
   }, [user])
 

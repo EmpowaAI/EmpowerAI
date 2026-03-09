@@ -91,7 +91,7 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="h-screen bg-background flex overflow-hidden">
+    <div className="min-h-[100dvh] bg-background flex overflow-hidden">
       {/* Mobile Menu Overlay */}
       <div
         className={cn(
@@ -273,19 +273,19 @@ export default function DashboardLayout({
 
             {/* Progress indicator */}
             {progress.twinCompleted ? (
-              <div className="hidden xs:flex items-center gap-2 px-3 py-1.5 bg-[var(--sa-green)]/10 rounded-full border border-[var(--sa-green)]/30">
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-[var(--sa-green)]/10 rounded-full border border-[var(--sa-green)]/30">
                 <span className="w-2 h-2 bg-[var(--sa-green)] rounded-full animate-pulse" />
                 <span className="text-xs font-bold text-[var(--sa-green)]">
                   Score: {progress.empowermentScore || 0}%
                 </span>
               </div>
             ) : progress.cvCompleted ? (
-              <div className="hidden xs:flex items-center gap-2 px-3 py-1.5 bg-[var(--sa-gold)]/10 text-[var(--sa-gold)] rounded-full text-xs font-medium whitespace-nowrap">
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-[var(--sa-gold)]/10 text-[var(--sa-gold)] rounded-full text-xs font-medium whitespace-nowrap">
                 <span className="h-2 w-2 rounded-full bg-[var(--sa-gold)] animate-pulse flex-shrink-0"></span>
                 <span className="truncate">Complete Digital Twin</span>
               </div>
             ) : (
-              <div className="hidden xs:flex items-center gap-2 px-3 py-1.5 bg-[var(--sa-gold)]/10 text-[var(--sa-gold)] rounded-full text-xs font-medium whitespace-nowrap">
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-[var(--sa-gold)]/10 text-[var(--sa-gold)] rounded-full text-xs font-medium whitespace-nowrap">
                 <span className="h-2 w-2 rounded-full bg-[var(--sa-gold)] animate-pulse flex-shrink-0"></span>
                 <span className="truncate">Start CV Analyzer</span>
               </div>
