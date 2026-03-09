@@ -132,11 +132,11 @@ async def debug_connection():
 # Import routes
 from routes import digital_twin, simulation, cv_analysis, cv_analysis_file, interview, chat, digital_twin_chat
 
-# Include routers with proper prefixes
+# Include routers with proper prefixes - FIXED: Added /cv prefix for CV endpoints
 app.include_router(digital_twin.router, prefix="/api")
 app.include_router(simulation.router, prefix="/api")
-app.include_router(cv_analysis.router, prefix="/api")
-app.include_router(cv_analysis_file.router, prefix="/api")
+app.include_router(cv_analysis.router, prefix="/api/cv")  # Fixed: Added /cv prefix
+app.include_router(cv_analysis_file.router, prefix="/api/cv")  # Fixed: Added /cv prefix
 app.include_router(interview.router, prefix="/api")
 app.include_router(chat.router, prefix="/api")
 app.include_router(digital_twin_chat.router, prefix="/api")  # This will make routes available at /api/chat/twin
