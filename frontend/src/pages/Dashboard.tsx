@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Target, Briefcase, FileText, ArrowRight, Sparkles,
@@ -23,11 +23,50 @@ interface DashboardStats {
 }
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [aiThinking, setAiThinking] = useState(true);
   const [aiMessage, setAiMessage] = useState("Initialising your AI twin...");
+  
+  // Reactive completion status
+  const [twinCompleted, setTwinCompleted] = useState(false);
+  const [cvCompleted, setCvCompleted] = useState(false);
+  
   const displayName = "Explorer";
+
+  // Check localStorage for completion status
+  useEffect(() => {
+    const checkCompletionStatus = () => {
+      try {
+        // Check twin completion
+        const twinData = localStorage.getItem('twinData');
+        setTwinCompleted(!!twinData);
+        
+        // Check CV completion
+        const cvAnalysis = localStorage.getItem('comprehensiveCVAnalysis');
+        setCvCompleted(!!cvAnalysis);
+      } catch (e) {
+        console.error('Error checking completion status:', e);
+      }
+    };
+
+    // Initial check
+    checkCompletionStatus();
+
+    // Listen for storage events (updates from other tabs)
+    window.addEventListener('storage', checkCompletionStatus);
+
+    // Custom event for same-tab updates
+    window.addEventListener('twinCompleted', checkCompletionStatus);
+    window.addEventListener('cvCompleted', checkCompletionStatus);
+
+    return () => {
+      window.removeEventListener('storage', checkCompletionStatus);
+      window.removeEventListener('twinCompleted', checkCompletionStatus);
+      window.removeEventListener('cvCompleted', checkCompletionStatus);
+    };
+  }, []);
 
   useEffect(() => {
     const messages = [
@@ -90,25 +129,6 @@ export default function Dashboard() {
     { icon: Briefcase, title: "Find Opportunities", desc: "AI-matched jobs, learnerships & graduate programmes", path: "/dashboard/opportunities", color: "sa-green" },
     { icon: Brain, title: "Digital Twin", desc: "Build and manage your AI twin profile", path: "/dashboard/twin-builder", color: "primary" },
   ];
-
-  // Check completion status from localStorage
-  const cvCompleted = (() => {
-    try {
-      const cvAnalysis = localStorage.getItem('comprehensiveCVAnalysis');
-      return !!cvAnalysis;
-    } catch {
-      return false;
-    }
-  })();
-
-  const twinCompleted = (() => {
-    try {
-      const twinData = localStorage.getItem('twinData');
-      return !!twinData;
-    } catch {
-      return false;
-    }
-  })();
 
   const journeySteps = [
     { label: "Build Digital Twin", path: "/dashboard/twin-builder", completed: twinCompleted },
@@ -253,25 +273,46 @@ export default function Dashboard() {
                 </div>
 
                 <div className="space-y-3">
-                  {journeySteps.map((step, i) => (
-                    <Link key={step.label} to={step.path}
-                      className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-muted/20 hover:border-sa-gold/30 hover:bg-sa-gold/5 transition-all group"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-display ${
-                          step.completed 
-                            ? "bg-sa-green/20 border border-sa-green/50 text-sa-green" 
-                            : "bg-primary/10 border border-primary/30 text-primary"
-                        }`}>
-                          {step.completed ? <CheckCircle className="h-4 w-4" /> : String(i + 1).padStart(2, "0")}
+                  {journeySteps.map((step, i) => {
+                    // If step is completed, render as non-clickable div
+                    if (step.completed) {
+                      return (
+                        <div
+                          key={step.label}
+                          className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-muted/20 opacity-75 cursor-not-allowed"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="h-8 w-8 rounded-full bg-sa-green/20 border border-sa-green/50 text-sa-green flex items-center justify-center text-xs font-display">
+                              <CheckCircle className="h-4 w-4" />
+                            </div>
+                            <span className="text-sm font-medium line-through text-muted-foreground">
+                              {step.label}
+                            </span>
+                          </div>
+                          <ChevronRight className="h-4 w-4 text-muted-foreground/30" />
                         </div>
-                        <span className={`text-sm font-medium ${step.completed ? "line-through text-muted-foreground" : ""}`}>
-                          {step.label}
-                        </span>
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-sa-gold transition-colors" />
-                    </Link>
-                  ))}
+                      );
+                    }
+
+                    // If step is not completed, render as clickable Link
+                    return (
+                      <Link
+                        key={step.label}
+                        to={step.path}
+                        className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-muted/20 hover:border-sa-gold/30 hover:bg-sa-gold/5 transition-all group cursor-pointer"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="h-8 w-8 rounded-full bg-primary/10 border border-primary/30 text-primary flex items-center justify-center text-xs font-display">
+                            {String(i + 1).padStart(2, "0")}
+                          </div>
+                          <span className="text-sm font-medium">
+                            {step.label}
+                          </span>
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-sa-gold transition-colors" />
+                      </Link>
+                    );
+                  })}
                 </div>
               </GlassCard>
             </motion.div>
