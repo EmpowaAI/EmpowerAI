@@ -1,5 +1,5 @@
 // src/components/DashboardLayout.tsx
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Link, useLocation, Outlet, useNavigate } from "react-router-dom"
 import {
   Zap,
@@ -41,6 +41,17 @@ export default function DashboardLayout({
   const { user } = useUser()
 
   const isSubPage = pathname !== "/dashboard"
+
+  useEffect(() => {
+    setMobileMenuOpen(false)
+  }, [pathname])
+
+  useEffect(() => {
+    document.body.style.overflow = mobileMenuOpen ? "hidden" : ""
+    return () => {
+      document.body.style.overflow = ""
+    }
+  }, [mobileMenuOpen])
 
   // Use user from context, with fallback
   const displayName = user?.name?.split(" ")[0] || "Guest"
@@ -286,10 +297,33 @@ export default function DashboardLayout({
 
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto bg-gradient-to-b from-background to-muted/30">
-          <div className="p-4 sm:p-6 md:p-8 lg:p-10 max-w-6xl mx-auto w-full">
+          <div className="p-4 sm:p-6 md:p-8 lg:p-10 pb-24 lg:pb-10 max-w-6xl mx-auto w-full">
             {children || <Outlet />}
           </div>
         </main>
+
+        {/* Mobile Bottom Navigation */}
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-card/95 backdrop-blur-md">
+          <div className="grid grid-cols-5 gap-1 px-2 py-2">
+            {navItems.map((item) => {
+              const isActive = pathname === item.path
+              const Icon = item.icon
+              return (
+                <Link
+                  key={`bottom-${item.path}`}
+                  to={item.path}
+                  className={cn(
+                    "flex flex-col items-center justify-center rounded-lg py-2 text-[10px] font-medium transition-colors",
+                    isActive ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  )}
+                >
+                  <Icon className="h-4 w-4 mb-1" />
+                  <span className="truncate max-w-[56px]">{item.label.split(" ")[0]}</span>
+                </Link>
+              )
+            })}
+          </div>
+        </nav>
       </div>
     </div>
   )

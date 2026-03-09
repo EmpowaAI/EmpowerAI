@@ -40,7 +40,7 @@ export default function EmailVerified() {
   }, [searchParams, navigate])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-background to-cyan-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 flex items-center justify-center p-4 animate-fade-in">
+    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/10 dark:from-background dark:via-background dark:to-muted/60 flex items-center justify-center p-4 animate-fade-in">
       <div className="w-full max-w-md">
         <div className="bg-card/80 dark:bg-card/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl p-8 sm:p-10 text-center animate-slide-up">
           <div className="mb-6">

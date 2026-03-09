@@ -127,11 +127,11 @@ export default function Dashboard() {
     { icon: FileText, title: "Analyse CV", desc: "Get AI-powered CV insights for the SA market", path: "/dashboard/cv-analyzer", color: "sa-gold" },
     { icon: MessageSquare, title: "Interview Coach", desc: "Practise with SA-specific interview questions", path: "/dashboard/interview-coach", color: "sa-terracotta" },
     { icon: Briefcase, title: "Find Opportunities", desc: "AI-matched jobs, learnerships & graduate programmes", path: "/dashboard/opportunities", color: "sa-green" },
-    { icon: Brain, title: "Digital Twin", desc: "Build and manage your AI twin profile", path: "/dashboard/twin-builder", color: "primary" },
+    { icon: Brain, title: "Digital Twin", desc: "Build and manage your AI twin profile", path: "/dashboard/twin", color: "primary" },
   ];
 
   const journeySteps = [
-    { label: "Build Digital Twin", path: "/dashboard/twin-builder", completed: twinCompleted },
+    { label: "Build Digital Twin", path: "/dashboard/twin", completed: twinCompleted },
     { label: "Analyse CV", path: "/dashboard/cv-analyzer", completed: cvCompleted },
     { label: "Practice Interview", path: "/dashboard/interview-coach", completed: false },
     { label: "Apply to Opportunities", path: "/dashboard/opportunities", completed: false },
@@ -329,7 +329,7 @@ export default function Dashboard() {
                   <div><p className="text-xs text-muted-foreground">Career Goals</p><p className="text-sm font-medium">Tech Career • Freelancing</p></div>
                   <div><p className="text-xs text-muted-foreground">Top Skills</p><p className="text-sm font-medium">JavaScript • React • TypeScript</p></div>
                 </div>
-                <Link to="/dashboard/twin-builder" className="mt-4 inline-flex items-center gap-2 text-xs text-sa-gold hover:text-sa-terracotta transition-colors font-medium">
+                <Link to="/dashboard/twin" className="mt-4 inline-flex items-center gap-2 text-xs text-sa-gold hover:text-sa-terracotta transition-colors font-medium">
                   Update profile <ArrowRight className="h-3 w-3" />
                 </Link>
               </GlassCard>
