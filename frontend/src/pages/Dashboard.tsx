@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Target, Briefcase, FileText, ArrowRight, Sparkles,
@@ -11,6 +11,7 @@ import GlassCard from "../components/GlassCard";
 import AIThinkingIndicator from "../components/AIThinkingIndicator";
 import LiveInsightsFeed from "../components/LiveInsightsFeed";
 import SkillGapAnalysis from "../components/SkillGapAnalysis";
+import { useUser } from "../lib/user-context";
 
 interface DashboardStats {
   empowermentScore: number;
@@ -23,7 +24,7 @@ interface DashboardStats {
 }
 
 export default function Dashboard() {
-  const navigate = useNavigate();
+  const { user } = useUser();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [aiThinking, setAiThinking] = useState(true);
@@ -33,7 +34,7 @@ export default function Dashboard() {
   const [twinCompleted, setTwinCompleted] = useState(false);
   const [cvCompleted, setCvCompleted] = useState(false);
   
-  const displayName = "Explorer";
+  const displayName = user?.name?.split(" ")[0] || "Explorer";
 
   // Check localStorage for completion status
   useEffect(() => {
@@ -106,14 +107,40 @@ export default function Dashboard() {
         console.error('Failed to parse twin data:', e);
       }
 
+      let skillsMatched = 0;
+      let opportunitiesCount = 0;
+      let applicationsCount = 0;
+
+      try {
+        const parsedCv = JSON.parse(localStorage.getItem("comprehensiveCVAnalysis") || "{}");
+        skillsMatched = Array.isArray(parsedCv?.sections?.skills) ? parsedCv.sections.skills.length : 0;
+      } catch {
+        skillsMatched = 0;
+      }
+
+      try {
+        const applicationsRaw = localStorage.getItem("trackedApplications");
+        const parsedApplications = applicationsRaw ? JSON.parse(applicationsRaw) : [];
+        applicationsCount = Array.isArray(parsedApplications) ? parsedApplications.length : 0;
+      } catch {
+        applicationsCount = 0;
+      }
+
+      try {
+        const cachedOpportunities = JSON.parse(localStorage.getItem("opportunitiesCache") || "[]");
+        opportunitiesCount = Array.isArray(cachedOpportunities) ? cachedOpportunities.length : 0;
+      } catch {
+        opportunitiesCount = 0;
+      }
+
       setStats({
         empowermentScore,
         cvScore,
         interviewScore: 0,
-        skillsMatched: cvScore > 0 ? Math.floor(Math.random() * 5) + 5 : 0,
-        opportunitiesCount: cvScore > 0 ? Math.floor(Math.random() * 20) + 15 : 0,
-        applicationsCount: 0,
-        learnershipsCount: empowermentScore > 0 ? Math.floor(Math.random() * 10) + 8 : 0,
+        skillsMatched,
+        opportunitiesCount,
+        applicationsCount,
+        learnershipsCount: opportunitiesCount,
       });
       setLoading(false);
       setAiThinking(false);
@@ -325,9 +352,9 @@ export default function Dashboard() {
                   <Users className="h-4 w-4 text-sa-gold" /> Profile Snapshot
                 </h4>
                 <div className="space-y-3">
-                  <div><p className="text-xs text-muted-foreground">Province</p><p className="text-sm font-medium">Gauteng</p></div>
-                  <div><p className="text-xs text-muted-foreground">Career Goals</p><p className="text-sm font-medium">Tech Career • Freelancing</p></div>
-                  <div><p className="text-xs text-muted-foreground">Top Skills</p><p className="text-sm font-medium">JavaScript • React • TypeScript</p></div>
+                  <div><p className="text-xs text-muted-foreground">Province</p><p className="text-sm font-medium">{user?.province || "Not set"}</p></div>
+                  <div><p className="text-xs text-muted-foreground">Career Goals</p><p className="text-sm font-medium">{user?.interests?.slice(0, 2).join(" • ") || "Not set yet"}</p></div>
+                  <div><p className="text-xs text-muted-foreground">Top Skills</p><p className="text-sm font-medium">{user?.skills?.slice(0, 3).join(" • ") || "Add skills in profile"}</p></div>
                 </div>
                 <Link to="/dashboard/twin" className="mt-4 inline-flex items-center gap-2 text-xs text-sa-gold hover:text-sa-terracotta transition-colors font-medium">
                   Update profile <ArrowRight className="h-3 w-3" />

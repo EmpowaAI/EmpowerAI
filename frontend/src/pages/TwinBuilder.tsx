@@ -188,7 +188,7 @@ export default function TwinBuilder() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-background chat-gradient">
+    <div className="flex flex-col min-h-[100dvh] bg-background chat-gradient">
       {/* Header */}
       <div className="flex-shrink-0 border-b border-border bg-card/80 backdrop-blur-md">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
