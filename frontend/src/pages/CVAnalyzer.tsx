@@ -37,26 +37,11 @@ export default function CVAnalyzer() {
   const [fileName, setFileName] = useState<string | null>(() => {
     return localStorage.getItem('cvFileName') || null
   })
-  const [darkMode, setDarkMode] = useState(() => {
-    const saved = localStorage.getItem('darkMode')
-    return saved ? JSON.parse(saved) : false
-  })
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   
   const { updateProgress } = useUser()
   const { success, error: toastError } = useToast()
-
-  // Save dark mode preference
-  useEffect(() => {
-    localStorage.setItem('darkMode', JSON.stringify(darkMode))
-    if (darkMode) {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
-  }, [darkMode])
 
   // Save to localStorage whenever cvData changes
   useEffect(() => {
@@ -73,17 +58,6 @@ export default function CVAnalyzer() {
       localStorage.removeItem('cvFileName')
     }
   }, [fileName])
-
-  // Close mobile menu on resize
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth > 768) {
-        setMobileMenuOpen(false)
-      }
-    }
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()

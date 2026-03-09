@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react"
 import { Send, Loader2, MessageCircle, AlertCircle } from "lucide-react"
 import { useUser } from "../lib/user-context"
 import { cn } from "../lib/utils"
+import { chatAPI } from "../lib/api"
 
 interface Message {
   id: string
@@ -42,28 +43,12 @@ export default function Chat() {
     setError("")
 
     try {
-      const response = await fetch("/api/chat/send", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("empowerai-token")}`,
-        },
-        body: JSON.stringify({
-          message: input,
-          conversationHistory: messages,
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to send message")
-      }
-
-      const data = await response.json()
+      const data = await chatAPI.sendMessage(input)
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: data.reply || data.message || "I couldn't process that request.",
+        content: data.reply || "I couldn't process that request.",
         timestamp: new Date(),
       }
 
@@ -78,22 +63,22 @@ export default function Chat() {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-150px)] bg-white rounded-lg shadow-md overflow-hidden">
+    <div className="flex flex-col h-[calc(100dvh-9rem)] min-h-[28rem] bg-card rounded-xl border border-border shadow-sm overflow-hidden">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6">
+      <div className="bg-gradient-to-r from-sa-gold to-sa-terracotta text-primary-foreground p-4 sm:p-6">
         <div className="flex items-center gap-3">
           <MessageCircle className="w-6 h-6" />
           <div>
             <h1 className="text-2xl font-bold">AI Assistant</h1>
-            <p className="text-blue-100">Get personalized guidance and support</p>
+            <p className="text-primary-foreground/80">Get personalized guidance and support</p>
           </div>
         </div>
       </div>
 
       {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-4">
+      <div className="flex-1 overflow-y-auto p-3 sm:p-5 space-y-4 bg-background">
         {messages.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-gray-400">
+          <div className="flex items-center justify-center h-full text-muted-foreground">
             <div className="text-center">
               <MessageCircle className="w-16 h-16 mx-auto mb-4 opacity-50" />
               <p>Start a conversation to get personalized guidance</p>
@@ -109,7 +94,7 @@ export default function Chat() {
               )}
             >
               {message.role === "assistant" && (
-                <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center flex-shrink-0">
                   AI
                 </div>
               )}
@@ -117,8 +102,8 @@ export default function Chat() {
                 className={cn(
                   "max-w-xs lg:max-w-md px-4 py-2 rounded-lg",
                   message.role === "user"
-                    ? "bg-blue-600 text-white rounded-br-none"
-                    : "bg-gray-100 text-gray-800 rounded-bl-none"
+                    ? "bg-primary text-primary-foreground rounded-br-none"
+                    : "bg-muted text-foreground rounded-bl-none border border-border"
                 )}
               >
                 <p className="text-sm">{message.content}</p>
@@ -127,7 +112,7 @@ export default function Chat() {
                 </p>
               </div>
               {message.role === "user" && (
-                <div className="w-8 h-8 bg-gray-300 text-gray-700 rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 bg-secondary text-secondary-foreground rounded-full flex items-center justify-center flex-shrink-0">
                   {user?.name?.charAt(0) || "U"}
                 </div>
               )}
@@ -136,25 +121,25 @@ export default function Chat() {
         )}
         {isLoading && (
           <div className="flex gap-3 justify-start">
-            <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center flex-shrink-0">
+            <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center flex-shrink-0">
               AI
             </div>
-            <div className="bg-gray-100 text-gray-800 rounded-lg rounded-bl-none px-4 py-2">
+            <div className="bg-muted text-foreground rounded-lg rounded-bl-none px-4 py-2 border border-border">
               <Loader2 className="w-5 h-5 animate-spin" />
             </div>
           </div>
         )}
         {error && (
-          <div className="flex gap-3 items-start bg-red-50 border border-red-200 rounded-lg p-3">
-            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-            <p className="text-sm text-red-800">{error}</p>
+          <div className="flex gap-3 items-start bg-destructive/10 border border-destructive/30 rounded-lg p-3">
+            <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-destructive">{error}</p>
           </div>
         )}
         <div ref={messagesEndRef} />
       </div>
 
       {/* Input Area */}
-      <div className="border-t border-gray-200 p-4 bg-gray-50">
+      <div className="border-t border-border p-3 sm:p-4 bg-card">
         <div className="flex gap-3">
           <input
             type="text"
@@ -168,12 +153,12 @@ export default function Chat() {
             }}
             placeholder="Ask me anything..."
             disabled={isLoading}
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
+            className="flex-1 px-4 py-2 border border-border bg-background text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
           />
           <button
             onClick={sendMessage}
             disabled={isLoading || !input.trim()}
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+            className="bg-primary text-primary-foreground px-4 sm:px-6 py-2 rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
           >
             {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
             Send

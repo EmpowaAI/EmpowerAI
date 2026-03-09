@@ -21,6 +21,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Error reading theme from localStorage:', error)
     }
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+    }
     return 'light'
   })
 

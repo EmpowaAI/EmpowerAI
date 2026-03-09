@@ -49,6 +49,7 @@ function App() {
             <Route index element={<Dashboard />} />
             <Route path="cv-analyzer" element={<CVAnalyzer />} />
             <Route path="twin" element={<TwinBuilder />} />
+            <Route path="twin-builder" element={<TwinBuilder />} />
             <Route path="opportunities" element={<Opportunities />} />
             <Route path="simulations" element={<Simulations />} />
             <Route path="interview-coach" element={<InterviewCoach />} />
