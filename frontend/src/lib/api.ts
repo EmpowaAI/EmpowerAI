@@ -6,7 +6,7 @@ const API_BASE =
 
 // Demo mode is opt-in via env var; real APIs are used by default.
 
-const USE_DEMO_MODE = import.meta.env.VITE_USE_DEMO_MODE === 'true';
+const USE_DEMO_MODE = import.meta.env.VITE_USE_DEMO_MODE === 'false';
 
 
 const getToken = (): string | null => localStorage.getItem('empowerai-token');
