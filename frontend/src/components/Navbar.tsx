@@ -7,6 +7,7 @@ import {
   User, Menu, X, Sparkles 
 } from "lucide-react";
 import { cn } from "../lib/utils";
+import Logo from "./Logo";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,17 +26,7 @@ export default function Navbar() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/dashboard" className="flex items-center gap-2 group">
-            <div className="relative">
-              <div className="absolute inset-0 bg-[var(--sa-gold)] rounded-full blur-md opacity-50 group-hover:opacity-75 transition-opacity" />
-              <Brain className="h-8 w-8 text-[var(--sa-gold)] relative" />
-            </div>
-            <span className="font-display font-bold text-lg hidden sm:block">
-              <span className="bg-gradient-to-r from-[var(--sa-gold)] to-[var(--sa-terracotta)] bg-clip-text text-transparent">
-                EmpowerAI
-              </span>
-            </span>
-          </Link>
+          <Logo size="md" linkTo="/dashboard" />
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-1">

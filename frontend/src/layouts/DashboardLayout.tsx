@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react"
 import { Link, useLocation, Outlet, useNavigate } from "react-router-dom"
 import {
-  Zap,
   Menu,
   X,
   LogOut,
@@ -16,6 +15,7 @@ import {
 } from "lucide-react"
 import { cn } from "../lib/utils"
 import ThemeToggle from "../components/ThemeToggle"
+import Logo from "../components/Logo"
 import { useUser } from "../lib/user-context" // Add this import
 
 interface DashboardLayoutProps {
@@ -112,14 +112,7 @@ export default function DashboardLayout({
         <div className="flex flex-col h-full">
           {/* Mobile Menu Header */}
           <div className="p-6 flex items-center justify-between border-b border-border">
-            <Link to="/dashboard" className="flex items-center gap-2 group">
-              <div className="p-2 bg-primary rounded-lg shadow-lg shadow-primary/20">
-                <Zap className="w-5 h-5 text-primary-foreground" />
-              </div>
-              <span className="text-xl font-black tracking-tight text-foreground">
-                EmpowerAI
-              </span>
-            </Link>
+            <Logo size="md" linkTo="/dashboard" />
             <button
               className="text-muted-foreground hover:text-foreground p-2 hover:bg-muted rounded-lg transition-colors"
               onClick={() => setMobileMenuOpen(false)}
@@ -200,14 +193,7 @@ export default function DashboardLayout({
             </button>
 
             {/* Logo - Visible on desktop */}
-            <Link to="/dashboard" className="hidden lg:flex items-center gap-2 group">
-              <div className="p-1.5 bg-primary rounded-lg shadow-lg shadow-primary/20">
-                <Zap className="w-4 h-4 text-primary-foreground" />
-              </div>
-              <span className="text-lg font-black tracking-tight text-foreground">
-                EmpowerAI
-              </span>
-            </Link>
+            <Logo size="md" linkTo="/dashboard" className="hidden lg:flex" />
 
             {/* Back button for subpages */}
             {isSubPage && (
