@@ -2,7 +2,9 @@
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'; // Frontend API base URL
 
 // Demo mode is opt-in via env var; real APIs are used by default.
+
 const USE_DEMO_MODE = import.meta.env.VITE_USE_DEMO_MODE === 'true';
+
 
 const getToken = (): string | null => localStorage.getItem('empowerai-token');
 const setToken = (token: string): void => localStorage.setItem('empowerai-token', token);

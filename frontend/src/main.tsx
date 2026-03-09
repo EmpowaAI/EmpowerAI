@@ -1,8 +1,8 @@
 import React from "react"
 import ReactDOM from "react-dom/client"
 import { BrowserRouter } from "react-router-dom"
-import App from "./App"
-import { ThemeProvider } from "./lib/theme" // ← Add this import
+import App from "../src/App"
+import { ThemeProvider } from "../src/lib/theme" // ← Add this import
 import "./index.css"
 
 console.log('React app starting...')

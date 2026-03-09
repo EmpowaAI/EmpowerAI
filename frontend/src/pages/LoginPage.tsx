@@ -3,13 +3,12 @@ import type React from "react"
 
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { Zap, Eye, EyeOff, Loader2, Sparkles, TrendingUp, Users } from "lucide-react"
+import { Eye, EyeOff, Loader2, Sparkles } from "lucide-react"
 import toast from 'react-hot-toast'
 import { authAPI } from "../lib/api"
 import { useUser } from "../lib/user-context"
 import { syncProgressFromBackend, unlockAllPages } from "../utils/progressSync"
 import Logo from "../components/Logo"
-import LoadingButton from "../components/LoadingButton"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)

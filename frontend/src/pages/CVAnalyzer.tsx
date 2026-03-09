@@ -1,50 +1,34 @@
 // src/pages/CVAnalyzer.tsx
 import { useState, useCallback, useRef, useEffect } from "react"
-import { Sparkles, AlertCircle, CheckCircle, XCircle, Info, Moon, Sun, Menu, X } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
+import { 
+  Sparkles, Upload, FileText, AlertCircle, Brain, 
+  CheckCircle, XCircle, Zap} from "lucide-react"
 import { cn } from "../lib/utils"
 import { useUser } from "../lib/user-context"
 import RateLimitAlert from "../components/RateLimitAlert"
 import ErrorAlert from "../components/ErrorAlert"
+import GlassCard from "../components/GlassCard"
+import ScoreMeter from "../components/ScoreMeter"
+import CVScanAnimation from "../components/CVScanAnimation"
+import SkillGapAnalysis from "../components/SkillGapAnalysis"
+import type { TransformedCVAnalysis } from '../services/aiService'
 import aiService from '../services/aiService'
 import { useToast } from "../components/Toast"
-
-
-interface IncomeIdea {
-  title: string
-  difficulty: string
-  potential: string
-  description: string
-}
-
-interface CVAnalysis {
-  score: number
-  readinessLevel: string
-  summary: string
-  sections: {
-    about: string
-    skills: string[]
-    education: string[]
-    experience: string[]
-    achievements: string[]
-  }
-  linkCheck: {
-    linkedin: boolean
-    github: boolean
-    portfolio: boolean
-  }
-  recommendations: string[]
-  missingKeywords: string[]
-  incomeIdeas: IncomeIdea[]
-}
 
 export default function CVAnalyzer() {
   const [file, setFile] = useState<File | null>(null)
   const [cvText, setCvText] = useState("")
   const [isDragging, setIsDragging] = useState(false)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [cvData, setCvData] = useState<CVAnalysis | null>(() => {
-    const saved = localStorage.getItem('comprehensiveCVAnalysis')
-    return saved ? JSON.parse(saved) : null
+  const [cvData, setCvData] = useState<TransformedCVAnalysis | null>(() => {
+    try {
+      const saved = localStorage.getItem('comprehensiveCVAnalysis')
+      return saved ? JSON.parse(saved) : null
+    } catch (e) {
+      console.error('Failed to parse saved CV data:', e)
+      return null
+    }
   })
   const [error, setError] = useState("")
   const [isRateLimited, setIsRateLimited] = useState(false)
@@ -57,13 +41,12 @@ export default function CVAnalyzer() {
     const saved = localStorage.getItem('darkMode')
     return saved ? JSON.parse(saved) : false
   })
-  const [showTips, setShowTips] = useState(true)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   
   const { updateProgress } = useUser()
-  const { success } = useToast()
+  const { success, error: toastError } = useToast()
 
   // Save dark mode preference
   useEffect(() => {
@@ -79,7 +62,6 @@ export default function CVAnalyzer() {
   useEffect(() => {
     if (cvData) {
       localStorage.setItem('comprehensiveCVAnalysis', JSON.stringify(cvData))
-      localStorage.setItem('cvSkills', JSON.stringify(cvData.sections.skills))
     }
   }, [cvData])
 
@@ -87,6 +69,8 @@ export default function CVAnalyzer() {
   useEffect(() => {
     if (fileName) {
       localStorage.setItem('cvFileName', fileName)
+    } else {
+      localStorage.removeItem('cvFileName')
     }
   }, [fileName])
 
@@ -112,7 +96,6 @@ export default function CVAnalyzer() {
       setFile(droppedFile)
       setFileName(droppedFile.name)
       
-      // Show format recommendation
       if (droppedFile.type === "application/pdf") {
         success("PDF uploaded. Note: DOCX files provide better text extraction accuracy!")
       } else if (droppedFile.type.includes("document")) {
@@ -129,7 +112,6 @@ export default function CVAnalyzer() {
       setFile(selectedFile)
       setFileName(selectedFile.name)
       
-      // Show format recommendation
       if (selectedFile.type === "application/pdf") {
         success("PDF uploaded. For best results, use DOCX format which preserves structure better.")
       } else if (selectedFile.type.includes("document")) {
@@ -145,10 +127,6 @@ export default function CVAnalyzer() {
       setError("Please upload your CV file.")
       return false
     }
-    if (!cvText.trim() || cvText.length < 50) {
-      setError("Please paste your CV text for analysis.")
-      return false
-    }
     return true
   }
 
@@ -161,15 +139,19 @@ export default function CVAnalyzer() {
 
     try {
       console.log('Starting CV analysis with AI Service...')
+      console.log('File:', file?.name)
+      console.log('CV Text length:', cvText.length)
       
-      let result
+      let result: TransformedCVAnalysis
+      
       if (file) {
-        result = await aiService.analyzeCVFile(file)
+        result = await aiService.analyzeCVFile(file, [])
       } else {
-        result = await aiService.analyzeCV(cvText)
+        result = await aiService.analyzeCV(cvText, [])
       }
       
-      console.log('CV analysis complete:', result)
+      console.log('CV analysis complete - REAL DATA:', result)
+      
       setCvData(result)
       updateProgress('cvCompleted', true)
       
@@ -181,10 +163,13 @@ export default function CVAnalyzer() {
         setIsRateLimited(true)
         setRetryAfter(err.retryAfter || 60)
         setError('Rate limit reached. Please try again in a moment.')
+        toastError('Rate limit reached. Please wait before trying again.')
       } else if (err.status === 503) {
         setError('AI service is temporarily unavailable. Please try again later.')
+        toastError('Service temporarily unavailable.')
       } else {
         setError(err.message || 'Failed to analyze CV. Please try again.')
+        toastError(err.message || 'Failed to analyze CV.')
       }
     } finally {
       setIsAnalyzing(false)
@@ -227,244 +212,247 @@ export default function CVAnalyzer() {
   // If we have CV data, show the comprehensive analysis
   if (cvData && !isAnalyzing) {
     return (
-      <div className={cn(
-        "min-h-screen w-full transition-colors duration-300",
-        darkMode ? "dark bg-slate-900" : "bg-slate-50"
-      )}>
-        {/* Mobile Header */}
-        <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-4 py-3">
-          <div className="flex items-center justify-between">
-            <h1 className="text-lg font-black text-slate-800 dark:text-white">CV Analysis</h1>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setDarkMode(!darkMode)}
-                className="p-2 rounded-full bg-slate-100 dark:bg-slate-700"
-              >
-                {darkMode ? <Sun className="h-4 w-4 text-yellow-500" /> : <Moon className="h-4 w-4 text-slate-700" />}
-              </button>
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-2 rounded-full bg-slate-100 dark:bg-slate-700"
-              >
-                {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-              </button>
-            </div>
-          </div>
-
-          {/* Mobile Menu */}
-          {mobileMenuOpen && (
-            <div className="absolute top-full left-0 right-0 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-4 shadow-lg">
-              <button
-                onClick={handleClearMemory}
-                className="w-full bg-slate-900 dark:bg-blue-600 text-white px-4 py-3 rounded-xl font-black text-sm"
-              >
-                Analyze New CV
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Main Content */}
-        <div className="pt-16 md:pt-0 px-4 sm:px-6 max-w-7xl mx-auto">
-          {/* Desktop Header */}
-          <header className="hidden md:flex flex-col md:flex-row justify-between items-start md:items-center gap-4 py-8">
+      <div className="w-full">
+        <div className="max-w-7xl mx-auto">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6"
+          >
             <div>
-              <h2 className="text-3xl md:text-4xl font-black text-slate-800 dark:text-white tracking-tight flex items-center">
-                <span className="mr-3">📊</span> CV Analysis Results
-              </h2>
-              <p className="text-slate-500 dark:text-slate-400 font-medium mt-2">
+              <h1 className="text-2xl md:text-3xl font-display font-bold flex items-center gap-3">
+                <Brain className="h-6 w-6 md:h-8 md:w-8 text-[var(--sa-gold)]" /> 
+                <span className="bg-gradient-to-r from-[var(--sa-gold)] to-[var(--sa-terracotta)] bg-clip-text text-transparent">
+                  CV Analysis Results
+                </span>
+              </h1>
+              <p className="text-muted-foreground mt-1 text-sm">
                 Readiness Level: <span className={cn(
-                  "font-black uppercase tracking-widest",
-                  cvData.readinessLevel === 'EXCEPTIONAL' ? 'text-emerald-600 dark:text-emerald-400' :
-                  cvData.readinessLevel === 'HIGH POTENTIAL' ? 'text-blue-600 dark:text-blue-400' :
-                  cvData.readinessLevel === 'INTERMEDIATE' ? 'text-amber-600 dark:text-amber-400' :
-                  'text-slate-600 dark:text-slate-400'
+                  "font-semibold",
+                  cvData.readinessLevel === 'EXCEPTIONAL' ? 'text-[var(--sa-green)]' :
+                  cvData.readinessLevel === 'HIGH POTENTIAL' ? 'text-[var(--sa-gold)]' :
+                  cvData.readinessLevel === 'INTERMEDIATE' ? 'text-[var(--sa-terracotta)]' :
+                  'text-muted-foreground'
                 )}>{cvData.readinessLevel}</span>
               </p>
             </div>
             <button 
               onClick={handleClearMemory}
-              className="bg-slate-900 dark:bg-blue-600 text-white px-6 md:px-8 py-3 rounded-xl md:rounded-2xl font-black text-sm md:text-base hover:bg-slate-800 dark:hover:bg-blue-700 transition-all shadow-xl"
+              className="px-6 py-3 rounded-xl bg-primary text-primary-foreground font-display font-semibold hover:bg-primary/90 transition-all text-sm shadow-lg hover:shadow-xl"
             >
               Analyze New CV
             </button>
-          </header>
+          </motion.div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8 py-4 md:py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Column 1: Score and Links */}
-            <div className="space-y-4 md:space-y-6">
-              <div className="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-2xl md:rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 text-center relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-16 md:w-24 h-16 md:h-24 bg-blue-500/5 rounded-full -mr-8 md:-mr-12 -mt-8 md:-mt-12" />
-                <p className="text-slate-400 dark:text-slate-500 font-black uppercase text-[8px] md:text-[10px] tracking-widest mb-2">Market Readiness</p>
-                <div className="text-5xl md:text-7xl font-black text-blue-600 dark:text-blue-400 mb-2">{cvData.score}%</div>
-                <p className="text-[10px] md:text-xs font-bold text-slate-500 dark:text-slate-400">Based on skills, experience & profile completeness</p>
-              </div>
+            <div className="space-y-6">
+              <GlassCard glow="cyan" className="text-center">
+                <ScoreMeter score={cvData.score} label="CV Strength" size="lg" />
+                <p className="text-xs text-muted-foreground mt-3">
+                  Based on skills, experience & SA market fit
+                </p>
+              </GlassCard>
 
-              <div className="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-2xl md:rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700">
-                <h4 className="font-black text-slate-800 dark:text-white text-[10px] md:text-xs uppercase tracking-widest mb-4 md:mb-6 flex items-center">
-                  <span className="mr-2">🔗</span> Profile Links Audit
+              <GlassCard>
+                <h4 className="text-xs font-display font-bold uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
+                  <span>🔗</span> Profile & Document Audit
                 </h4>
-                <div className="space-y-3 md:space-y-4">
+                <div className="space-y-3">
                   {[
                     { label: 'LinkedIn Profile', found: cvData.linkCheck.linkedin, warning: '85% of recruiters check this' },
-                    { label: 'GitHub Profile', found: cvData.linkCheck.github, warning: 'Essential for developer roles' },
-                    { label: 'Portfolio Website', found: cvData.linkCheck.portfolio, warning: 'Showcases your work visually' },
+                    { label: 'GitHub/Portfolio', found: cvData.linkCheck.github || cvData.linkCheck.portfolio, warning: 'Essential for dev roles' },
+                    { label: 'Driver\'s Licence', found: 'driversLicence' in cvData.linkCheck ? cvData.linkCheck.driversLicence : false, warning: 'Required for 60% of SA roles' },
                   ].map((link, index) => (
-                    <div key={index} className={cn(
-                      "flex flex-col sm:flex-row sm:items-center justify-between p-3 md:p-4 rounded-xl md:rounded-2xl border gap-2",
-                      link.found 
-                        ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800' 
-                        : 'bg-amber-50 dark:bg-amber-900/20 border-amber-100 dark:border-amber-800'
-                    )}>
-                      <div className="flex-1">
-                        <span className="text-[10px] md:text-xs font-bold text-slate-700 dark:text-slate-300 block">{link.label}</span>
-                        {!link.found && (
-                          <span className="text-[8px] text-amber-600 dark:text-amber-400 font-medium block mt-1">{link.warning}</span>
+                    <div 
+                      key={index} 
+                      className={cn(
+                        "flex items-center justify-between p-3 rounded-xl border transition-all",
+                        link.found 
+                          ? 'border-[var(--sa-green)]/30 bg-[var(--sa-green)]/5 hover:bg-[var(--sa-green)]/10' 
+                          : 'border-[var(--sa-gold)]/30 bg-[var(--sa-gold)]/5 hover:bg-[var(--sa-gold)]/10'
+                      )}
+                    >
+                      <div>
+                        <span className="text-sm font-medium block">{link.label}</span>
+                        {!link.found && link.warning && (
+                          <span className="text-[10px] text-[var(--sa-gold)]">{link.warning}</span>
                         )}
                       </div>
-                      <span className={cn(
-                        "text-[8px] md:text-[10px] font-black px-2 py-1 rounded-full uppercase inline-flex items-center justify-center gap-1 w-fit",
-                        link.found 
-                          ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/40' 
-                          : 'text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/40'
-                      )}>
-                        {link.found ? (
-                          <>✓ VERIFIED</>
-                        ) : (
-                          <>⚠ MISSING</>
-                        )}
-                      </span>
+                      {link.found ? (
+                        <CheckCircle className="h-4 w-4 text-[var(--sa-green)]" />
+                      ) : (
+                        <XCircle className="h-4 w-4 text-[var(--sa-gold)]" />
+                      )}
                     </div>
                   ))}
                 </div>
-              </div>
+              </GlassCard>
+
+              {/* About Section - Compact */}
+              <GlassCard>
+                <h4 className="text-xs font-display font-bold uppercase tracking-widest text-muted-foreground mb-3">
+                  Professional Summary
+                </h4>
+                <p className="text-xs text-muted-foreground leading-relaxed italic border-l-2 border-[var(--sa-gold)] pl-3">
+                  {cvData.sections.about}
+                </p>
+              </GlassCard>
             </div>
 
             {/* Column 2 & 3: Profile Details */}
-            <div className="lg:col-span-2 space-y-4 md:space-y-6">
-              <div className="bg-white dark:bg-slate-800 p-6 md:p-10 rounded-2xl md:rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700">
-                <h3 className="text-lg md:text-xl font-black text-slate-800 dark:text-white mb-6 md:mb-8 flex items-center">
-                  <span className="mr-3">👤</span> Professional Profile
+            <div className="lg:col-span-2 space-y-6">
+              <GlassCard>
+                <h3 className="font-display font-bold text-lg mb-4 flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-[var(--sa-gold)]" /> Skills & Experience
                 </h3>
                 
-                <div className="space-y-6 md:space-y-10">
-                  {/* About Section */}
-                  <section className="bg-slate-50 dark:bg-slate-700/50 p-4 md:p-6 rounded-xl md:rounded-2xl border border-slate-100 dark:border-slate-600">
-                    <h5 className="text-[8px] md:text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-2 md:mb-3">Professional Summary</h5>
-                    <p className="text-xs md:text-sm text-slate-700 dark:text-slate-300 leading-relaxed italic">
-                      {cvData.sections.about}
-                    </p>
-                  </section>
-
+                <div className="space-y-6">
                   {/* Skills Section */}
-                  <section>
-                    <h5 className="text-[8px] md:text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 md:mb-4">Technical Skills</h5>
-                    <div className="flex flex-wrap gap-1.5 md:gap-2">
+                  <div>
+                    <h5 className="text-xs font-display font-bold uppercase tracking-widest text-muted-foreground mb-3">
+                      Technical Skills
+                    </h5>
+                    <div className="flex flex-wrap gap-2">
                       {cvData.sections.skills.map((s, i) => (
-                        <span key={i} className="bg-slate-900 dark:bg-slate-700 text-white px-2 md:px-3 py-1 md:py-1.5 rounded-lg md:rounded-xl text-[8px] md:text-[10px] font-black uppercase tracking-tight">
+                        <motion.span 
+                          key={i}
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: i * 0.05 }}
+                          className="px-3 py-1.5 rounded-lg bg-[var(--sa-gold)]/10 border border-[var(--sa-gold)]/20 text-xs font-semibold text-[var(--sa-gold)]"
+                        >
                           {s}
-                        </span>
+                        </motion.span>
                       ))}
                     </div>
-                  </section>
+                  </div>
 
                   {/* Education Section */}
-                  <section>
-                    <h5 className="text-[8px] md:text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 md:mb-4">Education</h5>
-                    <div className="space-y-2 md:space-y-3">
+                  <div>
+                    <h5 className="text-xs font-display font-bold uppercase tracking-widest text-muted-foreground mb-3">
+                      Education
+                    </h5>
+                    <div className="space-y-2">
                       {cvData.sections.education.map((edu, i) => (
-                        <div key={i} className="p-3 md:p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg md:rounded-xl border border-slate-100 dark:border-slate-600">
-                          <p className="text-xs md:text-sm font-bold text-slate-800 dark:text-white">{edu}</p>
+                        <div key={i} className="p-3 rounded-xl bg-muted/30 border border-border/50">
+                          <p className="text-sm font-medium">{edu}</p>
                         </div>
                       ))}
                     </div>
-                  </section>
+                  </div>
 
                   {/* Experience Section */}
                   {cvData.sections.experience.length > 0 && (
-                    <section>
-                      <h5 className="text-[8px] md:text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 md:mb-4">Experience</h5>
-                      <div className="space-y-3 md:space-y-4">
+                    <div>
+                      <h5 className="text-xs font-display font-bold uppercase tracking-widest text-muted-foreground mb-3">
+                        Experience
+                      </h5>
+                      <div className="space-y-3">
                         {cvData.sections.experience.map((exp, i) => (
-                          <div key={i} className="p-4 md:p-5 bg-slate-50 dark:bg-slate-700/50 rounded-xl md:rounded-2xl border border-slate-100 dark:border-slate-600">
-                            <p className="text-xs md:text-sm text-slate-700 dark:text-slate-300 font-medium">{exp}</p>
+                          <div key={i} className="p-4 rounded-xl bg-muted/30 border border-border/50">
+                            <p className="text-sm font-medium">{exp}</p>
                           </div>
                         ))}
                       </div>
-                    </section>
+                    </div>
                   )}
 
                   {/* Achievements Section */}
                   {cvData.sections.achievements.length > 0 && (
-                    <section className="bg-emerald-50 dark:bg-emerald-900/20 p-4 md:p-6 rounded-2xl md:rounded-3xl border border-emerald-100 dark:border-emerald-800">
-                      <h5 className="text-[8px] md:text-[10px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest mb-3 md:mb-4">Key Achievements</h5>
-                      <ul className="space-y-2 md:space-y-3">
+                    <div className="bg-[var(--sa-green)]/5 p-4 rounded-xl border border-[var(--sa-green)]/30">
+                      <h5 className="text-xs font-display font-bold uppercase tracking-widest text-[var(--sa-green)] mb-3">
+                        Key Achievements
+                      </h5>
+                      <ul className="space-y-2">
                         {cvData.sections.achievements.map((ach, i) => (
-                          <li key={i} className="bg-white dark:bg-slate-800 p-3 md:p-4 rounded-lg md:rounded-xl border border-emerald-100 dark:border-emerald-800 text-[10px] md:text-xs text-emerald-800 dark:text-emerald-300 font-medium shadow-sm flex items-start">
-                            <span className="mr-2 md:mr-3 text-emerald-500 dark:text-emerald-400">✦</span>
+                          <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
+                            <span className="text-[var(--sa-green)]">✦</span>
                             {ach}
                           </li>
                         ))}
                       </ul>
-                    </section>
+                    </div>
                   )}
                 </div>
-              </div>
+              </GlassCard>
+
+              {/* Skill Gap Analysis */}
+              <SkillGapAnalysis cvData={cvData} cvText={cvText} />
 
               {/* Recommendations Section */}
-              <div className="bg-gradient-to-br from-blue-600 to-indigo-900 p-6 md:p-10 rounded-3xl md:rounded-[40px] text-white shadow-2xl relative">
-                <div className="absolute top-4 right-4 md:top-8 md:right-8 text-2xl md:text-4xl opacity-20">💡</div>
-                <h4 className="text-xl md:text-2xl font-black mb-4 md:mb-6">Recommendations & Insights</h4>
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[var(--sa-gold)] to-[var(--sa-terracotta)] p-6 md:p-8">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-8 -mt-8 blur-2xl" />
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-black/10 rounded-full -ml-8 -mb-8 blur-xl" />
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
-                  {/* Recommendations */}
-                  <div>
-                    <h5 className="text-[10px] md:text-xs font-black text-blue-200 uppercase mb-3 md:mb-4 tracking-widest">Suggested Improvements</h5>
-                    <ul className="space-y-2 md:space-y-3">
-                      {cvData.recommendations.map((rec, i) => (
-                        <li key={i} className="flex items-start space-x-2 md:space-x-3 text-xs md:text-sm text-blue-50 leading-relaxed">
-                          <span className="bg-white text-blue-600 w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center shrink-0 font-black text-[8px] md:text-[10px] mt-0.5">!</span>
-                          <span>{rec}</span>
-                        </li>
-                      ))}
-                    </ul>
+                <div className="relative">
+                  <h4 className="font-display font-bold text-xl text-white mb-4 flex items-center gap-2">
+                    <Brain className="h-5 w-5" /> AI Recommendations
+                  </h4>
+                  
+                  <div className="grid md:grid-cols-2 gap-6">
+                    {/* Recommendations */}
+                    <div>
+                      <h5 className="text-xs font-display font-bold uppercase tracking-widest text-white/80 mb-3">
+                        Suggested Improvements
+                      </h5>
+                      <ul className="space-y-3">
+                        {cvData.recommendations.map((rec, i) => (
+                          <li key={i} className="flex items-start gap-2 text-sm text-white/90">
+                            <span className="h-5 w-5 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 text-xs text-white font-bold">
+                              {i+1}
+                            </span>
+                            {rec}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* Market Keywords */}
+                    {cvData.missingKeywords.length > 0 && (
+                      <div className="bg-white/10 p-4 rounded-xl backdrop-blur-sm">
+                        <h5 className="text-xs font-display font-bold uppercase tracking-widest text-white/80 mb-3">
+                          Missing Keywords
+                        </h5>
+                        <div className="flex flex-wrap gap-2">
+                          {cvData.missingKeywords.map((kw, i) => (
+                            <span 
+                              key={i} 
+                              className="px-3 py-1 rounded-full bg-white/20 border border-white/30 text-xs font-medium text-white"
+                            >
+                              {kw}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Market Keywords */}
-                  {cvData.missingKeywords.length > 0 && (
-                    <div className="bg-white/10 p-4 md:p-6 rounded-2xl md:rounded-3xl border border-white/10">
-                      <h5 className="text-[10px] md:text-xs font-black text-blue-200 uppercase mb-3 md:mb-4 tracking-widest">Market Keywords to Add</h5>
-                      <div className="flex flex-wrap gap-1.5 md:gap-2">
-                        {cvData.missingKeywords.map((kw, i) => (
-                          <span key={i} className="text-[8px] md:text-[10px] font-bold text-white bg-blue-500/30 px-2 md:px-3 py-1 md:py-1.5 rounded-full border border-white/20">
-                            {kw}
-                          </span>
+                  {/* Income Ideas */}
+                  {cvData.incomeIdeas && cvData.incomeIdeas.length > 0 && (
+                    <div className="mt-6 pt-6 border-t border-white/20">
+                      <h5 className="text-base font-display font-bold mb-4 flex items-center gap-2 text-white">
+                        <Zap className="h-4 w-4" /> Income Opportunities
+                      </h5>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        {cvData.incomeIdeas.map((idea, i) => (
+                          <div key={i} className="bg-white/10 p-4 rounded-xl hover:bg-white/20 transition-all backdrop-blur-sm">
+                            <h6 className="font-display font-bold text-sm mb-2 text-white">{idea.title}</h6>
+                            <div className="flex justify-between text-[10px] mb-2">
+                              <span className="bg-white/20 px-2 py-0.5 rounded-full text-white">
+                                {idea.difficulty}
+                              </span>
+                              <span className="bg-white/20 px-2 py-0.5 rounded-full text-white">
+                                {idea.potential}
+                              </span>
+                            </div>
+                            <p className="text-xs text-white/80">{idea.description}</p>
+                          </div>
                         ))}
                       </div>
                     </div>
                   )}
                 </div>
-
-                {/* Income Ideas */}
-                {cvData.incomeIdeas && cvData.incomeIdeas.length > 0 && (
-                  <div className="mt-6 md:mt-8 pt-6 md:pt-8 border-t border-white/10">
-                    <h5 className="text-base md:text-lg font-black mb-3 md:mb-4 flex items-center">
-                      <span className="mr-2">💰</span> Income Opportunities
-                    </h5>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
-                      {cvData.incomeIdeas.map((idea, i) => (
-                        <div key={i} className="bg-white/10 p-4 md:p-5 rounded-lg md:rounded-xl border border-white/20 hover:bg-white/20 transition-colors">
-                          <h6 className="font-black text-sm md:text-base mb-1 md:mb-2">{idea.title}</h6>
-                          <div className="flex justify-between text-[8px] md:text-[10px] mb-2 md:mb-3">
-                            <span className="bg-white/20 px-2 py-0.5 rounded-full">{idea.difficulty}</span>
-                            <span className="bg-white/20 px-2 py-0.5 rounded-full">{idea.potential}</span>
-                          </div>
-                          <p className="text-[10px] md:text-[11px] text-blue-100 leading-relaxed">{idea.description}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -474,272 +462,187 @@ export default function CVAnalyzer() {
   }
 
   // Otherwise show the input form
-  return (
-    <div className={cn(
-      "min-h-screen w-full transition-colors duration-300",
-      darkMode ? "dark bg-slate-900" : "bg-slate-50"
-    )}>
-      {/* Mobile Header */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-4 py-3">
-        <div className="flex items-center justify-between">
-          <h1 className="text-lg font-black text-slate-800 dark:text-white">CV Analysis</h1>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setDarkMode(!darkMode)}
-              className="p-2 rounded-full bg-slate-100 dark:bg-slate-700"
-            >
-              {darkMode ? <Sun className="h-4 w-4 text-yellow-500" /> : <Moon className="h-4 w-4 text-slate-700" />}
-            </button>
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-full bg-slate-100 dark:bg-slate-700"
-            >
-              {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="absolute top-full left-0 right-0 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-4 shadow-lg">
-            <div className="space-y-4">
-              <button
-                onClick={() => {
-                  setShowTips(!showTips)
-                  setMobileMenuOpen(false)
-                }}
-                className="w-full text-left px-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium text-sm"
-              >
-                {showTips ? 'Hide Tips' : 'Show Tips'}
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Main Content */}
-      <div className="pt-16 md:pt-0 px-4 sm:px-6 max-w-4xl mx-auto">
-        {/* Toast Notifications */}
-        
-        
-        {/* Desktop Dark Mode Toggle */}
-        <div className="hidden md:block fixed top-4 right-4 z-50">
-          <button
-            onClick={() => setDarkMode(!darkMode)}
-            className="p-3 rounded-full bg-white dark:bg-slate-800 shadow-lg hover:shadow-xl transition-all"
-          >
-            {darkMode ? <Sun className="h-5 w-5 text-yellow-500" /> : <Moon className="h-5 w-5 text-slate-700" />}
-          </button>
-        </div>
-        
-        <header className="text-center space-y-2 md:space-y-4 py-6 md:py-12">
-          <h1 className="text-3xl md:text-5xl font-black text-slate-800 dark:text-white tracking-tight">CV Analysis</h1>
-          <p className="text-sm md:text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto px-4">
-            Upload your CV and paste the text for comprehensive analysis
+    return (
+      <div className="w-full max-w-3xl mx-auto">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          className="text-center mb-6 md:mb-8"
+        >
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold mb-4">
+            <span className="bg-gradient-to-r from-[var(--sa-gold)] to-[var(--sa-terracotta)] bg-clip-text text-transparent">
+              AI CV Analysis
+            </span>
+          </h1>
+          <p className="text-sm md:text-base text-muted-foreground max-w-2xl mx-auto px-4">
+            Upload your CV and let AI evaluate your market readiness for the SA job market
           </p>
-        </header>
-
-        {/* Tips Banner */}
-        {showTips && (
-          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl md:rounded-3xl p-4 md:p-6 relative mb-6 md:mb-8">
-            <button
-              onClick={() => setShowTips(false)}
-              className="absolute top-3 right-3 md:top-4 md:right-4 text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
-            >
-              <XCircle className="h-4 w-4 md:h-5 md:w-5" />
-            </button>
-            <div className="flex items-start gap-3 md:gap-4">
-              <Info className="h-5 w-5 md:h-6 md:w-6 text-blue-500 dark:text-blue-400 flex-shrink-0 mt-1" />
-              <div>
-                <h3 className="font-black text-blue-800 dark:text-blue-300 text-sm md:text-base mb-2">📌 For Best Results:</h3>
-                <ul className="text-xs md:text-sm text-blue-700 dark:text-blue-300 space-y-1 list-disc list-inside">
-                  <li><span className="font-bold">Use DOCX format</span> - Provides the best text extraction accuracy</li>
-                  <li><span className="font-bold">PDF works</span> but may have formatting issues with complex layouts</li>
-                  <li><span className="font-bold">Always paste your CV text</span> in addition to uploading the file</li>
-                  <li>Ensure your CV has clear section headers (Education, Experience, Skills, etc.)</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        )}
+        </motion.div>
 
         {/* Alert Messages */}
-        {isRateLimited && (
-          <RateLimitAlert
-            message={error}
-            retryAfter={retryAfter}
-            onRetry={handleRetry}
-          />
-        )}
-        {error && !isRateLimited && <ErrorAlert message={error} onDismiss={() => setError("")} />}
+        <AnimatePresence>
+          {isRateLimited && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <RateLimitAlert
+                message={error}
+                retryAfter={retryAfter}
+                onRetry={handleRetry}
+              />
+            </motion.div>
+          )}
+          {error && !isRateLimited && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <ErrorAlert message={error} onDismiss={() => setError("")} />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        {/* Simple Loading Overlay */}
-        {isAnalyzing && (
-          <div className="bg-white dark:bg-slate-800 rounded-3xl md:rounded-[50px] p-6 md:p-12 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] dark:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] border border-slate-100 dark:border-slate-700 text-center">
-            <div className="max-w-md mx-auto space-y-4 md:space-y-6">
-              <div className="relative inline-block">
-                <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-2xl animate-pulse" />
-                <div className="relative h-16 w-16 md:h-24 md:w-24 rounded-full bg-gradient-to-br from-blue-600 to-indigo-900 flex items-center justify-center shadow-2xl mx-auto">
-                  <Sparkles className="h-8 w-8 md:h-12 md:w-12 text-white animate-pulse" />
-                </div>
-              </div>
-              
-              <div className="space-y-2 md:space-y-3">
-                <h3 className="text-lg md:text-2xl font-bold text-slate-800 dark:text-white">
-                  Analyzing Your CV...
-                </h3>
-                <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400">
-                  Extracting skills, experience, and providing personalized feedback
-                </p>
-              </div>
-
-              <div className="flex items-center justify-center gap-2">
-                <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-              </div>
-
-              <div className="space-y-2">
-                <div className="h-1.5 md:h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-blue-600 to-indigo-900 rounded-full animate-pulse" style={{ width: '70%' }} />
-                </div>
-                <p className="text-[10px] md:text-xs text-slate-400 dark:text-slate-500">This may take 30-60 seconds...</p>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* CV Scan Animation */}
+        <AnimatePresence>
+          {isAnalyzing && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="mb-6"
+            >
+              <CVScanAnimation isActive={isAnalyzing} onComplete={() => {}} />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Form */}
         {!isAnalyzing && (
-          <div className="bg-white dark:bg-slate-800 rounded-3xl md:rounded-[50px] p-6 md:p-12 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] dark:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] border border-slate-100 dark:border-slate-700 space-y-6 md:space-y-10">
-            {/* Upload Section */}
-            <div className="space-y-3 md:space-y-4">
-              <h3 className="text-[10px] md:text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center flex-wrap gap-2">
-                <span className="w-5 h-5 md:w-6 md:h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-[8px] md:text-[10px] mr-2">1</span>
-                Upload CV File
-                <span className="text-[8px] md:text-[8px] bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 px-2 py-1 rounded-full">
-                  DOCX recommended
-                </span>
-              </h3>
-              <div 
-                className={cn(
-                  "relative border-2 border-dashed rounded-2xl md:rounded-3xl p-6 md:p-8 text-center transition-all cursor-pointer",
-                  fileName ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20' : 'border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700',
-                  isDragging && "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-                )}
-                onDrop={handleDrop}
-                onDragOver={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  setIsDragging(true)
-                }}
-                onDragLeave={() => setIsDragging(false)}
-                onClick={() => fileInputRef.current?.click()}
-              >
-                {fileName ? (
-                  <div className="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-3">
-                    <CheckCircle className="h-5 w-5 md:h-6 md:w-6 text-emerald-500" />
-                    <p className="font-black text-emerald-700 dark:text-emerald-400 text-xs md:text-sm break-all">{fileName}</p>
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setFile(null)
-                        setFileName(null)
-                        localStorage.removeItem('cvFileName')
-                      }} 
-                      className="text-emerald-900 dark:text-emerald-300 text-[10px] md:text-xs font-bold underline hover:no-underline"
-                    >
-                      Change
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept=".pdf,.docx,.txt"
-                      onChange={handleFileSelect}
-                      className="hidden"
-                    />
-                    <p className="text-xs md:text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                      Click or drag to upload
-                    </p>
-                    <p className="text-[8px] md:text-[10px] text-slate-400 dark:text-slate-500 mt-2">
-                      PDF, DOCX, TXT • DOCX provides best accuracy
-                    </p>
-                  </>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <GlassCard glow="cyan">
+              {/* Upload Section */}
+              <div className="space-y-4">
+                <h3 className="text-xs font-display font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-[var(--sa-gold)] text-white flex items-center justify-center text-[10px]">1</span>
+                  Upload CV File
+                  <span className="text-[8px] bg-[var(--sa-gold)]/20 text-[var(--sa-gold)] px-2 py-1 rounded-full">
+                    DOCX recommended
+                  </span>
+                </h3>
+                
+                <div
+                  onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                  onDragLeave={() => setIsDragging(false)}
+                  onDrop={handleDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={cn(
+                    "border-2 border-dashed rounded-xl p-8 md:p-12 text-center cursor-pointer transition-all",
+                    isDragging ? "border-[var(--sa-gold)] bg-[var(--sa-gold)]/5" : "border-border hover:border-[var(--sa-gold)]/50 hover:bg-[var(--sa-gold)]/5",
+                    fileName && "border-[var(--sa-green)] bg-[var(--sa-green)]/5"
+                  )}
+                >
+                  <input 
+                    ref={fileInputRef} 
+                    type="file" 
+                    accept=".pdf,.docx,.doc,.txt" 
+                    className="hidden" 
+                    onChange={handleFileSelect}
+                  />
+                  
+                  {fileName ? (
+                    <div className="flex flex-col items-center">
+                      <div className="h-12 w-12 rounded-full bg-[var(--sa-green)]/10 flex items-center justify-center mb-3">
+                        <FileText className="h-6 w-6 text-[var(--sa-green)]" />
+                      </div>
+                      <p className="font-semibold text-[var(--sa-green)] flex items-center gap-2">
+                        {fileName}
+                      </p>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setFile(null)
+                          setFileName(null)
+                        }}
+                        className="text-xs text-muted-foreground hover:text-[var(--sa-gold)] mt-2 underline"
+                      >
+                        Replace file
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="h-16 w-16 rounded-full bg-[var(--sa-gold)]/10 flex items-center justify-center mx-auto mb-4">
+                        <Upload className="h-8 w-8 text-[var(--sa-gold)]" />
+                      </div>
+                      <p className="font-display font-semibold mb-1">Drop your CV here</p>
+                      <p className="text-sm text-muted-foreground">PDF, DOCX, or TXT • Max 10MB</p>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Text Section - Optional */}
+              <div className="space-y-3 mt-6">
+                <h3 className="text-xs font-display font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-[var(--sa-gold)] text-white flex items-center justify-center text-[10px]">2</span>
+                  Paste CV Content
+                  <span className="text-[8px] bg-[var(--sa-green)]/20 text-[var(--sa-green)] px-2 py-1 rounded-full">
+                    Optional
+                  </span>
+                </h3>
+                <textarea
+                  value={cvText}
+                  onChange={(e) => setCvText(e.target.value)}
+                  placeholder="Optionally paste your CV text here for better analysis accuracy..."
+                  className="w-full h-32 md:h-40 p-4 rounded-xl bg-muted/30 border-2 outline-none transition-all text-sm focus:border-[var(--sa-gold)] border-border resize-none text-foreground placeholder-muted-foreground"
+                  aria-label="CV text content"
+                />
+                {cvText.length > 0 && cvText.length < 50 && (
+                  <p className="text-xs text-[var(--sa-gold)] mt-1 flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    Adding more text improves accuracy
+                  </p>
                 )}
               </div>
-            </div>
 
-            {/* Text Section */}
-            <div className="space-y-3 md:space-y-4">
-              <h3 className="text-[10px] md:text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center flex-wrap gap-2">
-                <span className="w-5 h-5 md:w-6 md:h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-[8px] md:text-[10px] mr-2">2</span>
-                Paste CV Content
-                <span className="text-[8px] md:text-[8px] bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400 px-2 py-1 rounded-full">
-                  Required
-                </span>
-              </h3>
-              <textarea
-                value={cvText}
-                onChange={(e) => setCvText(e.target.value)}
-                placeholder="Copy and paste your CV text here..."
-                className="w-full h-48 md:h-80 p-4 md:p-8 rounded-2xl md:rounded-[40px] bg-slate-50 dark:bg-slate-700 border-2 outline-none transition-all text-xs md:text-sm leading-relaxed focus:border-blue-500 border-slate-100 dark:border-slate-600 resize-none text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
-              />
-              {cvText.length > 0 && cvText.length < 50 && (
-                <p className="text-[10px] md:text-xs text-amber-500 dark:text-amber-400 mt-2 flex items-center gap-1">
-                  <AlertCircle className="h-3 w-3" />
-                  Add more text for accuracy ({cvText.length}/50)
-                </p>
-              )}
-            </div>
-
-            {/* Analyze Button */}
-            <div className="flex flex-col items-center space-y-4 md:space-y-6 pt-4">
+              {/* Analyze Button */}
               <button
                 onClick={handleAnalyzeClick}
-                disabled={isAnalyzing || !fileName || cvText.length < 50}
+                disabled={!fileName}
                 className={cn(
-                  "w-full py-4 md:py-6 rounded-2xl md:rounded-[30px] font-black text-lg md:text-2xl transition-all shadow-xl active:scale-95",
-                  isAnalyzing 
-                    ? 'bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed' 
-                    : (cvText.length >= 50 && fileName) 
-                      ? 'bg-slate-900 dark:bg-blue-600 text-white hover:bg-black dark:hover:bg-blue-700 shadow-blue-200 dark:shadow-blue-900/50' 
-                      : 'bg-slate-100 dark:bg-slate-700 text-slate-300 dark:text-slate-500 cursor-not-allowed'
+                  "w-full mt-6 py-4 rounded-xl font-display font-bold text-lg flex items-center justify-center gap-2 transition-all",
+                  fileName
+                    ? "bg-gradient-to-r from-[var(--sa-gold)] to-[var(--sa-terracotta)] text-white hover:opacity-90 shadow-lg hover:shadow-xl"
+                    : "bg-muted text-muted-foreground cursor-not-allowed"
                 )}
               >
-                {isAnalyzing ? (
-                  <span className="flex items-center justify-center">
-                    <div className="w-4 h-4 md:w-6 md:h-6 border-2 border-slate-400 border-t-transparent rounded-full animate-spin mr-2"></div>
-                    Analyzing...
-                  </span>
-                ) : 'Analyze CV'}
+                <Brain className="h-5 w-5" /> Analyse with AI
               </button>
-              
-              <div className="flex flex-wrap justify-center gap-4 md:gap-8 text-[8px] md:text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-[0.2em]">
-                <span className="flex items-center">
-                  <span className="w-1 h-1 md:w-1.5 md:h-1.5 bg-emerald-500 rounded-full mr-1 md:mr-2" /> 
+
+              {/* Features */}
+              <div className="flex flex-wrap justify-center gap-4 mt-6 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--sa-green)]" />
                   AI-Powered
                 </span>
-                <span className="flex items-center">
-                  <span className="w-1 h-1 md:w-1.5 md:h-1.5 bg-blue-500 rounded-full mr-1 md:mr-2" /> 
-                  Comprehensive
+                <span className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--sa-gold)]" />
+                  SA Market Focus
                 </span>
-                <span className="flex items-center">
-                  <span className="w-1 h-1 md:w-1.5 md:h-1.5 bg-indigo-500 rounded-full mr-1 md:mr-2" /> 
-                  Actionable
+                <span className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--sa-terracotta)]" />
+                  Actionable Insights
                 </span>
               </div>
-
-              {/* Accuracy Note */}
-              <div className="text-center text-[8px] md:text-[10px] text-slate-400 dark:text-slate-500 max-w-md px-4">
-                <span className="font-bold">Note:</span> For best results, use DOCX + paste text. PDFs may have limitations.
-              </div>
-            </div>
-          </div>
+            </GlassCard>
+          </motion.div>
         )}
       </div>
-    </div>
-  )
-}
+    )
+  }

@@ -1,529 +1,502 @@
-// TwinBuilder.tsx
-import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
-import { CheckCircle, ChevronRight, ChevronLeft, Sparkles, Loader2 } from "lucide-react"
-import { cn } from "../lib/utils"
-import { twinAPI, progressAPI } from "../lib/api"
-import ProgressTracker from "../components/ProgressTracker"
-import { useUser } from "../lib/user-context"
+import { useState, useEffect, useRef, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Brain, Send, Sparkles, ChevronRight, Bot, User, Zap } from "lucide-react";
+import { cn } from "../lib/utils";
+import { streamChat, parseAIResponse, type ChatMsg } from "../lib/chat-stream";
+import ReactMarkdown from "react-markdown";
+import { useNavigate } from "react-router-dom"; // Add this for navigation
 
-const steps = ["Personal Info", "Education", "Skills", "Goals"]
-const provinces = [
-  "Gauteng",
-  "Western Cape",
-  "KwaZulu-Natal",
-  "Eastern Cape",
-  "Free State",
-  "Limpopo",
-  "Mpumalanga",
-  "North West",
-  "Northern Cape",
-]
-const educationLevels = ["Matric", "Certificate", "Diploma", "Degree", "Postgraduate", "Other"]
-const skillOptions = [
-  "Microsoft Office",
-  "Social Media",
-  "Customer Service",
-  "Data Entry",
-  "Web Development",
-  "Graphic Design",
-  "Sales",
-  "Writing",
-  "Marketing",
-  "Accounting",
-  "Project Management",
-  "Communication",
-]
-const careerGoals = [
-  "Tech Career",
-  "Freelancing",
-  "Corporate Job",
-  "Entrepreneurship",
-  "Creative Industry",
-  "Finance",
-  "Healthcare",
-  "Education",
-]
+interface TwinProfile {
+  name?: string;
+  careerStage?: string;
+  province?: string;
+  industry?: string;
+  education?: string;
+  skills?: string[];
+  challenges?: string;
+  goals?: string;
+  empowermentScore?: number;
+  [key: string]: unknown; // Allow for additional properties
+}
+
+interface DisplayMessage {
+  id: string;
+  sender: "ai" | "user";
+  text: string;
+  options?: string[];
+  isComplete?: boolean;
+  timestamp: Date;
+}
+
+const thinkingPhrases = [
+  "Analysing your profile...",
+  "Scanning SA job market trends...",
+  "Cross-referencing skill demand by province...",
+  "Building your career DNA...",
+  "Generating personalised insights...",
+];
 
 export default function TwinBuilder() {
-  const [currentStep, setCurrentStep] = useState(0)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [successMsg, setSuccessMsg] = useState("")
-  const [formData, setFormData] = useState({
-    age: "",
-    province: "",
-    education: "",
-    skills: [] as string[],
-    goals: [] as string[],
-  })
-  const navigate = useNavigate()
-  const { user, updateProgress, updateUser } = useUser()
+  const navigate = useNavigate(); // Add navigate hook
+  const [messages, setMessages] = useState<DisplayMessage[]>([]);
+  const [chatHistory, setChatHistory] = useState<ChatMsg[]>([]);
+  const [isTyping, setIsTyping] = useState(false);
+  const [userInput, setUserInput] = useState("");
+  const [showThinking, setShowThinking] = useState(false);
+  const [thinkingIdx, setThinkingIdx] = useState(0);
+  const [profileComplete, setProfileComplete] = useState(false);
+  const [profileData, setProfileData] = useState<TwinProfile | null>(null);
+  const [error, setError] = useState("");
+  const chatEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  // Load any saved form data on mount so users can resume or update details
+  const scrollToBottom = useCallback(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, []);
+
+  useEffect(() => { scrollToBottom(); }, [messages, isTyping, scrollToBottom]);
+
+  // Start conversation
   useEffect(() => {
-    const savedFormData = localStorage.getItem('twinFormData')
-    if (savedFormData) {
-      try {
-        const parsedData = JSON.parse(savedFormData)
-        setFormData(parsedData)
-        console.log("Loaded saved form data:", parsedData)
-      } catch (error) {
-        console.error("Error loading saved form data:", error)
-      }
-    }
-  }, [navigate])
+    sendToAI([]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // Save form data to localStorage on change
-  useEffect(() => {
-    localStorage.setItem('twinFormData', JSON.stringify(formData))
-  }, [formData])
+  const sendToAI = async (history: ChatMsg[]) => {
+    setIsTyping(true);
+    setError("");
+    let fullText = "";
 
-  const toggleSkill = (skill: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      skills: prev.skills.includes(skill) ? prev.skills.filter((s) => s !== skill) : [...prev.skills, skill],
-    }))
-  }
-
-  const toggleGoal = (goal: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      goals: prev.goals.includes(goal) ? prev.goals.filter((g) => g !== goal) : [...prev.goals, goal],
-    }))
-  }
-
-  const calculateEmpowermentScore = () => {
-    let score = 50 // Base score
-    
-    // Add points for skills (max 30 points)
-    score += Math.min(formData.skills.length * 5, 30)
-    
-    // Add points for education
-    const educationScores: Record<string, number> = {
-      'Matric': 10,
-      'Certificate': 15,
-      'Diploma': 20,
-      'Degree': 25,
-      'Postgraduate': 30,
-      'Other': 5
-    }
-    score += educationScores[formData.education] || 0
-    
-    // Add points for goals (max 15 points)
-    score += Math.min(formData.goals.length * 3, 15)
-    
-    // Add points for age (younger gets more points for growth potential)
-    const age = parseInt(formData.age) || 25
-    if (age >= 16 && age <= 25) score += 10
-    else if (age >= 26 && age <= 30) score += 5
-    
-    return Math.min(Math.max(score, 0), 100)
-  }
-
-  const validateStep = () => {
-    switch (currentStep) {
-      case 0:
-        if (!formData.age || parseInt(formData.age) < 16 || parseInt(formData.age) > 35) {
-          setError("Please enter a valid age between 16 and 35")
-          return false
-        }
-        if (!formData.province) {
-          setError("Please select your province")
-          return false
-        }
-        return true
-      case 1:
-        if (!formData.education) {
-          setError("Please select your education level")
-          return false
-        }
-        return true
-      case 2:
-        if (formData.skills.length === 0) {
-          setError("Please select at least one skill")
-          return false
-        }
-        return true
-      case 3:
-        if (formData.goals.length === 0) {
-          setError("Please select at least one career goal")
-          return false
-        }
-        return true
-      default:
-        return true
-    }
-  }
-
-  const handleNext = async () => {
-    console.log("HandleNext called, currentStep:", currentStep)
-    setError("")
-    
-    if (!validateStep()) {
-      console.log("Validation failed")
-      return
-    }
-    
-    console.log("Validation passed, proceeding...")
-    
-    if (currentStep < steps.length - 1) {
-      console.log("Moving to next step:", currentStep + 1)
-      setCurrentStep(currentStep + 1)
-    } else {
-      console.log("Last step - creating twin")
-      setIsLoading(true)
-      setError("") // Clear any previous errors
-      
-      try {
-        // Create twin data
-        const twinData = {
-          name: user?.name || "User",
-          email: user?.email || "",
-          skills: formData.skills,
-          education: formData.education,
-          interests: formData.goals,
-          age: parseInt(formData.age) || 25,
-          province: formData.province,
-          careerGoals: formData.goals,
-          userId: user?.id || `user_${Date.now()}`
-        }
-        
-        console.log("Sending twin data:", twinData)
-        
-        // Save to API - no fallback to demo
-        const response = await twinAPI.create(twinData)
-        console.log("API Response:", response)
-        
-        if (response && (response.status === 'success' || response.data?.twin)) {
-          // Calculate empowerment score
-          const empowermentScore = calculateEmpowermentScore()
-          console.log("Empowerment Score:", empowermentScore)
-          
-          // Get twin ID from response or generate one
-          const twinObj = response.data?.twin || null
-          const twinId = twinObj?.id || twinObj?._id || `twin_${Date.now()}`
-          const created = twinObj && twinObj.createdAt && twinObj.updatedAt
-            ? new Date(twinObj.createdAt).getTime() === new Date(twinObj.updatedAt).getTime()
-            : true
-
-          setSuccessMsg(created ? 'Digital Twin created successfully.' : 'Existing Digital Twin updated.')
-          setIsLoading(false)
-          
-          // Create twin object with all data
-          const twinWithScore = {
-            ...twinData,
-            id: twinId,
-            empowermentScore,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
+    await streamChat({
+      messages: history,
+      onDelta: (chunk) => {
+        fullText += chunk;
+        // Update the last AI message progressively
+        setMessages((prev) => {
+          const last = prev[prev.length - 1];
+          const parsed = parseAIResponse(fullText);
+          if (last?.sender === "ai" && last.id.startsWith("ai-stream")) {
+            return prev.map((m, i) =>
+              i === prev.length - 1
+                ? { ...m, text: parsed.cleanText, options: parsed.options }
+                : m
+            );
           }
-          
-          // Update user context
-          updateProgress('twinCompleted', true)
-          updateProgress('empowermentScore', empowermentScore)
-          updateUser({
-            province: formData.province,
-            education: formData.education,
-            skills: formData.skills,
-            interests: formData.goals
-          })
-          
-          // Save twin data to localStorage for other components
-          localStorage.setItem('twinData', JSON.stringify(twinWithScore))
-          localStorage.setItem('twinCreated', 'true')
-          
-          // Clear saved form data
-          localStorage.removeItem('twinFormData')
-          
-          // Save user data with twin info
-          if (user) {
-            const updatedUser = {
-              ...user,
-              twinCreated: true,
-              empowermentScore,
-              twinId,
-              province: formData.province,
-              education: formData.education,
-              skills: formData.skills,
-              interests: formData.goals
-            }
-            localStorage.setItem('user', JSON.stringify(updatedUser))
-          }
+          return [
+            ...prev,
+            {
+              id: `ai-stream-${Date.now()}`,
+              sender: "ai",
+              text: parsed.cleanText,
+              options: parsed.options,
+              timestamp: new Date(),
+            },
+          ];
+        });
+      },
+      onDone: () => {
+        setIsTyping(false);
+        const parsed = parseAIResponse(fullText);
 
-          // Cache for quick filters
-          localStorage.setItem('userProvince', formData.province)
-          
-          // Try to save progress to API (non-blocking)
-          try {
-            await progressAPI.saveTwinCompletion(twinId)
-            console.log("Progress saved to API")
-          } catch (progressError) {
-            console.log("Local progress saved only:", progressError)
-            // Continue even if API progress save fails
+        // Finalize the message with options
+        setMessages((prev) => {
+          const updated = [...prev];
+          const lastIdx = updated.length - 1;
+          if (lastIdx >= 0 && updated[lastIdx].sender === "ai") {
+            updated[lastIdx] = {
+              ...updated[lastIdx],
+              text: parsed.cleanText,
+              options: parsed.options,
+              isComplete: parsed.isComplete,
+            };
           }
-          
-          // Redirect to dashboard after short delay
-          setTimeout(() => {
-            console.log("Redirecting to dashboard...")
-            navigate("/dashboard", { 
-              replace: true,
-              state: { 
-                twinCreated: true,
-                empowermentScore,
-                twinId,
-                showWelcome: true
-              } 
-            })
-          }, 1200)
-        } else {
-          throw new Error("Failed to create twin: Invalid response")
+          return updated;
+        });
+
+        // Update chat history
+        setChatHistory((prev) => [...prev, { role: "assistant", content: fullText }]);
+
+        if (parsed.isComplete && parsed.profile) {
+          handleProfileComplete(parsed.profile as TwinProfile);
         }
-      } catch (err: any) {
-        console.error("Twin creation error:", err)
-        setError(err.message || "Failed to create twin. Please try again.")
-        setIsLoading(false)
-      }
-    }
-  }
 
-  const handleBack = () => {
-    setError("")
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1)
-    }
-  }
+        setTimeout(() => inputRef.current?.focus(), 100);
+      },
+      onError: (err) => {
+        setIsTyping(false);
+        setError(err);
+      },
+    });
+  };
+
+  const handleProfileComplete = (profile: TwinProfile) => {
+    setProfileData(profile);
+    localStorage.setItem("twinData", JSON.stringify(profile));
+    localStorage.setItem("twinCreated", "true");
+
+    setTimeout(() => {
+      setShowThinking(true);
+      const interval = setInterval(() => {
+        setThinkingIdx((prev) => {
+          if (prev >= thinkingPhrases.length - 1) {
+            clearInterval(interval);
+            setTimeout(() => {
+              setShowThinking(false);
+              setProfileComplete(true);
+            }, 1500);
+            return prev;
+          }
+          return prev + 1;
+        });
+      }, 1200);
+    }, 1000);
+  };
+
+  const handleSend = (text: string) => {
+    if (!text.trim() || isTyping) return;
+    setUserInput("");
+
+    const userMsg: DisplayMessage = {
+      id: `user-${Date.now()}`,
+      sender: "user",
+      text: text.trim(),
+      timestamp: new Date(),
+    };
+    setMessages((prev) => [...prev.map(m => ({ ...m, options: undefined })), userMsg]);
+
+    const newHistory: ChatMsg[] = [...chatHistory, { role: "user", content: text.trim() }];
+    setChatHistory(newHistory);
+    sendToAI(newHistory);
+  };
+
+  const handleOptionClick = (option: string) => handleSend(option);
+
+  const handleContinueToDashboard = () => {
+    navigate("/dashboard"); // Navigate to dashboard
+  };
+
+  const lastMessage = messages[messages.length - 1];
+  const hasOptions = lastMessage?.sender === "ai" && (lastMessage?.options?.length ?? 0) > 0;
+
+  // Helper function to safely render profile values
+  const renderProfileValue = (value: unknown): string => {
+    if (value === null || value === undefined) return "";
+    if (typeof value === "string") return value;
+    if (typeof value === "number") return value.toString();
+    if (Array.isArray(value)) return value.join(", ");
+    return String(value);
+  };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
-      {/* Progress Tracker */}
-      <ProgressTracker currentStep="twin" />
-      
+    <div className="flex flex-col h-screen bg-background chat-gradient">
       {/* Header */}
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-foreground tracking-tight">
-          Step 2: Build Your Digital Twin
-        </h1>
-        <p className="mt-2 text-muted-foreground text-sm sm:text-base">
-          Tell us about yourself so we can generate an accurate economic profile tailored to you.
-        </p>
+      <div className="flex-shrink-0 border-b border-border bg-card/80 backdrop-blur-md">
+        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
+          <div className="relative">
+            <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center glow-primary">
+              <Brain className="h-5 w-5 text-primary" />
+            </div>
+            <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-primary border-2 border-card" />
+          </div>
+          <div>
+            <h1 className="font-display text-sm font-semibold text-foreground">
+              Digital Twin Builder
+            </h1>
+            <p className="text-xs text-muted-foreground flex items-center gap-1">
+              <Zap className="h-3 w-3 text-primary" />
+              SA Career Intelligence • Active
+            </p>
+          </div>
+        </div>
       </div>
 
-      {/* Internal Progress Steps */}
-      <div className="flex items-center justify-between bg-card border border-border rounded-xl px-4 sm:px-6 py-4 shadow-sm">
-        {steps.map((step, i) => (
-          <div key={i} className="flex items-center">
-            <div
+      {/* Thinking Overlay */}
+      <AnimatePresence>
+        {showThinking && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-background/90 backdrop-blur-xl"
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="text-center space-y-8 max-w-md px-6"
+            >
+              <div className="mx-auto h-20 w-20 rounded-2xl bg-primary/20 flex items-center justify-center glow-primary">
+                <Sparkles className="h-10 w-10 text-primary animate-pulse" />
+              </div>
+              <h2 className="text-2xl font-display font-bold text-foreground">
+                Building Your Digital Twin
+              </h2>
+              <div className="space-y-3">
+                {thinkingPhrases.map((phrase, i) => (
+                  <motion.div
+                    key={phrase}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{
+                      opacity: i <= thinkingIdx ? 1 : 0.3,
+                      x: 0,
+                    }}
+                    transition={{ delay: i * 0.1 }}
+                    className="flex items-center gap-3 text-sm"
+                  >
+                    <span
+                      className={cn(
+                        "text-xs font-mono",
+                        i < thinkingIdx
+                          ? "text-primary"
+                          : i === thinkingIdx
+                          ? "text-primary animate-pulse"
+                          : "text-muted-foreground"
+                      )}
+                    >
+                      {i < thinkingIdx ? "✓" : i === thinkingIdx ? "▸" : "○"}
+                    </span>
+                    <span className={cn(
+                      i <= thinkingIdx ? "text-foreground" : "text-muted-foreground"
+                    )}>
+                      {phrase}
+                    </span>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Profile Complete */}
+      <AnimatePresence>
+        {profileComplete && profileData && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-xl"
+          >
+            <motion.div
+              initial={{ scale: 0.8, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              className="max-w-lg w-full mx-4 bg-card border border-border rounded-2xl p-8 space-y-6 glow-primary"
+            >
+              <div className="text-center space-y-3">
+                <div className="mx-auto h-16 w-16 rounded-2xl bg-primary/20 flex items-center justify-center">
+                  <Sparkles className="h-8 w-8 text-primary" />
+                </div>
+                <h2 className="text-2xl font-display font-bold text-foreground">
+                  Your Digital Twin is Ready!
+                </h2>
+                <p className="text-muted-foreground text-sm">
+                  Your AI career profile has been built.
+                </p>
+              </div>
+
+              <div className="bg-muted/50 rounded-xl p-4 space-y-3">
+                {profileData.name && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Name</span>
+                    <span className="text-foreground font-medium">{renderProfileValue(profileData.name)}</span>
+                  </div>
+                )}
+                {profileData.careerStage && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Career Stage</span>
+                    <span className="text-foreground font-medium">{renderProfileValue(profileData.careerStage)}</span>
+                  </div>
+                )}
+                {profileData.province && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Province</span>
+                    <span className="text-foreground font-medium">{renderProfileValue(profileData.province)}</span>
+                  </div>
+                )}
+                {profileData.industry && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Industry</span>
+                    <span className="text-foreground font-medium">{renderProfileValue(profileData.industry)}</span>
+                  </div>
+                )}
+                {profileData.education && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Education</span>
+                    <span className="text-foreground font-medium">{renderProfileValue(profileData.education)}</span>
+                  </div>
+                )}
+                {profileData.skills && profileData.skills.length > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Skills</span>
+                    <span className="text-foreground font-medium text-right">
+                      {renderProfileValue(profileData.skills)}
+                    </span>
+                  </div>
+                )}
+                {profileData.empowermentScore != null && (
+                  <div className="flex justify-between items-center text-sm pt-2 border-t border-border">
+                    <span className="text-muted-foreground font-medium">Empowerment Score</span>
+                    <span className="text-2xl font-display font-bold text-primary">
+                      {renderProfileValue(profileData.empowermentScore)}
+                      <span className="text-sm text-muted-foreground">/100</span>
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <button
+                onClick={handleContinueToDashboard}
+                className="w-full py-3 bg-primary text-primary-foreground rounded-xl font-semibold hover:bg-primary/90 transition-colors"
+              >
+                Continue to Dashboard
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Chat Messages */}
+      <div className="flex-1 overflow-y-auto scrollbar-thin">
+        <div className="max-w-3xl mx-auto px-4 py-6 space-y-1">
+          {messages.map((msg) => (
+            <motion.div
+              key={msg.id}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
               className={cn(
-                "h-10 w-10 rounded-full flex items-center justify-center font-medium transition-colors shadow-sm",
-                i < currentStep
-                  ? "bg-accent text-white"
-                  : i === currentStep
-                    ? "bg-primary text-white"
-                    : "bg-muted text-muted-foreground",
+                "flex gap-3 py-3",
+                msg.sender === "user" ? "justify-end" : "justify-start"
               )}
             >
-              {i < currentStep ? <CheckCircle className="h-5 w-5" /> : i + 1}
-            </div>
-            {i < steps.length - 1 && (
-              <div className={cn("w-10 md:w-20 h-1 mx-2 rounded-full", i < currentStep ? "bg-accent" : "bg-muted")} />
-            )}
-          </div>
-        ))}
-      </div>
+              {msg.sender === "ai" && (
+                <div className="flex-shrink-0 h-8 w-8 rounded-lg bg-primary/15 flex items-center justify-center mt-1">
+                  <Bot className="h-4 w-4 text-primary" />
+                </div>
+              )}
 
-      {/* Step Title */}
-      <div className="text-center">
-        <h2 className="text-xl font-semibold text-foreground">{steps[currentStep]}</h2>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Step {currentStep + 1} of {steps.length}
-        </p>
-      </div>
-
-      {/* Form Content */}
-      <div className="bg-card border border-border rounded-2xl p-6 sm:p-7 mb-4 shadow-md">
-        {currentStep === 0 && (
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Age *</label>
-              <input
-                type="number"
-                value={formData.age}
-                onChange={(e) => setFormData({ ...formData, age: e.target.value })}
-                className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="Enter your age"
-                min="16"
-                max="35"
-                required
-              />
-              <p className="text-xs text-muted-foreground mt-1">Must be between 16 and 35</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Province *</label>
-              <select
-                value={formData.province}
-                onChange={(e) => setFormData({ ...formData, province: e.target.value })}
-                className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                required
+              <div
+                className={cn(
+                  "max-w-[80%] space-y-3",
+                  msg.sender === "user" ? "items-end" : "items-start"
+                )}
               >
-                <option value="">Select your province</option>
-                {provinces.map((p) => (
-                  <option key={p} value={p}>
-                    {p}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        )}
-
-        {currentStep === 1 && (
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-4">Highest Education Level *</label>
-            <div className="grid grid-cols-2 gap-3">
-              {educationLevels.map((level) => (
-                <button
-                  key={level}
-                  type="button"
-                  onClick={() => setFormData({ ...formData, education: level })}
+                <div
                   className={cn(
-                    "px-4 py-3 rounded-lg border text-left transition-colors",
-                    formData.education === level
-                      ? "border-primary bg-primary/10 text-foreground"
-                      : "border-border bg-background text-muted-foreground hover:border-primary/50",
+                    "rounded-2xl px-4 py-3 text-sm leading-relaxed",
+                    msg.sender === "user"
+                      ? "bg-primary text-primary-foreground rounded-br-md"
+                      : "bg-chat-ai text-foreground border border-border/50 rounded-bl-md"
                   )}
                 >
-                  {level}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {currentStep === 2 && (
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-4">Select your skills *</label>
-            <p className="text-sm text-muted-foreground mb-3">Select all that apply (at least one required)</p>
-            <div className="flex flex-wrap gap-2">
-              {skillOptions.map((skill) => (
-                <button
-                  key={skill}
-                  type="button"
-                  onClick={() => toggleSkill(skill)}
-                  className={cn(
-                    "px-4 py-2 rounded-full border text-sm transition-colors",
-                    formData.skills.includes(skill)
-                      ? "border-primary bg-primary text-white"
-                      : "border-border bg-background text-muted-foreground hover:border-primary/50",
+                  {msg.sender === "ai" ? (
+                    <div className="prose prose-sm prose-invert max-w-none">
+                      <ReactMarkdown>{msg.text}</ReactMarkdown>
+                    </div>
+                  ) : (
+                    msg.text
                   )}
-                >
-                  {skill}
-                </button>
-              ))}
-            </div>
-            <p className="text-sm text-muted-foreground mt-4">Selected: {formData.skills.length} skills</p>
-          </div>
-        )}
+                </div>
 
-        {currentStep === 3 && (
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-4">Career Goals *</label>
-            <p className="text-sm text-muted-foreground mb-3">Select up to 3 goals (at least one required)</p>
-            <div className="grid grid-cols-2 gap-3">
-              {careerGoals.map((goal) => (
-                <button
-                  key={goal}
-                  type="button"
-                  onClick={() => toggleGoal(goal)}
-                  disabled={!formData.goals.includes(goal) && formData.goals.length >= 3}
-                  className={cn(
-                    "px-4 py-3 rounded-lg border text-left transition-colors",
-                    formData.goals.includes(goal)
-                      ? "border-primary bg-primary/10 text-foreground"
-                      : "border-border bg-background text-muted-foreground hover:border-primary/50 disabled:opacity-50",
-                  )}
-                >
-                  {goal}
-                </button>
-              ))}
-            </div>
-            <p className="text-sm text-muted-foreground mt-4">Selected: {formData.goals.length} of 3 goals</p>
-          </div>
-        )}
+                {/* Options */}
+                {msg.sender === "ai" && msg.options && msg.options.length > 0 && msg === lastMessage && !isTyping && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="flex flex-wrap gap-2"
+                  >
+                    {msg.options.map((opt) => (
+                      <button
+                        key={opt}
+                        onClick={() => handleOptionClick(opt)}
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-medium border border-border/60 bg-secondary/50 hover:border-primary/50 hover:bg-primary/10 text-foreground transition-all group"
+                      >
+                        {opt}
+                        <ChevronRight className="h-3 w-3 text-muted-foreground group-hover:text-primary transition-colors" />
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </div>
+
+              {msg.sender === "user" && (
+                <div className="flex-shrink-0 h-8 w-8 rounded-lg bg-primary/30 flex items-center justify-center mt-1">
+                  <User className="h-4 w-4 text-primary-foreground" />
+                </div>
+              )}
+            </motion.div>
+          ))}
+
+          {/* Typing Indicator */}
+          <AnimatePresence>
+            {isTyping && (
+              <motion.div
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="flex gap-3 py-3"
+              >
+                <div className="h-8 w-8 rounded-lg bg-primary/15 flex items-center justify-center">
+                  <Bot className="h-4 w-4 text-primary" />
+                </div>
+                <div className="bg-chat-ai border border-border/50 rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-1.5">
+                  {[0, 1, 2].map((i) => (
+                    <div
+                      key={i}
+                      className="h-2 w-2 rounded-full bg-primary/60 typing-dot"
+                    />
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Error */}
+          {error && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mx-auto max-w-md p-3 bg-destructive/10 border border-destructive/20 rounded-xl text-sm text-destructive text-center"
+            >
+              {error}
+            </motion.div>
+          )}
+
+          <div ref={chatEndRef} />
+        </div>
       </div>
 
-      {/* Error Message */}
-      {error && (
-        <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-sm text-destructive">
-          {error}
-        </div>
-      )}
-
-      {/* Success Message (when twin is being created) */}
-      {isLoading && (
-        <div className="mb-4 p-3 bg-accent/10 border border-accent/20 rounded-lg text-sm text-accent">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 animate-pulse" />
-            Creating your Digital Twin and calculating your Empowerment Score...
+      {/* Input */}
+      <div className="flex-shrink-0 border-t border-border bg-card/80 backdrop-blur-md">
+        <div className="max-w-3xl mx-auto px-4 py-3">
+          <div className="flex items-center gap-3 bg-muted/50 border border-border rounded-xl px-4 py-2">
+            <Sparkles className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+            <input
+              ref={inputRef}
+              type="text"
+              value={userInput}
+              onChange={(e) => setUserInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSend(userInput)}
+              placeholder={
+                hasOptions
+                  ? "Or type your own answer..."
+                  : "Tell me about your career goals..."
+              }
+              className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none py-1"
+              disabled={isTyping || showThinking || profileComplete}
+            />
+            <button
+              onClick={() => handleSend(userInput)}
+              disabled={!userInput.trim() || isTyping || showThinking}
+              className="h-8 w-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <Send className="h-4 w-4" />
+            </button>
           </div>
-          <div className="mt-2 text-xs">
-            You will be redirected to the dashboard shortly...
-          </div>
-        </div>
-      )}
-
-      {/* Navigation Buttons */}
-      <div className="flex items-center justify-between">
-        <button
-          onClick={handleBack}
-          disabled={currentStep === 0 || isLoading}
-          className="flex items-center gap-2 px-4 py-2 text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
-          <ChevronLeft className="h-5 w-5" /> Back
-        </button>
-        
-        <div className="text-center">
-          <p className="text-xs text-muted-foreground">
-            Step {currentStep + 1} of {steps.length}
+          <p className="text-[10px] text-muted-foreground text-center mt-2">
+            AI-powered career insights for the South African job market
           </p>
         </div>
-        
-        <button
-          onClick={handleNext}
-          disabled={isLoading}
-          className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="h-5 w-5 animate-spin" /> Creating Twin...
-            </>
-          ) : currentStep === steps.length - 1 ? (
-            <>
-              <Sparkles className="h-5 w-5" /> Generate Twin
-            </>
-          ) : (
-            <>
-              Next <ChevronRight className="h-5 w-5" />
-            </>
-          )}
-        </button>
       </div>
-
-      {/* Preview of empowerment score (on last step) */}
-      {currentStep === steps.length - 1 && !isLoading && (
-        <div className="mt-6 p-4 bg-primary/5 border border-primary/20 rounded-xl">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-foreground">Estimated Empowerment Score</p>
-              <p className="text-xs text-muted-foreground">Based on your inputs</p>
-            </div>
-            <div className="text-right">
-              <p className="text-2xl font-bold text-primary">{calculateEmpowermentScore()}<span className="text-lg">/100</span></p>
-              <p className="text-xs text-muted-foreground">Will be calculated upon completion</p>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
-  )
+  );
 }
