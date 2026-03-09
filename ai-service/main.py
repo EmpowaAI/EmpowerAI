@@ -11,6 +11,11 @@ from dotenv import load_dotenv
 import os
 import uuid
 from datetime import datetime
+import sys
+
+# Add the current directory to path
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 from utils.logger import get_logger
 
 load_dotenv()
@@ -68,8 +73,9 @@ app.add_middleware(
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
-    if request.method != "OPTIONS":
-        logger.info(f"Request: {request.method} {request.url.path}")
+    path = request.url.path
+    if request.method != "OPTIONS" and not path.startswith("/docs") and not path.startswith("/redoc") and not path.startswith("/openapi"):
+        logger.info(f"Request: {request.method} {path}")
     response = await call_next(request)
     return response
 
@@ -84,10 +90,11 @@ async def root():
         "endpoints": {
             "cv_analyze": "/api/cv/analyze",
             "cv_analyze_file": "/api/cv/analyze-file",
-            "digital_twin": "/api/twin",
+            "digital_twin": "/api/twin/generate",
             "simulation": "/api/simulation",
             "interview": "/api/interview",
-            "chat": "/api/chat"
+            "chat": "/api/chat",
+            "chat_twin": "/api/chat/twin"
         }
     }
 
@@ -123,21 +130,34 @@ async def debug_connection():
     }
 
 # Import routes
-from routes import digital_twin, simulation, cv_analysis, interview, chat
-from routes import cv_analysis_file
+from routes import digital_twin, simulation, cv_analysis, cv_analysis_file, interview, chat, digital_twin_chat
 
-app.include_router(digital_twin.router, prefix="/api/twin", tags=["Digital Twin"])
-app.include_router(simulation.router, prefix="/api/simulation", tags=["Simulation"])
-app.include_router(cv_analysis.router, prefix="/api/cv", tags=["CV Analysis"])
-app.include_router(cv_analysis_file.router, prefix="/api/cv", tags=["CV Analysis"])
-app.include_router(interview.router, prefix="/api/interview", tags=["Interview Coach"])
-app.include_router(chat.router, prefix="/api/chat", tags=["Chat"])
+# Include routers with proper prefixes
+app.include_router(digital_twin.router, prefix="/api")
+app.include_router(simulation.router, prefix="/api")
+app.include_router(cv_analysis.router, prefix="/api")
+app.include_router(cv_analysis_file.router, prefix="/api")
+app.include_router(interview.router, prefix="/api")
+app.include_router(chat.router, prefix="/api")
+app.include_router(digital_twin_chat.router, prefix="/api")  # This will make routes available at /api/chat/twin
+
+# Print all registered routes for debugging
+logger.info("=== Registered Routes ===")
+for route in app.routes:
+    if hasattr(route, "path"):
+        logger.info(f"  {route.path}")
+logger.info("========================")
 
 @app.exception_handler(404)
 async def custom_404_handler(request: Request, exc):
+    logger.warning(f"404 Not Found: {request.method} {request.url.path}")
     return JSONResponse(
         status_code=404,
-        content={"detail": "Endpoint not found", "path": request.url.path}
+        content={
+            "detail": "Endpoint not found",
+            "path": request.url.path,
+            "method": request.method
+        }
     )
 
 if __name__ == "__main__":
