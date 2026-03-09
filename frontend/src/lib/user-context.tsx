@@ -127,7 +127,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       if (shouldValidate) {
         try {
           const response = await fetch(
-            `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/validate`,
+            `${import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/validate`,
             {
               headers: {
                 'Authorization': `Bearer ${token}`,
