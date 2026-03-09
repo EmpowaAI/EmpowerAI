@@ -145,6 +145,13 @@ export default function LandingPage() {
                 </a>
               ))}
               <a
+                href="/login"
+                className="text-sm font-medium text-muted-foreground py-2 hover:text-foreground transition-colors"
+                onClick={() => setMobileOpen(false)}
+              >
+                Sign In
+              </a>
+              <a
                 href="/signup"
                 className="bg-sa-gold hover:bg-sa-gold/90 text-primary-foreground px-5 py-2.5 rounded-xl font-semibold text-center transition-colors mt-2"
                 onClick={() => setMobileOpen(false)}
