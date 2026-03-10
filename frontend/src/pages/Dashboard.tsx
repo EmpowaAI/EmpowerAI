@@ -215,7 +215,10 @@ export default function Dashboard() {
         {/* Score Cards */}
         {!loading && stats && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[/* Removed the Interview Confidence card */].map((card) => (
+            {[
+              { label: "CV Strength", value: stats.cvScore, delay: 0.1 },
+              { label: "Career Readiness", value: Math.round((stats.cvScore + stats.empowermentScore) / 2), delay: 0.2 },
+            ].map((card) => (
               <motion.div key={card.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: card.delay }}>
                 <GlassCard className="text-center">
                   <ScoreMeter score={card.value} label={card.label} size="md" />
