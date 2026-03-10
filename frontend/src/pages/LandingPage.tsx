@@ -164,24 +164,25 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative pt-28 pb-16 md:pt-36 md:pb-24 overflow-hidden">
+      <section className="relative pt-20 pb-12 sm:pt-24 sm:pb-16 md:pt-28 md:pb-20 lg:pt-36 lg:pb-24 overflow-hidden">
         <div className="absolute inset-0 sa-pattern -z-10" />
         <div className="absolute inset-0 bg-gradient-to-br from-sa-gold/10 via-background to-sa-green/5 -z-10" />
 
-        <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* Left */}
             <motion.div
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
+              className="text-center lg:text-left"
             >
-              <span className="inline-flex items-center gap-2 bg-sa-gold/10 text-sa-gold text-sm font-semibold px-4 py-1.5 rounded-full mb-6 border border-sa-gold/20">
-                <Sparkles className="w-4 h-4" />
+              <span className="inline-flex items-center gap-2 bg-sa-gold/10 text-sa-gold text-xs sm:text-sm font-semibold px-3 sm:px-4 py-1.5 rounded-full mb-4 sm:mb-6 border border-sa-gold/20">
+                <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
                 <RotatingText text={t("poweredBy")} langKey={langIndex} /> {"\u{1F1FF}\u{1F1E6}"}
               </span>
 
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight mb-6 font-display">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-extrabold leading-tight tracking-tight mb-4 sm:mb-6 font-display">
                 Your Digital{" "}
                 <span className="bg-gradient-to-r from-sa-gold via-sa-terracotta to-sa-red bg-clip-text text-transparent">
                   Economic Twin
