@@ -361,11 +361,11 @@ export default function Opportunities() {
   }
 
   return (
-    <div className="space-y-5 sm:space-y-5 md:space-y-6 -mx-3 sm:mx-0">
+    <div className="space-y-5 sm:space-y-5 md:space-y-6 -mx-3 sm:-mx-4 md:mx-0">
       {/* Header */}
-      <div className="text-center sm:text-left px-3 sm:px-0">
+      <div className="text-center sm:text-left px-3 sm:px-4 md:px-0">
         <h1 className="text-2xl sm:text-2xl md:text-3xl font-bold text-foreground">Career Opportunities</h1>
-        <p className="text-base sm:text-base text-muted-foreground mt-2 sm:mt-2">
+        <p className="text-sm sm:text-base text-muted-foreground mt-2 sm:mt-2">
           Real jobs, learnerships, internships, and bursaries across South Africa.
           <span className="ml-2 text-xs text-muted-foreground">Updated daily - Transparent matching</span>
         </p>
@@ -572,7 +572,7 @@ export default function Opportunities() {
                 isLoading={applyingId === opp.id}
                 loadingText="Opening..."
                 icon={<ExternalLink className="h-3 w-3 sm:h-4 sm:w-4" />}
-                className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm sm:text-base bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors w-full sm:w-auto"
+                className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors w-full sm:w-auto"
               >
                 Apply Now
               </LoadingButton>

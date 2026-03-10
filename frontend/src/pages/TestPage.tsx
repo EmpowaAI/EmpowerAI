@@ -1,5 +1,4 @@
-import React from 'react'
-
+// Test page component - Simple verification that React app is working
 export default function TestPage() {
   return (
     <div style={{ padding: '2rem', textAlign: 'center' }}>
