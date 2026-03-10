@@ -443,7 +443,7 @@ export default function LandingPage() {
             >
               <div className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl border border-border hover:scale-[1.02] transition-transform duration-300">
                 <img
-                  src="images/empowaaidemo.png"
+                  src="images/empoweraidemo.png"
                   alt="EmpowaAI Demo Preview"
                   className="w-full h-full object-cover"
                   crossOrigin="anonymous"
