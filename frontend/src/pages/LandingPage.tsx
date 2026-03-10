@@ -76,11 +76,11 @@ export default function LandingPage() {
               {/* Replace with your logo image using regular img tag */}
               <img 
                 src="/images/empowerLogo.jpg" // Update this path to your logo location
-                alt="EmpowerAI Logo"
+                alt="EmpowaAI Logo"
                 className="w-full h-full object-contain"
               />
             </div>
-            <span className="font-display">{"Empower"}<span className="text-sa-gold">AI</span></span>
+            <span className="font-display">{"Empowa"}<span className="text-sa-gold">AI</span></span>
           </a>
 
           {/* Desktop Nav */}
@@ -427,7 +427,7 @@ export default function LandingPage() {
             <span className="text-sa-terracotta text-sm font-semibold uppercase tracking-wider mb-3 block">
               <RotatingText text={t("watch")} langKey={langIndex} languageLabel={getLanguageDisplay(currentLanguage)} />{" \u2014 Watch"}
             </span>
-            <h2 className="text-3xl md:text-4xl font-extrabold mb-3 font-display text-foreground">{"See EmpowerAI in Action"}</h2>
+            <h2 className="text-3xl md:text-4xl font-extrabold mb-3 font-display text-foreground">{"See EmpowaAI in Action"}</h2>
             <p className="text-muted-foreground max-w-3xl mx-auto">
               {"Watch how we're helping South African youth discover their economic potential"}
             </p>
@@ -442,8 +442,8 @@ export default function LandingPage() {
             >
               <div className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl border border-border hover:scale-[1.02] transition-transform duration-300">
                 <img
-                  src="images/empoweraidemo.png"
-                  alt="EmpowerAI Demo Preview"
+                  src="images/empowaaidemo.png"
+                  alt="EmpowaAI Demo Preview"
                   className="w-full h-full object-cover"
                   crossOrigin="anonymous"
                 />
@@ -497,12 +497,12 @@ export default function LandingPage() {
               <RotatingText text={t("successStories")} langKey={langIndex} languageLabel={getLanguageDisplay(currentLanguage)} />{" \u2014 Ubuntu Stories"}
             </span>
             <h2 className="text-3xl md:text-4xl font-extrabold mb-3 font-display text-foreground">Real Success Stories from Mzansi</h2>
-            <p className="text-muted-foreground">{"See how EmpowerAI is transforming careers across all 9 provinces"}</p>
+            <p className="text-muted-foreground">{"See how EmpowaAI is transforming careers across all 9 provinces"}</p>
           </div>
           <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {[
               {
-                quote: "EmpowerAI helped me discover tech skills I didn't know I had. From Khayelitsha to a R12k/month developer role. Siyabonga!",
+                quote: "EmpowaAI helped me discover tech skills I didn't know I had. From Khayelitsha to a R12k/month developer role. Siyabonga!",
                 name: "Lerato Mokoena",
                 initials: "LM",
                 role: "Student \u2192 Software Developer",
@@ -591,11 +591,11 @@ export default function LandingPage() {
                   {/* Replace with your logo image in footer too */}
                   <img 
                     src="/images/empowerLogo.jpg" // Update this path to your logo location
-                    alt="EmpowerAI Logo"
+                    alt="EmpowaAI Logo"
                     className="w-full h-full object-contain"
                   />
                 </div>
-                <span className="font-display text-foreground">{"Empower"}<span className="text-sa-gold">AI</span></span>
+                <span className="font-display text-foreground">{"Empowa"}<span className="text-sa-gold">AI</span></span>
               </a>
               <p className="text-sm text-muted-foreground max-w-xs">
                 {"AI-powered career guidance for South African youth. Built with Ubuntu values \u2014 because together, we rise."}
@@ -615,7 +615,7 @@ export default function LandingPage() {
 
             <div className="flex flex-col items-end gap-3">
               <ThemeToggle />
-              <p className="text-xs text-muted-foreground">{"\u00A9 2026 EmpowerAI. Made in Mzansi \u{1F1FF}\u{1F1E6}"}</p>
+              <p className="text-xs text-muted-foreground">{"\u00A9 2026 EmpowaAI. Made in Mzansi \u{1F1FF}\u{1F1E6}"}</p>
               <p className="text-xs text-muted-foreground italic">
                 <RotatingText text={`"${t("ubuntuProverb")}"`} langKey={langIndex} languageLabel={getLanguageDisplay(currentLanguage)} />
               </p>

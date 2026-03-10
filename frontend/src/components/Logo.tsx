@@ -40,7 +40,7 @@ export default function Logo({
       <div className="bg-gradient-to-br from-sa-gold via-sa-green to-sa-blue flex items-center justify-center shadow-md overflow-hidden">
         <img 
           src="/images/empowerLogo.jpg"
-          alt="EmpowerAI Logo" 
+          alt="EmpowaAI Logo" 
           className={cn(
             sizeClasses[size],
             "object-contain transition-transform duration-300 group-hover:scale-105"
@@ -56,7 +56,7 @@ export default function Logo({
           "font-display transition-colors duration-300",
           variantClasses[variant]
         )}>
-          Empower<span className={cn(variant === "light" ? "text-white/90" : "text-sa-gold")}>AI</span>
+          Empowa<span className={cn(variant === "light" ? "text-white/90" : "text-sa-gold")}>AI</span>
         </span>
       )}
     </div>
