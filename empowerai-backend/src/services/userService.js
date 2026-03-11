@@ -413,7 +413,7 @@ class UserService {
     user.emailTokenExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
     await user.save();
 
-    await emailService.sendVerification(dto.newEmail, rawToken);
+    await emailService.sendEmailChange(dto.newEmail, rawToken);
 
     logger.info('Email change requested - verification sent to new address', {
       correlationId,
