@@ -11,6 +11,14 @@ const { apiLimiter } = require('./middleware/rateLimiter');
 
 const app = express();
 let serverInstance = null;
+const AI_HEALTH_TIMEOUT_MS = Number(process.env.AI_HEALTH_TIMEOUT_MS || 15000);
+const AI_HEALTH_STALE_MS = Number(process.env.AI_HEALTH_STALE_MS || 5 * 60 * 1000);
+let lastAiHealth = {
+  status: 'unknown',
+  openaiStatus: 'unknown',
+  checkedAt: null,
+  error: null,
+};
 
 // Compression middleware - reduces response size by ~70%
 app.use(compression());
@@ -87,23 +95,44 @@ app.get('/api/health', async (req, res) => {
   // Test AI service connectivity
   let aiServiceStatus = 'unknown';
   let aiServiceError = null;
+  const now = Date.now();
+  const cacheFresh = lastAiHealth.checkedAt && (now - lastAiHealth.checkedAt) < AI_HEALTH_STALE_MS;
   try {
     const axios = require('axios');
     const healthResponse = await axios.get(`${aiServiceUrl}/health`, {
-      timeout: 5000,
+      timeout: AI_HEALTH_TIMEOUT_MS,
       headers: aiServiceApiKey ? { 'X-API-KEY': aiServiceApiKey } : undefined,
     });
     aiServiceStatus = healthResponse.data?.status === 'healthy' ? 'connected' : 'unhealthy';
     if (healthResponse.data) {
-      aiServiceStatus += ` (openai: ${healthResponse.data.openai_status || 'unknown'})`;
+      const openaiStatus = healthResponse.data.openai_status || 'unknown';
+      aiServiceStatus += ` (openai: ${openaiStatus})`;
+      lastAiHealth = {
+        status: aiServiceStatus,
+        openaiStatus,
+        checkedAt: now,
+        error: null,
+      };
     }
   } catch (error) {
-    aiServiceStatus = 'disconnected';
+    const isTimeout = error.code === 'ECONNABORTED' || error.message?.includes('timeout');
+    aiServiceStatus = isTimeout ? 'sleeping' : 'disconnected';
     aiServiceError = {
       code: error.code || 'UNKNOWN',
       message: error.message,
       url: `${aiServiceUrl}/health`
     };
+
+    if (cacheFresh) {
+      aiServiceStatus = `${lastAiHealth.status} (cached)`;
+    } else {
+      lastAiHealth = {
+        status: aiServiceStatus,
+        openaiStatus: 'unknown',
+        checkedAt: now,
+        error: aiServiceError,
+      };
+    }
   }
   
   res.status(200).json({ 
@@ -314,7 +343,7 @@ connectDatabase().then(async (connected) => {
     // Test health endpoint (non-blocking, won't prevent server from starting)
     setTimeout(() => {
       axios.get(`${aiServiceUrl}/health`, {
-        timeout: 5000,
+        timeout: AI_HEALTH_TIMEOUT_MS,
         headers: aiServiceApiKey ? { 'X-API-KEY': aiServiceApiKey } : undefined,
       })
         .then(response => {
@@ -324,11 +353,14 @@ connectDatabase().then(async (connected) => {
           });
         })
         .catch(error => {
+          const isTimeout = error.code === 'ECONNABORTED' || error.message?.includes('timeout');
           logger.warn('AI Service health check failed', {
             message: error.message,
             code: error.code,
             url: `${aiServiceUrl}/health`,
-            note: 'This may be normal if the service is starting up or sleeping'
+            note: isTimeout
+              ? 'AI service likely sleeping (Render cold start)'
+              : 'AI service health check failed'
           });
         });
     }, 2000); // Wait 2 seconds before checking to let the service start
