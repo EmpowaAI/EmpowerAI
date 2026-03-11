@@ -81,17 +81,13 @@ app.get('/api/health', async (req, res) => {
   const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
   const memoryUsage = process.memoryUsage();
   const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
-  const aiServiceApiKey = process.env.AI_SERVICE_API_KEY;
   
   // Test AI service connectivity
   let aiServiceStatus = 'unknown';
   let aiServiceError = null;
   try {
     const axios = require('axios');
-    const healthResponse = await axios.get(`${aiServiceUrl}/health`, {
-      timeout: 5000,
-      headers: aiServiceApiKey ? { 'X-API-KEY': aiServiceApiKey } : undefined,
-    });
+    const healthResponse = await axios.get(`${aiServiceUrl}/health`, { timeout: 5000 });
     aiServiceStatus = healthResponse.data?.status === 'healthy' ? 'connected' : 'unhealthy';
     if (healthResponse.data) {
       aiServiceStatus += ` (openai: ${healthResponse.data.openai_status || 'unknown'})`;
@@ -259,6 +255,7 @@ connectDatabase().then(async (connected) => {
   app.use('/api/chat', require('./routes/chat'));
   app.use('/api/rss', require('./routes/rss'));
   app.use('/api/admin', require('./routes/admin'));
+  app.use('/api/account', require('./routes/account'));
   app.use('/api/user', require('./routes/user'));
   app.use('/api/applications', require('./routes/applications'));
 
@@ -298,7 +295,6 @@ connectDatabase().then(async (connected) => {
   
   // Log AI service configuration on startup
   const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
-  const aiServiceApiKey = process.env.AI_SERVICE_API_KEY;
   logger.info('AI Service Configuration', {
     aiServiceUrl,
     baseURL: `${aiServiceUrl}/api`,
@@ -312,10 +308,7 @@ connectDatabase().then(async (connected) => {
     
     // Test health endpoint (non-blocking, won't prevent server from starting)
     setTimeout(() => {
-      axios.get(`${aiServiceUrl}/health`, {
-        timeout: 5000,
-        headers: aiServiceApiKey ? { 'X-API-KEY': aiServiceApiKey } : undefined,
-      })
+      axios.get(`${aiServiceUrl}/health`, { timeout: 5000 })
         .then(response => {
           logger.info('AI Service health check passed', {
             status: response.status,

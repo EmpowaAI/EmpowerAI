@@ -2,34 +2,27 @@
 FastAPI routes for CV Analysis
 """
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException
 from openai import RateLimitError
 from models.schemas import CVAnalysisRequest, CVAnalysisResponse
 from services.cv_analyzer import CVAnalyzer
-from utils.logger import get_logger
 
 router = APIRouter()
 cv_analyzer = CVAnalyzer()
 
 @router.post("/analyze", response_model=CVAnalysisResponse)
-async def analyze_cv(request: CVAnalysisRequest, req: Request):
+async def analyze_cv(request: CVAnalysisRequest):
     """
     Analyze CV text and extract skills, identify gaps, and provide suggestions
     """
     try:
-        logger = get_logger(req.headers.get('X-Correlation-ID'))
-        logger.info("CV analysis request received", extra={
-            "cv_text_length": len(request.cvText)
-        })
+        print(f"Received CV analysis request with text length: {len(request.cvText)}")
         result = await cv_analyzer.analyze_cv(  # <-- await here
             request.cvText,
             request.jobRequirements
         )
-        logger.info("CV analysis completed", extra={
-            "education_count": len(result.get('education', [])),
-            "experience_count": len(result.get('experience', [])),
-            "skills_count": len(result.get('extractedSkills', []))
-        })
+        print(f"Analysis complete. About: {result.get('about', '')[:100]}...")
+        print(f"Education: {len(result.get('education', []))}, Experience: {len(result.get('experience', []))}")
         return CVAnalysisResponse(**result)
     except RateLimitError as e:
         retry_after = 60
@@ -46,8 +39,7 @@ async def analyze_cv(request: CVAnalysisRequest, req: Request):
             headers={"Retry-After": str(retry_after)}
         )
     except Exception as e:
-        logger = get_logger(req.headers.get('X-Correlation-ID'))
-        logger.error("Error in CV analysis", extra={"error": str(e)})
+        print(f"Error in CV analysis: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error analyzing CV: {str(e)}")
 
 @router.get("/health")

@@ -7,7 +7,6 @@
 const axios = require('axios');
 
 const AI_SERVICE_URL = (process.env.AI_SERVICE_URL || 'http://localhost:8000').replace(/\/$/, ''); // Remove trailing slash
-const AI_SERVICE_API_KEY = process.env.AI_SERVICE_API_KEY;
 // Increased timeout for Render free tier (cold starts can take 30-60 seconds)
 const REQUEST_TIMEOUT = process.env.NODE_ENV === 'production' ? 90000 : 30000; // 90 seconds in production, 30 in dev
 const MAX_RETRIES = 3;
@@ -26,7 +25,6 @@ const aiServiceClient = axios.create({
   timeout: REQUEST_TIMEOUT,
   headers: {
     'Content-Type': 'application/json',
-    ...(AI_SERVICE_API_KEY ? { 'X-API-KEY': AI_SERVICE_API_KEY } : {}),
   },
   maxContentLength: 10 * 1024 * 1024, // 10MB
   maxBodyLength: 10 * 1024 * 1024, // 10MB
