@@ -1,0 +1,89 @@
+/**
+ * UpdateUserDTO
+ * Validates and sanitizes profile update requests.
+ * Email and password are intentionally excluded — they have their own flows.
+ *
+ * Used by: PATCH /api/user/profile → userService.updateUser
+ */
+
+const { body, validationResult } = require('express-validator');
+
+// ─────────────────────────────────────────────
+// Validation rules
+// ─────────────────────────────────────────────
+const updateUserRules = [
+  body('name')
+    .optional()
+    .trim()
+    .isLength({ min: 2, max: 100 }).withMessage('Name must be between 2 and 100 characters'),
+
+  body('age')
+    .optional()
+    .isInt({ min: 13, max: 120 }).withMessage('Age must be a valid number between 13 and 120'),
+
+  body('province')
+    .optional()
+    .trim()
+    .isLength({ max: 100 }).withMessage('Province must be under 100 characters'),
+
+  body('education')
+    .optional()
+    .trim()
+    .isLength({ max: 200 }).withMessage('Education must be under 200 characters'),
+
+  body('skills')
+    .optional()
+    .isArray().withMessage('Skills must be an array')
+    .custom((skills) => skills.every((s) => typeof s === 'string'))
+    .withMessage('Each skill must be a string'),
+
+  body('interests')
+    .optional()
+    .isArray().withMessage('Interests must be an array')
+    .custom((interests) => interests.every((i) => typeof i === 'string'))
+    .withMessage('Each interest must be a string'),
+
+  body('avatar')
+    .optional()
+    .trim()
+    .isURL().withMessage('Avatar must be a valid URL'),
+
+  // Block attempts to update email or password through this route
+  body('email')
+    .not().exists().withMessage('Email cannot be updated here. Use /api/account/change-email instead.'),
+
+  body('password')
+    .not().exists().withMessage('Password cannot be updated here. Use /api/account/change-password instead.'),
+];
+
+// ─────────────────────────────────────────────
+// Validation middleware
+// ─────────────────────────────────────────────
+const validateUpdateUser = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      status: 'fail',
+      errors: errors.array().map((e) => ({ field: e.path, message: e.msg })),
+    });
+  }
+  next();
+};
+
+// ─────────────────────────────────────────────
+// DTO builder — only passes allowed fields to service
+// ─────────────────────────────────────────────
+const toUpdateUserDTO = (body) => {
+  const allowed = ['name', 'age', 'province', 'education', 'skills', 'interests', 'avatar'];
+  const dto = {};
+
+  for (const field of allowed) {
+    if (body[field] !== undefined) {
+      dto[field] = body[field];
+    }
+  }
+
+  return dto;
+};
+
+module.exports = { updateUserRules, validateUpdateUser, toUpdateUserDTO };
