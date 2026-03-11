@@ -7,6 +7,47 @@ const logger = require('../utils/logger');
 const { sendError } = require('../utils/response');
 const { AppError, InternalServerError } = require('../utils/errors');
 
+const SENSITIVE_KEYS = new Set([
+  'password',
+  'newPassword',
+  'currentPassword',
+  'token',
+  'emailToken',
+  'resetToken',
+  'authorization',
+  'auth',
+  'jwt',
+  'cvText',
+  'message',
+]);
+
+const sanitizeObject = (value, depth = 0) => {
+  if (value == null) return value;
+  if (depth > 3) return '[REDACTED]';
+
+  if (Array.isArray(value)) {
+    return value.slice(0, 10).map((item) => sanitizeObject(item, depth + 1));
+  }
+
+  if (typeof value === 'object') {
+    const out = {};
+    for (const [key, val] of Object.entries(value)) {
+      if (SENSITIVE_KEYS.has(key.toLowerCase())) {
+        out[key] = '[REDACTED]';
+      } else {
+        out[key] = sanitizeObject(val, depth + 1);
+      }
+    }
+    return out;
+  }
+
+  if (typeof value === 'string' && value.length > 500) {
+    return `${value.slice(0, 100)}...[truncated]`;
+  }
+
+  return value;
+};
+
 /**
  * Handle operational errors (known errors)
  */
@@ -37,8 +78,8 @@ const handleProgrammingError = (err, req, res) => {
     url: req.originalUrl,
     ip: req.ip,
     user: req.user?.id,
-    body: req.body,
-    query: req.query,
+    body: sanitizeObject(req.body),
+    query: sanitizeObject(req.query),
   });
 
   // Don't leak error details in production

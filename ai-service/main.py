@@ -47,6 +47,28 @@ class CorrelationIDMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(CorrelationIDMiddleware)
 
+# Optional API key protection for internal routes
+AI_SERVICE_API_KEY = os.getenv("AI_SERVICE_API_KEY")
+
+@app.middleware("http")
+async def api_key_guard(request: Request, call_next):
+    if AI_SERVICE_API_KEY:
+        path = request.url.path
+        is_public = (
+            path == "/" or
+            path == "/health" or
+            path.endswith("/health") or
+            path.startswith("/docs") or
+            path.startswith("/redoc") or
+            path.startswith("/openapi")
+        )
+        is_protected = path.startswith("/api") or path.startswith("/debug")
+        if is_protected and not is_public:
+            provided = request.headers.get("X-API-KEY")
+            if provided != AI_SERVICE_API_KEY:
+                return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+    return await call_next(request)
+
 # CORS configuration
 allowed_origins = [
     "http://localhost:3000",
@@ -130,7 +152,7 @@ async def debug_connection():
     }
 
 # Import routes
-from routes import digital_twin, simulation, cv_analysis, cv_analysis_file, interview, chat, digital_twin_chat
+from routes import digital_twin, simulation, cv_analysis, cv_analysis_file, interview, chat
 
 # Include routers with proper prefixes - FIXED: Added /cv prefix for CV endpoints
 app.include_router(digital_twin.router, prefix="/api")
@@ -139,7 +161,6 @@ app.include_router(cv_analysis.router, prefix="/api/cv")  # Fixed: Added /cv pre
 app.include_router(cv_analysis_file.router, prefix="/api/cv")  # Fixed: Added /cv prefix
 app.include_router(interview.router, prefix="/api")
 app.include_router(chat.router, prefix="/api")
-app.include_router(digital_twin_chat.router, prefix="/api")  # This will make routes available at /api/chat/twin
 
 # Print all registered routes for debugging
 logger.info("=== Registered Routes ===")

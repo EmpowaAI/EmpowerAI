@@ -50,8 +50,11 @@ const callWithRateLimitRetry = async (fn) => {
 };
 
 exports.analyzeCV = async (req, res, next) => {
+  let cvText = null;
+  let jobRequirementsArray = null;
   try {
-    const { cvText, jobRequirements } = req.body;
+    const { cvText: cvTextInput, jobRequirements } = req.body;
+    cvText = cvTextInput;
 
     if (!cvText) {
       return res.status(400).json({
@@ -61,7 +64,7 @@ exports.analyzeCV = async (req, res, next) => {
     }
 
     // Convert jobRequirements to array if it's a string
-    let jobRequirementsArray = null;
+    jobRequirementsArray = null;
     if (jobRequirements) {
       if (typeof jobRequirements === 'string') {
         // Split by comma or newline to create array
@@ -205,6 +208,8 @@ exports.analyzeCV = async (req, res, next) => {
  * @access Private
  */
 exports.analyzeCVFile = async (req, res, next) => {
+  let file = null;
+  let jobRequirementsArray = null;
   try {
     if (!req.file) {
       return res.status(400).json({
@@ -214,10 +219,10 @@ exports.analyzeCVFile = async (req, res, next) => {
     }
 
     const { jobRequirements } = req.body;
-    const file = req.file;
+    file = req.file;
 
     // Convert jobRequirements to array if it's a string
-    let jobRequirementsArray = null;
+    jobRequirementsArray = null;
     if (jobRequirements) {
       if (typeof jobRequirements === 'string') {
         jobRequirementsArray = jobRequirements.split(/[,\n]/).map(s => s.trim()).filter(s => s);
@@ -244,12 +249,14 @@ exports.analyzeCVFile = async (req, res, next) => {
     }
 
     const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
+    const aiServiceApiKey = process.env.AI_SERVICE_API_KEY;
     // Use axios directly for FormData (aiServiceClient doesn't handle FormData well)
     const response = await enqueueCvTask(() =>
       callWithRateLimitRetry(() =>
         axios.post(`${aiServiceUrl}/api/cv/analyze-file`, formData, {
           headers: {
-            ...formData.getHeaders()
+            ...formData.getHeaders(),
+            ...(aiServiceApiKey ? { 'X-API-KEY': aiServiceApiKey } : {}),
           },
           timeout: 60000, // 60 seconds for file processing
           maxContentLength: 10 * 1024 * 1024, // 10MB
