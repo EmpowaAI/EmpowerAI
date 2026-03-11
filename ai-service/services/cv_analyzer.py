@@ -15,7 +15,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from openai import RateLimitError
 from utils.ai_client import AIClient
-from utils.logger import get_logger
 
 class CVAnalyzer:
     """Analyzes CVs and extracts information"""
@@ -199,7 +198,6 @@ class CVAnalyzer:
 
     def extract_skills(self, cv_text: str) -> List[str]:
         """Extract skills from CV text (rule-based) – always returns list."""
-        logger = get_logger()
         if not cv_text or not cv_text.strip():
             return []
 
@@ -717,7 +715,6 @@ class CVAnalyzer:
     # ----------------------------------------------------------------------
     async def analyze_cv(self, cv_text: str, job_requirements: Optional[List[str]] = None) -> Dict[str, Any]:
         """Complete CV analysis – tries AI first, falls back to rules."""
-        logger = get_logger()
         if not cv_text or not cv_text.strip():
             return {
                 'extractedSkills': [],
@@ -742,9 +739,9 @@ class CVAnalyzer:
             experience = ai_result.get('experience', [])
             achievements = ai_result.get('achievements', [])
             links = ai_result.get('links', {'linkedin': False, 'github': False, 'portfolio': False})
-            logger.info("CV analysis used AI extraction")
+            print("AI‑based extraction successful.")
         else:
-            logger.info("CV analysis using rule-based fallback")
+            print("AI extraction failed or disabled – using rule‑based fallback.")
             about = self.extract_about_section(cv_text) or ""
             education = self.extract_education(cv_text) or []
             experience = self.extract_experience(cv_text) or []
@@ -766,13 +763,13 @@ class CVAnalyzer:
             else:
                 about = "Professional seeking new opportunities."
 
-        logger.info("CV analysis results generated", extra={
-            "skills_count": len(extracted_skills),
-            "education_count": len(education),
-            "experience_count": len(experience),
-            "achievements_count": len(achievements),
-            "income_ideas_count": len(income_ideas)
-        })
+        print(f"CV Analysis Results:")
+        print(f"  - About: {about[:80] if about else 'Not found'}...")
+        print(f"  - Education: {education}")
+        print(f"  - Skills: {len(extracted_skills)}")
+        print(f"  - Experience: {len(experience)}")
+        print(f"  - Achievements: {len(achievements)}")
+        print(f"  - Income Ideas: {len(income_ideas)}")
 
         return {
             'extractedSkills': extracted_skills,
@@ -808,7 +805,3 @@ class CVAnalyzer:
             if not found:
                 missing.append(req)
         return missing
-
-
-
-

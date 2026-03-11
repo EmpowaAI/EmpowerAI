@@ -2,7 +2,7 @@
 FastAPI routes for CV Analysis with File Upload
 """
 
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Request
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from openai import RateLimitError
 from typing import Optional
 import PyPDF2
@@ -10,7 +10,6 @@ import io
 from docx import Document
 from models.schemas import CVAnalysisResponse
 from services.cv_analyzer import CVAnalyzer
-from utils.logger import get_logger
 import re
 import json
 import traceback
@@ -39,7 +38,8 @@ def extract_text_from_pdf(file_content: bytes) -> str:
         # Join with newlines to preserve structure
         text = '\n'.join(text_parts)
         
-        # Avoid logging raw CV content
+        print(f"Extracted {len(text)} characters from PDF")
+        print(f"First 500 chars:\n{text[:500]}")
         
         if not text or len(text.strip()) < 10:
             raise ValueError("PDF contains insufficient readable text")
@@ -70,7 +70,8 @@ def extract_text_from_docx(file_content: bytes) -> str:
         
         text = '\n'.join(paragraphs)
         
-        # Avoid logging raw CV content
+        print(f"Extracted {len(text)} characters from DOCX")
+        print(f"First 500 chars:\n{text[:500]}")
         
         if not text or len(text.strip()) < 10:
             raise ValueError("DOCX contains insufficient text")
@@ -89,7 +90,8 @@ def extract_text_from_txt(file_content: bytes) -> str:
     """Extract text from TXT file with error handling."""
     try:
         text = file_content.decode('utf-8').strip()
-        # Avoid logging raw CV content
+        print(f"Extracted {len(text)} characters from TXT")
+        print(f"First 500 chars:\n{text[:500]}")
         
         if not text or len(text) < 10:
             raise ValueError("TXT file is empty or too short")
@@ -116,7 +118,6 @@ def extract_text_from_txt(file_content: bytes) -> str:
 
 @router.post("/analyze-file", response_model=CVAnalysisResponse)
 async def analyze_cv_file(
-    req: Request,
     cvFile: UploadFile = File(...),
     jobRequirements: Optional[str] = Form(None)
 ):
@@ -124,14 +125,9 @@ async def analyze_cv_file(
     Analyze CV from uploaded file (PDF, DOCX, or TXT)
     """
     try:
-        logger = get_logger(req.headers.get('X-Correlation-ID') if req else None)
-
         # Read file content
         file_content = await cvFile.read()
-        logger.info("CV file received", extra={
-            "filename": cvFile.filename,
-            "size_bytes": len(file_content)
-        })
+        print(f"Received file: {cvFile.filename}, size: {len(file_content)} bytes")
         
         # Determine file type and extract text
         filename = cvFile.filename.lower()
@@ -159,14 +155,10 @@ async def analyze_cv_file(
         if jobRequirements:
             try:
                 job_requirements_list = json.loads(jobRequirements)
-                logger.info("Parsed job requirements (json)", extra={
-                    "count": len(job_requirements_list)
-                })
+                print(f"Parsed job requirements: {job_requirements_list}")
             except:
                 job_requirements_list = [req.strip() for req in jobRequirements.split(',') if req.strip()]
-                logger.info("Parsed job requirements (csv)", extra={
-                    "count": len(job_requirements_list)
-                })
+                print(f"Parsed job requirements (CSV): {job_requirements_list}")
         
         # Analyze CV (async)
         result = await cv_analyzer.analyze_cv(
@@ -195,8 +187,8 @@ async def analyze_cv_file(
         # Already formatted – re-raise
         raise
     except Exception as e:
-        logger = get_logger(req.headers.get('X-Correlation-ID') if req else None)
-        logger.error("Unexpected error analyzing CV file", extra={"error": str(e)})
+        print(f"Unexpected error analyzing CV file: {str(e)}")
+        print(traceback.format_exc())
         raise HTTPException(
             status_code=500,
             detail=f"Error analyzing CV file: {str(e)}"
