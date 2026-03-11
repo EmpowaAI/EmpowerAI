@@ -170,34 +170,6 @@ async resetPassword({ token, newPassword }) {
 
 
   /**
-   * Update user
-   * @param {string} userId - User ID
-   * @param {object} updateData - Data to update
-   * @param {string} correlationId - Request correlation ID
-   * @returns {Promise<object>} Updated user
-   */
-  async updateUser(userId, updateData, correlationId = null) {
-    const user = await this.findById(userId, correlationId);
-
-    // Remove fields that shouldn't be updated directly
-    const { password, email, ...allowedUpdates } = updateData;
-
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      { $set: allowedUpdates },
-      { new: true, runValidators: true }
-    );
-
-    logger.info('User updated successfully', {
-      correlationId,
-      userId,
-      updatedFields: Object.keys(allowedUpdates),
-    });
-
-    return updatedUser;
-  }
-
-  /**
    * Get user profile (sanitized)
    * @param {string} userId - User ID
    * @param {string} correlationId - Request correlation ID
