@@ -7,6 +7,17 @@ const userService = require('../services/userService');
 const { sendSuccess } = require('../utils/response');
 const logger = require('../utils/logger');
 
+const ensureSelf = (req, res) => {
+  if (req.params.id && req.user?.id && req.params.id !== req.user.id) {
+    res.status(403).json({
+      status: 'error',
+      message: 'Forbidden',
+    });
+    return false;
+  }
+  return true;
+};
+
 /**
  * Get user profile
  * @route GET /api/user/profile/:id or GET /api/user/profile (uses auth'd user)
@@ -16,6 +27,7 @@ exports.getUserProfile = async (req, res, next) => {
   const correlationId = req.correlationId;
   
   try{
+    if (!ensureSelf(req, res)) return;
     const user = await userService.getUserProfile(req.params.id, correlationId);
 
     logger.info('User profile retrieved successfully', { correlationId, userId: req.params.id });
@@ -35,6 +47,7 @@ exports.updateUser = async (req, res, next) => {
   const correlationId = req.correlationId;
 
     try {
+        if (!ensureSelf(req, res)) return;
         const user = await userService.updateUser(req.params.id, req.body, correlationId);
 
         logger.info('User profile updated successfully', { correlationId, userId: req.params.id });
@@ -81,6 +94,7 @@ exports.deleteUser = async (req, res, next) => {
   const correlationId = req.correlationId;
   
     try {
+        if (!ensureSelf(req, res)) return;
         await userService.deleteUser(req.params.id, correlationId);
         logger.info('User account deleted successfully', { correlationId, userId: req.params.id });
 

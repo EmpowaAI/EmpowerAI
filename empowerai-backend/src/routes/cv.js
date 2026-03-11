@@ -3,6 +3,8 @@ const multer = require('multer');
 const { analyzeCV, analyzeCVFile } = require('../controllers/cvController');
 const auth = require('../middleware/auth');
 const { aiServiceLimiter } = require('../middleware/rateLimiter');
+const validateRequest = require('../middleware/validate');
+const { cvAnalysisSchema } = require('../utils/validators');
 const router = express.Router();
 
 // All routes protected by authentication
@@ -33,7 +35,7 @@ const upload = multer({
 });
 
 // Text-based CV analysis
-router.post('/analyze', analyzeCV);
+router.post('/analyze', validateRequest(cvAnalysisSchema), analyzeCV);
 
 // File upload CV analysis
 router.post('/analyze-file', upload.single('cvFile'), analyzeCVFile);
