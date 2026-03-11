@@ -4,22 +4,29 @@
  */
 
 const express = require('express');
-const { register, login, validate } = require('../controllers/authController');
-const validateRequest = require('../middleware/validate');
-const { registerSchema, loginSchema } = require('../utils/validators');
+const { register, login, validate, logout } = require('../controllers/authController');
 const { authLimiter } = require('../middleware/rateLimiter');
 const auth = require('../middleware/auth');
 
+// DTO validation middleware
+const { registerRules, validateRegister } = require('../dtos/Authentication/RegisterDto');
+const { loginRules, validateLogin }       = require('../dtos/Authentication/LoginDto');
+
 const router = express.Router();
 
-// Apply strict rate limiting to auth endpoints
+// Apply strict rate limiting to all auth endpoints
 router.use(authLimiter);
 
+// ─────────────────────────────────────────────
 // Public routes
-router.post('/register', validateRequest(registerSchema), register);
-router.post('/login', validateRequest(loginSchema), login);
+// ─────────────────────────────────────────────
+router.post('/register', registerRules, validateRegister, register);
+router.post('/login',    loginRules,    validateLogin,    login);
 
-// Protected route
-router.get('/validate', auth, validate);
+// ─────────────────────────────────────────────
+// Protected routes
+// ─────────────────────────────────────────────
+router.get('/validate',  auth, validate);
+router.post('/logout',   auth, logout);
 
 module.exports = router;
