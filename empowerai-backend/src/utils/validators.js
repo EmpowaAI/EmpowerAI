@@ -52,7 +52,7 @@ const simulationSchema = z.object({
  */
 const cvAnalysisSchema = z.object({
   cvText: z.string().min(10, 'CV text must be at least 10 characters').max(50000, 'CV text is too long'),
-  jobRequirements: z.string().max(5000).optional(),
+  jobRequirements: z.union([z.string().max(5000), z.array(z.string())]).optional(),
 });
 
 /**
