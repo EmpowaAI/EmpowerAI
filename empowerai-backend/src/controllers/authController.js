@@ -1,144 +1,79 @@
 /**
- * Authentication Controller
- * Principal Engineer Level: Clean separation of concerns with proper error handling
+ * Auth Controller
+ * Responsibility: register, login, logout, validate token.
+ * No business logic — fully delegates to userService.
+ * DTOs are applied inside userService, not here.
  */
 
-const jwt = require('jsonwebtoken');
 const logger = require('../utils/logger');
 const { sendSuccess } = require('../utils/response');
-const { 
-  UnauthorizedError, 
-} = require('../utils/errors');
 const userService = require('../services/userService');
 
-/**
- * Sign JWT token
- * @param {string} id - User ID
- * @returns {string} JWT token
- */
-const signToken = (id) => {
-  if (!process.env.JWT_SECRET) {
-    throw new Error('JWT_SECRET is not configured');
-  }
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN || '7d'
-  });
-};
-
-/**
- * Register new user
- * @route POST /api/auth/register
- * @access Public
- */
+// ─────────────────────────────────────────────
+// Register
+// @route  POST /api/auth/register
+// @access Public
+// ─────────────────────────────────────────────
 exports.register = async (req, res, next) => {
   const correlationId = req.correlationId;
-  
   try {
-    // Use service layer to create user
-    const newUser = await userService.createUser(req.body, correlationId);
+    const pending = await userService.register(req.body, correlationId);
 
-    // Generate token
-    const token = signToken(newUser._id);
-
-    // Return success response with token
     return sendSuccess(res, {
-      token,
-      user: {
-        id: newUser._id,
-        name: newUser.name,
-        email: newUser.email,
-        province: newUser.province,
-        age: newUser.age,
-      }
+      message: 'Registration successful. Please check your email to verify your account.',
+      user: pending, // { id, name, email } — safe subset, no token yet
     }, 201);
   } catch (error) {
-    // Errors are handled by global error handler
     next(error);
   }
 };
 
-/**
- * Login user
- * @route POST /api/auth/login
- * @access Public
- */
+// ─────────────────────────────────────────────
+// Login
+// @route  POST /api/auth/login
+// @access Public
+// ─────────────────────────────────────────────
 exports.login = async (req, res, next) => {
   const correlationId = req.correlationId;
-  const startTime = Date.now();
-  
   try {
-    const { email, password } = req.body;
+    const { token, user } = await userService.login(req.body, correlationId);
 
-    // Find user with password included (optimized query)
-    const user = await userService.findByEmail(email, correlationId, true);
-    
-    if (!user) {
-      logger.warn('Login attempt with non-existent email', { correlationId, email });
-      throw new UnauthorizedError('Incorrect email or password');
-    }
-
-    // Verify password (bcrypt comparison - optimized to 10 rounds)
-    const isPasswordCorrect = await user.correctPassword(password);
-    if (!isPasswordCorrect) {
-      logger.warn('Login attempt with incorrect password', { correlationId, email, userId: user._id });
-      throw new UnauthorizedError('Incorrect email or password');
-    }
-
-    // Generate token (fast operation)
-    const token = signToken(user._id);
-    
-    const duration = Date.now() - startTime;
-    logger.info('Login performance', { correlationId, duration: `${duration}ms` });
-
-    logger.info('User logged in successfully', {
-      correlationId,
-      userId: user._id,
-      email: user.email,
-    });
-
-    // Return success response with token
-    return sendSuccess(res, {
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        province: user.province,
-        age: user.age,
-        empowermentScore: user.empowermentScore,
-      }
-    });
+    return sendSuccess(res, { token, user });
   } catch (error) {
-    // Errors are handled by global error handler
     next(error);
   }
 };
 
-/**
- * Validate token
- * @route GET /api/auth/validate
- * @access Private
- */
+// ─────────────────────────────────────────────
+// Validate token
+// @route  GET /api/auth/validate
+// @access Private
+// ─────────────────────────────────────────────
 exports.validate = async (req, res, next) => {
   const correlationId = req.correlationId;
-  
   try {
-    // User is already attached to req by auth middleware
-    const user = req.user;
+    // req.user is attached by auth middleware after token verification
+    const user = await userService.getUserProfile(req.user.id, correlationId);
 
-    logger.debug('Token validated successfully', {
-      correlationId,
-      userId: user.id,
-    });
+    logger.debug('Token validated successfully', { correlationId, userId: req.user.id });
 
-    return sendSuccess(res, {
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        province: user.province,
-      }
-    });
+    return sendSuccess(res, { user });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ─────────────────────────────────────────────
+// Logout
+// @route  POST /api/auth/logout
+// @access Private
+// ─────────────────────────────────────────────
+exports.logout = async (req, res, next) => {
+  const correlationId = req.correlationId;
+  try {
+    await userService.logout(req.user.id, correlationId);
+
+    return sendSuccess(res, { message: 'Logged out successfully' });
   } catch (error) {
     next(error);
   }
