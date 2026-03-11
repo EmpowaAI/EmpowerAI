@@ -17,17 +17,17 @@ exports.verifyEmail = async (req, res, next) => {
   const { token } = req.query;
 
   try {
-    logger.info('Email verification requested', { correlationId, token });
+    logger.info('Email verification requested', { correlationId });
 
     await userService.verifyEmail(token, correlationId);
 
-    logger.info('Email verified successfully', { correlationId, token });
+    logger.info('Email verified successfully', { correlationId });
 
     return sendSuccess(res, {
       message: 'Email verified successfully. You can now log in.'
     });
   } catch (error) {
-    logger.error('Email verification failed', { correlationId, token, error: error.message });
+    logger.error('Email verification failed', { correlationId, error: error.message });
     next(error);
   }
 };
@@ -69,17 +69,17 @@ exports.resetPassword = async (req, res, next) => {
   const { token, newPassword } = req.body;
 
   try {
-    logger.info('Password reset attempt', { correlationId, token });
+    logger.info('Password reset attempt', { correlationId });
 
     await userService.resetPassword({ token, newPassword }, correlationId);
 
-    logger.info('Password reset successful', { correlationId, token });
+    logger.info('Password reset successful', { correlationId });
 
     return sendSuccess(res, {
       message: 'Password reset successful. You can now log in.'
     });
   } catch (error) {
-    logger.error('Password reset failed', { correlationId, token, error: error.message });
+    logger.error('Password reset failed', { correlationId, error: error.message });
     next(error);
   }
 };
