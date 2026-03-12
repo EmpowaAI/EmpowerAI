@@ -2,28 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { motion} from "framer-motion"; // Added AnimatePresence
-import {
-  ArrowRight,
-  Play,
-  Star,
-  Users,
-  Sparkles,
-  X,
-  Menu,
-  Brain,
-  TrendingUp,
-  FileText,
-  Briefcase,
-  MessageSquare,
-  Map,
-  Heart,
-  Target,
-  BarChart3,
-} from "lucide-react";
-import ThemeToggle from "../components/ThemeToggle";
+import {ArrowRight,Play,Star,Users,Sparkles,X,Menu,Brain,TrendingUp,FileText,Briefcase,MessageSquare,Map,Heart,Target,BarChart3,} from "lucide-react";
+import ThemeToggle from "../components/ui/ThemeToggle";
 import { useLanguageRotation } from "../hooks/use-language-rotation"; // Fixed path
-import RotatingText from "../components/RotatingText"; // Fixed path
-// Remove the next/image import
+import RotatingText from "../components/ui/RotatingText"; // Fixed path
+import Logo from "../components/ui/Logo"; // Fixed path
+import logo from "../assets/images/empoweraidemo.png" // Added image import
 
 const navLinks = [
   { label: "Features", href: "#features" },
@@ -72,15 +56,10 @@ export default function LandingPage() {
         <div className="container mx-auto px-4 flex items-center justify-between h-16 md:h-20">
           {/* Logo - Updated with regular img tag */}
           <a href="/" className="flex items-center gap-2 font-bold text-xl">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-sa-gold via-sa-green to-sa-blue flex items-center justify-center shadow-md overflow-hidden">
+            <div>
               {/* Replace with your logo image using regular img tag */}
-              <img 
-                src="/images/empowerLogo.jpg" // Update this path to your logo location
-                alt="EmpowaAI Logo"
-                className="w-full h-full object-contain"
-              />
+             <Logo />
             </div>
-            <span className="font-display">{"Empowa"}<span className="text-sa-gold">AI</span></span>
           </a>
 
           {/* Desktop Nav */}
@@ -443,7 +422,7 @@ export default function LandingPage() {
             >
               <div className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl border border-border hover:scale-[1.02] transition-transform duration-300">
                 <img
-                  src="images/empoweraidemo.png"
+                  src={logo} // Updated to use the imported image
                   alt="EmpowaAI Demo Preview"
                   className="w-full h-full object-cover"
                   crossOrigin="anonymous"
@@ -585,18 +564,12 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-border py-10 sm:py-12 bg-secondary/20">
         <div className="container mx-auto px-4">
-          <div className="grid gap-8 md:grid-cols-3 items-start">
-            <div className="text-center md:text-left">
-              <a href="/" className="flex items-center justify-center md:justify-start gap-2 font-bold text-lg mb-3">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sa-gold via-sa-green to-sa-blue flex items-center justify-center shadow-sm overflow-hidden">
-                  {/* Replace with your logo image in footer too */}
-                  <img 
-                    src="/images/empowerLogo.jpg" // Update this path to your logo location
-                    alt="EmpowaAI Logo"
-                    className="w-full h-full object-contain"
-                  />
+          <div className="grid md:grid-cols-3 gap-8 items-center">
+            <div>
+              <a href="/" className="flex items-center gap-2 font-bold text-lg mb-3">
+                <div>
+                  <Logo />
                 </div>
-                <span className="font-display text-foreground">{"Empowa"}<span className="text-sa-gold">AI</span></span>
               </a>
               <p className="text-sm text-muted-foreground max-w-xs mx-auto md:mx-0">
                 {"AI-powered career guidance for South African youth. Built with Ubuntu values \u2014 because together, we rise."}
