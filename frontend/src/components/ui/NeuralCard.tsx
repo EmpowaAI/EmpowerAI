@@ -8,7 +8,7 @@ interface NeuralCardProps {
   glow?: boolean
 }
 
-export default function NeuralCard({ children, className, hover = true, glow = false }: NeuralCardProps) {
+export default function NeuralCard({ children, className, hover = true }: NeuralCardProps) {
   return (
     <div
       className={cn(
