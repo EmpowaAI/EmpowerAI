@@ -12,6 +12,7 @@ import AIThinkingIndicator from "../components/AIThinkingIndicator";
 import LiveInsightsFeed from "../components/LiveInsightsFeed";
 import SkillGapAnalysis from "../components/SkillGapAnalysis";
 import { useUser } from "../lib/user-context";
+import { twinAPI, opportunitiesAPI, applicationsAPI } from "../lib/api";
 
 interface DashboardStats {
   empowermentScore: number;
@@ -36,39 +37,6 @@ export default function Dashboard() {
   
   const displayName = user?.name?.split(" ")[0] || "Explorer";
 
-  // Check localStorage for completion status
-  useEffect(() => {
-    const checkCompletionStatus = () => {
-      try {
-        // Check twin completion
-        const twinData = localStorage.getItem('twinData');
-        setTwinCompleted(!!twinData);
-        
-        // Check CV completion
-        const cvAnalysis = localStorage.getItem('comprehensiveCVAnalysis');
-        setCvCompleted(!!cvAnalysis);
-      } catch (e) {
-        console.error('Error checking completion status:', e);
-      }
-    };
-
-    // Initial check
-    checkCompletionStatus();
-
-    // Listen for storage events (updates from other tabs)
-    window.addEventListener('storage', checkCompletionStatus);
-
-    // Custom event for same-tab updates
-    window.addEventListener('twinCompleted', checkCompletionStatus);
-    window.addEventListener('cvCompleted', checkCompletionStatus);
-
-    return () => {
-      window.removeEventListener('storage', checkCompletionStatus);
-      window.removeEventListener('twinCompleted', checkCompletionStatus);
-      window.removeEventListener('cvCompleted', checkCompletionStatus);
-    };
-  }, []);
-
   useEffect(() => {
     const messages = [
       "Scanning SA career landscape...",
@@ -82,73 +50,67 @@ export default function Dashboard() {
       i++;
     }, 1500);
 
-    const timer = setTimeout(() => {
-      // Read CV score from localStorage
-      let cvScore = 0;
+    const loadDashboard = async () => {
       try {
-        const cvAnalysis = localStorage.getItem('comprehensiveCVAnalysis');
-        if (cvAnalysis) {
-          const parsed = JSON.parse(cvAnalysis);
-          cvScore = parsed.score || 0;
-        }
-      } catch (e) {
-        console.error('Failed to parse CV analysis:', e);
+        setLoading(true);
+        const [twinRes, oppRes, appRes] = await Promise.allSettled([
+          twinAPI.get(),
+          opportunitiesAPI.getAll({ limit: 1 }),
+          applicationsAPI.getStats(),
+        ]);
+
+        const twin =
+          twinRes.status === "fulfilled" ? twinRes.value?.data?.twin : null;
+        const opportunitiesMeta =
+          oppRes.status === "fulfilled" ? oppRes.value?.meta : null;
+        const applicationsStats =
+          appRes.status === "fulfilled" ? appRes.value?.data : null;
+
+        const empowermentScore = twin?.empowermentScore || 0;
+        const skillsMatched = Array.isArray(user?.skills) ? user.skills.length : 0;
+        const opportunitiesCount =
+          typeof opportunitiesMeta?.totalFiltered === "number"
+            ? opportunitiesMeta.totalFiltered
+            : Array.isArray(oppRes.status === "fulfilled" ? oppRes.value?.data?.opportunities : null)
+              ? oppRes.value.data.opportunities.length
+              : 0;
+        const applicationsCount =
+          typeof applicationsStats?.total === "number" ? applicationsStats.total : 0;
+
+        setTwinCompleted(!!twin);
+        setCvCompleted(false);
+
+        setStats({
+          empowermentScore,
+          cvScore: 0,
+          interviewScore: 0,
+          skillsMatched,
+          opportunitiesCount,
+          applicationsCount,
+          learnershipsCount: opportunitiesCount,
+        });
+      } catch (error) {
+        console.error("Failed to load dashboard data:", error);
+        setStats({
+          empowermentScore: 0,
+          cvScore: 0,
+          interviewScore: 0,
+          skillsMatched: 0,
+          opportunitiesCount: 0,
+          applicationsCount: 0,
+          learnershipsCount: 0,
+        });
+      } finally {
+        setLoading(false);
+        setAiThinking(false);
+        clearInterval(interval);
       }
+    };
 
-      // Read empowerment score from twin data
-      let empowermentScore = 0;
-      try {
-        const twinData = localStorage.getItem('twinData');
-        if (twinData) {
-          const parsed = JSON.parse(twinData);
-          empowermentScore = parsed.empowermentScore || 0;
-        }
-      } catch (e) {
-        console.error('Failed to parse twin data:', e);
-      }
-
-      let skillsMatched = 0;
-      let opportunitiesCount = 0;
-      let applicationsCount = 0;
-
-      try {
-        const parsedCv = JSON.parse(localStorage.getItem("comprehensiveCVAnalysis") || "{}");
-        skillsMatched = Array.isArray(parsedCv?.sections?.skills) ? parsedCv.sections.skills.length : 0;
-      } catch {
-        skillsMatched = 0;
-      }
-
-      try {
-        const applicationsRaw = localStorage.getItem("trackedApplications");
-        const parsedApplications = applicationsRaw ? JSON.parse(applicationsRaw) : [];
-        applicationsCount = Array.isArray(parsedApplications) ? parsedApplications.length : 0;
-      } catch {
-        applicationsCount = 0;
-      }
-
-      try {
-        const cachedOpportunities = JSON.parse(localStorage.getItem("opportunitiesCache") || "[]");
-        opportunitiesCount = Array.isArray(cachedOpportunities) ? cachedOpportunities.length : 0;
-      } catch {
-        opportunitiesCount = 0;
-      }
-
-      setStats({
-        empowermentScore,
-        cvScore,
-        interviewScore: 0,
-        skillsMatched,
-        opportunitiesCount,
-        applicationsCount,
-        learnershipsCount: opportunitiesCount,
-      });
-      setLoading(false);
-      setAiThinking(false);
-      clearInterval(interval);
-    }, 3000);
+    const timer = setTimeout(loadDashboard, 1200);
 
     return () => { clearTimeout(timer); clearInterval(interval); };
-  }, []);
+  }, [user?.skills]);
 
   const quickActions = [
     { icon: FileText, title: "Analyse CV", desc: "Get AI-powered CV insights for the SA market", path: "/dashboard/cv-analyzer", color: "sa-gold" },
