@@ -34,6 +34,7 @@ export default function Dashboard() {
   // Reactive completion status
   const [twinCompleted, setTwinCompleted] = useState(false);
   const [cvCompleted, setCvCompleted] = useState(false);
+  const [cvData, setCvData] = useState<any | null>(null);
   
   const displayName = user?.name?.split(" ")[0] || "Explorer";
 
@@ -77,8 +78,17 @@ export default function Dashboard() {
         const applicationsCount =
           typeof applicationsStats?.total === "number" ? applicationsStats.total : 0;
 
+        let parsedCv = null;
+        try {
+          const raw = localStorage.getItem("comprehensiveCVAnalysis");
+          parsedCv = raw ? JSON.parse(raw) : null;
+        } catch {
+          parsedCv = null;
+        }
+
+        setCvData(parsedCv);
         setTwinCompleted(!!twin);
-        setCvCompleted(false);
+        setCvCompleted(!!parsedCv);
 
         setStats({
           empowermentScore,
@@ -263,7 +273,7 @@ export default function Dashboard() {
             <LiveInsightsFeed />
           </motion.div>
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 }}>
-            <SkillGapAnalysis />
+            <SkillGapAnalysis cvData={cvData} />
           </motion.div>
         </div>
 
