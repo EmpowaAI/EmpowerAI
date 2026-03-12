@@ -113,10 +113,10 @@ export default function Dashboard() {
   }, [user?.skills]);
 
   const quickActions = [
-    { icon: FileText, title: "Analyse CV", desc: "Get AI-powered CV insights for the SA market", path: "/dashboard/cv-analyzer", color: "sa-gold" },
-    { icon: MessageSquare, title: "Interview Coach", desc: "Practise with SA-specific interview questions", path: "/dashboard/interview-coach", color: "sa-terracotta" },
-    { icon: Briefcase, title: "Find Opportunities", desc: "AI-matched jobs, learnerships & graduate programmes", path: "/dashboard/opportunities", color: "sa-green" },
-    { icon: Brain, title: "Digital Twin", desc: "Build and manage your AI twin profile", path: "/dashboard/twin", color: "primary" },
+    { icon: FileText, title: "Analyse CV", desc: "Get AI-powered CV insights for the SA market", path: "/dashboard/cv-analyzer", accent: "from-sa-gold/20 to-sa-gold/5", label: "Improve CV" },
+    { icon: MessageSquare, title: "Interview Coach", desc: "Practise with SA-specific interview questions", path: "/dashboard/interview-coach", accent: "from-sa-terracotta/20 to-sa-terracotta/5", label: "Practice" },
+    { icon: Briefcase, title: "Find Opportunities", desc: "AI-matched jobs, learnerships & graduate programmes", path: "/dashboard/opportunities", accent: "from-sa-green/20 to-sa-green/5", label: "Explore roles" },
+    { icon: Brain, title: "Digital Twin", desc: "Build and manage your AI twin profile", path: "/dashboard/twin", accent: "from-primary/20 to-primary/5", label: "Update twin" },
   ];
 
   const journeySteps = [
@@ -368,8 +368,9 @@ export default function Dashboard() {
             {quickActions.map((action, i) => (
               <motion.div key={action.title} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.8 + i * 0.1 }}>
                 <Link to={action.path}>
-                  <GlassCard className="group cursor-pointer hover:scale-[1.02] transition-all">
-                    <div className="flex items-center gap-4">
+                  <GlassCard className="group cursor-pointer hover:scale-[1.02] transition-all relative overflow-hidden">
+                    <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-br ${action.accent}`} />
+                    <div className="relative flex items-center gap-4">
                       <div className="h-12 w-12 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform bg-primary/10">
                         <action.icon className="h-6 w-6 text-primary" />
                       </div>
@@ -377,7 +378,9 @@ export default function Dashboard() {
                         <h4 className="font-semibold text-sm">{action.title}</h4>
                         <p className="text-xs text-muted-foreground">{action.desc}</p>
                       </div>
-                      <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-[10px] uppercase tracking-wider text-muted-foreground border border-border/60 rounded-full px-2 py-1">
+                        {action.label}
+                      </span>
                     </div>
                   </GlassCard>
                 </Link>
