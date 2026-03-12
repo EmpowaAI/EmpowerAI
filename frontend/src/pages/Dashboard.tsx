@@ -144,10 +144,10 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Enhanced South African Neural Network Background */}
-      <div className="absolute inset-0 -z-10 sa-pattern opacity-15" />
+      <div className="absolute inset-0 z-0 sa-pattern opacity-15" />
       
       {/* South African Map Neural Network Pattern */}
-      <div className="absolute inset-0 -z-10">
+      <div className="absolute inset-0 z-0 pointer-events-none opacity-90">
         {/* Neural Network Nodes - Major Cities */}
         <div className="absolute top-[20%] left-[25%] w-4 h-4 bg-sa-gold/35 rounded-full animate-pulse" />
         <div className="absolute top-[30%] left-[35%] w-3 h-3 bg-sa-green/35 rounded-full animate-pulse delay-1000" />
@@ -160,7 +160,7 @@ export default function Dashboard() {
         <div className="absolute top-[70%] left-[45%] w-4 h-4 bg-sa-terracotta/35 rounded-full animate-pulse delay-4000" />
         
         {/* Neural Network Connections */}
-        <svg className="absolute inset-0 w-full h-full -z-10">
+        <svg className="absolute inset-0 w-full h-full">
           <defs>
             <linearGradient id="neuralGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="rgb(251 191 36 / 0.2)" />
@@ -196,15 +196,15 @@ export default function Dashboard() {
       </div>
       
       {/* Enhanced gradient overlays */}
-      <div className="absolute inset-0 -z-10 bg-gradient-to-br from-sa-gold/4 via-transparent to-sa-green/6" />
-      <div className="absolute -top-40 -right-32 h-96 w-96 rounded-full bg-sa-gold/10 blur-3xl -z-10" />
-      <div className="absolute -bottom-32 -left-24 h-80 w-80 rounded-full bg-sa-green/10 blur-3xl -z-10" />
+      <div className="absolute inset-0 z-0 bg-gradient-to-br from-sa-gold/4 via-transparent to-sa-green/6" />
+      <div className="absolute -top-40 -right-32 h-96 w-96 rounded-full bg-sa-gold/10 blur-3xl z-0" />
+      <div className="absolute -bottom-32 -left-24 h-80 w-80 rounded-full bg-sa-green/10 blur-3xl z-0" />
       
       {/* Additional atmospheric effects */}
-      <div className="absolute top-1/4 left-1/4 h-64 w-64 rounded-full bg-sa-terracotta/5 blur-3xl -z-10" />
-      <div className="absolute bottom-1/3 right-1/3 h-48 w-48 rounded-full bg-sa-gold/5 blur-3xl -z-10" />
+      <div className="absolute top-1/4 left-1/4 h-64 w-64 rounded-full bg-sa-terracotta/5 blur-3xl z-0" />
+      <div className="absolute bottom-1/3 right-1/3 h-48 w-48 rounded-full bg-sa-gold/5 blur-3xl z-0" />
 
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 md:py-8 space-y-8">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 md:py-8 space-y-8">
 
         <AIThinkingIndicator messages={[aiMessage]} isVisible={aiThinking} />
 
