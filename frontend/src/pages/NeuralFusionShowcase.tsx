@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { Brain, Sparkles, Mic, FileText, TrendingUp, ArrowRight } from 'lucide-react'
-import { useUser } from "../lib/user-context"
+import { useUser } from "../contexts/user-context"
 import HolographicButton from "../components/ui/HolographicButton"
 import NeuralCard from "../components/ui/NeuralCard"
 import AIAvatar from "../components/ui/AIAvatar"
 import VoiceVisualizer from "../components/ui/VoiceVisualizer"
 import NeuralLoading from "../components/ui/NeuralLoading"
-import CVAnalyzer8D from "../components/features/CVAnalyzer8D"
-import VoiceInterviewCoach from "../components/features/VoiceInterviewCoach"
+import CVAnalyzer8D from "./CV-analysis/CVAnalyzer8D"
+import VoiceInterviewCoach from "./Interview/VoiceInterviewCoach"
 
 export default function NeuralFusionShowcase() {
   const [activeFeature, setActiveFeature] = useState<'cv-analyzer' | 'voice-coach' | null>(null)
