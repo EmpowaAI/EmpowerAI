@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Brain, Search, Zap, TrendingUp, Target, BarChart3, AlertCircle, MapPin, GraduationCap } from "lucide-react";
+import { Brain, Search, Zap, TrendingUp, Target, BarChart3, AlertCircle, MapPin } from "lucide-react";
+import { opportunitiesAPI } from "../lib/api";
+import { useUser } from "../lib/user-context";
 
 interface Insight {
   id: string;
@@ -9,29 +11,87 @@ interface Insight {
   type: "detection" | "insight" | "market" | "alert";
 }
 
-const allInsights: Insight[] = [
-  { id: "1", icon: Search, text: "Detected: Your CV lacks 'customer service' keywords — appearing in 90% of SA retail job listings.", type: "detection" },
-  { id: "2", icon: Zap, text: "Insight: Rewrite your job descriptions using action verbs to boost recruiter interest by 32%.", type: "insight" },
-  { id: "3", icon: MapPin, text: "Market Scan: 12 new admin roles found in Gauteng in the last hour.", type: "market" },
-  { id: "4", icon: GraduationCap, text: "Learnership Alert: 5 new learnerships posted in Western Cape — applications close Friday.", type: "alert" },
-  { id: "5", icon: BarChart3, text: "Adding 'Sage Accounting' to your CV could increase your match rate by 23% for admin roles.", type: "insight" },
-  { id: "6", icon: TrendingUp, text: "Market Alert: Retail hiring in KZN is up 15% ahead of festive season.", type: "market" },
-  { id: "7", icon: AlertCircle, text: "Opportunity: New graduate programme at Multichoice in Randburg — matches your profile.", type: "alert" },
-  { id: "8", icon: Target, text: "SA employers require driver's licences in 60% of admin listings — update your CV if applicable.", type: "detection" },
-];
-
 export default function LiveInsightsFeed() {
+  const { user } = useUser();
   const [visibleInsights, setVisibleInsights] = useState<Insight[]>([]);
   const [isTyping, setIsTyping] = useState(true);
+  const [insights, setInsights] = useState<Insight[]>([]);
   const idxRef = useRef(0);
   const cancelledRef = useRef(false);
 
   useEffect(() => {
+    const loadInsights = async () => {
+      try {
+        const response = await opportunitiesAPI.getAll({ limit: 5 });
+        const opportunities = response?.data?.opportunities || [];
+        const total = response?.meta?.totalFiltered ?? opportunities.length;
+        const province = user?.province || "your province";
+
+        const nextInsights: Insight[] = [
+          {
+            id: "market-total",
+            icon: BarChart3,
+            text: `Market Scan: ${total} live opportunities indexed across South Africa.`,
+            type: "market",
+          },
+          {
+            id: "market-province",
+            icon: MapPin,
+            text: `Local Pulse: Opportunities are available in ${province}. Keep your profile updated for better matches.`,
+            type: "market",
+          },
+        ];
+
+        if (opportunities[0]) {
+          nextInsights.push({
+            id: "opportunity-highlight",
+            icon: AlertCircle,
+            text: `Opportunity Spotlight: ${opportunities[0].title} at ${opportunities[0].company || "a leading employer"}.`,
+            type: "alert",
+          });
+        }
+
+        if (user?.skills?.length) {
+          nextInsights.push({
+            id: "skills-detected",
+            icon: Search,
+            text: `Detected: ${user.skills.slice(0, 3).join(", ")} are strong signals in current listings.`,
+            type: "detection",
+          });
+        } else {
+          nextInsights.push({
+            id: "skills-missing",
+            icon: Zap,
+            text: "Insight: Add your top skills to unlock more accurate opportunity matching.",
+            type: "insight",
+          });
+        }
+
+        setInsights(nextInsights);
+      } catch (error) {
+        console.error("Failed to load insights:", error);
+        setInsights([
+          {
+            id: "fallback",
+            icon: Target,
+            text: "Insight feed is warming up. Check back for live market signals.",
+            type: "insight",
+          },
+        ]);
+      }
+    };
+
+    loadInsights();
+  }, [user?.province, user?.skills]);
+
+  useEffect(() => {
     cancelledRef.current = false;
+    idxRef.current = 0;
+    setVisibleInsights([]);
 
     const addInsight = () => {
       if (cancelledRef.current) return;
-      if (idxRef.current >= allInsights.length) {
+      if (idxRef.current >= insights.length) {
         setIsTyping(false);
         return;
       }
@@ -39,17 +99,20 @@ export default function LiveInsightsFeed() {
       const currentIdx = idxRef.current;
       setTimeout(() => {
         if (cancelledRef.current) return;
-        setVisibleInsights((prev) => [...prev, allInsights[currentIdx]]);
+        setVisibleInsights((prev) => [...prev, insights[currentIdx]]);
         idxRef.current = currentIdx + 1;
         setIsTyping(false);
-        if (currentIdx + 1 < allInsights.length) {
+        if (currentIdx + 1 < insights.length) {
           setTimeout(addInsight, 2000);
         }
-      }, 1200);
+      }, 900);
     };
-    const timer = setTimeout(addInsight, 1000);
-    return () => { cancelledRef.current = true; clearTimeout(timer); };
-  }, []);
+    const timer = setTimeout(addInsight, 700);
+    return () => {
+      cancelledRef.current = true;
+      clearTimeout(timer);
+    };
+  }, [insights]);
 
   const typeColor = {
     detection: "border-neon-orange/30 bg-neon-orange/5",
