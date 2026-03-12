@@ -170,12 +170,12 @@ export default function Dashboard() {
                   <span className="text-[11px] text-muted-foreground">Live sync</span>
                 </div>
 
-                <motion.h1 initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="text-3xl md:text-4xl font-display">
-                  Welcome back,{" "}
-                  <span className="bg-gradient-to-r from-sa-gold to-sa-terracotta bg-clip-text text-transparent">{displayName}</span>
+                <motion.h1 initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="text-4xl md:text-5xl font-display mb-3 font-bold">
+                  Welcome back,{' '}
+                  <span className="bg-gradient-to-r from-sa-gold to-sa-terracotta bg-clip-text text-transparent font-bold">{displayName}</span>
                 </motion.h1>
-                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="text-muted-foreground max-w-xl">
-                  Your AI twin is actively mapping opportunities across South Africa and aligning them to your goals.
+                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="text-base md:text-lg text-muted-foreground font-medium leading-relaxed">
+                  Your AI twin is actively analysing the SA career landscape for you.
                 </motion.p>
 
                 {!loading && stats && (
@@ -198,9 +198,9 @@ export default function Dashboard() {
 
               {!loading && stats && stats.empowermentScore > 0 && (
                 <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.5 }} className="flex items-center gap-4">
-                  <div className="text-center p-4 bg-sa-gold/10 rounded-2xl border border-sa-gold/20">
-                    <ScoreMeter score={stats.empowermentScore} label="Empowerment" size="md" />
-                    <p className="mt-3 text-xs text-muted-foreground">Your current trajectory</p>
+                  <div className="text-center p-6 bg-sa-gold/15 rounded-2xl border border-sa-gold/30 shadow-lg">
+                    <ScoreMeter score={stats.empowermentScore} label="Empowerment" size="lg" />
+                    <p className="mt-3 text-sm font-semibold text-foreground">Your current trajectory</p>
                   </div>
                 </motion.div>
               )}
@@ -216,21 +216,21 @@ export default function Dashboard() {
               { label: "Career Readiness", value: Math.round((stats.cvScore + stats.empowermentScore) / 2), icon: Brain, hint: "Combines CV + empowerment score", delay: 0.2 },
             ].map((card) => (
               <motion.div key={card.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: card.delay }}>
-                <GlassCard className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center">
-                      <card.icon className="h-5 w-5 text-primary" />
+                <GlassCard className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-2 border-border/50 shadow-md">
+                  <div className="flex items-center gap-4">
+                    <div className="h-14 w-14 rounded-xl bg-primary/20 flex items-center justify-center border border-primary/30">
+                      <card.icon className="h-7 w-7 text-primary" />
                     </div>
                     <div>
-                      <p className="text-xs uppercase tracking-wider text-muted-foreground">{card.label}</p>
-                      <p className="text-sm text-muted-foreground">{card.hint}</p>
+                      <p className="text-sm uppercase tracking-wider text-foreground font-bold">{card.label}</p>
+                      <p className="text-sm text-muted-foreground font-medium">{card.hint}</p>
                     </div>
                   </div>
                   <div className="text-center md:text-right">
-                    <ScoreMeter score={card.value} label="Score" size="md" />
+                    <ScoreMeter score={card.value} label="Score" size="lg" />
                     {card.value === 0 && (
-                      <p className="text-xs text-sa-gold mt-2 flex items-center justify-center md:justify-end gap-1">
-                        <AlertCircle className="h-3 w-3" /> No data yet
+                      <p className="text-sm text-sa-gold mt-2 flex items-center justify-center md:justify-end gap-1 font-semibold">
+                        <AlertCircle className="h-4 w-4" /> No data yet
                       </p>
                     )}
                   </div>
@@ -250,17 +250,17 @@ export default function Dashboard() {
               { label: "Applications", value: stats.applicationsCount || 0, icon: Target, color: "text-primary" },
             ].map((card, i) => (
               <motion.div key={card.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 * i }}>
-                <GlassCard className="group">
-                  <div className="flex items-start justify-between mb-3">
-                    <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">{card.label}</p>
-                    <div className="h-9 w-9 rounded-lg bg-muted/50 flex items-center justify-center group-hover:scale-105 transition-transform">
-                      <card.icon className={`h-4 w-4 ${card.color}`} />
+                <GlassCard className="group border-2 border-border/50 shadow-md">
+                  <div className="flex items-start justify-between mb-4">
+                    <p className="text-sm font-bold text-foreground uppercase tracking-wider">{card.label}</p>
+                    <div className="h-12 w-12 rounded-xl bg-muted/50 flex items-center justify-center group-hover:scale-105 transition-transform border border-border/30">
+                      <card.icon className={`h-6 w-6 ${card.color}`} />
                     </div>
                   </div>
-                  <motion.p className={`text-3xl font-display ${card.color}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 + i * 0.1 }}>
+                  <motion.p className={`text-4xl font-display ${card.color} font-bold`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 + i * 0.1 }}>
                     {card.value}
                   </motion.p>
-                  <p className="text-xs text-muted-foreground mt-2">Updated from live data</p>
+                  <p className="text-sm text-muted-foreground mt-2 font-medium">Updated from live data</p>
                 </GlassCard>
               </motion.div>
             ))}
@@ -381,14 +381,14 @@ export default function Dashboard() {
                   <GlassCard className="group cursor-pointer hover:scale-[1.02] transition-all relative overflow-hidden">
                     <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-br ${action.accent}`} />
                     <div className="relative flex items-center gap-4">
-                      <div className="h-12 w-12 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform bg-primary/10">
-                        <action.icon className="h-6 w-6 text-primary" />
+                      <div className="h-14 w-14 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform bg-primary/20 border border-primary/30">
+                        <action.icon className="h-7 w-7 text-primary" />
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-semibold text-sm">{action.title}</h4>
-                        <p className="text-xs text-muted-foreground">{action.desc}</p>
+                        <h4 className="font-bold text-lg text-foreground">{action.title}</h4>
+                        <p className="text-sm text-muted-foreground font-medium">{action.desc}</p>
                       </div>
-                      <span className="text-[10px] uppercase tracking-wider text-muted-foreground border border-border/60 rounded-full px-2 py-1">
+                      <span className="text-xs uppercase tracking-wider text-sa-gold font-semibold border border-sa-gold/30 rounded-full px-3 py-1.5">
                         {action.label}
                       </span>
                     </div>
