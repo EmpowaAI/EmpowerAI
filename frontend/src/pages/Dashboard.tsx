@@ -199,19 +199,30 @@ export default function Dashboard() {
 
         {/* Score Cards */}
         {!loading && stats && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {[
-              { label: "CV Strength", value: stats.cvScore, delay: 0.1 },
-              { label: "Career Readiness", value: Math.round((stats.cvScore + stats.empowermentScore) / 2), delay: 0.2 },
+              { label: "CV Strength", value: stats.cvScore, icon: FileText, hint: "Based on your latest CV analysis", delay: 0.1 },
+              { label: "Career Readiness", value: Math.round((stats.cvScore + stats.empowermentScore) / 2), icon: Brain, hint: "Combines CV + empowerment score", delay: 0.2 },
             ].map((card) => (
               <motion.div key={card.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: card.delay }}>
-                <GlassCard className="text-center">
-                  <ScoreMeter score={card.value} label={card.label} size="md" />
-                  {card.value === 0 && (
-                    <p className="text-xs text-sa-gold mt-2 flex items-center justify-center gap-1">
-                      <AlertCircle className="h-3 w-3" /> Not started
-                    </p>
-                  )}
+                <GlassCard className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center">
+                      <card.icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-wider text-muted-foreground">{card.label}</p>
+                      <p className="text-sm text-muted-foreground">{card.hint}</p>
+                    </div>
+                  </div>
+                  <div className="text-center md:text-right">
+                    <ScoreMeter score={card.value} label="Score" size="md" />
+                    {card.value === 0 && (
+                      <p className="text-xs text-sa-gold mt-2 flex items-center justify-center md:justify-end gap-1">
+                        <AlertCircle className="h-3 w-3" /> No data yet
+                      </p>
+                    )}
+                  </div>
                 </GlassCard>
               </motion.div>
             ))}
