@@ -147,29 +147,49 @@ export default function Dashboard() {
             <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-sa-gold/20 to-transparent rounded-full blur-3xl -mr-32 -mt-32" />
             <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-sa-green/20 to-transparent rounded-full blur-3xl -ml-24 -mb-24" />
 
-            <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-              <div>
-                <div className="flex items-center gap-2 mb-3">
+            <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
                   <motion.span
                     initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}
                     className="px-3 py-1 rounded-full bg-sa-gold/10 border border-sa-gold/20 text-sa-gold text-xs font-semibold flex items-center gap-1.5"
                   >
                     <Sparkles className="h-3.5 w-3.5" /> AI Command Centre
                   </motion.span>
+                  <span className="text-[11px] text-muted-foreground">Live sync</span>
                 </div>
-                <motion.h1 initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="text-3xl md:text-4xl font-display mb-2">
+
+                <motion.h1 initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="text-3xl md:text-4xl font-display">
                   Welcome back,{" "}
                   <span className="bg-gradient-to-r from-sa-gold to-sa-terracotta bg-clip-text text-transparent">{displayName}</span>
                 </motion.h1>
-                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="text-muted-foreground">
-                  Your AI twin is actively analysing the SA career landscape for you.
+                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="text-muted-foreground max-w-xl">
+                  Your AI twin is actively mapping opportunities across South Africa and aligning them to your goals.
                 </motion.p>
+
+                {!loading && stats && (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="rounded-xl border border-border/60 bg-card/60 px-4 py-3">
+                      <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Twin Status</p>
+                      <p className="text-sm font-semibold">{twinCompleted ? "Active" : "Not built yet"}</p>
+                    </div>
+                    <div className="rounded-xl border border-border/60 bg-card/60 px-4 py-3">
+                      <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Opportunities</p>
+                      <p className="text-sm font-semibold">{stats.opportunitiesCount}</p>
+                    </div>
+                    <div className="rounded-xl border border-border/60 bg-card/60 px-4 py-3">
+                      <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Applications</p>
+                      <p className="text-sm font-semibold">{stats.applicationsCount || 0}</p>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {!loading && stats && stats.empowermentScore > 0 && (
                 <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.5 }} className="flex items-center gap-4">
-                  <div className="text-center p-4 bg-sa-gold/10 rounded-xl border border-sa-gold/20">
+                  <div className="text-center p-4 bg-sa-gold/10 rounded-2xl border border-sa-gold/20">
                     <ScoreMeter score={stats.empowermentScore} label="Empowerment" size="md" />
+                    <p className="mt-3 text-xs text-muted-foreground">Your current trajectory</p>
                   </div>
                 </motion.div>
               )}
