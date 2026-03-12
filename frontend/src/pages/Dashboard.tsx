@@ -239,16 +239,17 @@ export default function Dashboard() {
               { label: "Applications", value: stats.applicationsCount || 0, icon: Target, color: "text-primary" },
             ].map((card, i) => (
               <motion.div key={card.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 * i }}>
-                <GlassCard>
+                <GlassCard className="group">
                   <div className="flex items-start justify-between mb-3">
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{card.label}</p>
-                    <div className="h-9 w-9 rounded-lg bg-muted/50 flex items-center justify-center">
+                    <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">{card.label}</p>
+                    <div className="h-9 w-9 rounded-lg bg-muted/50 flex items-center justify-center group-hover:scale-105 transition-transform">
                       <card.icon className={`h-4 w-4 ${card.color}`} />
                     </div>
                   </div>
                   <motion.p className={`text-3xl font-display ${card.color}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 + i * 0.1 }}>
                     {card.value}
                   </motion.p>
+                  <p className="text-xs text-muted-foreground mt-2">Updated from live data</p>
                 </GlassCard>
               </motion.div>
             ))}
