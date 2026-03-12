@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Brain, Search, Zap, TrendingUp, Target, BarChart3, AlertCircle, MapPin } from "lucide-react";
 import { opportunitiesAPI } from "../lib/api";
-import { useUser } from "../lib/user-context";
+import { useUser } from "../contexts/user-context";
 
 interface Insight {
   id: string;
