@@ -143,58 +143,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Enhanced South African Neural Network Background */}
       <div className="absolute inset-0 z-0 sa-pattern opacity-15" />
-      
-      {/* South African Map Neural Network Pattern */}
-      <div className="absolute inset-0 z-0 pointer-events-none opacity-100">
-        {/* Neural Network Nodes - Major Cities */}
-        <div className="absolute top-[20%] left-[25%] w-5 h-5 bg-sa-gold opacity-70 rounded-full animate-pulse shadow-[0_0_12px_rgba(214,162,54,0.6)]" />
-        <div className="absolute top-[30%] left-[35%] w-4 h-4 bg-sa-green opacity-70 rounded-full animate-pulse delay-1000 shadow-[0_0_12px_rgba(30,152,99,0.6)]" />
-        <div className="absolute top-[25%] left-[45%] w-5 h-5 bg-sa-terracotta opacity-70 rounded-full animate-pulse delay-2000 shadow-[0_0_12px_rgba(214,96,70,0.6)]" />
-        <div className="absolute top-[40%] left-[30%] w-4 h-4 bg-sa-gold opacity-70 rounded-full animate-pulse delay-500 shadow-[0_0_10px_rgba(214,162,54,0.5)]" />
-        <div className="absolute top-[35%] left-[50%] w-5 h-5 bg-sa-green opacity-70 rounded-full animate-pulse delay-1500 shadow-[0_0_12px_rgba(30,152,99,0.6)]" />
-        <div className="absolute top-[50%] left-[40%] w-4 h-4 bg-sa-terracotta opacity-70 rounded-full animate-pulse delay-2500 shadow-[0_0_10px_rgba(214,96,70,0.5)]" />
-        <div className="absolute top-[60%] left-[35%] w-5 h-5 bg-sa-gold opacity-70 rounded-full animate-pulse delay-3000 shadow-[0_0_12px_rgba(214,162,54,0.6)]" />
-        <div className="absolute top-[55%] left-[55%] w-4 h-4 bg-sa-green opacity-70 rounded-full animate-pulse delay-3500 shadow-[0_0_10px_rgba(30,152,99,0.5)]" />
-        <div className="absolute top-[70%] left-[45%] w-5 h-5 bg-sa-terracotta opacity-70 rounded-full animate-pulse delay-4000 shadow-[0_0_12px_rgba(214,96,70,0.6)]" />
-        
-        {/* Neural Network Connections */}
-        <svg className="absolute inset-0 w-full h-full">
-          <defs>
-            <linearGradient id="neuralGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="rgba(214,162,54,0.7)" />
-              <stop offset="100%" stopColor="rgba(30,152,99,0.7)" />
-            </linearGradient>
-            <linearGradient id="neuralGradient2" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="rgba(30,152,99,0.7)" />
-              <stop offset="100%" stopColor="rgba(214,96,70,0.7)" />
-            </linearGradient>
-          </defs>
-          
-          {/* Major neural pathways */}
-          <path d="M 25% 20% Q 35% 25% 45% 25%" stroke="url(#neuralGradient1)" strokeWidth="2.5" fill="none" opacity="0.95" />
-          <path d="M 35% 30% Q 40% 35% 30% 40%" stroke="url(#neuralGradient2)" strokeWidth="2.5" fill="none" opacity="0.95" />
-          <path d="M 45% 25% Q 50% 30% 50% 35%" stroke="url(#neuralGradient1)" strokeWidth="2.5" fill="none" opacity="0.95" />
-          <path d="M 30% 40% Q 35% 45% 40% 50%" stroke="url(#neuralGradient2)" strokeWidth="2.5" fill="none" opacity="0.95" />
-          <path d="M 50% 35% Q 55% 45% 55% 55%" stroke="url(#neuralGradient1)" strokeWidth="2.5" fill="none" opacity="0.95" />
-          <path d="M 40% 50% Q 45% 55% 35% 60%" stroke="url(#neuralGradient2)" strokeWidth="2.5" fill="none" opacity="0.95" />
-          <path d="M 55% 55% Q 50% 65% 45% 70%" stroke="url(#neuralGradient1)" strokeWidth="2.5" fill="none" opacity="0.95" />
-          
-          {/* Secondary neural pathways */}
-          <path d="M 25% 20% L 35% 30%" stroke="rgba(214,162,54,0.5)" strokeWidth="1.2" fill="none" />
-          <path d="M 45% 25% L 30% 40%" stroke="rgba(30,152,99,0.5)" strokeWidth="1.2" fill="none" />
-          <path d="M 50% 35% L 40% 50%" stroke="rgba(214,96,70,0.5)" strokeWidth="1.2" fill="none" />
-          <path d="M 35% 60% L 45% 70%" stroke="rgba(214,162,54,0.5)" strokeWidth="1.2" fill="none" />
-          <path d="M 55% 55% L 45% 70%" stroke="rgba(30,152,99,0.5)" strokeWidth="1.2" fill="none" />
-        </svg>
-        
-        {/* Animated neural pulses */}
-        <div className="absolute top-[20%] left-[25%] w-10 h-10 bg-sa-gold opacity-35 rounded-full animate-ping" />
-        <div className="absolute top-[35%] left-[50%] w-10 h-10 bg-sa-green opacity-35 rounded-full animate-ping delay-1000" />
-        <div className="absolute top-[70%] left-[45%] w-10 h-10 bg-sa-terracotta opacity-35 rounded-full animate-ping delay-2000" />
-      </div>
-      
       {/* Enhanced gradient overlays */}
       <div className="absolute inset-0 z-0 bg-gradient-to-br from-sa-gold/4 via-transparent to-sa-green/6" />
       <div className="absolute -top-40 -right-32 h-96 w-96 rounded-full bg-sa-gold/10 blur-3xl z-0" />
@@ -211,6 +160,20 @@ export default function Dashboard() {
         {/* Hero */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           <GlassCard glow="cyan" className="relative overflow-hidden">
+            {/* Subtle South African flag pattern (hero only) */}
+            <div className="absolute inset-0 pointer-events-none opacity-15">
+              <svg viewBox="0 0 1200 400" className="h-full w-full">
+                <rect width="1200" height="200" fill="rgba(200, 16, 46, 0.9)" />
+                <rect y="200" width="1200" height="200" fill="rgba(0, 51, 153, 0.9)" />
+                <polygon points="0,0 360,200 0,400" fill="rgba(0, 0, 0, 0.9)" />
+                <polygon points="0,40 320,200 0,360" fill="rgba(255, 184, 28, 0.95)" />
+                <polygon points="0,80 280,200 0,320" fill="rgba(0, 122, 61, 0.95)" />
+                <polygon points="260,200 1200,80 1200,0 200,0" fill="rgba(255, 255, 255, 0.9)" />
+                <polygon points="260,200 1200,320 1200,400 200,400" fill="rgba(255, 255, 255, 0.9)" />
+                <polygon points="260,200 1200,110 1200,40 220,40" fill="rgba(0, 122, 61, 0.95)" />
+                <polygon points="260,200 1200,290 1200,360 220,360" fill="rgba(0, 122, 61, 0.95)" />
+              </svg>
+            </div>
             <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-sa-gold/20 to-transparent rounded-full blur-3xl -mr-32 -mt-32" />
             <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-sa-green/20 to-transparent rounded-full blur-3xl -ml-24 -mb-24" />
 
