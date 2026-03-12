@@ -193,6 +193,11 @@ export default function Dashboard() {
         <div className="absolute top-[20%] left-[25%] w-8 h-8 bg-sa-gold/25 rounded-full animate-ping" />
         <div className="absolute top-[35%] left-[50%] w-8 h-8 bg-sa-green/25 rounded-full animate-ping delay-1000" />
         <div className="absolute top-[70%] left-[45%] w-8 h-8 bg-sa-terracotta/25 rounded-full animate-ping delay-2000" />
+
+        {/* TEMP: deployment marker */}
+        <div className="absolute right-6 top-6 text-xs font-semibold tracking-wide text-sa-gold/70 uppercase">
+          Neural map active
+        </div>
       </div>
       
       {/* Enhanced gradient overlays */}
