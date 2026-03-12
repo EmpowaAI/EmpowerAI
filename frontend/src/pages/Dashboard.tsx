@@ -131,10 +131,13 @@ export default function Dashboard() {
   const progressPercentage = Math.round((completedSteps / journeySteps.length) * 100);
 
   return (
-    <div className="min-h-screen p-4 md:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
-        <div className="fixed inset-0 -z-10 sa-pattern opacity-20" />
-        <div className="fixed inset-0 -z-10 bg-gradient-to-br from-sa-gold/5 via-transparent to-sa-green/5" />
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      <div className="absolute inset-0 -z-10 sa-pattern opacity-20" />
+      <div className="absolute inset-0 -z-10 bg-gradient-to-br from-sa-gold/5 via-transparent to-sa-green/10" />
+      <div className="absolute -top-40 -right-32 h-96 w-96 rounded-full bg-sa-gold/10 blur-3xl -z-10" />
+      <div className="absolute -bottom-32 -left-24 h-80 w-80 rounded-full bg-sa-green/10 blur-3xl -z-10" />
+
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 md:py-8 space-y-8">
 
         <AIThinkingIndicator messages={[aiMessage]} isVisible={aiThinking} />
 
