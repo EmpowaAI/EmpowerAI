@@ -129,6 +129,7 @@ export default function Dashboard() {
   // Calculate overall progress percentage
   const completedSteps = journeySteps.filter(step => step.completed).length;
   const progressPercentage = Math.round((completedSteps / journeySteps.length) * 100);
+  const nextStep = journeySteps.find((step) => !step.completed) || journeySteps[journeySteps.length - 1];
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
@@ -271,14 +272,17 @@ export default function Dashboard() {
           <div className="lg:col-span-2">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
               <GlassCard>
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex items-start justify-between gap-4 mb-6">
                   <div>
                     <h3 className="font-display text-lg flex items-center gap-2">
                       <Brain className="h-5 w-5 text-sa-gold" /> Your AI Journey
                     </h3>
-                    <p className="text-sm text-muted-foreground">Complete each step to unlock your full potential</p>
+                    <p className="text-sm text-muted-foreground">Your next best action is highlighted below.</p>
                   </div>
-                  <Target className="h-6 w-6 text-sa-terracotta" />
+                  <div className="text-right">
+                    <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Progress</p>
+                    <p className="text-sm font-semibold text-sa-gold">{progressPercentage}%</p>
+                  </div>
                 </div>
 
                 <div className="mb-6 p-4 bg-sa-gold/5 rounded-xl border border-sa-gold/20">
@@ -293,10 +297,12 @@ export default function Dashboard() {
                       className="h-full bg-gradient-to-r from-sa-gold to-sa-terracotta rounded-full"
                     />
                   </div>
+                  <p className="text-xs text-muted-foreground mt-3">Next step: <span className="text-foreground font-medium">{nextStep.label}</span></p>
                 </div>
 
                 <div className="space-y-3">
                   {journeySteps.map((step, i) => {
+                    const isNext = nextStep?.label === step.label && !step.completed;
                     // If step is completed, render as non-clickable div
                     if (step.completed) {
                       return (
@@ -322,15 +328,16 @@ export default function Dashboard() {
                       <Link
                         key={step.label}
                         to={step.path}
-                        className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-muted/20 hover:border-sa-gold/30 hover:bg-sa-gold/5 transition-all group cursor-pointer"
+                        className={`flex items-center justify-between p-4 rounded-xl border ${isNext ? "border-sa-gold/50 bg-sa-gold/10" : "border-border/50 bg-muted/20"} hover:border-sa-gold/30 hover:bg-sa-gold/5 transition-all group cursor-pointer`}
                       >
                         <div className="flex items-center gap-3">
                           <div className="h-8 w-8 rounded-full bg-primary/10 border border-primary/30 text-primary flex items-center justify-center text-xs font-display">
                             {String(i + 1).padStart(2, "0")}
                           </div>
-                          <span className="text-sm font-medium">
-                            {step.label}
-                          </span>
+                          <div>
+                            <span className="text-sm font-medium">{step.label}</span>
+                            {isNext && <p className="text-[11px] text-sa-gold">Recommended next action</p>}
+                          </div>
                         </div>
                         <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-sa-gold transition-colors" />
                       </Link>
