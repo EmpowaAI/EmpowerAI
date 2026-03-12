@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Bot, X, Send, Sparkles, User, Clock, ThumbsUp, ThumbsDown } from "lucide-react";
 import { cn } from "../lib/utils";
-import StatusPill from "./ui/StatusPill";
+import StatusPill from "./shared/StatusPill";
 import { chatAPI } from "../lib/api";
 
 interface Message {
