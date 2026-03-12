@@ -164,7 +164,7 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative pt-20 pb-12 sm:pt-24 sm:pb-16 md:pt-28 md:pb-20 lg:pt-36 lg:pb-24 overflow-hidden">
+      <section className="relative pt-16 pb-12 sm:pt-24 sm:pb-16 md:pt-28 md:pb-20 lg:pt-36 lg:pb-24 overflow-hidden">
         <div className="absolute inset-0 sa-pattern -z-10" />
         <div className="absolute inset-0 bg-gradient-to-br from-sa-gold/10 via-background to-sa-green/5 -z-10" />
 
@@ -182,22 +182,22 @@ export default function LandingPage() {
                 <RotatingText text={t("poweredBy")} langKey={langIndex} /> {"\u{1F1FF}\u{1F1E6}"}
               </span>
 
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-extrabold leading-tight tracking-tight mb-4 sm:mb-6 font-display">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl font-extrabold leading-tight tracking-tight mb-4 sm:mb-6 font-display">
                 Your Digital{" "}
                 <span className="bg-gradient-to-r from-sa-gold via-sa-terracotta to-sa-red bg-clip-text text-transparent">
                   Economic Twin
                 </span>
               </h1>
 
-              <p className="text-lg text-muted-foreground max-w-lg mb-4">
+              <p className="text-base sm:text-lg text-muted-foreground max-w-lg mx-auto lg:mx-0 mb-4">
                 <RotatingText text={`"${t("ubuntuProverb")}"`} langKey={langIndex} as="em" languageLabel={getLanguageDisplay(currentLanguage)} />
                 {" — A person is a person through other people."}
               </p>
-              <p className="text-base text-muted-foreground max-w-lg mb-8">
+              <p className="text-sm sm:text-base text-muted-foreground max-w-lg mx-auto lg:mx-0 mb-8">
                 {"AI-powered career pathways rooted in South African values. From Limpopo to the Western Cape, we're building futures together."}
               </p>
 
-              <div className="flex flex-wrap gap-4 mb-8">
+              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 mb-8 justify-center lg:justify-start">
                 <a
                   href="/signup"
                   className="inline-flex items-center justify-center gap-2 bg-sa-gold hover:bg-sa-gold/90 text-primary-foreground px-6 py-3 rounded-xl font-semibold text-base transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105"
@@ -212,7 +212,7 @@ export default function LandingPage() {
                 </a>
               </div>
 
-              <div className="flex items-center gap-6 text-sm text-muted-foreground">
+              <div className="flex flex-col sm:flex-row sm:flex-wrap items-center gap-4 sm:gap-6 text-xs sm:text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <div className="flex -space-x-2">
                     {["\u{1F1FF}\u{1F1E6}", "\u{270A}\u{1F3FE}", "\u{1F30D}", "\u{1F49B}"].map((emoji, i) => (
@@ -246,7 +246,7 @@ export default function LandingPage() {
                 <RotatingText text={t("mahala")} langKey={langIndex} /> {" Forever \u{1F193}"}
               </div>
 
-              <div className="bg-card rounded-2xl shadow-xl border border-border p-6 max-w-md mx-auto lg:ml-auto">
+              <div className="bg-card rounded-2xl shadow-xl border border-border p-5 sm:p-6 max-w-md w-full mx-auto lg:ml-auto">
                 <div className="flex items-center gap-4 mb-5">
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-sa-gold/30 to-sa-green/30 flex items-center justify-center text-xl">
                     {"\u{270A}\u{1F3FE}"}
@@ -583,11 +583,11 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border py-12 bg-secondary/20">
+      <footer className="border-t border-border py-10 sm:py-12 bg-secondary/20">
         <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-3 gap-8 items-center">
-            <div>
-              <a href="/" className="flex items-center gap-2 font-bold text-lg mb-3">
+          <div className="grid gap-8 md:grid-cols-3 items-start">
+            <div className="text-center md:text-left">
+              <a href="/" className="flex items-center justify-center md:justify-start gap-2 font-bold text-lg mb-3">
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sa-gold via-sa-green to-sa-blue flex items-center justify-center shadow-sm overflow-hidden">
                   {/* Replace with your logo image in footer too */}
                   <img 
@@ -598,13 +598,13 @@ export default function LandingPage() {
                 </div>
                 <span className="font-display text-foreground">{"Empowa"}<span className="text-sa-gold">AI</span></span>
               </a>
-              <p className="text-sm text-muted-foreground max-w-xs">
+              <p className="text-sm text-muted-foreground max-w-xs mx-auto md:mx-0">
                 {"AI-powered career guidance for South African youth. Built with Ubuntu values \u2014 because together, we rise."}
               </p>
             </div>
 
             <div className="flex flex-col items-center gap-3">
-              <div className="flex gap-6 text-sm text-muted-foreground">
+              <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
                 <a href="#features" className="hover:text-foreground transition-colors">Features</a>
                 <a href="#how-it-works" className="hover:text-foreground transition-colors">How It Works</a>
                 <a href="#success" className="hover:text-foreground transition-colors">Ubuntu Stories</a>
@@ -614,7 +614,7 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="flex flex-col items-end gap-3">
+            <div className="flex flex-col items-center md:items-end gap-3 text-center md:text-right">
               <ThemeToggle />
               <p className="text-xs text-muted-foreground">{"\u00A9 2026 EmpowaAI. Made in Mzansi \u{1F1FF}\u{1F1E6}"}</p>
               <p className="text-xs text-muted-foreground italic">
