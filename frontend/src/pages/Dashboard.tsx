@@ -143,10 +143,66 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      <div className="absolute inset-0 -z-10 sa-pattern opacity-20" />
-      <div className="absolute inset-0 -z-10 bg-gradient-to-br from-sa-gold/5 via-transparent to-sa-green/10" />
-      <div className="absolute -top-40 -right-32 h-96 w-96 rounded-full bg-sa-gold/10 blur-3xl -z-10" />
-      <div className="absolute -bottom-32 -left-24 h-80 w-80 rounded-full bg-sa-green/10 blur-3xl -z-10" />
+      {/* Enhanced South African Neural Network Background */}
+      <div className="absolute inset-0 -z-10 sa-pattern opacity-10" />
+      
+      {/* South African Map Neural Network Pattern */}
+      <div className="absolute inset-0 -z-10">
+        {/* Neural Network Nodes - Major Cities */}
+        <div className="absolute top-[20%] left-[25%] w-3 h-3 bg-sa-gold/30 rounded-full animate-pulse" />
+        <div className="absolute top-[30%] left-[35%] w-2 h-2 bg-sa-green/30 rounded-full animate-pulse delay-1000" />
+        <div className="absolute top-[25%] left-[45%] w-3 h-3 bg-sa-terracotta/30 rounded-full animate-pulse delay-2000" />
+        <div className="absolute top-[40%] left-[30%] w-2 h-2 bg-sa-gold/30 rounded-full animate-pulse delay-500" />
+        <div className="absolute top-[35%] left-[50%] w-3 h-3 bg-sa-green/30 rounded-full animate-pulse delay-1500" />
+        <div className="absolute top-[50%] left-[40%] w-2 h-2 bg-sa-terracotta/30 rounded-full animate-pulse delay-2500" />
+        <div className="absolute top-[60%] left-[35%] w-3 h-3 bg-sa-gold/30 rounded-full animate-pulse delay-3000" />
+        <div className="absolute top-[55%] left-[55%] w-2 h-2 bg-sa-green/30 rounded-full animate-pulse delay-3500" />
+        <div className="absolute top-[70%] left-[45%] w-3 h-3 bg-sa-terracotta/30 rounded-full animate-pulse delay-4000" />
+        
+        {/* Neural Network Connections */}
+        <svg className="absolute inset-0 w-full h-full -z-10">
+          <defs>
+            <linearGradient id="neuralGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="rgb(251 191 36 / 0.2)" />
+              <stop offset="100%" stopColor="rgb(34 197 94 / 0.2)" />
+            </linearGradient>
+            <linearGradient id="neuralGradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="rgb(34 197 94 / 0.2)" />
+              <stop offset="100%" stopColor="rgb(239 68 68 / 0.2)" />
+            </linearGradient>
+          </defs>
+          
+          {/* Major neural pathways */}
+          <path d="M 25% 20% Q 35% 25% 45% 25%" stroke="url(#neuralGradient1)" strokeWidth="1" fill="none" opacity="0.6" />
+          <path d="M 35% 30% Q 40% 35% 30% 40%" stroke="url(#neuralGradient2)" strokeWidth="1" fill="none" opacity="0.6" />
+          <path d="M 45% 25% Q 50% 30% 50% 35%" stroke="url(#neuralGradient1)" strokeWidth="1" fill="none" opacity="0.6" />
+          <path d="M 30% 40% Q 35% 45% 40% 50%" stroke="url(#neuralGradient2)" strokeWidth="1" fill="none" opacity="0.6" />
+          <path d="M 50% 35% Q 55% 45% 55% 55%" stroke="url(#neuralGradient1)" strokeWidth="1" fill="none" opacity="0.6" />
+          <path d="M 40% 50% Q 45% 55% 35% 60%" stroke="url(#neuralGradient2)" strokeWidth="1" fill="none" opacity="0.6" />
+          <path d="M 55% 55% Q 50% 65% 45% 70%" stroke="url(#neuralGradient1)" strokeWidth="1" fill="none" opacity="0.6" />
+          
+          {/* Secondary neural pathways */}
+          <path d="M 25% 20% L 35% 30%" stroke="rgb(251 191 36 / 0.1)" strokeWidth="0.5" fill="none" />
+          <path d="M 45% 25% L 30% 40%" stroke="rgb(34 197 94 / 0.1)" strokeWidth="0.5" fill="none" />
+          <path d="M 50% 35% L 40% 50%" stroke="rgb(239 68 68 / 0.1)" strokeWidth="0.5" fill="none" />
+          <path d="M 35% 60% L 45% 70%" stroke="rgb(251 191 36 / 0.1)" strokeWidth="0.5" fill="none" />
+          <path d="M 55% 55% L 45% 70%" stroke="rgb(34 197 94 / 0.1)" strokeWidth="0.5" fill="none" />
+        </svg>
+        
+        {/* Animated neural pulses */}
+        <div className="absolute top-[20%] left-[25%] w-6 h-6 bg-sa-gold/20 rounded-full animate-ping" />
+        <div className="absolute top-[35%] left-[50%] w-6 h-6 bg-sa-green/20 rounded-full animate-ping delay-1000" />
+        <div className="absolute top-[70%] left-[45%] w-6 h-6 bg-sa-terracotta/20 rounded-full animate-ping delay-2000" />
+      </div>
+      
+      {/* Enhanced gradient overlays */}
+      <div className="absolute inset-0 -z-10 bg-gradient-to-br from-sa-gold/3 via-transparent to-sa-green/5" />
+      <div className="absolute -top-40 -right-32 h-96 w-96 rounded-full bg-sa-gold/8 blur-3xl -z-10" />
+      <div className="absolute -bottom-32 -left-24 h-80 w-80 rounded-full bg-sa-green/8 blur-3xl -z-10" />
+      
+      {/* Additional atmospheric effects */}
+      <div className="absolute top-1/4 left-1/4 h-64 w-64 rounded-full bg-sa-terracotta/5 blur-3xl -z-10" />
+      <div className="absolute bottom-1/3 right-1/3 h-48 w-48 rounded-full bg-sa-gold/5 blur-3xl -z-10" />
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 md:py-8 space-y-8">
 
