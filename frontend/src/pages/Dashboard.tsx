@@ -161,17 +161,21 @@ export default function Dashboard() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           <GlassCard glow="cyan" className="relative overflow-hidden">
             {/* Subtle South African flag pattern (hero only) */}
-            <div className="absolute inset-0 pointer-events-none opacity-15">
-              <svg viewBox="0 0 1200 400" className="h-full w-full">
-                <rect width="1200" height="200" fill="rgba(200, 16, 46, 0.9)" />
-                <rect y="200" width="1200" height="200" fill="rgba(0, 51, 153, 0.9)" />
-                <polygon points="0,0 360,200 0,400" fill="rgba(0, 0, 0, 0.9)" />
-                <polygon points="0,40 320,200 0,360" fill="rgba(255, 184, 28, 0.95)" />
-                <polygon points="0,80 280,200 0,320" fill="rgba(0, 122, 61, 0.95)" />
-                <polygon points="260,200 1200,80 1200,0 200,0" fill="rgba(255, 255, 255, 0.9)" />
-                <polygon points="260,200 1200,320 1200,400 200,400" fill="rgba(255, 255, 255, 0.9)" />
-                <polygon points="260,200 1200,110 1200,40 220,40" fill="rgba(0, 122, 61, 0.95)" />
-                <polygon points="260,200 1200,290 1200,360 220,360" fill="rgba(0, 122, 61, 0.95)" />
+            <div className="absolute inset-0 pointer-events-none opacity-12">
+              <svg viewBox="0 0 300 200" className="h-full w-full" preserveAspectRatio="xMidYMid slice">
+                <rect width="300" height="100" fill="#C8102E" />
+                <rect y="100" width="300" height="100" fill="#0033A0" />
+                <polygon points="0,0 90,100 0,200" fill="#000000" />
+                {/* White fimbriation */}
+                <polygon points="0,30 110,100 0,170 40,170 140,100 40,30" fill="#FFFFFF" />
+                <polygon points="140,100 300,40 300,0 100,0" fill="#FFFFFF" />
+                <polygon points="140,100 300,160 300,200 100,200" fill="#FFFFFF" />
+                {/* Green Y */}
+                <polygon points="0,45 100,100 0,155 30,155 120,100 30,45" fill="#007A3D" />
+                <polygon points="120,100 300,55 300,0 90,0" fill="#007A3D" />
+                <polygon points="120,100 300,145 300,200 90,200" fill="#007A3D" />
+                {/* Gold border around black triangle */}
+                <polygon points="0,30 90,100 0,170 0,200 110,100 0,0" fill="#FFB81C" opacity="0.7" />
               </svg>
             </div>
             <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-sa-gold/20 to-transparent rounded-full blur-3xl -mr-32 -mt-32" />
