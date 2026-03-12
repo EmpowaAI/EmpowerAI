@@ -167,7 +167,7 @@ export default function Dashboard() {
                   >
                     <Sparkles className="h-3.5 w-3.5" /> AI Command Centre
                   </motion.span>
-                  <span className="text-[11px] text-muted-foreground">Live sync</span>
+                  <span className="text-xs text-muted-foreground">Live sync</span>
                 </div>
 
                 <motion.h1 initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="text-4xl md:text-5xl font-display mb-3 font-bold">
@@ -181,15 +181,15 @@ export default function Dashboard() {
                 {!loading && stats && (
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div className="rounded-xl border border-border/60 bg-card/60 px-4 py-3">
-                      <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Twin Status</p>
+                      <p className="text-xs uppercase tracking-wide text-muted-foreground">Twin Status</p>
                       <p className="text-sm font-semibold">{twinCompleted ? "Active" : "Not built yet"}</p>
                     </div>
                     <div className="rounded-xl border border-border/60 bg-card/60 px-4 py-3">
-                      <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Opportunities</p>
+                      <p className="text-xs uppercase tracking-wide text-muted-foreground">Opportunities</p>
                       <p className="text-sm font-semibold">{stats.opportunitiesCount}</p>
                     </div>
                     <div className="rounded-xl border border-border/60 bg-card/60 px-4 py-3">
-                      <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Applications</p>
+                      <p className="text-xs uppercase tracking-wide text-muted-foreground">Applications</p>
                       <p className="text-sm font-semibold">{stats.applicationsCount || 0}</p>
                     </div>
                   </div>
@@ -222,7 +222,7 @@ export default function Dashboard() {
                       <card.icon className="h-7 w-7 text-primary" />
                     </div>
                     <div>
-                      <p className="text-sm uppercase tracking-wider text-foreground font-bold">{card.label}</p>
+                      <p className="text-xs uppercase tracking-wide text-foreground font-bold">{card.label}</p>
                       <p className="text-sm text-muted-foreground font-medium">{card.hint}</p>
                     </div>
                   </div>
@@ -252,12 +252,12 @@ export default function Dashboard() {
               <motion.div key={card.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 * i }}>
                 <GlassCard className="group border-2 border-border/50 shadow-md">
                   <div className="flex items-start justify-between mb-4">
-                    <p className="text-sm font-bold text-foreground uppercase tracking-wider">{card.label}</p>
+                    <p className="text-xs font-bold text-foreground uppercase tracking-wide">{card.label}</p>
                     <div className="h-12 w-12 rounded-xl bg-muted/50 flex items-center justify-center group-hover:scale-105 transition-transform border border-border/30">
                       <card.icon className={`h-6 w-6 ${card.color}`} />
                     </div>
                   </div>
-                  <motion.p className={`text-4xl font-display ${card.color} font-bold`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 + i * 0.1 }}>
+                  <motion.p className={`text-3xl sm:text-4xl font-display ${card.color} font-bold`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 + i * 0.1 }}>
                     {card.value}
                   </motion.p>
                   <p className="text-sm text-muted-foreground mt-2 font-medium">Updated from live data</p>
@@ -290,7 +290,7 @@ export default function Dashboard() {
                     <p className="text-sm text-muted-foreground">Your next best action is highlighted below.</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Progress</p>
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Progress</p>
                     <p className="text-sm font-semibold text-sa-gold">{progressPercentage}%</p>
                   </div>
                 </div>
@@ -361,13 +361,13 @@ export default function Dashboard() {
           <div className="space-y-4">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
               <GlassCard>
-                <h4 className="text-xs font-display uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
+                <h4 className="text-xs font-display uppercase tracking-wide text-muted-foreground mb-4 flex items-center gap-2">
                   <Users className="h-4 w-4 text-sa-gold" /> Profile Snapshot
                 </h4>
                 <div className="space-y-3">
                   <div><p className="text-xs text-muted-foreground">Province</p><p className="text-sm font-medium">{user?.province || "Not set"}</p></div>
-                  <div><p className="text-xs text-muted-foreground">Career Goals</p><p className="text-sm font-medium">{user?.interests?.slice(0, 2).join(" • ") || "Not set yet"}</p></div>
-                  <div><p className="text-xs text-muted-foreground">Top Skills</p><p className="text-sm font-medium">{user?.skills?.slice(0, 3).join(" • ") || "Add skills in profile"}</p></div>
+                  <div><p className="text-xs text-muted-foreground">Career Goals</p><p className="text-sm font-medium">{user?.interests?.slice(0, 2).join(" / ") || "Not set yet"}</p></div>
+                  <div><p className="text-xs text-muted-foreground">Top Skills</p><p className="text-sm font-medium">{user?.skills?.slice(0, 3).join(" / ") || "Add skills in profile"}</p></div>
                 </div>
                 <Link to="/dashboard/twin" className="mt-4 inline-flex items-center gap-2 text-xs text-sa-gold hover:text-sa-terracotta transition-colors font-medium">
                   Update profile <ArrowRight className="h-3 w-3" />
