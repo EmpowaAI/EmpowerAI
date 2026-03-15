@@ -8,6 +8,19 @@ type AdminStats = {
   topCareers?: { career: string; count: number; lastSelectedAt?: string }[]
 }
 
+type QueueHealth = {
+  enabled?: boolean
+  workerEnabled?: boolean
+  redisUrlSet?: boolean
+  counts?: {
+    waiting?: number
+    active?: number
+    completed?: number
+    failed?: number
+    delayed?: number
+  } | null
+}
+
 const ADMIN_KEY_STORAGE = "empowerai-admin-key"
 
 export default function AdminPanel() {
@@ -15,6 +28,8 @@ export default function AdminPanel() {
   const [status, setStatus] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [stats, setStats] = useState<AdminStats | null>(null)
+  const [queueHealth, setQueueHealth] = useState<QueueHealth | null>(null)
+  const [loadingQueue, setLoadingQueue] = useState(false)
   const [taxonomyJson, setTaxonomyJson] = useState("")
   const [refreshing, setRefreshing] = useState(false)
   const [loadingTaxonomy, setLoadingTaxonomy] = useState(false)
@@ -46,6 +61,24 @@ export default function AdminPanel() {
       setStatus("Stats loaded.")
     } catch (err: any) {
       setError(err.message || "Failed to load stats.")
+    }
+  }
+
+  const loadQueueHealth = async () => {
+    if (!canCallAdmin) {
+      setError("Admin key is required.")
+      return
+    }
+    setLoadingQueue(true)
+    setError(null)
+    try {
+      const response = await adminAPI.getQueueHealth(adminKey.trim())
+      setQueueHealth(response.queue || null)
+      setStatus("Queue health loaded.")
+    } catch (err: any) {
+      setError(err.message || "Failed to load queue health.")
+    } finally {
+      setLoadingQueue(false)
     }
   }
 
@@ -105,6 +138,7 @@ export default function AdminPanel() {
   useEffect(() => {
     if (adminKey) {
       loadStats().catch(() => {})
+      loadQueueHealth().catch(() => {})
     }
   }, [])
 
@@ -207,6 +241,48 @@ export default function AdminPanel() {
           )}
         >
           {refreshing ? "Refreshing..." : "Run Refresh"}
+        </button>
+      </section>
+
+      <section className="rounded-2xl border border-border bg-card p-5 space-y-4">
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">AI Queue Health</h2>
+          <p className="text-sm text-muted-foreground">Visibility into background AI jobs.</p>
+        </div>
+        <div className="grid gap-3 md:grid-cols-2">
+          <div className="rounded-xl border border-border p-4 space-y-1">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">Queue Status</p>
+            <p className="text-sm text-foreground">
+              {queueHealth?.enabled ? "Enabled" : "Disabled"}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Worker: {queueHealth?.workerEnabled ? "On" : "Off"} • Redis: {queueHealth?.redisUrlSet ? "Set" : "Missing"}
+            </p>
+          </div>
+          <div className="rounded-xl border border-border p-4 space-y-1">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">Job Counts</p>
+            {queueHealth?.counts ? (
+              <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                <span>Waiting: {queueHealth.counts.waiting ?? 0}</span>
+                <span>Active: {queueHealth.counts.active ?? 0}</span>
+                <span>Completed: {queueHealth.counts.completed ?? 0}</span>
+                <span>Failed: {queueHealth.counts.failed ?? 0}</span>
+                <span>Delayed: {queueHealth.counts.delayed ?? 0}</span>
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground">No queue data available.</p>
+            )}
+          </div>
+        </div>
+        <button
+          onClick={loadQueueHealth}
+          disabled={loadingQueue}
+          className={cn(
+            "rounded-xl px-4 py-2 text-sm font-medium",
+            loadingQueue ? "bg-muted text-muted-foreground" : "bg-primary text-primary-foreground hover:bg-primary/90"
+          )}
+        >
+          {loadingQueue ? "Loading..." : "Refresh Queue Health"}
         </button>
       </section>
 

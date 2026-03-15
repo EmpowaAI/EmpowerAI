@@ -593,6 +593,22 @@ export const adminAPIDemo = {
       }
     };
   },
+
+  getQueueHealth: async (adminKey: string) => {
+    console.log('Admin demo: getting queue health with key:', adminKey.substring(0, 5) + '...');
+    await new Promise(resolve => setTimeout(resolve, 400));
+
+    return {
+      status: 'OK',
+      queue: {
+        enabled: false,
+        workerEnabled: false,
+        redisUrlSet: false,
+        counts: null
+      },
+      timestamp: new Date().toISOString()
+    };
+  },
   
   getCareerTaxonomy: async (adminKey: string) => {
     console.log('👑 Demo: Getting career taxonomy with key:', adminKey.substring(0, 5) + '...');
@@ -1051,6 +1067,10 @@ export const applicationsAPIReal = {
 export const adminAPIReal = {
   getStats: async (adminKey: string) => {
     const response = await adminRequest<any>('/admin/stats', adminKey);
+    return response;
+  },
+  getQueueHealth: async (adminKey: string) => {
+    const response = await adminRequest<any>('/queue/health', adminKey);
     return response;
   },
   getCareerTaxonomy: async (adminKey: string) => {
