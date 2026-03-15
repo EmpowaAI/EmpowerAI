@@ -130,12 +130,16 @@ function PreloadRoutes() {
   useEffect(() => {
     if (!user) return
 
-    const connection = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection
+    const connection = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string; downlink?: number } }).connection
     const saveData = connection?.saveData === true
     const effectiveType = connection?.effectiveType
     const slowConnection = effectiveType === '2g' || effectiveType === 'slow-2g'
+    const downlink = connection?.downlink
+    const slowDownlink = typeof downlink === 'number' && downlink < 1.5
+    const deviceMemory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory
+    const lowMemory = typeof deviceMemory === 'number' && deviceMemory <= 2
 
-    if (saveData || slowConnection) return
+    if (saveData || slowConnection || slowDownlink || lowMemory) return
 
     const requestIdle = (window as unknown as { requestIdleCallback?: (cb: () => void) => number }).requestIdleCallback
     const cancelIdle = (window as unknown as { cancelIdleCallback?: (id: number) => void }).cancelIdleCallback
