@@ -75,15 +75,19 @@ exports.createEconomicTwin = async (req, res, next) => {
 
       // Try to regenerate twin data with AI service (non-blocking)
       let updatedTwinData = {};
+      let meta = null;
       try {
-        const responseData = await runAiTask(
+        const queuedResult = await runAiTask(
           'twin:generate',
           userData,
           async (payload) => {
             const response = await aiServiceClient.post('/twin/generate', payload);
             return response.data
-          }
+          },
+          { includeJobId: true }
         );
+        const responseData = queuedResult.result || queuedResult
+        meta = queuedResult.result ? { jobId: queuedResult.jobId, queued: queuedResult.queued } : null
         const incomeProjection = responseData.incomeProjection || responseData.incomeProjections;
         const growthModel = responseData.growthModel || {};
         
@@ -110,7 +114,8 @@ exports.createEconomicTwin = async (req, res, next) => {
         status: 'success',
         message: 'Twin updated successfully',
         data: {
-          twin: updatedTwin || existingTwinCheck // Fallback to existing if update fails
+          twin: updatedTwin || existingTwinCheck, // Fallback to existing if update fails
+          ...(meta ? { meta } : {})
         }
       });
     }
@@ -160,16 +165,20 @@ exports.createEconomicTwin = async (req, res, next) => {
     console.log('Creating twin with userData:', { ...userData, experience: '[hidden]' });
     
     let response = null;
+    let meta = null;
     let aiServiceFailed = false;
     try {
-      const responseData = await runAiTask(
+      const queuedResult = await runAiTask(
         'twin:generate',
         userData,
         async (payload) => {
           const aiResponse = await aiServiceClient.post('/twin/generate', payload);
           return aiResponse.data
-        }
+        },
+        { includeJobId: true }
       );
+      const responseData = queuedResult.result || queuedResult
+      meta = queuedResult.result ? { jobId: queuedResult.jobId, queued: queuedResult.queued } : null
       response = { data: responseData };
       console.log('AI service call successful');
     } catch (aiError) {
@@ -264,7 +273,8 @@ exports.createEconomicTwin = async (req, res, next) => {
     res.status(201).json({
       status: 'success',
       data: {
-        twin: economicTwin
+        twin: economicTwin,
+        ...(meta ? { meta } : {})
       }
     });
   } catch (error) {
@@ -518,10 +528,11 @@ exports.runSimulation = async (req, res, next) => {
     }
 
     let simulationData;
+    let meta = null;
 
     try {
       // Try AI service first with shorter timeout (5 seconds)
-      simulationData = await runAiTask(
+      const queuedResult = await runAiTask(
         'simulation:paths',
         {
           user_data: userData,
@@ -533,8 +544,10 @@ exports.runSimulation = async (req, res, next) => {
           });
           return simulationResponse.data
         },
-        { timeout: 5000 }
+        { timeout: 5000, includeJobId: true }
       );
+      simulationData = queuedResult.result || queuedResult
+      meta = queuedResult.result ? { jobId: queuedResult.jobId, queued: queuedResult.queued } : null
       console.log('AI service simulation successful');
     } catch (aiError) {
       // AI service failed - use fallback simulation
@@ -571,7 +584,8 @@ exports.runSimulation = async (req, res, next) => {
     res.status(200).json({
       status: 'success',
       data: {
-        simulations: simulationData
+        simulations: simulationData,
+        ...(meta ? { meta } : {})
       }
     });
   } catch (error) {
