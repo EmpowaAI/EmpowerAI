@@ -191,6 +191,9 @@ PORT=5000
 MONGODB_URI=your_mongodb_connection_string
 JWT_SECRET=your_super_secret_jwt_key
 AI_SERVICE_URL=http://localhost:8000/api
+ENABLE_AI_QUEUE=false
+ENABLE_AI_QUEUE_WORKER=false
+REDIS_URL=redis://localhost:6379
 BREVO_API_KEY=your_brevo_api_key
 FRONTEND_URL=http://localhost:5173
 ```
