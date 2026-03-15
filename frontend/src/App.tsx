@@ -47,7 +47,8 @@ function App() {
             </div>
           }
         >
-          <Routes>
+          <RouteTransition>
+            <Routes>
 
           {/* Public routes */}
           <Route path="/" element={<LandingPage />} />
@@ -94,10 +95,21 @@ function App() {
           {/* Fallback route */}
           <Route path="*" element={<Navigate to="/" replace />} />
 
-          </Routes>
+            </Routes>
+          </RouteTransition>
         </Suspense>
       </UserProvider>
     </ThemeProvider>
+  )
+}
+
+function RouteTransition({ children }: { children: React.ReactNode }) {
+  const location = useLocation()
+
+  return (
+    <div className="route-transition" key={location.pathname}>
+      {children}
+    </div>
   )
 }
 
