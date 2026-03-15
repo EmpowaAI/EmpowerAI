@@ -440,3 +440,4 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 - Use npm run dev:all from the repository root to start frontend, backend, and AI services together.
 - Keep .env files local only; never commit credentials or production secrets.
 - For backend-only changes, run npm run dev:backend and validate /api/health before opening a PR.
+- Queue operations: see docs/ai-queue.md
