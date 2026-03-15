@@ -86,12 +86,14 @@ async function runAiTask(name, payload, handler, options = {}) {
   }
 
   const workerEnabled = process.env.ENABLE_AI_QUEUE_WORKER === 'true'
+  const includeJobId = options.includeJobId === true
 
   if (!queueEnabled) {
     if (!processors.get(name)) {
       throw new Error(`No processor registered for job: ${name}`)
     }
-    return processors.get(name)(payload)
+    const result = await processors.get(name)(payload)
+    return includeJobId ? { result, jobId: null, queued: false } : result
   }
 
   if (!workerEnabled) {
@@ -99,7 +101,8 @@ async function runAiTask(name, payload, handler, options = {}) {
       throw new Error(`No processor registered for job: ${name}`)
     }
     logger.info('AI queue enabled but worker disabled; running task inline', { name })
-    return processors.get(name)(payload)
+    const result = await processors.get(name)(payload)
+    return includeJobId ? { result, jobId: null, queued: false } : result
   }
 
   initAiQueue()
@@ -117,7 +120,8 @@ async function runAiTask(name, payload, handler, options = {}) {
   })
 
   const timeout = options.timeout || 30_000
-  return job.waitUntilFinished(queueEvents, timeout)
+  const result = await job.waitUntilFinished(queueEvents, timeout)
+  return includeJobId ? { result, jobId: job.id, queued: true } : result
 }
 
 async function getAiQueueHealth() {

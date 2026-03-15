@@ -80,7 +80,7 @@ exports.analyzeCV = async (req, res, next) => {
       endpoint: '/cv/analyze',
       fullUrl: `${aiServiceUrl}/api/cv/analyze`
     });
-    const analysis = await runAiTask(
+    const queuedResult = await runAiTask(
       'cv:analyze',
       {
         cvText,
@@ -95,14 +95,18 @@ exports.analyzeCV = async (req, res, next) => {
         )
         return response.data
       },
-      { timeout: REQUEST_TIMEOUT }
+      { timeout: REQUEST_TIMEOUT, includeJobId: true }
     );
+
+    const analysis = queuedResult.result || queuedResult
+    const meta = queuedResult.result ? { jobId: queuedResult.jobId, queued: queuedResult.queued } : undefined
 
     console.log('[CV Controller] AI service response received successfully');
     res.status(200).json({
       status: 'success',
       data: {
-        analysis
+        analysis,
+        ...(meta ? { meta } : {})
       }
     });
   } catch (error) {
@@ -260,7 +264,7 @@ exports.analyzeCVFile = async (req, res, next) => {
     const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
     const aiServiceApiKey = process.env.AI_SERVICE_API_KEY;
     // Use axios directly for FormData (aiServiceClient doesn't handle FormData well)
-    const analysis = await runAiTask(
+    const queuedResult = await runAiTask(
       'cv:analyze-file',
       {
         fileBuffer: file.buffer.toString('base64'),
@@ -289,14 +293,18 @@ exports.analyzeCVFile = async (req, res, next) => {
           })
         ).then((response) => response.data);
       },
-      { timeout: 60000 }
+      { timeout: 60000, includeJobId: true }
     );
+
+    const analysis = queuedResult.result || queuedResult
+    const meta = queuedResult.result ? { jobId: queuedResult.jobId, queued: queuedResult.queued } : undefined
 
     console.log('[CV Controller] AI service response received successfully');
     res.status(200).json({
       status: 'success',
       data: {
-        analysis
+        analysis,
+        ...(meta ? { meta } : {})
       }
     });
   } catch (error) {

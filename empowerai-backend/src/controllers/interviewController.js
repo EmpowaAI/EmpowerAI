@@ -116,10 +116,11 @@ exports.startInterview = async (req, res, next) => {
     }
 
     let sessionData;
+    let meta = null;
 
     try {
       // Try AI service first with shorter timeout
-      sessionData = await runAiTask(
+      const queuedResult = await runAiTask(
         'interview:start',
         {
           type,
@@ -134,8 +135,10 @@ exports.startInterview = async (req, res, next) => {
           }, { timeout: 8000 }); // 8 second timeout
           return response.data
         },
-        { timeout: 8000 }
+        { timeout: 8000, includeJobId: true }
       );
+      sessionData = queuedResult.result || queuedResult
+      meta = queuedResult.result ? { jobId: queuedResult.jobId, queued: queuedResult.queued } : null
       console.log('AI service interview start successful');
     } catch (aiError) {
       // AI service failed - use fallback questions
@@ -157,7 +160,8 @@ exports.startInterview = async (req, res, next) => {
     res.status(200).json({
       status: 'success',
       data: {
-        session: sessionData
+        session: sessionData,
+        ...(meta ? { meta } : {})
       }
     });
   } catch (error) {
@@ -189,10 +193,11 @@ exports.submitAnswer = async (req, res, next) => {
     }
 
     let feedbackData;
+    let meta = null;
 
     try {
       // Try AI service first with shorter timeout
-      feedbackData = await runAiTask(
+      const queuedResult = await runAiTask(
         'interview:answer',
         { questionId, response },
         async ({ questionId: taskQuestionId, response: taskResponse }) => {
@@ -202,8 +207,10 @@ exports.submitAnswer = async (req, res, next) => {
           }, { timeout: 8000 }); // 8 second timeout
           return apiResponse.data
         },
-        { timeout: 8000 }
+        { timeout: 8000, includeJobId: true }
       );
+      feedbackData = queuedResult.result || queuedResult
+      meta = queuedResult.result ? { jobId: queuedResult.jobId, queued: queuedResult.queued } : null
       console.log('AI service feedback successful');
     } catch (aiError) {
       // AI service failed - use fallback feedback
@@ -224,7 +231,8 @@ exports.submitAnswer = async (req, res, next) => {
     res.status(200).json({
       status: 'success',
       data: {
-        feedback: feedbackData
+        feedback: feedbackData,
+        ...(meta ? { meta } : {})
       }
     });
   } catch (error) {

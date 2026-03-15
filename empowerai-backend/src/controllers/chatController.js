@@ -28,22 +28,26 @@ exports.sendMessage = async (req, res, next) => {
     logger.info('Chat message received', { correlationId, messageLength: message.length });
 
     // Call AI service chat endpoint
-    const replyData = await runAiTask(
+    const queuedResult = await runAiTask(
       'chat:message',
       { message },
       async ({ message: taskMessage }) => {
         const response = await aiServiceClient.post('/chat', { message: taskMessage });
         return response.data
       },
-      { timeout: 10000 }
+      { timeout: 10000, includeJobId: true }
     );
+
+    const replyData = queuedResult.result || queuedResult
+    const meta = queuedResult.result ? { jobId: queuedResult.jobId, queued: queuedResult.queued } : null
 
     logger.info('Chat response received', { correlationId, replyLength: replyData?.reply?.length || 0 });
 
     res.status(200).json({
       status: 'success',
       data: {
-        reply: replyData.reply || 'I received your message but got an empty response.'
+        reply: replyData.reply || 'I received your message but got an empty response.',
+        ...(meta ? { meta } : {})
       }
     });
   } catch (error) {
