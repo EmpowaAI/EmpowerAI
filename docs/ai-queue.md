@@ -24,6 +24,7 @@ REDIS_URL=redis://localhost:6379
 - If `ENABLE_AI_QUEUE=true` but `ENABLE_AI_QUEUE_WORKER=false`, requests run inline.
 - On low-resource or early testing environments, keep the queue disabled.
 - Default retries: 2 attempts with exponential backoff (1s).
+- When queueing is enabled, AI endpoints may return `meta.jobId` for tracking.
 
 ## Common Issues
 - Queue disabled: check `ENABLE_AI_QUEUE` and `REDIS_URL`.
