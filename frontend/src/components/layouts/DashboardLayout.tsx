@@ -125,6 +125,7 @@ useEffect(() => {
 }, [])
 
 return (
+<>
 <div className="min-h-[100dvh] bg-background flex overflow-hidden">
 
 {/* Mobile Menu Overlay */}
@@ -375,4 +376,5 @@ return (
                 </div>
             </div>
         )}
-    )}
+</>
+)}
