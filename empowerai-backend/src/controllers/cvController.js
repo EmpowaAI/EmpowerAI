@@ -5,6 +5,7 @@ const axios = require('axios');
 const fs = require('fs').promises;
 const path = require('path');
 const { enqueueCvTask } = require('../services/cvQueue');
+const { runAiTask } = require('../queues/aiQueue');
 const { extractSkillsEnhanced } = require('../utils/skillExtractors');
 
 // Request timeout constant (matches aiServiceClient timeout)
@@ -80,20 +81,29 @@ exports.analyzeCV = async (req, res, next) => {
       endpoint: '/cv/analyze',
       fullUrl: `${aiServiceUrl}/api/cv/analyze`
     });
-    const response = await enqueueCvTask(() =>
-      callWithRateLimitRetry(() =>
-        aiServiceClient.post('/cv/analyze', {
-          cvText,
-          jobRequirements: jobRequirementsArray
-        })
-      )
+    const analysis = await runAiTask(
+      'cv:analyze',
+      {
+        cvText,
+        jobRequirements: jobRequirementsArray
+      },
+      async ({ cvText: taskCvText, jobRequirements: taskRequirements }) => {
+        const response = await callWithRateLimitRetry(() =>
+          aiServiceClient.post('/cv/analyze', {
+            cvText: taskCvText,
+            jobRequirements: taskRequirements
+          })
+        )
+        return response.data
+      },
+      { timeout: REQUEST_TIMEOUT }
     );
 
     console.log('[CV Controller] AI service response received successfully');
     res.status(200).json({
       status: 'success',
       data: {
-        analysis: response.data
+        analysis
       }
     });
   } catch (error) {
