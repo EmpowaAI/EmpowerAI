@@ -8,7 +8,7 @@ require('dotenv').config();
 
 const logger = require('./utils/logger');
 const { apiLimiter } = require('./middleware/rateLimiter');
-const { initAiQueue } = require('./queues/aiQueue');
+const { initAiQueue, getAiQueueHealth } = require('./queues/aiQueue');
 
 const app = express();
 let serverInstance = null;
@@ -155,6 +155,16 @@ app.get('/api/health', async (req, res) => {
     },
     timestamp: new Date().toISOString(),
     version: process.env.APP_VERSION || '1.0.0',
+  });
+});
+
+// Queue health (AI jobs)
+app.get('/api/queue/health', async (req, res) => {
+  const queueHealth = await getAiQueueHealth();
+  res.status(200).json({
+    status: 'OK',
+    queue: queueHealth,
+    timestamp: new Date().toISOString()
   });
 });
 
