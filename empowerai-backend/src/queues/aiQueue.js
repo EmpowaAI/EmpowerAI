@@ -157,6 +157,36 @@ async function getAiQueueHealth() {
   }
 }
 
+async function getAiJobStatus(jobId) {
+  if (!queueEnabled) {
+    return { enabled: false, job: null }
+  }
+
+  initAiQueue()
+
+  try {
+    const job = await queue.getJob(jobId)
+    if (!job) {
+      return { enabled: true, job: null }
+    }
+    const state = await job.getState()
+    return {
+      enabled: true,
+      job: {
+        id: job.id,
+        name: job.name,
+        state,
+        attemptsMade: job.attemptsMade,
+        timestamp: job.timestamp,
+        finishedOn: job.finishedOn || null,
+        failedReason: job.failedReason || null
+      }
+    }
+  } catch (error) {
+    return { enabled: true, job: null, error: error.message }
+  }
+}
+
 function isAiQueueEnabled() {
   return queueEnabled
 }
@@ -167,5 +197,6 @@ module.exports = {
   registerAiProcessor,
   runAiTask,
   getAiQueueHealth,
+  getAiJobStatus,
   isAiQueueEnabled,
 }

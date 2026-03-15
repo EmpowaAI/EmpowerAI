@@ -20,6 +20,10 @@ REDIS_URL=redis://localhost:6379
 - Endpoint: `GET /api/queue/health`
 - Returns queue status and job counts if enabled
 
+## Job Status
+- Endpoint: `GET /api/queue/jobs/:jobId`
+- Returns job state, attempts, timestamps, and failures
+
 ## Operational Notes
 - If `ENABLE_AI_QUEUE=true` but `ENABLE_AI_QUEUE_WORKER=false`, requests run inline.
 - On low-resource or early testing environments, keep the queue disabled.
