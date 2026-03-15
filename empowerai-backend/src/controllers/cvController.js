@@ -4,7 +4,6 @@ const FormData = require('form-data');
 const axios = require('axios');
 const fs = require('fs').promises;
 const path = require('path');
-const { enqueueCvTask } = require('../services/cvQueue');
 const { runAiTask } = require('../queues/aiQueue');
 const { extractSkillsEnhanced } = require('../utils/skillExtractors');
 
@@ -261,25 +260,43 @@ exports.analyzeCVFile = async (req, res, next) => {
     const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
     const aiServiceApiKey = process.env.AI_SERVICE_API_KEY;
     // Use axios directly for FormData (aiServiceClient doesn't handle FormData well)
-    const response = await enqueueCvTask(() =>
-      callWithRateLimitRetry(() =>
-        axios.post(`${aiServiceUrl}/api/cv/analyze-file`, formData, {
-          headers: {
-            ...formData.getHeaders(),
-            ...(aiServiceApiKey ? { 'X-API-KEY': aiServiceApiKey } : {}),
-          },
-          timeout: 60000, // 60 seconds for file processing
-          maxContentLength: 10 * 1024 * 1024, // 10MB
-          maxBodyLength: 10 * 1024 * 1024 // 10MB
-        })
-      )
+    const analysis = await runAiTask(
+      'cv:analyze-file',
+      {
+        fileBuffer: file.buffer.toString('base64'),
+        filename: file.originalname,
+        mimetype: file.mimetype,
+        jobRequirements: jobRequirementsArray || []
+      },
+      async (payload) => {
+        const payloadForm = new FormData();
+        payloadForm.append('cvFile', Buffer.from(payload.fileBuffer, 'base64'), {
+          filename: payload.filename,
+          contentType: payload.mimetype
+        });
+        if (payload.jobRequirements && payload.jobRequirements.length > 0) {
+          payloadForm.append('jobRequirements', JSON.stringify(payload.jobRequirements));
+        }
+        return callWithRateLimitRetry(() =>
+          axios.post(`${aiServiceUrl}/api/cv/analyze-file`, payloadForm, {
+            headers: {
+              ...payloadForm.getHeaders(),
+              ...(aiServiceApiKey ? { 'X-API-KEY': aiServiceApiKey } : {}),
+            },
+            timeout: 60000,
+            maxContentLength: 10 * 1024 * 1024,
+            maxBodyLength: 10 * 1024 * 1024
+          })
+        ).then((response) => response.data);
+      },
+      { timeout: 60000 }
     );
 
     console.log('[CV Controller] AI service response received successfully');
     res.status(200).json({
       status: 'success',
       data: {
-        analysis: response.data
+        analysis
       }
     });
   } catch (error) {
