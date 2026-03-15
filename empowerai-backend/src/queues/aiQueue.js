@@ -105,14 +105,52 @@ async function runAiTask(name, payload, handler, options = {}) {
   initAiQueue()
   ensureWorker()
 
+  const attempts = options.attempts ?? 2
+  const backoff = options.backoff ?? { type: 'exponential', delay: 1000 }
+
   const job = await queue.add(name, payload, {
     removeOnComplete: 100,
     removeOnFail: 1000,
+    attempts,
+    backoff,
     ...options,
   })
 
   const timeout = options.timeout || 30_000
   return job.waitUntilFinished(queueEvents, timeout)
+}
+
+async function getAiQueueHealth() {
+  const workerEnabled = process.env.ENABLE_AI_QUEUE_WORKER === 'true'
+  const redisUrlSet = !!process.env.REDIS_URL
+
+  if (!queueEnabled) {
+    return {
+      enabled: false,
+      workerEnabled,
+      redisUrlSet
+    }
+  }
+
+  initAiQueue()
+
+  try {
+    const counts = await queue.getJobCounts('waiting', 'active', 'completed', 'failed', 'delayed')
+    return {
+      enabled: true,
+      workerEnabled,
+      redisUrlSet,
+      counts
+    }
+  } catch (error) {
+    return {
+      enabled: true,
+      workerEnabled,
+      redisUrlSet,
+      counts: null,
+      error: error.message
+    }
+  }
 }
 
 function isAiQueueEnabled() {
@@ -124,5 +162,6 @@ module.exports = {
   enqueueAiJob,
   registerAiProcessor,
   runAiTask,
+  getAiQueueHealth,
   isAiQueueEnabled,
 }
