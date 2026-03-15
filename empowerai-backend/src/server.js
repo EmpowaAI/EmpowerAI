@@ -8,6 +8,7 @@ require('dotenv').config();
 
 const logger = require('./utils/logger');
 const { apiLimiter } = require('./middleware/rateLimiter');
+const { initAiQueue } = require('./queues/aiQueue');
 
 const app = express();
 let serverInstance = null;
@@ -19,6 +20,9 @@ let lastAiHealth = {
   checkedAt: null,
   error: null,
 };
+
+// Initialize background queue (no-op unless enabled via env)
+initAiQueue();
 
 // Compression middleware - reduces response size by ~70%
 app.use(compression());
