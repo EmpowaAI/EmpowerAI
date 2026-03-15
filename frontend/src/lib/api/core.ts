@@ -55,6 +55,15 @@ export const request = async <T>(endpoint: string, options: RequestInit = {}): P
     }
 
     const data = await response.json();
+    try {
+      const jobId = data?.data?.meta?.jobId;
+      if (jobId) {
+        localStorage.setItem('empowerai:last-ai-job-id', String(jobId));
+        localStorage.setItem('empowerai:last-ai-job-at', new Date().toISOString());
+      }
+    } catch {
+      // Ignore localStorage failures
+    }
     clearTimeout(timeoutId);
     return data;
   } catch (error: any) {
