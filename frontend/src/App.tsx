@@ -5,6 +5,7 @@ import { UserProvider, useUser } from './contexts/user-context'
 import { ThemeProvider } from './lib/theme'
 import ProtectedRoute from './routes/ProtectedRoute'
 import NeuralLoading from './components/ui/NeuralLoading'
+import { Toaster } from 'react-hot-toast'
 
 const LandingPage = lazy(() => import('./pages/LandingPage'))
 const LoginPage = lazy(() => import('./pages/Auth/LoginPage'))
@@ -34,6 +35,7 @@ function App() {
     <ThemeProvider>
       <UserProvider>
         <PreloadRoutes />
+        <Toaster position="top-right" />
         <Suspense
           fallback={
             <div className="min-h-screen relative flex items-center justify-center overflow-hidden bg-gradient-to-br from-emerald-50 via-white to-sky-50">

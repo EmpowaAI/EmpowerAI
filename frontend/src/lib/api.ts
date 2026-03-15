@@ -91,6 +91,15 @@ const request = async <T>(endpoint: string, options: RequestInit = {}): Promise<
     }
 
     const data = await response.json();
+    try {
+      const jobId = data?.data?.meta?.jobId;
+      if (jobId) {
+        localStorage.setItem('empowerai:last-ai-job-id', String(jobId));
+        localStorage.setItem('empowerai:last-ai-job-at', new Date().toISOString());
+      }
+    } catch {
+      // Ignore localStorage failures
+    }
     return data;
   } catch (error: any) {
     clearTimeout(timeoutId);

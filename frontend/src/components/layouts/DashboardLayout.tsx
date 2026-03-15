@@ -9,6 +9,7 @@ import Logo from "../../components/ui/Logo"
 import { useUser } from "../../contexts/user-context"
 import { authService } from "../../api/Index"
 import { adminAPI } from "../../lib/api"
+import toast from "react-hot-toast"
 
 interface DashboardLayoutProps {
     children?: React.ReactNode
@@ -57,6 +58,7 @@ const navItems = [
 ]
 
 const ADMIN_KEY_STORAGE = "empowerai-admin-key"
+const LAST_JOB_ID_STORAGE = "empowerai:last-ai-job-id"
 
 const handleLogout = async (e: React.MouseEvent) => {
     e.preventDefault()
@@ -92,8 +94,10 @@ const [queueStatus, setQueueStatus] = useState<{
 } | null>(null)
 const [queueUpdatedAt, setQueueUpdatedAt] = useState<string | null>(null)
 const [queueModalOpen, setQueueModalOpen] = useState(false)
+const [copyStatus, setCopyStatus] = useState<string | null>(null)
+const [lastJobId, setLastJobId] = useState<string | null>(null)
 
-const refreshQueueHealth = async () => {
+const refreshQueueHealth = async (opts?: { silent?: boolean }) => {
     if (import.meta.env.VITE_ENABLE_ADMIN !== "true") return
     const adminKey = localStorage.getItem(ADMIN_KEY_STORAGE)
     if (!adminKey) return
@@ -103,6 +107,35 @@ const refreshQueueHealth = async () => {
         setQueueUpdatedAt(new Date().toISOString())
     } catch {
         setQueueStatus(null)
+        if (!opts?.silent) {
+            toast.error("Failed to load queue health.")
+        }
+    }
+}
+
+useEffect(() => {
+    if (!queueModalOpen) return
+    try {
+        const stored = localStorage.getItem(LAST_JOB_ID_STORAGE)
+        setLastJobId(stored)
+    } catch {
+        setLastJobId(null)
+    }
+}, [queueModalOpen, queueUpdatedAt])
+
+const copyJobId = async () => {
+    if (!lastJobId) {
+        setCopyStatus("No job ID available yet.")
+        setTimeout(() => setCopyStatus(null), 2000)
+        return
+    }
+    try {
+        await navigator.clipboard.writeText(String(lastJobId))
+        setCopyStatus("Job ID copied.")
+        setTimeout(() => setCopyStatus(null), 2000)
+    } catch {
+        setCopyStatus("Failed to copy.")
+        setTimeout(() => setCopyStatus(null), 2000)
     }
 }
 
@@ -112,7 +145,7 @@ useEffect(() => {
 
     const load = async () => {
         if (cancelled) return
-        await refreshQueueHealth()
+        await refreshQueueHealth({ silent: true })
     }
 
     load()
@@ -362,17 +395,33 @@ return (
                                 </p>
                             )}
                         </div>
+                        <div className="rounded-xl border border-border p-3">
+                            <p className="text-xs uppercase tracking-wide text-muted-foreground">Last Job ID</p>
+                            <p className="mt-1 text-xs font-mono text-foreground break-all">
+                                {lastJobId || "No job ID captured yet."}
+                            </p>
+                        </div>
                     </div>
 
                     <div className="mt-4 flex items-center justify-end gap-2">
                         <button
                             type="button"
-                            onClick={refreshQueueHealth}
+                            onClick={copyJobId}
+                            className="rounded-xl border border-border px-3 py-2 text-xs font-semibold text-foreground hover:bg-muted"
+                        >
+                            Copy Job ID
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => refreshQueueHealth()}
                             className="rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/90"
                         >
                             Refresh
                         </button>
                     </div>
+                    {copyStatus && (
+                        <p className="mt-2 text-[11px] text-muted-foreground">{copyStatus}</p>
+                    )}
                 </div>
             </div>
         )}
