@@ -5,6 +5,7 @@
 
 const aiServiceClient = require('../services/aiServiceClient');
 const logger = require('../utils/logger');
+const { runAiTask } = require('../queues/aiQueue');
 
 /**
  * Send chat message
@@ -27,14 +28,22 @@ exports.sendMessage = async (req, res, next) => {
     logger.info('Chat message received', { correlationId, messageLength: message.length });
 
     // Call AI service chat endpoint
-    const response = await aiServiceClient.post('/chat', { message });
+    const replyData = await runAiTask(
+      'chat:message',
+      { message },
+      async ({ message: taskMessage }) => {
+        const response = await aiServiceClient.post('/chat', { message: taskMessage });
+        return response.data
+      },
+      { timeout: 10000 }
+    );
 
-    logger.info('Chat response received', { correlationId, replyLength: response.data?.reply?.length || 0 });
+    logger.info('Chat response received', { correlationId, replyLength: replyData?.reply?.length || 0 });
 
     res.status(200).json({
       status: 'success',
       data: {
-        reply: response.data.reply || 'I received your message but got an empty response.'
+        reply: replyData.reply || 'I received your message but got an empty response.'
       }
     });
   } catch (error) {
