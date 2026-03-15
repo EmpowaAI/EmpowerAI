@@ -8,6 +8,7 @@ import ThemeToggle from "../ui/ThemeToggle"
 import Logo from "../../components/ui/Logo"
 import { useUser } from "../../contexts/user-context"
 import { authService } from "../../api/Index"
+import { adminAPI } from "../../lib/api"
 
 interface DashboardLayoutProps {
     children?: React.ReactNode
@@ -55,6 +56,8 @@ const navItems = [
     { path: "/dashboard/opportunities", label: "Opportunities", icon: Briefcase },
 ]
 
+const ADMIN_KEY_STORAGE = "empowerai-admin-key"
+
 const handleLogout = async (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -75,6 +78,47 @@ localStorage.removeItem('cvFileName')
 navigate('/', { replace: true })
 
 }}
+
+const [queueStatus, setQueueStatus] = useState<{
+    enabled: boolean
+    workerEnabled: boolean
+    redisUrlSet: boolean
+    counts?: {
+        waiting?: number
+        active?: number
+        failed?: number
+    } | null
+} | null>(null)
+
+useEffect(() => {
+    if (import.meta.env.VITE_ENABLE_ADMIN !== "true") return
+    const adminKey = localStorage.getItem(ADMIN_KEY_STORAGE)
+    if (!adminKey) return
+
+    let cancelled = false
+    let intervalId: number | null = null
+
+    const loadQueueHealth = async () => {
+        try {
+            const response = await adminAPI.getQueueHealth(adminKey.trim())
+            if (!cancelled) {
+                setQueueStatus(response.queue || null)
+            }
+        } catch {
+            if (!cancelled) {
+                setQueueStatus(null)
+            }
+        }
+    }
+
+    loadQueueHealth()
+    intervalId = window.setInterval(loadQueueHealth, 30000)
+
+    return () => {
+        cancelled = true
+        if (intervalId) window.clearInterval(intervalId)
+    }
+}, [])
 
 return (
 <div className="min-h-[100dvh] bg-background flex overflow-hidden">
@@ -210,6 +254,25 @@ return (
             <span className="h-2 w-2 rounded-full bg-[var(--sa-gold)] animate-pulse flex-shrink-0"></span>
             <span className="truncate">Start CV Analyzer</span>
         </div>
+        )}
+        {queueStatus && (
+            <div className={cn(
+                "hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap border",
+                queueStatus.enabled && queueStatus.workerEnabled
+                    ? "bg-[var(--sa-green)]/10 text-[var(--sa-green)] border-[var(--sa-green)]/30"
+                    : "bg-[var(--sa-gold)]/10 text-[var(--sa-gold)] border-[var(--sa-gold)]/30"
+            )}>
+                <span className={cn(
+                    "h-2 w-2 rounded-full animate-pulse flex-shrink-0",
+                    queueStatus.enabled && queueStatus.workerEnabled
+                        ? "bg-[var(--sa-green)]"
+                        : "bg-[var(--sa-gold)]"
+                )}></span>
+                <span className="truncate">
+                    Queue {queueStatus.enabled ? "On" : "Off"}
+                    {queueStatus.counts?.failed ? ` • Failed ${queueStatus.counts.failed}` : ""}
+                </span>
+            </div>
         )}
         <ThemeToggle />
         </div>
