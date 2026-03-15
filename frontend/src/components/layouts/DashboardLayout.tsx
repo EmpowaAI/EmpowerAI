@@ -87,32 +87,36 @@ const [queueStatus, setQueueStatus] = useState<{
         waiting?: number
         active?: number
         failed?: number
+        delayed?: number
     } | null
 } | null>(null)
+const [queueUpdatedAt, setQueueUpdatedAt] = useState<string | null>(null)
+const [queueModalOpen, setQueueModalOpen] = useState(false)
 
-useEffect(() => {
+const refreshQueueHealth = async () => {
     if (import.meta.env.VITE_ENABLE_ADMIN !== "true") return
     const adminKey = localStorage.getItem(ADMIN_KEY_STORAGE)
     if (!adminKey) return
+    try {
+        const response = await adminAPI.getQueueHealth(adminKey.trim())
+        setQueueStatus(response.queue || null)
+        setQueueUpdatedAt(new Date().toISOString())
+    } catch {
+        setQueueStatus(null)
+    }
+}
 
+useEffect(() => {
     let cancelled = false
     let intervalId: number | null = null
 
-    const loadQueueHealth = async () => {
-        try {
-            const response = await adminAPI.getQueueHealth(adminKey.trim())
-            if (!cancelled) {
-                setQueueStatus(response.queue || null)
-            }
-        } catch {
-            if (!cancelled) {
-                setQueueStatus(null)
-            }
-        }
+    const load = async () => {
+        if (cancelled) return
+        await refreshQueueHealth()
     }
 
-    loadQueueHealth()
-    intervalId = window.setInterval(loadQueueHealth, 30000)
+    load()
+    intervalId = window.setInterval(load, 30000)
 
     return () => {
         cancelled = true
@@ -256,12 +260,17 @@ return (
         </div>
         )}
         {queueStatus && (
-            <div className={cn(
+            <button
+            type="button"
+            onClick={() => setQueueModalOpen(true)}
+            className={cn(
                 "hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap border",
                 queueStatus.enabled && queueStatus.workerEnabled
                     ? "bg-[var(--sa-green)]/10 text-[var(--sa-green)] border-[var(--sa-green)]/30"
                     : "bg-[var(--sa-gold)]/10 text-[var(--sa-gold)] border-[var(--sa-gold)]/30"
-            )}>
+            )}
+            aria-label="View AI queue status"
+            >
                 <span className={cn(
                     "h-2 w-2 rounded-full animate-pulse flex-shrink-0",
                     queueStatus.enabled && queueStatus.workerEnabled
@@ -272,7 +281,7 @@ return (
                     Queue {queueStatus.enabled ? "On" : "Off"}
                     {queueStatus.counts?.failed ? ` • Failed ${queueStatus.counts.failed}` : ""}
                 </span>
-            </div>
+            </button>
         )}
         <ThemeToggle />
         </div>
@@ -302,4 +311,68 @@ return (
                 </nav>
             </div>
         </div>
+        {queueModalOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center">
+                <div
+                    className="absolute inset-0 bg-foreground/50 backdrop-blur-sm"
+                    onClick={() => setQueueModalOpen(false)}
+                    aria-hidden="true"
+                />
+                <div className="relative w-[92%] max-w-md rounded-2xl border border-border bg-card p-5 shadow-2xl">
+                    <div className="flex items-start justify-between gap-4">
+                        <div>
+                            <h3 className="text-lg font-semibold text-foreground">AI Queue Status</h3>
+                            <p className="text-xs text-muted-foreground">Live snapshot of background jobs.</p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setQueueModalOpen(false)}
+                            className="rounded-lg border border-border px-2 py-1 text-xs text-muted-foreground hover:text-foreground hover:bg-muted"
+                        >
+                            Close
+                        </button>
+                    </div>
+
+                    <div className="mt-4 grid gap-3">
+                        <div className="rounded-xl border border-border p-3">
+                            <p className="text-xs uppercase tracking-wide text-muted-foreground">Status</p>
+                            <p className="text-sm text-foreground">
+                                {queueStatus?.enabled ? "Enabled" : "Disabled"}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                                Worker: {queueStatus?.workerEnabled ? "On" : "Off"} • Redis: {queueStatus?.redisUrlSet ? "Set" : "Missing"}
+                            </p>
+                        </div>
+                        <div className="rounded-xl border border-border p-3">
+                            <p className="text-xs uppercase tracking-wide text-muted-foreground">Jobs</p>
+                            {queueStatus?.counts ? (
+                                <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                                    <span>Waiting: {queueStatus.counts.waiting ?? 0}</span>
+                                    <span>Active: {queueStatus.counts.active ?? 0}</span>
+                                    <span>Failed: {queueStatus.counts.failed ?? 0}</span>
+                                    <span>Delayed: {queueStatus.counts.delayed ?? 0}</span>
+                                </div>
+                            ) : (
+                                <p className="text-xs text-muted-foreground">No queue data available.</p>
+                            )}
+                            {queueUpdatedAt && (
+                                <p className="mt-2 text-[11px] text-muted-foreground">
+                                    Updated {new Date(queueUpdatedAt).toLocaleTimeString()}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="mt-4 flex items-center justify-end gap-2">
+                        <button
+                            type="button"
+                            onClick={refreshQueueHealth}
+                            className="rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/90"
+                        >
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
     )}
