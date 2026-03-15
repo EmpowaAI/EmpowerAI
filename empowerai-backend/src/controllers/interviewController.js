@@ -1,6 +1,7 @@
 const aiServiceClient = require('../services/aiServiceClient');
 const { v4: uuidv4 } = require('uuid');
 const logger = require('../utils/logger');
+const { runAiTask } = require('../queues/aiQueue');
 
 // Fallback interview questions when AI service is unavailable
 function generateFallbackQuestions(type, difficulty) {
@@ -118,13 +119,23 @@ exports.startInterview = async (req, res, next) => {
 
     try {
       // Try AI service first with shorter timeout
-      const response = await aiServiceClient.post('/interview/start', {
-        type: type,
-        difficulty: difficulty || 'medium',
-        company: company || null
-      }, { timeout: 8000 }); // 8 second timeout
-
-      sessionData = response.data;
+      sessionData = await runAiTask(
+        'interview:start',
+        {
+          type,
+          difficulty: difficulty || 'medium',
+          company: company || null
+        },
+        async ({ type: taskType, difficulty: taskDifficulty, company: taskCompany }) => {
+          const response = await aiServiceClient.post('/interview/start', {
+            type: taskType,
+            difficulty: taskDifficulty || 'medium',
+            company: taskCompany || null
+          }, { timeout: 8000 }); // 8 second timeout
+          return response.data
+        },
+        { timeout: 8000 }
+      );
       console.log('AI service interview start successful');
     } catch (aiError) {
       // AI service failed - use fallback questions
@@ -181,12 +192,18 @@ exports.submitAnswer = async (req, res, next) => {
 
     try {
       // Try AI service first with shorter timeout
-      const apiResponse = await aiServiceClient.post('/interview/answer', {
-        questionId,
-        response
-      }, { timeout: 8000 }); // 8 second timeout
-
-      feedbackData = apiResponse.data;
+      feedbackData = await runAiTask(
+        'interview:answer',
+        { questionId, response },
+        async ({ questionId: taskQuestionId, response: taskResponse }) => {
+          const apiResponse = await aiServiceClient.post('/interview/answer', {
+            questionId: taskQuestionId,
+            response: taskResponse
+          }, { timeout: 8000 }); // 8 second timeout
+          return apiResponse.data
+        },
+        { timeout: 8000 }
+      );
       console.log('AI service feedback successful');
     } catch (aiError) {
       // AI service failed - use fallback feedback

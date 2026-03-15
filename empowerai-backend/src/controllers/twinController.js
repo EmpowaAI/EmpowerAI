@@ -2,6 +2,7 @@ const EconomicTwin = require('../models/EconomicTwin');
 const User = require('../models/User');
 const aiServiceClient = require('../services/aiServiceClient');
 const { recordCareerSelections } = require('../services/careerAnalyticsService');
+const { runAiTask } = require('../queues/aiQueue');
 
 exports.createEconomicTwin = async (req, res, next) => {
   try {
@@ -75,14 +76,21 @@ exports.createEconomicTwin = async (req, res, next) => {
       // Try to regenerate twin data with AI service (non-blocking)
       let updatedTwinData = {};
       try {
-        const response = await aiServiceClient.post('/twin/generate', userData);
-        const incomeProjection = response.data.incomeProjection || response.data.incomeProjections;
-        const growthModel = response.data.growthModel || {};
+        const responseData = await runAiTask(
+          'twin:generate',
+          userData,
+          async (payload) => {
+            const response = await aiServiceClient.post('/twin/generate', payload);
+            return response.data
+          }
+        );
+        const incomeProjection = responseData.incomeProjection || responseData.incomeProjections;
+        const growthModel = responseData.growthModel || {};
         
         updatedTwinData = {
-          skillVector: response.data.skillVector || existingTwinCheck.skillVector || [],
+          skillVector: responseData.skillVector || existingTwinCheck.skillVector || [],
           incomeProjections: incomeProjection || existingTwinCheck.incomeProjections,
-          empowermentScore: response.data.empowermentScore || existingTwinCheck.empowermentScore || 0,
+          empowermentScore: responseData.empowermentScore || existingTwinCheck.empowermentScore || 0,
           recommendedPaths: growthModel.recommendedPaths || existingTwinCheck.recommendedPaths || []
         };
       } catch (aiError) {
@@ -154,7 +162,15 @@ exports.createEconomicTwin = async (req, res, next) => {
     let response = null;
     let aiServiceFailed = false;
     try {
-      response = await aiServiceClient.post('/twin/generate', userData);
+      const responseData = await runAiTask(
+        'twin:generate',
+        userData,
+        async (payload) => {
+          const aiResponse = await aiServiceClient.post('/twin/generate', payload);
+          return aiResponse.data
+        }
+      );
+      response = { data: responseData };
       console.log('AI service call successful');
     } catch (aiError) {
       aiServiceFailed = true;
@@ -505,13 +521,20 @@ exports.runSimulation = async (req, res, next) => {
 
     try {
       // Try AI service first with shorter timeout (5 seconds)
-      const simulationResponse = await aiServiceClient.post('/simulation/paths', {
-        user_data: userData,
-        path_ids: pathIds || null
-      }, {
-        timeout: 5000 // 5 second timeout for faster fallback
-      });
-      simulationData = simulationResponse.data;
+      simulationData = await runAiTask(
+        'simulation:paths',
+        {
+          user_data: userData,
+          path_ids: pathIds || null
+        },
+        async (payload) => {
+          const simulationResponse = await aiServiceClient.post('/simulation/paths', payload, {
+            timeout: 5000 // 5 second timeout for faster fallback
+          });
+          return simulationResponse.data
+        },
+        { timeout: 5000 }
+      );
       console.log('AI service simulation successful');
     } catch (aiError) {
       // AI service failed - use fallback simulation
