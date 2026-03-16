@@ -113,6 +113,41 @@ const refreshQueueHealth = async (opts?: { silent?: boolean }) => {
     }
 }
 
+const prefetchRoute = (path: string) => {
+    switch (path) {
+        case "/dashboard":
+            void import("../../pages/Dashboard/Dashboard")
+            return
+        case "/dashboard/twin":
+        case "/dashboard/twin-builder":
+            void import("../../pages/Twin-builder/TwinBuilder")
+            return
+        case "/dashboard/cv-analyzer":
+            void import("../../pages/CV-analysis/CVAnalyzer")
+            return
+        case "/dashboard/interview-coach":
+            void import("../../pages/Interview/InterviewCoach")
+            return
+        case "/dashboard/opportunities":
+            void import("../../pages/Oportunities/Opportunities")
+            return
+        case "/dashboard/simulations":
+            void import("../../pages/Simulation/Simulations")
+            return
+        case "/dashboard/applications":
+            void import("../../pages/Oportunities/Applications")
+            return
+        case "/dashboard/chat":
+            void import("../../pages/AI/Chat")
+            return
+        case "/dashboard/profile":
+            void import("../../pages/User/Profile")
+            return
+        default:
+            return
+    }
+}
+
 useEffect(() => {
     if (!queueModalOpen) return
     try {
@@ -187,7 +222,13 @@ return (
                 const isActive = pathname === item.path;
                 const Icon = item.icon;
                 return (
-                    <Link key={item.path}   to={item.path}  onClick={() => setMobileMenuOpen(false)} className={cn("flex items-center gap-3 px-4 py-3 rounded-xl transition-all",isActive 
+                    <Link
+                        key={item.path}
+                        to={item.path}
+                        onClick={() => setMobileMenuOpen(false)}
+                        onMouseEnter={() => prefetchRoute(item.path)}
+                        onFocus={() => prefetchRoute(item.path)}
+                        className={cn("flex items-center gap-3 px-4 py-3 rounded-xl transition-all",isActive 
                         ? "bg-primary/10 text-primary border border-primary/20" : "text-muted-foreground hover:bg-muted hover:text-foreground")}>
                         <Icon className="h-5 w-5" />
                         <span className="font-medium">{item.label}</span>
@@ -248,7 +289,12 @@ return (
                 const isActive = pathname === item.path;
                 const Icon = item.icon;
                 return (
-                    <Link key={item.path} to={item.path} className={cn( "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all", isActive ? "bg-primary/10 text-primary border border-primary/20" : "text-muted-foreground hover:bg-muted hover:text-foreground")}>
+                    <Link
+                        key={item.path}
+                        to={item.path}
+                        onMouseEnter={() => prefetchRoute(item.path)}
+                        onFocus={() => prefetchRoute(item.path)}
+                        className={cn( "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all", isActive ? "bg-primary/10 text-primary border border-primary/20" : "text-muted-foreground hover:bg-muted hover:text-foreground")}>
                         <Icon className="h-4 w-4" />
                         {item.label}
                     </Link>
@@ -335,7 +381,11 @@ return (
                     const isActive = pathname === item.path
                     const Icon = item.icon
                         return (
-                            <Link key={`bottom-${item.path}`} to={item.path} className={cn("flex flex-col items-center justify-center rounded-lg py-2 text-[10px] font-medium transition-colors", isActive ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground hover:bg-muted")}>
+                            <Link
+                                key={`bottom-${item.path}`}
+                                to={item.path}
+                                onTouchStart={() => prefetchRoute(item.path)}
+                                className={cn("flex flex-col items-center justify-center rounded-lg py-2 text-[10px] font-medium transition-colors", isActive ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground hover:bg-muted")}>
                                 <Icon className="h-4 w-4 mb-1" />
                                 <span className="truncate max-w-[56px]">{item.label.split(" ")[0]}</span>
                             </Link>
