@@ -426,6 +426,8 @@ export default function LandingPage() {
                   alt="EmpowaAI Demo Preview"
                   className="w-full h-full object-cover"
                   crossOrigin="anonymous"
+                  loading="lazy"
+                  decoding="async"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent group-hover:from-black/70 transition-all duration-300" />
                 <div className="absolute inset-0 flex items-center justify-center">
