@@ -288,7 +288,7 @@ export default function LandingPage() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 border-y border-border bg-gradient-to-r from-sa-gold/5 via-background to-sa-green/5">
+      <section className="py-16 border-y border-border bg-gradient-to-r from-sa-gold/5 via-background to-sa-green/5 cv-auto">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
@@ -320,7 +320,7 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 md:py-28 sa-pattern">
+      <section id="features" className="py-20 md:py-28 sa-pattern cv-auto">
         <div className="container mx-auto px-4">
           <div className="text-center mb-14">
             <span className="text-sa-gold text-sm font-semibold uppercase tracking-wider mb-3 block">
@@ -360,7 +360,7 @@ export default function LandingPage() {
       </section>
 
       {/* How It Works */}
-      <section id="how-it-works" className="py-20 md:py-28 bg-gradient-to-b from-secondary/30 to-background">
+      <section id="how-it-works" className="py-20 md:py-28 bg-gradient-to-b from-secondary/30 to-background cv-auto">
         <div className="container mx-auto px-4">
           <div className="text-center mb-14">
             <span className="text-sa-green text-sm font-semibold uppercase tracking-wider mb-3 block">
@@ -401,7 +401,7 @@ export default function LandingPage() {
       </section>
 
       {/* Demo Section */}
-      <section id="demo" className="py-20 md:py-28 sa-pattern">
+      <section id="demo" className="py-20 md:py-28 sa-pattern cv-auto">
         <div className="container mx-auto px-4">
           <div className="text-center mb-14">
             <span className="text-sa-terracotta text-sm font-semibold uppercase tracking-wider mb-3 block">
@@ -472,7 +472,7 @@ export default function LandingPage() {
       </section>
 
       {/* Testimonials */}
-      <section id="success" className="py-20 md:py-28 bg-gradient-to-b from-secondary/30 to-background">
+      <section id="success" className="py-20 md:py-28 bg-gradient-to-b from-secondary/30 to-background cv-auto">
         <div className="container mx-auto px-4">
           <div className="text-center mb-14">
             <span className="text-sa-terracotta text-sm font-semibold uppercase tracking-wider mb-3 block">
@@ -536,7 +536,7 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 md:py-28 relative overflow-hidden">
+      <section className="py-20 md:py-28 relative overflow-hidden cv-auto">
         <div className="absolute inset-0 bg-gradient-to-br from-sa-gold via-sa-terracotta to-sa-red" />
         <div className="absolute inset-0 sa-pattern opacity-20" />
         <motion.div
