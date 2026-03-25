@@ -18,12 +18,280 @@ from utils.ai_client import AIClient
 from utils.logger import get_logger
 
 class CVAnalyzer:
-    """Analyzes CVs and extracts information"""
+    """Analyzes CVs and extracts information - No shared state between requests"""
+
+    # Tech-specific keywords that should NEVER appear in non-tech weaknesses
+    TECH_KEYWORDS = [
+        'agile', 'scrum', 'devops', 'containerization', 'docker', 'kubernetes',
+        'ci/cd', 'git', 'github', 'pipeline', 'microservices', 'api', 'rest',
+        'frontend', 'backend', 'fullstack', 'react', 'angular', 'vue', 'node.js',
+        'javascript', 'typescript', 'python', 'java', 'c#', 'c++', 'cloud', 'aws',
+        'azure', 'gcp', 'unit test', 'integration test', 'code review'
+    ]
 
     def __init__(self, ai_client: Optional[AIClient] = None):
         self.ai_client = ai_client or AIClient()
+        self.logger = get_logger()
+        
+        # Industry detection keywords
+        self.industry_keywords = {
+            'retail': [
+                'spar', 'pick n pay', 'checkers', 'woolworths', 'shoprite', 'game', 'makro',
+                'cashier', 'till', 'pos', 'point of sale', 'stock management', 'merchandising',
+                'inventory', 'shelf', 'customer service', 'retail', 'store', 'supermarket',
+                'cash handling', 'restocking', 'floor assistant', 'sales assistant',
+                'customer', 'shop', 'shelves', 'display', 'stock take', 'pricing'
+            ],
+            'technology': [
+                'python', 'javascript', 'react', 'node', 'java', 'c++', 'c#', 'developer',
+                'software', 'engineer', 'devops', 'agile', 'scrum', 'git', 'docker', 'kubernetes',
+                'api', 'frontend', 'backend', 'fullstack', 'cloud', 'aws', 'azure'
+            ],
+            'healthcare': [
+                'nurse', 'doctor', 'clinical', 'patient', 'hospital', 'clinic', 'medical',
+                'healthcare', 'caregiver', 'pharmacy', 'therapist', 'radiology', 'laboratory',
+                'lab tech', 'phlebotomy', 'mbchb', 'nursing'
+            ],
+            'hospitality': [
+                'hotel', 'restaurant', 'chef', 'waiter', 'bartender', 'hospitality', 'food',
+                'beverage', 'catering', 'guest', 'front desk', 'reception', 'lodge', 'resort',
+                'housekeeping', 'banquet'
+            ],
+            'finance': [
+                'accountant', 'bookkeeper', 'finance', 'audit', 'tax', 'payroll', 'sage',
+                'pastel', 'quickbooks', 'financial', 'budget', 'forecasting', 'reconciliation',
+                'creditors', 'debtors', 'invoice', 'sap'
+            ],
+            'administration': [
+                'administrative', 'admin', 'secretary', 'receptionist', 'office', 'data entry',
+                'filing', 'scheduling', 'calendar', 'correspondence', 'clerical', 'assistant',
+                'personal assistant', 'executive assistant'
+            ],
+            'education': [
+                'teacher', 'lecturer', 'educator', 'school', 'university', 'college', 'tutor',
+                'curriculum', 'lesson', 'student', 'academic', 'professor', 'instructor'
+            ],
+            'construction': [
+                'construction', 'building', 'civil', 'site', 'foreman', 'engineer', 'architect',
+                'quantity surveyor', 'project manager', 'contractor', 'bricklayer', 'carpenter',
+                'electrician', 'plumber', 'welder'
+            ],
+            'manufacturing': [
+                'manufacturing', 'production', 'factory', 'assembly', 'quality control', 'qc',
+                'operator', 'machine', 'plant', 'warehouse', 'logistics', 'supply chain',
+                'fabrication', 'process'
+            ],
+            'sales': [
+                'sales', 'business development', 'account manager', 'client relationship',
+                'lead generation', 'cold calling', 'b2b', 'b2c', 'sales representative',
+                'sales consultant', 'territory manager'
+            ]
+        }
+        
+        # Industry-specific weakness templates - CRITICAL for fallback
+        self.industry_weaknesses = {
+            'retail': [
+                "No specific POS/till systems mentioned - list the systems you've used (e.g., SAP, GAAP, or specific POS)",
+                "Limited measurable achievements - add numbers like 'Served 100+ customers daily' or 'Handled R50,000+ in daily transactions'",
+                "No driver's licence indicated - many retail roles require reliable transport",
+                "Matric subjects not listed - specify subjects passed (especially Mathematics, Accounting, or Business Studies)",
+                "No references or character references - retail employers often value references from previous supervisors",
+                "Missing specific retail terminology - add keywords like 'Merchandising', 'Stock Control', 'Inventory Management'",
+                "No mention of shift flexibility or weekend availability - important for retail roles",
+                "Limited work experience duration - add more detail about responsibilities and daily tasks"
+            ],
+            'technology': [
+                "Missing Agile/Scrum methodology experience - valuable for team environments",
+                "No version control (Git) mentioned - essential for collaborative development",
+                "Few quantifiable achievements - add metrics like performance improvements or user metrics",
+                "Missing cloud platform experience (AWS/Azure/GCP) - increasingly important",
+                "No CI/CD or DevOps practices mentioned",
+                "Lack of testing practices (unit tests, integration tests)",
+                "Missing portfolio or GitHub link - important for showcasing work"
+            ],
+            'healthcare': [
+                "No HPCSA/SANC registration number listed if applicable",
+                "Missing specific clinical skills or procedures performed",
+                "No mention of patient care metrics or caseload numbers",
+                "Limited continuing education or CPD points mentioned",
+                "Missing specialization or area of interest"
+            ],
+            'hospitality': [
+                "No mention of specific POS or reservation systems used",
+                "Missing language skills - valuable in hospitality",
+                "No food safety or hygiene certifications mentioned",
+                "Limited customer service achievements or recognition",
+                "Missing shift flexibility or availability information"
+            ],
+            'finance': [
+                "No specific accounting software mentioned (Sage, Pastel, SAP, QuickBooks)",
+                "Missing tax knowledge or SARS compliance experience",
+                "No mention of financial reporting or analysis skills",
+                "Limited experience with audits or reconciliations",
+                "No professional body registration (SAICA, SAIPA, CIMA)"
+            ],
+            'administration': [
+                "No specific office software proficiency listed beyond basics",
+                "Missing typing speed or accuracy metrics",
+                "No mention of diary management or scheduling tools",
+                "Limited experience with filing systems or document management",
+                "No mention of handling confidential information"
+            ],
+            'education': [
+                "No SACE registration number listed if applicable",
+                "Missing specific subjects or grades taught",
+                "No mention of curriculum development or lesson planning",
+                "Limited experience with assessment and evaluation",
+                "Missing continuing professional development (CPD) activities"
+            ],
+            'construction': [
+                "No mention of specific tools, equipment, or machinery experience",
+                "Missing health and safety certifications (SACPCMP, etc.)",
+                "No project scale or budget details",
+                "Limited site management or supervision experience mentioned",
+                "Missing professional body registration (ECSA, SACPCMP)"
+            ],
+            'manufacturing': [
+                "No specific machinery or equipment experience listed",
+                "Missing quality control or inspection experience",
+                "No mention of safety protocols or OHS training",
+                "Limited production efficiency or output metrics",
+                "No experience with lean manufacturing or continuous improvement"
+            ],
+            'sales': [
+                "No specific sales targets or quota achievements mentioned",
+                "Missing CRM software experience",
+                "No mention of closing rates or conversion metrics",
+                "Limited territory management or account planning details",
+                "Missing negotiation skills examples"
+            ]
+        }
+        
+        # Industry-specific recommendation templates
+        self.industry_recommendations = {
+            'retail': [
+                "Add measurable achievements such as sales targets met or customer satisfaction scores",
+                "Include retail-specific keywords like 'point of sale', 'inventory control', 'merchandising', and 'loss prevention'",
+                "List any retail systems or POS software used",
+                "Add a LinkedIn profile link for professional presence",
+                "Format CV with clear headings and bullet points for ATS readability",
+                "Highlight shift flexibility, weekend availability, and ability to work under pressure",
+                "Include any training, certificates, or workshops related to retail or customer service",
+                "Add driver's licence information (e.g., Code 8) if applicable"
+            ],
+            'technology': [
+                "Add links to GitHub, portfolio, or LinkedIn to showcase work",
+                "Include specific technologies and frameworks with version numbers",
+                "Add quantifiable achievements with metrics (e.g., 'Improved performance by 30%')",
+                "Mention Agile/Scrum methodology experience if applicable",
+                "List any cloud certifications or DevOps experience",
+                "Include testing frameworks and CI/CD experience"
+            ],
+            'healthcare': [
+                "Add HPCSA/SANC registration number and professional body details",
+                "List specific clinical procedures and competencies",
+                "Include continuing education and CPD points",
+                "Add language proficiency (especially for patient communication)",
+                "Mention any specialized training or certifications"
+            ],
+            'hospitality': [
+                "Add language skills (English, Afrikaans, isiZulu, etc.)",
+                "Include food safety and hygiene certifications",
+                "List specific POS and reservation systems used",
+                "Add upselling achievements and revenue metrics",
+                "Mention availability for shifts and weekends"
+            ],
+            'finance': [
+                "Add specific accounting software proficiency (Sage, Pastel, SAP, etc.)",
+                "Include professional body registration (SAICA, SAIPA, CIMA)",
+                "List tax and SARS compliance experience",
+                "Add financial reporting and analysis examples",
+                "Mention audit experience if applicable"
+            ],
+            'administration': [
+                "Add specific Office 365/Google Workspace proficiency",
+                "Include typing speed and accuracy metrics",
+                "List scheduling and diary management tools used",
+                "Add examples of handling confidential information",
+                "Mention multitasking and prioritization skills"
+            ],
+            'education': [
+                "Add SACE registration number",
+                "List specific subjects and grades taught",
+                "Include curriculum development experience",
+                "Add assessment and evaluation examples",
+                "Mention extracurricular involvement"
+            ],
+            'construction': [
+                "Add health and safety certifications",
+                "List specific software proficiency (AutoCAD, Revit, MS Project)",
+                "Include project scale and budget details",
+                "Add professional body registration (ECSA, SACPCMP)",
+                "Mention specific tools and equipment experience"
+            ],
+            'manufacturing': [
+                "Add OHS and safety certifications",
+                "List specific machinery and equipment experience",
+                "Include quality control and inspection experience",
+                "Add production efficiency metrics",
+                "Mention lean manufacturing experience"
+            ],
+            'sales': [
+                "Add specific sales targets and achievements with numbers",
+                "List CRM software experience (Salesforce, HubSpot, etc.)",
+                "Include closing rates and conversion metrics",
+                "Add territory management and account planning details",
+                "Mention pipeline management experience"
+            ]
+        }
+        
+        # Industry-specific missing keywords
+        self.industry_missing_keywords = {
+            'retail': [
+                'POS System', 'Till Operation', 'Cash Handling', 'Stock Management',
+                'Merchandising', 'Customer Service Excellence', 'Shelf Restocking',
+                'Inventory Control', 'Point of Sale', 'Retail Operations',
+                'Stock Taking', 'Loss Prevention', 'Customer Engagement', 'Store Standards'
+            ],
+            'technology': [
+                'Agile', 'Scrum', 'Git', 'CI/CD', 'REST APIs', 'Cloud Computing',
+                'Microservices', 'Unit Testing', 'Code Review', 'DevOps'
+            ],
+            'healthcare': [
+                'Patient Care', 'Clinical Assessment', 'Vital Signs', 'Medical Records',
+                'Infection Control', 'Medication Administration', 'HPCSA Registered'
+            ],
+            'hospitality': [
+                'Food Safety', 'Customer Service', 'POS Systems', 'Table Service',
+                'Mixology', 'Event Coordination', 'Hospitality Management'
+            ],
+            'finance': [
+                'Financial Reporting', 'Tax Compliance', 'Audit', 'Reconciliation',
+                'Budgeting', 'Forecasting', 'Sage Pastel', 'SAP FICO'
+            ],
+            'administration': [
+                'Office Management', 'Scheduling', 'Data Entry', 'Document Management',
+                'Correspondence', 'Calendar Management', 'MS Office Suite'
+            ],
+            'education': [
+                'Curriculum Development', 'Lesson Planning', 'Assessment', 'SACE Registered',
+                'Classroom Management', 'Student Engagement', 'Parent Communication'
+            ],
+            'construction': [
+                'Site Management', 'Health & Safety', 'Project Planning', 'AutoCAD',
+                'Quantity Surveying', 'Building Regulations', 'Contract Management'
+            ],
+            'manufacturing': [
+                'Quality Control', 'Production Planning', 'Lean Manufacturing',
+                'Six Sigma', 'OHS Compliance', 'Machine Operation', 'Supply Chain'
+            ],
+            'sales': [
+                'Lead Generation', 'Pipeline Management', 'CRM', 'Closing Deals',
+                'Account Management', 'Negotiation', 'Revenue Growth'
+            ]
+        }
 
-        # Comprehensive skill list (used for fallback)
+        # Read-only fallback data structures
         self.skill_keywords = [
             'python', 'javascript', 'react', 'node', 'sql', 'html', 'css',
             'communication', 'leadership', 'teamwork', 'problem solving',
@@ -45,7 +313,9 @@ class CVAnalyzer:
             'inventory', 'merchandising', 'cleaning', 'organization',
             'time management', 'multitasking', 'reliable', 'hardworking',
             'motivated', 'positive attitude', 'team player', 'independent',
-            'grade 12', 'matric', 'high school'
+            'grade 12', 'matric', 'high school', 'sage', 'pastel', 'sap',
+            'drivers licence', 'code 8', 'code 10', 'bbbeee', 'bee', 'pos',
+            'till', 'retail', 'spar', 'shoprite', 'checkers', 'woolworths'
         ]
 
         self.market_keywords_map = {
@@ -69,7 +339,12 @@ class CVAnalyzer:
             'communication': ['Interpersonal Skills', 'Verbal Communication', 'Written Communication', 'Presentation'],
             'problem solving': ['Analytical Thinking', 'Critical Thinking', 'Troubleshooting', 'Decision Making'],
             'sales': ['Lead Generation', 'Closing Deals', 'Customer Acquisition', 'Relationship Building'],
-            'retail': ['Inventory Management', 'Merchandising', 'Point of Sale', 'Stock Control']
+            'retail': ['Inventory Management', 'Merchandising', 'Point of Sale', 'Stock Control'],
+            'sage': ['Sage Pastel', 'Sage Evolution', 'Sage One', 'Sage 300'],
+            'pastel': ['Pastel Partner', 'Pastel Xpress', 'Pastel Payroll'],
+            'sap': ['SAP FICO', 'SAP HCM', 'SAP MM', 'SAP SD', 'SAP Basis'],
+            'pos': ['Point of Sale Systems', 'Till Operation', 'Cash Register', 'Payment Processing'],
+            'stock management': ['Inventory Control', 'Stock Replenishment', 'Stock Taking', 'Warehouse Management']
         }
 
         self.common_misspellings = {
@@ -89,69 +364,336 @@ class CVAnalyzer:
             'mongodb': 'MongoDB',
             'azue': 'Azure',
             'dockr': 'Docker',
-            'kubenetes': 'Kubernetes'
+            'kubenetes': 'Kubernetes',
+            'drivers': "driver's",
+            'licence': 'license',
+            'matriculant': 'matric',
+            'grand 12': 'grade 12',
+            'nqf': 'NQF level',
+            'bbbeee': 'B-BBEE',
+            'bee': 'B-BBEE'
         }
 
-        self.context = {}
+    # ----------------------------------------------------------------------
+    # Helper to clean AI weaknesses
+    # ----------------------------------------------------------------------
+    def _clean_weaknesses(self, weaknesses: List[str], industry: str) -> List[str]:
+        """Remove tech-specific weaknesses for non-tech industries and ensure industry-appropriate content."""
+        if not weaknesses:
+            return self.industry_weaknesses.get(industry, ["No specific weaknesses identified"])[:6]
+        
+        cleaned = []
+        for w in weaknesses:
+            w_lower = w.lower()
+            # Skip if it contains tech keywords but industry is not tech
+            if industry != 'technology':
+                contains_tech = any(tech in w_lower for tech in self.TECH_KEYWORDS)
+                if contains_tech:
+                    self.logger.info(f"Skipping tech-specific weakness for {industry}: {w}")
+                    continue
+            cleaned.append(w)
+        
+        # If after cleaning we have fewer than 2 weaknesses, add industry defaults
+        if len(cleaned) < 2:
+            defaults = self.industry_weaknesses.get(industry, ["Few quantifiable achievements - add metrics and numbers to demonstrate impact"])
+            cleaned.extend(defaults[:3])
+        
+        # Ensure we don't have duplicates
+        seen = set()
+        unique = []
+        for w in cleaned:
+            if w not in seen:
+                seen.add(w)
+                unique.append(w)
+        
+        return unique[:6]
 
     # ----------------------------------------------------------------------
-    # AI‑powered extraction (primary method) – async
+    # Industry Detection
+    # ----------------------------------------------------------------------
+    def detect_industry(self, cv_text: str, extracted_skills: List[str] = None, experience: List[str] = None) -> str:
+        """Detect the candidate's industry from CV text, skills, and experience."""
+        text_lower = cv_text.lower()
+        
+        # Combine all text for detection
+        combined_text = text_lower
+        if extracted_skills:
+            combined_text += " " + " ".join([s.lower() for s in extracted_skills])
+        if experience:
+            combined_text += " " + " ".join([e.lower() for e in experience])
+        
+        # Count matches for each industry
+        industry_scores = {}
+        for industry, keywords in self.industry_keywords.items():
+            score = 0
+            for keyword in keywords:
+                if keyword in combined_text:
+                    score += 1
+            if score > 0:
+                industry_scores[industry] = score
+        
+        # Get the industry with highest score
+        if industry_scores:
+            detected_industry = max(industry_scores, key=industry_scores.get)
+            self.logger.info(f"Detected industry: {detected_industry} (score: {industry_scores[detected_industry]})")
+            return detected_industry
+        
+        # Default to general if no specific industry detected
+        self.logger.info("No specific industry detected, using general recommendations")
+        return 'general'
+    
+    def get_industry_specific_weaknesses(self, industry: str, extracted_skills: List[str], 
+                                          experience: List[str], achievements: List[str]) -> List[str]:
+        """Get industry-specific weaknesses based on detected industry."""
+        if industry not in self.industry_weaknesses:
+            return self._get_general_weaknesses(extracted_skills, experience, achievements)
+        
+        weaknesses = list(self.industry_weaknesses[industry])
+        
+        # Add industry-agnostic weaknesses based on actual content
+        if not achievements or len(achievements) == 0:
+            weaknesses.append("No achievements listed - add quantifiable accomplishments to demonstrate impact")
+        elif not any(re.search(r'\d+%|\d+\s*(customers|sales|units|items)|[R\$]\s*\d+', str(ach).lower()) for ach in achievements):
+            weaknesses.append("Achievements lack metrics - add numbers to show impact (e.g., 'Increased sales by 20%', 'Served 100+ customers daily')")
+        
+        if not experience or len(experience) < 2:
+            weaknesses.append("Limited work experience - consider adding volunteer work, internships, or part-time roles")
+        
+        if len(extracted_skills) < 5:
+            weaknesses.append("Limited skills listed - add more relevant skills for your industry")
+        
+        # Limit to 6 weaknesses
+        return weaknesses[:6]
+    
+    def _get_general_weaknesses(self, extracted_skills: List[str], experience: List[str], 
+                                 achievements: List[str]) -> List[str]:
+        """Get general weaknesses when industry can't be detected."""
+        weaknesses = []
+        
+        if not experience or len(experience) == 0:
+            weaknesses.append("No work experience listed - add employment history, internships, or volunteer work")
+        
+        if len(extracted_skills) < 5:
+            weaknesses.append("Limited skills listed - add more relevant skills to strengthen your profile")
+        
+        if not achievements or len(achievements) == 0:
+            weaknesses.append("No achievements listed - add quantifiable accomplishments to demonstrate impact")
+        
+        if not any('linkedin' in skill.lower() for skill in extracted_skills) and not any('linkedin' in str(exp).lower() for exp in experience):
+            weaknesses.append("No LinkedIn profile mentioned - create one for professional visibility")
+        
+        return weaknesses[:6]
+    
+    def get_industry_specific_recommendations(self, industry: str, extracted_skills: List[str],
+                                               links: Dict[str, bool], education: List[str]) -> List[str]:
+        """Get industry-specific recommendations based on detected industry."""
+        if industry not in self.industry_recommendations:
+            return self._get_general_recommendations(extracted_skills, links, education)
+        
+        recommendations = list(self.industry_recommendations[industry])
+        
+        # Add industry-agnostic recommendations based on actual content
+        if not links.get('linkedin', False):
+            recommendations.append("Create and link a LinkedIn profile for professional visibility")
+        
+        if not education or len(education) == 0:
+            recommendations.append("Add educational background including Matric/Grade 12 details")
+        elif not any('matric' in edu.lower() or 'grade 12' in edu.lower() for edu in education):
+            recommendations.append("Add Matric/Grade 12 details with subjects - important for South African employers")
+        
+        # Limit to 8 recommendations
+        return recommendations[:8]
+    
+    def _get_general_recommendations(self, extracted_skills: List[str], links: Dict[str, bool], 
+                                      education: List[str]) -> List[str]:
+        """Get general recommendations when industry can't be detected."""
+        recommendations = []
+        
+        if not links.get('linkedin', False):
+            recommendations.append("Create and link a LinkedIn profile for professional visibility")
+        
+        if not education or len(education) == 0:
+            recommendations.append("Add educational background including qualifications and institutions")
+        
+        if len(extracted_skills) < 8:
+            recommendations.append("Expand your skills section with more relevant skills")
+        
+        recommendations.append("Add measurable achievements with numbers and metrics to demonstrate impact")
+        recommendations.append("Improve formatting with clear headings and bullet points for better readability")
+        
+        return recommendations[:6]
+    
+    def get_industry_specific_missing_keywords(self, industry: str) -> List[str]:
+        """Get industry-specific missing keywords for ATS optimization."""
+        if industry not in self.industry_missing_keywords:
+            return [
+                'Communication', 'Teamwork', 'Problem Solving', 'Time Management',
+                'Attention to Detail', 'Reliability', 'Adaptability'
+            ]
+        return self.industry_missing_keywords[industry]
+
+    # ----------------------------------------------------------------------
+    # AI-powered extraction (primary method) – async
     # ----------------------------------------------------------------------
     async def _analyze_with_ai(self, cv_text: str) -> Optional[Dict[str, Any]]:
-        """
-        Use Azure OpenAI to extract structured information from the CV.
-        Returns a dict with keys: about, skills, education, experience,
-        achievements, links (with linkedin/github/portfolio booleans).
-        Returns None if AI fails or is disabled.
-        """
+        """Use Azure OpenAI to extract structured information from the CV."""
         if not self.ai_client.enabled:
+            self.logger.warning("AI client disabled - will use rule-based fallback")
             return None
 
-        system_prompt = (
-            "You are a CV analysis expert. Extract the following information from the CV text "
-            "and return a valid JSON object with these exact keys:\n"
-            "- about: a concise professional summary (string)\n"
-            "- skills: an array of skill names (strings)\n"
-            "- education: an array of education entries, each as a string (e.g. 'BSc Computer Science, University of XYZ, 2020-2024')\n"
-            "- experience: an array of work experience entries, each as a string (e.g. 'Software Developer at ABC Corp, 2022-present')\n"
-            "- achievements: an array of notable achievements (strings)\n"
-            "- links: an object with boolean fields 'linkedin', 'github', 'portfolio' indicating presence of those links\n\n"
-            "If a section is missing, return an empty array for that field. Do not include any explanations or markdown."
-        )
+        system_prompt = """You are an expert South African career consultant and CV analyst specializing in ATS (Applicant Tracking System) optimization. You analyze CVs across ALL industries.
 
-        prompt = f"CV text:\n\n{cv_text[:4000]}"  # limit length to avoid token overflow
+CRITICAL INSTRUCTION: FIRST detect the candidate's industry from their work experience. If they have retail experience (Spar, cashier, stock management), they are in RETAIL - NOT TECHNOLOGY.
+
+DO NOT suggest tech skills (Agile, Scrum, DevOps, Docker, Kubernetes, Git, CI/CD) for non-tech candidates.
+
+Analyze the CV text and return a JSON response. Be honest about what's actually in the CV.
+
+Return a JSON object with these exact keys:
+
+{
+  "score": number (0-100),
+  "readinessLevel": string (EXCEPTIONAL, HIGH POTENTIAL, INTERMEDIATE, DEVELOPING, JUNIOR),
+  "industry": string (retail, technology, healthcare, hospitality, finance, administration, education, construction, manufacturing, sales, or general),
+  "summary": string (2-3 sentence summary based on ACTUAL industry),
+  "strengths": array of strings (3-6 strengths based on ACTUAL CV content),
+  "weaknesses": array of strings (3-8 weaknesses - MUST match the detected industry, NO tech terms for retail candidates),
+  "sections": {
+    "about": string,
+    "skills": array of strings,
+    "education": array of strings,
+    "experience": array of strings,
+    "achievements": array of strings
+  },
+  "linkCheck": {
+    "linkedin": boolean,
+    "github": boolean,
+    "portfolio": boolean,
+    "driversLicence": boolean
+  },
+  "recommendations": array of strings (industry-appropriate),
+  "missingKeywords": array of strings (industry-appropriate),
+  "incomeIdeas": array of objects with title, difficulty, potential, description
+}
+
+For RETAIL candidates, weaknesses should be like:
+- No specific POS/till systems mentioned
+- Limited measurable achievements
+- No driver's licence indicated
+- Matric subjects not listed
+- Missing specific retail terminology
+
+NEVER suggest Agile, Scrum, DevOps, or containerization for retail candidates."""
+
+        max_cv_length = 8000
+        truncated_cv = cv_text[:max_cv_length] if len(cv_text) > max_cv_length else cv_text
+        
+        prompt = f"""Analyze this CV. First, identify the industry from the work experience.
+
+CV TEXT:
+{truncated_cv}
+
+Return a JSON object with the exact structure specified."""
 
         try:
+            self.logger.info("Attempting AI-powered CV analysis with industry detection...")
+            
             result = await self.ai_client.generate_structured_response_async(
                 prompt=prompt,
                 system_prompt=system_prompt,
-                response_schema={},  # not used for JSON mode, we rely on instructions
-                temperature=0.3,
-                max_tokens=1500,
+                response_schema={},
+                temperature=0.2,
+                max_tokens=3000,
                 retry_on_fail=True
             )
+            
             if result and isinstance(result, dict):
-                # Ensure all expected keys exist
-                expected_keys = ['about', 'skills', 'education', 'experience', 'achievements', 'links']
-                for key in expected_keys:
-                    if key not in result:
-                        result[key] = [] if key not in ('about', 'links') else ('' if key == 'about' else {})
-                # Ensure links object has the three booleans
-                links = result.get('links', {})
-                for link in ['linkedin', 'github', 'portfolio']:
-                    if link not in links:
-                        links[link] = False
-                result['links'] = links
+                expected_keys = ['score', 'readinessLevel', 'industry', 'summary', 'strengths', 'weaknesses', 
+                               'sections', 'linkCheck', 'recommendations', 'missingKeywords', 'incomeIdeas']
+                
+                missing_keys = [key for key in expected_keys if key not in result]
+                
+                if missing_keys:
+                    self.logger.warning(f"AI response missing keys: {missing_keys}")
+                    return None
+                
+                sections = result.get('sections', {})
+                required_sections = ['about', 'skills', 'education', 'experience', 'achievements']
+                for section in required_sections:
+                    if section not in sections:
+                        sections[section] = [] if section != 'about' else ''
+                
+                link_check = result.get('linkCheck', {})
+                for link in ['linkedin', 'github', 'portfolio', 'driversLicence']:
+                    if link not in link_check:
+                        link_check[link] = False
+                
+                result['linkCheck'] = link_check
+                
+                # CRITICAL: Clean weaknesses based on detected industry
+                detected_industry = result.get('industry', 'general')
+                result['weaknesses'] = self._clean_weaknesses(result.get('weaknesses', []), detected_industry)
+                
+                self.logger.info(f"✅ AI analysis successful! Industry: {detected_industry}")
+                self.logger.info(f"   Weaknesses after cleaning: {result['weaknesses']}")
+                
                 return result
+            else:
+                self.logger.warning("AI returned invalid result format")
+                return None
+                
         except Exception as e:
-            print(f"AI analysis failed: {e}")
-        return None
+            self.logger.error(f"❌ AI analysis failed: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return None
 
     # ----------------------------------------------------------------------
-    # Rule‑based extraction methods (fallback) – all return safe defaults
+    # Rule-based extraction methods (fallback)
     # ----------------------------------------------------------------------
+    def _extract_email(self, text: str) -> Optional[str]:
+        email_pattern = r'[\w\.-]+@[\w\.-]+\.\w+'
+        match = re.search(email_pattern, text)
+        return match.group(0) if match else None
+
+    def _extract_phone(self, text: str) -> Optional[str]:
+        patterns = [
+            r'(?:\+27|0)[\s-]?[1-9][0-9]{8}',
+            r'0[0-9]{2}[\s-]?[0-9]{3}[\s-]?[0-9]{4}',
+            r'\(?0[0-9]{2}\)?[\s-]?[0-9]{3}[\s-]?[0-9]{4}'
+        ]
+        
+        for pattern in patterns:
+            match = re.search(pattern, text)
+            if match:
+                return match.group(0)
+        return None
+
+    def _extract_location(self, text: str) -> Optional[str]:
+        cities = [
+            'Johannesburg', 'Cape Town', 'Durban', 'Pretoria', 'Port Elizabeth',
+            'Bloemfontein', 'East London', 'Pietermaritzburg', 'Polokwane',
+            'Nelspruit', 'Rustenburg', 'Kimberley', 'Upington', 'George'
+        ]
+        
+        text_lower = text.lower()
+        for city in cities:
+            if city.lower() in text_lower:
+                return city
+        return None
+
+    def _extract_name(self, text: str) -> Optional[str]:
+        lines = text.split('\n')
+        for line in lines[:5]:
+            line = line.strip()
+            if line and len(line.split()) in [2, 3]:
+                words = line.split()
+                if all(word[0].isupper() if word else False for word in words):
+                    if not any(word.lower() in ['cv', 'curriculum', 'vitae', 'resume'] for word in words):
+                        return line
+        return None
+
     def extract_text_sections(self, cv_text: str) -> Dict[str, str]:
-        """Extract different sections from CV text"""
         sections = {
             'about': '',
             'skills': '',
@@ -165,7 +707,6 @@ class CVAnalyzer:
         current_section = None
         section_content = []
 
-        # Section headers with variations
         section_headers = {
             'about': ['about me', 'profile', 'summary', 'professional summary', 'personal statement', 'about'],
             'skills': ['skills', 'technical skills', 'core competencies', 'expertise', 'technologies', 'competencies'],
@@ -198,8 +739,6 @@ class CVAnalyzer:
         return sections
 
     def extract_skills(self, cv_text: str) -> List[str]:
-        """Extract skills from CV text (rule-based) – always returns list."""
-        logger = get_logger()
         if not cv_text or not cv_text.strip():
             return []
 
@@ -209,7 +748,6 @@ class CVAnalyzer:
         for skill in self.skill_keywords:
             pattern = r'\b' + re.escape(skill) + r'\b'
             if re.search(pattern, cv_lower):
-                # Format skill properly
                 if skill in ['html', 'css', 'sql', 'nosql', 'aws', 'azure', 'gcp', 'ci/cd']:
                     found_skills.add(skill.upper())
                 elif skill == 'c#':
@@ -222,12 +760,25 @@ class CVAnalyzer:
                     found_skills.add('Node.js')
                 elif skill in ['javascript', 'typescript', 'python', 'java', 'ruby', 'php']:
                     found_skills.add(skill.capitalize())
+                elif skill == 'drivers licence':
+                    found_skills.add("Driver's Licence")
+                elif skill == 'bbbeee' or skill == 'bee':
+                    found_skills.add("B-BBEE")
+                elif skill == 'sage':
+                    found_skills.add("Sage")
+                elif skill == 'pastel':
+                    found_skills.add("Pastel")
+                elif skill == 'sap':
+                    found_skills.add("SAP")
+                elif skill == 'pos':
+                    found_skills.add("POS Systems")
+                elif skill == 'till':
+                    found_skills.add("Till Operation")
                 else:
                     words = skill.split()
                     capitalized = ' '.join(w.capitalize() for w in words)
                     found_skills.add(capitalized)
 
-        # Check for compound skills
         compound_skills = [
             ('machine learning', 'Machine Learning'),
             ('artificial intelligence', 'AI'),
@@ -253,7 +804,16 @@ class CVAnalyzer:
             ('stock management', 'Stock Management'),
             ('time management', 'Time Management'),
             ('team player', 'Team Player'),
-            ('positive attitude', 'Positive Attitude')
+            ('positive attitude', 'Positive Attitude'),
+            ('grade 12', 'Matric'),
+            ('high school', 'Matric'),
+            ('drivers licence', "Driver's Licence"),
+            ('code 8', 'Driver\'s Licence Code 8'),
+            ('code 10', 'Driver\'s Licence Code 10'),
+            ('point of sale', 'POS Systems'),
+            ('till operation', 'Till Operation'),
+            ('inventory control', 'Inventory Control'),
+            ('merchandising', 'Merchandising')
         ]
 
         for skill_text, display_name in compound_skills:
@@ -263,7 +823,6 @@ class CVAnalyzer:
         return sorted(list(found_skills)) if found_skills else []
 
     def extract_about_section(self, cv_text: str) -> str:
-        """Extract professional summary/about section – always returns string."""
         if not cv_text:
             return ""
 
@@ -282,7 +841,8 @@ class CVAnalyzer:
         for i, line in enumerate(lines):
             line = line.strip()
             if len(line) > 50 and any(word in line.lower() for word in
-                                     ['developer', 'engineer', 'professional', 'experienced',
+                                     ['retail', 'customer service', 'sales', 'assistant', 'cashier',
+                                      'developer', 'engineer', 'professional', 'experienced',
                                       'passionate', 'skilled', 'expert', 'specialize',
                                       'motivated', 'hardworking', 'individual', 'dedicated',
                                       'enthusiastic', 'detail-oriented', 'results-driven']):
@@ -299,7 +859,6 @@ class CVAnalyzer:
         return ""
 
     def extract_education(self, cv_text: str) -> List[str]:
-        """Extract education entries with complete information – always returns list."""
         if not cv_text:
             return []
 
@@ -309,7 +868,6 @@ class CVAnalyzer:
         in_education = False
         edu_lines = []
 
-        # Try to locate Education section
         for i, line in enumerate(lines):
             line_lower = line.lower()
             if any(word in line_lower for word in ['education', 'academic', 'qualifications', 'training']):
@@ -321,7 +879,6 @@ class CVAnalyzer:
                 if line.strip():
                     edu_lines.append(line.strip())
 
-        # Parse lines inside education section
         if edu_lines:
             current_entry = []
             for line in edu_lines:
@@ -345,74 +902,34 @@ class CVAnalyzer:
                     seen_entries.add(formatted_entry)
                     education_entries.append(formatted_entry)
 
-        # If still no entries, use regex patterns on full text
         if not education_entries:
-            # Pattern 1: Institution, Program (Year-Year)
-            pattern1 = r'([A-Za-z\s]+(?:University|College|Institute|Academy|School|Foundation|High School|Secondary))[,\s]+([A-Za-z\s]+(?:Development|Science|Engineering|Technology|Program|Certificate|Course|Diploma|Degree)?)[,\s]*\(?(\d{4})\s*[-–]\s*(\d{4}|present|current)\)?'
+            pattern1 = r'([A-Za-z\s]+(?:University|College|Institute|Academy|School|Foundation|Secondary))[,\s]+([A-Za-z\s]+(?:Development|Science|Engineering|Technology|Program|Certificate|Course|Diploma|Degree)?)[,\s]*\(?(\d{4})\s*[-–]\s*(\d{4}|present|current)\)?'
             matches = re.findall(pattern1, cv_text, re.IGNORECASE)
             for match in matches:
                 entry = f"{match[0]}, {match[1]} ({match[2]}-{match[3]})"
                 education_entries.append(entry)
 
-            # Pattern 2: Year-Year | Institution, Program
             pattern2 = r'(\d{4})\s*[-–]\s*(\d{4}|present|current)\s*[|,]\s*([A-Za-z\s]+(?:University|College|Institute|Academy|School|Foundation))[,\s]+([A-Za-z\s]+)'
             matches = re.findall(pattern2, cv_text, re.IGNORECASE)
             for match in matches:
                 entry = f"{match[2]}, {match[3]} ({match[0]}-{match[1]})"
                 education_entries.append(entry)
 
-            # Pattern 3: Institution - Program (Year)
             pattern3 = r'([A-Za-z\s]+(?:University|College|Institute|Academy|School|Foundation))\s*[-–]\s*([A-Za-z\s]+(?:Development|Science|Engineering|Technology)?)[,\s]*\(?(\d{4})\)?'
             matches = re.findall(pattern3, cv_text, re.IGNORECASE)
             for match in matches:
                 entry = f"{match[0]}, {match[1]} ({match[2]})"
                 education_entries.append(entry)
 
-            # Pattern 4: Matric/Grade 12
-            pattern4 = r'(Matric|Grade\s*12|High\s*School)[,\s]*([A-Za-z\s]+(?:High\s*School|Secondary))?[,\s]*\(?(\d{4})\)?'
-            matches = re.findall(pattern4, cv_text, re.IGNORECASE)
-            for match in matches:
-                entry = f"{match[0]} - {match[1]} ({match[2]})" if match[1] else f"{match[0]} ({match[2]})"
-                education_entries.append(entry)
-
-            # Pattern 5: Simple year with institution (for PDF case)
-            pattern5 = r'(\d{4})\s*[-–]?\s*(\d{4})\s*([A-Za-z\s]+(?:University|College|Institute|Academy|School|Foundation))\s*([A-Za-z\s]+)'
-            matches = re.findall(pattern5, cv_text, re.IGNORECASE)
-            for match in matches:
-                entry = f"{match[2]}, {match[3]} ({match[0]}-{match[1]})"
-                education_entries.append(entry)
-
-        # Format and deduplicate
         formatted_entries = []
         seen_lower = set()
         for entry in education_entries:
-            # Fix common institution names
-            entry = re.sub(r'\btechbridle\b', 'TechBridle Foundation', entry, flags=re.IGNORECASE)
-            entry = re.sub(r'\btech bridle\b', 'TechBridle Foundation', entry, flags=re.IGNORECASE)
-            entry = re.sub(r'\bnwu\b', 'North West University', entry, flags=re.IGNORECASE)
-            entry = re.sub(r'\bnorth west university\b', 'North West University', entry, flags=re.IGNORECASE)
-            entry = re.sub(r'\bnorth-west university\b', 'North West University', entry, flags=re.IGNORECASE)
-            entry = re.sub(r'\balx\b', 'ALX', entry, flags=re.IGNORECASE)
-
-            # Clean up program names
-            if 'computer science' in entry.lower() and 'bsc' not in entry.lower():
-                entry = re.sub(r'computer science', 'BSc Computer Science', entry, flags=re.IGNORECASE)
-            if 'software development' in entry.lower():
-                entry = re.sub(r'software development', 'Software Development Program', entry, flags=re.IGNORECASE)
-            if 'virtual assistance' in entry.lower() or 'aice' in entry.lower():
-                entry = re.sub(r'aice', 'AI & Virtual Assistant Program', entry, flags=re.IGNORECASE)
-
-            # Clean up spacing and punctuation
             entry = re.sub(r'\s+', ' ', entry).strip()
-            entry = re.sub(r'\((\d{4})\)(\d{4})', r'(\1-\2)', entry)
-            entry = re.sub(r'(\d{4})\s*(\d{4})', r'\1-\2', entry)
-
             lower_entry = entry.lower()
             if lower_entry not in seen_lower and len(entry) > 10:
                 seen_lower.add(lower_entry)
                 formatted_entries.append(entry)
 
-        # Sort by most recent year
         def extract_year(entry):
             years = re.findall(r'20\d{2}', entry)
             return max([int(y) for y in years]) if years else 0
@@ -421,7 +938,6 @@ class CVAnalyzer:
         return formatted_entries if formatted_entries else []
 
     def _format_education_entry(self, text: str) -> str:
-        """Format a single education entry with proper structure"""
         text = re.sub(r'\s+', ' ', text).strip()
         years = re.findall(r'\b20\d{2}\b', text)
         year_range = ""
@@ -433,8 +949,7 @@ class CVAnalyzer:
 
         institution = ""
         institution_patterns = [
-            r'([A-Za-z\s]+(?:University|College|Institute|Academy|School|Foundation))',
-            r'(TechBridle|ALX|NWU|North West|High School|Secondary|Rondebult)'
+            r'([A-Za-z\s]+(?:University|College|Institute|Academy|School|Foundation|Secondary))',
         ]
         for pattern in institution_patterns:
             match = re.search(pattern, text, re.IGNORECASE)
@@ -445,17 +960,13 @@ class CVAnalyzer:
 
         program = ""
         program_patterns = [
-            r'(BSc|Bachelor|Master|PhD|Diploma|Certificate|Program|Course)',
-            r'(Computer Science|Software Development|Virtual Assistance|AI|Data Science|Matric|Grade\s*12|AiCE)'
+            r'(BSc|Bachelor|Master|PhD|Diploma|Certificate|Program|Course|Matric|Grade\s*12|NQF\s*Level\s*\d+)',
+            r'(Computer Science|Software Development|Virtual Assistance|AI|Data Science|Retail Management|Business Studies)'
         ]
         for pattern in program_patterns:
             match = re.search(pattern, text, re.IGNORECASE)
             if match:
                 program = match.group(0).strip()
-                if program.lower() == 'aice':
-                    program = 'AI & Virtual Assistant Program'
-                elif program.lower() == 'matric' or program.lower() == 'grade 12':
-                    program = 'Matric'
                 break
 
         if institution and program and year_range:
@@ -471,7 +982,6 @@ class CVAnalyzer:
         return text
 
     def extract_experience(self, cv_text: str) -> List[str]:
-        """Extract work experience entries – always returns list."""
         experience = []
         sections = self.extract_text_sections(cv_text)
         experience_text = sections['experience'] or sections['projects']
@@ -514,22 +1024,13 @@ class CVAnalyzer:
         return cleaned if cleaned else []
 
     def extract_achievements(self, cv_text: str) -> List[str]:
-        """Extract achievements – always returns list."""
         achievements = []
         lines = cv_text.split('\n')
-
-        achievement_indicators = [
-            r'\d+%', r'\d+\s*(percent|%)', r'increased', r'decreased', r'reduced',
-            r'improved', r'developed', r'created', r'built', r'designed',
-            r'implemented', r'launched', r'delivered', r'achieved', r'won',
-            r'awarded', r'recognized', r'led', r'managed', r'coordinated',
-            r'\$\s*\d+', r'R\s*\d+', r'\d+\s*(users|clients|customers|projects|sales)'
-        ]
 
         for line in lines:
             line = line.strip()
             if line and (line.startswith(('•', '-', '*', '○', '●')) or
-                        re.match(r'^(Developed|Created|Built|Designed|Implemented|Led|Managed|Achieved|Improved|Increased|Reduced|Handled|Processed|Assisted)', line, re.IGNORECASE)):
+                        re.match(r'^(Developed|Created|Built|Designed|Implemented|Led|Managed|Achieved|Improved|Increased|Reduced|Handled|Processed|Assisted|Served|Operated|Maintained|Restocked|Organized|Coordinated)', line, re.IGNORECASE)):
                 line = re.sub(r'^[•\-*○●]\s*', '', line)
                 if len(line) > 20:
                     line = re.sub(r'\s+', ' ', line)
@@ -539,7 +1040,6 @@ class CVAnalyzer:
                         line += '.'
                     achievements.append(line)
 
-        # Remove duplicates
         unique_achievements = []
         seen = set()
         for ach in achievements:
@@ -550,11 +1050,11 @@ class CVAnalyzer:
         return unique_achievements if unique_achievements else []
 
     def extract_links(self, cv_text: str) -> Dict[str, bool]:
-        """Extract links from CV – always returns dict with defaults."""
         links = {
             'linkedin': False,
             'github': False,
-            'portfolio': False
+            'portfolio': False,
+            'driversLicence': False
         }
         text_lower = cv_text.lower()
 
@@ -575,11 +1075,16 @@ class CVAnalyzer:
             if re.search(pattern, text_lower):
                 links['portfolio'] = True
                 break
+        
+        drivers_patterns = [r'code\s*[8|10]', r'driver.?s\s*licence', r'drivers\s*license', r'valid\s*driver']
+        for pattern in drivers_patterns:
+            if re.search(pattern, text_lower):
+                links['driversLicence'] = True
+                break
 
         return links
 
     def check_spelling_errors(self, cv_text: str) -> List[str]:
-        """Check for common spelling errors – returns list."""
         suggestions = []
         text_lower = cv_text.lower()
         for error, correction in self.common_misspellings.items():
@@ -588,7 +1093,6 @@ class CVAnalyzer:
         return suggestions[:5]
 
     def generate_market_keywords(self, extracted_skills: List[str]) -> List[str]:
-        """Generate market keywords based on skills – returns list."""
         market_keywords = set()
         for skill in extracted_skills:
             skill_lower = skill.lower()
@@ -606,8 +1110,14 @@ class CVAnalyzer:
                 market_keywords.update(['Data Modeling', 'Query Optimization', 'Database Design', 'Indexing'])
             if any(soft in skill_lower for soft in ['communication', 'problem solving', 'customer service', 'sales']):
                 market_keywords.update(['Client Relations', 'Team Collaboration', 'Stakeholder Management', 'Negotiation'])
-            if any(retail in skill_lower for retail in ['cash handling', 'stock management', 'inventory', 'merchandising']):
-                market_keywords.update(['Inventory Control', 'POS Systems', 'Stock Replenishment', 'Loss Prevention'])
+            if any(retail in skill_lower for retail in ['cash handling', 'stock management', 'inventory', 'merchandising', 'pos', 'till']):
+                market_keywords.update(['Inventory Control', 'POS Systems', 'Stock Replenishment', 'Loss Prevention', 'Customer Service Excellence'])
+            if 'sage' in skill_lower or 'pastel' in skill_lower:
+                market_keywords.update(['Sage Pastel Accounting', 'Financial Software', 'Bookkeeping'])
+            if 'sap' in skill_lower:
+                market_keywords.update(['SAP ERP', 'Enterprise Resource Planning', 'SAP Modules'])
+            if 'drivers' in skill_lower or 'licence' in skill_lower:
+                market_keywords.update(["Driver's Licence Code 8", 'Valid Driver\'s Licence'])
         return sorted(list(market_keywords))[:12]
 
     def generate_suggestions(
@@ -619,183 +1129,108 @@ class CVAnalyzer:
         experience: List[str],
         achievements: List[str]
     ) -> List[str]:
-        """Generate comprehensive improvement suggestions – returns list."""
-        suggestions = []
+        # Detect industry first
+        industry = self.detect_industry(cv_text, extracted_skills, experience)
+        
+        # Get industry-specific recommendations
+        suggestions = self.get_industry_specific_recommendations(
+            industry, extracted_skills, links, education
+        )
+        
+        # Add spelling suggestions
         spelling_suggestions = self.check_spelling_errors(cv_text)
-        suggestions.extend(spelling_suggestions[:3])
-
-        if not education:
-            suggestions.append("Add your educational background to strengthen your profile.")
-        else:
-            has_years = any(re.search(r'20\d{2}', edu) for edu in education)
-            if not has_years:
-                suggestions.append("Add graduation years to your education entries.")
-            for edu in education:
-                if 'ALX' in edu and 'Program' not in edu and 'Certificate' not in edu:
-                    suggestions.append("Specify your ALX qualification (e.g., AI & Virtual Assistant Program).")
-                    break
-                if 'North West' in edu and 'BSc' not in edu and 'Computer Science' not in edu:
-                    suggestions.append("Specify your NWU degree (e.g., BSc Computer Science).")
-                    break
-
+        suggestions.extend(spelling_suggestions[:2])
+        
+        # Add industry-agnostic suggestions based on actual content
+        if not achievements or len(achievements) == 0:
+            suggestions.append("Highlight your key achievements with quantifiable results - employers value measurable impact")
+        elif not any(re.search(r'\d+%|\d+\s*(customers|sales|units|items)|[R\$]\s*\d+', str(ach).lower()) for ach in achievements):
+            suggestions.append("Add metrics and numbers to your achievements to show impact (e.g., 'Increased sales by 20%', 'Served 100+ customers daily')")
+        
+        if not experience or len(experience) < 2:
+            suggestions.append("Add more detail about your responsibilities in each role - use action verbs and quantify achievements where possible")
+        
         if len(extracted_skills) < 5:
-            suggestions.append("Add more specific skills to your CV. Aim for at least 8-10 relevant skills.")
-        elif len(extracted_skills) < 10:
-            suggestions.append("Good skill set! Consider adding more specialized skills to stand out.")
-        else:
-            suggestions.append("Excellent skill diversity! Now focus on demonstrating these skills with concrete examples.")
-
-        if len(experience) == 0:
-            suggestions.append("Add work experience or significant projects with clear roles and responsibilities.")
-        elif len(experience) < 2:
-            suggestions.append("Add more details about your responsibilities in each role.")
-
-        if achievements:
-            has_metrics = any(re.search(r'\d+%|\d+\s*(users|projects|clients|sales|percent)|[R\$]\s*\d+', ach.lower()) for ach in achievements)
-            if not has_metrics:
-                suggestions.append("Add metrics and numbers to your achievements to show impact (e.g., 'Increased sales by 20%').")
-        else:
-            suggestions.append("Highlight your key achievements with quantifiable results.")
-
-        if not links['linkedin']:
-            suggestions.append("Add your LinkedIn profile URL - 85% of recruiters check LinkedIn first.")
-        if not links['github'] and any(s in extracted_skills for s in ['Python', 'JavaScript', 'Java', 'C#', 'TypeScript', 'HTML', 'CSS']):
-            suggestions.append("Include your GitHub profile to showcase your code and projects.")
-        if not links['portfolio'] and any(s in extracted_skills for s in ['React', 'Frontend', 'UI/UX', 'Design', 'HTML', 'CSS']):
-            suggestions.append("Create and add a portfolio website to showcase your visual work.")
-
+            suggestions.append("Expand your skills section with more relevant skills for your industry")
+        
+        # Remove duplicates while preserving order
         unique_suggestions = []
         seen = set()
         for s in suggestions:
             if s not in seen:
                 seen.add(s)
                 unique_suggestions.append(s)
-        return unique_suggestions[:6]
+        
+        return unique_suggestions[:8]
 
-    def generate_income_ideas(self, extracted_skills: List[str]) -> List[Dict[str, str]]:
-        """Generate income ideas based on skills – returns list."""
+    def generate_income_ideas(self, extracted_skills: List[str], industry: str = None) -> List[Dict[str, str]]:
         skills_lower = [s.lower() for s in extracted_skills]
-        is_tech = any(s in skills_lower for s in ['python', 'javascript', 'java', 'c#', 'c++', 'react', 'html', 'css', 'typescript', 'node.js', 'sql', 'mongodb', 'git', 'aws', 'azure', '.net', 'php', 'ruby', 'swift', 'kotlin', 'flutter'])
-        is_virtual_assistant = any(s in skills_lower for s in ['virtual assistant', 'email management', 'calendar management', 'scheduling', 'meeting coordination', 'travel planning', 'administrative', 'office 365', 'microsoft office'])
-        is_customer_service = any(s in skills_lower for s in ['customer service', 'communication', 'sales', 'retail', 'cash handling', 'stock management', 'client relations', 'problem solving', 'negotiation'])
-        is_administrative = any(s in skills_lower for s in ['typing skills', 'data entry', 'microsoft office', 'excel', 'word', 'powerpoint', 'organization', 'time management', 'multitasking', 'filing', 'document preparation'])
-
-        if is_tech:
-            primary_skill = extracted_skills[0] if extracted_skills else 'development'
+        
+        # Use detected industry if available
+        if industry == 'retail':
             return [
-                {'title': 'Freelance Development', 'difficulty': 'MEDIUM', 'potential': 'HIGH', 'description': f'Offer your {primary_skill} development services on platforms like Upwork, Toptal, or Fiverr'},
-                {'title': 'Technical Support', 'difficulty': 'LOW', 'potential': 'MEDIUM', 'description': 'Provide technical support or tutoring services to individuals or small businesses'},
-                {'title': 'Remote Tech Role', 'difficulty': 'MEDIUM', 'potential': 'HIGH', 'description': 'Target international companies hiring remote tech talent'}
+                {'title': 'Part-time Retail Sales Assistant', 'difficulty': 'Low', 'potential': 'R4k-R8k/mo', 'description': 'Work in supermarkets, clothing stores, or electronics shops to gain more retail experience and earn steady income.'},
+                {'title': 'Cashier at Fast Food or Grocery Store', 'difficulty': 'Low', 'potential': 'R4k-R7k/mo', 'description': 'Leverage cash handling skills to work in high-volume environments while improving speed and accuracy.'},
+                {'title': 'Merchandising Assistant', 'difficulty': 'Medium', 'potential': 'R5k-R9k/mo', 'description': 'Assist in product display setups for retail brands, ensuring shelves are stocked and visually appealing.'},
+                {'title': 'Customer Service Call Centre Agent', 'difficulty': 'Medium', 'potential': 'R5k-R10k/mo', 'description': 'Use communication and problem-solving skills to handle customer inquiries and complaints over the phone.'},
+                {'title': 'Promotional Brand Ambassador', 'difficulty': 'Medium', 'potential': 'R6k-R12k/mo', 'description': 'Promote products in-store or at events, engaging customers and driving sales through demonstrations.'}
             ]
-        elif is_virtual_assistant:
+        elif industry == 'technology':
             return [
-                {'title': 'Virtual Assistant Services', 'difficulty': 'LOW', 'potential': 'MEDIUM', 'description': 'Offer VA services on platforms like Belay, Time Etc, or Upwork'},
-                {'title': 'Executive Support', 'difficulty': 'MEDIUM', 'potential': 'HIGH', 'description': 'Specialize in executive support with calendar and email management'},
-                {'title': 'Remote Admin Assistant', 'difficulty': 'LOW', 'potential': 'MEDIUM', 'description': 'Find remote administrative assistant roles on job boards'}
+                {'title': 'Freelance Development', 'difficulty': 'Medium', 'potential': 'R12k-R25k/mo', 'description': 'Offer your development services on platforms like Upwork, Toptal, or local SA platforms like OfferZen.'},
+                {'title': 'Technical Support', 'difficulty': 'Low', 'potential': 'R8k-R15k/mo', 'description': 'Provide technical support or tutoring services to individuals or small businesses in SA.'},
+                {'title': 'Remote Tech Role', 'difficulty': 'Medium', 'potential': 'R15k-R30k/mo', 'description': 'Target international companies hiring remote tech talent - earn in foreign currency.'}
             ]
-        elif is_customer_service:
+        elif industry == 'healthcare':
             return [
-                {'title': 'Customer Service Representative', 'difficulty': 'LOW', 'potential': 'MEDIUM', 'description': 'Remote customer service roles in call centers or support teams'},
-                {'title': 'Retail Associate', 'difficulty': 'LOW', 'potential': 'MEDIUM', 'description': 'Entry-level retail positions with growth opportunities'},
-                {'title': 'Sales Representative', 'difficulty': 'MEDIUM', 'potential': 'HIGH', 'description': 'Commission-based sales roles leveraging your communication skills'}
+                {'title': 'Healthcare Assistant', 'difficulty': 'Low', 'potential': 'R6k-R12k/mo', 'description': 'Support healthcare professionals in clinics, hospitals, or home care settings.'},
+                {'title': 'Pharmacy Assistant', 'difficulty': 'Medium', 'potential': 'R7k-R14k/mo', 'description': 'Assist pharmacists with dispensing medication and customer service.'},
+                {'title': 'Medical Receptionist', 'difficulty': 'Low', 'potential': 'R5k-R10k/mo', 'description': 'Manage front desk operations in medical practices or clinics.'}
             ]
-        elif is_administrative:
+        elif industry == 'hospitality':
             return [
-                {'title': 'Data Entry Specialist', 'difficulty': 'LOW', 'potential': 'MEDIUM', 'description': 'Remote data entry positions on freelance platforms'},
-                {'title': 'Administrative Assistant', 'difficulty': 'LOW', 'potential': 'MEDIUM', 'description': 'Office admin or remote administrative support roles'},
-                {'title': 'Office Coordinator', 'difficulty': 'MEDIUM', 'potential': 'MEDIUM', 'description': 'Coordinate office operations and administrative tasks'}
+                {'title': 'Restaurant Server', 'difficulty': 'Low', 'potential': 'R3k-R8k/mo + tips', 'description': 'Serve customers in restaurants, cafes, or hotels.'},
+                {'title': 'Front Desk Receptionist', 'difficulty': 'Low', 'potential': 'R5k-R10k/mo', 'description': 'Welcome and assist guests in hotels, lodges, or guest houses.'},
+                {'title': 'Food & Beverage Assistant', 'difficulty': 'Low', 'potential': 'R4k-R8k/mo', 'description': 'Assist in food preparation, service, and maintaining hygiene standards.'}
+            ]
+        elif industry == 'finance':
+            return [
+                {'title': 'Bookkeeping Assistant', 'difficulty': 'Medium', 'potential': 'R8k-R15k/mo', 'description': 'Assist with financial records, reconciliations, and using accounting software.'},
+                {'title': 'Accounts Clerk', 'difficulty': 'Medium', 'potential': 'R7k-R14k/mo', 'description': 'Process invoices, payments, and assist with financial administration.'},
+                {'title': 'Sage/Pastel Operator', 'difficulty': 'Medium', 'potential': 'R8k-R16k/mo', 'description': 'Leverage your accounting software skills for bookkeeping support roles.'}
+            ]
+        elif industry == 'administration':
+            return [
+                {'title': 'Data Entry Specialist', 'difficulty': 'Low', 'potential': 'R4k-R8k/mo', 'description': 'Remote data entry positions on freelance platforms.'},
+                {'title': 'Administrative Assistant', 'difficulty': 'Low', 'potential': 'R5k-R10k/mo', 'description': 'Office admin or remote administrative support roles in SA companies.'},
+                {'title': 'Receptionist', 'difficulty': 'Low', 'potential': 'R4k-R8k/mo', 'description': 'Manage front desk operations, calls, and visitor greeting.'}
+            ]
+        elif industry == 'sales':
+            return [
+                {'title': 'Sales Representative', 'difficulty': 'Medium', 'potential': 'R8k-R20k/mo', 'description': 'Commission-based sales roles leveraging your communication skills.'},
+                {'title': 'Call Centre Agent', 'difficulty': 'Low', 'potential': 'R5k-R10k/mo', 'description': 'Handle inbound or outbound sales calls for SA companies.'},
+                {'title': 'Retail Sales Consultant', 'difficulty': 'Low', 'potential': 'R5k-R12k/mo', 'description': 'Assist customers and drive sales in retail environments.'}
             ]
         else:
+            # General income ideas for entry-level candidates
             return [
-                {'title': 'Entry-Level Opportunities', 'difficulty': 'LOW', 'potential': 'MEDIUM', 'description': 'Explore entry-level roles matching your skills and interests'},
-                {'title': 'Skill Development', 'difficulty': 'LOW', 'potential': 'HIGH', 'description': 'Take online courses to build in-demand skills for better opportunities'},
-                {'title': 'Apprenticeship Program', 'difficulty': 'MEDIUM', 'potential': 'HIGH', 'description': 'Apply for learnerships or apprenticeship programs in your field'}
+                {'title': 'Entry-Level Opportunities', 'difficulty': 'Low', 'potential': 'R4k-R8k/mo', 'description': 'Explore entry-level roles matching your skills and interests on SA job boards.'},
+                {'title': 'Skill Development', 'difficulty': 'Low', 'potential': 'R0-R5k/mo', 'description': 'Take online courses to build in-demand skills for better opportunities.'},
+                {'title': 'YES Programme', 'difficulty': 'Medium', 'potential': 'R5k-R10k/mo', 'description': 'Apply for the Youth Employment Service (YES) programme - a government initiative to help young South Africans gain work experience.'}
             ]
-
-    # ----------------------------------------------------------------------
-    # Main analysis method – async
-    # ----------------------------------------------------------------------
-    async def analyze_cv(self, cv_text: str, job_requirements: Optional[List[str]] = None) -> Dict[str, Any]:
-        """Complete CV analysis – tries AI first, falls back to rules."""
-        logger = get_logger()
-        if not cv_text or not cv_text.strip():
-            return {
-                'extractedSkills': [],
-                'missingSkills': [],
-                'marketKeywords': [],
-                'suggestions': ['Please provide CV text for analysis'],
-                'about': '',
-                'education': [],
-                'experience': [],
-                'achievements': [],
-                'cvText': '',
-                'links': {'linkedin': False, 'github': False, 'portfolio': False}
-            }
-
-        # Try AI extraction (async)
-        ai_result = await self._analyze_with_ai(cv_text)
-
-        if ai_result:
-            about = ai_result.get('about', '')
-            extracted_skills = ai_result.get('skills', [])
-            education = ai_result.get('education', [])
-            experience = ai_result.get('experience', [])
-            achievements = ai_result.get('achievements', [])
-            links = ai_result.get('links', {'linkedin': False, 'github': False, 'portfolio': False})
-            logger.info("CV analysis used AI extraction")
-        else:
-            logger.info("CV analysis using rule-based fallback")
-            about = self.extract_about_section(cv_text) or ""
-            education = self.extract_education(cv_text) or []
-            experience = self.extract_experience(cv_text) or []
-            achievements = self.extract_achievements(cv_text) or []
-            extracted_skills = self.extract_skills(cv_text) or []
-            links = self.extract_links(cv_text) or {'linkedin': False, 'github': False, 'portfolio': False}
-
-        missing_skills = []
-        if job_requirements:
-            missing_skills = self.identify_missing_skills(extracted_skills, job_requirements)
-
-        market_keywords = self.generate_market_keywords(extracted_skills)
-        suggestions = self.generate_suggestions(extracted_skills, cv_text, links, education, experience, achievements)
-        income_ideas = self.generate_income_ideas(extracted_skills)
-
-        if not about or len(about) < 30:
-            if extracted_skills:
-                about = f"Professional with expertise in {', '.join(extracted_skills[:6])}."
-            else:
-                about = "Professional seeking new opportunities."
-
-        logger.info("CV analysis results generated", extra={
-            "skills_count": len(extracted_skills),
-            "education_count": len(education),
-            "experience_count": len(experience),
-            "achievements_count": len(achievements),
-            "income_ideas_count": len(income_ideas)
-        })
-
-        return {
-            'extractedSkills': extracted_skills,
-            'missingSkills': missing_skills,
-            'marketKeywords': market_keywords,
-            'suggestions': suggestions,
-            'about': about,
-            'education': education,
-            'experience': experience,
-            'achievements': achievements,
-            'cvText': cv_text[:2000],
-            'links': links,
-            'incomeIdeas': income_ideas
-        }
 
     def identify_missing_skills(
         self,
         extracted_skills: List[str],
-        job_requirements: List[str]
+        job_requirements: List[str],
+        industry: str = None
     ) -> List[str]:
-        """Identify missing skills compared to job requirements – returns list."""
         if not job_requirements:
+            # Return industry-specific missing keywords if no job requirements provided
+            if industry:
+                return self.get_industry_specific_missing_keywords(industry)
             return []
+        
         missing = []
         extracted_lower = [s.lower() for s in extracted_skills]
         for req in job_requirements:
@@ -809,6 +1244,214 @@ class CVAnalyzer:
                 missing.append(req)
         return missing
 
+    # ----------------------------------------------------------------------
+    # Main analysis method – async
+    # ----------------------------------------------------------------------
+    async def analyze_cv(self, cv_text: str, job_requirements: Optional[List[str]] = None) -> Dict[str, Any]:
+        if not cv_text or not cv_text.strip():
+            return {
+                'extractedSkills': [],
+                'missingSkills': [],
+                'marketKeywords': [],
+                'suggestions': ['Please provide CV text for analysis'],
+                'about': '',
+                'education': [],
+                'experience': [],
+                'achievements': [],
+                'cvText': '',
+                'links': {'linkedin': False, 'github': False, 'portfolio': False, 'driversLicence': False}
+            }
 
+        self.logger.info("Attempting AI-powered CV analysis...")
+        ai_result = await self._analyze_with_ai(cv_text)
 
+        if ai_result:
+            self.logger.info("✅ CV analysis used AI extraction")
+            
+            score = ai_result.get('score', 50)
+            readiness_level = ai_result.get('readinessLevel', 'DEVELOPING')
+            industry = ai_result.get('industry', 'general')
+            strengths = ai_result.get('strengths', [])
+            # Weaknesses are already cleaned in _analyze_with_ai
+            weaknesses = ai_result.get('weaknesses', [])
+            sections = ai_result.get('sections', {})
+            links = ai_result.get('linkCheck', {'linkedin': False, 'github': False, 'portfolio': False, 'driversLicence': False})
+            recommendations = ai_result.get('recommendations', [])
+            missing_keywords = ai_result.get('missingKeywords', [])
+            income_ideas = ai_result.get('incomeIdeas', [])
+            
+            about = sections.get('about', '')
+            extracted_skills = sections.get('skills', [])
+            education = sections.get('education', [])
+            experience = sections.get('experience', [])
+            achievements = sections.get('achievements', [])
+            
+            links_simple = {
+                'linkedin': links.get('linkedin', False),
+                'github': links.get('github', False),
+                'portfolio': links.get('portfolio', False),
+                'driversLicence': links.get('driversLicence', False)
+            }
+            
+            market_keywords = self.generate_market_keywords(extracted_skills)
+            
+            # If missing keywords are empty but we have an industry, provide industry defaults
+            if not missing_keywords and industry != 'general':
+                missing_keywords = self.get_industry_specific_missing_keywords(industry)
+            
+            # Also ensure recommendations are industry-appropriate
+            if recommendations and industry != 'technology':
+                # Remove any tech-specific recommendations for non-tech industries
+                tech_rec_keywords = ['github', 'git', 'docker', 'kubernetes', 'devops', 'agile', 'scrum', 'ci/cd', 'cloud']
+                cleaned_recs = []
+                for rec in recommendations:
+                    rec_lower = rec.lower()
+                    if not any(tech in rec_lower for tech in tech_rec_keywords):
+                        cleaned_recs.append(rec)
+                if len(cleaned_recs) < 3 and industry in self.industry_recommendations:
+                    cleaned_recs.extend(self.industry_recommendations[industry][:3])
+                recommendations = cleaned_recs[:8]
+            
+            self.logger.info(f"   Industry: {industry}")
+            self.logger.info(f"   Score: {score}")
+            self.logger.info(f"   Weaknesses: {weaknesses}")
+            
+            return {
+                'extractedSkills': extracted_skills,
+                'missingSkills': missing_keywords if job_requirements else missing_keywords,
+                'marketKeywords': market_keywords,
+                'suggestions': recommendations,
+                'about': about,
+                'education': education,
+                'experience': experience,
+                'achievements': achievements,
+                'cvText': cv_text[:2000],
+                'links': links_simple,
+                'incomeIdeas': income_ideas,
+                'score': score,
+                'readinessLevel': readiness_level,
+                'strengths': strengths,
+                'weaknesses': weaknesses,
+                'recommendations': recommendations,
+                'missingKeywords': missing_keywords,
+                'industry': industry
+            }
+        else:
+            self.logger.warning("⚠️ AI extraction failed - using rule-based fallback")
+            
+            # Extract all the basic information
+            about = self.extract_about_section(cv_text) or ""
+            education = self.extract_education(cv_text) or []
+            experience = self.extract_experience(cv_text) or []
+            achievements = self.extract_achievements(cv_text) or []
+            extracted_skills = self.extract_skills(cv_text) or []
+            links = self.extract_links(cv_text) or {'linkedin': False, 'github': False, 'portfolio': False, 'driversLicence': False}
+            
+            # Detect industry
+            industry = self.detect_industry(cv_text, extracted_skills, experience)
+            
+            # Get industry-specific weaknesses
+            weaknesses = self.get_industry_specific_weaknesses(industry, extracted_skills, experience, achievements)
+            
+            # Get industry-specific recommendations
+            suggestions = self.get_industry_specific_recommendations(industry, extracted_skills, links, education)
+            
+            # Get industry-specific missing keywords
+            missing_keywords = self.get_industry_specific_missing_keywords(industry)
+            
+            # If job requirements provided, override missing skills
+            if job_requirements:
+                missing_skills = self.identify_missing_skills(extracted_skills, job_requirements, industry)
+            else:
+                missing_skills = missing_keywords
+            
+            market_keywords = self.generate_market_keywords(extracted_skills)
+            income_ideas = self.generate_income_ideas(extracted_skills, industry)
+            
+            # Generate strengths based on extracted data
+            strengths = []
+            if education and len(education) > 0:
+                strengths.append(f"Educational background: {education[0][:100]}")
+            if experience and len(experience) > 0:
+                strengths.append(f"Work experience in {industry if industry != 'general' else 'relevant field'}")
+            if len(extracted_skills) >= 5:
+                strengths.append(f"Good skill set with {len(extracted_skills)} identified skills")
+            if achievements and len(achievements) >= 2:
+                strengths.append("Demonstrated achievements and accomplishments")
+            if links.get('driversLicence', False):
+                strengths.append("Valid driver's licence - valuable for many roles")
+            
+            if not strengths:
+                strengths = ["Motivated individual ready to develop skills and contribute"]
+            
+            # Ensure we have at least 3 strengths
+            while len(strengths) < 3:
+                strengths.append("Willingness to learn and grow professionally")
+            
+            # Calculate a simple score
+            score = 30  # Base score
+            if education:
+                score += 15
+            if experience:
+                score += 25
+            if len(extracted_skills) >= 5:
+                score += 15
+            if achievements:
+                score += 10
+            if links.get('linkedin', False):
+                score += 5
+            score = min(score, 100)
+            
+            # Determine readiness level
+            if score >= 85:
+                readiness_level = "EXCEPTIONAL"
+            elif score >= 70:
+                readiness_level = "HIGH POTENTIAL"
+            elif score >= 50:
+                readiness_level = "INTERMEDIATE"
+            elif score >= 35:
+                readiness_level = "DEVELOPING"
+            else:
+                readiness_level = "JUNIOR"
+            
+            # Create a summary
+            summary = f"A {readiness_level.lower()} candidate with "
+            if education:
+                summary += f"{education[0][:50]}"
+            if experience:
+                summary += f" and {len(experience)} work experience entries"
+            if extracted_skills:
+                summary += f". Key skills include {', '.join(extracted_skills[:3])}"
+            summary += "."
+            
+            if not about or len(about) < 30:
+                if extracted_skills:
+                    about = f"Professional with expertise in {', '.join(extracted_skills[:6])}."
+                else:
+                    about = "Motivated individual seeking opportunities to grow and contribute."
 
+            self.logger.info(f"CV analysis results generated using fallback")
+            self.logger.info(f"   Industry: {industry}")
+            self.logger.info(f"   Weaknesses: {weaknesses}")
+
+            return {
+                'extractedSkills': extracted_skills,
+                'missingSkills': missing_skills,
+                'marketKeywords': market_keywords,
+                'suggestions': suggestions,
+                'about': about,
+                'education': education,
+                'experience': experience,
+                'achievements': achievements,
+                'cvText': cv_text[:2000],
+                'links': links,
+                'incomeIdeas': income_ideas,
+                'score': score,
+                'readinessLevel': readiness_level,
+                'strengths': strengths[:6],
+                'weaknesses': weaknesses[:6],
+                'recommendations': suggestions,
+                'missingKeywords': missing_keywords[:12],
+                'industry': industry,
+                'summary': summary
+            }

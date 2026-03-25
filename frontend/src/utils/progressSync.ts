@@ -76,4 +76,4 @@ export function unlockAllPages(empowermentScore?: number) {
   
   // Trigger storage event so other components update
   window.dispatchEvent(new Event('storage'))
-}
+} // Remove the extra comma here

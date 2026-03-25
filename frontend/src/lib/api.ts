@@ -1,8 +1,6 @@
 // frontend/src/lib/api.ts
 const API_BASE =
-  import.meta.env.VITE_API_BASE_URL ||
-  import.meta.env.VITE_API_URL ||
-  'http://localhost:5000/api'; // Frontend API base URL
+  import.meta.env.VITE_API_URL || 'http://localhost:8000/api';// Frontend API base URL
 
 // Demo mode is opt-in via env var; real APIs are used by default.
 const USE_DEMO_MODE = import.meta.env.VITE_USE_DEMO_MODE === 'true';
@@ -170,7 +168,7 @@ export const authAPIDemo = {
         token,
         user: {
           id: 'demo-1',
-          name: 'Demo User',
+          name: 'Siyanda Nkosi',
           email: email
         }
       }
@@ -188,7 +186,7 @@ export const authAPIDemo = {
       data: {
         user: {
           id: 'demo-1',
-          name: 'Demo User',
+          name: 'Siyanda Nkosi',
           email: 'demo@example.com'
         }
       }
@@ -269,7 +267,7 @@ export const twinAPIDemo = {
       data: {
         twin: {
           id: 'demo-twin-1',
-          name: 'Demo User',
+          name: 'Siyanda Nkosi',
           skills: ['JavaScript', 'React', 'Node.js'],
           experienceYears: 3,
           education: ['Bachelor of Computer Science'],
@@ -670,7 +668,7 @@ export const userAPIDemo = {
       data: {
         user: {
           id: 'demo-1',
-          name: 'Demo User',
+          name: 'Siyanda Nkosi',
           email: 'demo@example.com',
           age: 28,
           province: 'Gauteng',
@@ -856,8 +854,15 @@ export const twinAPIReal = {
       });
 
       // Calculate empowerment score if not provided by backend
-      if (response.data?.twin && !response.data.twin.empowermentScore) {
-        response.data.twin.empowermentScore = calculateEmpowermentScoreLocal(data);
+      if (response .status === 'success') {
+        if (!response.data?.twin && response.twin){
+          return{
+            status: 'success',
+            data: {
+              twin: response.twin
+            }
+          };
+        }
       }
 
       return response;

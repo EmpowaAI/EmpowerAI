@@ -18,7 +18,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from utils.logger import get_logger
 
-router = APIRouter()
+router = APIRouter(prefix="/twin/chat", tags=["Digital Twin Chat"])
 logger = logging.getLogger(__name__)
 
 class ChatMessage(BaseModel):

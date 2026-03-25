@@ -112,7 +112,9 @@ async def root():
         "endpoints": {
             "cv_analyze": "/api/cv/analyze",
             "cv_analyze_file": "/api/cv/analyze-file",
+            "cv_revamp": "/api/cv/revamp",
             "digital_twin": "/api/twin/generate",
+            "digital_twin_get": "/api/twin/my-twin",
             "simulation": "/api/simulation",
             "interview": "/api/interview",
             "chat": "/api/chat",
@@ -151,16 +153,18 @@ async def debug_connection():
         "timestamp": datetime.now().isoformat()
     }
 
-# Import routes
-from routes import digital_twin, simulation, cv_analysis, cv_analysis_file, interview, chat
+# Import all routes - FIXED: Removed duplicate chat import
+from routes import digital_twin, simulation, cv_analysis, cv_analysis_file, cv_revamp, interview, chat, twin
 
-# Include routers with proper prefixes - FIXED: Added /cv prefix for CV endpoints
+# Include all routers with proper prefixes
 app.include_router(digital_twin.router, prefix="/api")
 app.include_router(simulation.router, prefix="/api")
-app.include_router(cv_analysis.router, prefix="/api/cv")  # Fixed: Added /cv prefix
-app.include_router(cv_analysis_file.router, prefix="/api/cv")  # Fixed: Added /cv prefix
+app.include_router(cv_analysis.router, prefix="/api/cv")
+app.include_router(cv_analysis_file.router, prefix="/api/cv")
+app.include_router(cv_revamp.router, prefix="/api/cv")
 app.include_router(interview.router, prefix="/api")
-app.include_router(chat.router, prefix="/api")
+app.include_router(chat.router, prefix="/api")  # Single chat router (AI-powered)
+app.include_router(twin.router, prefix="/api")  # New twin router for /api/twin/* endpoints
 
 # Print all registered routes for debugging
 logger.info("=== Registered Routes ===")
