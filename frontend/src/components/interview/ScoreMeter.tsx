@@ -1,83 +1,67 @@
-// frontend/src/components/interview/ScoreMeter.tsx
-import React from 'react';
-import { cn } from '../../lib/utils';
+import { motion } from "framer-motion";
 
 interface ScoreMeterProps {
   score: number;
-  size?: 'sm' | 'md' | 'lg';
-  showLabel?: boolean;
+  label?: string;
+  size?: "sm" | "md" | "lg";
 }
 
-export const ScoreMeter: React.FC<ScoreMeterProps> = ({
-  score,
-  size = 'md',
-  showLabel = true
-}) => {
-  const getColor = (score: number) => {
-    if (score >= 80) return 'text-emerald-500';
-    if (score >= 60) return 'text-blue-500';
-    if (score >= 40) return 'text-amber-500';
-    return 'text-rose-500';
+export default function ScoreMeter({ score, label = "Score", size = "md" }: ScoreMeterProps) {
+  const sizes = {
+    sm: { dim: 80, stroke: 6, fontSize: "text-lg", labelSize: "text-[10px]" },
+    md: { dim: 120, stroke: 8, fontSize: "text-2xl", labelSize: "text-xs" },
+    lg: { dim: 160, stroke: 10, fontSize: "text-4xl", labelSize: "text-sm" },
   };
 
-  const getLabel = (score: number) => {
-    if (score >= 80) return 'Excellent';
-    if (score >= 60) return 'Good';
-    if (score >= 40) return 'Fair';
-    return 'Needs Work';
-  };
-
-  const sizeClasses = {
-    sm: 'w-16 h-16 text-lg',
-    md: 'w-24 h-24 text-2xl',
-    lg: 'w-32 h-32 text-3xl'
-  };
-
-  const strokeWidth = size === 'sm' ? 4 : size === 'md' ? 6 : 8;
-  const radius = size === 'sm' ? 28 : size === 'md' ? 42 : 56;
+  const { dim, stroke, fontSize, labelSize } = sizes[size];
+  const radius = (dim - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (score / 100) * circumference;
+  const progress = (score / 100) * circumference;
+
+  const getColor = () => {
+    if (score >= 80) return "hsl(var(--cv-success))";
+    if (score >= 60) return "hsl(var(--cv-gold))";
+    return "hsl(var(--destructive))";
+  };
 
   return (
     <div className="flex flex-col items-center">
-      <div className={cn("relative", sizeClasses[size])}>
-        {/* Background circle */}
-        <svg className="w-full h-full -rotate-90">
+      <div className="relative" style={{ width: dim, height: dim }}>
+        <svg width={dim} height={dim} className="-rotate-90">
           <circle
-            cx="50%"
-            cy="50%"
+            cx={dim / 2}
+            cy={dim / 2}
             r={radius}
             fill="none"
-            stroke="currentColor"
-            strokeWidth={strokeWidth}
-            className="text-slate-100 dark:text-slate-700"
+            stroke="hsl(var(--muted))"
+            strokeWidth={stroke}
           />
-          {/* Progress circle */}
-          <circle
-            cx="50%"
-            cy="50%"
+          <motion.circle
+            cx={dim / 2}
+            cy={dim / 2}
             r={radius}
             fill="none"
-            stroke="currentColor"
-            strokeWidth={strokeWidth}
-            strokeDasharray={circumference}
-            strokeDashoffset={offset}
+            stroke={getColor()}
+            strokeWidth={stroke}
             strokeLinecap="round"
-            className={cn("transition-all duration-1000", getColor(score))}
+            strokeDasharray={circumference}
+            initial={{ strokeDashoffset: circumference }}
+            animate={{ strokeDashoffset: circumference - progress }}
+            transition={{ duration: 1.5, ease: "easeOut" }}
           />
         </svg>
-        {/* Score text */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className={cn("font-black", getColor(score))}>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <motion.span
+            className={`${fontSize} font-display font-bold`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+          >
             {score}
-          </span>
+          </motion.span>
+          <span className={`${labelSize} text-muted-foreground`}>{label}</span>
         </div>
       </div>
-      {showLabel && (
-        <span className={cn("mt-2 text-xs md:text-sm font-medium", getColor(score))}>
-          {getLabel(score)}
-        </span>
-      )}
     </div>
   );
-};
+}

@@ -74,6 +74,16 @@ class CVData(BaseModel):
     score: Optional[int] = None
     readinessLevel: Optional[str] = None
     summary: Optional[str] = None
+    recommendations: Optional[List[str]] = None
+    missingKeywords: Optional[List[str]] = None
+
+# NEW: CV Revamp Request Model
+class CVRevampRequest(BaseModel):
+    cvData: Dict[str, Any]  # The TransformedCVAnalysis data
+
+# NEW: CV Revamp Response Model
+class CVRevampResponse(BaseModel):
+    revampedCV: str
 
 # CV Analysis Models
 class CVAnalysisRequest(BaseModel):
@@ -127,7 +137,7 @@ class InterviewStartRequest(BaseModel):
     difficulty: str = Field(default="medium", description="easy, medium, or hard")
     company: Optional[str] = Field(None, description="Target company for questions")
     cvData: Optional[CVData] = Field(None, description="User's CV data for personalization")
-    jobDescription: Optional[str] = Field(None, description="Job description for tailored questions")  # 👈 ADDED
+    jobDescription: Optional[str] = Field(None, description="Job description for tailored questions")
     
     @field_validator('type')
     def validate_type(cls, v):
@@ -169,7 +179,7 @@ class InterviewSessionResponse(BaseModel):
     feedback: List[Dict[str, Any]] = []
     startedAt: Optional[datetime] = None
     cvUsed: bool = False
-    jobDescriptionUsed: bool = False  # 👈 ADDED to track if JD was used
+    jobDescriptionUsed: bool = False
 
 class InterviewAnswerRequest(BaseModel):
     sessionId: str

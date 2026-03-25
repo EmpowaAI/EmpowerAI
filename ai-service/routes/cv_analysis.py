@@ -18,18 +18,15 @@ async def analyze_cv(request: CVAnalysisRequest, req: Request):
     """
     try:
         logger = get_logger(req.headers.get('X-Correlation-ID'))
-        logger.info("CV analysis request received", extra={
-            "cv_text_length": len(request.cvText)
-        })
-        result = await cv_analyzer.analyze_cv(  # <-- await here
+        logger.info(f"CV analysis request received with {len(request.cvText)} characters")
+        
+        result = await cv_analyzer.analyze_cv(
             request.cvText,
             request.jobRequirements
         )
-        logger.info("CV analysis completed", extra={
-            "education_count": len(result.get('education', [])),
-            "experience_count": len(result.get('experience', [])),
-            "skills_count": len(result.get('extractedSkills', []))
-        })
+        
+        logger.info(f"CV analysis completed - Found: {len(result.get('education', []))} education entries, {len(result.get('experience', []))} experience entries, {len(result.get('extractedSkills', []))} skills")
+        
         return CVAnalysisResponse(**result)
     except RateLimitError as e:
         retry_after = 60
@@ -47,7 +44,7 @@ async def analyze_cv(request: CVAnalysisRequest, req: Request):
         )
     except Exception as e:
         logger = get_logger(req.headers.get('X-Correlation-ID'))
-        logger.error("Error in CV analysis", extra={"error": str(e)})
+        logger.error(f"Error in CV analysis: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error analyzing CV: {str(e)}")
 
 @router.get("/health")

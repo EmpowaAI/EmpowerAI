@@ -107,13 +107,15 @@
   * {
     @apply border-border;
   }
+  
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
   }
 }
 
 @layer utilities {
+  /* Animation delays */
   .animation-delay-200 {
     animation-delay: 0.2s;
   }
@@ -133,12 +135,13 @@
     animation-delay: 4s;
   }
 
+  /* Font utilities */
   .font-display {
     font-family: 'Plus Jakarta Sans', sans-serif;
     letter-spacing: -0.01em;
   }
 
-  /* Custom animations */
+  /* Animation keyframes */
   @keyframes blob {
     0% { transform: translate(0px, 0px) scale(1); }
     33% { transform: translate(30px, -50px) scale(1.1); }
@@ -157,8 +160,14 @@
   }
 
   @keyframes slide-up {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { 
+      opacity: 0; 
+      transform: translateY(30px); 
+    }
+    to { 
+      opacity: 1; 
+      transform: translateY(0); 
+    }
   }
 
   @keyframes bounce-slow {
@@ -176,28 +185,36 @@
     to { width: 100%; }
   }
 
+  /* Animation classes */
   .animate-blob {
     animation: blob 7s infinite;
   }
+  
   .animate-float {
     animation: float 6s ease-in-out infinite;
   }
+  
   .animate-fade-in {
     animation: fade-in 0.6s ease-out forwards;
   }
+  
   .animate-slide-up {
     animation: slide-up 0.6s ease-out forwards;
   }
+  
   .animate-bounce-slow {
     animation: bounce-slow 3s ease-in-out infinite;
   }
+  
   .animate-pulse-slow {
     animation: pulse-slow 4s ease-in-out infinite;
   }
+  
   .animate-progress {
     animation: progress 2s ease-out forwards;
   }
 
+  /* Route transition */
   .route-transition {
     animation: fade-in 0.18s ease-out;
   }
@@ -206,6 +223,43 @@
     .route-transition {
       animation: none;
     }
+  }
+
+  /* Image and panel utilities */
+  .crisp-image {
+    image-rendering: auto;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    filter: none;
+  }
+
+  .panel-image-overlay {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--foreground) / 0.84) 0%,
+      hsl(var(--foreground) / 0.62) 48%,
+      hsl(var(--foreground) / 0.76) 100%
+    );
+  }
+
+  .panel-image-accent {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--primary) / 0.22) 0%,
+      transparent 42%,
+      hsl(var(--accent) / 0.16) 100%
+    );
+  }
+
+  .panel-copy-shadow {
+    text-shadow: 0 2px 18px hsl(var(--foreground) / 0.35);
+  }
+
+  /* FIXED: Auth card surface - removed opacity modifiers from @apply */
+  .auth-card-surface {
+    @apply rounded-2xl border border-border bg-card shadow-2xl;
+    background-color: hsl(var(--card) / 0.95);
+    border-color: hsl(var(--border) / 0.7);
   }
 
   /* South African geometric pattern */
@@ -217,12 +271,14 @@
     background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d4a017' fill-opacity='0.04'%3E%3Cpath d='M30 0L60 30L30 60L0 30z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
   }
 
+  /* Grid utilities */
   .bg-grid-white {
     background-image:
       linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
       linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
   }
 
+  /* Content visibility */
   .cv-auto {
     content-visibility: auto;
     contain-intrinsic-size: 800px;

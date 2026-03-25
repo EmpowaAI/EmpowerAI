@@ -1,11 +1,13 @@
+// frontend/src/components/GlassCard.tsx
 import { cn } from "../../lib/utils";
+
 import { motion } from "framer-motion";
-import {type ReactNode } from "react";
+import { type ReactNode } from "react";
 
 interface GlassCardProps {
   children: ReactNode;
   className?: string;
-  glow?: "cyan" | "purple" | "pink" | "green" | "none";
+  glow?: "cyan" | "purple" | "pink" | "green" | "gold" | "none"; // Added "gold"
   hover?: boolean;
   delay?: number;
 }
@@ -18,6 +20,7 @@ export default function GlassCard({
     purple: "shadow-[0_0_30px_-5px_hsl(var(--secondary)/0.3)]",
     pink: "shadow-[0_0_30px_-5px_hsl(var(--destructive)/0.3)]",
     green: "shadow-[0_0_30px_-5px_hsl(var(--success)/0.3)]",
+    gold: "shadow-[0_0_30px_-5px_hsl(var(--sa-gold)/0.3)]", // Added gold style
     none: "",
   };
 
