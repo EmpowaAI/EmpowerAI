@@ -1,4 +1,9 @@
-const AI_SERVICE_URL = import.meta.env.VITE_AI_SERVICE_URL || 'http://localhost:8000';
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  import.meta.env.VITE_API_URL ||
+  'http://localhost:5000/api';
+
+const getToken = () => localStorage.getItem('empowerai-token');
 
 export type ChatMsg = { role: "user" | "assistant"; content: string };
 
@@ -14,12 +19,13 @@ export async function streamChat({
   onError: (error: string) => void;
 }) {
   try {
-    console.log('Sending to AI service:', AI_SERVICE_URL);
+    console.log('Sending twin chat:', API_BASE_URL);
     
-    const response = await fetch(`${AI_SERVICE_URL}/api/chat/twin`, {
+    const response = await fetch(`${API_BASE_URL}/chat/twin`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...(getToken() ? { 'Authorization': `Bearer ${getToken()}` } : {}),
       },
       body: JSON.stringify({ messages }),
     });
@@ -45,9 +51,10 @@ export async function streamChat({
     if (contentType?.includes('application/json')) {
       // Handle JSON response
       const data = await response.json();
-      if (data.reply) {
+      const payload = data?.data || data;
+      if (payload.reply) {
         // Send the entire reply at once
-        onDelta(data.reply);
+        onDelta(payload.reply);
         onDone();
       } else {
         onError("Invalid response format from AI service");
