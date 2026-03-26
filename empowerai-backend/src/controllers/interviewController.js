@@ -106,7 +106,7 @@ function normalizeScoreOnly(rawScore) {
 
 exports.startInterview = async (req, res, next) => {
   try {
-    const { type, difficulty, company } = req.body;
+    const { type, difficulty, company, cvData, jobDescription } = req.body;
 
     if (!type) {
       return res.status(400).json({
@@ -125,13 +125,17 @@ exports.startInterview = async (req, res, next) => {
         {
           type,
           difficulty: difficulty || 'medium',
-          company: company || null
+          company: company || null,
+          cvData: cvData || null,
+          jobDescription: jobDescription || null,
         },
-        async ({ type: taskType, difficulty: taskDifficulty, company: taskCompany }) => {
+        async ({ type: taskType, difficulty: taskDifficulty, company: taskCompany, cvData: taskCvData, jobDescription: taskJobDescription }) => {
           const response = await aiServiceClient.post('/interview/start', {
             type: taskType,
             difficulty: taskDifficulty || 'medium',
-            company: taskCompany || null
+            company: taskCompany || null,
+            cvData: taskCvData || null,
+            jobDescription: taskJobDescription || null,
           }, { timeout: 8000 }); // 8 second timeout
           return response.data
         },
@@ -183,7 +187,7 @@ exports.startInterview = async (req, res, next) => {
 exports.submitAnswer = async (req, res, next) => {
   try {
     const { sessionId } = req.params;
-    const { questionId, response } = req.body;
+    const { questionId, response, cvData } = req.body;
 
     if (!questionId || !response) {
       return res.status(400).json({
@@ -199,11 +203,13 @@ exports.submitAnswer = async (req, res, next) => {
       // Try AI service first with shorter timeout
       const queuedResult = await runAiTask(
         'interview:answer',
-        { questionId, response },
-        async ({ questionId: taskQuestionId, response: taskResponse }) => {
+        { sessionId, questionId, response, cvData: cvData || null },
+        async ({ sessionId: taskSessionId, questionId: taskQuestionId, response: taskResponse, cvData: taskCvData }) => {
           const apiResponse = await aiServiceClient.post('/interview/answer', {
+            sessionId: taskSessionId,
             questionId: taskQuestionId,
-            response: taskResponse
+            response: taskResponse,
+            cvData: taskCvData || null,
           }, { timeout: 8000 }); // 8 second timeout
           return apiResponse.data
         },
