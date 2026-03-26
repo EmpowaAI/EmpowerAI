@@ -1,5 +1,10 @@
 // frontend/src/services/aiService.ts
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  import.meta.env.VITE_API_URL ||
+  'http://localhost:5000/api';
+
+const getToken = () => localStorage.getItem('empowerai-token');
 
 export interface IncomeIdea {
   title: string;
@@ -155,12 +160,13 @@ export function formatEducationForDisplay(education: Array<{ degree: string; ins
 class AIService {
   async analyzeCV(cvText: string, jobRequirements: string[] = []): Promise<TransformedCVAnalysis> {
     try {
-      console.log('Calling AI Service for CV analysis...', { url: `${API_BASE_URL}/api/cv/analyze` })
+      console.log('Calling AI Service for CV analysis...', { url: `${API_BASE_URL}/cv/analyze` })
       
-      const response = await fetch(`${API_BASE_URL}/api/cv/analyze`, {
+      const response = await fetch(`${API_BASE_URL}/cv/analyze`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(getToken() ? { 'Authorization': `Bearer ${getToken()}` } : {}),
         },
         body: JSON.stringify({
           cvText,
@@ -189,7 +195,8 @@ class AIService {
         throw new Error(error.detail || `Failed to analyze CV (Status: ${response.status})`)
       }
 
-      const data: CVAnalysisResponse = await response.json()
+      const raw = await response.json()
+      const data: CVAnalysisResponse = raw?.data?.analysis || raw
       console.log('AI Service response received:', data)
       return this.transformResponse(data)
     } catch (error) {
@@ -207,13 +214,16 @@ class AIService {
 
     try {
       console.log('Calling AI Service for CV file analysis...', { 
-        url: `${API_BASE_URL}/api/cv/analyze-file`,
+        url: `${API_BASE_URL}/cv/analyze-file`,
         fileName: file.name,
         fileSize: file.size
       })
       
-      const response = await fetch(`${API_BASE_URL}/api/cv/analyze-file`, {
+      const response = await fetch(`${API_BASE_URL}/cv/analyze-file`, {
         method: 'POST',
+        headers: {
+          ...(getToken() ? { 'Authorization': `Bearer ${getToken()}` } : {}),
+        },
         body: formData,
       })
 
@@ -238,7 +248,8 @@ class AIService {
         throw new Error(error.detail || `Failed to analyze CV file (Status: ${response.status})`)
       }
 
-      const data: CVAnalysisResponse = await response.json()
+      const raw = await response.json()
+      const data: CVAnalysisResponse = (raw as any)?.data?.analysis || raw
       console.log('✅ AI Service file analysis response received:', data)
       console.log('📊 Weaknesses from API:', data.weaknesses)
       
@@ -251,12 +262,13 @@ class AIService {
 
   async revampCV(cvData: TransformedCVAnalysis): Promise<RevampedCVResponse> {
     try {
-      console.log('Calling Azure AI for CV revamp...', { url: `${API_BASE_URL}/api/cv/revamp` });
+      console.log('Calling Azure AI for CV revamp...', { url: `${API_BASE_URL}/cv/revamp` });
       
-      const response = await fetch(`${API_BASE_URL}/api/cv/revamp`, {
+      const response = await fetch(`${API_BASE_URL}/cv/revamp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(getToken() ? { 'Authorization': `Bearer ${getToken()}` } : {}),
         },
         body: JSON.stringify({
           cvData,
@@ -268,7 +280,8 @@ class AIService {
         throw new Error(error.detail || `Failed to revamp CV (Status: ${response.status})`);
       }
 
-      const data = await response.json();
+      const raw = await response.json();
+      const data = (raw as any)?.data?.revamp || raw;
       console.log('Azure AI revamp response received:', data);
       
       if (data && typeof data === 'object') {
