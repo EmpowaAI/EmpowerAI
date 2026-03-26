@@ -70,6 +70,9 @@ const interviewStartSchema = z.object({
     errorMap: () => ({ message: 'Interview type must be tech, behavioral, or non-tech' }),
   }),
   difficulty: z.enum(['easy', 'medium', 'hard']).optional(),
+  company: z.string().max(100).optional(),
+  cvData: z.object({}).passthrough().optional(),
+  jobDescription: z.string().max(10_000).optional(),
 });
 
 /**
@@ -78,6 +81,7 @@ const interviewStartSchema = z.object({
 const interviewAnswerSchema = z.object({
   questionId: z.string().min(1, 'Question ID is required'),
   response: z.string().min(1, 'Response is required').max(5000, 'Response is too long'),
+  cvData: z.object({}).passthrough().optional(),
 });
 
 /**

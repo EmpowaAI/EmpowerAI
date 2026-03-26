@@ -1,5 +1,10 @@
 // frontend/src/services/interviewService.ts
-const API_BASE_URL = import.meta.env.VITE_AI_SERVICE_URL || 'http://127.0.0.1:8000';
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  import.meta.env.VITE_API_URL ||
+  'http://localhost:5000/api';
+
+const getToken = () => localStorage.getItem('empowerai-token');
 
 export interface ServiceInterviewQuestion {
   id: string;
@@ -58,9 +63,12 @@ class InterviewService {
     jobDescription?: string
   ): Promise<ServiceInterviewSession> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/interview/start`, {
+      const response = await fetch(`${API_BASE_URL}/interview/start`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(getToken() ? { 'Authorization': `Bearer ${getToken()}` } : {}),
+        },
         body: JSON.stringify({
           type,
           difficulty,
@@ -90,11 +98,13 @@ class InterviewService {
     cvData?: CVContext
   ): Promise<ServiceInterviewFeedback> {
     try {
-      const apiResponse = await fetch(`${API_BASE_URL}/api/interview/answer`, {
+      const apiResponse = await fetch(`${API_BASE_URL}/interview/${sessionId}/answer`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(getToken() ? { 'Authorization': `Bearer ${getToken()}` } : {}),
+        },
         body: JSON.stringify({
-          sessionId,
           questionId,
           response,
           cvData
@@ -123,9 +133,7 @@ class InterviewService {
 
     // Try multiple endpoints
     const endpoints = [
-      { url: `${API_BASE_URL}/health`, name: 'main' },
-      { url: 'http://127.0.0.1:8000/health', name: '127' },
-      { url: 'http://localhost:8000/health', name: 'localhost' },
+      { url: `${API_BASE_URL.replace(/\/api\/?$/, '')}/api/health`, name: 'backend' },
     ];
 
     for (const endpoint of endpoints) {
