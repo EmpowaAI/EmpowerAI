@@ -56,10 +56,29 @@ const cvAnalysisSchema = z.object({
 });
 
 /**
+ * CV revamp validation schema
+ */
+const cvRevampSchema = z.object({
+  cvData: z.object({}).passthrough(),
+});
+
+/**
  * Chat message validation schema
  */
 const chatMessageSchema = z.object({
   message: z.string().min(1, 'Message is required').max(2000, 'Message is too long'),
+});
+
+/**
+ * Digital Twin chat schema
+ */
+const chatTwinSchema = z.object({
+  messages: z.array(
+    z.object({
+      role: z.string().min(1),
+      content: z.string().min(1).max(5000),
+    })
+  ).min(1),
 });
 
 /**
@@ -112,9 +131,11 @@ module.exports = {
   createTwinSchema,
   simulationSchema,
   cvAnalysisSchema,
+  cvRevampSchema,
   interviewStartSchema,
   interviewAnswerSchema,
   chatMessageSchema,
+  chatTwinSchema,
   validate,
 };
 

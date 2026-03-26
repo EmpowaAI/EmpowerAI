@@ -1,10 +1,10 @@
 const express = require('express');
 const multer = require('multer');
-const { analyzeCV, analyzeCVFile } = require('../controllers/cvController');
+const { analyzeCV, analyzeCVFile, revampCV } = require('../controllers/cvController');
 const auth = require('../middleware/auth');
 const { aiServiceLimiter } = require('../middleware/rateLimiter');
 const validateRequest = require('../middleware/validate');
-const { cvAnalysisSchema } = require('../utils/validators');
+const { cvAnalysisSchema, cvRevampSchema } = require('../utils/validators');
 const router = express.Router();
 
 // All routes protected by authentication
@@ -39,6 +39,9 @@ router.post('/analyze', validateRequest(cvAnalysisSchema), analyzeCV);
 
 // File upload CV analysis
 router.post('/analyze-file', upload.single('cvFile'), analyzeCVFile);
+
+// CV revamp (structured rewrite)
+router.post('/revamp', validateRequest(cvRevampSchema), revampCV);
 
 module.exports = router;
 

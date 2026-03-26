@@ -68,3 +68,54 @@ exports.sendMessage = async (req, res, next) => {
     next(error);
   }
 };
+
+/**
+ * Digital Twin chat message
+ * @route POST /api/chat/twin
+ * @access Private
+ */
+exports.sendTwinChat = async (req, res, next) => {
+  const correlationId = req.correlationId || req.id;
+
+  try {
+    const { messages } = req.body || {};
+
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'messages is required'
+      });
+    }
+
+    const queuedResult = await runAiTask(
+      'chat:twin',
+      { messages },
+      async ({ messages: taskMessages }) => {
+        const response = await aiServiceClient.post('/chat/twin', { messages: taskMessages }, { timeout: 15000 });
+        return response.data;
+      },
+      { timeout: 15000, includeJobId: true }
+    );
+
+    const replyData = queuedResult.result || queuedResult;
+    const meta = queuedResult.result ? { jobId: queuedResult.jobId, queued: queuedResult.queued } : null;
+
+    logger.info('Twin chat response received', { correlationId, replyLength: replyData?.reply?.length || 0 });
+
+    return res.status(200).json({
+      status: 'success',
+      data: {
+        ...replyData,
+        ...(meta ? { meta } : {})
+      }
+    });
+  } catch (error) {
+    logger.error('Twin chat error', {
+      correlationId,
+      error: error.message,
+      status: error.response?.status
+    });
+
+    next(error);
+  }
+};
