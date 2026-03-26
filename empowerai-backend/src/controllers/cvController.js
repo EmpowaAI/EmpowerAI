@@ -404,3 +404,70 @@ exports.analyzeCVFile = async (req, res, next) => {
     next(unexpectedError);
   }
 };
+
+/**
+ * Revamp CV (structured rewrite)
+ * @route POST /api/cv/revamp
+ */
+exports.revampCV = async (req, res, next) => {
+  try {
+    const { cvData } = req.body || {};
+
+    if (!cvData || typeof cvData !== 'object') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'cvData is required'
+      });
+    }
+
+    const queuedResult = await runAiTask(
+      'cv:revamp',
+      { cvData },
+      async ({ cvData: taskCvData }) => {
+        const response = await callWithRateLimitRetry(() =>
+          aiServiceClient.post('/cv/revamp', { cvData: taskCvData })
+        );
+        return response.data;
+      },
+      { timeout: 60000, includeJobId: true }
+    );
+
+    const revamp = queuedResult.result || queuedResult;
+    const meta = queuedResult.result ? { jobId: queuedResult.jobId, queued: queuedResult.queued } : undefined;
+
+    return res.status(200).json({
+      status: 'success',
+      data: {
+        revamp,
+        ...(meta ? { meta } : {})
+      }
+    });
+  } catch (error) {
+    console.error('[CV Controller] Error revamping CV:', {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+      code: error.code
+    });
+
+    const errorMessage = error.message || '';
+    if (error.isRateLimit || errorMessage.toLowerCase().includes('rate limit')) {
+      const retryAfter = error.retryAfter || 60;
+      return res.status(429).json({
+        status: 'error',
+        message: `AI service is rate limited. Please try again in ${retryAfter} seconds.`,
+        retryAfter
+      });
+    }
+
+    if (error.response?.status === 400) {
+      return next(new BadRequestError(error.response?.data?.detail || 'Invalid CV data for revamp'));
+    }
+
+    if (error.response?.status === 503 || error.code === 'ECONNABORTED') {
+      return next(new ServiceUnavailableError('AI service is temporarily unavailable. Please try again later.'));
+    }
+
+    return next(error);
+  }
+};
