@@ -182,7 +182,8 @@ npm run dev:all
 
 **`frontend/.env`**
 ```env
-VITE_API_URL=http://localhost:5000/api
+# Can be the backend origin (the app will normalize to `/api`) or include `/api`
+VITE_API_URL=http://localhost:5000
 ```
 
 **`empowerai-backend/.env`**
