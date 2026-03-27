@@ -1,8 +1,5 @@
 // frontend/src/lib/api.ts
-const API_BASE =
-  import.meta.env.VITE_API_BASE_URL ||
-  import.meta.env.VITE_API_URL ||
-  'http://localhost:5000/api'; // Frontend API base URL
+import { API_BASE_URL as API_BASE } from './apiBase';
 
 // Demo mode is opt-in via env var; real APIs are used by default.
 const USE_DEMO_MODE = import.meta.env.VITE_USE_DEMO_MODE === 'true';
