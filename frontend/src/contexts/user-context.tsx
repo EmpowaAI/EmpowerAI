@@ -125,10 +125,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
       if (shouldValidate) {
         try {
-          const apiBase =
-            import.meta.env.VITE_API_BASE_URL ||
-            import.meta.env.VITE_API_URL ||
-            'http://localhost:5000/api'
+          const { API_BASE_URL: apiBase } = await import('../lib/apiBase')
 
           const response = await fetch(
             `${apiBase}/auth/validate`,
