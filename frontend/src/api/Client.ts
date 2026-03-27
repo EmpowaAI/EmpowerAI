@@ -1,7 +1,4 @@
-const API_BASE =
-  import.meta.env.VITE_API_BASE_URL ||
-  import.meta.env.VITE_API_URL ||
-  'http://localhost:5000/api';
+import { API_BASE_URL } from '../lib/apiBase';
 
 // Token management
 export const getToken = (): string | null => localStorage.getItem('empowerai-token');
@@ -20,7 +17,7 @@ export const request = async <T>(endpoint: string, options: RequestInit = {}): P
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   try {
-    const response = await fetch(`${API_BASE}${endpoint}`, {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,
       headers,
       signal: controller.signal,
@@ -74,4 +71,4 @@ export const request = async <T>(endpoint: string, options: RequestInit = {}): P
   }
 };
 
-export const API_BASE_URL = API_BASE;
+export { API_BASE_URL };
