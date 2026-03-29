@@ -50,15 +50,14 @@ async def start_interview(request: InterviewStartRequest, req: Request):
         # Log Azure status and CV data
         logger.info(f"Azure OpenAI enabled: {ai_client.enabled}")
         if request.cvData:
-            skill_count = len(request.cvData.sections.skills) if request.cvData.sections else 0
+            skill_count = len(getattr(request.cvData.sections, 'skills', [])) if request.cvData.sections else 0
             logger.info(f"CV data received with {skill_count} skills")
         else:
             logger.info("No CV data provided for this session")
             
-        if request.jobDescription:
-            logger.info(f"Job description received (length: {len(request.jobDescription)})")
-        else:
-            logger.info("No job description provided for this session")
+        # Defensive check for job description naming
+        job_desc = getattr(request, 'jobDescription', getattr(request, 'job_description', None))
+        logger.info(f"Job description status: {'Received' if job_desc else 'Not provided'}")
         
         # Convert CV data to dict for the coach
         cv_data = request.cvData.dict() if request.cvData else None
@@ -69,7 +68,7 @@ async def start_interview(request: InterviewStartRequest, req: Request):
             request.difficulty,
             request.company,
             cv_data,  # Pass CV data to coach
-            request.jobDescription  # Pass job description to coach 👈 NEW
+            job_desc  # Pass job description to coach
         )
         
         session['startedAt'] = datetime.now()
