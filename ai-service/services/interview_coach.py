@@ -146,10 +146,10 @@ The questions should be tailored to this specific job description, focusing on t
 {cv_summary}
 {job_summary}
 
-The questions should:
-1. Be highly relevant to the candidate's actual skills and experience listed above
+CRITICAL INSTRUCTIONS:
+1. Use the "Key Skills" from the CANDIDATE PROFILE as the basis for at least 3 of the questions.
 2. Be tailored to the job description provided (if any)
-3. Test both theoretical knowledge and practical application
+3. For behavioral questions, reference specific companies or achievements found in their "Experience Highlights".
 4. Include follow-up opportunities
 5. Be challenging but fair
 6. Reference their specific skills and background when possible
