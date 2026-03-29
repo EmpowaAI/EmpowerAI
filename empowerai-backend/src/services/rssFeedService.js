@@ -79,7 +79,8 @@ async function fetchAllFeeds() {
   let totalErrors = 0;
 
   // Process each feed source
-  await Promise.all(FEED_SOURCES.map(async (source) => {
+  // Using Promise.allSettled ensures one failed feed doesn't reject the whole aggregation
+  await Promise.allSettled(FEED_SOURCES.map(async (source) => {
     try {
       logger.info(`Fetching feed: ${source.name} (${source.url})`);
       const feed = await parser.parseURL(source.url);
@@ -172,10 +173,11 @@ async function purgeOldOpportunities(daysOld = 30) {
  */
 async function findExistingOpportunity(opportunity) {
   // Try multiple strategies for deduplication
+  const escapedTitle = opportunity.title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const queries = [
     { applicationUrl: opportunity.applicationUrl },
     { 
-      title: new RegExp(opportunity.title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'),
+      title: { $regex: `^${escapedTitle}$`, $options: 'i' },
       company: opportunity.company
     }
   ];
@@ -652,5 +654,3 @@ module.exports = {
   purgeOldOpportunities,
   FEED_SOURCES
 };
-
-
