@@ -3,11 +3,17 @@ FastAPI routes for CV Revamp
 """
 
 from fastapi import APIRouter, HTTPException, Request
+import sys
+import os
 from openai import RateLimitError
-from models.schemas import CVRevampRequest
-from services.cv_revamp_service import CVRevampService
 import traceback
 import uuid
+
+# Add parent directory to path for imports
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from models.schemas import CVRevampRequest
+from services.cv_revamp_service import CVRevampService
 
 router = APIRouter()
 
