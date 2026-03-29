@@ -141,8 +141,9 @@ exports.startInterview = async (req, res, next) => {
         },
         { timeout: 8000, includeJobId: true }
       );
-      sessionData = queuedResult.result || queuedResult
-      meta = queuedResult.result ? { jobId: queuedResult.jobId, queued: queuedResult.queued } : null
+      // Safely extract result and meta
+      sessionData = (queuedResult && queuedResult.result) ? queuedResult.result : (queuedResult || null);
+      meta = (queuedResult && queuedResult.jobId) ? { jobId: queuedResult.jobId, queued: !!queuedResult.queued } : null;
       console.log('AI service interview start successful');
     } catch (aiError) {
       // AI service failed - use fallback questions
@@ -161,12 +162,18 @@ exports.startInterview = async (req, res, next) => {
       };
     }
 
+    if (!sessionData) {
+      throw new Error('Failed to initialize interview session data');
+    }
+
     res.status(200).json({
       status: 'success',
+      // Flatten the response so frontend sees session properties directly
+      ...(sessionData.session ? sessionData.session : sessionData),
       data: {
-        session: sessionData,
-        ...(meta ? { meta } : {})
-      }
+        session: sessionData.session || sessionData
+      },
+      meta
     });
   } catch (error) {
     console.error('Error starting interview:', error.response?.data || error.message);
@@ -289,5 +296,3 @@ exports.debugNormalizeScore = async (req, res) => {
     }
   });
 };
-
-
