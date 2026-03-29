@@ -261,12 +261,12 @@ function extractUserProfile(req) {
     userId: user.id,
     skills: [],
     province: null,
-    yearsOfExperience: user.yearsOfExperience || 0,
+    yearsOfExperience: 0,
     salaryExpectation: null,
     preferredJobTypes: ['job', 'internship', 'learnership'],
     education: user.education || null,
     careerGoals: user.interests || [],
-    ...(user.profile || {})
+    ...user.profile
   };
 
   // Try to get skills from query parameters
@@ -275,11 +275,6 @@ function extractUserProfile(req) {
       .split(',')
       .map(s => s.trim())
       .filter(s => s);
-  }
-  
-  // If no skills in query, try to get from the analyzed CV data if available
-  if (profile.skills.length === 0 && user.cvData?.extractedSkills) {
-    profile.skills = user.cvData.extractedSkills;
   }
 
   // Try to get province from query parameters
