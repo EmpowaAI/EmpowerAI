@@ -7,7 +7,17 @@ const USE_DEMO_MODE = import.meta.env.VITE_USE_DEMO_MODE === 'true';
 
 const getToken = (): string | null => localStorage.getItem('empowerai-token');
 const setToken = (token: string): void => localStorage.setItem('empowerai-token', token);
-const removeToken = (): void => localStorage.removeItem('empowerai-token');
+const removeToken = (): void => {
+  localStorage.removeItem('empowerai-token');
+  // Also clear other user-specific data from local storage on logout
+  localStorage.removeItem('enrichedProfile');
+  localStorage.removeItem('cvAnalysisData');
+  localStorage.removeItem('twinData');
+  localStorage.removeItem('twinCreated');
+  localStorage.removeItem('cvCompleted');
+  localStorage.removeItem('twinCompleted');
+  localStorage.removeItem('empowermentScore');
+};
 
 const getStoredCvScore = (): number => {
   try {

@@ -213,13 +213,26 @@ async def chat_health():
         "timestamp": __import__('datetime').datetime.now().isoformat()
     }
 
-def get_current_step(messages: List[ChatMessage]) -> int:
+def get_current_step(messages: List[ChatMessage], cv_context: Optional[Dict[str, Any]] = None, focus: Optional[str] = None) -> int:
     """
     Determine current step based on message history
+    Intelligently skips steps if info is already in CV
     """
     user_messages = [m for m in messages if m.role == "user"]
     user_count = len(user_messages)
     
+    # Aggressive skipping: If we have CV data and this is the start
+    if cv_context and user_count == 0:
+        sections = cv_context.get('sections', {})
+        has_name = bool(cv_context.get('name'))
+        # Check if skills exist or if there is substantial CV text to extract from
+        has_skills = bool(sections.get('skills')) or len(cv_context.get('cvText', '')) > 500
+        
+        if has_name and has_skills:
+            # Skip name (0), career_stage (1) and go to province (2)
+            # The AI prompt handles the "acknowledge" part via the system prompt
+            return 2
+
     # Step mapping based on user message count
     if user_count == 0:
         return 0  # greeting
