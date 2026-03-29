@@ -93,7 +93,13 @@ app.use(require('./middleware/requestLogger'));
 app.get('/api/health', async (req, res) => {
   const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
   const memoryUsage = process.memoryUsage();
-  const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
+  
+  // If AI_SERVICE_URL is missing in production, it will fail to connect
+  const aiServiceUrl = process.env.AI_SERVICE_URL;
+  if (!aiServiceUrl && process.env.NODE_ENV === 'production') {
+    logger.error('CRITICAL: AI_SERVICE_URL environment variable is missing in production!');
+  }
+
   const aiServiceApiKey = process.env.AI_SERVICE_API_KEY;
   
   // Test AI service connectivity
@@ -103,7 +109,7 @@ app.get('/api/health', async (req, res) => {
   const cacheFresh = lastAiHealth.checkedAt && (now - lastAiHealth.checkedAt) < AI_HEALTH_STALE_MS;
   try {
     const axios = require('axios');
-    const healthResponse = await axios.get(`${aiServiceUrl}/health`, {
+    const healthResponse = await axios.get(`${aiServiceUrl || 'http://localhost:8000'}/health`, {
       timeout: AI_HEALTH_TIMEOUT_MS,
       headers: aiServiceApiKey ? { 'X-API-KEY': aiServiceApiKey } : undefined,
     });
@@ -352,7 +358,7 @@ connectDatabase().then(async (connected) => {
   const PORT = process.env.PORT || 5000;
   
   // Log AI service configuration on startup
-  const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
+  const aiServiceUrl = process.env.AI_SERVICE_URL || (process.env.NODE_ENV === 'production' ? 'MISSING_URL' : 'http://localhost:8000');
   const aiServiceApiKey = process.env.AI_SERVICE_API_KEY;
   logger.info('AI Service Configuration', {
     aiServiceUrl,
