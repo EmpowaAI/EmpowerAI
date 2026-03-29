@@ -186,17 +186,13 @@ async function saveJobsToDatabase(jobs) {
   
   for (const job of jobs) {
     try {
-      // Check for duplicates by externalId or title+company+location
+      // Principal Engineer Note: Check externalId first as it's the most reliable unique identifier
       const existing = await Opportunity.findOne({
         $or: [
           { externalId: job.externalId, source: job.source },
-          {
-            title: new RegExp(job.title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'),
-            company: job.company,
-            location: job.location
-          }
+          { applicationUrl: job.applicationUrl }
         ]
-      });
+      }, { _id: 1 }).lean(); // Only fetch _id for speed
       
       if (existing) {
         skippedCount++;
