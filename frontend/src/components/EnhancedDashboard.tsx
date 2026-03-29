@@ -12,7 +12,10 @@ import {
   DollarSign,
   ChevronRight,
   Sparkles,
-  Brain} from 'lucide-react';
+  Brain,
+  RefreshCcw,
+  Loader2} from 'lucide-react';
+import { twinAPI } from '../lib/api';
 import type { EnrichedProfile } from '../types/profile.types';
 import { cn } from '../lib/utils';
 
@@ -20,32 +23,48 @@ export const EnhancedDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<EnrichedProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadProfile();
   }, []);
 
-  const loadProfile = async () => {
+  const loadProfile = async (silent = false) => {
     try {
-      setLoading(true);
-      // Try to get from localStorage first
+      if (!silent) setLoading(true);
+      else setIsRefreshing(true);
+      
+      const response = await twinAPI.get();
+      
+      if (response?.status === 'success' && response.data?.twin) {
+        const twin = response.data.twin;
+        setProfile(twin);
+        localStorage.setItem('enrichedProfile', JSON.stringify(twin));
+        return;
+      }
+
+      // Fallback to localStorage if offline or no twin found
       const stored = localStorage.getItem('enrichedProfile');
       if (stored) {
         setProfile(JSON.parse(stored));
       } else {
-        // Check if we have CV data but no twin
         const cvData = localStorage.getItem('cvAnalysisData');
         if (cvData) {
-          // Prompt user to create twin
           setError('Create your Digital Twin to see personalized insights');
         }
       }
     } catch (err) {
       console.error('Failed to load profile:', err);
-      setError('Failed to load profile data');
+      const stored = localStorage.getItem('enrichedProfile');
+      if (stored) {
+        setProfile(JSON.parse(stored));
+      } else {
+        setError('Failed to load profile data');
+      }
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
     }
   };
 
@@ -96,41 +115,53 @@ export const EnhancedDashboard: React.FC = () => {
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
+        <div
+          className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8"
         >
-          <h1 className="text-3xl md:text-4xl font-display font-bold">
-            Welcome back, {profile.name || 'User'}!
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            Your personalized career insights and opportunities
-          </p>
-        </motion.div>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+          >
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold">
+              Welcome back, {profile.name || 'User'}!
+            </h1>
+            <p className="text-sm sm:text-base text-muted-foreground mt-1">
+              Your personalized career insights and opportunities
+            </p>
+          </motion.div>
+          
+          <button 
+            onClick={() => loadProfile(true)}
+            disabled={isRefreshing}
+            className="flex items-center gap-2 px-4 py-2 bg-secondary/50 border border-border rounded-lg text-sm font-medium hover:bg-secondary transition-colors disabled:opacity-50"
+          >
+            {isRefreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCcw className="h-4 w-4" />}
+            Sync Data
+          </button>
+        </div>
 
         {/* Score Cards */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
         >
-          <div className="bg-card rounded-xl border border-border p-6">
+          <div className="bg-card rounded-xl border border-border p-4 sm:p-6">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-medium text-muted-foreground">Empowerment Score</h3>
               <Brain className="h-5 w-5 text-primary" />
             </div>
-            <div className="text-3xl font-display font-bold">{profile.empowermentScore}</div>
+            <div className="text-2xl sm:text-3xl font-display font-bold">{profile.empowermentScore}</div>
             <div className="text-xs text-muted-foreground mt-1">out of 100</div>
           </div>
 
-          <div className="bg-card rounded-xl border border-border p-6">
+          <div className="bg-card rounded-xl border border-border p-4 sm:p-6">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-medium text-muted-foreground">CV Strength</h3>
               <Award className="h-5 w-5 text-cv-success" />
             </div>
-            <div className="text-3xl font-display font-bold">{profile.cvData?.score || 0}%</div>
+            <div className="text-2xl sm:text-3xl font-display font-bold">{profile.cvData?.score || 0}%</div>
             <div className="text-xs text-muted-foreground mt-1">{profile.cvData?.readinessLevel || 'Not analyzed'}</div>
           </div>
 
