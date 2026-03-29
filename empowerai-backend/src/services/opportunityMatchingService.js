@@ -203,8 +203,8 @@ function getMatchReason(userProfile, opportunity, score) {
     const matchingSkills = opportunity.skills.filter(skill => 
       userProfile.skills.some(userSkill => 
         userSkill.toLowerCase() === skill.toLowerCase() ||
-        new RegExp(`\\b${escapeRegExp(skill)}\\b`, 'i').test(userSkill) ||
-        new RegExp(`\\b${escapeRegExp(userSkill)}\\b`, 'i').test(skill)
+        new RegExp(`(?:^|[^a-zA-Z0-9])${escapeRegExp(skill)}(?:$|[^a-zA-Z0-9])`, 'i').test(userSkill) ||
+        new RegExp(`(?:^|[^a-zA-Z0-9])${escapeRegExp(userSkill)}(?:$|[^a-zA-Z0-9])`, 'i').test(skill)
       )
     );
     if (matchingSkills.length > 0) {
