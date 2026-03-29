@@ -14,6 +14,11 @@ const logger = require('../utils/logger');
 const educationBoosts = require('../config/educationBoosts');
 
 /**
+ * Helper to escape strings for use in Regex
+ */
+const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/**
  * Calculate match score for an opportunity
  * Returns score from 0-100
  */
@@ -37,15 +42,19 @@ function calculateMatchScore(userProfile, opportunity) {
   if (userProfile.skills && opportunity.skills) {
     const userSkillsLower = userProfile.skills.map(s => s.toLowerCase());
     const oppSkillsLower = opportunity.skills.map(s => s.toLowerCase());
-    
+
     const matchingSkills = oppSkillsLower.filter(skill =>
       userSkillsLower.some(userSkill => 
-        userSkill.includes(skill) || skill.includes(userSkill)
+        userSkill === skill ||
+        // Technical Boundary Logic: Matches start/end of string or non-alphanumeric chars
+        // This ensures .NET and C++ match correctly where \b would fail
+        new RegExp(`(?:^|[^a-zA-Z0-9])${escapeRegExp(skill)}(?:$|[^a-zA-Z0-9])`, 'i').test(userSkill) ||
+        new RegExp(`(?:^|[^a-zA-Z0-9])${escapeRegExp(userSkill)}(?:$|[^a-zA-Z0-9])`, 'i').test(skill)
       )
     );
     
     skillsMatched = matchingSkills.length;
-    weights.skills = (matchingSkills.length / Math.max(oppSkillsLower.length, 1)) * 40;
+    weights.skills = Math.min((matchingSkills.length / Math.max(oppSkillsLower.length, 3)) * 40, 40);
   }
 
   // 2. Location matching (25% weight)
@@ -191,10 +200,11 @@ function getMatchReason(userProfile, opportunity, score) {
 
   // Skills
   if (userProfile.skills && opportunity.skills) {
-    const matchingSkills = opportunity.skills.filter(skill =>
-      userProfile.skills.some(userSkill =>
-        userSkill.toLowerCase().includes(skill.toLowerCase()) ||
-        skill.toLowerCase().includes(userSkill.toLowerCase())
+    const matchingSkills = opportunity.skills.filter(skill => 
+      userProfile.skills.some(userSkill => 
+        userSkill.toLowerCase() === skill.toLowerCase() ||
+        new RegExp(`(?:^|[^a-zA-Z0-9])${escapeRegExp(skill)}(?:$|[^a-zA-Z0-9])`, 'i').test(userSkill) ||
+        new RegExp(`(?:^|[^a-zA-Z0-9])${escapeRegExp(userSkill)}(?:$|[^a-zA-Z0-9])`, 'i').test(skill)
       )
     );
     if (matchingSkills.length > 0) {

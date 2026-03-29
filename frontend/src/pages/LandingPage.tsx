@@ -10,8 +10,8 @@ import Logo from "../components/ui/Logo"; // Fixed path
 import logo from "../assets/images/empoweraidemo.png" // Added image import
 
 const navLinks = [
-  { label: "Features", href: "#features" },
   { label: "How It Works", href: "#how-it-works" },
+  { label: "Features", href: "#features" },
   { label: "Ubuntu Stories", href: "#success" },
   { label: "Demo", href: "#demo" },
 ];
@@ -319,46 +319,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section id="features" className="py-20 md:py-28 sa-pattern cv-auto">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-14">
-            <span className="text-sa-gold text-sm font-semibold uppercase tracking-wider mb-3 block">
-              <RotatingText text={t("ourTools")} langKey={langIndex} languageLabel={getLanguageDisplay(currentLanguage)} />{" \u2014 Our Tools"}
-            </span>
-            <h2 className="text-3xl md:text-4xl font-extrabold mb-3 font-display text-foreground">Everything You Need to Succeed</h2>
-            <p className="text-muted-foreground max-w-md mx-auto">
-              Built by South Africans, for South Africans. AI tools that understand our unique economy.
-            </p>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              { icon: Brain, title: "Digital Economic Twin", desc: "AI-powered simulation of your economic future, rooted in South African market realities", color: "from-sa-gold/20 to-sa-gold/5" },
-              { icon: TrendingUp, title: "Path Simulation", desc: "Visualize income projections across career paths \u2014 from SMMEs to corporate", color: "from-sa-green/20 to-sa-green/5" },
-              { icon: FileText, title: "CV Analysis", desc: "Get instant AI feedback tailored for SA employers and the B-BBEE landscape", color: "from-sa-blue/20 to-sa-blue/5" },
-              { icon: Briefcase, title: "Opportunity Matching", desc: "Find jobs, learnerships, and YES4Youth programmes matched to your profile", color: "from-sa-terracotta/20 to-sa-terracotta/5" },
-              { icon: MessageSquare, title: "Interview Coach", desc: "Practice interviews with AI \u2014 from panel discussions to one-on-ones", color: "from-sa-red/20 to-sa-red/5" },
-              { icon: Map, title: "Career Roadmap", desc: "Step-by-step guidance from matric to your dream career, wherever you are in SA", color: "from-sa-gold/20 to-sa-green/5" },
-            ].map((f, i) => (
-              <motion.div
-                key={f.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.08 }}
-                className="group bg-card border border-border rounded-2xl p-6 hover:shadow-lg hover:border-sa-gold/30 transition-all duration-300"
-              >
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${f.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                  <f.icon className="w-6 h-6 text-foreground" />
-                </div>
-                <h3 className="font-bold text-lg mb-2 text-card-foreground">{f.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* How It Works */}
       <section id="how-it-works" className="py-20 md:py-28 bg-gradient-to-b from-secondary/30 to-background cv-auto">
         <div className="container mx-auto px-4">
@@ -394,6 +354,46 @@ export default function LandingPage() {
                 </span>
                 <h3 className="font-bold text-lg mb-2 text-foreground">{s.title}</h3>
                 <p className="text-sm text-muted-foreground">{s.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section id="features" className="py-20 md:py-28 sa-pattern cv-auto">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-14">
+            <span className="text-sa-gold text-sm font-semibold uppercase tracking-wider mb-3 block">
+              <RotatingText text={t("ourTools")} langKey={langIndex} languageLabel={getLanguageDisplay(currentLanguage)} />{" \u2014 Our Tools"}
+            </span>
+            <h2 className="text-3xl md:text-4xl font-extrabold mb-3 font-display text-foreground">Everything You Need to Succeed</h2>
+            <p className="text-muted-foreground max-w-md mx-auto">
+              Built by South Africans, for South Africans. AI tools that understand our unique economy.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              { icon: Brain, title: "Digital Economic Twin", desc: "AI-powered simulation of your economic future, rooted in South African market realities", color: "from-sa-gold/20 to-sa-gold/5" },
+              { icon: TrendingUp, title: "Path Simulation", desc: "Visualize income projections across career paths \u2014 from SMMEs to corporate", color: "from-sa-green/20 to-sa-green/5" },
+              { icon: FileText, title: "CV Analysis", desc: "Get instant AI feedback tailored for SA employers and the B-BBEE landscape", color: "from-sa-blue/20 to-sa-blue/5" },
+              { icon: Briefcase, title: "Opportunity Matching", desc: "Find jobs, learnerships, and YES4Youth programmes matched to your profile", color: "from-sa-terracotta/20 to-sa-terracotta/5" },
+              { icon: MessageSquare, title: "Interview Coach", desc: "Practice interviews with AI \u2014 from panel discussions to one-on-ones", color: "from-sa-red/20 to-sa-red/5" },
+              { icon: Map, title: "Career Roadmap", desc: "Step-by-step guidance from matric to your dream career, wherever you are in SA", color: "from-sa-gold/20 to-sa-green/5" },
+            ].map((f, i) => (
+              <motion.div
+                key={f.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.08 }}
+                className="group bg-card border border-border rounded-2xl p-6 hover:shadow-lg hover:border-sa-gold/30 transition-all duration-300"
+              >
+                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${f.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                  <f.icon className="w-6 h-6 text-foreground" />
+                </div>
+                <h3 className="font-bold text-lg mb-2 text-card-foreground">{f.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
               </motion.div>
             ))}
           </div>
