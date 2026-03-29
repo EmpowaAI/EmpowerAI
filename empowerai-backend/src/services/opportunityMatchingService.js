@@ -186,6 +186,9 @@ function calculateMatchScore(userProfile, opportunity) {
   if (userProfile.strictCareerMatch && userProfile.careerGoals && userProfile.careerGoals.length > 0 && !hasCareerMatch) {
     score = 0;
   }
+  
+  // If we have a very low score but some skills match, give a baseline boost
+  if (score < 30 && hasSkillMatch) score += 15;
 
   return Math.min(Math.max(Math.round(score), 0), 100);
 }
