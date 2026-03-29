@@ -83,11 +83,11 @@ class InterviewCoach:
         if not cv_context:
             return "No CV data provided."
 
-        sections = cv_context.get('sections', {})
-        skills = sections.get('skills', [])
-        experience = sections.get('experience', [])
-        education = sections.get('education', [])
-        achievements = sections.get('achievements', [])
+        sections = cv_context.get('sections') or {}
+        skills = sections.get('skills') or []
+        experience = sections.get('experience') or []
+        education = sections.get('education') or []
+        achievements = sections.get('achievements') or []
         score = cv_context.get('score', 'N/A')
         level = cv_context.get('readinessLevel', 'N/A')
 

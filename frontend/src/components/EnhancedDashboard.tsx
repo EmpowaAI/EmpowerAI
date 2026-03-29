@@ -152,7 +152,7 @@ export const EnhancedDashboard: React.FC = () => {
               <h3 className="text-sm font-medium text-muted-foreground">Empowerment Score</h3>
               <Brain className="h-5 w-5 text-primary" />
             </div>
-            <div className="text-2xl sm:text-3xl font-display font-bold">{profile.empowermentScore}</div>
+            <div className="text-2xl sm:text-3xl font-display font-bold">{profile?.empowermentScore}</div>
             <div className="text-xs text-muted-foreground mt-1">out of 100</div>
           </div>
 
@@ -161,7 +161,7 @@ export const EnhancedDashboard: React.FC = () => {
               <h3 className="text-sm font-medium text-muted-foreground">CV Strength</h3>
               <Award className="h-5 w-5 text-cv-success" />
             </div>
-            <div className="text-2xl sm:text-3xl font-display font-bold">{profile.cvData?.score || 0}%</div>
+            <div className="text-2xl sm:text-3xl font-display font-bold">{profile?.cvData?.score || 0}%</div>
             <div className="text-xs text-muted-foreground mt-1">{profile.cvData?.readinessLevel || 'Not analyzed'}</div>
           </div>
 
@@ -170,7 +170,7 @@ export const EnhancedDashboard: React.FC = () => {
               <h3 className="text-sm font-medium text-muted-foreground">Skills Identified</h3>
               <Target className="h-5 w-5 text-cv-gold" />
             </div>
-            <div className="text-3xl font-display font-bold">{profile.skills?.length || 0}</div>
+            <div className="text-3xl sm:text-3xl font-display font-bold">{profile?.skills?.length || 0}</div>
             <div className="text-xs text-muted-foreground mt-1">across your profile</div>
           </div>
 
@@ -179,7 +179,7 @@ export const EnhancedDashboard: React.FC = () => {
               <h3 className="text-sm font-medium text-muted-foreground">Market Opportunities</h3>
               <TrendingUp className="h-5 w-5 text-primary" />
             </div>
-            <div className="text-3xl font-display font-bold">{profile.marketInsights?.topOpportunities?.length || 0}</div>
+            <div className="text-3xl sm:text-3xl font-display font-bold">{profile?.marketInsights?.topOpportunities?.length || 0}</div>
             <div className="text-xs text-muted-foreground mt-1">matching your profile</div>
           </div>
         </motion.div>
@@ -199,7 +199,7 @@ export const EnhancedDashboard: React.FC = () => {
                 <TrendingUp className="h-5 w-5 text-primary" />
                 Top Opportunities for You
               </h2>
-              <div className="space-y-4">
+              <div className="space-y-4"> {/* profile.marketInsights?.topOpportunities */}
                 {profile.marketInsights?.topOpportunities?.map((opp, index) => (
                   <div key={index} className="p-4 bg-muted/30 rounded-lg border border-border/50">
                     <div className="flex items-center justify-between mb-2">
@@ -243,7 +243,7 @@ export const EnhancedDashboard: React.FC = () => {
                 <Target className="h-5 w-5 text-primary" />
                 Skills in High Demand
               </h2>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2"> {/* profile.marketInsights?.inDemandSkills */}
                 {profile.marketInsights?.inDemandSkills?.map((skill, index) => (
                   <span
                     key={index}
@@ -256,13 +256,13 @@ export const EnhancedDashboard: React.FC = () => {
             </div>
 
             {/* Skill Gaps */}
-            {profile.skillGaps && profile.skillGaps.length > 0 && (
+            {profile?.skillGaps && profile.skillGaps.length > 0 && (
               <div className="bg-card rounded-xl border border-border p-6">
                 <h2 className="text-lg font-display font-bold mb-4 flex items-center gap-2">
                   <BookOpen className="h-5 w-5 text-primary" />
                   Skills to Develop
                 </h2>
-                <div className="space-y-4">
+                <div className="space-y-4"> {/* profile.skillGaps */}
                   {profile.skillGaps.map((gap, index) => (
                     <div key={index} className="p-4 bg-muted/30 rounded-lg border border-border/50">
                       <div className="flex items-center justify-between mb-2">
@@ -308,7 +308,7 @@ export const EnhancedDashboard: React.FC = () => {
               {/* Immediate Actions */}
               <div className="mb-6">
                 <h3 className="text-sm font-medium text-muted-foreground mb-3">Next 30 Days</h3>
-                <div className="space-y-3">
+                <div className="space-y-3"> {/* profile.actionPlan?.immediate */}
                   {profile.actionPlan?.immediate?.map((item, index) => (
                     <div key={index} className="p-3 bg-card rounded-lg border border-border">
                       <div className="flex items-start gap-2">
@@ -331,7 +331,7 @@ export const EnhancedDashboard: React.FC = () => {
               {/* Short Term Goals */}
               <div className="mb-6">
                 <h3 className="text-sm font-medium text-muted-foreground mb-3">3-6 Months</h3>
-                <div className="space-y-3">
+                <div className="space-y-3"> {/* profile.actionPlan?.shortTerm */}
                   {profile.actionPlan?.shortTerm?.map((goal, index) => (
                     <div key={index} className="p-3 bg-card rounded-lg border border-border">
                       <p className="text-sm font-medium">{goal.task}</p>
@@ -347,7 +347,7 @@ export const EnhancedDashboard: React.FC = () => {
               {/* Long Term Goals */}
               <div>
                 <h3 className="text-sm font-medium text-muted-foreground mb-3">Long Term</h3>
-                {profile.actionPlan?.longTerm?.map((goal, index) => (
+                {profile?.actionPlan?.longTerm?.map((goal, index) => (
                   <div key={index} className="p-3 bg-card rounded-lg border border-border">
                     <p className="text-sm font-medium mb-2">{goal.goal}</p>
                     <div className="space-y-1">
@@ -367,7 +367,7 @@ export const EnhancedDashboard: React.FC = () => {
             {/* Career Paths */}
             <div className="bg-card rounded-xl border border-border p-6">
               <h2 className="text-lg font-display font-bold mb-4">Recommended Paths</h2>
-              <div className="space-y-3">
+              <div className="space-y-3"> {/* profile.recommendedPaths */}
                 {profile.recommendedPaths?.map((path, index) => (
                   <button
                     key={index}

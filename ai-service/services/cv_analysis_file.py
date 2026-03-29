@@ -123,7 +123,7 @@ async def analyze_cv_file(
                 print(f"Parsed job requirements (CSV): {job_requirements_list}")
         
         # Analyze CV
-        result = cv_analyzer.analyze_cv(
+        result = await cv_analyzer.analyze_cv(
             cv_text,
             job_requirements_list
         )
