@@ -1004,7 +1004,7 @@ class CVRevampService:
         
         tech_keywords = ['python', 'java', 'javascript', 'react', 'node', 'sql', 'html', 'css', 'developer', 'api', 'git', 'docker', 'azure', 'aws', 'c#', 'c++', '.net', 'typescript', 'angular', 'vue']
         for skill in skills:
-            skill_lower = skill.lower()
+            skill_lower = str(skill).lower()
             for keyword in tech_keywords:
                 if keyword in skill_lower:
                     self.logger.info(f"Tech detected from skill: {skill}")
@@ -1053,7 +1053,7 @@ class CVRevampService:
             }
             
             for weakness in weaknesses[:5]:
-                weakness_lower = weakness.lower()
+                weakness_lower = str(weakness).lower()
                 matched = False
                 for key, change in weakness_map.items():
                     if key in weakness_lower:
@@ -1284,8 +1284,7 @@ Create a clean, professional tech CV with the exact format specified. Add metric
                 max_tokens=3000
             )
             
-            if result and isinstance(result, str) and len(result) > 300:
-                result = re.sub(r'\*\*([^*]+)\*\*', r'\1', result)
+            if result and isinstance(result, str) and len(result) > 100:
                 self.logger.info("✅ AI revamp successful")
                 return result
             else:
