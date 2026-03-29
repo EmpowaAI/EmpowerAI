@@ -1284,8 +1284,8 @@ Create a clean, professional tech CV with the exact format specified. Add metric
                 max_tokens=3000
             )
             
-            if result and isinstance(result, str) and len(result) > 100:
-                self.logger.info("✅ AI revamp successful")
+            if result and isinstance(result, str) and len(result.strip()) > 150: # Ensure a meaningful response
+                self.logger.info("✅ AI revamp successful with meaningful response")
                 return result
             else:
                 self.logger.warning("AI returned invalid response")
