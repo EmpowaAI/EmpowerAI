@@ -219,7 +219,7 @@ function getMatchReason(userProfile, opportunity, score) {
   if (userProfile.province && opportunity.province) {
     const match = (Array.isArray(opportunity.province) ? opportunity.province : [opportunity.province])
       .some(oppProv => 
-        userProfile.province.toLowerCase().includes(oppProv.toLowerCase())
+        userProfile.province?.toLowerCase().includes(oppProv.toLowerCase())
       );
     if (match) {
       reasons.push('matches your province');

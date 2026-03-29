@@ -37,8 +37,8 @@ export const EnhancedDashboard: React.FC = () => {
       
       const response = await twinAPI.get();
       
-      if (response?.status === 'success' && response.data?.twin) {
-        const twin = response.data.twin;
+      if (response?.status === 'success' && (response.data?.twin || response.twin)) {
+        const twin = response.data?.twin || response.twin;
         setProfile(twin);
         localStorage.setItem('enrichedProfile', JSON.stringify(twin));
         return;
