@@ -276,6 +276,11 @@ function extractUserProfile(req) {
       .map(s => s.trim())
       .filter(s => s);
   }
+  
+  // If no skills in query, try to get from the analyzed CV data if available
+  if (profile.skills.length === 0 && user.cvData?.extractedSkills) {
+    profile.skills = user.cvData.extractedSkills;
+  }
 
   // Try to get province from query parameters
   if (req.query.province) {
