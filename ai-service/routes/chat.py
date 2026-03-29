@@ -29,6 +29,8 @@ class ChatMessage(BaseModel):
 
 class ChatRequest(BaseModel):
     messages: List[ChatMessage]
+    cv_context: Optional[Dict[str, Any]] = None
+    focus: Optional[str] = None  # Added focus for personalization
 
 class ChatResponse(BaseModel):
     reply: str
@@ -91,7 +93,7 @@ async def chat_twin(request: ChatRequest, req: Request):
         log.info(f"📋 Twin chat request with {len(request.messages)} messages")
         
         # Determine current step based on message count
-        step = get_current_step(request.messages)
+        step = get_current_step(request.messages, request.cv_context, request.focus)
         log.info(f"📍 Current step: {STEPS[step]} (step {step})")
         
         # Extract user's last message if any
@@ -138,7 +140,7 @@ async def chat_twin(request: ChatRequest, req: Request):
                 # Continue with normal flow
         
         # Generate response based on step
-        response = generate_step_response(request.messages, step)
+        response = generate_step_response(request.messages, step, request.cv_context, request.focus)
         return ChatResponse(**response)
         
     except Exception as e:
@@ -267,12 +269,31 @@ def get_question_for_step(step: int) -> str:
     }
     return questions.get(step, "")
 
-def generate_step_response(messages: List[ChatMessage], step: int) -> Dict[str, Any]:
+def generate_step_response(messages: List[ChatMessage], step: int, cv_context: Optional[Dict[str, Any]] = None, focus: Optional[str] = None) -> Dict[str, Any]:
     """
     Generate response based on current step
     """
     user_messages = [m for m in messages if m.role == "user"]
     user_count = len(user_messages)
+    
+    # Focus-specific starter mapping
+    starters = {
+        "growth": "Let's focus on scaling your current potential.",
+        "switch": "Let's map out your transition to a new field.",
+        "startup": "Let's build a profile geared toward the SA startup ecosystem.",
+        "corporate": "Let's optimize your profile for SA's top corporate entities."
+    }
+    focus_note = starters.get(focus, "")
+
+    # Fallback Skill Extraction
+    extracted_skills = []
+    if cv_context:
+        extracted_skills = cv_context.get('sections', {}).get('skills', [])
+        if not extracted_skills and cv_context.get('cvText'):
+            # Aggressive fallback: basic regex extraction if structured data is missing
+            text = cv_context.get('cvText').lower()
+            tech_keywords = ['python', 'javascript', 'react', 'node', 'sales', 'retail', 'management']
+            extracted_skills = [k.capitalize() for k in tech_keywords if k in text]
     
     # Extract name if available
     name = "there"
@@ -288,8 +309,12 @@ def generate_step_response(messages: List[ChatMessage], step: int) -> Dict[str, 
     # STEP 0: GREETING - Ask for name
     if step == 0:
         trend = random.choice(TRENDS)
+        personalization = ""
+        if extracted_skills:
+            personalization = f"I've already spotted your background in {', '.join(extracted_skills[:3])}. {focus_note} "
+
         return {
-            "reply": f"Hi there, and welcome! 🌟 {trend} — a great time to position yourself for growth.\n\nWhat's your name?",
+            "reply": f"Sharp shooter! 🌟 {personalization}{trend}\n\nTo get started, what is your name?",
             "options": None,
             "isComplete": False,
             "profile": None
