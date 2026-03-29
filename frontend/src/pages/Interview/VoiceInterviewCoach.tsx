@@ -1,11 +1,15 @@
 import { useState, useEffect, useRef } from 'react'
-import { Mic, MicOff, Play, Pause, RotateCcw, TrendingUp, Clock, Award } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Mic, MicOff, Play, Pause, RotateCcw, TrendingUp, Clock, Award, Loader2, AlertCircle } from 'lucide-react'
 import { cn } from "../../lib/utils"
 import NeuralCard from "../../components/ui/NeuralCard"
 import HolographicButton from "../../components/ui/HolographicButton"
 import NeuralLoading from "../../components/ui/NeuralLoading"
 import AIAvatar from "../../components/ui/AIAvatar"
 import VoiceVisualizer from "../../components/ui/VoiceVisualizer"
+import { interviewService } from '../../services/interviewService'
+import { useToast } from '../../components/Toast'
+import { useAudioLevel } from '../../hooks/useAudioLevel'
 
 interface InterviewQuestion {
   id: number
@@ -15,142 +19,194 @@ interface InterviewQuestion {
 }
 
 interface FeedbackData {
-  confidence: number
-  clarity: number
-  pace: number
-  emotion: string
-  suggestions: string[]
+  score: number
+  feedback: string
+  strengths: string[]
+  improvements: string[]
 }
 
-const interviewQuestions: InterviewQuestion[] = [
-  {
-    id: 1,
-    question: "Tell me about yourself and your experience",
-    type: 'behavioral',
-    category: 'Introduction'
-  },
-  {
-    id: 2,
-    question: "Describe a challenging project you've worked on",
-    type: 'behavioral',
-    category: 'Experience'
-  },
-  {
-    id: 3,
-    question: "How do you handle tight deadlines?",
-    type: 'situational',
-    category: 'Problem Solving'
-  },
-  {
-    id: 4,
-    question: "What's your experience with React and modern JavaScript?",
-    type: 'technical',
-    category: 'Technical Skills'
-  },
-  {
-    id: 5,
-    question: "Where do you see yourself in 5 years?",
-    type: 'behavioral',
-    category: 'Career Goals'
-  }
-]
-
 export default function VoiceInterviewCoach() {
-  const [currentQuestion, setCurrentQuestion] = useState(0)
+  const [questions, setQuestions] = useState<InterviewQuestion[]>([])
+  const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0)
+  const [sessionId, setSessionId] = useState<string | null>(null)
+  const [sessionStarted, setSessionStarted] = useState(false)
+  const [isStarting, setIsStarting] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [feedback, setFeedback] = useState<FeedbackData | null>(null)
   const [transcript, setTranscript] = useState('')
   const [answers, setAnswers] = useState<string[]>([])
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
-  const audioChunksRef = useRef<Blob[]>([])
+  const { showToast, ToastComponent } = useToast()
+  
+  // Use Web Speech API for real-time transcription
+  const recognitionRef = useRef<any>(null)
+  const transcriptRef = useRef('')
+  const interimRef = useRef('')
+  const { volume: micVolume, isLowVolume } = useAudioLevel(isRecording)
+
+  // Load dynamic questions from backend on mount
+  useEffect(() => {
+    const startSession = async () => {
+      try {
+        setIsStarting(true);
+        const storedCV = localStorage.getItem('cvAnalysisData');
+        const cvData = storedCV ? JSON.parse(storedCV) : undefined;
+
+        const session = await interviewService.startInterview(
+          'behavioral', 
+          'medium', 
+          undefined, 
+          cvData
+        );
+
+        if (session && session.questions) {
+          setQuestions(session.questions as any);
+          setSessionId(session.sessionId);
+          setSessionStarted(true);
+        }
+      } catch (error) {
+        showToast("Failed to connect to AI Coach. Is the service running?", "error");
+      } finally {
+        setIsStarting(false);
+      }
+    };
+    startSession();
+  }, []);
+
+  useEffect(() => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition()
+      recognition.continuous = true
+      recognition.interimResults = true
+      recognition.lang = 'en-ZA' // Tailored for SA accents
+
+      recognition.onresult = (event: any) => {
+        let finalTranscript = ''
+        let interimTranscript = ''
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcriptPart = event.results[i][0].transcript
+          if (event.results[i].isFinal) finalTranscript += transcriptPart
+          else interimTranscript += transcriptPart
+        }
+        interimRef.current = interimTranscript
+        if (finalTranscript) {
+          transcriptRef.current = (transcriptRef.current + ' ' + finalTranscript).trim().replace(/\s+/g, ' ')
+          setTranscript(transcriptRef.current)
+        }
+      }
+
+      recognition.onerror = (event: any) => {
+        console.error('Speech recognition error', event.error)
+        setIsRecording(false)
+        showToast(`Voice error: ${event.error}`, 'error')
+      }
+
+      recognitionRef.current = recognition
+    }
+  }, [])
 
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      const mediaRecorder = new MediaRecorder(stream)
-      mediaRecorderRef.current = mediaRecorder
-      audioChunksRef.current = []
-
-      mediaRecorder.ondataavailable = (event) => {
-        audioChunksRef.current.push(event.data)
+      if (!recognitionRef.current) {
+        showToast("Speech recognition not supported in this browser.", "error")
+        return
       }
 
-      mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' })
-        processAnswer(audioBlob)
-      }
-
-      mediaRecorder.start()
-      setIsRecording(true)
       setTranscript('')
+      transcriptRef.current = ''
       setFeedback(null)
+      recognitionRef.current.start()
+      setIsRecording(true)
     } catch (error) {
       console.error('Error accessing microphone:', error)
     }
   }
 
   const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop()
-      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop())
+    if (recognitionRef.current && isRecording) {
+      recognitionRef.current.stop()
       setIsRecording(false)
-      setIsProcessing(true)
+      // Small delay to allow the last onresult event to fire
+      setTimeout(() => processAnswer(), 200)
     }
   }
 
-  const processAnswer = async (audioBlob: Blob) => {
-    // Simulate AI processing
-    setTimeout(() => {
-      const mockTranscript = "I have over 3 years of experience in web development, particularly with React and Node.js. I've worked on several challenging projects where I had to deliver under tight deadlines, and I always make sure to communicate effectively with my team."
-      
-      setTranscript(mockTranscript)
-      setAnswers([...answers, mockTranscript])
-      
-      setFeedback({
-        confidence: 78,
-        clarity: 85,
-        pace: 72,
-        emotion: 'Confident',
-        suggestions: [
-          "Great structure! Try adding specific metrics to quantify your achievements",
-          "Consider mentioning a specific challenging project with measurable outcomes",
-          "Your pace is good, but try to vary your tone for more engagement"
-        ]
-      })
-      
+  const processAnswer = async () => {
+    const finalResponse = transcriptRef.current.trim() || interimRef.current.trim() || transcript.trim()
+    if (!finalResponse.trim()) return
+    
+    setIsProcessing(true)
+    try {
+      const storedCV = localStorage.getItem('cvAnalysisData');
+      const cvData = storedCV ? JSON.parse(storedCV) : undefined;
+
+      const feedbackData = await interviewService.submitAnswer(
+        sessionId!,
+        questions[currentQuestionIdx].id.toString(),
+        finalResponse,
+        cvData
+      );
+
+      if (feedbackData) {
+        const normalizedFeedback = { ...feedbackData };
+        if (normalizedFeedback.score <= 1) normalizedFeedback.score *= 100;
+        
+        // Ensure UI shows what was actually analyzed
+        setTranscript(finalResponse);
+        setFeedback(normalizedFeedback)
+        setAnswers([...answers, finalResponse])
+      } else {
+        showToast("Failed to analyze response. Try again.", "error")
+      }
+    } catch (error) {
+      showToast("AI Service timeout. Retrying in background...", "warning")
+    } finally {
       setIsProcessing(false)
-    }, 2000)
+    }
   }
 
   const playQuestion = () => {
-    setIsPlaying(true)
-    // Simulate text-to-speech
-    setTimeout(() => {
-      setIsPlaying(false)
-    }, 3000)
+    if (!('speechSynthesis' in window) || !questions[currentQuestionIdx]) return;
+    window.speechSynthesis.cancel();
+    setIsPlaying(true);
+    const utterance = new SpeechSynthesisUtterance(questions[currentQuestionIdx].question);
+    utterance.lang = 'en-ZA';
+    utterance.onend = () => setIsPlaying(false);
+    utterance.onerror = () => setIsPlaying(false);
+    window.speechSynthesis.speak(utterance);
   }
 
   const nextQuestion = () => {
-    if (currentQuestion < interviewQuestions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1)
+    if (currentQuestionIdx < questions.length - 1) {
+      setCurrentQuestionIdx(currentQuestionIdx + 1)
       setTranscript('')
+      transcriptRef.current = ''
+      interimRef.current = ''
       setFeedback(null)
     }
   }
 
   const resetInterview = () => {
-    setCurrentQuestion(0)
+    setCurrentQuestionIdx(0)
     setTranscript('')
+    transcriptRef.current = ''
+    interimRef.current = ''
     setFeedback(null)
     setAnswers([])
   }
 
-  const question = interviewQuestions[currentQuestion]
+  if (isStarting) {
+    return <div className="min-h-[60vh] flex items-center justify-center"><NeuralLoading size="lg" text="AI is tailoring your interview..." /></div>
+  }
+
+  const question = questions[currentQuestionIdx]
+  if (!question) return null;
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
+      <ToastComponent />
       {/* Header */}
       <NeuralCard className="text-center">
         <div className="flex items-center justify-center gap-4 mb-4">
@@ -164,13 +220,13 @@ export default function VoiceInterviewCoach() {
         {/* Progress */}
         <div className="mb-4">
           <div className="flex justify-between text-sm text-muted-foreground mb-2">
-            <span>Question {currentQuestion + 1} of {interviewQuestions.length}</span>
-            <span>{Math.round(((currentQuestion + 1) / interviewQuestions.length) * 100)}% Complete</span>
+            <span>Question {currentQuestionIdx + 1} of {questions.length}</span>
+            <span>{questions.length > 0 ? Math.round(((currentQuestionIdx + 1) / questions.length) * 100) : 0}% Complete</span>
           </div>
           <div className="w-full bg-muted rounded-full h-2">
             <div
               className="bg-gradient-to-r from-blue-500 to-green-500 h-2 rounded-full transition-all duration-500"
-              style={{ width: `${((currentQuestion + 1) / interviewQuestions.length) * 100}%` }}
+              style={{ width: `${questions.length > 0 ? ((currentQuestionIdx + 1) / questions.length) * 100 : 0}%` }}
             />
           </div>
         </div>
@@ -230,7 +286,14 @@ export default function VoiceInterviewCoach() {
               
               {isRecording && (
                 <div className="space-y-4">
-                  <VoiceVisualizer isActive={true} intensity={0.8} />
+                  <VoiceVisualizer isActive={true} volume={micVolume} />
+                  <AnimatePresence>
+                    {isLowVolume && (
+                      <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-xs text-amber-400 flex items-center justify-center gap-1">
+                        <AlertCircle className="h-3 w-3" /> Speak a bit louder, the AI is having trouble hearing you
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
                   <p className="text-sm text-muted-foreground animate-pulse">
                     Recording... Speak clearly and naturally
                   </p>
@@ -258,35 +321,42 @@ export default function VoiceInterviewCoach() {
           </h4>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-400 mb-1">{feedback.confidence}%</div>
-              <p className="text-sm text-muted-foreground">Confidence</p>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-400 mb-1">{feedback.clarity}%</div>
-              <p className="text-sm text-muted-foreground">Clarity</p>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-yellow-400 mb-1">{feedback.pace}%</div>
-              <p className="text-sm text-muted-foreground">Pace</p>
+            <div className="md:col-span-3 text-center p-4 bg-primary/5 rounded-xl border border-primary/10">
+              <div className={cn(
+                "text-5xl font-bold mb-1",
+                feedback.score >= 70 ? "text-green-400" : feedback.score >= 50 ? "text-amber-400" : "text-red-400"
+              )}>
+                {Math.round(feedback.score)}%
+              </div>
+              <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Overall Score</p>
             </div>
           </div>
 
           <div className="space-y-3">
             <div>
-              <h5 className="font-semibold text-foreground mb-2">Emotion Detected</h5>
-              <span className="px-3 py-1 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-full text-purple-300">
-                {feedback.emotion}
-              </span>
+              <h5 className="font-semibold text-foreground mb-2">AI Summary</h5>
+              <p className="text-sm text-muted-foreground leading-relaxed">{feedback.feedback}</p>
             </div>
             
             <div>
-              <h5 className="font-semibold text-foreground mb-2">Suggestions for Improvement</h5>
+              <h5 className="font-semibold text-foreground mb-2">Strengths</h5>
               <ul className="space-y-2">
-                {feedback.suggestions.map((suggestion, index) => (
-                  <li key={index} className="flex items-start gap-2">
-                    <div className="w-2 h-2 bg-green-400 rounded-full mt-2 flex-shrink-0" />
-                    <span className="text-sm text-muted-foreground">{suggestion}</span>
+                {feedback.strengths.filter(s => s).map((s, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0" />
+                    <span className="text-sm text-muted-foreground">{s}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <h5 className="font-semibold text-foreground mb-2">Improvements</h5>
+              <ul className="space-y-2">
+                {feedback.improvements.filter(s => s).map((s, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <div className="w-2 h-2 bg-amber-400 rounded-full mt-2 flex-shrink-0" />
+                    <span className="text-sm text-muted-foreground">{s}</span>
                   </li>
                 ))}
               </ul>
@@ -297,19 +367,19 @@ export default function VoiceInterviewCoach() {
 
       {/* Navigation */}
       <div className="flex justify-center gap-4">
-        {currentQuestion > 0 && (
-          <HolographicButton variant="secondary" onClick={() => setCurrentQuestion(currentQuestion - 1)}>
+        {currentQuestionIdx > 0 && (
+          <HolographicButton variant="secondary" onClick={() => setCurrentQuestionIdx(currentQuestionIdx - 1)}>
             Previous Question
           </HolographicButton>
         )}
         
-        {feedback && currentQuestion < interviewQuestions.length - 1 && (
+        {feedback && currentQuestionIdx < questions.length - 1 && (
           <HolographicButton onClick={nextQuestion}>
             Next Question
           </HolographicButton>
         )}
         
-        {currentQuestion === interviewQuestions.length - 1 && feedback && (
+        {currentQuestionIdx === questions.length - 1 && feedback && (
           <HolographicButton variant="accent" onClick={resetInterview}>
             <RotateCcw className="h-4 w-4" />
             Start New Interview
