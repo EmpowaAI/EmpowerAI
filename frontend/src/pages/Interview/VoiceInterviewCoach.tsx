@@ -156,7 +156,7 @@ export default function VoiceInterviewCoach() {
         // Ensure UI shows what was actually analyzed
         setTranscript(finalResponse);
         setFeedback(normalizedFeedback)
-        setAnswers([...answers, finalResponse])
+        setAnswers(prev => [...prev, finalResponse])
       } else {
         showToast("Failed to analyze response. Try again.", "error")
       }

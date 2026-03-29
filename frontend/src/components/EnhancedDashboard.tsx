@@ -123,7 +123,7 @@ export const EnhancedDashboard: React.FC = () => {
             animate={{ opacity: 1, x: 0 }}
           >
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold">
-              Welcome back, {profile.name || 'User'}!
+              Welcome back, {profile?.name || 'User'}!
             </h1>
             <p className="text-sm sm:text-base text-muted-foreground mt-1">
               Your personalized career insights and opportunities
