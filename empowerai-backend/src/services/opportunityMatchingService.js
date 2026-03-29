@@ -186,6 +186,9 @@ function calculateMatchScore(userProfile, opportunity) {
   if (userProfile.strictCareerMatch && userProfile.careerGoals && userProfile.careerGoals.length > 0 && !hasCareerMatch) {
     score = 0;
   }
+  
+  // If we have a very low score but some skills match, give a baseline boost
+  if (score < 30 && hasSkillMatch) score += 15;
 
   return Math.min(Math.max(Math.round(score), 0), 100);
 }
@@ -258,12 +261,12 @@ function extractUserProfile(req) {
     userId: user.id,
     skills: [],
     province: null,
-    yearsOfExperience: 0,
+    yearsOfExperience: user.yearsOfExperience || 0,
     salaryExpectation: null,
     preferredJobTypes: ['job', 'internship', 'learnership'],
     education: user.education || null,
     careerGoals: user.interests || [],
-    ...user.profile
+    ...(user.profile || {})
   };
 
   // Try to get skills from query parameters
@@ -272,6 +275,11 @@ function extractUserProfile(req) {
       .split(',')
       .map(s => s.trim())
       .filter(s => s);
+  }
+  
+  // If no skills in query, try to get from the analyzed CV data if available
+  if (profile.skills.length === 0 && user.cvData?.extractedSkills) {
+    profile.skills = user.cvData.extractedSkills;
   }
 
   // Try to get province from query parameters
