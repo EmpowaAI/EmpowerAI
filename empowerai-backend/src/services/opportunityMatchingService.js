@@ -219,7 +219,7 @@ function getMatchReason(userProfile, opportunity, score) {
   if (userProfile.province && opportunity.province) {
     const match = (Array.isArray(opportunity.province) ? opportunity.province : [opportunity.province])
       .some(oppProv => 
-        userProfile.province.toLowerCase().includes(oppProv.toLowerCase())
+        userProfile.province?.toLowerCase().includes(oppProv.toLowerCase())
       );
     if (match) {
       reasons.push('matches your province');
@@ -275,6 +275,11 @@ function extractUserProfile(req) {
       .split(',')
       .map(s => s.trim())
       .filter(s => s);
+  }
+  
+  // If no skills in query, try to get from the analyzed CV data if available
+  if (profile.skills.length === 0 && user.cvData?.extractedSkills) {
+    profile.skills = user.cvData.extractedSkills;
   }
 
   // Try to get province from query parameters
