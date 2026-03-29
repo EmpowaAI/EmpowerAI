@@ -168,8 +168,8 @@ exports.startInterview = async (req, res, next) => {
 
     res.status(200).json({
       status: 'success',
-      // Flatten the response so frontend sees session properties directly
-      ...(sessionData.session ? sessionData.session : sessionData),
+      // Ensure properties like questions and sessionId are directly accessible
+      ...(sessionData.session || sessionData),
       data: {
         session: sessionData.session || sessionData
       },
