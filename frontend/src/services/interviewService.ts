@@ -81,7 +81,9 @@ class InterviewService {
         throw new Error(`Failed to start interview: ${response.status}`);
       }
 
-      return await response.json();
+      const jsonResponse = await response.json();
+      // Backend now wraps session in a 'data' property
+      return jsonResponse.data.session || jsonResponse.session || jsonResponse;
     } catch (error) {
       console.error('Error starting interview:', error);
       throw new Error('Failed to start interview');
