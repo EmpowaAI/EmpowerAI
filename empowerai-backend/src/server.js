@@ -7,7 +7,7 @@ const compression = require('compression');
 require('dotenv').config();
 
 const logger = require('./utils/logger');
-const { apiLimiter } = require('./middleware/rateLimiter');
+const { apiLimiter, authLimiter, aiServiceLimiter } = require('./middleware/rateLimiter');
 const { initAiQueue, getAiQueueHealth, getAiJobStatus } = require('./queues/aiQueue');
 
 const app = express();
@@ -84,6 +84,11 @@ app.use('/api', (req, res, next) => {
   }
   return apiLimiter(req, res, next);
 });
+
+// Apply specific limiters to sensitive/expensive routes
+app.use('/api/auth', authLimiter);
+app.use('/api/cv', aiServiceLimiter);
+app.use('/api/twin', aiServiceLimiter);
 
 // Request logging middleware
 app.use(require('./middleware/requestLogger'));
@@ -262,6 +267,20 @@ async function connectDatabase() {
   }
 }
 
+// --- MOVED ROUTES OUTSIDE TO PREVENT STARTUP 404s ---
+// Standard middleware (JSON, CORS, logging) must be before routes
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/account', require('./routes/account')); 
+app.use('/api/twin', require('./routes/twin'));
+app.use('/api/opportunities', require('./routes/opportunities'));
+app.use('/api/cv', require('./routes/cv'));
+app.use('/api/interview', require('./routes/interview'));
+app.use('/api/chat', require('./routes/chat'));
+app.use('/api/rss', require('./routes/rss'));
+app.use('/api/admin', require('./routes/admin'));
+app.use('/api/user', require('./routes/user'));
+app.use('/api/applications', require('./routes/applications'));
+
 // Connect to database first, then set up routes
 connectDatabase().then(async (connected) => {
   if (connected) {
@@ -309,21 +328,6 @@ connectDatabase().then(async (connected) => {
   } else {
     logger.warn('Database not connected, routes will return 503 errors');
   }
-
-  // Routes (set up after database connection attempt)
-  app.use('/api/auth', require('./routes/auth'));
-  app.use('/api/account', require('./routes/account')); // Email verification & password reset
-  app.use('/api/twin', require('./routes/twin'));
-  app.use('/api/opportunities', require('./routes/opportunities'));
-  app.use('/api/cv', require('./routes/cv'));
-  app.use('/api/interview', require('./routes/interview'));
-  app.use('/api/chat', require('./routes/chat'));
-  app.use('/api/rss', require('./routes/rss'));
-  app.use('/api/admin', require('./routes/admin'));
-  app.use('/api/user', require('./routes/user'));
-  app.use('/api/applications', require('./routes/applications'));
-
-
 
   // Root route handler (for Render health checks and general requests)
   app.get('/', (req, res) => {
