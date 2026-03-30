@@ -46,11 +46,11 @@ const authLimiter = rateLimit({
  */
 const aiServiceLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
-  max: 1000, // Very permissive, let OpenAI handle rate limits
+  max: 30, // Proactively throttle to 30 requests per minute per IP
   message: 'Too many AI service requests, please try again later.',
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-  skipSuccessfulRequests: true, // Only count failed requests
+  skipSuccessfulRequests: false, // Count all requests to protect upstream Tier limits
   // Removed custom keyGenerator - use default IP-based rate limiting (supports IPv6)
   handler: (req, res) => {
     const { RateLimitError } = require('../utils/errors');
@@ -78,4 +78,3 @@ module.exports = {
   authLimiter,
   aiServiceLimiter,
 };
-

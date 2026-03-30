@@ -168,10 +168,10 @@ exports.startInterview = async (req, res, next) => {
 
     res.status(200).json({
       status: 'success',
-      // Ensure properties like questions and sessionId are directly accessible
-      ...(sessionData.session || sessionData),
+      // sessionData is already the session object, spread it directly
+      ...sessionData,
       data: {
-        session: sessionData.session || sessionData
+        session: sessionData // sessionData is already the session object
       },
       meta
     });

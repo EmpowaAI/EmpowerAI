@@ -42,7 +42,7 @@ export async function revampCV(cvData: CVAnalysis): Promise<RevampedCVResponse> 
     // Handle different response formats
     if (response && typeof response === 'object') {
       // If nested inside data.revamp from Node.js controller
-      if ('data' in response && (response as any).data?.revamp) {
+      if ('data' in response && (response as any).data?.revamp) { // Check for data.revamp
         return (response as any).data.revamp as RevampedCVResponse;
       }
 
