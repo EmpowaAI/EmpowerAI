@@ -94,6 +94,11 @@ const request = async <T>(endpoint: string, options: RequestInit = {}): Promise<
         (apiError as any).isRateLimit = true;
         (apiError as any).retryAfter = error.retryAfter || 60;
       }
+      if (response.status === 401) {
+        removeToken();
+        // Optionally, redirect to login page
+        window.location.href = '/login';
+      }
       throw apiError;
     }
 
