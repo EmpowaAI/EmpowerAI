@@ -47,12 +47,12 @@ const request = async <T>(endpoint: string, options: RequestInit = {}): Promise<
   if (token) headers.set('Authorization', `Bearer ${token}`);
 
   // Determine timeout based on endpoint type
-  let timeout = 60000; // default 60 seconds
+  let timeout = 45000; // default 45 seconds for standard CRUD
   if (typeof endpoint === 'string') {
     if (endpoint.includes('/auth/')) {
-      timeout = 30000; // auth: 30 seconds
+      timeout = 20000; // auth: 20 seconds (fail fast)
     } else if (endpoint.includes('/twin/')) {
-      timeout = 120000; // twin creation can be slow: 120 seconds
+      timeout = 150000; // AI tasks: 2.5 minutes (allow for cold starts + deep analysis)
     }
   }
 
