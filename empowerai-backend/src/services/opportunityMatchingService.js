@@ -175,10 +175,10 @@ function calculateMatchScore(userProfile, opportunity) {
   }
 
   score = weights.skills + weights.location + weights.experience + weights.salary + weights.type + weights.career + weights.boost + weights.educationBoost;
-  // If the user provided skills/goals and none match, drop to 0
+  // If the user provided skills/goals and none match, drop to 0 - but only if profile is mature
   const hasSignals = (userProfile.skills && userProfile.skills.length > 0) ||
     (userProfile.careerGoals && userProfile.careerGoals.length > 0);
-  if (hasSignals && !hasSkillMatch && !hasCareerMatch) {
+  if (hasSignals && !hasSkillMatch && !hasCareerMatch && score < 20) {
     score = 0;
   }
 
