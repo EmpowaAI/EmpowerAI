@@ -208,7 +208,8 @@ async def chat_health():
     return {
         "status": "ok",
         "service": "chat",
-        "ai_enabled": ai_client.enabled,
+        "ai_provider_status": "healthy" if ai_client.enabled else "unavailable",
+        "ai_mode": "hybrid",
         "mode": "hybrid",
         "timestamp": __import__('datetime').datetime.now().isoformat()
     }
