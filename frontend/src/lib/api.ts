@@ -52,7 +52,7 @@ const request = async <T>(endpoint: string, options: RequestInit = {}): Promise<
     if (endpoint.includes('/auth/')) {
       timeout = 20000; // auth: 20 seconds (fail fast)
     } else if (endpoint.includes('/twin/')) {
-      timeout = 150000; // AI tasks: 2.5 minutes (allow for cold starts + deep analysis)
+      timeout = 45000; // Post-Upgrade: 45 seconds is plenty for an "Always-On" service
     }
   }
 
