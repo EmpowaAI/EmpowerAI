@@ -1258,7 +1258,7 @@ NAME: {name if name else '[Name]'}
 CONTACT: {phone if phone else '[Phone]'} | {email if email else '[Email]'}
 
 PROFESSIONAL SUMMARY:
-{about}
+{about[:1000]}
 
 SKILLS:
 {skills_text}

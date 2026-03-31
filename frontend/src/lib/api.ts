@@ -96,8 +96,10 @@ const request = async <T>(endpoint: string, options: RequestInit = {}): Promise<
       }
       if (response.status === 401) {
         removeToken();
-        // Optionally, redirect to login page
-        window.location.href = '/login';
+        // Avoid redirect loops if already on login
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = '/login';
+        }
       }
       throw apiError;
     }
