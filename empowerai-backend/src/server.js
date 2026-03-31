@@ -77,18 +77,13 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // CV routes: aiServiceLimiter (currently disabled)
 // Auth routes: authLimiter
 // Twin routes: No rate limiting (OpenAI will rate limit before we do)
-app.use('/api', (req, res, next) => {
-  // Skip general rate limiting for routes that have their own specific limiters or don't need it
-  if (req.path.startsWith('/cv') || req.path.startsWith('/auth') || req.path.startsWith('/twin')) {
-    return next();
-  }
-  return apiLimiter(req, res, next);
-});
-
-// Apply specific limiters to sensitive/expensive routes
+// --- CONSOLIDATED RATE LIMITING ---
 app.use('/api/auth', authLimiter);
 app.use('/api/cv', aiServiceLimiter);
 app.use('/api/twin', aiServiceLimiter);
+app.use('/api/interview', aiServiceLimiter);
+app.use('/api/chat', aiServiceLimiter);
+app.use('/api', apiLimiter);
 
 // Request logging middleware
 app.use(require('./middleware/requestLogger'));

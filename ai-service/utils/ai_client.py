@@ -403,16 +403,11 @@ Skills:"""
             return []
 
     def _clean_json_response(self, text: str) -> str:
-        text = text.strip()
-        if text.startswith("```"):
-            lines = text.split("\n")
-            if lines[0].startswith("```"):
-                lines = lines[1:]
-            if lines and lines[-1].startswith("```"):
-                lines = lines[:-1]
-            text = "\n".join(lines).strip()
-        brace_start = text.find('{')
-        brace_end = text.rfind('}')
-        if brace_start != -1 and brace_end != -1 and brace_end > brace_start:
-            text = text[brace_start:brace_end+1]
-        return text
+        """Principal Level JSON Extraction: Ignores surrounding conversation/markdown."""
+        # Remove possible markdown code block wrappers
+        cleaned = re.sub(r'```json\s*|\s*```', '', text).strip()
+        # Extract only the content between the first { and last }
+        match = re.search(r'(\{.*\}|\[.*\])', cleaned, re.DOTALL)
+        if match:
+            return match.group(0)
+        return cleaned

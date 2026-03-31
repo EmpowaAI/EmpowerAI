@@ -136,10 +136,10 @@ exports.startInterview = async (req, res, next) => {
             company: taskCompany || null,
             cvData: taskCvData || null,
             jobDescription: taskJobDescription || null,
-          }, { timeout: 8000 }); // 8 second timeout
+          }, { timeout: 25000 }); // Increased to 25s for AI reasoning
           return response.data
         },
-        { timeout: 8000, includeJobId: true }
+        { timeout: 25000, includeJobId: true }
       );
       // Safely extract result and meta
       sessionData = (queuedResult && queuedResult.result) ? queuedResult.result : (queuedResult || null);
