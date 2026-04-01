@@ -17,32 +17,6 @@ const updateUserRules = [
     .trim()
     .isLength({ min: 2, max: 100 }).withMessage('Name must be between 2 and 100 characters'),
 
-  body('age')
-    .optional()
-    .isInt({ min: 13, max: 120 }).withMessage('Age must be a valid number between 13 and 120'),
-
-  body('province')
-    .optional()
-    .trim()
-    .isLength({ max: 100 }).withMessage('Province must be under 100 characters'),
-
-  body('education')
-    .optional()
-    .trim()
-    .isLength({ max: 200 }).withMessage('Education must be under 200 characters'),
-
-  body('skills')
-    .optional()
-    .isArray().withMessage('Skills must be an array')
-    .custom((skills) => skills.every((s) => typeof s === 'string'))
-    .withMessage('Each skill must be a string'),
-
-  body('interests')
-    .optional()
-    .isArray().withMessage('Interests must be an array')
-    .custom((interests) => interests.every((i) => typeof i === 'string'))
-    .withMessage('Each interest must be a string'),
-
   body('avatar')
     .optional()
     .trim()

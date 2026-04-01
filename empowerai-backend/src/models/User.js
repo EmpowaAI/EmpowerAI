@@ -1,52 +1,133 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-const userSchema = new mongoose.Schema({
-  name:     { type: String, required: true },
-  email:    { type: String, required: true, unique: true, index: true, sparse: true },
-  password: { type: String, required: true, select: false },
+const userSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
-  age:       { type: Number, index: true },
-  province:  { type: String, index: true },
-  education: { type: String },
-  skills:    [{ type: String }],
-  interests: [{ type: String }],
-  avatar:    { type: String },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true,
+      lowercase: true,
+      trim: true,
+    },
 
-  // Verification
-  isVerified:        { type: Boolean, default: false },
-  emailToken:        { type: String, select: false },
-  emailTokenExpires: { type: Date,   select: false },
+    password: {
+      type: String,
+      required: true,
+      minlength: 8,
+      select: false,
+    },
 
-  // Password reset
-  resetToken:        { type: String, select: false },
-  resetTokenExpires: { type: Date,   select: false },
+    avatar: {
+      type: String,
+      default: null,
+    },
 
-  // Email change (two-step: stores new email until confirmed)
-  pendingEmail:      { type: String, default: null, select: false },
+    // -------------------------
+    // ACCOUNT STATUS
+    // -------------------------
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
 
-  // Account deletion (two-step: token sent via email)
-  deleteToken:        { type: String, select: false },
-  deleteTokenExpires: { type: Date,   select: false },
+    // -------------------------
+    // EMAIL VERIFICATION
+    // -------------------------
+    emailToken: {
+      type: String,
+      select: false,
+    },
 
-}, {
-  timestamps: true,
-  toJSON:   { virtuals: true, transform: (doc, ret) => { delete ret.password; return ret; } },
-  toObject: { virtuals: true, transform: (doc, ret) => { delete ret.password; return ret; } },
+    emailTokenExpires: {
+      type: Date,
+      select: false,
+    },
+
+    // -------------------------
+    // PASSWORD RESET
+    // -------------------------
+    resetToken: {
+      type: String,
+      select: false,
+    },
+
+    resetTokenExpires: {
+      type: Date,
+      select: false,
+    },
+
+    // -------------------------
+    // EMAIL CHANGE FLOW
+    // -------------------------
+    pendingEmail: {
+      type: String,
+      default: null,
+      lowercase: true,
+      trim: true,
+      select: false,
+    },
+
+    // -------------------------
+    // ACCOUNT DELETION FLOW
+    // -------------------------
+    deleteToken: {
+      type: String,
+      select: false,
+    },
+
+    deleteTokenExpires: {
+      type: Date,
+      select: false,
+    },
+  },
+  {
+    timestamps: true,
+
+    toJSON: {
+      virtuals: true,
+      transform: (doc, ret) => {
+        delete ret.password;
+        return ret;
+      },
+    },
+
+    toObject: {
+      virtuals: true,
+      transform: (doc, ret) => {
+        delete ret.password;
+        return ret;
+      },
+    },
+  }
+);
+
+// -------------------------
+// HASH PASSWORD BEFORE SAVE
+// -------------------------
+userSchema.pre('save', async function (next) {
+  try {
+    if (!this.isModified('password')) return next();
+
+    this.password = await bcrypt.hash(this.password, 12);
+    next();
+  } catch (err) {
+    next(err);
+  }
 });
 
-// Hash password before saving.
-// Skips hashing if $locals.skipHash is true — used when promoting
-// a PendingUser to User where the password is already hashed.
-userSchema.pre('save', async function () {
-  if (this.$locals.skipHash)        return; // already hashed by PendingUser
-  if (!this.isModified('password')) return;
-  this.password = await bcrypt.hash(this.password, 10);
-});
-
-// Compare password
-userSchema.methods.correctPassword = async function (candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password);
+// -------------------------
+// PASSWORD CHECK METHOD
+// -------------------------
+userSchema.methods.isPasswordCorrect = async function (candidatePassword) {
+  return bcrypt.compare(candidatePassword, this.password);
 };
 
 module.exports = mongoose.model('User', userSchema);

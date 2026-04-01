@@ -1,47 +1,61 @@
 const express = require('express');
 const multer = require('multer');
-const { analyzeCV, analyzeCVFile, revampCV } = require('../controllers/cvController');
+const path = require('path');
+
+const { analyzeCV, analyzeCVFile, revampCV, getCvProfile } = require('../controllers/cvController');
 const auth = require('../middleware/auth');
 const { aiServiceLimiter } = require('../middleware/rateLimiter');
 const validateRequest = require('../middleware/validate');
 const { cvAnalysisSchema, cvRevampSchema } = require('../utils/validators');
+
 const router = express.Router();
 
-// All routes protected by authentication
+// ─── AUTH ─────────────────────────────────────────────────
+
 router.use(auth);
 
-// Apply AI service rate limiter to CV analysis endpoints (configurable)
+// ─── RATE LIMITER (optional) ──────────────────────────────
+
 if (process.env.ENABLE_CV_RATE_LIMITER !== 'false') {
   router.use(aiServiceLimiter);
 }
 
-// Configure multer for file uploads
+// ─── MULTER ───────────────────────────────────────────────
+
 const upload = multer({
-  storage: multer.memoryStorage(), // Store in memory
+  storage: multer.memoryStorage(),
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
+    fileSize: 5 * 1024 * 1024, // 5MB
   },
   fileFilter: (req, file, cb) => {
-    const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
+    const allowedTypes = [
+      'application/pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'text/plain',
+    ];
     const allowedExtensions = ['.pdf', '.docx', '.txt'];
-    const ext = require('path').extname(file.originalname).toLowerCase();
-    
+    const ext = path.extname(file.originalname).toLowerCase();
+
     if (allowedTypes.includes(file.mimetype) || allowedExtensions.includes(ext)) {
       cb(null, true);
     } else {
       cb(new Error('Invalid file type. Only PDF, DOCX, and TXT files are allowed.'));
     }
-  }
+  },
 });
 
-// Text-based CV analysis
+// ─── ROUTES ───────────────────────────────────────────────
+
+// GET  /api/cv/profile        → fetch saved CvProfile for logged-in user
+router.get('/profile', getCvProfile);
+
+// POST /api/cv/analyze        → analyze CV from raw text
 router.post('/analyze', validateRequest(cvAnalysisSchema), analyzeCV);
 
-// File upload CV analysis
+// POST /api/cv/analyze-file   → analyze CV from uploaded file
 router.post('/analyze-file', upload.single('cvFile'), analyzeCVFile);
 
-// CV revamp (structured rewrite)
+// POST /api/cv/revamp         → structured CV rewrite
 router.post('/revamp', validateRequest(cvRevampSchema), revampCV);
 
 module.exports = router;
-
