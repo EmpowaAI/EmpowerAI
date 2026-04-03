@@ -91,10 +91,11 @@ exports.sendTwinChat = async (req, res, next) => {
       'chat:twin',
       { messages },
       async ({ messages: taskMessages }) => {
-        const response = await aiServiceClient.post('/chat/twin', { messages: taskMessages }, { timeout: 15000 });
+        // Twin chat can take longer than standard chat (profile building + reasoning)
+        const response = await aiServiceClient.post('/chat/twin', { messages: taskMessages }, { timeout: 45000 });
         return response.data;
       },
-      { timeout: 15000, includeJobId: true }
+      { timeout: 45000, includeJobId: true }
     );
 
     const replyData = queuedResult.result || queuedResult;
@@ -116,6 +117,44 @@ exports.sendTwinChat = async (req, res, next) => {
       status: error.response?.status
     });
 
-    next(error);
+    // If the AI service is down / waking up, don't surface as a generic 500
+    const status = error.response?.status;
+
+    if (status === 401 || status === 403) {
+      return res.status(503).json({
+        status: 'error',
+        message: 'AI service authentication failed. Please try again later.',
+      });
+    }
+
+    if (status === 404) {
+      return res.status(503).json({
+        status: 'error',
+        message: 'AI service endpoint not found. Please try again later.',
+      });
+    }
+
+    if (status === 429 || error.isRateLimit) {
+      const retryAfter = error.retryAfter || error.response?.data?.retryAfter || 60;
+      return res.status(429).json({
+        status: 'error',
+        message: 'Rate limited. Please wait a moment and try again.',
+        retryAfter,
+      });
+    }
+
+    // Render/connection timeouts: treat as service unavailable
+    if (error.isRenderColdStart || error.isTimeout || error.code === 'ECONNABORTED') {
+      return res.status(503).json({
+        status: 'error',
+        message: 'AI service is waking up. Please wait 30–60 seconds and try again.',
+        retryAfter: 60,
+      });
+    }
+
+    return res.status(503).json({
+      status: 'error',
+      message: error.message || 'AI service unavailable. Please try again later.',
+    });
   }
 };

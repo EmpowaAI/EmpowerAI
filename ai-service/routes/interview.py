@@ -14,7 +14,7 @@ from services.interview_coach import InterviewCoach
 from utils.logger import get_logger
 from utils.ai_client import AIClient
 
-router = APIRouter()
+router = APIRouter(prefix="/interview", tags=["Interview"])
 interview_coach = InterviewCoach()
 ai_client = AIClient()  # Get singleton instance
 
@@ -143,7 +143,7 @@ async def submit_answer(answer: InterviewAnswerRequest, req: Request):
         logger.error(f"Error evaluating answer: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error evaluating answer: {str(e)}")
 
-@router.get("/session/{session_id}")
+@router.get("/{session_id}")
 async def get_session(session_id: str, req: Request):
     cleanup_expired_sessions()
     
