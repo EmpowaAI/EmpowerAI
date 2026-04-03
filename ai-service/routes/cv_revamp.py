@@ -67,4 +67,6 @@ async def revamp_cv(request: CVRevampRequest, req: Request):
     except Exception as e:
         print(f"[{request_id}] ❌ Error in CV revamp: {str(e)}")
         print(traceback.format_exc())
-        raise HTTPException(status_code=500, detail=f"Error revamping CV: {str(e)}")
+        # Prefer 503 for upstream/LLM issues; the service includes a non-AI fallback,
+        # but keep this defensive so clients don't see a generic 500 for transient errors.
+        raise HTTPException(status_code=503, detail=f"CV revamp temporarily unavailable: {str(e)}")
