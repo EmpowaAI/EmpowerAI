@@ -234,11 +234,12 @@
   }
 
   .panel-image-overlay {
+    /* Always-dark overlay so left-panel copy stays readable in light + dark themes */
     background: linear-gradient(
       135deg,
-      hsl(var(--foreground) / 0.84) 0%,
-      hsl(var(--foreground) / 0.62) 48%,
-      hsl(var(--foreground) / 0.76) 100%
+      rgba(0, 0, 0, 0.78) 0%,
+      rgba(0, 0, 0, 0.56) 48%,
+      rgba(0, 0, 0, 0.74) 100%
     );
   }
 
