@@ -60,19 +60,25 @@ class InterviewService {
     jobDescription?: string
   ): Promise<ServiceInterviewSession> {
     try {
+      const payload: Record<string, unknown> = {
+        type,
+        difficulty,
+      };
+
+      const companyValue = typeof company === 'string' ? company.trim() : '';
+      if (companyValue) payload.company = companyValue;
+      if (cvData) payload.cvData = cvData;
+      if (typeof jobDescription === 'string' && jobDescription.trim()) {
+        payload.jobDescription = jobDescription.trim();
+      }
+
       const response = await fetch(`${API_BASE_URL}/interview/start`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...(getToken() ? { 'Authorization': `Bearer ${getToken()}` } : {}),
         },
-        body: JSON.stringify({
-          type,
-          difficulty,
-          company: company || null,
-          cvData,
-          jobDescription
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {

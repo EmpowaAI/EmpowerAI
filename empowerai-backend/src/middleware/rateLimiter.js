@@ -4,6 +4,7 @@
  */
 
 const rateLimit = require('express-rate-limit');
+const { ipKeyGenerator } = require('express-rate-limit');
 const crypto = require('crypto');
 
 const num = (value, fallback) => {
@@ -74,7 +75,7 @@ const aiServiceLimiter = rateLimit({
     if (typeof adminKey === 'string' && adminKey.trim()) {
       return `admin:${crypto.createHash('sha256').update(adminKey.trim()).digest('hex')}`;
     }
-    return req.ip;
+    return ipKeyGenerator(req);
   },
   handler: (req, res) => {
     const { RateLimitError } = require('../utils/errors');
