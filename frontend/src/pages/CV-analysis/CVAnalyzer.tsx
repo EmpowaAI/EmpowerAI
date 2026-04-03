@@ -156,6 +156,13 @@ export default function CVAnalyzerPage() {
       }
     } catch (err: any) {
       console.error("❌ Revamp error:", err)
+      if (err?.status === 429) {
+        const seconds = typeof err.retryAfter === 'number' ? err.retryAfter : 60
+        const msg = err.message || `Rate limited. Please try again in ${seconds} seconds.`
+        setError(msg)
+        showToast(msg, "error")
+        return
+      }
       showToast(err.message || "Failed to revamp CV.", "error")
     } finally {
       setIsRevamping(false)
