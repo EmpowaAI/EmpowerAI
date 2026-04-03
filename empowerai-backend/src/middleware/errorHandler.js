@@ -218,6 +218,20 @@ module.exports = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
 
+  // Body-parser / JSON parsing errors (happen before route handlers)
+  // Without this, they get treated as "programming errors" and return a misleading 500.
+  // Common cases on Render: large payloads (413) and malformed JSON (400).
+  if (err?.type === 'entity.too.large' || err?.status === 413) {
+    const payloadError = new AppError('Request payload too large. Please reduce the size and try again.', 413);
+    return handleOperationalError(payloadError, req, res);
+  }
+
+  // Express.json SyntaxError typically has status=400 and includes the "body" key
+  if (err instanceof SyntaxError && err?.status === 400 && 'body' in err) {
+    const jsonError = new AppError('Invalid JSON in request body.', 400);
+    return handleOperationalError(jsonError, req, res);
+  }
+
   // Handle operational errors (AppError instances)
   if (err.isOperational) {
     return handleOperationalError(err, req, res);
