@@ -102,6 +102,16 @@ class CVAnalysisResponse(BaseModel):
     cvText: str = Field(default="")
     links: Optional[Dict[str, bool]] = Field(default=None)
     incomeIdeas: Optional[List[IncomeIdea]] = Field(default=None)
+
+    # Enhanced fields (used by frontend scoring + revamp)
+    score: Optional[int] = None
+    readinessLevel: Optional[str] = None
+    strengths: Optional[List[str]] = None
+    weaknesses: Optional[List[str]] = None
+    recommendations: Optional[List[str]] = None
+    missingKeywords: Optional[List[str]] = None
+    industry: Optional[str] = None
+    summary: Optional[str] = None
     
     class Config:
         json_schema_extra = {
