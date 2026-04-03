@@ -188,10 +188,10 @@ export default function LoginPage() {
                   autoComplete="email"
                   inputMode="email"
                   spellCheck={false}
-                  className={`w-full px-4 py-4 border-2 rounded-xl text-base text-foreground transition-all min-h-[56px] auth-input ${
+                  className={`w-full px-4 py-4 border rounded-xl text-base text-foreground transition-all min-h-[56px] auth-input ${
                     emailFocused 
-                      ? "border-primary shadow-lg shadow-primary/10" 
-                      : "border-border hover:border-border/80"
+                      ? "border-primary/40" 
+                      : "border-border/60 hover:border-border/70"
                   }`}
                   required
                 />
@@ -215,10 +215,10 @@ export default function LoginPage() {
                   onFocus={() => setPasswordFocused(true)}
                   onBlur={() => setPasswordFocused(false)}
                   autoComplete="current-password"
-                  className={`w-full px-4 py-4 pr-12 border-2 rounded-xl text-base text-foreground transition-all min-h-[56px] auth-input ${
+                  className={`w-full px-4 py-4 pr-12 border rounded-xl text-base text-foreground transition-all min-h-[56px] auth-input ${
                     passwordFocused 
-                      ? "border-primary shadow-lg shadow-primary/10" 
-                      : "border-border hover:border-border/80"
+                      ? "border-primary/40" 
+                      : "border-border/60 hover:border-border/70"
                   }`}
                   required
                 />

@@ -217,12 +217,12 @@ export default function SignupPage() {
                   onFocus={() => setFocusedField('name')}
                   onBlur={() => setFocusedField(null)}
                   autoComplete="name"
-                  className={`w-full px-4 py-4 border-2 rounded-xl text-base text-foreground transition-all min-h-[56px] auth-input ${
+                  className={`w-full px-4 py-4 border rounded-xl text-base text-foreground transition-all min-h-[56px] auth-input ${
                     fieldErrors.name 
-                      ? "border-destructive" 
+                      ? "border-destructive/50" 
                       : focusedField === 'name' 
-                        ? "border-primary shadow-lg shadow-primary/10" 
-                        : "border-border hover:border-border/80"
+                        ? "border-primary/40" 
+                        : "border-border/60 hover:border-border/70"
                   }`}
                   required
                 />
@@ -257,12 +257,12 @@ export default function SignupPage() {
                   autoComplete="email"
                   inputMode="email"
                   spellCheck={false}
-                  className={`w-full px-4 py-4 border-2 rounded-xl text-base text-foreground transition-all min-h-[56px] auth-input ${
+                  className={`w-full px-4 py-4 border rounded-xl text-base text-foreground transition-all min-h-[56px] auth-input ${
                     fieldErrors.email 
-                      ? "border-destructive" 
+                      ? "border-destructive/50" 
                       : focusedField === 'email' 
-                        ? "border-primary shadow-lg shadow-primary/10" 
-                        : "border-border hover:border-border/80"
+                        ? "border-primary/40" 
+                        : "border-border/60 hover:border-border/70"
                   }`}
                   required
                 />
@@ -295,12 +295,12 @@ export default function SignupPage() {
                   onFocus={() => setFocusedField('password')}
                   onBlur={() => setFocusedField(null)}
                   autoComplete="new-password"
-                  className={`w-full px-4 py-4 pr-12 border-2 rounded-xl text-base text-foreground transition-all min-h-[56px] auth-input ${
+                  className={`w-full px-4 py-4 pr-12 border rounded-xl text-base text-foreground transition-all min-h-[56px] auth-input ${
                     fieldErrors.password 
-                      ? "border-destructive" 
+                      ? "border-destructive/50" 
                       : focusedField === 'password' 
-                        ? "border-primary shadow-lg shadow-primary/10" 
-                        : "border-border hover:border-border/80"
+                        ? "border-primary/40" 
+                        : "border-border/60 hover:border-border/70"
                   }`}
                   required
                 />
