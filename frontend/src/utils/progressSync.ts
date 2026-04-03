@@ -24,6 +24,18 @@ export async function syncProgressFromBackend(): Promise<ProgressData> {
   }
 
   try {
+    const token = localStorage.getItem('empowerai-token')
+    if (!token) {
+      // Not authenticated: do not call protected endpoints
+      return {
+        cvCompleted: localStorage.getItem('cvCompleted') === 'true',
+        twinCompleted: localStorage.getItem('twinCompleted') === 'true',
+        empowermentScore: localStorage.getItem('empowermentScore')
+          ? parseInt(localStorage.getItem('empowermentScore')!)
+          : null
+      }
+    }
+
     // Check if twin exists - if it does, user has completed both CV and Twin
     const twinResponse = await twinAPI.get()
     

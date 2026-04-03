@@ -159,6 +159,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!user) return
+    const token = localStorage.getItem('empowerai-token')
+    if (!token) return
 
     const syncProgress = async () => {
       try {

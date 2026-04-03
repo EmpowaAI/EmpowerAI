@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Brain, Send, Sparkles, ChevronRight, Bot, User, Zap } from "lucide-react";
 import { cn } from "../../lib/utils";
-import { streamChat, parseAIResponse, type ChatMsg } from "../../lib/chat-stream";
+import { streamChat, parseAIResponse, type ChatMsg, type TwinChatMeta } from "../../lib/chat-stream";
 import ReactMarkdown from "react-markdown";
 import { useNavigate } from "react-router-dom"; // Add this for navigation
 
@@ -94,9 +94,12 @@ export default function TwinBuilder() {
           ];
         });
       },
-      onDone: () => {
+      onDone: (meta?: TwinChatMeta) => {
         setIsTyping(false);
         const parsed = parseAIResponse(fullText);
+        const finalOptions = meta?.options && meta.options.length > 0 ? meta.options : parsed.options;
+        const finalIsComplete = typeof meta?.isComplete === 'boolean' ? meta.isComplete : parsed.isComplete;
+        const finalProfile = meta?.profile || parsed.profile;
 
         // Finalize the message with options
         setMessages((prev) => {
@@ -106,8 +109,8 @@ export default function TwinBuilder() {
             updated[lastIdx] = {
               ...updated[lastIdx],
               text: parsed.cleanText,
-              options: parsed.options,
-              isComplete: parsed.isComplete,
+              options: finalOptions,
+              isComplete: finalIsComplete,
             };
           }
           return updated;
@@ -116,8 +119,8 @@ export default function TwinBuilder() {
         // Update chat history
         setChatHistory((prev) => [...prev, { role: "assistant", content: fullText }]);
 
-        if (parsed.isComplete && parsed.profile) {
-          handleProfileComplete(parsed.profile as TwinProfile);
+        if (finalIsComplete && finalProfile) {
+          handleProfileComplete(finalProfile as TwinProfile);
         }
 
         setTimeout(() => inputRef.current?.focus(), 100);
