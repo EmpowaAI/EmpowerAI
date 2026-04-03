@@ -217,7 +217,7 @@ export default function SignupPage() {
                   onFocus={() => setFocusedField('name')}
                   onBlur={() => setFocusedField(null)}
                   autoComplete="name"
-                  className={`w-full px-4 py-4 bg-background border-2 rounded-xl text-base text-foreground focus:outline-none transition-all min-h-[56px] ${
+                  className={`w-full px-4 py-4 border-2 rounded-xl text-base text-foreground transition-all min-h-[56px] auth-input ${
                     fieldErrors.name 
                       ? "border-destructive" 
                       : focusedField === 'name' 
@@ -257,7 +257,7 @@ export default function SignupPage() {
                   autoComplete="email"
                   inputMode="email"
                   spellCheck={false}
-                  className={`w-full px-4 py-4 bg-background border-2 rounded-xl text-base text-foreground focus:outline-none transition-all min-h-[56px] ${
+                  className={`w-full px-4 py-4 border-2 rounded-xl text-base text-foreground transition-all min-h-[56px] auth-input ${
                     fieldErrors.email 
                       ? "border-destructive" 
                       : focusedField === 'email' 
@@ -295,7 +295,7 @@ export default function SignupPage() {
                   onFocus={() => setFocusedField('password')}
                   onBlur={() => setFocusedField(null)}
                   autoComplete="new-password"
-                  className={`w-full px-4 py-4 pr-12 bg-background border-2 rounded-xl text-base text-foreground focus:outline-none transition-all min-h-[56px] ${
+                  className={`w-full px-4 py-4 pr-12 border-2 rounded-xl text-base text-foreground transition-all min-h-[56px] auth-input ${
                     fieldErrors.password 
                       ? "border-destructive" 
                       : focusedField === 'password' 
@@ -307,7 +307,7 @@ export default function SignupPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors min-w-[48px] min-h-[48px] flex items-center justify-center rounded-lg hover:bg-background"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors min-w-[48px] min-h-[48px] flex items-center justify-center rounded-lg hover:bg-background auth-icon-button"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}

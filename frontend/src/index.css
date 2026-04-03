@@ -284,6 +284,35 @@
     position: relative;
   }
 
+  /* Auth form controls (glassmorphism) */
+  .auth-input {
+    background-color: hsl(var(--background) / 0.55);
+    border-color: hsl(var(--border) / 0.6);
+    backdrop-filter: blur(16px) saturate(1.25);
+    -webkit-backdrop-filter: blur(16px) saturate(1.25);
+    box-shadow:
+      0 1px 0 hsl(var(--foreground) / 0.06) inset,
+      0 0 0 1px hsl(var(--foreground) / 0.02) inset;
+  }
+
+  .auth-input::placeholder {
+    color: hsl(var(--muted-foreground) / 0.85);
+  }
+
+  .auth-input:focus {
+    outline: none;
+    box-shadow:
+      0 0 0 4px hsl(var(--primary) / 0.14),
+      0 1px 0 hsl(var(--foreground) / 0.06) inset;
+  }
+
+  .auth-icon-button {
+    background-color: hsl(var(--background) / 0.35);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid hsl(var(--border) / 0.55);
+  }
+
   /* South African geometric pattern */
   .sa-pattern {
     background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d4a017' fill-opacity='0.06'%3E%3Cpath d='M30 0L60 30L30 60L0 30z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
