@@ -107,10 +107,10 @@ export default function SignupPage() {
 
       <div className="relative z-10 max-w-lg space-y-6 animate-slide-up">
         <Logo variant="light" size="lg" linkTo="/" />
-        <p className="text-sm font-semibold uppercase tracking-[0.24em] text-primary panel-copy-shadow">
+        <p className="text-sm font-semibold uppercase tracking-[0.24em] text-white/80 panel-copy-shadow">
           Create your account
         </p>
-        <h1 className="text-4xl font-bold leading-tight text-primary-foreground panel-copy-shadow">
+        <h1 className="text-4xl font-bold leading-tight text-white panel-copy-shadow">
           Start your journey to economic empowerment.
         </h1>
         <ul className="space-y-4">
@@ -120,9 +120,9 @@ export default function SignupPage() {
             { text: "Get personalized career guidance", icon: CheckCircle },
             { text: "Access SA-specific opportunities", icon: Shield },
           ].map((item, i) => (
-            <li key={i} className="flex items-center gap-3 text-primary-foreground panel-copy-shadow animate-slide-up" style={{ animationDelay: `${0.2 + i * 0.1}s` }}>
-              <div className="h-8 w-8 rounded-lg bg-background/15 border border-primary-foreground/10 flex items-center justify-center flex-shrink-0">
-                <item.icon className="h-4 w-4 text-primary" />
+            <li key={i} className="flex items-center gap-3 text-white panel-copy-shadow animate-slide-up" style={{ animationDelay: `${0.2 + i * 0.1}s` }}>
+              <div className="h-8 w-8 rounded-lg bg-white/10 border border-white/15 flex items-center justify-center flex-shrink-0 backdrop-blur-sm">
+                <item.icon className="h-4 w-4 text-white" />
               </div>
               <span className="text-base">{item.text}</span>
             </li>
@@ -130,7 +130,7 @@ export default function SignupPage() {
         </ul>
       </div>
 
-      <p className="relative z-10 max-w-sm text-sm text-primary-foreground/90 panel-copy-shadow animate-slide-up" style={{ animationDelay: "0.6s" }}>
+      <p className="relative z-10 max-w-sm text-sm text-white/80 panel-copy-shadow animate-slide-up" style={{ animationDelay: "0.6s" }}>
         Youth Economic Digital Twin Platform
       </p>
     </div>
@@ -216,6 +216,7 @@ export default function SignupPage() {
                   onChange={(e) => handleInputChange('name', e.target.value)}
                   onFocus={() => setFocusedField('name')}
                   onBlur={() => setFocusedField(null)}
+                  autoComplete="name"
                   className={`w-full px-4 py-4 bg-background border-2 rounded-xl text-base text-foreground focus:outline-none transition-all min-h-[56px] ${
                     fieldErrors.name 
                       ? "border-destructive" 
@@ -253,6 +254,9 @@ export default function SignupPage() {
                   onChange={(e) => handleInputChange('email', e.target.value)}
                   onFocus={() => setFocusedField('email')}
                   onBlur={() => setFocusedField(null)}
+                  autoComplete="email"
+                  inputMode="email"
+                  spellCheck={false}
                   className={`w-full px-4 py-4 bg-background border-2 rounded-xl text-base text-foreground focus:outline-none transition-all min-h-[56px] ${
                     fieldErrors.email 
                       ? "border-destructive" 
@@ -290,6 +294,7 @@ export default function SignupPage() {
                   onChange={(e) => handleInputChange('password', e.target.value)}
                   onFocus={() => setFocusedField('password')}
                   onBlur={() => setFocusedField(null)}
+                  autoComplete="new-password"
                   className={`w-full px-4 py-4 pr-12 bg-background border-2 rounded-xl text-base text-foreground focus:outline-none transition-all min-h-[56px] ${
                     fieldErrors.password 
                       ? "border-destructive" 
