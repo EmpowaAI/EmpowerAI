@@ -273,8 +273,26 @@ class AIService {
       });
 
       if (!response.ok) {
+        if (response.status === 429) {
+          const retryAfter = response.headers.get('Retry-After') || '60';
+          const error = await response.json().catch(() => ({ detail: 'Rate limit exceeded' }));
+          throw {
+            status: 429,
+            message: error.detail || error.message || 'Rate limit exceeded. Please try again shortly.',
+            retryAfter: parseInt(retryAfter),
+          };
+        }
+
+        if (response.status === 503) {
+          const error = await response.json().catch(() => ({ detail: 'Service unavailable' }));
+          throw {
+            status: 503,
+            message: error.detail || error.message || 'CV revamp is temporarily unavailable. Please try again later.',
+          };
+        }
+
         const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
-        throw new Error(error.detail || `Failed to revamp CV (Status: ${response.status})`);
+        throw new Error(error.detail || error.message || `Failed to revamp CV (Status: ${response.status})`);
       }
 
       const raw = await response.json();
