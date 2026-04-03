@@ -7,6 +7,7 @@ import {
   Brain, MessageSquare, BarChart3, ChevronRight,
   CheckCircle, AlertCircle, Users, GraduationCap,
 } from "lucide-react";
+import { RefreshCcw } from "lucide-react";
 import ScoreMeter from "../../components/ui/ScoreMeter";
 import GlassCard from "../../components/shared/GlassCard";
 import AIThinkingIndicator from "../../components/AIThinkingIndicator";
@@ -37,9 +38,11 @@ export default function Dashboard() {
   const { user } = useUser();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [aiThinking, setAiThinking] = useState(true);
   const [aiMessage, setAiMessage] = useState("Initialising your AI twin...");
   const [dataSource, setDataSource] = useState<"live" | "cached">("cached");
+  const [lastUpdatedAt, setLastUpdatedAt] = useState<Date | null>(null);
   const [cvData, setCvData] = useState<any | null>(null);
   const [profileData, setProfileData] = useState<ProfileData>({
     name: "",
@@ -53,6 +56,18 @@ export default function Dashboard() {
   const [cvCompleted, setCvCompleted] = useState(false);
   
   const displayName = user?.name?.split(" ")[0] || profileData.name || "Explorer";
+
+  const formatLastUpdated = (dt: Date | null) => {
+    if (!dt) return "Not updated yet";
+    const diffMs = Date.now() - dt.getTime();
+    const diffSec = Math.max(0, Math.floor(diffMs / 1000));
+    if (diffSec < 15) return "Just now";
+    if (diffSec < 60) return `${diffSec}s ago`;
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return `${diffMin}m ago`;
+    const diffHr = Math.floor(diffMin / 60);
+    return `${diffHr}h ago`;
+  };
 
   // Check localStorage for completion status and profile data
   useEffect(() => {
@@ -167,10 +182,13 @@ export default function Dashboard() {
       i++;
     }, 1500);
 
-    const loadDashboard = async () => {
+    const loadDashboard = async (opts?: { silent?: boolean }) => {
       try {
-        setLoading(true);
-
+        const silent = opts?.silent === true;
+        if (silent) setIsRefreshing(true);
+        else setLoading(true);
+        setAiThinking(true);
+        
         const [statsRes, appsRes] = await Promise.allSettled([
           statsAPI.getDashboardStats(),
           applicationsAPI.getStats(),
@@ -187,9 +205,10 @@ export default function Dashboard() {
             interviewScore: Number(liveStats.interviewsPracticed) || 0,
             skillsMatched: Number(liveStats.skillsMatched) || 0,
             opportunitiesCount: Number(liveStats.opportunitiesCount) || 0,
-            applicationsCount: Number(appStats?.totalApplications) || Number(appStats?.total) || 0,
+            applicationsCount: Number(appStats?.total) || 0,
             learnershipsCount: undefined,
           });
+          setLastUpdatedAt(new Date());
         } else {
           // Cached fallback (localStorage) if the API is unreachable
           setDataSource("cached");
@@ -225,6 +244,7 @@ export default function Dashboard() {
             applicationsCount: 0,
             learnershipsCount: undefined,
           });
+          setLastUpdatedAt(new Date());
         }
       } catch (error) {
         console.error("Failed to load dashboard data:", error);
@@ -238,8 +258,10 @@ export default function Dashboard() {
           applicationsCount: 0,
           learnershipsCount: 0,
         });
+        setLastUpdatedAt(new Date());
       } finally {
         setLoading(false);
+        setIsRefreshing(false);
         setAiThinking(false);
       }
     };
@@ -301,9 +323,46 @@ export default function Dashboard() {
                   >
                     <Sparkles className="h-3.5 w-3.5" /> AI Command Centre
                   </motion.span>
-                  <span className="text-xs text-muted-foreground">
-                    {dataSource === "live" ? "Live data" : "Cached data"}
-                  </span>
+                  <span className="text-xs text-muted-foreground">{dataSource === "live" ? "Live data" : "Cached data"}</span>
+                  <span className="text-xs text-muted-foreground">•</span>
+                  <span className="text-xs text-muted-foreground">Updated {formatLastUpdated(lastUpdatedAt)}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      // trigger a silent refresh (keeps layout stable)
+                      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+                      (async () => {
+                        try {
+                          setIsRefreshing(true);
+                          const statsRes = await statsAPI.getDashboardStats();
+                          const appsRes = await applicationsAPI.getStats().catch(() => null);
+                          const liveStats = statsRes?.data || null;
+                          if (liveStats) {
+                            setDataSource("live");
+                            setStats({
+                              empowermentScore: Number(liveStats.empowermentScore) || 0,
+                              cvScore: Number(liveStats.cvScore) || 0,
+                              interviewScore: Number(liveStats.interviewsPracticed) || 0,
+                              skillsMatched: Number(liveStats.skillsMatched) || 0,
+                              opportunitiesCount: Number(liveStats.opportunitiesCount) || 0,
+                              applicationsCount: Number((appsRes as any)?.data?.total) || 0,
+                              learnershipsCount: undefined,
+                            });
+                            setLastUpdatedAt(new Date());
+                          }
+                        } finally {
+                          setIsRefreshing(false);
+                        }
+                      })();
+                    }}
+                    disabled={isRefreshing}
+                    className="ml-1 inline-flex items-center gap-1 rounded-full border border-border/60 bg-card/40 px-2.5 py-1 text-[11px] text-muted-foreground hover:text-foreground hover:border-border transition-colors disabled:opacity-50"
+                    aria-label="Refresh dashboard"
+                    title="Refresh"
+                  >
+                    <RefreshCcw className={`h-3 w-3 ${isRefreshing ? "animate-spin" : ""}`} />
+                    Refresh
+                  </button>
                 </div>
                 <motion.h1 initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="text-4xl md:text-5xl font-display mb-3 font-bold">
                   Welcome back,{' '}
@@ -313,7 +372,16 @@ export default function Dashboard() {
                   Your AI twin is actively analysing the SA career landscape for you.
                 </motion.p>
 
-                {!loading && stats && (
+                {loading && !stats ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {[0, 1, 2].map((k) => (
+                      <div key={k} className="rounded-xl border border-border/60 bg-card/40 px-4 py-3 animate-pulse">
+                        <div className="h-3 w-24 bg-muted/50 rounded" />
+                        <div className="h-4 w-16 bg-muted/50 rounded mt-2" />
+                      </div>
+                    ))}
+                  </div>
+                ) : (!loading && stats ? (
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div className="rounded-xl border border-border/60 bg-card/60 px-4 py-3">
                       <p className="text-xs uppercase tracking-wide text-muted-foreground">Twin Status</p>
@@ -328,8 +396,17 @@ export default function Dashboard() {
                       <p className="text-sm font-semibold">{stats.applicationsCount || 0}</p>
                     </div>
                   </div>
-                )}
+                ) : null)}
               </div>
+
+              {loading && (
+                <div className="flex items-center gap-4">
+                  <div className="text-center p-6 bg-amber-500/10 rounded-2xl border border-amber-500/20 shadow-lg animate-pulse">
+                    <div className="h-[120px] w-[120px] rounded-full bg-muted/50 mx-auto" />
+                    <div className="h-4 w-40 bg-muted/50 rounded mt-4 mx-auto" />
+                  </div>
+                </div>
+              )}
 
               {!loading && stats && stats.empowermentScore > 0 && (
                 <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.5 }} className="flex items-center gap-4">
@@ -343,7 +420,56 @@ export default function Dashboard() {
           </GlassCard>
         </motion.div>
 
+        {/* Next best action */}
+        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, delay: 0.05 }}>
+          <Link to={nextStep.path}>
+            <GlassCard className="group cursor-pointer hover:scale-[1.01] transition-all relative overflow-hidden border-amber-500/25">
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-500/12 via-transparent to-green-500/10 opacity-70" />
+              <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <div className="h-11 w-11 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0">
+                    <Target className="h-5 w-5 text-amber-500" />
+                  </div>
+                  <div>
+                    <p className="text-[11px] uppercase tracking-widest text-amber-500 font-semibold">Recommended next step</p>
+                    <p className="text-lg font-display font-bold">{nextStep.label}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {nextStep.label.includes("CV")
+                        ? "Unlock better matching and a stronger profile in minutes."
+                        : nextStep.label.includes("Twin")
+                          ? "Personalize your insights and projections."
+                          : nextStep.label.includes("Interview")
+                            ? "Practice and improve your readiness score."
+                            : "Start applying to real opportunities."}
+                    </p>
+                  </div>
+                </div>
+                <div className="inline-flex items-center gap-2 text-sm font-semibold text-amber-500">
+                  Get started <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+                </div>
+              </div>
+            </GlassCard>
+          </Link>
+        </motion.div>
+
         {/* Score Cards */}
+        {loading && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {[0, 1].map((k) => (
+              <GlassCard key={k} className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-2 border-border/50 shadow-md animate-pulse">
+                <div className="flex items-center gap-4">
+                  <div className="h-14 w-14 rounded-xl bg-muted/50 border border-border/30" />
+                  <div>
+                    <div className="h-3 w-28 bg-muted/50 rounded" />
+                    <div className="h-3 w-44 bg-muted/50 rounded mt-2" />
+                  </div>
+                </div>
+                <div className="h-[120px] w-[120px] rounded-full bg-muted/50 self-center md:self-auto" />
+              </GlassCard>
+            ))}
+          </div>
+        )}
+
         {!loading && stats && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {[
@@ -376,6 +502,21 @@ export default function Dashboard() {
         )}
 
         {/* Stats Grid */}
+        {loading && (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {[0, 1, 2, 3].map((k) => (
+              <GlassCard key={k} className="group border-2 border-border/50 shadow-md animate-pulse">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="h-3 w-24 bg-muted/50 rounded" />
+                  <div className="h-12 w-12 rounded-xl bg-muted/50 border border-border/30" />
+                </div>
+                <div className="h-9 w-16 bg-muted/50 rounded" />
+                <div className="h-3 w-32 bg-muted/50 rounded mt-3" />
+              </GlassCard>
+            ))}
+          </div>
+        )}
+
         {!loading && stats && (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
@@ -395,7 +536,9 @@ export default function Dashboard() {
                   <motion.p className={`text-3xl sm:text-4xl font-display ${card.color} font-bold`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 + i * 0.1 }}>
                     {card.value}
                   </motion.p>
-                  <p className="text-sm text-muted-foreground mt-2 font-medium">Updated from live data</p>
+                  <p className="text-sm text-muted-foreground mt-2 font-medium">
+                    Updated from {dataSource === "live" ? "live data" : "cached data"}
+                  </p>
                 </GlassCard>
               </motion.div>
             ))}
