@@ -514,7 +514,16 @@ exports.revampCV = async (req, res, next) => {
       return next(new BadRequestError(error.response?.data?.detail || 'Invalid CV data for revamp'));
     }
 
-    if (error.response?.status === 503 || error.code === 'ECONNABORTED') {
+    // Treat upstream/connection issues as 503 instead of surfacing a 500 to the client
+    if (
+      error.response?.status === 401 || // AI service protected but backend missing/incorrect key
+      error.response?.status === 503 ||
+      error.code === 'ECONNABORTED' ||
+      error.code === 'ECONNREFUSED' ||
+      error.code === 'ENOTFOUND' ||
+      error.code === 'ETIMEDOUT' ||
+      !error.response
+    ) {
       return next(new ServiceUnavailableError('AI service is temporarily unavailable. Please try again later.'));
     }
 
