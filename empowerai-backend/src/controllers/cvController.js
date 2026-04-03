@@ -33,8 +33,44 @@ const buildBasicAnalysis = (cvText, jobRequirementsArray) => {
     extractedSkills,
     missingSkills,
     suggestions,
-    analysisSource: 'fallback'
+    marketKeywords: [],
+    about: extractedSkills.length > 0
+      ? `Professional with experience in ${extractedSkills.slice(0, 6).join(', ')}.`
+      : 'Motivated professional seeking new opportunities.',
+    education: [],
+    experience: [],
+    achievements: [],
+    cvText: (cvText || '').slice(0, 2000),
+    links: { linkedin: false, github: false, portfolio: false, driversLicence: false },
+    analysisSource: 'fallback',
   };
+};
+
+const extractTextFromUploadedFile = async (file) => {
+  if (!file || !file.buffer) return '';
+  const filename = (file.originalname || '').toLowerCase();
+  const mimetype = (file.mimetype || '').toLowerCase();
+
+  if (mimetype === 'text/plain' || filename.endsWith('.txt')) {
+    return file.buffer.toString('utf8');
+  }
+
+  if (mimetype === 'application/pdf' || filename.endsWith('.pdf')) {
+    const pdfParse = require('pdf-parse');
+    const parsed = await pdfParse(file.buffer);
+    return (parsed?.text || '').trim();
+  }
+
+  if (
+    mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+    filename.endsWith('.docx')
+  ) {
+    const mammoth = require('mammoth');
+    const result = await mammoth.extractRawText({ buffer: file.buffer });
+    return (result?.value || '').trim();
+  }
+
+  return '';
 };
 
 const callWithRateLimitRetry = async (fn) => {
@@ -324,8 +360,10 @@ exports.analyzeCVFile = async (req, res, next) => {
     if (error.isRateLimit || isOpenAIRateLimit || errorMessage.toLowerCase().includes('rate limit')) {
       const retryAfter = error.retryAfter || error.response?.data?.retryAfter || 60;
       let cvTextFallback = '';
-      if (file.mimetype === 'text/plain' || file.originalname?.toLowerCase().endsWith('.txt')) {
-        cvTextFallback = file.buffer.toString('utf8');
+      try {
+        cvTextFallback = await extractTextFromUploadedFile(file);
+      } catch (e) {
+        cvTextFallback = '';
       }
       const analysis = buildBasicAnalysis(cvTextFallback, jobRequirementsArray);
       return res.status(200).json({
@@ -352,10 +390,12 @@ exports.analyzeCVFile = async (req, res, next) => {
       
       if (status === 400) {
         return next(new BadRequestError(message));
-      } else if (status === 429 || status === 503) {
+      } else if (status === 401 || status === 429 || status === 503 || status >= 500) {
         let cvTextFallback = '';
-        if (file.mimetype === 'text/plain' || file.originalname?.toLowerCase().endsWith('.txt')) {
-          cvTextFallback = file.buffer.toString('utf8');
+        try {
+          cvTextFallback = await extractTextFromUploadedFile(file);
+        } catch (e) {
+          cvTextFallback = '';
         }
         const analysis = buildBasicAnalysis(cvTextFallback, jobRequirementsArray);
         return res.status(200).json({
@@ -366,8 +406,6 @@ exports.analyzeCVFile = async (req, res, next) => {
             message: 'AI service is temporarily unavailable. Showing basic CV insights.'
           }
         });
-      } else if (status >= 500) {
-        return next(new ServiceUnavailableError('AI service is temporarily unavailable. Please try again later.'));
       } else {
         return next(new AppError(message, status));
       }
@@ -376,7 +414,13 @@ exports.analyzeCVFile = async (req, res, next) => {
     // Network errors or errors without response
     if (!error.response) {
       if (error.code === 'ECONNREFUSED' || error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
-        const analysis = buildBasicAnalysis('', jobRequirementsArray);
+        let cvTextFallback = '';
+        try {
+          cvTextFallback = await extractTextFromUploadedFile(file);
+        } catch (e) {
+          cvTextFallback = '';
+        }
+        const analysis = buildBasicAnalysis(cvTextFallback, jobRequirementsArray);
         return res.status(200).json({
           status: 'success',
           data: {
@@ -387,7 +431,13 @@ exports.analyzeCVFile = async (req, res, next) => {
         });
       }
       const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
-      const analysis = buildBasicAnalysis('', jobRequirementsArray);
+      let cvTextFallback = '';
+      try {
+        cvTextFallback = await extractTextFromUploadedFile(file);
+      } catch (e) {
+        cvTextFallback = '';
+      }
+      const analysis = buildBasicAnalysis(cvTextFallback, jobRequirementsArray);
       return res.status(200).json({
         status: 'success',
         data: {
