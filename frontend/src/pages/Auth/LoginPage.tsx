@@ -236,7 +236,7 @@ export default function LoginPage() {
                 <label className="flex items-center gap-2.5 cursor-pointer group">
                   <input 
                     type="checkbox" 
-                    className="rounded border-2 border-border text-primary focus:ring-2 focus:ring-primary/30 w-4 h-4 transition-all cursor-pointer" 
+                    className="rounded border border-border/60 text-primary focus:ring-2 focus:ring-primary/30 w-4 h-4 transition-all cursor-pointer" 
                   />
                   <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">Remember me</span>
                 </label>

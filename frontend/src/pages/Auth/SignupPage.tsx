@@ -352,7 +352,7 @@ export default function SignupPage() {
               <label className="flex items-start gap-2.5 cursor-pointer group pt-2">
                 <input 
                   type="checkbox" 
-                  className="mt-1 rounded border-2 border-border text-primary focus:ring-2 focus:ring-primary/30 w-4 h-4 flex-shrink-0 cursor-pointer transition-all" 
+                  className="mt-1 rounded border border-border/60 text-primary focus:ring-2 focus:ring-primary/30 w-4 h-4 flex-shrink-0 cursor-pointer transition-all" 
                   required 
                 />
                 <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">

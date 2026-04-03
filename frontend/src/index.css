@@ -258,14 +258,14 @@
 
   /* FIXED: Auth card surface - removed opacity modifiers from @apply */
   .auth-card-surface {
-    @apply relative overflow-hidden rounded-2xl border shadow-2xl;
-    background-color: hsl(var(--card) / 0.72);
-    border-color: hsl(var(--border) / 0.38);
+    @apply relative overflow-hidden rounded-2xl shadow-2xl;
+    background-color: hsl(var(--card) / 0.62);
+    border: 1px solid hsl(var(--border) / 0.22);
     backdrop-filter: blur(22px) saturate(1.35);
     -webkit-backdrop-filter: blur(22px) saturate(1.35);
     box-shadow:
-      0 20px 60px hsl(var(--foreground) / 0.12),
-      0 0 0 1px hsl(var(--primary) / 0.08) inset;
+      0 22px 70px hsl(var(--foreground) / 0.12),
+      0 0 0 1px hsl(var(--foreground) / 0.035) inset;
   }
 
   .auth-card-surface::before {
@@ -286,13 +286,12 @@
 
   /* Auth form controls (glassmorphism) */
   .auth-input {
-    background-color: hsl(var(--background) / 0.55);
-    border-color: hsl(var(--border) / 0.38);
+    background-color: hsl(var(--background) / 0.42);
+    border-color: hsl(var(--border) / 0.24);
     backdrop-filter: blur(16px) saturate(1.25);
     -webkit-backdrop-filter: blur(16px) saturate(1.25);
     box-shadow:
-      0 1px 0 hsl(var(--foreground) / 0.06) inset,
-      0 0 0 1px hsl(var(--foreground) / 0.02) inset;
+      0 1px 0 hsl(var(--foreground) / 0.06) inset;
   }
 
   .auth-input::placeholder {
@@ -310,7 +309,7 @@
     background-color: hsl(var(--background) / 0.35);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
-    border: 1px solid hsl(var(--border) / 0.38);
+    border: 1px solid hsl(var(--border) / 0.24);
   }
 
   /* South African geometric pattern */
