@@ -339,6 +339,19 @@ export default function RevampedCVDisplay({ cvData }: RevampedCVDisplayProps) {
   };
 
   const downloadTXT = () => {
+    if (data.formattedText && data.formattedText.trim().length > 100) {
+      const blob = new Blob([data.formattedText], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${customFileName}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      return;
+    }
+
     let text = `${data.name}\n`;
     if (data.contactInfo) text += `${data.contactInfo}\n`;
     if (data.links) text += `${data.links}\n`;

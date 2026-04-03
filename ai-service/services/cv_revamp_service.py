@@ -34,16 +34,29 @@ class CVRevampService:
         self.logger.info(f"Original score: {original_score}")
         self.logger.info("=" * 50)
         
-        # Try AI-powered revamp first
-        ai_result = await self._revamp_with_ai(cv_data)
+        # Prefer structured revamp first (prevents incomplete parsing from plain text)
+        revamped_cv = None
 
-        if ai_result:
-            self.logger.info("✅ AI revamp successful")
-            revamped_cv = await self._parse_ai_result_to_structured_cv(ai_result, cv_data)
+        ai_structured = await self._revamp_with_ai_structured(cv_data)
+        if ai_structured:
+            self.logger.info("✅ AI structured revamp successful")
+            revamped_cv = self._normalize_revamped_cv(ai_structured, cv_data)
         else:
-            # Fallback: generate an ATS-friendly CV without an LLM
-            self.logger.warning("⚠️ AI revamp unavailable; using deterministic fallback revamp")
-            revamped_cv = self._build_fallback_structured_cv(cv_data)
+            # Legacy path: generate formatted CV text, then parse it (best-effort)
+            ai_text = await self._revamp_with_ai(cv_data)
+            if ai_text:
+                self.logger.info("✅ AI text revamp successful")
+                revamped_cv = await self._parse_ai_result_to_structured_cv(ai_text, cv_data)
+            else:
+                # Fallback: generate an ATS-friendly CV without an LLM
+                self.logger.warning("⚠️ AI revamp unavailable; using deterministic fallback revamp")
+                revamped_cv = self._build_fallback_structured_cv(cv_data)
+
+        # Render a clean ATS-friendly plain-text CV for copy/download
+        try:
+            revamped_cv["formattedText"] = self._render_revamped_cv_text(revamped_cv)
+        except Exception as e:
+            self.logger.warning(f"Failed to render formattedText: {e}")
 
         weaknesses = cv_data.get('weaknesses', []) or []
         improvements = min(len(weaknesses) * 4, 25)
@@ -59,6 +72,394 @@ class CVRevampService:
             "changesSummary": changes_summary,
             "revampedCV": revamped_cv,
         }
+
+    def _compact_lines(self, text: str) -> str:
+        if not text:
+            return ""
+        # Normalize bullets + whitespace so output is neat
+        t = str(text).replace("\r\n", "\n").replace("\r", "\n")
+        t = re.sub(r"[ \t]+\n", "\n", t)
+        t = re.sub(r"\n{3,}", "\n\n", t).strip()
+        return t
+
+    def _normalize_revamped_cv(self, revamped: Dict[str, Any], original: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Ensure the revamped CV object is complete and matches the frontend's expected shape.
+        """
+        if not isinstance(revamped, dict):
+            revamped = {}
+
+        sections = original.get("sections") or {}
+        if not isinstance(sections, dict):
+            sections = {}
+
+        name = revamped.get("name") or original.get("name") or "[Your Name]"
+        contact = revamped.get("contactInfo") or original.get("contactInfo")
+
+        email = original.get("email") or "[Email]"
+        phone = original.get("phone") or "[Phone]"
+        if not contact:
+            contact_parts = [p for p in [phone, email] if p and str(p).strip()]
+            contact = f"South Africa | {' | '.join(contact_parts)}" if contact_parts else "South Africa | [Phone] | [Email]"
+
+        links = revamped.get("links") or original.get("links")
+        if not links:
+            links_obj = original.get("linkCheck") or {}
+            if isinstance(links_obj, dict):
+                link_parts: List[str] = []
+                if links_obj.get("linkedin"):
+                    link_parts.append("LinkedIn: [link]")
+                if links_obj.get("github"):
+                    link_parts.append("GitHub: [link]")
+                if links_obj.get("portfolio"):
+                    link_parts.append("Portfolio: [link]")
+                links = " | ".join(link_parts) if link_parts else None
+
+        summary = revamped.get("professionalSummary") or original.get("summary") or sections.get("about") or ""
+
+        technical_skills = revamped.get("technicalSkills")
+        if not isinstance(technical_skills, dict) or len(technical_skills.keys()) == 0:
+            skills = sections.get("skills") or []
+            if not isinstance(skills, list):
+                skills = []
+            technical_skills = {
+                "Core Skills": ", ".join([str(s) for s in skills[:18]]) if skills else ""
+            }
+
+        experience = revamped.get("experience") or []
+        if not isinstance(experience, list):
+            experience = []
+
+        education = revamped.get("education") or []
+        if not isinstance(education, list):
+            education = []
+
+        projects = revamped.get("projects") or []
+        if not isinstance(projects, list):
+            projects = []
+
+        languages = revamped.get("languages") or ["English: Fluent"]
+        if not isinstance(languages, list) or len(languages) == 0:
+            languages = ["English: Fluent"]
+
+        out = {
+            "name": str(name).strip() if name else "[Your Name]",
+            "contactInfo": self._compact_lines(str(contact)) if contact else "South Africa | [Phone] | [Email]",
+            **({"links": self._compact_lines(str(links))} if links else {}),
+            "credentials": self._compact_lines(str(revamped.get("credentials") or original.get("credentials") or "ID Holder | Driver's License: Not specified | B-BBEE Status: South African Citizen")),
+            "professionalSummary": self._compact_lines(str(summary)) if summary else "",
+            "technicalSkills": {str(k): self._compact_lines(str(v)) for (k, v) in (technical_skills or {}).items() if str(v).strip()},
+            "experience": [],
+            "projects": [],
+            "education": [],
+            "languages": [self._compact_lines(str(l)) for l in languages if str(l).strip()],
+        }
+
+        # Experience normalization
+        for exp in experience[:8]:
+            if not isinstance(exp, dict):
+                continue
+            bullets = exp.get("bullets") or []
+            if not isinstance(bullets, list):
+                bullets = []
+            bullets_clean = [self._compact_lines(str(b).lstrip("•- ").strip()) for b in bullets if str(b).strip()]
+            out["experience"].append({
+                "title": str(exp.get("title") or "").strip() or "Role",
+                "company": str(exp.get("company") or "").strip() or "Company",
+                "dates": str(exp.get("dates") or "").strip(),
+                "bullets": bullets_clean[:6] if bullets_clean else [],
+            })
+
+        # Education normalization
+        for edu in education[:6]:
+            if not isinstance(edu, dict):
+                continue
+            out["education"].append({
+                "degree": self._compact_lines(str(edu.get("degree") or "").strip()) or "Qualification",
+                "institution": self._compact_lines(str(edu.get("institution") or "").strip()) or "",
+                **({"dates": self._compact_lines(str(edu.get("dates")).strip())} if edu.get("dates") else {}),
+                **({"details": self._compact_lines(str(edu.get("details")).strip())} if edu.get("details") else {}),
+            })
+
+        # Projects normalization
+        for proj in projects[:6]:
+            if not isinstance(proj, dict):
+                continue
+            bullets = proj.get("bullets") or []
+            if not isinstance(bullets, list):
+                bullets = []
+            bullets_clean = [self._compact_lines(str(b).lstrip("•- ").strip()) for b in bullets if str(b).strip()]
+            out["projects"].append({
+                "name": self._compact_lines(str(proj.get("name") or "").strip()) or "Project",
+                **({"technologies": self._compact_lines(str(proj.get("technologies")).strip())} if proj.get("technologies") else {}),
+                "bullets": bullets_clean[:5] if bullets_clean else [],
+            })
+
+        # If we still have no experience/projects/education, backfill lightly from original sections
+        original_exp = sections.get("experience") or []
+        if isinstance(original_exp, list) and len(out["experience"]) == 0 and len(original_exp) > 0:
+            out["experience"].append({
+                "title": "Experience Highlights",
+                "company": "",
+                "dates": "",
+                "bullets": [self._compact_lines(str(x)) for x in original_exp[:4] if str(x).strip()],
+            })
+
+        original_edu = sections.get("education") or []
+        if isinstance(original_edu, list) and len(out["education"]) == 0 and len(original_edu) > 0:
+            out["education"].append({
+                "degree": self._compact_lines(str(original_edu[0])),
+                "institution": "",
+            })
+
+        original_ach = sections.get("achievements") or []
+        if isinstance(original_ach, list) and len(out["projects"]) == 0 and len(original_ach) > 0:
+            out["projects"].append({
+                "name": "Key Achievements",
+                "bullets": [self._compact_lines(str(x)) for x in original_ach[:5] if str(x).strip()],
+            })
+
+        return out
+
+    def _render_revamped_cv_text(self, cv: Dict[str, Any]) -> str:
+        """
+        Create a neat, ATS-friendly plain-text CV using the structured object.
+        This text is what we want users to copy/download.
+        """
+        name = cv.get("name") or "[Your Name]"
+        lines: List[str] = [str(name).strip()]
+
+        contact = cv.get("contactInfo")
+        if contact:
+            lines.append(str(contact).strip())
+        links = cv.get("links")
+        if links:
+            lines.append(str(links).strip())
+        creds = cv.get("credentials")
+        if creds:
+            lines.append(str(creds).strip())
+
+        def header(title: str):
+            lines.append("")
+            lines.append(title.upper())
+
+        summary = cv.get("professionalSummary")
+        if summary:
+            header("Professional Summary")
+            lines.append(self._compact_lines(summary))
+
+        skills = cv.get("technicalSkills") or {}
+        if isinstance(skills, dict) and len(skills) > 0:
+            header("Technical Skills")
+            for k, v in skills.items():
+                if v and str(v).strip():
+                    lines.append(f"{k}: {self._compact_lines(str(v))}")
+
+        exp = cv.get("experience") or []
+        if isinstance(exp, list) and len(exp) > 0:
+            header("Professional Experience")
+            for item in exp:
+                if not isinstance(item, dict):
+                    continue
+                title = (item.get("title") or "").strip()
+                company = (item.get("company") or "").strip()
+                dates = (item.get("dates") or "").strip()
+                headline_parts = [p for p in [title, company] if p]
+                headline = " | ".join(headline_parts) if headline_parts else "Role"
+                lines.append(headline)
+                if dates:
+                    lines.append(dates)
+                bullets = item.get("bullets") or []
+                if isinstance(bullets, list):
+                    for b in bullets:
+                        if str(b).strip():
+                            lines.append(f"• {self._compact_lines(str(b))}")
+                lines.append("")
+            # Remove trailing blank line
+            while lines and lines[-1] == "":
+                lines.pop()
+
+        projects = cv.get("projects") or []
+        if isinstance(projects, list) and len(projects) > 0:
+            header("Projects")
+            for p in projects:
+                if not isinstance(p, dict):
+                    continue
+                name = (p.get("name") or "").strip() or "Project"
+                lines.append(name)
+                tech = (p.get("technologies") or "").strip()
+                if tech:
+                    lines.append(f"Technologies: {tech}")
+                bullets = p.get("bullets") or []
+                if isinstance(bullets, list):
+                    for b in bullets:
+                        if str(b).strip():
+                            lines.append(f"• {self._compact_lines(str(b))}")
+                lines.append("")
+            while lines and lines[-1] == "":
+                lines.pop()
+
+        edu = cv.get("education") or []
+        if isinstance(edu, list) and len(edu) > 0:
+            header("Education")
+            for e in edu:
+                if not isinstance(e, dict):
+                    continue
+                degree = (e.get("degree") or "").strip() or "Qualification"
+                dates = (e.get("dates") or "").strip()
+                inst = (e.get("institution") or "").strip()
+                primary = f"{degree} ({dates})" if dates and dates not in degree else degree
+                lines.append(primary)
+                if inst:
+                    lines.append(inst)
+                details = (e.get("details") or "").strip()
+                if details:
+                    lines.append(details)
+                lines.append("")
+            while lines and lines[-1] == "":
+                lines.pop()
+
+        langs = cv.get("languages") or []
+        if isinstance(langs, list) and len(langs) > 0:
+            header("Languages")
+            for l in langs:
+                if str(l).strip():
+                    lines.append(self._compact_lines(str(l)))
+
+        return self._compact_lines("\n".join(lines))
+
+    async def _revamp_with_ai_structured(self, cv_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """
+        Ask the model for a structured JSON revamped CV. This avoids brittle parsing and
+        produces more complete output.
+        """
+        if not self.ai_client.enabled:
+            return None
+
+        sections = cv_data.get("sections") or {}
+        if not isinstance(sections, dict):
+            sections = {}
+
+        # Keep prompts bounded to reduce truncation and increase completeness
+        about = str(sections.get("about") or cv_data.get("summary") or "")[:1200]
+        skills = sections.get("skills") or []
+        if not isinstance(skills, list):
+            skills = []
+        education = sections.get("education") or []
+        if not isinstance(education, list):
+            education = []
+        experience = sections.get("experience") or []
+        if not isinstance(experience, list):
+            experience = []
+        achievements = sections.get("achievements") or []
+        if not isinstance(achievements, list):
+            achievements = []
+
+        missing_keywords = cv_data.get("missingKeywords") or []
+        if not isinstance(missing_keywords, list):
+            missing_keywords = []
+        weaknesses = cv_data.get("weaknesses") or []
+        if not isinstance(weaknesses, list):
+            weaknesses = []
+
+        name = cv_data.get("name") or "[Your Name]"
+        email = cv_data.get("email") or "[Email]"
+        phone = cv_data.get("phone") or "[Phone]"
+
+        # Simple heuristic for CV type
+        joined = " ".join([str(x) for x in skills[:30]]).lower()
+        cv_type = "retail" if any(k in joined for k in ["cash", "pos", "merch", "stock", "customer"]) else "tech"
+
+        system_prompt = """You are a professional CV writer for the South African job market.
+You rewrite CVs to be ATS-friendly, complete, and neatly structured.
+Do not invent jobs, employers, degrees, dates, or certifications. If missing, leave empty strings.
+Write concise, achievement-focused bullets using metrics only if implied by the input.
+Return JSON only."""
+
+        # We include the expected JSON shape explicitly so the model fills everything.
+        prompt = f"""Create a structured revamped CV JSON for a {cv_type} candidate.
+
+Candidate info:
+- name: {name}
+- phone: {phone}
+- email: {email}
+- location: South Africa
+
+Input summary (may be sparse):
+ABOUT: {about}
+SKILLS: {skills[:40]}
+EDUCATION: {education[:20]}
+EXPERIENCE: {experience[:20]}
+ACHIEVEMENTS: {achievements[:20]}
+WEAKNESSES: {weaknesses[:10]}
+MISSING KEYWORDS (include where relevant, do not spam): {missing_keywords[:20]}
+
+Output MUST be a JSON object with this exact structure and keys:
+{{
+  "name": "string",
+  "contactInfo": "South Africa | [Phone] | [Email]",
+  "links": "string (optional; can be empty string)",
+  "credentials": "string",
+  "professionalSummary": "string",
+  "technicalSkills": {{
+    "Languages": "string",
+    "Frameworks & Libraries": "string",
+    "Web Technologies": "string",
+    "Tools & Platforms": "string",
+    "Methodologies": "string"
+  }},
+  "experience": [
+    {{
+      "title": "string",
+      "company": "string",
+      "dates": "string",
+      "bullets": ["string","string","string"]
+    }}
+  ],
+  "projects": [
+    {{
+      "name": "string",
+      "technologies": "string",
+      "bullets": ["string","string"]
+    }}
+  ],
+  "education": [
+    {{
+      "degree": "string",
+      "institution": "string",
+      "dates": "string",
+      "details": "string"
+    }}
+  ],
+  "languages": ["English: Fluent"]
+}}
+
+Rules:
+- Use empty strings instead of null.
+- For retail CVs, put retail/operations skills into the skill categories (still use the same keys).
+- Ensure bullets are complete sentences without leading bullet characters.
+"""
+
+        try:
+            result = await self.ai_client.generate_structured_response_async(
+                prompt=prompt,
+                system_prompt=system_prompt,
+                response_schema={},
+                temperature=0.2,
+                max_tokens=2200
+            )
+
+            if not isinstance(result, dict):
+                return None
+
+            # Basic sanity check
+            if not result.get("name") and not result.get("professionalSummary"):
+                return None
+
+            return result
+        except Exception as e:
+            self.logger.error(f"Structured revamp failed: {e}")
+            return None
 
     def _build_fallback_structured_cv(self, cv_data: Dict[str, Any]) -> Dict[str, Any]:
         sections = cv_data.get('sections') or {}
