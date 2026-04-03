@@ -81,13 +81,31 @@ class InterviewService {
           response.headers.get('x-correlation-id');
 
         const errorText = await response.text();
+        let errorJson: any = null;
+        try {
+          errorJson = JSON.parse(errorText);
+        } catch {
+          // ignore
+        }
+
+        const messageFromBody =
+          errorJson?.message ||
+          errorJson?.detail ||
+          errorJson?.error ||
+          errorJson?.data?.message;
+
+        const correlationFromBody = errorJson?.correlationId;
+        const finalCorrelationId = correlationFromBody || correlationId || undefined;
+
         console.error('Server error:', {
           status: response.status,
-          correlationId,
+          correlationId: finalCorrelationId,
           body: errorText
         });
 
-        throw new Error(`Failed to start interview: ${response.status}${correlationId ? ` (Correlation ID: ${correlationId})` : ''}`);
+        throw new Error(
+          `${messageFromBody || `Failed to start interview: ${response.status}`}${finalCorrelationId ? ` (Correlation ID: ${finalCorrelationId})` : ''}`
+        );
       }
 
       const jsonResponse = await response.json();
@@ -95,6 +113,7 @@ class InterviewService {
       return jsonResponse.data.session || jsonResponse.session || jsonResponse;
     } catch (error) {
       console.error('Error starting interview:', error);
+      if (error instanceof Error) throw error;
       throw new Error('Failed to start interview');
     }
   }
@@ -120,14 +139,42 @@ class InterviewService {
       });
 
       if (!apiResponse.ok) {
-        const errorData = await apiResponse.text();
-        console.error('Server error:', errorData);
-        throw new Error(`Failed to submit answer: ${apiResponse.status}`);
+        const correlationId =
+          apiResponse.headers.get('X-Correlation-ID') ||
+          apiResponse.headers.get('x-correlation-id');
+
+        const errorText = await apiResponse.text();
+        let errorJson: any = null;
+        try {
+          errorJson = JSON.parse(errorText);
+        } catch {
+          // ignore
+        }
+
+        const messageFromBody =
+          errorJson?.message ||
+          errorJson?.detail ||
+          errorJson?.error ||
+          errorJson?.data?.message;
+
+        const correlationFromBody = errorJson?.correlationId;
+        const finalCorrelationId = correlationFromBody || correlationId || undefined;
+
+        console.error('Server error:', {
+          status: apiResponse.status,
+          correlationId: finalCorrelationId,
+          body: errorText
+        });
+
+        throw new Error(
+          `${messageFromBody || `Failed to submit answer: ${apiResponse.status}`}${finalCorrelationId ? ` (Correlation ID: ${finalCorrelationId})` : ''}`
+        );
       }
 
       return await apiResponse.json();
     } catch (error) {
       console.error('Error submitting answer:', error);
+      if (error instanceof Error) throw error;
       throw new Error('Failed to submit answer');
     }
   }
