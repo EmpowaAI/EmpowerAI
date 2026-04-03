@@ -178,7 +178,11 @@ export default function InterviewCoach() {
       }
     } catch (err) {
       console.error('Failed to start interview:', err);
-      showToast('Connection error. Is the AI service running?', 'error');
+      const message =
+        err instanceof Error
+          ? err.message
+          : 'Failed to start interview. Please try again.';
+      showToast(message, 'error');
     } finally {
       setIsStarting(false);
     }
@@ -217,7 +221,11 @@ export default function InterviewCoach() {
       }
     } catch (err) {
       console.error('Failed to evaluate response:', err);
-      showToast('AI service is currently busy. Try a shorter response.', 'warning');
+      const message =
+        err instanceof Error
+          ? err.message
+          : 'Failed to evaluate response. Please try again.';
+      showToast(message, 'warning');
     } finally {
       setIsSubmitting(false);
     }
