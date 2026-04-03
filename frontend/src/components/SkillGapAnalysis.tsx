@@ -35,16 +35,83 @@ export default function SkillGapAnalysis({ cvData, cvText = "" }: SkillGapAnalys
       return;
     }
 
-    // SWITCH FROM MOCK TO REAL:
-    // Instead of generateTechnicalInsights, we now prepare to fetch from the /cv/analyze endpoint
     setIsAnalyzing(true);
     
     if (cvData?.aiInsights) {
       setInsights(cvData.aiInsights);
       setIsAnalyzing(false);
     } else {
-      // If no AI insights exist in the CV data, we should keep it simple
-      setInsights([]);
+      // Practical fallback: derive insights from weaknesses/missing keywords so the widget is still useful.
+      const weaknesses: string[] = Array.isArray(cvData?.weaknesses) ? cvData.weaknesses : [];
+      const missingKeywords: string[] = Array.isArray(cvData?.missingKeywords) ? cvData.missingKeywords : [];
+
+      const next: SkillInsight[] = [];
+
+      for (const w of weaknesses.slice(0, 3)) {
+        const wl = String(w).toLowerCase();
+        if (wl.includes("matric") || wl.includes("grade 12")) {
+          next.push({
+            id: `w-${next.length}`,
+            type: "missing",
+            title: "Add Matric / Grade 12 details",
+            description: "Many SA entry-level screens look for Matric/Grade 12. Add your school name, year, and key subjects.",
+            actionLabel: "Update CV and re-run",
+            actionLink: "/dashboard/cv-analyzer",
+            category: "experience",
+          });
+          continue;
+        }
+
+        if (wl.includes("quantifiable") || wl.includes("metrics") || wl.includes("numbers")) {
+          next.push({
+            id: `w-${next.length}`,
+            type: "weak",
+            title: "Add measurable achievements",
+            description: "Rewrite 2–3 bullets with numbers (e.g., customers/day, time saved, revenue, % improvement).",
+            actionLabel: "Revamp CV",
+            actionLink: "/dashboard/cv-analyzer",
+            category: "achievement",
+          });
+          continue;
+        }
+
+        if (wl.includes("driver") || wl.includes("licence") || wl.includes("license")) {
+          next.push({
+            id: `w-${next.length}`,
+            type: "missing",
+            title: "Mention your driver's licence",
+            description: "If you have one, add it clearly (e.g., “Driver’s Licence: Code B”). It improves ATS matching for many roles.",
+            actionLabel: "Update CV and re-run",
+            actionLink: "/dashboard/cv-analyzer",
+            category: "experience",
+          });
+          continue;
+        }
+
+        next.push({
+          id: `w-${next.length}`,
+          type: "weak",
+          title: "Improve a weak area",
+          description: String(w),
+          actionLabel: "Update CV and re-run",
+          actionLink: "/dashboard/cv-analyzer",
+          category: "experience",
+        });
+      }
+
+      if (next.length < 4 && missingKeywords.length > 0) {
+        next.push({
+          id: `k-${next.length}`,
+          type: "opportunity",
+          title: "Add missing keywords",
+          description: `Add these keywords naturally in your skills/experience: ${missingKeywords.slice(0, 6).join(", ")}.`,
+          actionLabel: "Update CV and re-run",
+          actionLink: "/dashboard/cv-analyzer",
+          category: "technical",
+        });
+      }
+
+      setInsights(next);
       setIsAnalyzing(false);
     }
   }, [cvData, cvText]);
