@@ -55,6 +55,16 @@ const handleOperationalError = (err, req, res) => {
   const statusCode = err.statusCode || 500;
   const correlationId = req.id || req.correlationId;
 
+  // Render log search is unreliable with deeply nested JSON objects.
+  // Emit a plain-text line so correlation IDs are easily searchable.
+  // Avoid leaking sensitive request fields (body/query are sanitized separately below for programming errors).
+  try {
+    // eslint-disable-next-line no-console
+    console.error(`[${correlationId}] OperationalError ${statusCode} ${req.method} ${req.originalUrl}: ${err.name}: ${err.message}`);
+  } catch {
+    // ignore
+  }
+
   // Log error with context
   logger.logError(err, correlationId, {
     method: req.method,
@@ -71,6 +81,17 @@ const handleOperationalError = (err, req, res) => {
  */
 const handleProgrammingError = (err, req, res) => {
   const correlationId = req.id || req.correlationId;
+
+  try {
+    // eslint-disable-next-line no-console
+    console.error(`[${correlationId}] ProgrammingError 500 ${req.method} ${req.originalUrl}: ${err?.name || 'Error'}: ${err?.message || String(err)}`);
+    if (err?.stack) {
+      // eslint-disable-next-line no-console
+      console.error(err.stack);
+    }
+  } catch {
+    // ignore
+  }
 
   // Log error with full context
   logger.logError(err, correlationId, {
