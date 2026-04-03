@@ -78,6 +78,7 @@ export interface RevampedCV {
   links?: string;
   credentials?: string;
   professionalSummary?: string;
+  formattedText?: string;
   technicalSkills?: Record<string, string>;
   experience?: Array<{
     title: string;
