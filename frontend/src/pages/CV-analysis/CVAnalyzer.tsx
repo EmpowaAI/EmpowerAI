@@ -98,6 +98,13 @@ export default function CVAnalyzerPage() {
       const result = await analyzeCV(file, cvText)
       console.log("CV Analysis Result:", result)
       setCvData(result)
+      try {
+        const skills = Array.isArray((result as any)?.sections?.skills) ? (result as any).sections.skills : []
+        localStorage.setItem('cvSkills', JSON.stringify(skills))
+        localStorage.setItem('cvScore', String((result as any)?.score ?? 0))
+      } catch {
+        // ignore storage errors
+      }
       showToast(`CV analyzed! Score: ${result.score}% — ${result.readinessLevel}`, "success")
     } catch (err: any) {
       setError(err.message || "Failed to analyze CV.")

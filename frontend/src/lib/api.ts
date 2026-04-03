@@ -1156,14 +1156,27 @@ export const statsAPIReal = {
       const totalOpportunities =
         opportunitiesResponse.status === 'fulfilled' ? opportunitiesResponse.value.meta?.totalFiltered : null;
 
-      const cvSkills = localStorage.getItem('cvSkills') ? JSON.parse(localStorage.getItem('cvSkills')!) : [];
+      let skillsMatched = 0;
+      try {
+        const comprehensive = localStorage.getItem('comprehensiveCVAnalysis');
+        if (comprehensive) {
+          const parsed = JSON.parse(comprehensive);
+          const skills = parsed?.sections?.skills;
+          if (Array.isArray(skills)) skillsMatched = skills.length;
+        } else {
+          const cvSkills = localStorage.getItem('cvSkills') ? JSON.parse(localStorage.getItem('cvSkills')!) : [];
+          if (Array.isArray(cvSkills)) skillsMatched = cvSkills.length;
+        }
+      } catch (e) {
+        // ignore parse errors
+      }
 
       return {
         status: 'success',
         data: {
           empowermentScore: twin?.empowermentScore || 0,
           threeMonthProjection: twin?.incomeProjections?.threeMonth || 0,
-          skillsMatched: cvSkills.length || 0,
+          skillsMatched,
           opportunitiesCount: typeof totalOpportunities === 'number' ? totalOpportunities : opportunities.length,
           interviewsPracticed: 0,
           cvScore: getStoredCvScore(),

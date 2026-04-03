@@ -13,6 +13,7 @@ import AIThinkingIndicator from "../../components/AIThinkingIndicator";
 import LiveInsightsFeed from "../../components/LiveInsightsFeed";
 import SkillGapAnalysis from "../../components/SkillGapAnalysis";
 import { useUser } from "../../contexts/user-context";
+import { applicationsAPI, statsAPI } from "../../lib/api";
 
 interface DashboardStats {
   empowermentScore: number;
@@ -38,6 +39,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [aiThinking, setAiThinking] = useState(true);
   const [aiMessage, setAiMessage] = useState("Initialising your AI twin...");
+  const [dataSource, setDataSource] = useState<"live" | "cached">("cached");
   const [cvData, setCvData] = useState<any | null>(null);
   const [profileData, setProfileData] = useState<ProfileData>({
     name: "",
@@ -168,53 +170,65 @@ export default function Dashboard() {
     const loadDashboard = async () => {
       try {
         setLoading(true);
-        
-        // Get data from localStorage
-        let cvScore = 0;
-        let empowermentScore = 0;
-        let skills: string[] = [];
-        
-        try {
-          const cvAnalysis = localStorage.getItem('comprehensiveCVAnalysis');
-          if (cvAnalysis) {
-            const parsed = JSON.parse(cvAnalysis);
-            cvScore = parsed.score || 0;
-            skills = parsed.sections?.skills || [];
+
+        const [statsRes, appsRes] = await Promise.allSettled([
+          statsAPI.getDashboardStats(),
+          applicationsAPI.getStats(),
+        ]);
+
+        const liveStats = statsRes.status === "fulfilled" ? statsRes.value?.data : null;
+        const appStats = appsRes.status === "fulfilled" ? appsRes.value?.data : null;
+
+        if (liveStats) {
+          setDataSource("live");
+          setStats({
+            empowermentScore: Number(liveStats.empowermentScore) || 0,
+            cvScore: Number(liveStats.cvScore) || 0,
+            interviewScore: Number(liveStats.interviewsPracticed) || 0,
+            skillsMatched: Number(liveStats.skillsMatched) || 0,
+            opportunitiesCount: Number(liveStats.opportunitiesCount) || 0,
+            applicationsCount: Number(appStats?.totalApplications) || Number(appStats?.total) || 0,
+            learnershipsCount: undefined,
+          });
+        } else {
+          // Cached fallback (localStorage) if the API is unreachable
+          setDataSource("cached");
+          let cvScore = 0;
+          let empowermentScore = 0;
+          let skillsMatched = 0;
+          try {
+            const cvAnalysis = localStorage.getItem("comprehensiveCVAnalysis");
+            if (cvAnalysis) {
+              const parsed = JSON.parse(cvAnalysis);
+              cvScore = Number(parsed?.score) || 0;
+              skillsMatched = Array.isArray(parsed?.sections?.skills) ? parsed.sections.skills.length : 0;
+            }
+          } catch (e) {
+            // ignore
           }
-        } catch (e) {
-          console.error('Failed to parse CV analysis:', e);
-        }
-
-        try {
-          const twinData = localStorage.getItem('twinData');
-          if (twinData) {
-            const parsed = JSON.parse(twinData);
-            empowermentScore = parsed.empowermentScore || 0;
+          try {
+            const twinData = localStorage.getItem("twinData");
+            if (twinData) {
+              const parsed = JSON.parse(twinData);
+              empowermentScore = Number(parsed?.empowermentScore) || 0;
+            }
+          } catch (e) {
+            // ignore
           }
-        } catch (e) {
-          console.error('Failed to parse twin data:', e);
+
+          setStats({
+            empowermentScore,
+            cvScore,
+            interviewScore: 0,
+            skillsMatched,
+            opportunitiesCount: 0,
+            applicationsCount: 0,
+            learnershipsCount: undefined,
+          });
         }
-
-        // Calculate opportunities count based on skills
-        const opportunitiesCount = skills.length > 0 ? Math.floor(Math.random() * 20) + 15 : 0;
-        
-        // Calculate learnerships based on empowerment score
-        const learnershipsCount = empowermentScore > 0 ? Math.floor(Math.random() * 10) + 8 : 0;
-        
-        // Calculate skills matched (random for now, but could be based on market demand)
-        const skillsMatched = cvScore > 0 ? Math.floor(Math.random() * 5) + 5 : 0;
-
-        setStats({
-          empowermentScore,
-          cvScore,
-          interviewScore: 0,
-          skillsMatched,
-          opportunitiesCount,
-          applicationsCount: 0,
-          learnershipsCount,
-        });
       } catch (error) {
         console.error("Failed to load dashboard data:", error);
+        setDataSource("cached");
         setStats({
           empowermentScore: 0,
           cvScore: 0,
@@ -230,10 +244,9 @@ export default function Dashboard() {
       }
     };
 
-    const timer = setTimeout(loadDashboard, 1200);
+    loadDashboard();
 
     return () => { 
-      clearTimeout(timer); 
       clearInterval(interval); 
     };
   }, []);
@@ -288,7 +301,9 @@ export default function Dashboard() {
                   >
                     <Sparkles className="h-3.5 w-3.5" /> AI Command Centre
                   </motion.span>
-                  <span className="text-xs text-muted-foreground">Live sync</span>
+                  <span className="text-xs text-muted-foreground">
+                    {dataSource === "live" ? "Live data" : "Cached data"}
+                  </span>
                 </div>
                 <motion.h1 initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="text-4xl md:text-5xl font-display mb-3 font-bold">
                   Welcome back,{' '}
