@@ -90,6 +90,10 @@ Create `.env` file:
 OPENAI_API_KEY=your-key-here
 MODEL_NAME=gpt-4
 EMBEDDING_MODEL=text-embedding-ada-002
+
+# Optional: lock down /api/* endpoints so only the backend can call them
+REQUIRE_AI_SERVICE_API_KEY=false
+AI_SERVICE_API_KEY=replace_with_a_shared_secret
 ```
 
 ## Development Tips

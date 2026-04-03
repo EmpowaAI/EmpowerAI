@@ -9,6 +9,10 @@ services:
         value: 3.11.9
       - key: PORT
         value: 10000
+      - key: REQUIRE_AI_SERVICE_API_KEY
+        value: true
+      - key: AI_SERVICE_API_KEY
+        sync: false
       - key: OPENAI_API_KEY
         sync: false
 

@@ -48,7 +48,18 @@ class CorrelationIDMiddleware(BaseHTTPMiddleware):
 app.add_middleware(CorrelationIDMiddleware)
 
 # Optional API key protection for internal routes
+def _is_truthy(value: str | None) -> bool:
+    if value is None:
+        return False
+    return value.strip().lower() in ("1", "true", "yes", "y", "on")
+
+REQUIRE_AI_SERVICE_API_KEY = _is_truthy(os.getenv("REQUIRE_AI_SERVICE_API_KEY"))
 AI_SERVICE_API_KEY = os.getenv("AI_SERVICE_API_KEY")
+
+if REQUIRE_AI_SERVICE_API_KEY and not AI_SERVICE_API_KEY:
+    raise RuntimeError(
+        "AI_SERVICE_API_KEY must be set when REQUIRE_AI_SERVICE_API_KEY=true"
+    )
 
 @app.middleware("http")
 async def api_key_guard(request: Request, call_next):

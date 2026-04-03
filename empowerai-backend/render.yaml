@@ -17,6 +17,8 @@ services:
         value: 90d
       - key: AI_SERVICE_URL
         sync: false
+      - key: AI_SERVICE_API_KEY
+        sync: false
       - key: FRONTEND_URL
         value: https://empower-ai-gamma.vercel.app
       - key: ADZUNA_APP_ID
