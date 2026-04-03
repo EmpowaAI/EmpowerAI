@@ -76,9 +76,18 @@ class InterviewService {
       });
 
       if (!response.ok) {
-        const errorData = await response.text();
-        console.error('Server error:', errorData);
-        throw new Error(`Failed to start interview: ${response.status}`);
+        const correlationId =
+          response.headers.get('X-Correlation-ID') ||
+          response.headers.get('x-correlation-id');
+
+        const errorText = await response.text();
+        console.error('Server error:', {
+          status: response.status,
+          correlationId,
+          body: errorText
+        });
+
+        throw new Error(`Failed to start interview: ${response.status}${correlationId ? ` (Correlation ID: ${correlationId})` : ''}`);
       }
 
       const jsonResponse = await response.json();

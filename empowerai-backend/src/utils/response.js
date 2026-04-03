@@ -11,10 +11,12 @@
  * @param {object} meta - Additional metadata
  */
 const sendSuccess = (res, data, statusCode = 200, meta = {}) => {
+  const correlationId = res.getHeader?.('X-Correlation-ID') || res.getHeader?.('x-correlation-id') || null;
   const response = {
     status: 'success',
     data,
     timestamp: new Date().toISOString(),
+    ...(correlationId ? { correlationId } : {}),
   };
 
   // Add metadata if provided
@@ -36,11 +38,13 @@ const sendError = (res, error, statusCode = 500, details = {}) => {
   const isErrorObject = error instanceof Error;
   const message = isErrorObject ? error.message : error;
   const errorName = isErrorObject ? error.name : 'Error';
+  const correlationId = res.getHeader?.('X-Correlation-ID') || res.getHeader?.('x-correlation-id') || null;
 
   const response = {
     status: 'error',
     message,
     timestamp: new Date().toISOString(),
+    ...(correlationId ? { correlationId } : {}),
   };
 
   // Add error code if available
