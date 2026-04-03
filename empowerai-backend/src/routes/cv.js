@@ -2,18 +2,12 @@ const express = require('express');
 const multer = require('multer');
 const { analyzeCV, analyzeCVFile, revampCV } = require('../controllers/cvController');
 const auth = require('../middleware/auth');
-const { aiServiceLimiter } = require('../middleware/rateLimiter');
 const validateRequest = require('../middleware/validate');
 const { cvAnalysisSchema, cvRevampSchema } = require('../utils/validators');
 const router = express.Router();
 
 // All routes protected by authentication
 router.use(auth);
-
-// Apply AI service rate limiter to CV analysis endpoints (configurable)
-if (process.env.ENABLE_CV_RATE_LIMITER !== 'false') {
-  router.use(aiServiceLimiter);
-}
 
 // Configure multer for file uploads
 const upload = multer({
