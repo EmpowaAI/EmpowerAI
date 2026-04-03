@@ -115,7 +115,14 @@ const validate = (schema, data) => {
     return schema.parse(data);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const errors = error.errors.map((err) => ({
+      // Zod v4 uses `issues` (v3 exposed `errors`).
+      const issues = Array.isArray(error.issues)
+        ? error.issues
+        : Array.isArray(error.errors)
+          ? error.errors
+          : [];
+
+      const errors = issues.map((err) => ({
         field: err.path.join('.'),
         message: err.message,
       }));
