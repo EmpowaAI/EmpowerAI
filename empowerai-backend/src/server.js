@@ -7,7 +7,7 @@ const compression = require('compression');
 require('dotenv').config();
 
 const logger = require('./utils/logger');
-const { apiLimiter, authLimiter, aiServiceLimiter } = require('./middleware/rateLimiter');
+const { apiLimiter, authLimiter, aiServiceLimiter, isEnabled } = require('./middleware/rateLimiter');
 const { initAiQueue, getAiQueueHealth, getAiJobStatus } = require('./queues/aiQueue');
 
 const app = express();
@@ -78,12 +78,20 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Auth routes: authLimiter
 // Twin routes: No rate limiting (OpenAI will rate limit before we do)
 // --- CONSOLIDATED RATE LIMITING ---
-app.use('/api/auth', authLimiter);
-app.use('/api/cv', aiServiceLimiter);
-app.use('/api/twin', aiServiceLimiter);
-app.use('/api/interview', aiServiceLimiter);
-app.use('/api/chat', aiServiceLimiter);
-app.use('/api', apiLimiter);
+if (isEnabled(process.env.ENABLE_AUTH_RATE_LIMITER, true)) {
+  app.use('/api/auth', authLimiter);
+}
+
+if (isEnabled(process.env.ENABLE_AI_RATE_LIMITER, true)) {
+  app.use('/api/cv', aiServiceLimiter);
+  app.use('/api/twin', aiServiceLimiter);
+  app.use('/api/interview', aiServiceLimiter);
+  app.use('/api/chat', aiServiceLimiter);
+}
+
+if (isEnabled(process.env.ENABLE_API_RATE_LIMITER, true)) {
+  app.use('/api', apiLimiter);
+}
 
 // Request logging middleware
 app.use(require('./middleware/requestLogger'));
