@@ -1,8 +1,16 @@
 import { API_BASE_URL } from './apiBase';
 
 const getToken = () => localStorage.getItem('empowerai-token');
+const USE_DEMO_MODE = import.meta.env.VITE_USE_DEMO_MODE === 'true';
 
 export type ChatMsg = { role: "user" | "assistant"; content: string };
+
+export type TwinChatMeta = {
+  reply?: string;
+  options?: string[];
+  isComplete?: boolean;
+  profile?: Record<string, unknown> | null;
+};
 
 export async function streamChat({
   messages,
@@ -12,17 +20,24 @@ export async function streamChat({
 }: {
   messages: ChatMsg[];
   onDelta: (text: string) => void;
-  onDone: () => void;
+  onDone: (meta?: TwinChatMeta) => void;
   onError: (error: string) => void;
 }) {
   try {
     console.log('Sending twin chat:', API_BASE_URL);
+
+    const token = getToken();
+    if (!token) {
+      onError("Please log in to use Digital Twin chat.");
+      onDone({ reply: "", options: [], isComplete: false, profile: null });
+      return;
+    }
     
     const response = await fetch(`${API_BASE_URL}/chat/twin`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...(getToken() ? { 'Authorization': `Bearer ${getToken()}` } : {}),
+        'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify({ messages }),
     });
@@ -30,15 +45,33 @@ export async function streamChat({
     if (!response.ok) {
       if (response.status === 429) {
         onError("Rate limited — please wait a moment and try again.");
+        onDone({ reply: "", options: [], isComplete: false, profile: null });
         return;
       }
       
       const errorData = await response.json().catch(() => ({}));
       console.error('AI service error:', response.status, errorData);
       
-      // Fallback to demo mode on error
-      console.log('Falling back to demo mode');
-      simulateChat(messages, onDelta, onDone, onError);
+      const serverMessage =
+        errorData?.message ||
+        errorData?.detail ||
+        errorData?.data?.message ||
+        `Request failed (status ${response.status})`;
+
+      if (response.status === 401) {
+        onError("Your session expired. Please log in again.");
+        onDone({ reply: "", options: [], isComplete: false, profile: null });
+        return;
+      }
+
+      if (USE_DEMO_MODE) {
+        console.log('Falling back to demo mode');
+        simulateChat(messages, onDelta, () => onDone(), onError);
+        return;
+      }
+
+      onError(serverMessage);
+      onDone({ reply: "", options: [], isComplete: false, profile: null });
       return;
     }
 
@@ -52,9 +85,15 @@ export async function streamChat({
       if (payload.reply) {
         // Send the entire reply at once
         onDelta(payload.reply);
-        onDone();
+        onDone({
+          reply: payload.reply,
+          options: Array.isArray(payload.options) ? payload.options : [],
+          isComplete: !!payload.isComplete,
+          profile: payload.profile || null,
+        });
       } else {
         onError("Invalid response format from AI service");
+        onDone({ reply: "", options: [], isComplete: false, profile: null });
       }
     } else if (response.body) {
       // Handle streaming response
@@ -109,13 +148,19 @@ export async function streamChat({
       onDone();
     } else {
       onError("No response body from AI service");
+      onDone({ reply: "", options: [], isComplete: false, profile: null });
     }
   } catch (e) {
     console.error("Stream error:", e);
     
-    // Fallback to demo mode on error
-    console.log('Falling back to demo mode due to connection error');
-    simulateChat(messages, onDelta, onDone, onError);
+    if (USE_DEMO_MODE) {
+      console.log('Falling back to demo mode due to connection error');
+      simulateChat(messages, onDelta, () => onDone(), onError);
+      return;
+    }
+
+    onError("Network error connecting to the AI service. Please try again.");
+    onDone({ reply: "", options: [], isComplete: false, profile: null });
   }
 }
 
