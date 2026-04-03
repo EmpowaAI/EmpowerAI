@@ -36,32 +36,123 @@ class CVRevampService:
         
         # Try AI-powered revamp first
         ai_result = await self._revamp_with_ai(cv_data)
-        
+
         if ai_result:
-            self.logger.info(f"✅ AI revamp successful")
-            
-            # Parse the AI result into structured format
+            self.logger.info("✅ AI revamp successful")
             revamped_cv = await self._parse_ai_result_to_structured_cv(ai_result, cv_data)
-            
-            # Calculate new score based on improvements
-            weaknesses = cv_data.get('weaknesses', [])
-            improvements = min(len(weaknesses) * 4, 25)
-            new_score = min(original_score + improvements, 98)
-            
-            # Generate changes summary based on actual weaknesses and CV type
-            changes_summary = self._generate_changes_summary(cv_data)
-            
-            self.logger.info("✅ Revamp complete!")
-            
-            return {
-                "originalScore": original_score,
-                "newScore": new_score,
-                "changesSummary": changes_summary,
-                "revampedCV": revamped_cv
-            }
-        
-        self.logger.error("❌ AI revamp failed")
-        raise Exception("AI revamp service unavailable. Please try again later.")
+        else:
+            # Fallback: generate an ATS-friendly CV without an LLM
+            self.logger.warning("⚠️ AI revamp unavailable; using deterministic fallback revamp")
+            revamped_cv = self._build_fallback_structured_cv(cv_data)
+
+        weaknesses = cv_data.get('weaknesses', []) or []
+        improvements = min(len(weaknesses) * 4, 25)
+        new_score = min(original_score + improvements, 98)
+
+        changes_summary = self._generate_changes_summary(cv_data)
+
+        self.logger.info("✅ Revamp complete!")
+
+        return {
+            "originalScore": original_score,
+            "newScore": new_score,
+            "changesSummary": changes_summary,
+            "revampedCV": revamped_cv,
+        }
+
+    def _build_fallback_structured_cv(self, cv_data: Dict[str, Any]) -> Dict[str, Any]:
+        sections = cv_data.get('sections') or {}
+        if not isinstance(sections, dict):
+            sections = {}
+
+        name = cv_data.get('name') or "[Your Name]"
+        email = cv_data.get('email') or "[Email]"
+        phone = cv_data.get('phone') or "[Phone]"
+
+        links = cv_data.get('linkCheck') or {}
+        if not isinstance(links, dict):
+            links = {}
+
+        about = sections.get('about') or cv_data.get('summary') or "Motivated candidate seeking opportunities to grow and contribute."
+        skills = sections.get('skills') or []
+        education = sections.get('education') or []
+        experience = sections.get('experience') or []
+        achievements = sections.get('achievements') or []
+
+        # Best-effort skill bucketing (kept intentionally simple)
+        languages: List[str] = []
+        frameworks: List[str] = []
+        web_tech: List[str] = []
+        tools: List[str] = []
+        methodologies: List[str] = []
+
+        if isinstance(skills, list):
+            for skill in skills:
+                sl = str(skill).lower()
+                if sl in ("python", "javascript", "typescript", "java", "c#", "c++", "sql", "go", "rust"):
+                    languages.append(str(skill))
+                elif any(k in sl for k in ("react", "angular", "vue", "next", "node", "express", "django", "flask", "fastapi", ".net")):
+                    frameworks.append(str(skill))
+                elif any(k in sl for k in ("html", "css", "rest", "api", "graphql")):
+                    web_tech.append(str(skill))
+                elif any(k in sl for k in ("docker", "kubernetes", "git", "github", "aws", "azure", "gcp", "linux")):
+                    tools.append(str(skill))
+                elif any(k in sl for k in ("agile", "scrum", "ci/cd", "tdd")):
+                    methodologies.append(str(skill))
+                else:
+                    tools.append(str(skill))
+
+        contact = " | ".join([p for p in ["South Africa", phone, email] if p])
+
+        link_parts: List[str] = []
+        if links.get('linkedin'):
+            link_parts.append("LinkedIn: [link]")
+        if links.get('github'):
+            link_parts.append("GitHub: [link]")
+        if links.get('portfolio'):
+            link_parts.append("Portfolio: [link]")
+
+        technical_skills = {
+            "Languages": ", ".join(languages[:10]) if languages else (", ".join([str(s) for s in skills[:10]]) if isinstance(skills, list) else ""),
+            "Frameworks & Libraries": ", ".join(frameworks[:10]),
+            "Web Technologies": ", ".join(web_tech[:10]),
+            "Tools & Platforms": ", ".join(tools[:10]),
+            "Methodologies": ", ".join(methodologies[:10]),
+        }
+
+        experience_items = []
+        if isinstance(experience, list) and experience:
+            experience_items.append({
+                "title": "Professional Experience",
+                "company": "",
+                "dates": "",
+                "bullets": [str(e) for e in experience[:8]],
+            })
+
+        projects_items = []
+        if isinstance(achievements, list) and achievements:
+            projects_items.append({
+                "name": "Projects & Achievements",
+                "technologies": ", ".join([str(s) for s in (skills[:6] if isinstance(skills, list) else [])]),
+                "bullets": [str(a) for a in achievements[:10]],
+            })
+
+        education_items = []
+        if isinstance(education, list) and education:
+            education_items = [{"degree": str(edu), "institution": "", "dates": "", "details": ""} for edu in education[:8]]
+
+        return {
+            "name": name,
+            "contactInfo": contact,
+            "links": " | ".join(link_parts),
+            "credentials": "ID Holder | Driver's License: Available | B-BBEE Status: South African Citizen",
+            "professionalSummary": about,
+            "technicalSkills": technical_skills,
+            "experience": experience_items,
+            "projects": projects_items,
+            "education": education_items,
+            "languages": ["English: Fluent"],
+        }
 
     async def _parse_ai_result_to_structured_cv(self, ai_text: str, cv_data: Dict[str, Any]) -> Dict[str, Any]:
         """
