@@ -37,12 +37,16 @@ export async function streamChat({
     let cvContext = null;
     try {
       const stored = localStorage.getItem('comprehensiveCVAnalysis') || localStorage.getItem('cvAnalysisData');
-      if (stored) cvContext = JSON.parse(stored);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        // Ensure cv_context is a plain object, as Pydantic Dict expects this
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) cvContext = parsed;
+      }
     } catch (e) {
       console.warn('Failed to parse CV context');
     }
 
-    const focus = localStorage.getItem('careerFocus') || 'growth';
+    const focus = String(localStorage.getItem('careerFocus') || 'growth');
     
     const response = await fetch(`${API_BASE_URL}/chat/twin`, {
       method: 'POST',

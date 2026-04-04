@@ -26,13 +26,23 @@ route_logger = logging.getLogger(__name__)
 class ChatMessage(BaseModel):
     role: str  # "user" or "assistant"
     content: str
-    model_config = {"extra": "ignore"}
+    
+    # Compatibility for both Pydantic v1 and v2
+    class Config:
+        extra = "ignore"
+        populate_by_name = True
+    model_config = {"extra": "ignore", "populate_by_name": True}
 
 class ChatRequest(BaseModel):
     messages: List[ChatMessage]
     cv_context: Optional[Dict[str, Any]] = None
     focus: Optional[str] = None  # Added focus for personalization
-    model_config = {"extra": "ignore"}
+    
+    # Compatibility for both Pydantic v1 and v2
+    class Config:
+        extra = "ignore"
+        populate_by_name = True
+    model_config = {"extra": "ignore", "populate_by_name": True}
 
 class ChatResponse(BaseModel):
     reply: str
