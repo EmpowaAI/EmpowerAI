@@ -8,6 +8,7 @@ import asyncio
 import json
 import re
 import time
+import httpx
 from openai import OpenAI, RateLimitError, APIError, AsyncOpenAI, AzureOpenAI, AsyncAzureOpenAI
 from typing import List, Dict, Any, Optional
 from utils.logger import get_logger
@@ -50,20 +51,25 @@ class AIClient:
                     self.model = os.getenv("AZURE_OPENAI_MODEL", "gpt-4o-mini")
                     logger.info(f"Initializing Azure OpenAI with endpoint: {azure_endpoint}, model: {self.model}")
 
-                    # Explicitly initialize Azure clients to avoid any 'proxies' argument issues
+                    # Use a custom httpx client to bypass internal 'proxies' injection issues
+                    http_client = httpx.Client(trust_env=False)
+                    async_http_client = httpx.AsyncClient(trust_env=False)
+
                     self.client = AzureOpenAI(
                         api_key=azure_api_key,
                         api_version="2024-02-15-preview",
                         azure_endpoint=azure_endpoint,
                         timeout=60.0,
-                        max_retries=3
+                        max_retries=3,
+                        http_client=http_client
                     )
                     self.async_client = AsyncAzureOpenAI(
                         api_key=azure_api_key,
                         api_version="2024-02-15-preview",
                         azure_endpoint=azure_endpoint,
                         timeout=60.0,
-                        max_retries=3
+                        max_retries=3,
+                        http_client=async_http_client
                     )
 
                     # Test connection
@@ -80,16 +86,20 @@ class AIClient:
                         self.enabled = False
 
                 else:
-                    # Explicitly initialize Standard OpenAI clients
+                    http_client = httpx.Client(trust_env=False)
+                    async_http_client = httpx.AsyncClient(trust_env=False)
+
                     self.client = OpenAI(
                         api_key=openai_api_key,
                         timeout=60.0,
-                        max_retries=3
+                        max_retries=3,
+                        http_client=http_client
                     )
                     self.async_client = AsyncOpenAI(
                         api_key=openai_api_key,
                         timeout=60.0,
-                        max_retries=3
+                        max_retries=3,
+                        http_client=async_http_client
                     )
                     self.model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
                     logger.info("OpenAI client initialized successfully", extra={'model': self.model})
