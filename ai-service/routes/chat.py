@@ -26,15 +26,13 @@ route_logger = logging.getLogger(__name__)
 class ChatMessage(BaseModel):
     role: str  # "user" or "assistant"
     content: str
-    class Config:
-        extra = "ignore"
+    model_config = {"extra": "ignore"}
 
 class ChatRequest(BaseModel):
     messages: List[ChatMessage]
     cv_context: Optional[Dict[str, Any]] = None
     focus: Optional[str] = None  # Added focus for personalization
-    class Config:
-        extra = "ignore"
+    model_config = {"extra": "ignore"}
 
 class ChatResponse(BaseModel):
     reply: str
@@ -329,11 +327,18 @@ def generate_step_response(messages: List[ChatMessage], step: int, cv_context: O
     
     # Extract name if available
     name = "there"
-    if user_count >= 1:
-        name = clean_user_name(user_messages[0].content)
-        if not name:
-            name = "there"
     
+    # Determine offset to see if we are in CV mode
+    has_cv_name = cv_context and (cv_context.get('name') or cv_context.get('sections', {}).get('about'))
+    
+    if has_cv_name:
+        # Priority 1: Use name from CV
+        name = clean_user_name(cv_context.get('name') or "there")
+    elif user_count >= 1:
+        # Priority 2: Use name from first message (only if NOT skipping steps)
+        # If step is not 0 or 1, and we don't have a CV name, message 0 IS the name
+        name = clean_user_name(user_messages[0].content)
+
     route_logger.info(f"📝 Step {step} - User count: {user_count}, Name: {name}")
     
     # STEP 0: GREETING - Ask for name
