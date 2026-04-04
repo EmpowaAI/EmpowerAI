@@ -65,7 +65,7 @@ export async function streamChat({
             return { role, content };
           })
           .filter(m => m.content.trim() !== ''),
-        cvData: cvContext || {}, // Standardize on cvData for Node proxy validation
+        cv_context: cvContext || {}, // Revert to cv_context to satisfy strict Node proxy validation
         focus: focus
       }),
     });
