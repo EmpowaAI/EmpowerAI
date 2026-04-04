@@ -50,17 +50,21 @@ class AIClient:
                     self.model = os.getenv("AZURE_OPENAI_MODEL", "gpt-4o-mini")
                     logger.info(f"Initializing Azure OpenAI with endpoint: {azure_endpoint}, model: {self.model}")
 
-                    # Initialize Azure clients without 'proxies' keyword
-                    client_kwargs = {
-                        "api_key": azure_api_key,
-                        "api_version": "2024-02-15-preview",
-                        "azure_endpoint": azure_endpoint,
-                        "timeout": 60.0,
-                        "max_retries": 3
-                    }
-                    
-                    self.client = AzureOpenAI(**client_kwargs)
-                    self.async_client = AsyncAzureOpenAI(**client_kwargs)
+                    # Explicitly initialize Azure clients to avoid any 'proxies' argument issues
+                    self.client = AzureOpenAI(
+                        api_key=azure_api_key,
+                        api_version="2024-02-15-preview",
+                        azure_endpoint=azure_endpoint,
+                        timeout=60.0,
+                        max_retries=3
+                    )
+                    self.async_client = AsyncAzureOpenAI(
+                        api_key=azure_api_key,
+                        api_version="2024-02-15-preview",
+                        azure_endpoint=azure_endpoint,
+                        timeout=60.0,
+                        max_retries=3
+                    )
 
                     # Test connection
                     try:
@@ -76,15 +80,17 @@ class AIClient:
                         self.enabled = False
 
                 else:
-                    # Initialize Standard OpenAI clients
-                    client_kwargs = {
-                        "api_key": openai_api_key,
-                        "timeout": 60.0,
-                        "max_retries": 3
-                    }
-                    
-                    self.client = OpenAI(**client_kwargs)
-                    self.async_client = AsyncOpenAI(**client_kwargs)
+                    # Explicitly initialize Standard OpenAI clients
+                    self.client = OpenAI(
+                        api_key=openai_api_key,
+                        timeout=60.0,
+                        max_retries=3
+                    )
+                    self.async_client = AsyncOpenAI(
+                        api_key=openai_api_key,
+                        timeout=60.0,
+                        max_retries=3
+                    )
                     self.model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
                     logger.info("OpenAI client initialized successfully", extra={'model': self.model})
 
