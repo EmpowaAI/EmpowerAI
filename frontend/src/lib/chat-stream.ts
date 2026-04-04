@@ -32,6 +32,17 @@ export async function streamChat({
       onDone({ reply: "", options: [], isComplete: false, profile: null });
       return;
     }
+
+    // Extract CV context to ensure the AI knows who it's talking to
+    let cvContext = null;
+    try {
+      const stored = localStorage.getItem('comprehensiveCVAnalysis') || localStorage.getItem('cvAnalysisData');
+      if (stored) cvContext = JSON.parse(stored);
+    } catch (e) {
+      console.warn('Failed to parse CV context');
+    }
+
+    const focus = localStorage.getItem('careerFocus') || 'growth';
     
     const response = await fetch(`${API_BASE_URL}/chat/twin`, {
       method: 'POST',
@@ -39,14 +50,16 @@ export async function streamChat({
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
       },
-        body: JSON.stringify({ 
-          messages: messages
-            .filter(m => m.content && m.role)
-            .map(m => ({
-              role: m.role,
-              content: m.content
-            }))
-        }),
+      body: JSON.stringify({ 
+        messages: messages
+          .filter(m => (m.content || (m as any).text) && (m.role || (m as any).sender))
+          .map(m => ({
+            role: m.role || (m as any).sender || 'user',
+            content: m.content || (m as any).text || ''
+          })),
+        cv_context: cvContext,
+        focus: focus
+      }),
     });
 
     if (!response.ok) {
