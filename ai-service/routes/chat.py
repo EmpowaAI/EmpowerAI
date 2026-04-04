@@ -21,16 +21,20 @@ from utils.logger import get_logger
 
 # Create router WITHOUT prefix here - we'll add it in main.py
 router = APIRouter(tags=["Chat"])
-logger = logging.getLogger(__name__)
+route_logger = logging.getLogger(__name__)
 
 class ChatMessage(BaseModel):
     role: str  # "user" or "assistant"
     content: str
+    class Config:
+        extra = "ignore"
 
 class ChatRequest(BaseModel):
     messages: List[ChatMessage]
     cv_context: Optional[Dict[str, Any]] = None
     focus: Optional[str] = None  # Added focus for personalization
+    class Config:
+        extra = "ignore"
 
 class ChatResponse(BaseModel):
     reply: str
@@ -318,7 +322,7 @@ def generate_step_response(messages: List[ChatMessage], step: int, cv_context: O
         if not name:
             name = "there"
     
-    logger.info(f"📝 Step {step} - User count: {user_count}, Name: {name}")
+    route_logger.info(f"📝 Step {step} - User count: {user_count}, Name: {name}")
     
     # STEP 0: GREETING - Ask for name
     if step == 0:
