@@ -39,7 +39,14 @@ export async function streamChat({
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
       },
-      body: JSON.stringify({ messages }),
+        body: JSON.stringify({ 
+          messages: messages
+            .filter(m => m.content && m.role)
+            .map(m => ({
+              role: m.role,
+              content: m.content
+            }))
+        }),
     });
 
     if (!response.ok) {
