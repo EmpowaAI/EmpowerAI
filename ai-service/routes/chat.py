@@ -30,8 +30,8 @@ class ChatMessage(BaseModel):
 
 class ChatRequest(BaseModel):
     messages: List[ChatMessage]
-    cv_context: Optional[Dict[str, Any]] = Field(default=None, alias="cvData") # Accepts cvData from Node proxy
-    focus: Optional[str] = Field(default="growth")
+    cv_context: Optional[Dict[str, Any]] = None
+    focus: Optional[str] = "growth"
     model_config = {"extra": "ignore", "populate_by_name": True}
 
 class ChatResponse(BaseModel):
