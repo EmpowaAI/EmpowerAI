@@ -81,7 +81,7 @@ STEP_PROMPTS = {
 }
 
 @router.post("/chat/twin", response_model=ChatResponse)
-async def chat_twin(request: ChatRequest, req: Request):
+async def chat_twin(payload: ChatRequest, req: Request):
     """
     Digital Twin chat endpoint - builds user profile through conversation
     Uses AI for natural language understanding while maintaining quiz flow
@@ -90,14 +90,14 @@ async def chat_twin(request: ChatRequest, req: Request):
     log = get_logger(correlation_id)
     
     try:
-        log.info(f"📋 Twin chat request with {len(request.messages)} messages")
+        log.info(f"📋 Twin chat request with {len(payload.messages)} messages")
         
         # Determine current step based on message count
-        step = get_current_step(request.messages, request.cv_context, request.focus)
+        step = get_current_step(payload.messages, payload.cv_context, payload.focus)
         log.info(f"📍 Current step: {STEPS[step]} (step {step})")
         
         # Extract user's last message if any
-        user_messages = [m for m in request.messages if m.role == "user"]
+        user_messages = [m for m in payload.messages if m.role == "user"]
         last_user_message = user_messages[-1].content if user_messages else ""
         
         # If AI is enabled, use it to understand unclear answers
@@ -140,7 +140,7 @@ async def chat_twin(request: ChatRequest, req: Request):
                 # Continue with normal flow
         
         # Generate response based on step
-        response = generate_step_response(request.messages, step, request.cv_context, request.focus)
+        response = generate_step_response(payload.messages, step, payload.cv_context, payload.focus)
         return ChatResponse(**response)
         
     except Exception as e:
@@ -153,7 +153,7 @@ async def options_twin():
     return {"message": "OK"}
 
 @router.post("/chat", response_model=ChatResponse)
-async def chat_endpoint(request: ChatRequest, req: Request):
+async def chat_endpoint(payload: ChatRequest, req: Request):
     """
     General chat endpoint for non-twin conversations
     Uses AI for intelligent responses
@@ -162,7 +162,7 @@ async def chat_endpoint(request: ChatRequest, req: Request):
     log = get_logger(correlation_id)
     
     try:
-        log.info(f"💬 General chat request with {len(request.messages)} messages")
+        log.info(f"💬 General chat request with {len(payload.messages)} messages")
         
         if ai_client.enabled:
             try:
@@ -173,7 +173,7 @@ async def chat_endpoint(request: ChatRequest, req: Request):
                 Keep responses friendly and encouraging."""
                 
                 response_text = await ai_client.generate_text_async(
-                    prompt=request.messages[-1].content if request.messages else "",
+                    prompt=payload.messages[-1].content if payload.messages else "",
                     system_prompt=system_prompt,
                     temperature=0.7,
                     max_tokens=300,

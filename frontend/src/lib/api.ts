@@ -1231,8 +1231,11 @@ export const chatAPIReal = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${getToken()}`,
         },
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({ 
+          messages: [{ role: 'user', content: message }] 
+        }),
       });
 
       if (!response.ok) {
