@@ -314,9 +314,15 @@ def generate_step_response(messages: List[ChatMessage], step: int, cv_context: O
     # Extract name if available
     name = "there"
     if user_count >= 1:
-        name = user_messages[0].content.strip()
-        # Clean up name (remove punctuation)
-        name = re.sub(r'[^\w\s]', '', name)
+        raw_name = user_messages[0].content.strip()
+        # Logic to extract just the name if they provide a sentence
+        if "name is" in raw_name.lower():
+            name = raw_name.lower().split("name is")[-1].strip()
+        elif "im " in raw_name.lower() or "i am " in raw_name.lower():
+            name = raw_name.split(" ")[-1].strip()
+        else:
+            name = raw_name
+        name = re.sub(r'[^\w\s]', '', name).capitalize()
         if not name:
             name = "there"
     
@@ -427,7 +433,7 @@ def build_profile_from_conversation(messages: List[ChatMessage], cv_context: Opt
 
     # Initialize profile with defaults or CV data
     profile = {
-        "name": cv_context.get('name', 'User') if cv_context and cv_context.get('name') else "User",
+        "name": (cv_context.get('name') or "User") if cv_context else "User",
         "careerStage": "Mid Career" if offset == 2 else "Early Career",
         "province": "Gauteng",
         "industry": "Information Technology",
