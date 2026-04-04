@@ -285,6 +285,22 @@ def get_question_for_step(step: int) -> str:
     }
     return questions.get(step, "")
 
+def clean_user_name(raw_name: str) -> str:
+    """Helper to extract and clean name from various input formats"""
+    if not raw_name:
+        return "there"
+    
+    name_lower = raw_name.lower()
+    if "name is" in name_lower:
+        name = raw_name.split("is")[-1].strip()
+    elif "i am " in name_lower or "im " in name_lower:
+        name = raw_name.split(" ")[-1].strip()
+    else:
+        name = raw_name
+    
+    cleaned = re.sub(r'[^\w\s]', '', name).strip().capitalize()
+    return cleaned if cleaned else "there"
+
 def generate_step_response(messages: List[ChatMessage], step: int, cv_context: Optional[Dict[str, Any]] = None, focus: Optional[str] = None) -> Dict[str, Any]:
     """
     Generate response based on current step
@@ -314,15 +330,7 @@ def generate_step_response(messages: List[ChatMessage], step: int, cv_context: O
     # Extract name if available
     name = "there"
     if user_count >= 1:
-        raw_name = user_messages[0].content.strip()
-        # Logic to extract just the name if they provide a sentence
-        if "name is" in raw_name.lower():
-            name = raw_name.lower().split("name is")[-1].strip()
-        elif "im " in raw_name.lower() or "i am " in raw_name.lower():
-            name = raw_name.split(" ")[-1].strip()
-        else:
-            name = raw_name
-        name = re.sub(r'[^\w\s]', '', name).capitalize()
+        name = clean_user_name(user_messages[0].content)
         if not name:
             name = "there"
     
@@ -449,8 +457,9 @@ def build_profile_from_conversation(messages: List[ChatMessage], cv_context: Opt
 
     # If no offset, first two messages are Name and Career Stage
     if offset == 0:
-        if get_user_reply(0): 
-            profile["name"] = get_user_reply(0)
+        name_reply = get_user_reply(0)
+        if name_reply: 
+            profile["name"] = clean_user_name(name_reply)
         
         career = get_user_reply(1)
         if career:
