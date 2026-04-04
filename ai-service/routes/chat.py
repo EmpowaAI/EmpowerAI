@@ -157,12 +157,12 @@ async def options_twin():
     return {"message": "OK"}
 
 @router.post("/chat", response_model=ChatResponse)
-async def chat_endpoint(payload: ChatRequest, req: Request):
+async def chat_endpoint(payload: ChatRequest, req: Request = None):
     """
     General chat endpoint for non-twin conversations
     Uses AI for intelligent responses
     """
-    correlation_id = req.headers.get('X-Correlation-ID')
+    correlation_id = req.headers.get('X-Correlation-ID') if req else None
     log = get_logger(correlation_id)
     
     try:
@@ -226,37 +226,35 @@ def get_current_step(messages: List[ChatMessage], cv_context: Optional[Dict[str,
     user_messages = [m for m in messages if m.role == "user"]
     user_count = len(user_messages)
     
-    # Aggressive skipping: If we have CV data and this is the start
-    if cv_context and user_count == 0:
-        sections = cv_context.get('sections', {})
-        has_name = bool(cv_context.get('name'))
-        # Check if skills exist or if there is substantial CV text to extract from
-        has_skills = bool(sections.get('skills')) or len(cv_context.get('cvText', '')) > 500
-        
-        if has_name and has_skills:
-            # Skip name (0), career_stage (1) and go to province (2)
-            # The AI prompt handles the "acknowledge" part via the system prompt
-            return 2
+    # Check if we should be in "CV-enhanced" mode (skipping first 2 steps)
+    offset = 0
+    if cv_context:
+        has_name = bool(cv_context.get('name') or cv_context.get('sections', {}).get('about'))
+        if has_name:
+            offset = 2
 
     # Step mapping based on user message count
     if user_count == 0:
-        return 0  # greeting
-    elif user_count == 1:
-        return 1  # name received, ask career stage
-    elif user_count == 2:
-        return 2  # career stage received, ask province
-    elif user_count == 3:
-        return 3  # province received, ask industry
-    elif user_count == 4:
-        return 4  # industry received, ask education
-    elif user_count == 5:
-        return 5  # education received, ask skills
-    elif user_count == 6:
-        return 6  # skills received, ask challenges
-    elif user_count == 7:
-        return 7  # challenges received, ask goals
-    elif user_count >= 8:
-        return 8  # goals received, complete profile
+        return 0 if offset == 0 else 2  # greeting or skip to province
+    
+    adjusted_step = user_count + offset
+    
+    if adjusted_step == 1:
+        return 1
+    elif adjusted_step == 2:
+        return 2
+    elif adjusted_step == 3:
+        return 3
+    elif adjusted_step == 4:
+        return 4
+    elif adjusted_step == 5:
+        return 5
+    elif adjusted_step == 6:
+        return 6
+    elif adjusted_step == 7:
+        return 7
+    elif adjusted_step >= 8:
+        return 8
     else:
         return 0
 
@@ -403,8 +401,8 @@ def generate_step_response(messages: List[ChatMessage], step: int, cv_context: O
     
     # STEP 8: After goals - Build and return profile
     else:
-        # Build profile from all answers
-        profile = build_profile_from_conversation(messages)
+        # Build profile from conversation + CV context
+        profile = build_profile_from_conversation(messages, cv_context)
         
         return {
             "reply": f"🎉 Great! I've built your Digital Twin profile. Your empowerment score is **{profile['empowermentScore']}/100**.\n\nHere's your profile summary:\n- **Name:** {profile['name']}\n- **Career Stage:** {profile['careerStage']}\n- **Province:** {profile['province']}\n- **Industry:** {profile['industry']}\n- **Education:** {profile['education']}\n- **Skills:** {', '.join(profile['skills'])}\n- **Challenge:** {profile['challenges']}\n- **Goal:** {profile['goals']}",
@@ -413,16 +411,24 @@ def generate_step_response(messages: List[ChatMessage], step: int, cv_context: O
             "profile": profile
         }
 
-def build_profile_from_conversation(messages: List[ChatMessage]) -> Dict[str, Any]:
+def build_profile_from_conversation(messages: List[ChatMessage], cv_context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """
     Extract profile data from conversation history
+    Adjusts extraction indices based on whether steps were skipped due to CV context
     """
     user_messages = [m for m in messages if m.role == "user"]
     
-    # Default values
+    # Determine if steps were skipped (offset)
+    offset = 0
+    if cv_context:
+        has_name = bool(cv_context.get('name') or cv_context.get('sections', {}).get('about'))
+        if has_name:
+            offset = 2
+
+    # Initialize profile with defaults or CV data
     profile = {
-        "name": "User",
-        "careerStage": "Early Career",
+        "name": cv_context.get('name', 'User') if cv_context and cv_context.get('name') else "User",
+        "careerStage": "Mid Career" if offset == 2 else "Early Career",
         "province": "Gauteng",
         "industry": "Information Technology",
         "education": "Bachelor's Degree",
@@ -431,21 +437,30 @@ def build_profile_from_conversation(messages: List[ChatMessage]) -> Dict[str, An
         "goals": "Find a full-time job"
     }
     
-    # Extract from messages if available
-    if len(user_messages) >= 1:
-        profile["name"] = user_messages[0].content.strip()
+    # Safe extractor helper
+    def get_user_reply(idx):
+        return user_messages[idx].content.strip() if len(user_messages) > idx else None
+
+    # If no offset, first two messages are Name and Career Stage
+    if offset == 0:
+        if get_user_reply(0): 
+            profile["name"] = get_user_reply(0)
+        
+        career = get_user_reply(1)
+        if career:
+            if "Early" in career: profile["careerStage"] = "Early Career"
+            elif "Mid" in career: profile["careerStage"] = "Mid Career"
+            elif "Established" in career: profile["careerStage"] = "Established"
+        
+        # Remaining questions start at index 2
+        conv_start_idx = 2
+    else:
+        # CV provided Name/Stage, so the very first user message (index 0) is Province
+        conv_start_idx = 0
     
-    if len(user_messages) >= 2:
-        career = user_messages[1].content
-        if "Early" in career:
-            profile["careerStage"] = "Early Career"
-        elif "Mid" in career:
-            profile["careerStage"] = "Mid Career"
-        elif "Established" in career:
-            profile["careerStage"] = "Established"
-    
-    if len(user_messages) >= 3:
-        province = user_messages[2].content
+    # Map fields following the fixed quiz order
+    province = get_user_reply(conv_start_idx)
+    if province:
         if "Gauteng" in province:
             profile["province"] = "Gauteng"
         elif "Cape" in province:
@@ -455,8 +470,8 @@ def build_profile_from_conversation(messages: List[ChatMessage]) -> Dict[str, An
         else:
             profile["province"] = province
     
-    if len(user_messages) >= 4:
-        industry = user_messages[3].content
+    industry = get_user_reply(conv_start_idx + 1)
+    if industry:
         if "IT" in industry or "Technology" in industry:
             profile["industry"] = "Information Technology"
         elif "Finance" in industry:
@@ -472,8 +487,8 @@ def build_profile_from_conversation(messages: List[ChatMessage]) -> Dict[str, An
         else:
             profile["industry"] = industry
     
-    if len(user_messages) >= 5:
-        edu = user_messages[4].content
+    edu = get_user_reply(conv_start_idx + 2)
+    if edu:
         if "Matric" in edu:
             profile["education"] = "Matric"
         elif "Diploma" in edu:
@@ -485,23 +500,19 @@ def build_profile_from_conversation(messages: List[ChatMessage]) -> Dict[str, An
         elif "Certificate" in edu:
             profile["education"] = "Certificate"
     
-    if len(user_messages) >= 6:
-        skills_text = user_messages[5].content
-        # Extract skills from the response
+    skills_text = get_user_reply(conv_start_idx + 3)
+    if skills_text:
         skill_keywords = ["Coding", "Customer Service", "Sales", "Administration", 
                          "Data Analysis", "Project Management", "Communication", "Leadership"]
-        skills = []
-        for skill in skill_keywords:
-            if skill.lower() in skills_text.lower():
-                skills.append(skill)
+        skills = [s for s in skill_keywords if s.lower() in skills_text.lower()]
         if skills:
-            profile["skills"] = skills
+            profile["skills"] = list(set(profile["skills"] + skills))
     
-    if len(user_messages) >= 7:
-        profile["challenges"] = user_messages[6].content
+    if get_user_reply(conv_start_idx + 4):
+        profile["challenges"] = get_user_reply(conv_start_idx + 4)
     
-    if len(user_messages) >= 8:
-        goals_text = user_messages[7].content
+    goals_text = get_user_reply(conv_start_idx + 5)
+    if goals_text:
         if "job" in goals_text.lower():
             profile["goals"] = "Find a full-time job"
         elif "learnership" in goals_text.lower() or "internship" in goals_text.lower():
