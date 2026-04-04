@@ -30,7 +30,7 @@ class ChatMessage(BaseModel):
 
 class ChatRequest(BaseModel):
     messages: List[ChatMessage]
-    cv_context: Optional[Dict[str, Any]] = Field(default=None, alias="cvContext") # Support both
+    cv_data: Optional[Dict[str, Any]] = Field(default=None, alias="cvData")
     focus: Optional[str] = Field(default="growth")
     model_config = {"extra": "ignore", "populate_by_name": True}
 
@@ -95,7 +95,7 @@ async def chat_twin(payload: ChatRequest, req: Request):
         log.info(f"📋 Twin chat request with {len(payload.messages)} messages")
         
         # Determine current step based on message count
-        step = get_current_step(payload.messages, payload.cv_context, payload.focus)
+        step = get_current_step(payload.messages, payload.cv_data, payload.focus)
         log.info(f"📍 Current step: {STEPS[step]} (step {step})")
         
         # Extract user's last message if any
@@ -142,7 +142,7 @@ async def chat_twin(payload: ChatRequest, req: Request):
                 # Continue with normal flow
         
         # Generate response based on step
-        response = generate_step_response(payload.messages, step, payload.cv_context, payload.focus)
+        response = generate_step_response(payload.messages, step, payload.cv_data, payload.focus)
         return ChatResponse(**response)
         
     except Exception as e:
@@ -216,7 +216,7 @@ async def chat_health():
         "timestamp": __import__('datetime').datetime.now().isoformat()
     }
 
-def get_current_step(messages: List[ChatMessage], cv_context: Optional[Dict[str, Any]] = None, focus: Optional[str] = None) -> int:
+def get_current_step(messages: List[ChatMessage], cv_data: Optional[Dict[str, Any]] = None, focus: Optional[str] = None) -> int:
     """
     Determine current step based on message history
     Intelligently skips steps if info is already in CV
@@ -226,8 +226,8 @@ def get_current_step(messages: List[ChatMessage], cv_context: Optional[Dict[str,
     
     # Check if we should be in "CV-enhanced" mode (skipping first 2 steps)
     offset = 0
-    if cv_context:
-        has_name = bool(cv_context.get('name') or cv_context.get('sections', {}).get('about'))
+    if cv_data:
+        has_name = bool(cv_data.get('name') or cv_data.get('sections', {}).get('about'))
         if has_name:
             offset = 2
 
@@ -299,7 +299,7 @@ def clean_user_name(raw_name: str) -> str:
     cleaned = re.sub(r'[^\w\s]', '', name).strip().capitalize()
     return cleaned if cleaned else "there"
 
-def generate_step_response(messages: List[ChatMessage], step: int, cv_context: Optional[Dict[str, Any]] = None, focus: Optional[str] = None) -> Dict[str, Any]:
+def generate_step_response(messages: List[ChatMessage], step: int, cv_data: Optional[Dict[str, Any]] = None, focus: Optional[str] = None) -> Dict[str, Any]:
     """
     Generate response based on current step
     """
@@ -317,11 +317,11 @@ def generate_step_response(messages: List[ChatMessage], step: int, cv_context: O
 
     # Fallback Skill Extraction
     extracted_skills = []
-    if cv_context:
-        extracted_skills = cv_context.get('sections', {}).get('skills', [])
-        if not extracted_skills and cv_context.get('cvText'):
+    if cv_data:
+        extracted_skills = cv_data.get('sections', {}).get('skills', [])
+        if not extracted_skills and cv_data.get('cvText'):
             # Aggressive fallback: basic regex extraction if structured data is missing
-            text = cv_context.get('cvText').lower()
+            text = cv_data.get('cvText').lower()
             tech_keywords = ['python', 'javascript', 'react', 'node', 'sales', 'retail', 'management']
             extracted_skills = [k.capitalize() for k in tech_keywords if k in text]
     
@@ -329,11 +329,11 @@ def generate_step_response(messages: List[ChatMessage], step: int, cv_context: O
     name = "there"
     
     # Determine offset to see if we are in CV mode
-    has_cv_name = cv_context and (cv_context.get('name') or cv_context.get('sections', {}).get('about'))
+    has_cv_name = cv_data and (cv_data.get('name') or cv_data.get('sections', {}).get('about'))
     
     if has_cv_name:
         # Priority 1: Use name from CV
-        name = clean_user_name(cv_context.get('name') or "there")
+        name = clean_user_name(cv_data.get('name') or "there")
     elif user_count >= 1:
         # Priority 2: Use name from first message (only if NOT skipping steps)
         # If step is not 0 or 1, and we don't have a CV name, message 0 IS the name
@@ -421,7 +421,7 @@ def generate_step_response(messages: List[ChatMessage], step: int, cv_context: O
     # STEP 8: After goals - Build and return profile
     else:
         # Build profile from conversation + CV context
-        profile = build_profile_from_conversation(messages, cv_context)
+        profile = build_profile_from_conversation(messages, cv_data)
         
         return {
             "reply": f"🎉 Great! I've built your Digital Twin profile. Your empowerment score is **{profile['empowermentScore']}/100**.\n\nHere's your profile summary:\n- **Name:** {profile['name']}\n- **Career Stage:** {profile['careerStage']}\n- **Province:** {profile['province']}\n- **Industry:** {profile['industry']}\n- **Education:** {profile['education']}\n- **Skills:** {', '.join(profile['skills'])}\n- **Challenge:** {profile['challenges']}\n- **Goal:** {profile['goals']}",
@@ -430,7 +430,7 @@ def generate_step_response(messages: List[ChatMessage], step: int, cv_context: O
             "profile": profile
         }
 
-def build_profile_from_conversation(messages: List[ChatMessage], cv_context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+def build_profile_from_conversation(messages: List[ChatMessage], cv_data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """
     Extract profile data from conversation history
     Adjusts extraction indices based on whether steps were skipped due to CV context
@@ -439,14 +439,14 @@ def build_profile_from_conversation(messages: List[ChatMessage], cv_context: Opt
     
     # Determine if steps were skipped (offset)
     offset = 0
-    if cv_context:
-        has_name = bool(cv_context.get('name') or cv_context.get('sections', {}).get('about'))
+    if cv_data:
+        has_name = bool(cv_data.get('name') or cv_data.get('sections', {}).get('about'))
         if has_name:
             offset = 2
 
     # Initialize profile with defaults or CV data
     profile = {
-        "name": (cv_context.get('name') or "User") if cv_context else "User",
+        "name": (cv_data.get('name') or "User") if cv_data else "User",
         "careerStage": "Mid Career" if offset == 2 else "Early Career",
         "province": "Gauteng",
         "industry": "Information Technology",

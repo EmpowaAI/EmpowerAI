@@ -65,8 +65,7 @@ export async function streamChat({
             return { role, content };
           })
           .filter(m => m.content.trim() !== ''),
-        cv_context: cvContext, // Main field for Node.js proxy validation
-        cvContext: cvContext,  // Alias support for direct AI service calls
+        cvData: cvContext || {}, // Standardize on cvData for Node proxy validation
         focus: focus
       }),
     });
