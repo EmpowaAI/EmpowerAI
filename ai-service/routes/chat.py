@@ -4,7 +4,7 @@ Handles the interactive profile building conversation with AI assistance
 """
 
 from fastapi import APIRouter, HTTPException, Request
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 import logging
 import json
@@ -35,13 +35,14 @@ class ChatMessage(BaseModel):
 
 class ChatRequest(BaseModel):
     messages: List[ChatMessage]
-    cv_context: Optional[Dict[str, Any]] = None
-    focus: Optional[str] = None  # Added focus for personalization
+    cv_context: Optional[Dict[str, Any]] = Field(default=None, alias="cvContext") # Support both
+    focus: Optional[str] = Field(default="growth")
     
     # Compatibility for both Pydantic v1 and v2
     class Config:
         extra = "ignore"
         populate_by_name = True
+        allow_population_by_field_name = True
     model_config = {"extra": "ignore", "populate_by_name": True}
 
 class ChatResponse(BaseModel):

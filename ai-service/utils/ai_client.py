@@ -51,9 +51,10 @@ class AIClient:
                     self.model = os.getenv("AZURE_OPENAI_MODEL", "gpt-4o-mini")
                     logger.info(f"Initializing Azure OpenAI with endpoint: {azure_endpoint}, model: {self.model}")
 
-                    # Use a custom httpx client to bypass internal 'proxies' injection issues
-                    http_client = httpx.Client(trust_env=False)
-                    async_http_client = httpx.AsyncClient(trust_env=False)
+                    # Explicitly create httpx clients to bypass internal proxy injection issues
+                    # trust_env=False ensures it doesn't try to use system/Render proxy vars
+                    _http_client = httpx.Client(trust_env=False)
+                    _async_http_client = httpx.AsyncClient(trust_env=False)
 
                     self.client = AzureOpenAI(
                         api_key=azure_api_key,
@@ -61,7 +62,7 @@ class AIClient:
                         azure_endpoint=azure_endpoint,
                         timeout=60.0,
                         max_retries=3,
-                        http_client=http_client
+                        http_client=_http_client
                     )
                     self.async_client = AsyncAzureOpenAI(
                         api_key=azure_api_key,
@@ -69,7 +70,7 @@ class AIClient:
                         azure_endpoint=azure_endpoint,
                         timeout=60.0,
                         max_retries=3,
-                        http_client=async_http_client
+                        http_client=_async_http_client
                     )
 
                     # Test connection
@@ -86,20 +87,21 @@ class AIClient:
                         self.enabled = False
 
                 else:
-                    http_client = httpx.Client(trust_env=False)
-                    async_http_client = httpx.AsyncClient(trust_env=False)
+                    # Explicitly create httpx clients for standard OpenAI
+                    _http_client = httpx.Client(trust_env=False)
+                    _async_http_client = httpx.AsyncClient(trust_env=False)
 
                     self.client = OpenAI(
                         api_key=openai_api_key,
                         timeout=60.0,
                         max_retries=3,
-                        http_client=http_client
+                        http_client=_http_client
                     )
                     self.async_client = AsyncOpenAI(
                         api_key=openai_api_key,
                         timeout=60.0,
                         max_retries=3,
-                        http_client=async_http_client
+                        http_client=_async_http_client
                     )
                     self.model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
                     logger.info("OpenAI client initialized successfully", extra={'model': self.model})

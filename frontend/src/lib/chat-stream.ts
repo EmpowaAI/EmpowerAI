@@ -46,7 +46,10 @@ export async function streamChat({
       console.warn('Failed to parse CV context');
     }
 
-    const focus = String(localStorage.getItem('careerFocus') || 'growth');
+    // Sanitize focus value to match backend expectations
+    let focusValue = localStorage.getItem('careerFocus') || 'growth';
+    const validFocus = ['growth', 'switch', 'startup', 'corporate'];
+    const focus = validFocus.includes(focusValue) ? focusValue : 'growth';
     
     const response = await fetch(`${API_BASE_URL}/chat/twin`, {
       method: 'POST',
@@ -56,12 +59,14 @@ export async function streamChat({
       },
       body: JSON.stringify({ 
         messages: messages
-          .filter(m => (m.content || (m as any).text) && (m.role || (m as any).sender))
-          .map(m => ({
-            role: m.role || (m as any).sender || 'user',
-            content: m.content || (m as any).text || ''
-          })),
-        cv_context: cvContext,
+          .map(m => {
+            const role = m.role || (m as any).sender || 'user';
+            const content = m.content || (m as any).text || '';
+            return { role, content };
+          })
+          .filter(m => m.content.trim() !== ''),
+        cv_context: cvContext, // Main field for Node.js proxy validation
+        cvContext: cvContext,  // Alias support for direct AI service calls
         focus: focus
       }),
     });
