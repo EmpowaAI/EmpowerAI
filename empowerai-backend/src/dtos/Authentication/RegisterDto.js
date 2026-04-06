@@ -9,6 +9,7 @@
  */
 
 const { body, validationResult } = require('express-validator');
+const logger = require('../../utils/logger');
 
 // ─────────────────────────────────────────────
 // Validation rules
@@ -40,6 +41,12 @@ const registerRules = [
 const validateRegister = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    logger.warn('Registration validation failed', {
+      email: req.body.email,
+      errors: errors.array().map(e => ({ field: e.path, msg: e.msg })),
+      correlationId: req.headers['x-correlation-id']
+    });
+
     return res.status(400).json({
       status: 'fail',
       errors: errors.array().map((e) => ({ field: e.path, message: e.msg })),

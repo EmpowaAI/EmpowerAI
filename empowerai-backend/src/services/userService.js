@@ -132,7 +132,7 @@ class UserService {
 
     const pending = await PendingUser.create({
       name:              dto.name,
-      email:             dto.email.toLowerCase(),
+      email:             dto.email, // Use normalized email from DTO directly
       password:          dto.password,
       emailToken,
       emailTokenExpires: new Date(Date.now() + 60 * 60 * 1000), // 1 hour
