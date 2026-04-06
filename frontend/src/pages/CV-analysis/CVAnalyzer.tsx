@@ -1,8 +1,10 @@
 // frontend/src/pages/CV-analysis/CVAnalyzer.tsx
+
 import { useState, useCallback, useRef, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
-import { 
-  Sparkles, Upload, FileText, AlertCircle, Brain, 
+import {
+  Sparkles, Upload, FileText, AlertCircle, Brain,
   CheckCircle, XCircle, Zap, RotateCcw, Wand2
 } from "lucide-react"
 import { cn } from "../../lib/utils"
@@ -15,8 +17,12 @@ import type { RevampedCV, RevampedCVResponse } from '../../services/aiService'
 import { useToast } from "../../hooks/useToast"
 import { analyzeCV, revampCV, type CVAnalysis } from "../../services/cvService"
 
+
 export default function CVAnalyzerPage() {
-  const { user } = useUser()
+
+  const { user, updateProgress } = useUser()
+  const navigate = useNavigate()
+
   const [file, setFile] = useState<File | null>(null)
   const [cvText, setCvText] = useState("")
   const [isDragging, setIsDragging] = useState(false)
@@ -26,6 +32,7 @@ export default function CVAnalyzerPage() {
   const [originalScore, setOriginalScore] = useState<number | null>(null)
   const [newScore, setNewScore] = useState<number | null>(null)
   const [changesSummary, setChangesSummary] = useState<string[]>([])
+
   const [cvData, setCvData] = useState<CVAnalysis | null>(() => {
     try {
       const saved = localStorage.getItem('comprehensiveCVAnalysis')
@@ -35,15 +42,18 @@ export default function CVAnalyzerPage() {
       return null
     }
   })
+
   const [error, setError] = useState("")
   const [isRateLimited, setIsRateLimited] = useState(false)
   const [retryAfter, setRetryAfter] = useState(60)
+
   const [fileName, setFileName] = useState<string | null>(() => {
     return localStorage.getItem('cvFileName') || null
   })
+
   const fileInputRef = useRef<HTMLInputElement | null>(null)
-  
   const { showToast, ToastContainer } = useToast()
+
 
   // Save to localStorage whenever cvData changes
   useEffect(() => {
@@ -61,6 +71,7 @@ export default function CVAnalyzerPage() {
     }
   }, [fileName])
 
+
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -73,6 +84,7 @@ export default function CVAnalyzerPage() {
     }
   }, [showToast])
 
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0]
     if (selectedFile) {
@@ -82,11 +94,13 @@ export default function CVAnalyzerPage() {
     }
   }
 
+
   const handleAnalyze = async () => {
-    if (!file && !cvText) { 
+    if (!file && !cvText) {
       setError("Please upload a CV file or paste your CV text.")
-      return 
+      return
     }
+
     setError("")
     setIsAnalyzing(true)
     setRevampedCV(null)
@@ -98,6 +112,7 @@ export default function CVAnalyzerPage() {
       const result = await analyzeCV(file, cvText)
       console.log("CV Analysis Result:", result)
       setCvData(result)
+
       try {
         const skills = Array.isArray((result as any)?.sections?.skills) ? (result as any).sections.skills : []
         localStorage.setItem('cvSkills', JSON.stringify(skills))
@@ -105,11 +120,21 @@ export default function CVAnalyzerPage() {
       } catch {
         // ignore storage errors
       }
+
+      // Mark CV step complete — unlocks twin builder and all protected routes
+      updateProgress('cvCompleted', true)
+
       showToast(`CV analyzed! Score: ${result.score}% — ${result.readinessLevel}`, "success")
+
+      // Navigate to twin builder after short delay so user sees the toast
+      setTimeout(() => {
+        navigate('/dashboard/twin')
+      }, 1500)
+
     } catch (err: any) {
       setError(err.message || "Failed to analyze CV.")
       showToast(err.message || "Analysis failed.", "error")
-      
+
       if (err.status === 429) {
         setIsRateLimited(true)
         if (err.retryAfter) {
@@ -121,11 +146,12 @@ export default function CVAnalyzerPage() {
     }
   }
 
+
   const handleRevamp = async () => {
     if (!cvData) return
     setIsRevamping(true)
     setError("")
-    
+
     try {
       console.log("🚀 Starting CV revamp with data:", {
         score: cvData.score,
@@ -133,14 +159,12 @@ export default function CVAnalyzerPage() {
         strengthsCount: cvData.strengths?.length || 0,
         weaknessesCount: cvData.weaknesses?.length || 0
       })
-      
+
       const result = await revampCV(cvData)
-      console.log("📥 Revamp result received:", result)
-      
-      // Check if result has the nested structure
+      console.log("🔥 Revamp result received:", result)
+
       if (result && typeof result === 'object') {
         if ('revampedCV' in result) {
-          // This is a RevampedCVResponse
           const response = result as RevampedCVResponse
           setRevampedCV(response.revampedCV)
           setOriginalScore(response.originalScore)
@@ -148,7 +172,6 @@ export default function CVAnalyzerPage() {
           setChangesSummary(response.changesSummary || [])
           showToast(`CV revamped! New score: ${response.newScore}%`, "success")
         } else if ('professionalSummary' in result || 'name' in result) {
-          // This is a direct RevampedCV object
           setRevampedCV(result as RevampedCV)
           setOriginalScore(cvData.score)
           setNewScore(Math.min(cvData.score + 15, 96))
@@ -161,6 +184,7 @@ export default function CVAnalyzerPage() {
       } else {
         throw new Error("Empty or invalid response from revamp service")
       }
+
     } catch (err: any) {
       console.error("❌ Revamp error:", err)
       if (err?.status === 429) {
@@ -176,14 +200,12 @@ export default function CVAnalyzerPage() {
     }
   }
 
-  // Helper function to generate changes summary from weaknesses
+
   const generateChangesSummary = (data: CVAnalysis): string[] => {
     const weaknesses = data.weaknesses || []
     const missingKeywords = data.missingKeywords || []
-    
     const changes: string[] = []
-    
-    // Add specific changes based on weaknesses
+
     for (const weakness of weaknesses.slice(0, 4)) {
       if (weakness.includes("Matric")) {
         changes.push("Added Matric/Grade 12 details for SA graduate programs")
@@ -199,13 +221,11 @@ export default function CVAnalyzerPage() {
         changes.push(`Addressed: ${weakness.substring(0, 50)}...`)
       }
     }
-    
-    // Add missing keywords
+
     if (missingKeywords.length > 0) {
       changes.push(`Added missing keywords: ${missingKeywords.slice(0, 3).join(', ')}`)
     }
-    
-    // Add generic improvements if needed
+
     if (changes.length < 3) {
       const genericChanges = [
         "Enhanced professional summary with stronger action verbs",
@@ -215,9 +235,10 @@ export default function CVAnalyzerPage() {
       ]
       changes.push(...genericChanges.slice(0, 3 - changes.length))
     }
-    
+
     return changes.slice(0, 7)
   }
+
 
   const handleClear = () => {
     setCvData(null)
@@ -232,16 +253,16 @@ export default function CVAnalyzerPage() {
     localStorage.removeItem("cvFileName")
   }
 
+
   // Access data from the correct structure
-  const sections = cvData?.sections || { 
-    about: '', 
-    skills: [], 
-    education: [], 
-    experience: [], 
-    achievements: [] 
+  const sections = cvData?.sections || {
+    about: '',
+    skills: [],
+    education: [],
+    experience: [],
+    achievements: []
   }
-  
-  // Use strengths and weaknesses directly from the transformed data
+
   const strengths = cvData?.strengths || []
   const weaknesses = cvData?.weaknesses || []
   const skills = sections.skills || []
@@ -251,11 +272,12 @@ export default function CVAnalyzerPage() {
   const recommendations = cvData?.recommendations || []
   const missingKeywords = cvData?.missingKeywords || []
   const incomeIdeas = cvData?.incomeIdeas || []
-  const linkCheck = cvData?.linkCheck || { 
-    linkedin: false, 
-    github: false, 
-    portfolio: false 
+  const linkCheck = cvData?.linkCheck || {
+    linkedin: false,
+    github: false,
+    portfolio: false
   }
+
 
   // ========== RESULTS VIEW ==========
   if (cvData && !isAnalyzing) {
@@ -263,6 +285,7 @@ export default function CVAnalyzerPage() {
       <div className="min-h-screen bg-background">
         <ToastContainer />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -298,6 +321,7 @@ export default function CVAnalyzerPage() {
           </motion.div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
             {/* Column 1: Score & Summary */}
             <div className="space-y-5">
               <motion.div
@@ -339,7 +363,7 @@ export default function CVAnalyzerPage() {
               {/* Strengths */}
               {strengths.length > 0 && (
                 <div className="bg-card rounded-xl border border-border p-5">
-                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-green-500 mb-2">✓ Strengths</h4>
+                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-green-500 mb-2">✔ Strengths</h4>
                   <ul className="space-y-1.5">
                     {strengths.map((s: string, i: number) => (
                       <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
@@ -399,6 +423,7 @@ export default function CVAnalyzerPage() {
 
             {/* Column 2-3: Details */}
             <div className="lg:col-span-2 space-y-5">
+
               {/* Before/After Scores */}
               {originalScore && newScore && (
                 <div className="grid grid-cols-2 gap-4 mb-5">
@@ -524,7 +549,6 @@ export default function CVAnalyzerPage() {
                   <h4 className="font-display font-bold text-lg mb-4 flex items-center gap-2">
                     <Brain className="h-5 w-5" /> AI Recommendations
                   </h4>
-                  
                   <div className="grid md:grid-cols-2 gap-5">
                     {recommendations.length > 0 && (
                       <div>
@@ -541,7 +565,6 @@ export default function CVAnalyzerPage() {
                         </ul>
                       </div>
                     )}
-                    
                     {missingKeywords.length > 0 && (
                       <div className="bg-primary-foreground/10 p-4 rounded-lg backdrop-blur-sm">
                         <h5 className="text-xs font-bold uppercase tracking-widest opacity-80 mb-3">Missing Keywords</h5>
@@ -577,6 +600,7 @@ export default function CVAnalyzerPage() {
                   )}
                 </div>
               )}
+
             </div>
           </div>
         </div>
@@ -584,11 +608,13 @@ export default function CVAnalyzerPage() {
     )
   }
 
+
   // ========== UPLOAD VIEW ==========
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <ToastContainer />
       <div className="w-full max-w-2xl">
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -626,8 +652,8 @@ export default function CVAnalyzerPage() {
           )}
 
           {isRateLimited && (
-            <RateLimitAlert 
-              retryAfter={retryAfter} 
+            <RateLimitAlert
+              retryAfter={retryAfter}
               onRetry={() => {
                 setIsRateLimited(false)
                 handleAnalyze()
@@ -661,7 +687,7 @@ export default function CVAnalyzerPage() {
               </label>
 
               <div
-                onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
                 onDragLeave={() => setIsDragging(false)}
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
@@ -680,7 +706,7 @@ export default function CVAnalyzerPage() {
                     </div>
                     <p className="font-semibold text-green-500 text-sm">{fileName}</p>
                     <button
-                      onClick={(e) => { e.stopPropagation(); setFile(null); setFileName(null); }}
+                      onClick={(e) => { e.stopPropagation(); setFile(null); setFileName(null) }}
                       className="text-xs text-muted-foreground hover:text-primary mt-1 underline"
                     >
                       Replace file
@@ -738,8 +764,10 @@ export default function CVAnalyzerPage() {
               <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-primary" /> ATS Optimized</span>
               <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-amber-500" /> Editable PDF Output</span>
             </div>
+
           </motion.div>
         )}
+
       </div>
     </div>
   )
