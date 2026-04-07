@@ -15,6 +15,13 @@ const userService = require('../services/userService');
 // @access Public
 // ─────────────────────────────────────────────
 exports.register = async (req, res, next) => {
+
+  //lock the registration for a short time to prevent abuse (e.g., 5 attempts per IP per hour)
+  return res.status(503).json({
+    success: false,
+    message: "Registration is temporarily disabled due to maintenance. Try again later."
+  });
+  
   const correlationId = req.correlationId;
   try {
     const pending = await userService.register(req.body, correlationId);
