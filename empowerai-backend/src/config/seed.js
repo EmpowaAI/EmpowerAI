@@ -2,7 +2,7 @@ const logger = require('../utils/logger');
 
 async function seedOpportunitiesIfEmpty() {
   try {
-    const Opportunity = require('../models/Opportunity');
+    const Opportunity = require('../modules/opportunities/Opportunity.Model');
     const opportunityCount = await Opportunity.countDocuments({ isActive: true });
 
     if (opportunityCount === 0) {

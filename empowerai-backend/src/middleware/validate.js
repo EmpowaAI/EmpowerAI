@@ -11,17 +11,20 @@ const { validate } = require('../utils/validators');
  * @param {string} source - Where to validate from ('body', 'query', 'params')
  * @returns {Function} Express middleware
  */
-const validateRequest = (schema, source = 'body') => {
-  return (req, res, next) => {
-    try {
-      const data = source === 'body' ? req.body : 
-                   source === 'query' ? req.query : 
-                   req.params;
-      
+
       // Validate and sanitize data
+     const validateRequest = (schema, source = 'body') => {
+  return (req, res, next) => {
+    let data; // 👈 move outside try
+
+    try {
+      data =
+        source === 'body' ? req.body :
+        source === 'query' ? req.query :
+        req.params;
+
       const validatedData = validate(schema, data);
-      
-      // Replace original data with validated data
+
       if (source === 'body') {
         req.body = validatedData;
       } else if (source === 'query') {
@@ -29,13 +32,21 @@ const validateRequest = (schema, source = 'body') => {
       } else {
         req.params = validatedData;
       }
-      
+
       next();
     } catch (error) {
+      console.log('❌ VALIDATION FAILED');
+      console.log('SOURCE:', source);
+      console.log('INPUT:', data); // now safe
+
+      if (error.errors) {
+        console.log('DETAILS:', error.errors);
+      }
+
       next(error);
     }
   };
 };
 
 module.exports = validateRequest;
-
+    
