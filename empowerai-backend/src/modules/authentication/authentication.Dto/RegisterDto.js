@@ -1,19 +1,8 @@
-/**
- * RegisterDTO
- * Validates and sanitizes incoming registration request body.
- * Used by: POST /api/auth/register → AuthController.register → userService.createUser
- *
- * Note: Only name, email and password are required at registration.
- * Additional profile fields (age, province, education, skills, interests)
- * are collected separately when the user creates their twin.
- */
+
 
 const { body, validationResult } = require('express-validator');
 const logger = require('../../../utils/logger');
 
-// ─────────────────────────────────────────────
-// Validation rules
-// ─────────────────────────────────────────────
 const registerRules = [
   body('name')
     .trim()
@@ -35,9 +24,6 @@ const registerRules = [
     .matches(/[^A-Za-z0-9]/).withMessage('Password must contain at least one special character'),
 ];
 
-// ─────────────────────────────────────────────
-// Validation middleware
-// ─────────────────────────────────────────────
 const validateRegister = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -55,10 +41,6 @@ const validateRegister = (req, res, next) => {
   next();
 };
 
-// ─────────────────────────────────────────────
-// DTO builder — strips unknown fields before
-// passing clean data to the service layer
-// ─────────────────────────────────────────────
 const toRegisterDTO = (body) => ({
   name:     body.name,
   email:    body.email,

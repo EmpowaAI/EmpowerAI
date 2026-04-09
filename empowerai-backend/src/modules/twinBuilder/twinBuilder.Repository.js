@@ -1,25 +1,29 @@
-/**
- * EconomicTwin Repository
- * Data access layer — no business logic, only DB operations.
- */
-
 const EconomicTwin = require('./twinBuilder.Model');
 
 /**
- * Find a twin by userId (matches model field `user`)
+ * =========================
+ * GET TWIN
+ * =========================
  */
 const findByUserId = async (userId) => {
   return EconomicTwin.findOne({ user: userId }).populate('cvProfile');
 };
 
 /**
- * Create or update a twin atomically.
- * Always uses `user` field (not `userId`) to match the schema.
+ * =========================
+ * UPSERT TWIN (safe + atomic)
+ * =========================
  */
 const upsertTwin = async (userId, data) => {
   return EconomicTwin.findOneAndUpdate(
     { user: userId },
-    { ...data, user: userId },
+    {
+      $set: {
+        ...data,
+        user: userId,
+        updatedAt: new Date(),
+      },
+    },
     {
       new: true,
       upsert: true,
@@ -30,66 +34,91 @@ const upsertTwin = async (userId, data) => {
 };
 
 /**
- * Append a chat message to twin.chatHistory.
- * Caps history at 100 messages to prevent unbounded growth.
+ * =========================
+ * CHAT APPEND (atomic + safe)
+ * =========================
+ * Uses $push + $slice instead of read-modify-write
  */
 const appendChatMessage = async (userId, message) => {
-  const MAX_HISTORY = 100;
-
-  const twin = await EconomicTwin.findOne({ user: userId });
-  if (!twin) return null;
-
-  const history = twin.chatHistory || [];
-  history.push(message);
-
-  const trimmed = history.length > MAX_HISTORY
-    ? history.slice(-MAX_HISTORY)
-    : history;
-
   return EconomicTwin.findOneAndUpdate(
     { user: userId },
-    { chatHistory: trimmed, updatedAt: new Date() },
+    {
+      $push: {
+        chatHistory: {
+          $each: [message],
+          $slice: -100, // keep last 100 automatically
+        },
+      },
+      $set: { updatedAt: new Date() },
+    },
     { new: true }
   );
 };
 
 /**
- * Append a simulation run to twin.simulationHistory.
- * Caps at 20 entries.
+ * =========================
+ * SIMULATION APPEND (atomic + safe)
+ * =========================
  */
 const appendSimulation = async (userId, simulationEntry) => {
-  const MAX_HISTORY = 20;
+  return EconomicTwin.findOneAndUpdate(
+    { user: userId },
+    {
+      $push: {
+        simulationHistory: {
+          $each: [simulationEntry],
+          $slice: -20,
+        },
+      },
+      $set: { updatedAt: new Date() },
+    },
+    { new: true }
+  );
+};
 
-  const twin = await EconomicTwin.findOne({ user: userId });
-  if (!twin) return null;
+/**
+ * =========================
+ * SAFE FIELD UPDATE
+ * =========================
+ * Only allows controlled updates
+ */
+const updateFields = async (userId, fields) => {
+  const allowedFields = [
+    'analysis',
+    'identity',
+    'economy',
+    'skills',
+    'market',
+    'intelligence',
+    'status',
+    'evolution',
+    'lastCalculatedAt',
+  ];
 
-  let history = twin.simulationHistory || [];
-  history.push(simulationEntry);
+  const safeUpdate = {};
 
-  if (history.length > MAX_HISTORY) {
-    history = history.slice(-MAX_HISTORY);
+  for (const key of allowedFields) {
+    if (fields[key] !== undefined) {
+      safeUpdate[key] = fields[key];
+    }
   }
 
   return EconomicTwin.findOneAndUpdate(
     { user: userId },
-    { simulationHistory: history },
-    { new: true }
-  );
-};
-
-/**
- * Update specific top-level fields on the twin.
- */
-const updateFields = async (userId, fields) => {
-  return EconomicTwin.findOneAndUpdate(
-    { user: userId },
-    { ...fields, updatedAt: new Date() },
+    {
+      $set: {
+        ...safeUpdate,
+        updatedAt: new Date(),
+      },
+    },
     { new: true, runValidators: true }
   );
 };
 
 /**
- * Delete a twin (used in tests / admin ops).
+ * =========================
+ * DELETE TWIN
+ * =========================
  */
 const deleteByUserId = async (userId) => {
   return EconomicTwin.findOneAndDelete({ user: userId });

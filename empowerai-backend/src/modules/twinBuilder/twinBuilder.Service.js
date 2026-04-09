@@ -1,208 +1,273 @@
 /**
- * EconomicTwin Service
- * Builds and updates Economic Twin from CV analysis + AI enrichment
+ * Twin Builder Service
+ * =====================
+ * Core intelligence layer for Economic Twin system.
+ * Converts CV + onboarding data into structured economic intelligence.
  */
 
+const aiClientService = require('../../intergration/ai/ai.ServiceClient');
+
+const cvRepository = require('../cvAnalyser/cvAnalyser.Repository');
 const twinRepository = require('./twinBuilder.Repository');
-const cvProfileRepository = require('../cvAnalyser/cvAnalyser.Repository');
-const { AppError } = require('../../utils/errors');
 
-// -----------------------------------------------------------------------------
-// SAFE ENUMS (MATCH YOUR MONGOOSE SCHEMA)
-// -----------------------------------------------------------------------------
+/**
+ * =========================
+ * INTERNAL: BUILD PROMPT
+ * =========================
+ */
+function buildTwinPrompt(cvProfile, formData = {}) {
+  return `
+You are an economic intelligence engine.
 
-const EVOLUTION_SOURCE = {
-  CV_ANALYZER: 'cv_analyzer',
-  AI_ENRICHMENT: 'ai_enrichment',
-};
+Your task is to build a structured "Economic Twin" model from user data.
 
-// -----------------------------------------------------------------------------
-// CV MAPPER (BASE TRUTH)
-// -----------------------------------------------------------------------------
+Return ONLY valid JSON with this structure:
 
-const mapCvProfileToTwin = (cv) => ({
-  cvProfile: cv._id,
-
-  identity: {
-    currentRole: cv.currentRole || 'UNDEFINED',
-    targetRole: cv.targetRole || 'UNDEFINED',
-    seniorityLevel: cv.seniorityLevel || 'ENTRY',
-    industry: cv.industry || 'general',
+{
+  "identity": {
+    "careerLevel": "",
+    "industry": "",
+    "location": "",
+    "jobSeekingStatus": ""
   },
-
-  skills: {
-    core: cv.extractedSkills || [],
-    missing: cv.missingSkills || [],
-    emerging: [],
-    monetizable: [],
+  "economy": {
+    "estimatedIncome": number,
+    "incomeConfidence": number,
+    "financialStability": "",
+    "employmentType": ""
   },
-
-  economy: {
-    employabilityScore: cv.employabilityScore || 0,
-    marketValueScore: 0,
-    demandLevel: 'LOW',
-    incomePotentialRange: {
-      min: 0,
-      max: 0,
-      currency: 'ZAR',
-    },
+  "skills": {
+    "core": [],
+    "technical": [],
+    "soft": []
   },
-
-  intelligence: {
-    strengths: cv.strengths || [],
-    weaknesses: cv.weaknesses || [],
-    opportunities: [],
-    threats: [],
-    recommendations: cv.recommendations || [],
+  "market": {
+    "demandLevel": "",
+    "growthPotential": "",
+    "competitionLevel": ""
   },
-
-  market: {
-    trendingSkills: [],
-    decliningSkills: [],
-    jobTitlesMapped: [],
-    competitorRoles: [],
+  "intelligence": {
+    "careerScore": number,
+    "employabilityScore": number,
+    "adaptabilityScore": number
   },
+  "recommendations": [],
+  "risks": [],
+  "opportunities": []
+}
 
-  evolution: {
-    version: 1,
-    lastUpdatedBy: EVOLUTION_SOURCE.CV_ANALYZER,
-    confidenceScore: cv.confidenceScore || 0,
-  },
+RULES:
+- Be realistic, not optimistic.
+- Use South African job market context.
+- If data is missing, infer conservatively.
+- Do NOT include explanations.
+- Return ONLY JSON.
 
-  status: 'ACTIVE',
-  lastCalculatedAt: new Date(),
-});
+CV DATA:
+${JSON.stringify(cvProfile, null, 2)}
 
-// -----------------------------------------------------------------------------
-// AI MAPPER (ENRICHMENT LAYER)
-// -----------------------------------------------------------------------------
+FORM DATA:
+${JSON.stringify(formData, null, 2)}
+`;
+}
 
-const mapAiResponseToTwin = (ai = {}) => {
-  const income = ai.incomeProjection || {};
-  const market = ai.market || {};
-  const growth = ai.growthModel || {};
+/**
+ * =========================
+ * CREATE / UPDATE FROM FORM
+ * =========================
+ */
+async function createOrUpdateFromForm(userId, formData) {
+  const cvProfile = await cvRepository.findByUserId(userId);
+
+  const aiResponse = await aiClientService.generateCompletion({
+    prompt: buildTwinPrompt(cvProfile, formData),
+    temperature: 0.3,
+  });
+
+  let parsed;
+  try {
+    parsed = JSON.parse(aiResponse);
+  } catch (err) {
+    throw new Error('AI returned invalid JSON for EconomicTwin');
+  }
+
+  const twin = await twinRepository.upsertTwin(userId, {
+    ...parsed,
+    cvProfile: cvProfile?._id,
+    source: 'form_ai_generated',
+    lastCalculatedAt: new Date(),
+  });
 
   return {
-    skills: {
-      core: ai.extractedSkills || [],
-      missing: ai.missingSkills || [],
-      emerging: ai.emergingSkills || [],
-      monetizable: ai.monetizable || [],
-    },
-
-    economy: {
-      employabilityScore: ai.employabilityScore || 0,
-      marketValueScore: ai.marketValueScore || 0,
-      demandLevel: ai.demandLevel || 'LOW',
-      incomePotentialRange: {
-        min: income.min || income.threeMonth || 0,
-        max: income.max || income.twelveMonth || 0,
-        currency: income.currency || 'ZAR',
-      },
-    },
-
-    market: {
-      trendingSkills: market.trendingSkills || [],
-      decliningSkills: market.decliningSkills || [],
-      jobTitlesMapped:
-        market.jobTitlesMapped ||
-        growth?.recommendedPaths?.map((p) => p.name) ||
-        [],
-      competitorRoles: market.competitorRoles || [],
-    },
-
-    intelligence: {
-      strengths: ai.strengths || [],
-      weaknesses: ai.weaknesses || [],
-      opportunities: ai.opportunities || [],
-      threats: ai.threats || [],
-      recommendations: ai.recommendations || [],
-    },
-
-    evolution: {
-      lastUpdatedBy: EVOLUTION_SOURCE.AI_ENRICHMENT,
-      confidenceScore: ai.confidenceScore || 0,
+    twin,
+    meta: {
+      generatedFrom: 'form',
+      aiModel: true,
     },
   };
-};
+}
 
-// -----------------------------------------------------------------------------
-// SAFE DEEP MERGE (CRITICAL FIX)
-// -----------------------------------------------------------------------------
+/**
+ * =========================
+ * BUILD FROM CV PROFILE
+ * =========================
+ */
+async function buildFromCvProfile(userId) {
+  const cvProfile = await cvRepository.findByUserId(userId);
 
-const deepMerge = (base, update) => {
-  const output = JSON.parse(JSON.stringify(base));
+  if (!cvProfile) {
+    throw new Error('CV profile not found');
+  }
 
-  for (const key in update) {
-    if (
-      update[key] &&
-      typeof update[key] === 'object' &&
-      !Array.isArray(update[key])
-    ) {
-      output[key] = {
-        ...output[key],
-        ...update[key],
-      };
-    } else {
-      output[key] = update[key];
+  const aiResponse = await aiClientService.generateCompletion({
+    prompt: buildTwinPrompt(cvProfile),
+    temperature: 0.2,
+  });
+
+  let parsed;
+  try {
+    parsed = JSON.parse(aiResponse);
+  } catch (err) {
+    throw new Error('AI returned invalid JSON for CV-based twin');
+  }
+
+  const twin = await twinRepository.upsertTwin(userId, {
+    ...parsed,
+    cvProfile: cvProfile._id,
+    source: 'cv_ai_generated',
+    lastCalculatedAt: new Date(),
+  });
+
+  return twin;
+}
+
+async function buildFromAnalysis(userId, analysis) {
+  return twinRepository.upsertTwin(userId, {
+    analysis,
+    source: 'analysis_direct',
+    lastCalculatedAt: new Date(),
+  });
+}
+
+/**
+ * =========================
+ * CHAT WITH TWIN
+ * =========================
+ */
+async function chatWithTwin(userId, messages) {
+  const twin = await twinRepository.findByUserId(userId);
+
+  const prompt = `
+You are the user's Economic Twin.
+
+You simulate a career advisor, economist, and personal growth analyst.
+
+Use the twin data below as your memory:
+
+TWIN STATE:
+${JSON.stringify(twin, null, 2)}
+
+Conversation:
+${JSON.stringify(messages, null, 2)}
+
+Rules:
+- Be direct and realistic
+- Give career-focused advice
+- Consider South African job market
+- Do not hallucinate data outside twin state
+`;
+
+  const aiResponse = await aiClientService.generateCompletion({
+    prompt,
+    temperature: 0.5,
+  });
+
+  const message = {
+    role: 'assistant',
+    content: aiResponse,
+    timestamp: new Date(),
+  };
+
+  const updatedTwin = await twinRepository.appendChatMessage(userId, message);
+
+  return {
+    reply: aiResponse,
+    twin: updatedTwin,
+  };
+}
+
+/**
+ * =========================
+ * RUN CAREER SIMULATION
+ * =========================
+ */
+async function runSimulation(userId, pathIds) {
+  const twin = await twinRepository.findByUserId(userId);
+
+  const prompt = `
+You are a career simulation engine.
+
+Simulate career paths based on the user's economic twin.
+
+TWIN:
+${JSON.stringify(twin, null, 2)}
+
+PATHS:
+${JSON.stringify(pathIds, null, 2)}
+
+Return ONLY JSON:
+{
+  "results": [
+    {
+      "pathId": "",
+      "salaryProjection": number,
+      "riskLevel": "",
+      "timeToStability": "",
+      "growthScore": number,
+      "recommendation": ""
     }
+  ]
+}
+
+Be realistic and use South African job market assumptions.
+`;
+
+  const aiResponse = await aiClientService.generateCompletion({
+    prompt,
+    temperature: 0.3,
+  });
+
+  let parsed;
+  try {
+    parsed = JSON.parse(aiResponse);
+  } catch (err) {
+    throw new Error('AI returned invalid simulation JSON');
   }
 
-  return output;
-};
+  const updatedTwin = await twinRepository.appendSimulation(userId, {
+    results: parsed.results,
+    createdAt: new Date(),
+  });
 
-// -----------------------------------------------------------------------------
-// BUILD FROM CV PROFILE ONLY
-// -----------------------------------------------------------------------------
+  return {
+    simulation: parsed,
+    twin: updatedTwin,
+  };
+}
 
-const buildFromCvProfile = async (userId) => {
-  const cv = await cvProfileRepository.findByUserId(userId);
-
-  if (!cv) {
-    throw new AppError('CV profile not found', 404);
-  }
-
-  const twin = mapCvProfileToTwin(cv);
-
-  return await twinRepository.upsertTwin(userId, twin);
-};
-
-// -----------------------------------------------------------------------------
-// BUILD FROM FULL ANALYSIS (CV + AI)
-// -----------------------------------------------------------------------------
-
-const buildFromAnalysis = async (analysis, userId) => {
-  if (!analysis) {
-    throw new AppError('No analysis data provided', 400);
-  }
-
-  // 1. Extract CV + AI safely
-  const cv = analysis.cvProfile || analysis;
-  const ai = analysis.aiData || analysis;
-
-  // 2. Build base twin
-  const baseTwin = mapCvProfileToTwin(cv);
-
-  // 3. Build AI enrichment
-  const aiTwin = mapAiResponseToTwin(ai);
-
-  // 4. Merge safely (no overwrites)
-  const finalTwin = deepMerge(baseTwin, aiTwin);
-
-  // 5. Ensure timestamps + version safety
-  finalTwin.lastCalculatedAt = new Date();
-
-  // 6. Persist
-  return await twinRepository.upsertTwin(userId, finalTwin);
-};
-
-// -----------------------------------------------------------------------------
-// EXPORTS
-// -----------------------------------------------------------------------------
+/**
+ * =========================
+ * GET TWIN
+ * =========================
+ */
+async function getTwin(userId) {
+  return twinRepository.findByUserId(userId);
+}
 
 module.exports = {
-  buildFromAnalysis,
+  createOrUpdateFromForm,
   buildFromCvProfile,
-  mapCvProfileToTwin,
-  mapAiResponseToTwin,
+  chatWithTwin,
+  runSimulation,
+  getTwin,
 };

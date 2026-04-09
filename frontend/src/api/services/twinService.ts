@@ -1,18 +1,38 @@
 import axios from 'axios';
 import { API_BASE_URL } from '../Client';
 
+// =========================
+// AXIOS INSTANCE
+// =========================
 const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
 });
 
-// Chat message shape matching the backend controller expectation
+// =========================
+// 🔥 AUTH INTERCEPTOR (FIXES YOUR 401)
+// =========================
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('empowerai-token');
+
+  if (token && config.headers) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
+});
+
+// =========================
+// TYPES
+// =========================
 export interface ChatMsg {
   role: 'user' | 'assistant';
   content: string;
 }
 
-// Build Twin from CV profile
+// =========================
+// BUILD TWIN FROM CV
+// =========================
 export const buildTwinFromCv = async () => {
   try {
     const res = await api.post('/twin/build-from-cv');
@@ -23,10 +43,12 @@ export const buildTwinFromCv = async () => {
   }
 };
 
-// GET /my-twin — returns { status, data: { twin } }
+// =========================
+// GET MY TWIN
+// =========================
 export const getMyTwin = async () => {
   try {
-    const res = await api.get('twin/twin');
+    const res = await api.get('/twin/my-twin');
     return res.data;
   } catch (error: any) {
     console.error('Get twin error:', error.response?.data || error.message);
@@ -34,8 +56,9 @@ export const getMyTwin = async () => {
   }
 };
 
-// POST /chat/twin — sends full messages array (not a single string)
-// Backend controller expects: { messages: ChatMsg[] }
+// =========================
+// CHAT WITH TWIN
+// =========================
 export const chatWithTwin = async (messages: ChatMsg[]) => {
   try {
     const res = await api.post('/chat/twin', { messages });
@@ -46,7 +69,9 @@ export const chatWithTwin = async (messages: ChatMsg[]) => {
   }
 };
 
-// POST /twin/simulate
+// =========================
+// RUN SIMULATION
+// =========================
 export const runSimulation = async (pathIds?: string[]) => {
   try {
     const res = await api.post('/twin/simulate', { pathIds });

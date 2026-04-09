@@ -1,5 +1,10 @@
 const mongoose = require('mongoose');
 
+/**
+ * =========================
+ * Chat Message Schema
+ * =========================
+ */
 const chatMessageSchema = new mongoose.Schema(
   {
     role: { type: String, enum: ['user', 'assistant'], required: true },
@@ -9,6 +14,12 @@ const chatMessageSchema = new mongoose.Schema(
   { _id: false }
 );
 
+/**
+ * =========================
+ * Analysis Snapshot Schema
+ * =========================
+ * Stored ONLY as latest + optional snapshot reference
+ */
 const analysisSnapshotSchema = new mongoose.Schema(
   {
     source: {
@@ -17,38 +28,41 @@ const analysisSnapshotSchema = new mongoose.Schema(
       required: true,
     },
 
-    employabilityScore: Number,
+    employabilityScore: { type: Number, default: 0 },
+
     skills: {
-      core: [String],
-      missing: [String],
-      extracted: [String],
+      core: [{ type: String }],
+      missing: [{ type: String }],
+      extracted: [{ type: String }],
     },
 
     swot: {
-      strengths: [String],
-      weaknesses: [String],
-      opportunities: [String],
-      threats: [String],
+      strengths: [{ type: String }],
+      weaknesses: [{ type: String }],
+      opportunities: [{ type: String }],
+      threats: [{ type: String }],
     },
 
-    recommendations: [String],
+    recommendations: [{ type: String }],
 
     metadata: {
       confidenceScore: Number,
       modelVersion: String,
     },
 
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
+    createdAt: { type: Date, default: Date.now },
   },
   { _id: false }
 );
 
+/**
+ * =========================
+ * Economic Twin Schema
+ * =========================
+ */
 const economicTwinSchema = new mongoose.Schema(
   {
-    // 🔗 User link
+    // 🔗 Core Identity
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
@@ -57,23 +71,29 @@ const economicTwinSchema = new mongoose.Schema(
       index: true,
     },
 
-    // 🔗 Primary CV source (MUST exist for twin creation)
     cvProfile: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'CvProfile',
       required: true,
     },
 
-    // 📦 RAW ANALYSIS (THIS IS NOW THE CORE)
+    /**
+     * =========================
+     * CORE AI STATE (single source of truth)
+     * =========================
+     */
     analysis: {
       latest: analysisSnapshotSchema,
-      history: [analysisSnapshotSchema],
     },
 
-    // 🧠 Derived identity (computed from analysis)
+    /**
+     * =========================
+     * Derived Identity (computed, not user input)
+     * =========================
+     */
     identity: {
-      currentRole: { type: String, default: null },
-      targetRole: { type: String, default: null },
+      currentRole: String,
+      targetRole: String,
 
       seniorityLevel: {
         type: String,
@@ -81,10 +101,14 @@ const economicTwinSchema = new mongoose.Schema(
         default: 'ENTRY',
       },
 
-      industry: { type: String, default: null },
+      industry: String,
     },
 
-    // 💰 Derived economic model (NOT manually filled)
+    /**
+     * =========================
+     * Economic Engine (computed fields only)
+     * =========================
+     */
     economy: {
       employabilityScore: { type: Number, default: 0 },
       marketValueScore: { type: Number, default: 0 },
@@ -102,7 +126,11 @@ const economicTwinSchema = new mongoose.Schema(
       },
     },
 
-    // 🧠 Skills derived from analysis (NOT free text)
+    /**
+     * =========================
+     * Skills Layer (derived ONLY from analysis)
+     * =========================
+     */
     skills: {
       core: [{ type: String }],
       missing: [{ type: String }],
@@ -110,7 +138,11 @@ const economicTwinSchema = new mongoose.Schema(
       monetizable: [{ type: String }],
     },
 
-    // 📊 Market layer (optional enrichment)
+    /**
+     * =========================
+     * Market Intelligence Layer
+     * =========================
+     */
     market: {
       trendingSkills: [{ type: String }],
       decliningSkills: [{ type: String }],
@@ -118,7 +150,11 @@ const economicTwinSchema = new mongoose.Schema(
       competitorRoles: [{ type: String }],
     },
 
-    // 🧭 AI reasoning (SWOT from analysis only)
+    /**
+     * =========================
+     * AI Reasoning Layer (SWOT output only)
+     * =========================
+     */
     intelligence: {
       strengths: [{ type: String }],
       weaknesses: [{ type: String }],
@@ -127,19 +163,35 @@ const economicTwinSchema = new mongoose.Schema(
       recommendations: [{ type: String }],
     },
 
-    // 💬 Chat memory
+    /**
+     * =========================
+     * CHAT (⚠️ should move to separate collection later)
+     * =========================
+     */
     chatHistory: {
       type: [chatMessageSchema],
       default: [],
     },
 
-    // 📈 Simulation history
-    simulationHistory: {
-      type: [mongoose.Schema.Types.Mixed],
-      default: [],
-    },
+    /**
+     * =========================
+     * SIMULATIONS (structured moving forward)
+     * =========================
+     */
+    simulationHistory: [
+      {
+        scenario: String,
+        input: mongoose.Schema.Types.Mixed,
+        output: mongoose.Schema.Types.Mixed,
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
 
-    // 🔄 Evolution tracking (STRICT + CONTROLLED)
+    /**
+     * =========================
+     * LIFECYCLE CONTROL
+     * =========================
+     */
     evolution: {
       version: { type: Number, default: 1 },
 
@@ -157,7 +209,6 @@ const economicTwinSchema = new mongoose.Schema(
       confidenceScore: { type: Number, default: 0 },
     },
 
-    // ⚙️ Lifecycle state
     status: {
       type: String,
       enum: ['ACTIVE', 'INCOMPLETE', 'NEEDS_UPDATE'],
@@ -173,5 +224,14 @@ const economicTwinSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+/**
+ * =========================
+ * INDEXES (important for scale)
+ * =========================
+ */
+economicTwinSchema.index({ user: 1 });
+economicTwinSchema.index({ status: 1 });
+economicTwinSchema.index({ 'evolution.version': 1 });
 
 module.exports = mongoose.model('EconomicTwin', economicTwinSchema);

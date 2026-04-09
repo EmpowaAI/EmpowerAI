@@ -1,7 +1,4 @@
-/**
- * Authentication Routes
- * Principal Engineer Level: Clean routes with validation and rate limiting
- */
+
 
 const express = require('express');
 const { register, login, validate, logout } = require('./auth.Controller');
@@ -14,18 +11,12 @@ const { loginRules, validateLogin }       = require('./authentication.Dto/LoginD
 
 const router = express.Router();
 
-// Apply strict rate limiting to all auth endpoints
 router.use(authLimiter);
 
-// ─────────────────────────────────────────────
-// Public routes
-// ─────────────────────────────────────────────
+
 router.post('/register', registerRules, validateRegister, register);
 router.post('/login',    loginRules,    validateLogin,    login);
 
-// ─────────────────────────────────────────────
-// Protected routes
-// ─────────────────────────────────────────────
 router.get('/validate',  auth, validate);
 router.post('/logout',   auth, logout);
 

@@ -26,22 +26,7 @@ exports.createEconomicTwin = async (req, res, next) => {
   }
 };
 
-/**
- * GET /api/twin
- * Fetch the current user's twin.
- */
-exports.getEconomicTwin = async (req, res, next) => {
-  try {
-    const twin = await twinService.getTwin(req.user.id);
 
-    return res.status(200).json({
-      status: 'success',
-      data: { twin },
-    });
-  } catch (error) {
-    next(error);
-  }
-};
 
 /**
  * POST /api/twin/build-from-cv
@@ -55,6 +40,23 @@ exports.buildTwinFromCv = async (req, res, next) => {
     return res.status(200).json({
       status:  'success',
       message: 'Twin built from CV profile',
+      data: { twin },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * GET /api/twin
+ * Fetch the current user's twin.
+ */
+exports.getEconomicTwin = async (req, res, next) => {
+  try {
+    const twin = await twinService.getTwin(req.user.id);
+
+    return res.status(200).json({
+      status: 'success',
       data: { twin },
     });
   } catch (error) {

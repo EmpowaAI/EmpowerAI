@@ -10,11 +10,6 @@ const { sendSuccess } = require('../../utils/response');
 const authService = require('./auth.Service');
 const userService = require('../user/user.Service');
 
-// ─────────────────────────────────────────────
-// Register
-// @route  POST /api/auth/register
-// @access Public
-// ─────────────────────────────────────────────
 exports.register = async (req, res, next) => {
 
  /* //lock the registration for a short time to prevent abuse (e.g., 5 attempts per IP per hour)
@@ -36,13 +31,6 @@ exports.register = async (req, res, next) => {
   }
 };
 
-
-
-// ─────────────────────────────────────────────
-// Login
-// @route  POST /api/auth/login
-// @access Public
-// ─────────────────────────────────────────────
 exports.login = async (req, res, next) => {
   const correlationId = req.correlationId;
   try {
@@ -54,11 +42,6 @@ exports.login = async (req, res, next) => {
   }
 };
 
-// ─────────────────────────────────────────────
-// Validate token
-// @route  GET /api/auth/validate
-// @access Private
-// ─────────────────────────────────────────────
 exports.validate = async (req, res, next) => {
   const correlationId = req.correlationId;
   try {
@@ -73,11 +56,6 @@ exports.validate = async (req, res, next) => {
   }
 };
 
-// ─────────────────────────────────────────────
-// Logout
-// @route  POST /api/auth/logout
-// @access Private
-// ─────────────────────────────────────────────
 exports.logout = async (req, res, next) => {
   const correlationId = req.correlationId;
   try {
