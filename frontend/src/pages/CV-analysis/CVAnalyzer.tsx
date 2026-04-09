@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   Sparkles, Upload, FileText, AlertCircle, Brain,
-  CheckCircle, XCircle, Zap, RotateCcw, Wand2
+  CheckCircle, XCircle, Zap, RotateCcw, Wand2, Cpu
 } from "lucide-react"
 import { cn } from "../../lib/utils"
 import { useUser } from "../../contexts/user-context"
@@ -126,10 +126,7 @@ export default function CVAnalyzerPage() {
 
       showToast(`CV analyzed! Score: ${result.score}% — ${result.readinessLevel}`, "success")
 
-      // Navigate to twin builder after short delay so user sees the toast
-      setTimeout(() => {
-        navigate('/dashboard/twin')
-      }, 1500)
+      // Auto-navigate removed — use the "Build Twin" button to go to twin
 
     } catch (err: any) {
       setError(err.message || "Failed to analyze CV.")
@@ -312,13 +309,38 @@ export default function CVAnalyzerPage() {
                 </p>
               )}
             </div>
-            <button
-              onClick={handleClear}
-              className="px-5 py-2.5 rounded-lg bg-secondary text-secondary-foreground font-medium text-sm hover:bg-muted transition-all flex items-center gap-2"
-            >
-              <RotateCcw className="h-4 w-4" /> Analyze New CV
-            </button>
+
+            {/* Action buttons */}
+            <div className="flex items-center gap-2">
+
+              {/* Refresh — icon only, clears localStorage and resets state */}
+              <button
+                onClick={handleClear}
+                title="Clear saved data and start fresh"
+                className="p-2.5 rounded-lg bg-secondary text-secondary-foreground hover:bg-muted transition-all flex items-center justify-center"
+              >
+                <RotateCcw className="h-4 w-4" />
+              </button>
+
+              {/* Analyze New CV */}
+              <button
+                onClick={handleClear}
+                className="px-4 py-2.5 rounded-lg bg-secondary text-secondary-foreground font-medium text-sm hover:bg-muted transition-all flex items-center gap-2"
+              >
+                <Brain className="h-4 w-4" /> Analyze New CV
+              </button>
+
+              {/* Build Twin — manual navigation to twin view */}
+              <button
+                onClick={() => navigate('/dashboard/twin/my-twin')}
+                className="px-4 py-2.5 rounded-lg bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-all flex items-center gap-2 shadow-sm"
+              >
+                <Cpu className="h-4 w-4" /> Build Twin
+              </button>
+
+            </div>
           </motion.div>
+
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
@@ -363,7 +385,7 @@ export default function CVAnalyzerPage() {
               {/* Strengths */}
               {strengths.length > 0 && (
                 <div className="bg-card rounded-xl border border-border p-5">
-                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-green-500 mb-2">✔ Strengths</h4>
+                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-green-500 mb-2">✓ Strengths</h4>
                   <ul className="space-y-1.5">
                     {strengths.map((s: string, i: number) => (
                       <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
@@ -420,6 +442,7 @@ export default function CVAnalyzerPage() {
                 </button>
               </motion.div>
             </div>
+
 
             {/* Column 2-3: Details */}
             <div className="lg:col-span-2 space-y-5">
@@ -603,6 +626,7 @@ export default function CVAnalyzerPage() {
 
             </div>
           </div>
+
         </div>
       </div>
     )
