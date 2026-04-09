@@ -8,11 +8,9 @@ export default function Profile() {
     const { user, updateUser } = useUser()
     const [isEditing, setIsEditing] = useState(false)
     const [isSaving, setIsSaving] = useState(false)
-    const [isLoading, setIsLoading] = useState(true)
     const [saveMessage, setSaveMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
     const [hasCVData, setHasCVData] = useState(false)
     const [showProfileConfirm, setShowProfileConfirm] = useState(false)
-    const [detectedProfileType, setDetectedProfileType] = useState<"tech" | "retail" | "general">("general")
 
     const [formData, setFormData] = useState({
         name: user?.name || "",
@@ -53,7 +51,6 @@ export default function Profile() {
     useEffect(() => {
         const loadProfile = async () => {
             try {
-                setIsLoading(true)
                 const profileUser = await userService.getProfile()
                 setFormData({
                     name: profileUser.name || "",
@@ -75,14 +72,12 @@ export default function Profile() {
                         occupation: (user as any).occupation || "",
                         education: (user as any).education || "",
                         bio: (user as any).bio || "",
-                })
-            }
-            } finally {
-                setIsLoading(false)
+                    })
+                }
             }
         }
         loadProfile()
-    }, [])
+    }, [user])
 
     // ─── Improved Extraction Helpers ─────────────────────────
 
@@ -159,11 +154,11 @@ export default function Profile() {
         const retailSkills = ["POS", "Merchandising", "Stock Control", "Inventory", "Cashier", "Sales", "Customer Service", "Till", "Retail"]
         
         const techCount = skills.filter((s: string) => 
-            techSkills.some(tech => s.toLowerCase().includes(tech.toLowerCase()))
+            techSkills.some((tech: string) => s.toLowerCase().includes(tech.toLowerCase()))
         ).length
         
         const retailCount = skills.filter((s: string) => 
-            retailSkills.some(retail => s.toLowerCase().includes(retail.toLowerCase()))
+            retailSkills.some((retail: string) => s.toLowerCase().includes(retail.toLowerCase()))
         ).length
         
         if (techCount > retailCount && techCount >= 3) return "tech"
@@ -176,8 +171,8 @@ export default function Profile() {
         const skills = cvData?.sections?.skills || []
         
         if (type === "tech") {
-            const hasFrontend = skills.some(s => s.toLowerCase().includes("react") || s.toLowerCase().includes("angular") || s.toLowerCase().includes("vue"))
-            const hasBackend = skills.some(s => s.toLowerCase().includes("c#") || s.toLowerCase().includes(".net") || s.toLowerCase().includes("python") || s.toLowerCase().includes("java"))
+            const hasFrontend = skills.some((s: string) => s.toLowerCase().includes("react") || s.toLowerCase().includes("angular") || s.toLowerCase().includes("vue"))
+            const hasBackend = skills.some((s: string) => s.toLowerCase().includes("c#") || s.toLowerCase().includes(".net") || s.toLowerCase().includes("python") || s.toLowerCase().includes("java"))
             const hasFullStack = hasFrontend && hasBackend
             
             if (hasFullStack) return "Full Stack Developer"
@@ -251,7 +246,6 @@ export default function Profile() {
             
             // If no forced type and it's ambiguous, show confirmation dialog
             if (!forcedType && profileType === "general") {
-                setDetectedProfileType(profileType)
                 setShowProfileConfirm(true)
                 return
             }
@@ -274,7 +268,7 @@ export default function Profile() {
             if (extractedInfo.education) finalInfo.education = extractedInfo.education
             if (extractedInfo.bio) finalInfo.bio = extractedInfo.bio
             
-            setFormData(prev => ({ ...prev, ...finalInfo }))
+            setFormData((prev: any) => ({ ...prev, ...finalInfo }))
             
             // Auto-save to backend
             await userService.updateProfile(finalInfo)
