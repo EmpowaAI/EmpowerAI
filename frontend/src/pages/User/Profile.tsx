@@ -4,6 +4,20 @@ import { useUser } from "../../contexts/user-context"
 import { userService, accountService } from "../../api/Index"
 import { cn } from "../../lib/utils"
 
+// South African Provinces
+const SA_PROVINCES = [
+    "Select Province",
+    "Eastern Cape",
+    "Free State",
+    "Gauteng",
+    "KwaZulu-Natal",
+    "Limpopo",
+    "Mpumalanga",
+    "North West",
+    "Northern Cape",
+    "Western Cape"
+]
+
 export default function Profile() {
     const { user, updateUser } = useUser()
     const [isEditing, setIsEditing] = useState(false)
@@ -52,8 +66,8 @@ export default function Profile() {
             try {
                 const profileUser = await userService.getProfile()
                 setFormData({
-                    name: profileUser.name || "",
-                    email: profileUser.email || "",
+                    name: profileUser.name || user?.name || "",
+                    email: profileUser.email || user?.email || "",
                     phone: (profileUser as any).phone || "",
                     location: (profileUser as any).location || "",
                     occupation: (profileUser as any).occupation || "",
@@ -78,13 +92,11 @@ export default function Profile() {
         loadProfile()
     }, [user])
 
-    // ─── Extraction Helpers ─────────────────────────
-
-    // Extract phone - filters out dates and years
+    // ─── Extract VALID phone number (filters out dates) ───
     const extractPhone = (cvData: any): string => {
         const allText = JSON.stringify(cvData)
         
-        // South African phone patterns
+        // South African phone patterns - must start with +27 or 0
         const phonePatterns = [
             /(?:\+27|0)[0-9]{9}\b/,                    // +27123456789 or 0123456789
             /(?:\+27|0)[0-9\s\-]{10,15}\b/,            // With spaces/hyphens
@@ -95,10 +107,10 @@ export default function Profile() {
             const match = allText.match(pattern)
             if (match) {
                 const phone = match[0].trim()
-                // Filter out date patterns and years
-                const isDatePattern = /^\d{4}[-–]\d{4}$|^\d{4}$|^\d{2}\/\d{2}\/\d{4}/.test(phone)
-                const isYearOnly = /^\d{4}$/.test(phone) && (parseInt(phone) >= 1900 && parseInt(phone) <= 2030)
-                const isEducationDuration = /^\d{4}[-–]\d{4}$/.test(phone)
+                // REJECT anything that looks like a date or year range
+                const isDatePattern = /^\d{4}[-–]\d{4}$/.test(phone)  // 2022-2023
+                const isYearOnly = /^\d{4}$/.test(phone) && (parseInt(phone) >= 1900 && parseInt(phone) <= 2030) // 2022
+                const isEducationDuration = /^\d{4}[-–]\d{4}$/.test(phone) // 2022-2023
                 
                 if (!isDatePattern && !isYearOnly && !isEducationDuration && phone.length >= 9 && phone.length <= 15) {
                     return phone
@@ -108,40 +120,7 @@ export default function Profile() {
         return ""
     }
 
-    // Extract location - South African cities only
-    const extractLocation = (cvData: any): string => {
-        const about = cvData?.sections?.about || ""
-        const allText = JSON.stringify(cvData)
-        
-        const saCities = [
-            "Johannesburg", "Cape Town", "Durban", "Pretoria", 
-            "Port Elizabeth", "Gqeberha", "Bloemfontein", "East London", 
-            "Polokwane", "Nelspruit", "Mbombela", "Kimberley", 
-            "Rustenburg", "Pietermaritzburg", "Soweto", "Sandton",
-            "Centurion", "Midrand", "Benoni", "Boksburg"
-        ]
-        
-        for (const city of saCities) {
-            if (about.includes(city) || allText.includes(city)) {
-                return city
-            }
-        }
-        
-        // Look for location patterns
-        const locationPattern = /(?:based in|from|located in|residing in|lives in)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i
-        const match = about.match(locationPattern)
-        if (match) {
-            const location = match[1]
-            // Don't return university names
-            if (!location.toLowerCase().includes("university") && !location.toLowerCase().includes("north west")) {
-                return location
-            }
-        }
-        
-        return ""
-    }
-
-    // Extract occupation from skills and experience
+    // ─── Extract occupation from CV ───
     const extractOccupation = (cvData: any): string => {
         const skills = cvData?.sections?.skills || []
         const experience = cvData?.sections?.experience || []
@@ -182,7 +161,7 @@ export default function Profile() {
         return ""
     }
 
-    // Extract education level
+    // ─── Extract education level ───
     const extractEducation = (cvData: any): string => {
         const education = cvData?.sections?.education || []
         if (education.length === 0) return ""
@@ -198,7 +177,7 @@ export default function Profile() {
         return ""
     }
 
-    // Extract bio
+    // ─── Extract bio ───
     const extractBio = (cvData: any): string => {
         const about = cvData?.sections?.about || ""
         if (about.length > 20) {
@@ -208,7 +187,7 @@ export default function Profile() {
         return ""
     }
 
-    // ─── AI Fill from CV ─────────────────────────
+    // ─── AI Fill from CV (ONLY phone, occupation, education, bio) ───
     const autoFillFromCV = async () => {
         try {
             const storedCV = localStorage.getItem('comprehensiveCVAnalysis')
@@ -223,37 +202,36 @@ export default function Profile() {
 
             const cvData = JSON.parse(storedCV)
             
-            const extractedInfo = {
-                phone: extractPhone(cvData),
-                location: extractLocation(cvData),
-                occupation: extractOccupation(cvData),
-                education: extractEducation(cvData),
-                bio: extractBio(cvData),
-            }
+            const extractedPhone = extractPhone(cvData)
+            const extractedOccupation = extractOccupation(cvData)
+            const extractedEducation = extractEducation(cvData)
+            const extractedBio = extractBio(cvData)
             
-            // Only update non-empty fields
+            // Build update object (ONLY these fields - NOT name or email)
             const finalInfo: any = {}
-            if (extractedInfo.phone) finalInfo.phone = extractedInfo.phone
-            if (extractedInfo.location) finalInfo.location = extractedInfo.location
-            if (extractedInfo.occupation) finalInfo.occupation = extractedInfo.occupation
-            if (extractedInfo.education) finalInfo.education = extractedInfo.education
-            if (extractedInfo.bio) finalInfo.bio = extractedInfo.bio
+            if (extractedPhone && !extractedPhone.includes("-")) finalInfo.phone = extractedPhone
+            if (extractedOccupation) finalInfo.occupation = extractedOccupation
+            if (extractedEducation) finalInfo.education = extractedEducation
+            if (extractedBio) finalInfo.bio = extractedBio
             
+            // Update form
             setFormData((prev: any) => ({ ...prev, ...finalInfo }))
             
-            // Auto-save to backend
-            await userService.updateProfile(finalInfo)
-            if (updateUser) {
-                updateUser({
-                    ...user,
-                    ...finalInfo,
-                })
+            // Save to backend
+            if (Object.keys(finalInfo).length > 0) {
+                await userService.updateProfile(finalInfo)
+                if (updateUser) {
+                    updateUser({
+                        ...user,
+                        ...finalInfo,
+                    })
+                }
             }
             
-            const filledFields = Object.keys(finalInfo).filter(k => finalInfo[k]).length
+            const filledCount = Object.keys(finalInfo).length
             setSaveMessage({ 
                 type: "success", 
-                text: `✨ Imported ${filledFields} fields from your CV!` 
+                text: `✨ Imported ${filledCount} fields from your CV!` 
             })
             setTimeout(() => setSaveMessage(null), 3000)
             
@@ -422,7 +400,7 @@ export default function Profile() {
                             </div>
                             <div className="flex items-center justify-between">
                                 <span className="text-sm text-muted-foreground">CV Analyzed</span>
-                                <span className="text-sm font-medium text-foreground">{(user as any)?.cvAnalyzed ? "Yes" : hasCVData ? "Yes" : "No"}</span>
+                                <span className="text-sm font-medium text-foreground">{hasCVData ? "Yes" : "No"}</span>
                             </div>
                         </div>
                     </div>
@@ -459,7 +437,7 @@ export default function Profile() {
                         </div>
 
                         <div className="space-y-5">
-                            {/* Full Name - from registration, not auto-filled */}
+                            {/* Full Name - NEVER auto-filled, kept from registration */}
                             <div className="space-y-2">
                                 <label className="flex items-center gap-2 text-sm font-medium text-foreground">
                                     <User className="h-4 w-4 text-muted-foreground" />Full Name
@@ -474,7 +452,7 @@ export default function Profile() {
                                 />
                             </div>
 
-                            {/* Email */}
+                            {/* Email - NEVER auto-filled */}
                             <div className="space-y-2">
                                 <label className="flex items-center gap-2 text-sm font-medium text-foreground">
                                     <Mail className="h-4 w-4 text-muted-foreground" />Email Address
@@ -510,21 +488,31 @@ export default function Profile() {
                                     className={cn("w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-colors", !isEditing && "opacity-75 cursor-not-allowed")}
                                     placeholder="+27 XX XXX XXXX" 
                                 />
+                                {formData.phone && /^\d{4}[-–]\d{4}$/.test(formData.phone) && (
+                                    <p className="text-xs text-amber-500 flex items-center gap-1">
+                                        <AlertCircle className="h-3 w-3" />
+                                        This appears to be a date range, not a phone number. Please update.
+                                    </p>
+                                )}
                             </div>
 
-                            {/* Location - extracted from CV */}
+                            {/* Location - DROPDOWN for provinces */}
                             <div className="space-y-2">
                                 <label className="flex items-center gap-2 text-sm font-medium text-foreground">
-                                    <MapPin className="h-4 w-4 text-muted-foreground" />Location
+                                    <MapPin className="h-4 w-4 text-muted-foreground" />Province
                                 </label>
-                                <input 
-                                    type="text" 
-                                    value={formData.location} 
-                                    onChange={(e) => setFormData({ ...formData, location: e.target.value })} 
+                                <select
+                                    value={formData.location}
+                                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                                     disabled={!isEditing}
-                                    className={cn("w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-colors", !isEditing && "opacity-75 cursor-not-allowed")}
-                                    placeholder="City, Province" 
-                                />
+                                    className={cn("w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-colors", !isEditing && "opacity-75 cursor-not-allowed")}
+                                >
+                                    {SA_PROVINCES.map((province) => (
+                                        <option key={province} value={province === "Select Province" ? "" : province}>
+                                            {province}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
 
                             {/* Occupation - extracted from CV */}
