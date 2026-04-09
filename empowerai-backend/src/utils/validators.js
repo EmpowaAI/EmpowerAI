@@ -73,9 +73,12 @@ const cvRevampSchema = z.object({
  * ✅ FIX: was `export const` (ES module syntax) — changed to `const` to match CommonJS module.exports below
  */
 const chatTwinSchema = z.object({
-  message:    z.string().min(1, 'Message is required'),
-  cv_context: z.any().optional(),
-  focus:      z.string().optional(),
+  messages: z.array(
+  z.object({
+    role: z.enum(['user', 'assistant']),
+    content: z.string()
+  })
+)
 });
 
 

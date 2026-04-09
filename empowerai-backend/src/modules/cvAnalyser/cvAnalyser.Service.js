@@ -1,11 +1,3 @@
-/**
- * cvAnalyser.Service.js
- * Owns all CV business logic:
- *  - AI analysis orchestration (text & file)
- *  - Fallback handling
- *  - Persistence via repository
- *  - Economic twin trigger
- */
 
 const cvProfileRepository = require('./cvAnalyser.Repository');
 const logger = require('../../utils/logger');

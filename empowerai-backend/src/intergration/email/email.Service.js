@@ -1,10 +1,4 @@
 
-
-
-/* =====================================================
-   SHARED STYLES
-===================================================== */
-
 const baseStyle = `
   font-family: Arial, sans-serif;
   max-width: 600px;
@@ -30,16 +24,12 @@ const footerHtml = `
 `;
 
 
-/* =====================================================
-   CORE SEND FUNCTION
-   Env vars are read here (lazily) on every call — not
-   at module load time — so they are always up to date.
-===================================================== */
+
 
 const send = async (to, subject, html, replyTo = null) => {
   const BREVO_API_KEY = process.env.BREVO_API_KEY;
   const EMAIL_FROM    = process.env.EMAIL_FROM;
-  const FRONTEND_URL  = process.env.FRONTEND_URL;  // kept for completeness
+  const FRONTEND_URL  = process.env.FRONTEND_URL;  
 
   if (!BREVO_API_KEY || !EMAIL_FROM) {
     console.warn('[Email] Missing required env vars — email NOT sent.');
@@ -81,10 +71,6 @@ const send = async (to, subject, html, replyTo = null) => {
 };
 
 
-/* =====================================================
-   EMAIL VERIFICATION
-===================================================== */
-
 exports.sendVerification = async (email, token) => {
   const link = `${process.env.FRONTEND_URL}/verify?token=${token}`;
 
@@ -109,10 +95,6 @@ exports.sendVerification = async (email, token) => {
   );
 };
 
-
-/* =====================================================
-   PASSWORD RESET
-===================================================== */
 
 exports.sendReset = async (email, token) => {
   const link = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
@@ -144,10 +126,6 @@ exports.sendReset = async (email, token) => {
   );
 };
 
-
-/* =====================================================
-   ACCOUNT DELETION
-===================================================== */
 
 exports.sendAccountDeletion = async (email, token) => {
   const link = `${process.env.FRONTEND_URL}/confirm-delete?token=${token}`;
@@ -181,9 +159,6 @@ exports.sendAccountDeletion = async (email, token) => {
 };
 
 
-/* =====================================================
-   GENERIC NOTIFICATION
-===================================================== */
 
 exports.sendNotification = async (
   email,
@@ -220,9 +195,6 @@ exports.sendNotification = async (
 };
 
 
-/* =====================================================
-   USER FEEDBACK
-===================================================== */
 
 exports.sendFeedback = async (userEmail, userName, feedbackMessage) => {
   const ADMIN_EMAIL = process.env.EMAIL_FROM;
@@ -269,9 +241,7 @@ exports.sendFeedback = async (userEmail, userName, feedbackMessage) => {
 };
 
 
-/* =====================================================
-   SURVEY
-===================================================== */
+
 
 exports.sendSurvey = async (userEmail, userName, surveyResponses) => {
   const ADMIN_EMAIL = process.env.EMAIL_FROM;
@@ -307,9 +277,6 @@ exports.sendSurvey = async (userEmail, userName, surveyResponses) => {
 };
 
 
-/* =====================================================
-   EMAIL CHANGE VERIFICATION
-===================================================== */
 
 exports.sendEmailChange = async (newEmail, token) => {
   const link = `${process.env.FRONTEND_URL}/confirm-email?token=${token}`;
@@ -336,10 +303,6 @@ exports.sendEmailChange = async (newEmail, token) => {
 };
 
 
-/* =====================================================
-   HEALTH CHECK
-   Lazy read so it reflects the actual runtime state.
-===================================================== */
 
 exports.isConfigured = () =>
   !!(process.env.BREVO_API_KEY && process.env.EMAIL_FROM && process.env.FRONTEND_URL);

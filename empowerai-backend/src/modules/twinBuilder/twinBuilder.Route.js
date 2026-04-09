@@ -22,13 +22,15 @@ router.post(
   twinController.createEconomicTwin
 );
 
-router.get(
-  '/twin',
+/*router.get(
+  '/twin', auth,
   twinController.getEconomicTwin
-);
+); */
 
 
-router.get('/my-twin', auth, twinController.getEconomicTwin)
+
+
+router.get('/my-twin', auth, twinController.getEconomicTwin);
 
 router.post(
   '/twin/build-from-cv',

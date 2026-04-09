@@ -332,7 +332,7 @@ export default function CVAnalyzerPage() {
 
               {/* Build Twin — manual navigation to twin view */}
               <button
-                onClick={() => navigate('/dashboard/twin/my-twin')}
+                onClick={() => navigate('/dashboard/twin')}
                 className="px-4 py-2.5 rounded-lg bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-all flex items-center gap-2 shadow-sm"
               >
                 <Cpu className="h-4 w-4" /> Build Twin
