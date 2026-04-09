@@ -16,7 +16,7 @@
  */
 
 const mongoose = require('mongoose');
-const Opportunity = require('../src/models/Opportunity');
+const Opportunity = require('../src/modules/opportunities/Opportunity.Model');
 require('dotenv').config();
 
 // Real South African opportunities curated from public sources
