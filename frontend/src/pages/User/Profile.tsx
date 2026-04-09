@@ -6,16 +6,16 @@ import { cn } from "../../lib/utils"
 
 // South African Provinces
 const SA_PROVINCES = [
-    "Select Province",
-    "Eastern Cape",
-    "Free State",
-    "Gauteng",
-    "KwaZulu-Natal",
-    "Limpopo",
-    "Mpumalanga",
-    "North West",
-    "Northern Cape",
-    "Western Cape"
+    { value: "", label: "Select Province" },
+    { value: "Eastern Cape", label: "Eastern Cape" },
+    { value: "Free State", label: "Free State" },
+    { value: "Gauteng", label: "Gauteng" },
+    { value: "KwaZulu-Natal", label: "KwaZulu-Natal" },
+    { value: "Limpopo", label: "Limpopo" },
+    { value: "Mpumalanga", label: "Mpumalanga" },
+    { value: "North West", label: "North West" },
+    { value: "Northern Cape", label: "Northern Cape" },
+    { value: "Western Cape", label: "Western Cape" }
 ]
 
 export default function Profile() {
@@ -65,6 +65,7 @@ export default function Profile() {
         const loadProfile = async () => {
             try {
                 const profileUser = await userService.getProfile()
+                // CRITICAL: NEVER overwrite name with CV data - keep what's in the database
                 setFormData({
                     name: profileUser.name || user?.name || "",
                     email: profileUser.email || user?.email || "",
@@ -111,8 +112,9 @@ export default function Profile() {
                 const isDatePattern = /^\d{4}[-–]\d{4}$/.test(phone)  // 2022-2023
                 const isYearOnly = /^\d{4}$/.test(phone) && (parseInt(phone) >= 1900 && parseInt(phone) <= 2030) // 2022
                 const isEducationDuration = /^\d{4}[-–]\d{4}$/.test(phone) // 2022-2023
+                const hasParentheses = phone.includes("(") && phone.includes(")") && phone.length <= 10
                 
-                if (!isDatePattern && !isYearOnly && !isEducationDuration && phone.length >= 9 && phone.length <= 15) {
+                if (!isDatePattern && !isYearOnly && !isEducationDuration && !hasParentheses && phone.length >= 9 && phone.length <= 15) {
                     return phone
                 }
             }
@@ -187,7 +189,7 @@ export default function Profile() {
         return ""
     }
 
-    // ─── AI Fill from CV (ONLY phone, occupation, education, bio) ───
+    // ─── AI Fill from CV (ONLY phone, occupation, education, bio - NEVER name or email) ───
     const autoFillFromCV = async () => {
         try {
             const storedCV = localStorage.getItem('comprehensiveCVAnalysis')
@@ -209,7 +211,9 @@ export default function Profile() {
             
             // Build update object (ONLY these fields - NOT name or email)
             const finalInfo: any = {}
-            if (extractedPhone && !extractedPhone.includes("-")) finalInfo.phone = extractedPhone
+            if (extractedPhone && !extractedPhone.includes("-") && !extractedPhone.includes("(")) {
+                finalInfo.phone = extractedPhone
+            }
             if (extractedOccupation) finalInfo.occupation = extractedOccupation
             if (extractedEducation) finalInfo.education = extractedEducation
             if (extractedBio) finalInfo.bio = extractedBio
@@ -224,6 +228,9 @@ export default function Profile() {
                     updateUser({
                         ...user,
                         ...finalInfo,
+                        // CRITICAL: Preserve original name and email
+                        name: user?.name,
+                        email: user?.email,
                     })
                 }
             }
@@ -341,8 +348,8 @@ export default function Profile() {
         }
     }
 
-    const initials = user?.name
-        ? user.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
+    const initials = formData.name
+        ? formData.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
         : "U"
 
     return (
@@ -381,8 +388,8 @@ export default function Profile() {
                                     <Camera className="h-4 w-4" />
                                 </button>
                             </div>
-                            <h2 className="text-xl font-bold text-foreground mt-4">{user?.name || "User"}</h2>
-                            <p className="text-sm text-muted-foreground">{user?.email || "email@example.com"}</p>
+                            <h2 className="text-xl font-bold text-foreground mt-4">{formData.name || "User"}</h2>
+                            <p className="text-sm text-muted-foreground">{formData.email || "email@example.com"}</p>
                         </div>
 
                         <div className="space-y-3 pt-4 border-t border-border">
@@ -437,7 +444,7 @@ export default function Profile() {
                         </div>
 
                         <div className="space-y-5">
-                            {/* Full Name - NEVER auto-filled, kept from registration */}
+                            {/* Full Name - User can edit, but NEVER auto-filled from CV */}
                             <div className="space-y-2">
                                 <label className="flex items-center gap-2 text-sm font-medium text-foreground">
                                     <User className="h-4 w-4 text-muted-foreground" />Full Name
@@ -452,7 +459,7 @@ export default function Profile() {
                                 />
                             </div>
 
-                            {/* Email - NEVER auto-filled */}
+                            {/* Email - User can change via modal, NEVER auto-filled from CV */}
                             <div className="space-y-2">
                                 <label className="flex items-center gap-2 text-sm font-medium text-foreground">
                                     <Mail className="h-4 w-4 text-muted-foreground" />Email Address
@@ -475,7 +482,7 @@ export default function Profile() {
                                 <p className="text-xs text-muted-foreground">Email changes require verification via a confirmation link.</p>
                             </div>
 
-                            {/* Phone - extracted from CV */}
+                            {/* Phone - Extracted from CV if valid */}
                             <div className="space-y-2">
                                 <label className="flex items-center gap-2 text-sm font-medium text-foreground">
                                     <Phone className="h-4 w-4 text-muted-foreground" />Phone Number
@@ -496,7 +503,7 @@ export default function Profile() {
                                 )}
                             </div>
 
-                            {/* Location - DROPDOWN for provinces */}
+                            {/* Province - DROPDOWN for South African provinces */}
                             <div className="space-y-2">
                                 <label className="flex items-center gap-2 text-sm font-medium text-foreground">
                                     <MapPin className="h-4 w-4 text-muted-foreground" />Province
@@ -508,14 +515,14 @@ export default function Profile() {
                                     className={cn("w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-colors", !isEditing && "opacity-75 cursor-not-allowed")}
                                 >
                                     {SA_PROVINCES.map((province) => (
-                                        <option key={province} value={province === "Select Province" ? "" : province}>
-                                            {province}
+                                        <option key={province.value} value={province.value}>
+                                            {province.label}
                                         </option>
                                     ))}
                                 </select>
                             </div>
 
-                            {/* Occupation - extracted from CV */}
+                            {/* Occupation - Extracted from CV */}
                             <div className="space-y-2">
                                 <label className="flex items-center gap-2 text-sm font-medium text-foreground">
                                     <Briefcase className="h-4 w-4 text-muted-foreground" />Current Occupation
@@ -530,7 +537,7 @@ export default function Profile() {
                                 />
                             </div>
 
-                            {/* Education - extracted from CV */}
+                            {/* Education - Extracted from CV */}
                             <div className="space-y-2">
                                 <label className="flex items-center gap-2 text-sm font-medium text-foreground">
                                     <GraduationCap className="h-4 w-4 text-muted-foreground" />Education Level
@@ -545,7 +552,7 @@ export default function Profile() {
                                 />
                             </div>
 
-                            {/* Bio - extracted from CV */}
+                            {/* Bio - Extracted from CV */}
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-foreground block">Bio</label>
                                 <textarea 
