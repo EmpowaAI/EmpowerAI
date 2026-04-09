@@ -3,8 +3,8 @@ const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
 
-const corsOptions = require('./config/cors');
-const helmetOptions = require('./config/helmet');
+const corsOptions = require('./infrastructures/cors');
+const helmetOptions = require('./infrastructures/helmet');
 const { apiLimiter, authLimiter, aiServiceLimiter, isEnabled } = require('./middleware/rateLimiter');
 
 const app = express();
@@ -46,17 +46,17 @@ app.use(require('./middleware/requestLogger'));
 
 // --- Routes ---
 app.use('/api/health', require('./routes/health'));
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/account', require('./routes/account'));
-app.use('/api/twin', require('./routes/twin'));
-app.use('/api/opportunities', require('./routes/opportunities'));
-app.use('/api/cv', require('./routes/cv'));
-app.use('/api/interview', require('./routes/interview'));
-app.use('/api/chat', require('./routes/chat'));
+app.use('/api/auth', require('./modules/authentication/auth.Route'));
+app.use('/api/account', require('./modules/userAccount/account.Route'));
+app.use('/api/twin', require('./modules/twinBuilder/twinBuilder.Route'));
+app.use('/api/opportunities', require('./modules/opportunities/opportunities.Route'));
+app.use('/api/cv', require('./modules/cvAnalyser/cvAnalyser.Route'));
+app.use('/api/interview', require('./modules/interview/interview.Route'));
+app.use('/api/chat', require('./modules/twinChat/twinChat.Route'));
 app.use('/api/rss', require('./routes/rss'));
-app.use('/api/admin', require('./routes/admin'));
-app.use('/api/user', require('./routes/user'));
-app.use('/api/applications', require('./routes/applications'));
+app.use('/api/admin', require('./modules/admin/admin.Route'));
+app.use('/api/user', require('./modules/user/user.Route'));
+app.use('/api/applications', require('./modules/applications/applications.Route'));
 
 // Root — Render health check + API discovery
 app.get('/', (req, res) => {
