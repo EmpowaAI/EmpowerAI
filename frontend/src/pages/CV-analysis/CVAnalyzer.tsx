@@ -16,11 +16,12 @@ import RevampedCVDisplay from "../../components/RevampedCVDisplay"
 import type { RevampedCV, RevampedCVResponse } from '../../services/aiService'
 import { useToast } from "../../hooks/useToast"
 import { analyzeCV, revampCV, type CVAnalysis } from "../../services/cvService"
+import { userService } from "../../api/Index"
 
 
 export default function CVAnalyzerPage() {
 
-  const { user, updateProgress } = useUser()
+  const { user, updateUser, updateProgress } = useUser()
   const navigate = useNavigate()
 
   const [file, setFile] = useState<File | null>(null)
@@ -71,6 +72,144 @@ export default function CVAnalyzerPage() {
     }
   }, [fileName])
 
+  // Helper: Extract name from CV
+  const extractNameFromCV = (cvData: CVAnalysis): string => {
+    const about = cvData?.sections?.about || ""
+    // Try to find name pattern at start of about section
+    const nameMatch = about.match(/^([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)/)
+    if (nameMatch) return nameMatch[1]
+    
+    // Try to find from experience or other sections
+    const allText = JSON.stringify(cvData)
+    const commonNameMatch = allText.match(/([A-Z][a-z]+)\s+([A-Z][a-z]+)/)
+    return commonNameMatch ? `${commonNameMatch[1]} ${commonNameMatch[2]}` : user?.name || ""
+  }
+
+  // Helper: Extract phone from CV
+  const extractPhoneFromCV = (cvData: CVAnalysis): string => {
+    const allText = JSON.stringify(cvData)
+    // Match South African or international phone numbers
+    const phoneMatch = allText.match(/[\+]?[0-9\s\-\(\)]{10,15}/)
+    return phoneMatch ? phoneMatch[0].trim() : ""
+  }
+
+  // Helper: Extract location from CV
+  const extractLocationFromCV = (cvData: CVAnalysis): string => {
+    const about = cvData?.sections?.about || ""
+    // Look for location patterns
+    const patterns = [
+      /(?:based in|from|located in|residing in)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i,
+      /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s*,\s*South Africa/i,
+      /Johannesburg|Cape Town|Durban|Pretoria|Port Elizabeth|Bloemfontein/i
+    ]
+    
+    for (const pattern of patterns) {
+      const match = about.match(pattern)
+      if (match) {
+        const location = match[1] || match[0]
+        if (location && location.length < 30) return location
+      }
+    }
+    return ""
+  }
+
+  // Helper: Extract occupation from CV
+  const extractOccupationFromCV = (cvData: CVAnalysis): string => {
+    const experience = cvData?.sections?.experience || []
+    const about = cvData?.sections?.about || ""
+    
+    // Look for job titles in experience
+    const jobTitles = [
+      /(?:as a|as an|position:?\s*)([A-Za-z\s]+(?:Developer|Engineer|Manager|Designer|Analyst|Specialist|Consultant|Intern|Assistant|Associate))/i,
+      /^([A-Za-z\s]+(?:Developer|Engineer|Manager|Designer|Analyst|Specialist|Consultant))/im
+    ]
+    
+    for (const exp of experience) {
+      for (const pattern of jobTitles) {
+        const match = exp.match(pattern)
+        if (match) return match[1].trim()
+      }
+    }
+    
+    // Check about section
+    for (const pattern of jobTitles) {
+      const match = about.match(pattern)
+      if (match) return match[1].trim()
+    }
+    
+    // Check readiness level for students
+    if (cvData.readinessLevel === "DEVELOPING" && cvData.score < 40) {
+      return "Student / Entry Level"
+    }
+    
+    return ""
+  }
+
+  // Helper: Extract education level from CV
+  const extractEducationFromCV = (cvData: CVAnalysis): string => {
+    const education = cvData?.sections?.education || []
+    if (education.length === 0) return ""
+    
+    const eduText = education.join(" ").toLowerCase()
+    
+    if (eduText.includes("phd") || eduText.includes("doctorate")) return "PhD"
+    if (eduText.includes("master") || eduText.includes("masters") || eduText.includes("msc") || eduText.includes("ma")) return "Master's Degree"
+    if (eduText.includes("bachelor") || eduText.includes("bsc") || eduText.includes("ba") || eduText.includes("bcom")) return "Bachelor's Degree"
+    if (eduText.includes("diploma") || eduText.includes("higher certificate")) return "Diploma"
+    if (eduText.includes("matric") || eduText.includes("grade 12") || eduText.includes("high school")) return "Matric / Grade 12"
+    
+    return "Other"
+  }
+
+  // Helper: Extract bio from CV
+  const extractBioFromCV = (cvData: CVAnalysis): string => {
+    const about = cvData?.sections?.about || ""
+    const strengths = cvData?.strengths || []
+    
+    // Use about section or create from strengths
+    if (about.length > 20) {
+      return about.length > 200 ? about.substring(0, 200) + "..." : about
+    }
+    
+    if (strengths.length > 0) {
+      return `I am a professional with strengths in ${strengths.slice(0, 3).join(", ")}.`
+    }
+    
+    return ""
+  }
+
+  // Auto-fill profile from CV data
+  const autoFillProfile = async (cvData: CVAnalysis) => {
+    try {
+      const extractedProfile = {
+        name: extractNameFromCV(cvData),
+        phone: extractPhoneFromCV(cvData),
+        location: extractLocationFromCV(cvData),
+        occupation: extractOccupationFromCV(cvData),
+        education: extractEducationFromCV(cvData),
+        bio: extractBioFromCV(cvData),
+      }
+      
+      // Only update if we have at least some data
+      const hasData = Object.values(extractedProfile).some(v => v && v.length > 0)
+      
+      if (hasData) {
+        await userService.updateProfile(extractedProfile)
+        if (updateUser) {
+          updateUser({
+            ...user,
+            ...extractedProfile,
+            name: extractedProfile.name || user?.name,
+          })
+        }
+        console.log("✅ Profile auto-filled from CV:", extractedProfile)
+        showToast("✨ Profile info auto-filled from your CV!", "success")
+      }
+    } catch (err) {
+      console.warn("Auto-profile fill failed:", err)
+      // Don't show error to user - this is a background feature
+    }
+  }
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -124,9 +263,10 @@ export default function CVAnalyzerPage() {
       // Mark CV step complete — unlocks twin builder and all protected routes
       updateProgress('cvCompleted', true)
 
-      showToast(`CV analyzed! Score: ${result.score}% — ${result.readinessLevel}`, "success")
+      // 🔥 AUTO-FILL PROFILE FROM CV (background)
+      await autoFillProfile(result)
 
-      // Auto-navigate removed — use the "Build Twin" button to go to twin
+      showToast(`CV analyzed! Score: ${result.score}% — ${result.readinessLevel}`, "success")
 
     } catch (err: any) {
       setError(err.message || "Failed to analyze CV.")

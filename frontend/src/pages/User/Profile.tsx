@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { User, Mail, Phone, MapPin, Briefcase, GraduationCap, Save, Loader2, CheckCircle, AlertCircle, Edit2, Camera, Lock, Trash2, X, Eye, EyeOff } from "lucide-react"
+import { User, Mail, Phone, MapPin, Briefcase, GraduationCap, Save, Loader2, CheckCircle, AlertCircle, Edit2, Camera, Lock, Trash2, X, Eye, EyeOff, Sparkles } from "lucide-react"
 import { useUser } from "../../contexts/user-context"
 import { userService, accountService } from "../../api/Index"
 import { cn } from "../../lib/utils"
@@ -10,6 +10,7 @@ export default function Profile() {
     const [isSaving, setIsSaving] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
     const [saveMessage, setSaveMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
+    const [hasCVData, setHasCVData] = useState(false)
 
     const [formData, setFormData] = useState({
         name: user?.name || "",
@@ -20,6 +21,12 @@ export default function Profile() {
         education: user?.education || "",
         bio: user?.bio || "",
     })
+
+    // Check if CV data exists in localStorage
+    useEffect(() => {
+        const cvData = localStorage.getItem('comprehensiveCVAnalysis')
+        setHasCVData(!!cvData)
+    }, [])
 
     // ─── Change Password Modal ───────────────────
     const [showPasswordModal, setShowPasswordModal] = useState(false)
@@ -74,6 +81,138 @@ export default function Profile() {
         }
         loadProfile()
     }, [])
+
+    // ─── AI Fill from CV ─────────────────────────
+    const autoFillFromCV = async () => {
+        try {
+            const storedCV = localStorage.getItem('comprehensiveCVAnalysis')
+            if (!storedCV) {
+                setSaveMessage({ 
+                    type: "error", 
+                    text: "Please analyze your CV first in the CV Analyzer" 
+                })
+                setTimeout(() => setSaveMessage(null), 3000)
+                return
+            }
+
+            const cvData = JSON.parse(storedCV)
+            
+            // Extract functions
+            const extractName = (): string => {
+                const about = cvData?.sections?.about || ""
+                const nameMatch = about.match(/^([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)/)
+                if (nameMatch) return nameMatch[1]
+                const allText = JSON.stringify(cvData)
+                const commonMatch = allText.match(/([A-Z][a-z]+)\s+([A-Z][a-z]+)/)
+                return commonMatch ? `${commonMatch[1]} ${commonMatch[2]}` : formData.name
+            }
+
+            const extractPhone = (): string => {
+                const allText = JSON.stringify(cvData)
+                const phoneMatch = allText.match(/[\+]?[0-9\s\-\(\)]{10,15}/)
+                return phoneMatch ? phoneMatch[0].trim() : formData.phone
+            }
+
+            const extractLocation = (): string => {
+                const about = cvData?.sections?.about || ""
+                const patterns = [
+                    /(?:based in|from|located in|residing in)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i,
+                    /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s*,\s*South Africa/i,
+                    /Johannesburg|Cape Town|Durban|Pretoria|Port Elizabeth|Bloemfontein/i
+                ]
+                for (const pattern of patterns) {
+                    const match = about.match(pattern)
+                    if (match) {
+                        const location = match[1] || match[0]
+                        if (location && location.length < 30) return location
+                    }
+                }
+                return formData.location
+            }
+
+            const extractOccupation = (): string => {
+                const experience = cvData?.sections?.experience || []
+                const about = cvData?.sections?.about || ""
+                const jobTitles = [
+                    /(?:as a|as an|position:?\s*)([A-Za-z\s]+(?:Developer|Engineer|Manager|Designer|Analyst|Specialist|Consultant|Intern|Assistant|Associate))/i,
+                    /^([A-Za-z\s]+(?:Developer|Engineer|Manager|Designer|Analyst|Specialist|Consultant))/im
+                ]
+                for (const exp of experience) {
+                    for (const pattern of jobTitles) {
+                        const match = exp.match(pattern)
+                        if (match) return match[1].trim()
+                    }
+                }
+                for (const pattern of jobTitles) {
+                    const match = about.match(pattern)
+                    if (match) return match[1].trim()
+                }
+                if (cvData.readinessLevel === "DEVELOPING" && cvData.score < 40) {
+                    return "Student / Entry Level"
+                }
+                return formData.occupation
+            }
+
+            const extractEducation = (): string => {
+                const education = cvData?.sections?.education || []
+                if (education.length === 0) return formData.education
+                const eduText = education.join(" ").toLowerCase()
+                if (eduText.includes("phd") || eduText.includes("doctorate")) return "PhD"
+                if (eduText.includes("master") || eduText.includes("masters")) return "Master's Degree"
+                if (eduText.includes("bachelor") || eduText.includes("bsc") || eduText.includes("ba")) return "Bachelor's Degree"
+                if (eduText.includes("diploma")) return "Diploma"
+                if (eduText.includes("matric") || eduText.includes("grade 12")) return "Matric / Grade 12"
+                return "Other"
+            }
+
+            const extractBio = (): string => {
+                const about = cvData?.sections?.about || ""
+                const strengths = cvData?.strengths || []
+                if (about.length > 20) {
+                    return about.length > 200 ? about.substring(0, 200) + "..." : about
+                }
+                if (strengths.length > 0) {
+                    return `I am a professional with strengths in ${strengths.slice(0, 3).join(", ")}.`
+                }
+                return formData.bio
+            }
+
+            const extractedInfo = {
+                name: extractName(),
+                phone: extractPhone(),
+                location: extractLocation(),
+                occupation: extractOccupation(),
+                education: extractEducation(),
+                bio: extractBio(),
+            }
+            
+            setFormData(prev => ({ ...prev, ...extractedInfo }))
+            
+            // Auto-save to backend
+            await userService.updateProfile(extractedInfo)
+            if (updateUser) {
+                updateUser({
+                    ...user,
+                    ...extractedInfo,
+                    name: extractedInfo.name || user?.name,
+                })
+            }
+            
+            setSaveMessage({ 
+                type: "success", 
+                text: "✨ Profile auto-filled from your CV!" 
+            })
+            setTimeout(() => setSaveMessage(null), 3000)
+            
+        } catch (error) {
+            console.error('Auto-fill failed:', error)
+            setSaveMessage({ 
+                type: "error", 
+                text: "Failed to extract info from CV" 
+            })
+            setTimeout(() => setSaveMessage(null), 3000)
+        }
+    }
 
     // ─── Save profile (name + non-email fields) ──
     const handleSave = async () => {
@@ -175,6 +314,9 @@ export default function Profile() {
     ? user.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
     : "U"
 
+    // Check if profile is mostly empty
+    const isProfileEmpty = !formData.occupation && !formData.bio && !formData.location
+
     return (
         <div className="space-y-6 -mx-3 sm:mx-0">
 
@@ -195,6 +337,28 @@ export default function Profile() {
             {saveMessage.type === "success" ? <CheckCircle className="h-5 w-5 flex-shrink-0" /> : <AlertCircle className="h-5 w-5 flex-shrink-0" />}
             <p className="text-sm font-medium">{saveMessage.text}</p>
         </div>
+        )}
+
+        {/* AI Fill Banner - shows when CV exists and profile is empty */}
+        {hasCVData && isProfileEmpty && !isEditing && (
+            <div className="mx-3 sm:mx-0 bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 rounded-xl p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center">
+                        <Sparkles className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                        <p className="font-semibold text-sm">✨ AI detected your CV information</p>
+                        <p className="text-xs text-muted-foreground">Import your name, occupation, education & more with one click</p>
+                    </div>
+                </div>
+                <button 
+                    onClick={autoFillFromCV}
+                    className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors flex items-center gap-2"
+                >
+                    <Sparkles className="h-4 w-4" />
+                    Import from CV
+                </button>
+            </div>
         )}
 
         <div className="grid lg:grid-cols-3 gap-6 px-3 sm:px-0">
@@ -230,7 +394,7 @@ export default function Profile() {
                         </div>
                         <div className="flex items-center justify-between">
                             <span className="text-sm text-muted-foreground">CV Analyzed</span>
-                            <span className="text-sm font-medium text-foreground">{(user as any)?.cvAnalyzed ? "Yes" : "No"}</span>
+                            <span className="text-sm font-medium text-foreground">{(user as any)?.cvAnalyzed ? "Yes" : hasCVData ? "Yes" : "No"}</span>
                         </div>
                     </div>
                 </div>
@@ -239,21 +403,34 @@ export default function Profile() {
             {/* Profile Form */}
             <div className="lg:col-span-2 space-y-6">
                 <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-                    <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
                         <h3 className="text-lg font-semibold text-foreground">Personal Information</h3>
-                        {!isEditing ? (
-                        <button onClick={() => setIsEditing(true)} className="flex items-center gap-2 px-4 py-2 text-primary hover:bg-primary/10 rounded-lg transition-colors font-medium text-sm">
-                            <Edit2 className="h-4 w-4" />Edit Profile
-                        </button>
-                        ) : (
                         <div className="flex items-center gap-2">
-                        <button onClick={handleCancel} disabled={isSaving} className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors text-sm disabled:opacity-50">Cancel</button>
-                        <button onClick={handleSave} disabled={isSaving} className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm disabled:opacity-50">
-                            {isSaving ? <><Loader2 className="h-4 w-4 animate-spin" />Saving...</> : <><Save className="h-4 w-4" />Save Changes</>}
-                        </button>
+                            {/* AI Fill Button - always visible when CV exists */}
+                            {hasCVData && !isEditing && (
+                                <button 
+                                    onClick={autoFillFromCV}
+                                    className="flex items-center gap-2 px-4 py-2 text-accent hover:bg-accent/10 rounded-lg transition-colors font-medium text-sm"
+                                    title="Auto-fill from your analyzed CV"
+                                >
+                                    <Sparkles className="h-4 w-4" />
+                                    AI Fill from CV
+                                </button>
+                            )}
+                            {!isEditing ? (
+                                <button onClick={() => setIsEditing(true)} className="flex items-center gap-2 px-4 py-2 text-primary hover:bg-primary/10 rounded-lg transition-colors font-medium text-sm">
+                                    <Edit2 className="h-4 w-4" />Edit Profile
+                                </button>
+                            ) : (
+                                <div className="flex items-center gap-2">
+                                    <button onClick={handleCancel} disabled={isSaving} className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors text-sm disabled:opacity-50">Cancel</button>
+                                    <button onClick={handleSave} disabled={isSaving} className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm disabled:opacity-50">
+                                        {isSaving ? <><Loader2 className="h-4 w-4 animate-spin" />Saving...</> : <><Save className="h-4 w-4" />Save Changes</>}
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     </div>
-                    )}
-                </div>
 
                 <div className="space-y-5">
                     {/* Full Name */}
