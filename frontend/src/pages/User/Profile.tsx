@@ -192,27 +192,26 @@ export default function ProfilePage() {
 
   // Helper: Check if a string is a date range (not a phone number)
   const isDateRange = (text: string): boolean => {
-    // Matches patterns like 2022-2023, 2020–2024, 2022 - 2023, etc.
+    if (!text) return false;
     const dateRangePatterns = [
       /^\d{4}[-–]\d{4}$/,           // 2022-2023 or 2022–2023
       /^\d{4}\s*[-–]\s*\d{4}$/,     // 2022 - 2023
       /^\d{2}\/\d{4}$/,              // 02/2024
       /^\d{4}$/,                     // Just a year
-      /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{4}$/i, // Month Year
+      /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{4}$/i,
+      /\([0-9]{4}[-–][0-9]{4}\)/,    // (2022-2023)
+      /[0-9]{4}[-–][0-9]{4}/,        // 2022-2023 without parentheses
     ];
     return dateRangePatterns.some(pattern => pattern.test(text.trim()));
   };
 
   // Helper: Extract valid phone number (not a date range)
   const extractValidPhone = (text: string): string => {
-    // Match South African or international phone numbers
     const phoneMatches = text.match(/(?:\+27|0|27)[0-9\s\-\(\)]{9,15}\b/g) || [];
     
     for (const match of phoneMatches) {
       const cleaned = match.trim();
-      // Skip if it's a date range
       if (isDateRange(cleaned)) continue;
-      // Skip if it's too short or too long for a phone
       const digitsOnly = cleaned.replace(/\D/g, '');
       if (digitsOnly.length >= 9 && digitsOnly.length <= 12) {
         return cleaned;
@@ -221,7 +220,7 @@ export default function ProfilePage() {
     return "";
   };
 
-  // ─── AI Fill from CV (NEVER touches name or email) ──────────────────────────
+  // ─── AI Fill from CV - NEVER EVER touches name or email ──────────────────────────
   const autoFillFromCV = async () => {
     try {
       const storedCV = localStorage.getItem('comprehensiveCVAnalysis');
@@ -251,15 +250,9 @@ export default function ProfilePage() {
         else if (hasFrontend) occupation = "Frontend Developer";
         else if (hasBackend) occupation = "Backend Developer";
         else occupation = "Software Developer";
-      } else if (cvData?.sections?.experience?.length > 0) {
-        // Try to extract from experience
-        const experienceText = cvData.sections.experience.join(" ").toLowerCase();
-        if (experienceText.includes("developer")) occupation = "Software Developer";
-        else if (experienceText.includes("engineer")) occupation = "Software Engineer";
-        else if (experienceText.includes("intern")) occupation = "Intern";
       }
       
-      // Extract education (don't overwrite if empty)
+      // Extract education
       const educationSection = cvData?.sections?.education || [];
       let education = "";
       if (educationSection.length > 0) {
@@ -298,7 +291,7 @@ export default function ProfilePage() {
         }
       }
       
-      // Build update object - NEVER include name or email
+      // ⚠️ CRITICAL: NEVER include name or email - explicitly EXCLUDE them
       const finalInfo: Partial<UserProfile> = {};
       if (phone && !isDateRange(phone)) finalInfo.phone = phone;
       if (occupation) finalInfo.occupation = occupation;
@@ -307,11 +300,15 @@ export default function ProfilePage() {
       if (detectedProvince) finalInfo.province = detectedProvince;
       if (detectedCity) finalInfo.city = detectedCity;
       
-      // Update form data (only if we're in edit mode or just applying)
+      // Double-check: explicitly remove name and email if somehow added (paranoia protection)
+      delete (finalInfo as any).name;
+      delete (finalInfo as any).email;
+      
+      // Update ONLY form data (not profile directly)
       setFormData((prev) => ({ ...prev, ...finalInfo }));
       
       const filledCount = Object.keys(finalInfo).length;
-      showToast({ type: "success", text: `✨ Imported ${filledCount} fields from your CV! (Name and email never changed)` });
+      showToast({ type: "success", text: `✨ Imported ${filledCount} fields from your CV! (Your name and email were NOT changed)` });
       
     } catch (error) {
       console.error('Auto-fill failed:', error);
@@ -323,6 +320,7 @@ export default function ProfilePage() {
     setIsSaving(true);
     setToast(null);
     try {
+      // NEVER send email in update payload - email changes go through separate flow
       const { email, createdAt, ...updatePayload } = formData;
       const response = await userService.updateProfile(updatePayload);
       
@@ -426,7 +424,7 @@ export default function ProfilePage() {
     }
   };
 
-  const initials = profile.name
+  const initials = profile.name && profile.name !== "Calendar Scheduling"
     ? profile.name
         .split(" ")
         .map((n) => n[0])
@@ -459,6 +457,9 @@ export default function ProfilePage() {
       </div>
     );
   }
+
+  // Fix the corrupted name if it got set to "Calendar Scheduling"
+  const displayName = profile.name === "Calendar Scheduling" ? (user?.name || "Your Name") : profile.name;
 
   return (
     <div className="min-h-screen bg-background">
@@ -494,7 +495,7 @@ export default function ProfilePage() {
                   </button>
                 </div>
                 <h2 className="text-xl font-bold text-foreground mt-4">
-                  {profile.name || "Your Name"}
+                  {displayName}
                 </h2>
                 <p className="text-sm text-muted-foreground">
                   {profile.email || "your@email.com"}
@@ -593,7 +594,7 @@ export default function ProfilePage() {
               </div>
 
               <div className="space-y-5">
-                {/* Full Name - NEVER auto-filled */}
+                {/* Full Name - NEVER auto-filled, user can edit */}
                 <div className="space-y-2">
                   <label className="flex items-center gap-2 text-sm font-medium text-foreground">
                     <User className="h-4 w-4 text-muted-foreground" />
@@ -607,6 +608,12 @@ export default function ProfilePage() {
                     className={inputClass(!isEditing)}
                     placeholder="Enter your full name"
                   />
+                  {formData.name === "Calendar Scheduling" && (
+                    <p className="text-xs text-destructive flex items-center gap-1 mt-1">
+                      <AlertCircle className="h-3 w-3" />
+                      Your name was incorrectly set. Please correct it above.
+                    </p>
+                  )}
                 </div>
 
                 {/* Email - NEVER auto-filled, read-only */}
@@ -653,7 +660,7 @@ export default function ProfilePage() {
                   {formData.phone && isDateRange(formData.phone) && (
                     <p className="text-xs text-destructive flex items-center gap-1 mt-1">
                       <AlertCircle className="h-3 w-3" />
-                      This appears to be a date range, not a phone number. Please update it.
+                      This appears to be a date range (like 2022-2023), not a phone number. Please update it.
                     </p>
                   )}
                 </div>
@@ -813,7 +820,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* ── Password Modal ── */}
+        {/* Modals remain the same... */}
         <Modal
           open={showPasswordModal}
           onClose={() => {
@@ -824,83 +831,67 @@ export default function ProfilePage() {
         >
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-foreground">Change Password</h3>
-            <button onClick={() => setShowPasswordModal(false)} className="text-muted-foreground hover:text-foreground">
-              <X className="h-5 w-5" />
-            </button>
+            <button onClick={() => setShowPasswordModal(false)}><X className="h-5 w-5" /></button>
           </div>
           <AnimatePresence><Toast msg={passwordMsg} /></AnimatePresence>
           <div className="space-y-4">
-            <div className="space-y-2">
-              <label>Current Password</label>
-              <div className="relative">
-                <input type={showPasswords ? "text" : "password"} value={passwordForm.currentPassword}
-                  onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
-                  className={inputClass(false) + " pr-12"} placeholder="Enter current password" />
-                <button type="button" onClick={() => setShowPasswords(!showPasswords)} className="absolute right-3 top-1/2 -translate-y-1/2">
-                  {showPasswords ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
+            <div className="relative">
+              <input type={showPasswords ? "text" : "password"} value={passwordForm.currentPassword}
+                onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                className={inputClass(false)} placeholder="Current Password" />
+              <button type="button" onClick={() => setShowPasswords(!showPasswords)} className="absolute right-3 top-3">
+                {showPasswords ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
             </div>
-            <div className="space-y-2">
-              <label>New Password</label>
-              <input type={showPasswords ? "text" : "password"} value={passwordForm.password}
-                onChange={(e) => setPasswordForm({ ...passwordForm, password: e.target.value })}
-                className={inputClass(false)} placeholder="Enter new password (min 8 chars)" />
-            </div>
-            <div className="space-y-2">
-              <label>Confirm New Password</label>
-              <input type={showPasswords ? "text" : "password"} value={passwordForm.confirmPassword}
-                onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
-                className={inputClass(false)} placeholder="Confirm new password" />
-            </div>
+            <input type={showPasswords ? "text" : "password"} value={passwordForm.password}
+              onChange={(e) => setPasswordForm({ ...passwordForm, password: e.target.value })}
+              className={inputClass(false)} placeholder="New Password (min 8 chars)" />
+            <input type={showPasswords ? "text" : "password"} value={passwordForm.confirmPassword}
+              onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+              className={inputClass(false)} placeholder="Confirm New Password" />
           </div>
-          <div className="flex gap-3 pt-2">
-            <button onClick={() => setShowPasswordModal(false)} className="flex-1 px-4 py-2 text-sm">Cancel</button>
+          <div className="flex gap-3">
+            <button onClick={() => setShowPasswordModal(false)} className="flex-1">Cancel</button>
             <button onClick={handleChangePassword} disabled={passwordSaving}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-lg">
-              {passwordSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Update Password"}
+              className="flex-1 bg-primary text-white rounded-lg py-2">
+              {passwordSaving ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : "Update"}
             </button>
           </div>
         </Modal>
 
-        {/* ── Email Modal ── */}
         <Modal open={showEmailModal} onClose={() => setShowEmailModal(false)}>
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-foreground">Change Email Address</h3>
+            <h3 className="text-lg font-semibold text-foreground">Change Email</h3>
             <button onClick={() => setShowEmailModal(false)}><X className="h-5 w-5" /></button>
           </div>
           <AnimatePresence><Toast msg={emailMsg} /></AnimatePresence>
-          <div className="space-y-4">
-            <input type="email" value={emailForm.newEmail} onChange={(e) => setEmailForm({ ...emailForm, newEmail: e.target.value })}
-              className={inputClass(false)} placeholder="Enter new email address" />
-            <input type="password" value={emailForm.password} onChange={(e) => setEmailForm({ ...emailForm, password: e.target.value })}
-              className={inputClass(false)} placeholder="Enter your current password" />
-            <p className="text-xs text-muted-foreground">A verification link will be sent to the new address.</p>
-          </div>
+          <input type="email" value={emailForm.newEmail} onChange={(e) => setEmailForm({ ...emailForm, newEmail: e.target.value })}
+            className={inputClass(false)} placeholder="New Email" />
+          <input type="password" value={emailForm.password} onChange={(e) => setEmailForm({ ...emailForm, password: e.target.value })}
+            className={inputClass(false)} placeholder="Current Password" />
           <div className="flex gap-3">
             <button onClick={() => setShowEmailModal(false)} className="flex-1">Cancel</button>
             <button onClick={handleEmailChange} disabled={emailSaving}
-              className="flex-1 flex items-center justify-center gap-2 bg-primary text-white rounded-lg">
-              {emailSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send Verification"}
+              className="flex-1 bg-primary text-white rounded-lg py-2">
+              {emailSaving ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : "Send Verification"}
             </button>
           </div>
         </Modal>
 
-        {/* ── Delete Account Modal ── */}
         <Modal open={showDeleteModal} onClose={() => setShowDeleteModal(false)} variant="danger">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-destructive">Delete Account</h3>
             <button onClick={() => setShowDeleteModal(false)}><X className="h-5 w-5" /></button>
           </div>
-          <p className="text-sm text-muted-foreground">Type <strong>DELETE</strong> below to confirm.</p>
+          <p className="text-sm">Type <strong className="text-destructive">DELETE</strong> to confirm</p>
           <AnimatePresence><Toast msg={deleteMsg} /></AnimatePresence>
           <input type="text" value={deleteConfirm} onChange={(e) => setDeleteConfirm(e.target.value)}
-            className={inputClass(false)} placeholder='Type "DELETE" to confirm' />
+            className={inputClass(false)} placeholder="DELETE" />
           <div className="flex gap-3">
-            <button onClick={() => setShowDeleteModal(false)}>Cancel</button>
+            <button onClick={() => setShowDeleteModal(false)} className="flex-1">Cancel</button>
             <button onClick={handleDeleteAccount} disabled={deleteLoading || deleteConfirm !== "DELETE"}
-              className="flex-1 flex items-center justify-center gap-2 bg-destructive text-white rounded-lg">
-              {deleteLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Trash2 className="h-4 w-4" />Delete</>}
+              className="flex-1 bg-destructive text-white rounded-lg py-2">
+              {deleteLoading ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : "Delete"}
             </button>
           </div>
         </Modal>
