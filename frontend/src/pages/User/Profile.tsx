@@ -134,7 +134,6 @@ export default function ProfilePage() {
       try {
         setIsLoading(true);
         
-        // First try to get from API
         const profileUser = await userService.getProfile();
         const loadedProfile = {
           name: profileUser.name || user?.name || "",
@@ -152,7 +151,6 @@ export default function ProfilePage() {
         setFormData(loadedProfile);
       } catch (error) {
         console.error('Failed to load profile:', error);
-        // Fallback to user context
         if (user) {
           const fallbackProfile = {
             name: user.name || "",
@@ -192,7 +190,38 @@ export default function ProfilePage() {
     ? SA_PROVINCES_CITIES[formData.province] || []
     : [];
 
-  // ─── AI Fill from CV ──────────────────────────────────────────
+  // Helper: Check if a string is a date range (not a phone number)
+  const isDateRange = (text: string): boolean => {
+    // Matches patterns like 2022-2023, 2020–2024, 2022 - 2023, etc.
+    const dateRangePatterns = [
+      /^\d{4}[-–]\d{4}$/,           // 2022-2023 or 2022–2023
+      /^\d{4}\s*[-–]\s*\d{4}$/,     // 2022 - 2023
+      /^\d{2}\/\d{4}$/,              // 02/2024
+      /^\d{4}$/,                     // Just a year
+      /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{4}$/i, // Month Year
+    ];
+    return dateRangePatterns.some(pattern => pattern.test(text.trim()));
+  };
+
+  // Helper: Extract valid phone number (not a date range)
+  const extractValidPhone = (text: string): string => {
+    // Match South African or international phone numbers
+    const phoneMatches = text.match(/(?:\+27|0|27)[0-9\s\-\(\)]{9,15}\b/g) || [];
+    
+    for (const match of phoneMatches) {
+      const cleaned = match.trim();
+      // Skip if it's a date range
+      if (isDateRange(cleaned)) continue;
+      // Skip if it's too short or too long for a phone
+      const digitsOnly = cleaned.replace(/\D/g, '');
+      if (digitsOnly.length >= 9 && digitsOnly.length <= 12) {
+        return cleaned;
+      }
+    }
+    return "";
+  };
+
+  // ─── AI Fill from CV (NEVER touches name or email) ──────────────────────────
   const autoFillFromCV = async () => {
     try {
       const storedCV = localStorage.getItem('comprehensiveCVAnalysis');
@@ -202,20 +231,12 @@ export default function ProfilePage() {
       }
 
       const cvData = JSON.parse(storedCV);
-      
-      // Extract valid phone
       const allText = JSON.stringify(cvData);
-      const phoneMatch = allText.match(/(?:\+27|0)[0-9\s\-]{9,15}\b/);
-      let phone = "";
-      if (phoneMatch) {
-        const extractedPhone = phoneMatch[0].trim();
-        const isDatePattern = /^\d{4}[-–]\d{4}$|^\d{4}$/.test(extractedPhone);
-        if (!isDatePattern && extractedPhone.length >= 9 && extractedPhone.length <= 15) {
-          phone = extractedPhone;
-        }
-      }
       
-      // Extract occupation
+      // Extract valid phone (filter out date ranges)
+      let phone = extractValidPhone(allText);
+      
+      // Extract occupation from skills
       const skills = cvData?.sections?.skills || [];
       const techSkills = ["Python", "Java", "JavaScript", "React", "C#", "C++", "TypeScript", "Node.js", "HTML", "CSS", "SQL"];
       const techCount = skills.filter((s: string) => 
@@ -230,17 +251,25 @@ export default function ProfilePage() {
         else if (hasFrontend) occupation = "Frontend Developer";
         else if (hasBackend) occupation = "Backend Developer";
         else occupation = "Software Developer";
+      } else if (cvData?.sections?.experience?.length > 0) {
+        // Try to extract from experience
+        const experienceText = cvData.sections.experience.join(" ").toLowerCase();
+        if (experienceText.includes("developer")) occupation = "Software Developer";
+        else if (experienceText.includes("engineer")) occupation = "Software Engineer";
+        else if (experienceText.includes("intern")) occupation = "Intern";
       }
       
-      // Extract education
+      // Extract education (don't overwrite if empty)
       const educationSection = cvData?.sections?.education || [];
       let education = "";
       if (educationSection.length > 0) {
         const eduText = educationSection.join(" ").toLowerCase();
-        if (eduText.includes("bachelor") || eduText.includes("bsc")) education = "Bachelor's Degree";
-        else if (eduText.includes("master")) education = "Master's Degree";
-        else if (eduText.includes("diploma")) education = "Diploma";
-        else if (eduText.includes("matric")) education = "Matric / Grade 12";
+        if (eduText.includes("bachelor") || eduText.includes("bsc") || eduText.includes("ba") || eduText.includes("bcom")) {
+          education = "Bachelor's Degree";
+        } else if (eduText.includes("master") || eduText.includes("msc") || eduText.includes("ma")) {
+          education = "Master's Degree";
+        } else if (eduText.includes("diploma")) education = "Diploma";
+        else if (eduText.includes("matric") || eduText.includes("grade 12")) education = "Matric / Grade 12";
       }
       
       // Extract bio
@@ -269,20 +298,20 @@ export default function ProfilePage() {
         }
       }
       
-      // Build update object
+      // Build update object - NEVER include name or email
       const finalInfo: Partial<UserProfile> = {};
-      if (phone) finalInfo.phone = phone;
+      if (phone && !isDateRange(phone)) finalInfo.phone = phone;
       if (occupation) finalInfo.occupation = occupation;
       if (education) finalInfo.education = education;
       if (bio) finalInfo.bio = bio;
       if (detectedProvince) finalInfo.province = detectedProvince;
       if (detectedCity) finalInfo.city = detectedCity;
       
-      // Update form
+      // Update form data (only if we're in edit mode or just applying)
       setFormData((prev) => ({ ...prev, ...finalInfo }));
       
       const filledCount = Object.keys(finalInfo).length;
-      showToast({ type: "success", text: `✨ Imported ${filledCount} fields from your CV!` });
+      showToast({ type: "success", text: `✨ Imported ${filledCount} fields from your CV! (Name and email never changed)` });
       
     } catch (error) {
       console.error('Auto-fill failed:', error);
@@ -413,27 +442,9 @@ export default function ProfilePage() {
       })
     : "Jan 2026";
 
-  const updateField = (field: keyof UserProfile, value: string) =>
+  const updateField = (field: keyof UserProfile, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-
-  // Field component
-  const Field = ({
-    icon: Icon,
-    label,
-    children,
-  }: {
-    icon: React.ElementType;
-    label: string;
-    children: React.ReactNode;
-  }) => (
-    <div className="space-y-2">
-      <label className="flex items-center gap-2 text-sm font-medium text-foreground">
-        <Icon className="h-4 w-4 text-muted-foreground" />
-        {label}
-      </label>
-      {children}
-    </div>
-  );
+  };
 
   const inputClass = (disabled: boolean) =>
     cn(
@@ -531,6 +542,7 @@ export default function ProfilePage() {
                 <div className="flex items-center gap-2">
                   {hasCVData && !isEditing && (
                     <button
+                      type="button"
                       onClick={autoFillFromCV}
                       className="flex items-center gap-2 px-4 py-2 text-accent hover:bg-accent/10 rounded-lg transition-colors font-medium text-sm"
                     >
@@ -540,6 +552,7 @@ export default function ProfilePage() {
                   )}
                   {!isEditing ? (
                     <button
+                      type="button"
                       onClick={() => setIsEditing(true)}
                       className="flex items-center gap-2 px-4 py-2 text-primary hover:bg-primary/10 rounded-lg transition-colors font-medium text-sm"
                     >
@@ -549,6 +562,7 @@ export default function ProfilePage() {
                   ) : (
                     <div className="flex items-center gap-2">
                       <button
+                        type="button"
                         onClick={handleCancel}
                         disabled={isSaving}
                         className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors text-sm disabled:opacity-50"
@@ -556,6 +570,7 @@ export default function ProfilePage() {
                         Cancel
                       </button>
                       <button
+                        type="button"
                         onClick={handleSave}
                         disabled={isSaving}
                         className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm disabled:opacity-50"
@@ -578,8 +593,12 @@ export default function ProfilePage() {
               </div>
 
               <div className="space-y-5">
-                {/* Full Name */}
-                <Field icon={User} label="Full Name">
+                {/* Full Name - NEVER auto-filled */}
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 text-sm font-medium text-foreground">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    Full Name
+                  </label>
                   <input
                     type="text"
                     value={formData.name}
@@ -588,10 +607,14 @@ export default function ProfilePage() {
                     className={inputClass(!isEditing)}
                     placeholder="Enter your full name"
                   />
-                </Field>
+                </div>
 
-                {/* Email */}
-                <Field icon={Mail} label="Email Address">
+                {/* Email - NEVER auto-filled, read-only */}
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 text-sm font-medium text-foreground">
+                    <Mail className="h-4 w-4 text-muted-foreground" />
+                    Email Address
+                  </label>
                   <div className="flex gap-2">
                     <input
                       type="email"
@@ -601,6 +624,7 @@ export default function ProfilePage() {
                       placeholder="your.email@example.com"
                     />
                     <button
+                      type="button"
                       onClick={() => setShowEmailModal(true)}
                       className="px-4 py-2 text-sm font-medium text-primary hover:bg-primary/10 border border-primary/30 rounded-lg transition-colors whitespace-nowrap"
                     >
@@ -610,10 +634,14 @@ export default function ProfilePage() {
                   <p className="text-xs text-muted-foreground">
                     Email changes require verification via a confirmation link.
                   </p>
-                </Field>
+                </div>
 
                 {/* Phone */}
-                <Field icon={Phone} label="Phone Number">
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 text-sm font-medium text-foreground">
+                    <Phone className="h-4 w-4 text-muted-foreground" />
+                    Phone Number
+                  </label>
                   <input
                     type="tel"
                     value={formData.phone}
@@ -622,19 +650,33 @@ export default function ProfilePage() {
                     className={inputClass(!isEditing)}
                     placeholder="+27 XX XXX XXXX"
                   />
-                </Field>
+                  {formData.phone && isDateRange(formData.phone) && (
+                    <p className="text-xs text-destructive flex items-center gap-1 mt-1">
+                      <AlertCircle className="h-3 w-3" />
+                      This appears to be a date range, not a phone number. Please update it.
+                    </p>
+                  )}
+                </div>
 
                 {/* Location */}
-                <Field icon={Globe} label="Country">
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 text-sm font-medium text-foreground">
+                    <Globe className="h-4 w-4 text-muted-foreground" />
+                    Country
+                  </label>
                   <input
                     type="text"
                     value="South Africa"
                     disabled
                     className={inputClass(true)}
                   />
-                </Field>
+                </div>
 
-                <Field icon={MapPin} label="Province">
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 text-sm font-medium text-foreground">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    Province
+                  </label>
                   <select
                     value={formData.province}
                     onChange={(e) => {
@@ -651,9 +693,13 @@ export default function ProfilePage() {
                       </option>
                     ))}
                   </select>
-                </Field>
+                </div>
 
-                <Field icon={Building} label="City / Town">
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 text-sm font-medium text-foreground">
+                    <Building className="h-4 w-4 text-muted-foreground" />
+                    City / Town
+                  </label>
                   <select
                     value={formData.city}
                     onChange={(e) => updateField("city", e.target.value)}
@@ -671,10 +717,14 @@ export default function ProfilePage() {
                       </option>
                     ))}
                   </select>
-                </Field>
+                </div>
 
                 {/* Occupation */}
-                <Field icon={Briefcase} label="Current Occupation">
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 text-sm font-medium text-foreground">
+                    <Briefcase className="h-4 w-4 text-muted-foreground" />
+                    Current Occupation
+                  </label>
                   <input
                     type="text"
                     value={formData.occupation}
@@ -683,10 +733,14 @@ export default function ProfilePage() {
                     className={inputClass(!isEditing)}
                     placeholder="Your job title or 'Student' or 'Unemployed'"
                   />
-                </Field>
+                </div>
 
                 {/* Education */}
-                <Field icon={GraduationCap} label="Education Level">
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 text-sm font-medium text-foreground">
+                    <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                    Education Level
+                  </label>
                   <select
                     value={formData.education}
                     onChange={(e) => updateField("education", e.target.value)}
@@ -704,7 +758,7 @@ export default function ProfilePage() {
                     <option value="PhD / Doctorate">PhD / Doctorate</option>
                     <option value="Other">Other</option>
                   </select>
-                </Field>
+                </div>
 
                 {/* Bio */}
                 <div className="space-y-2">
@@ -729,6 +783,7 @@ export default function ProfilePage() {
                 Account Security
               </h3>
               <button
+                type="button"
                 onClick={() => setShowPasswordModal(true)}
                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-muted hover:bg-muted/80 rounded-lg transition-colors"
               >
@@ -747,6 +802,7 @@ export default function ProfilePage() {
                 confirmation email will be sent before deletion.
               </p>
               <button
+                type="button"
                 onClick={() => setShowDeleteModal(true)}
                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-destructive bg-destructive/10 hover:bg-destructive/20 border border-destructive/30 rounded-lg transition-colors"
               >
@@ -757,7 +813,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Modals - Password, Email, Delete */}
+        {/* ── Password Modal ── */}
         <Modal
           open={showPasswordModal}
           onClose={() => {
@@ -807,6 +863,7 @@ export default function ProfilePage() {
           </div>
         </Modal>
 
+        {/* ── Email Modal ── */}
         <Modal open={showEmailModal} onClose={() => setShowEmailModal(false)}>
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-foreground">Change Email Address</h3>
@@ -829,6 +886,7 @@ export default function ProfilePage() {
           </div>
         </Modal>
 
+        {/* ── Delete Account Modal ── */}
         <Modal open={showDeleteModal} onClose={() => setShowDeleteModal(false)} variant="danger">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-destructive">Delete Account</h3>
