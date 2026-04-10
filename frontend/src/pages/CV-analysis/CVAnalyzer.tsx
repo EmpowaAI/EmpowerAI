@@ -72,31 +72,41 @@ export default function CVAnalyzerPage() {
     }
   }, [fileName])
 
-  // Helper: Extract name from CV
-  const extractNameFromCV = (cvData: CVAnalysis): string => {
-    const about = cvData?.sections?.about || ""
-    // Try to find name pattern at start of about section
-    const nameMatch = about.match(/^([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)/)
-    if (nameMatch) return nameMatch[1]
-    
-    // Try to find from experience or other sections
-    const allText = JSON.stringify(cvData)
-    const commonNameMatch = allText.match(/([A-Z][a-z]+)\s+([A-Z][a-z]+)/)
-    return commonNameMatch ? `${commonNameMatch[1]} ${commonNameMatch[2]}` : user?.name || ""
+  // ❌ REMOVED: extractNameFromCV - NEVER extract name from CV
+
+  // Helper: Extract phone from CV (filter out date ranges)
+  const isDateRange = (text: string): boolean => {
+    if (!text) return false
+    const dateRangePatterns = [
+      /^\d{4}[-–]\d{4}$/,           // 2022-2023 or 2022–2023
+      /^\d{4}\s*[-–]\s*\d{4}$/,     // 2022 - 2023
+      /^\d{2}\/\d{4}$/,              // 02/2024
+      /^\d{4}$/,                     // Just a year
+      /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{4}$/i,
+      /\([0-9]{4}[-–][0-9]{4}\)/,    // (2022-2023)
+      /[0-9]{4}[-–][0-9]{4}/,        // 2022-2023 without parentheses
+    ]
+    return dateRangePatterns.some(pattern => pattern.test(text.trim()))
   }
 
-  // Helper: Extract phone from CV
   const extractPhoneFromCV = (cvData: CVAnalysis): string => {
     const allText = JSON.stringify(cvData)
-    // Match South African or international phone numbers
-    const phoneMatch = allText.match(/[\+]?[0-9\s\-\(\)]{10,15}/)
-    return phoneMatch ? phoneMatch[0].trim() : ""
+    const phoneMatches = allText.match(/(?:\+27|0|27)[0-9\s\-\(\)]{9,15}\b/g) || []
+    
+    for (const match of phoneMatches) {
+      const cleaned = match.trim()
+      if (isDateRange(cleaned)) continue
+      const digitsOnly = cleaned.replace(/\D/g, '')
+      if (digitsOnly.length >= 9 && digitsOnly.length <= 12) {
+        return cleaned
+      }
+    }
+    return ""
   }
 
   // Helper: Extract location from CV
   const extractLocationFromCV = (cvData: CVAnalysis): string => {
     const about = cvData?.sections?.about || ""
-    // Look for location patterns
     const patterns = [
       /(?:based in|from|located in|residing in)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i,
       /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s*,\s*South Africa/i,
@@ -118,7 +128,6 @@ export default function CVAnalyzerPage() {
     const experience = cvData?.sections?.experience || []
     const about = cvData?.sections?.about || ""
     
-    // Look for job titles in experience
     const jobTitles = [
       /(?:as a|as an|position:?\s*)([A-Za-z\s]+(?:Developer|Engineer|Manager|Designer|Analyst|Specialist|Consultant|Intern|Assistant|Associate))/i,
       /^([A-Za-z\s]+(?:Developer|Engineer|Manager|Designer|Analyst|Specialist|Consultant))/im
@@ -131,13 +140,11 @@ export default function CVAnalyzerPage() {
       }
     }
     
-    // Check about section
     for (const pattern of jobTitles) {
       const match = about.match(pattern)
       if (match) return match[1].trim()
     }
     
-    // Check readiness level for students
     if (cvData.readinessLevel === "DEVELOPING" && cvData.score < 40) {
       return "Student / Entry Level"
     }
@@ -166,7 +173,6 @@ export default function CVAnalyzerPage() {
     const about = cvData?.sections?.about || ""
     const strengths = cvData?.strengths || []
     
-    // Use about section or create from strengths
     if (about.length > 20) {
       return about.length > 200 ? about.substring(0, 200) + "..." : about
     }
@@ -178,11 +184,14 @@ export default function CVAnalyzerPage() {
     return ""
   }
 
-  // Auto-fill profile from CV data
+  // Auto-fill profile from CV data - ⚠️ NEVER updates name or email
   const autoFillProfile = async (cvData: CVAnalysis) => {
     try {
+      // ❌ REMOVED: name extraction - NEVER update user's name from CV
+      // ❌ REMOVED: email extraction - NEVER update user's email from CV
+      
       const extractedProfile = {
-        name: extractNameFromCV(cvData),
+        // name is NOT included - user's name should never be auto-changed
         phone: extractPhoneFromCV(cvData),
         location: extractLocationFromCV(cvData),
         occupation: extractOccupationFromCV(cvData),
@@ -190,24 +199,34 @@ export default function CVAnalyzerPage() {
         bio: extractBioFromCV(cvData),
       }
       
-      // Only update if we have at least some data
-      const hasData = Object.values(extractedProfile).some(v => v && v.length > 0)
+      // Filter out empty values and date ranges
+      const cleanProfile: any = {}
+      if (extractedProfile.phone && !isDateRange(extractedProfile.phone)) {
+        cleanProfile.phone = extractedProfile.phone
+      }
+      if (extractedProfile.location) cleanProfile.location = extractedProfile.location
+      if (extractedProfile.occupation) cleanProfile.occupation = extractedProfile.occupation
+      if (extractedProfile.education) cleanProfile.education = extractedProfile.education
+      if (extractedProfile.bio) cleanProfile.bio = extractedProfile.bio
+      
+      const hasData = Object.keys(cleanProfile).length > 0
       
       if (hasData) {
-        await userService.updateProfile(extractedProfile)
+        await userService.updateProfile(cleanProfile)
         if (updateUser) {
+          // ⚠️ IMPORTANT: Only update non-name, non-email fields
           updateUser({
             ...user,
-            ...extractedProfile,
-            name: extractedProfile.name || user?.name,
+            // name is NOT included - preserve user's name
+            // email is NOT included - preserve user's email
+            ...cleanProfile,
           })
         }
-        console.log("✅ Profile auto-filled from CV:", extractedProfile)
-        showToast("✨ Profile info auto-filled from your CV!", "success")
+        console.log("✅ Profile auto-filled from CV (name and email unchanged):", cleanProfile)
+        showToast("✨ Profile info auto-filled from your CV! (Your name and email were not changed)", "success")
       }
     } catch (err) {
       console.warn("Auto-profile fill failed:", err)
-      // Don't show error to user - this is a background feature
     }
   }
 
@@ -263,7 +282,7 @@ export default function CVAnalyzerPage() {
       // Mark CV step complete — unlocks twin builder and all protected routes
       updateProgress('cvCompleted', true)
 
-      // 🔥 AUTO-FILL PROFILE FROM CV (background)
+      // 🔥 AUTO-FILL PROFILE FROM CV (background) - NEVER changes name or email
       await autoFillProfile(result)
 
       showToast(`CV analyzed! Score: ${result.score}% — ${result.readinessLevel}`, "success")
