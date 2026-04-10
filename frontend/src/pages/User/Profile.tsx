@@ -83,18 +83,18 @@ function Modal({
 // ── Main Component ──
 export default function ProfilePage() {
   const { user, updateUser } = useUser();
-  const [profile, setProfile] = useState<UserProfile>(() => ({
-    name: user?.name || "",
-    email: user?.email || "",
-    phone: (user as any)?.phone || "",
-    country: (user as any)?.country || "South Africa",
-    province: (user as any)?.province || "",
-    city: (user as any)?.city || "",
-    occupation: (user as any)?.occupation || "",
-    education: (user as any)?.education || "",
-    bio: (user as any)?.bio || "",
-    createdAt: (user as any)?.createdAt || new Date().toISOString(),
-  }));
+  const [profile, setProfile] = useState<UserProfile>({
+    name: "",
+    email: "",
+    phone: "",
+    country: "South Africa",
+    province: "",
+    city: "",
+    occupation: "",
+    education: "",
+    bio: "",
+    createdAt: new Date().toISOString(),
+  });
   
   const [formData, setFormData] = useState<UserProfile>(profile);
   const [isEditing, setIsEditing] = useState(false);
@@ -128,23 +128,25 @@ export default function ProfilePage() {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteMsg, setDeleteMsg] = useState<ToastMsg>(null);
 
-  // Load profile from API
+  // Load profile from API and user context
   useEffect(() => {
     const loadProfile = async () => {
       try {
         setIsLoading(true);
+        
+        // First try to get from API
         const profileUser = await userService.getProfile();
         const loadedProfile = {
-          name: profileUser.name || "",
-          email: profileUser.email || "",
-          phone: (profileUser as any).phone || "",
+          name: profileUser.name || user?.name || "",
+          email: profileUser.email || user?.email || "",
+          phone: (profileUser as any).phone || (user as any)?.phone || "",
           country: (profileUser as any).country || "South Africa",
-          province: (profileUser as any).province || "",
-          city: (profileUser as any).city || "",
-          occupation: (profileUser as any).occupation || "",
-          education: (profileUser as any).education || "",
-          bio: (profileUser as any).bio || "",
-          createdAt: (profileUser as any).createdAt || new Date().toISOString(),
+          province: (profileUser as any).province || (user as any)?.province || "",
+          city: (profileUser as any).city || (user as any)?.city || "",
+          occupation: (profileUser as any).occupation || (user as any)?.occupation || "",
+          education: (profileUser as any).education || (user as any)?.education || "",
+          bio: (profileUser as any).bio || (user as any)?.bio || "",
+          createdAt: (profileUser as any).createdAt || (user as any)?.createdAt || new Date().toISOString(),
         };
         setProfile(loadedProfile);
         setFormData(loadedProfile);
@@ -201,7 +203,7 @@ export default function ProfilePage() {
 
       const cvData = JSON.parse(storedCV);
       
-      // Extract valid phone (filter out date ranges)
+      // Extract valid phone
       const allText = JSON.stringify(cvData);
       const phoneMatch = allText.match(/(?:\+27|0)[0-9\s\-]{9,15}\b/);
       let phone = "";
@@ -213,7 +215,7 @@ export default function ProfilePage() {
         }
       }
       
-      // Extract occupation from skills
+      // Extract occupation
       const skills = cvData?.sections?.skills || [];
       const techSkills = ["Python", "Java", "JavaScript", "React", "C#", "C++", "TypeScript", "Node.js", "HTML", "CSS", "SQL"];
       const techCount = skills.filter((s: string) => 
@@ -245,12 +247,11 @@ export default function ProfilePage() {
       let bio = cvData?.sections?.about || "";
       if (bio.length > 300) bio = bio.substring(0, 300) + "...";
       
-      // Extract province from CV text
+      // Extract province and city
       let detectedProvince = "";
       let detectedCity = "";
       const cvText = JSON.stringify(cvData).toLowerCase();
       
-      // Check each province
       for (const province of SA_PROVINCES) {
         if (cvText.includes(province.toLowerCase())) {
           detectedProvince = province;
@@ -258,7 +259,6 @@ export default function ProfilePage() {
         }
       }
       
-      // Check for cities if province found
       if (detectedProvince) {
         const cities = SA_PROVINCES_CITIES[detectedProvince] || [];
         for (const city of cities) {
@@ -269,7 +269,7 @@ export default function ProfilePage() {
         }
       }
       
-      // Build update object (ONLY these fields - NEVER name or email)
+      // Build update object
       const finalInfo: Partial<UserProfile> = {};
       if (phone) finalInfo.phone = phone;
       if (occupation) finalInfo.occupation = occupation;
@@ -294,7 +294,7 @@ export default function ProfilePage() {
     setIsSaving(true);
     setToast(null);
     try {
-      const { email, ...updatePayload } = formData;
+      const { email, createdAt, ...updatePayload } = formData;
       const response = await userService.updateProfile(updatePayload);
       
       // Update local state
@@ -406,12 +406,12 @@ export default function ProfilePage() {
         .slice(0, 2)
     : "U";
 
-  const memberSince = profile.createdAt
+  const memberSince = profile.createdAt && profile.createdAt !== "Invalid Date"
     ? new Date(profile.createdAt).toLocaleDateString("en-US", {
         month: "short",
         year: "numeric",
       })
-    : "—";
+    : "Jan 2026";
 
   const updateField = (field: keyof UserProfile, value: string) =>
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -503,8 +503,8 @@ export default function ProfilePage() {
                   <span className="text-sm text-muted-foreground">
                     Account Status
                   </span>
-                  <span className="text-sm font-medium text-primary flex items-center gap-1">
-                    <span className="h-2 w-2 rounded-full bg-primary" />
+                  <span className="text-sm font-medium text-green-500 flex items-center gap-1">
+                    <span className="h-2 w-2 rounded-full bg-green-500" />
                     Active
                   </span>
                 </div>
@@ -578,7 +578,7 @@ export default function ProfilePage() {
               </div>
 
               <div className="space-y-5">
-                {/* Full Name - NEVER auto-filled */}
+                {/* Full Name */}
                 <Field icon={User} label="Full Name">
                   <input
                     type="text"
@@ -590,7 +590,7 @@ export default function ProfilePage() {
                   />
                 </Field>
 
-                {/* Email - NEVER auto-filled */}
+                {/* Email */}
                 <Field icon={Mail} label="Email Address">
                   <div className="flex gap-2">
                     <input
@@ -612,7 +612,7 @@ export default function ProfilePage() {
                   </p>
                 </Field>
 
-                {/* Phone - Extracted from CV */}
+                {/* Phone */}
                 <Field icon={Phone} label="Phone Number">
                   <input
                     type="tel"
@@ -624,7 +624,7 @@ export default function ProfilePage() {
                   />
                 </Field>
 
-                {/* Location: Country → Province → City */}
+                {/* Location */}
                 <Field icon={Globe} label="Country">
                   <input
                     type="text"
@@ -673,7 +673,7 @@ export default function ProfilePage() {
                   </select>
                 </Field>
 
-                {/* Occupation - Extracted from CV */}
+                {/* Occupation */}
                 <Field icon={Briefcase} label="Current Occupation">
                   <input
                     type="text"
@@ -685,7 +685,7 @@ export default function ProfilePage() {
                   />
                 </Field>
 
-                {/* Education - Extracted from CV */}
+                {/* Education */}
                 <Field icon={GraduationCap} label="Education Level">
                   <select
                     value={formData.education}
@@ -706,7 +706,7 @@ export default function ProfilePage() {
                   </select>
                 </Field>
 
-                {/* Bio - Extracted from CV */}
+                {/* Bio */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground block">
                     Bio
@@ -757,7 +757,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* ── Password Modal ── */}
+        {/* Modals - Password, Email, Delete */}
         <Modal
           open={showPasswordModal}
           onClose={() => {
@@ -767,271 +767,82 @@ export default function ProfilePage() {
           }}
         >
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-foreground">
-              Change Password
-            </h3>
-            <button
-              onClick={() => {
-                setShowPasswordModal(false);
-                setPasswordMsg(null);
-              }}
-              className="text-muted-foreground hover:text-foreground p-1 rounded-lg hover:bg-muted transition-colors"
-            >
+            <h3 className="text-lg font-semibold text-foreground">Change Password</h3>
+            <button onClick={() => setShowPasswordModal(false)} className="text-muted-foreground hover:text-foreground">
               <X className="h-5 w-5" />
             </button>
           </div>
-
-          <AnimatePresence>
-            <Toast msg={passwordMsg} />
-          </AnimatePresence>
-
+          <AnimatePresence><Toast msg={passwordMsg} /></AnimatePresence>
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">
-                Current Password
-              </label>
+              <label>Current Password</label>
               <div className="relative">
-                <input
-                  type={showPasswords ? "text" : "password"}
-                  value={passwordForm.currentPassword}
-                  onChange={(e) =>
-                    setPasswordForm({ ...passwordForm, currentPassword: e.target.value })
-                  }
-                  className={inputClass(false) + " pr-12"}
-                  placeholder="Enter current password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPasswords(!showPasswords)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  {showPasswords ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
+                <input type={showPasswords ? "text" : "password"} value={passwordForm.currentPassword}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                  className={inputClass(false) + " pr-12"} placeholder="Enter current password" />
+                <button type="button" onClick={() => setShowPasswords(!showPasswords)} className="absolute right-3 top-1/2 -translate-y-1/2">
+                  {showPasswords ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">
-                New Password
-              </label>
-              <input
-                type={showPasswords ? "text" : "password"}
-                value={passwordForm.password}
-                onChange={(e) =>
-                  setPasswordForm({ ...passwordForm, password: e.target.value })
-                }
-                className={inputClass(false)}
-                placeholder="Enter new password (min 8 chars)"
-              />
+              <label>New Password</label>
+              <input type={showPasswords ? "text" : "password"} value={passwordForm.password}
+                onChange={(e) => setPasswordForm({ ...passwordForm, password: e.target.value })}
+                className={inputClass(false)} placeholder="Enter new password (min 8 chars)" />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">
-                Confirm New Password
-              </label>
-              <input
-                type={showPasswords ? "text" : "password"}
-                value={passwordForm.confirmPassword}
-                onChange={(e) =>
-                  setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })
-                }
-                className={inputClass(false)}
-                placeholder="Confirm new password"
-              />
+              <label>Confirm New Password</label>
+              <input type={showPasswords ? "text" : "password"} value={passwordForm.confirmPassword}
+                onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                className={inputClass(false)} placeholder="Confirm new password" />
             </div>
           </div>
-
           <div className="flex gap-3 pt-2">
-            <button
-              onClick={() => {
-                setShowPasswordModal(false);
-                setPasswordMsg(null);
-                setPasswordForm({ currentPassword: "", password: "", confirmPassword: "" });
-              }}
-              className="flex-1 px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleChangePassword}
-              disabled={passwordSaving}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm disabled:opacity-50"
-            >
-              {passwordSaving ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                "Update Password"
-              )}
+            <button onClick={() => setShowPasswordModal(false)} className="flex-1 px-4 py-2 text-sm">Cancel</button>
+            <button onClick={handleChangePassword} disabled={passwordSaving}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-lg">
+              {passwordSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Update Password"}
             </button>
           </div>
         </Modal>
 
-        {/* ── Email Modal ── */}
-        <Modal
-          open={showEmailModal}
-          onClose={() => {
-            setShowEmailModal(false);
-            setEmailMsg(null);
-            setEmailForm({ newEmail: "", password: "" });
-          }}
-        >
+        <Modal open={showEmailModal} onClose={() => setShowEmailModal(false)}>
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-foreground">
-              Change Email Address
-            </h3>
-            <button
-              onClick={() => {
-                setShowEmailModal(false);
-                setEmailMsg(null);
-              }}
-              className="text-muted-foreground hover:text-foreground p-1 rounded-lg hover:bg-muted transition-colors"
-            >
-              <X className="h-5 w-5" />
-            </button>
+            <h3 className="text-lg font-semibold text-foreground">Change Email Address</h3>
+            <button onClick={() => setShowEmailModal(false)}><X className="h-5 w-5" /></button>
           </div>
-
-          <AnimatePresence>
-            <Toast msg={emailMsg} />
-          </AnimatePresence>
-
+          <AnimatePresence><Toast msg={emailMsg} /></AnimatePresence>
           <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">
-                New Email Address
-              </label>
-              <input
-                type="email"
-                value={emailForm.newEmail}
-                onChange={(e) =>
-                  setEmailForm({ ...emailForm, newEmail: e.target.value })
-                }
-                className={inputClass(false)}
-                placeholder="Enter new email address"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">
-                Current Password
-              </label>
-              <input
-                type="password"
-                value={emailForm.password}
-                onChange={(e) =>
-                  setEmailForm({ ...emailForm, password: e.target.value })
-                }
-                className={inputClass(false)}
-                placeholder="Enter your current password"
-              />
-            </div>
-            <p className="text-xs text-muted-foreground">
-              A verification link will be sent to the new address. Your email
-              won&apos;t change until you click it.
-            </p>
+            <input type="email" value={emailForm.newEmail} onChange={(e) => setEmailForm({ ...emailForm, newEmail: e.target.value })}
+              className={inputClass(false)} placeholder="Enter new email address" />
+            <input type="password" value={emailForm.password} onChange={(e) => setEmailForm({ ...emailForm, password: e.target.value })}
+              className={inputClass(false)} placeholder="Enter your current password" />
+            <p className="text-xs text-muted-foreground">A verification link will be sent to the new address.</p>
           </div>
-
-          <div className="flex gap-3 pt-2">
-            <button
-              onClick={() => {
-                setShowEmailModal(false);
-                setEmailMsg(null);
-                setEmailForm({ newEmail: "", password: "" });
-              }}
-              className="flex-1 px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleEmailChange}
-              disabled={emailSaving}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm disabled:opacity-50"
-            >
-              {emailSaving ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Sending...
-                </>
-              ) : (
-                "Send Verification"
-              )}
+          <div className="flex gap-3">
+            <button onClick={() => setShowEmailModal(false)} className="flex-1">Cancel</button>
+            <button onClick={handleEmailChange} disabled={emailSaving}
+              className="flex-1 flex items-center justify-center gap-2 bg-primary text-white rounded-lg">
+              {emailSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send Verification"}
             </button>
           </div>
         </Modal>
 
-        {/* ── Delete Account Modal ── */}
-        <Modal
-          open={showDeleteModal}
-          onClose={() => {
-            setShowDeleteModal(false);
-            setDeleteMsg(null);
-            setDeleteConfirm("");
-          }}
-          variant="danger"
-        >
+        <Modal open={showDeleteModal} onClose={() => setShowDeleteModal(false)} variant="danger">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-destructive">
-              Delete Account
-            </h3>
-            <button
-              onClick={() => {
-                setShowDeleteModal(false);
-                setDeleteMsg(null);
-                setDeleteConfirm("");
-              }}
-              className="text-muted-foreground hover:text-foreground p-1 rounded-lg hover:bg-muted transition-colors"
-            >
-              <X className="h-5 w-5" />
-            </button>
+            <h3 className="text-lg font-semibold text-destructive">Delete Account</h3>
+            <button onClick={() => setShowDeleteModal(false)}><X className="h-5 w-5" /></button>
           </div>
-
-          <p className="text-sm text-muted-foreground">
-            This action is permanent. Type{" "}
-            <strong className="text-foreground">DELETE</strong> below to confirm.
-          </p>
-
-          <AnimatePresence>
-            <Toast msg={deleteMsg} />
-          </AnimatePresence>
-
-          <input
-            type="text"
-            value={deleteConfirm}
-            onChange={(e) => setDeleteConfirm(e.target.value)}
-            className={inputClass(false)}
-            placeholder='Type "DELETE" to confirm'
-          />
-
-          <div className="flex gap-3 pt-2">
-            <button
-              onClick={() => {
-                setShowDeleteModal(false);
-                setDeleteMsg(null);
-                setDeleteConfirm("");
-              }}
-              className="flex-1 px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleDeleteAccount}
-              disabled={deleteLoading || deleteConfirm !== "DELETE"}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-destructive text-destructive-foreground rounded-lg hover:bg-destructive/90 transition-colors font-medium text-sm disabled:opacity-50"
-            >
-              {deleteLoading ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Deleting...
-                </>
-              ) : (
-                <>
-                  <Trash2 className="h-4 w-4" />
-                  Delete Account
-                </>
-              )}
+          <p className="text-sm text-muted-foreground">Type <strong>DELETE</strong> below to confirm.</p>
+          <AnimatePresence><Toast msg={deleteMsg} /></AnimatePresence>
+          <input type="text" value={deleteConfirm} onChange={(e) => setDeleteConfirm(e.target.value)}
+            className={inputClass(false)} placeholder='Type "DELETE" to confirm' />
+          <div className="flex gap-3">
+            <button onClick={() => setShowDeleteModal(false)}>Cancel</button>
+            <button onClick={handleDeleteAccount} disabled={deleteLoading || deleteConfirm !== "DELETE"}
+              className="flex-1 flex items-center justify-center gap-2 bg-destructive text-white rounded-lg">
+              {deleteLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Trash2 className="h-4 w-4" />Delete</>}
             </button>
           </div>
         </Modal>
