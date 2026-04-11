@@ -83,6 +83,15 @@ const cvProfileSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+
+    // Optional retention control (TTL). When set, MongoDB will auto-delete the document
+    // once this timestamp is reached. When null/absent, the profile is retained.
+    expiresAt: {
+      type: Date,
+      default: null,
+      expires: 0,
+      index: true,
+    },
   },
   {
     timestamps: true, // createdAt + updatedAt

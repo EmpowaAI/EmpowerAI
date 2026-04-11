@@ -1,11 +1,28 @@
 const CvProfile = require('../models/cvProfile');
 
+const toBool = (value, defaultValue = false) => {
+  if (value === undefined || value === null) return defaultValue;
+  const normalized = String(value).trim().toLowerCase();
+  if (['1', 'true', 'yes', 'y', 'on'].includes(normalized)) return true;
+  if (['0', 'false', 'no', 'n', 'off'].includes(normalized)) return false;
+  return defaultValue;
+};
+
+const toPositiveInt = (value) => {
+  const n = Number.parseInt(String(value), 10);
+  return Number.isFinite(n) && n > 0 ? n : null;
+};
+
 /**
  * Upsert a CvProfile for a user.
  * Uses findOneAndUpdate with upsert:true so re-uploads overwrite the previous profile.
  */
 async function saveOrUpdate({ userId, filename, mimetype, fileSize, rawText, analysis, isFallback }) {
   const isComplete = !isFallback && !!analysis?.score;
+  const storeRawText = toBool(process.env.CV_STORE_RAW_TEXT, false);
+
+  const ttlDays = process.env.CV_PROFILE_TTL_DAYS ? toPositiveInt(process.env.CV_PROFILE_TTL_DAYS) : null;
+  const expiresAt = ttlDays ? new Date(Date.now() + ttlDays * 24 * 60 * 60 * 1000) : null;
 
   const profile = await CvProfile.findOneAndUpdate(
     { user: userId },
@@ -15,7 +32,7 @@ async function saveOrUpdate({ userId, filename, mimetype, fileSize, rawText, ana
         filename,
         mimetype,
         fileSize,
-        rawText: (rawText || '').slice(0, 10000),
+        rawText: storeRawText ? (rawText || '').slice(0, 10000) : '',
         analysis: {
           score: analysis?.score ?? 0,
           readinessLevel: analysis?.readinessLevel ?? 'JUNIOR',
@@ -44,6 +61,7 @@ async function saveOrUpdate({ userId, filename, mimetype, fileSize, rawText, ana
         isComplete,
         isFallback: !!isFallback,
         analyzedAt: new Date(),
+        expiresAt,
       },
     },
     {
