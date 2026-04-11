@@ -76,17 +76,11 @@ def fix_weaknesses_for_industry(result: dict, cv_text: str, experience: list = N
     for w in weaknesses:
         w_lower = w.lower()
         for tech in TECH_KEYWORDS:
-            if tech in w_lower:
-                has_tech_weaknesses = True
-                print(f"Found tech keyword '{tech}' in weakness: {w}")
-                break
+            if tech in w_lower: has_tech_weaknesses = True; break
     
     # If it's retail and has tech weaknesses, replace them
     if is_retail and has_tech_weaknesses:
-        print("⚠️ Detected retail candidate with tech weaknesses - overriding!")
-        
-        # Keep only the "quantifiable achievements" weakness if present (it's actually valid)
-        quantifiable_weakness = None
+        # Keep only the "quantifiable achievements" weakness if present
         for w in weaknesses:
             if 'quantifiable' in w.lower() or 'metrics' in w.lower() or 'numbers' in w.lower():
                 quantifiable_weakness = w
@@ -107,8 +101,7 @@ def fix_weaknesses_for_industry(result: dict, cv_text: str, experience: list = N
                 seen.add(w)
                 unique_weaknesses.append(w)
         
-        result['weaknesses'] = unique_weaknesses[:6]
-        print(f"✅ Fixed weaknesses: {result['weaknesses']}")
+        result['weaknesses'] = unique_weaknesses[:6] # Limit to top 6
     
     return result
 

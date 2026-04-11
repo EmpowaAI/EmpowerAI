@@ -10,6 +10,7 @@ import {
 import { useUser } from "../lib/user-context";
 import { userAPI } from "../lib/api";
 import { cn } from "../lib/utils";
+import { getStoredCvAnalysis } from "../lib/sensitiveStorage";
 import type { CVAnalysisData } from "../types/profile.types";
 
 interface FormData {
@@ -87,10 +88,9 @@ export default function Profile() {
           console.log('Using local profile data');
         }
 
-        // 3. Extract from CV analysis
-        const cvData = localStorage.getItem('cvAnalysisData');
-        if (cvData) {
-          const parsedCV: CVAnalysisData = JSON.parse(cvData);
+        // 3. Extract from CV analysis (session storage; avoid long-lived localStorage for PII)
+        const parsedCV = getStoredCvAnalysis<CVAnalysisData>();
+        if (parsedCV) {
           
           // Extract name from CV
           const extractedName = extractNameFromCV(parsedCV);

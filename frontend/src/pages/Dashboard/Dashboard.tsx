@@ -78,73 +78,37 @@ export default function Dashboard() {
         setTwinCompleted(!!twinData);
         
         // Check CV completion
-        const cvAnalysis = localStorage.getItem('comprehensiveCVAnalysis');
-        setCvCompleted(!!cvAnalysis);
+        const cvAnalysis = null;
+        setCvCompleted(localStorage.getItem('cvCompleted') === 'true');
+        setCvData(null);
         
-        // Extract profile data from CV
-        if (cvAnalysis) {
-          const parsedCV = JSON.parse(cvAnalysis);
-          setCvData(parsedCV);
-          
-          // Extract name from CV (try to get from about section or use default)
-          let name = "Career Seeker";
-          if (parsedCV.sections?.about) {
-            // Try to extract name from about section
-            const nameMatch = parsedCV.sections.about.match(/(?:I am|I'm|My name is)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i);
-            if (nameMatch) {
-              name = nameMatch[1];
-            }
-          }
-          
-          // Extract location from CV
-          let location = "South Africa";
-          const locations = ['Gauteng', 'Johannesburg', 'Cape Town', 'Durban', 'Pretoria', 'Western Cape', 'KwaZulu-Natal'];
-          if (parsedCV.sections?.about) {
-            for (const loc of locations) {
-              if (parsedCV.sections.about.includes(loc)) {
-                location = loc;
-                break;
-              }
-            }
-          }
-          
-          // Get top skills
-          const topSkills = parsedCV.sections?.skills?.slice(0, 5) || [];
-          
-          // Infer career goals from skills and experience
-          const careerGoals: string[] = [];
-          if (parsedCV.sections?.skills?.includes('JavaScript') || parsedCV.sections?.skills?.includes('React')) {
-            careerGoals.push('Tech Career');
-          }
-          if (parsedCV.sections?.skills?.includes('Python')) {
-            careerGoals.push('Data Science');
-          }
-          if (parsedCV.sections?.skills?.includes('Project Management')) {
-            careerGoals.push('Project Management');
-          }
-          if (careerGoals.length === 0) {
-            careerGoals.push('Professional Growth');
-          }
-          
-          // Add freelancing if they have marketable skills
-          if (topSkills.length >= 3) {
-            careerGoals.push('Freelancing');
-          }
-          
-          setProfileData({
-            name,
-            location,
-            careerGoals,
-            topSkills,
-          });
-        } else if (twinData) {
-          // Try to get from twin data if no CV
+        let topSkills: string[] = [];
+        try {
+          const raw = localStorage.getItem('cvSkills');
+          const parsed = raw ? JSON.parse(raw) : [];
+          if (Array.isArray(parsed)) topSkills = parsed.slice(0, 5);
+        } catch {
+          // ignore parse errors
+        }
+
+        const baseName = user?.name || "Career Seeker";
+        const baseLocation = user?.province || user?.location || "South Africa";
+
+        if (twinData) {
+          // Prefer twin data when available
           const parsedTwin = JSON.parse(twinData);
           setProfileData({
-            name: parsedTwin.name || "Career Seeker",
-            location: parsedTwin.province || "South Africa",
+            name: parsedTwin.name || baseName,
+            location: parsedTwin.province || baseLocation,
             careerGoals: parsedTwin.goals ? [parsedTwin.goals] : ["Professional Growth"],
-            topSkills: parsedTwin.skills?.slice(0, 5) || [],
+            topSkills: Array.isArray(parsedTwin.skills) ? parsedTwin.skills.slice(0, 5) : topSkills,
+          });
+        } else {
+          setProfileData({
+            name: baseName,
+            location: baseLocation,
+            careerGoals: ["Professional Growth"],
+            topSkills,
           });
         }
       } catch (e) {
@@ -167,7 +131,7 @@ export default function Dashboard() {
       window.removeEventListener('twinCompleted', checkCompletionStatus);
       window.removeEventListener('cvCompleted', checkCompletionStatus);
     };
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     const messages = [
@@ -216,12 +180,11 @@ export default function Dashboard() {
           let empowermentScore = 0;
           let skillsMatched = 0;
           try {
-            const cvAnalysis = localStorage.getItem("comprehensiveCVAnalysis");
-            if (cvAnalysis) {
-              const parsed = JSON.parse(cvAnalysis);
-              cvScore = Number(parsed?.score) || 0;
-              skillsMatched = Array.isArray(parsed?.sections?.skills) ? parsed.sections.skills.length : 0;
-            }
+            const storedScore = localStorage.getItem("cvScore");
+            if (storedScore) cvScore = Number(storedScore) || 0;
+            const rawSkills = localStorage.getItem("cvSkills");
+            const parsedSkills = rawSkills ? JSON.parse(rawSkills) : [];
+            skillsMatched = Array.isArray(parsedSkills) ? parsedSkills.length : 0;
           } catch (e) {
             // ignore
           }

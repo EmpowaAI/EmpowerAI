@@ -12,6 +12,7 @@ import { useUser } from "../../contexts/user-context";
 import { authService } from "../../api/Index";
 import { adminAPI } from "../../lib/api";
 import toast from "react-hot-toast";
+import { clearStoredCvAnalysis, clearStoredCvFileName } from "../../lib/sensitiveStorage";
 
 interface DashboardLayoutProps {
   children?: React.ReactNode;
@@ -117,8 +118,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       // Clear all app-specific localStorage keys
       localStorage.removeItem('twinData');
       localStorage.removeItem('twinCreated');
-      localStorage.removeItem('comprehensiveCVAnalysis');
-      localStorage.removeItem('cvSkills');
+      clearStoredCvAnalysis(); // Clears from sessionStorage
+      clearStoredCvFileName();
       localStorage.removeItem('cvFileName');
       localStorage.removeItem('empowerai-token');
       localStorage.removeItem('empowerai-user');

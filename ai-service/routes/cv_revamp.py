@@ -29,22 +29,10 @@ async def revamp_cv(request: CVRevampRequest, req: Request):
         # CREATE FRESH SERVICE INSTANCE FOR THIS REQUEST
         cv_revamp_service = CVRevampService()
         
-        print("=" * 50)
-        print(f"[{request_id}] 📥 Received CV revamp request")
-        print(f"[{request_id}] CV Data keys: {request.cvData.keys() if request.cvData else 'None'}")
-        print(f"[{request_id}] Score: {request.cvData.get('score') if request.cvData else 'N/A'}")
-        print(f"[{request_id}] Readiness Level: {request.cvData.get('readinessLevel') if request.cvData else 'N/A'}")
-        
         if not request.cvData:
             raise HTTPException(status_code=400, detail="No CV data provided for revamp")
         
         result = await cv_revamp_service.revamp_cv(request.cvData)
-        
-        print("=" * 50)
-        print(f"[{request_id}] ✅ Revamp complete")
-        print(f"[{request_id}] Original Score: {result.get('originalScore')}")
-        print(f"[{request_id}] New Score: {result.get('newScore')}")
-        print("=" * 50)
         
         return result
         

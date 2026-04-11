@@ -22,12 +22,14 @@ load_dotenv()
 
 logger = get_logger()
 logger.info("Starting EmpowerAI AI Service...")
-
-print("=" * 50)
-print(f"AZURE_OPENAI_ENDPOINT: {os.getenv('AZURE_OPENAI_ENDPOINT')}")
-print(f"AZURE_OPENAI_MODEL: {os.getenv('AZURE_OPENAI_MODEL')}")
-print(f"PORT: {os.getenv('PORT', '8000')}")
-print("=" * 50)
+logger.info(
+    "AI service config loaded",
+    extra={
+        "azure_openai_configured": bool(os.getenv("AZURE_OPENAI_ENDPOINT")),
+        "azure_openai_model_configured": bool(os.getenv("AZURE_OPENAI_MODEL")),
+        "port": os.getenv("PORT", "8000"),
+    },
+)
 
 app = FastAPI(
     title="EmpowerAI AI Service",

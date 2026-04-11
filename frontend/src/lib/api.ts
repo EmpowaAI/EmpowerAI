@@ -1,5 +1,6 @@
 // frontend/src/lib/api.ts
 import { API_BASE_URL as API_BASE } from './apiBase';
+import { clearStoredCvAnalysis, clearStoredCvFileName, getStoredCvAnalysis } from './sensitiveStorage';
 
 // Demo mode is opt-in via env var; real APIs are used by default.
 const USE_DEMO_MODE = import.meta.env.VITE_USE_DEMO_MODE === 'true';
@@ -12,6 +13,7 @@ const removeToken = (): void => {
   // Also clear other user-specific data from local storage on logout
   localStorage.removeItem('enrichedProfile');
   localStorage.removeItem('cvAnalysisData');
+  clearStoredCvAnalysis();
   localStorage.removeItem('twinData');
   localStorage.removeItem('twinCreated');
   localStorage.removeItem('cvCompleted');
@@ -21,18 +23,10 @@ const removeToken = (): void => {
 
 const getStoredCvScore = (): number => {
   try {
-    const comprehensive = localStorage.getItem('comprehensiveCVAnalysis');
-    if (comprehensive) {
-      const parsed = JSON.parse(comprehensive);
-      const score = Number(parsed?.score);
-      if (Number.isFinite(score) && score >= 0) return Math.round(score);
-    }
+    // Prioritize sensitiveStorage for CV analysis score
 
-    const cvScore = localStorage.getItem('cvScore');
-    if (cvScore) {
-      const score = Number(cvScore);
-      if (Number.isFinite(score) && score >= 0) return Math.round(score);
-    }
+    const score = Number(getStoredCvAnalysis<any>()?.score);
+    if (Number.isFinite(score) && score >= 0) return Math.round(score);
   } catch (error) {
     console.warn('Failed to parse stored CV score:', error);
   }
@@ -1158,15 +1152,8 @@ export const statsAPIReal = {
 
       let skillsMatched = 0;
       try {
-        const comprehensive = localStorage.getItem('comprehensiveCVAnalysis');
-        if (comprehensive) {
-          const parsed = JSON.parse(comprehensive);
-          const skills = parsed?.sections?.skills;
-          if (Array.isArray(skills)) skillsMatched = skills.length;
-        } else {
-          const cvSkills = localStorage.getItem('cvSkills') ? JSON.parse(localStorage.getItem('cvSkills')!) : [];
-          if (Array.isArray(cvSkills)) skillsMatched = cvSkills.length;
-        }
+        const cvSkills = getStoredCvAnalysis<any>()?.extractedSkills || [];
+        if (Array.isArray(cvSkills)) skillsMatched = cvSkills.length;
       } catch (e) {
         // ignore parse errors
       }

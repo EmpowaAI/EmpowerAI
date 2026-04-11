@@ -11,6 +11,7 @@ import GlassCard from "../components/shared/GlassCard";
 import AIThinkingIndicator from "../components/AIThinkingIndicator";
 import LiveInsightsFeed from "../components/LiveInsightsFeed";
 import SkillGapAnalysis from "../components/SkillGapAnalysis";
+import { getStoredCvAnalysis } from "../lib/sensitiveStorage";
 
 interface DashboardStats {
   empowermentScore: number;
@@ -44,8 +45,7 @@ export default function Dashboard() {
         setTwinCompleted(!!twinData);
         
         // Check CV completion
-        const cvAnalysis = localStorage.getItem('comprehensiveCVAnalysis');
-        setCvCompleted(!!cvAnalysis);
+        setCvCompleted(localStorage.getItem('cvCompleted') === 'true');
       } catch (e) {
         console.error('Error checking completion status:', e);
       }
@@ -85,11 +85,9 @@ export default function Dashboard() {
       // Read CV score from localStorage
       let cvScore = 0;
       try {
-        const cvAnalysis = localStorage.getItem('comprehensiveCVAnalysis');
-        if (cvAnalysis) {
-          const parsed = JSON.parse(cvAnalysis);
-          cvScore = parsed.score || 0;
-        }
+        const storedScore = localStorage.getItem('cvScore');
+        if (storedScore) cvScore = Number(storedScore) || 0;
+        if (!cvScore) cvScore = Number(getStoredCvAnalysis<any>()?.score) || 0;
       } catch (e) {
         console.error('Failed to parse CV analysis:', e);
       }

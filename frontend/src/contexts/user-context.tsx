@@ -1,6 +1,7 @@
 // frontend/src/lib/user-context.tsx
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { syncProgressFromBackend } from '../utils/progressSync'
+import { clearStoredCvAnalysis, clearStoredCvFileName, getStoredCvAnalysis } from '../lib/sensitiveStorage'
 
 interface User {
   name: string
@@ -79,15 +80,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   })
   
   const [cvData, setCvData] = useState<CVData | null>(() => {
-    try {
-      if (typeof window !== 'undefined' && window.localStorage) {
-        const saved = localStorage.getItem('comprehensiveCVAnalysis')
-        return saved ? JSON.parse(saved) : null
-      }
-    } catch (error) {
-      console.error('Error reading CV data from localStorage:', error)
-    }
-    return null
+    return getStoredCvAnalysis<CVData>()
   })
   
   const getProgressFromStorage = () => {
@@ -219,26 +212,13 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   // Only refresh CV data when explicitly called, not on every render
   const refreshCVData = useCallback(() => {
-    try {
-      if (typeof window !== 'undefined' && window.localStorage) {
-        const saved = localStorage.getItem('comprehensiveCVAnalysis')
-        if (saved) {
-          const parsed = JSON.parse(saved)
-          setCvData(parsed)
-          console.log('CV data refreshed:', parsed.sections?.skills?.length || 0, 'skills found')
-        } else {
-          setCvData(null)
-        }
-      }
-    } catch (error) {
-      console.error('Error refreshing CV data:', error)
-      setCvData(null)
-    }
+    const stored = getStoredCvAnalysis<CVData>()
+    setCvData(stored)
   }, []) // No dependencies!
 
   const clearCVData = () => {
     setCvData(null)
-    localStorage.removeItem('comprehensiveCVAnalysis')
+    clearStoredCvAnalysis()
     localStorage.removeItem('cvSkills')
     updateProgress('cvCompleted', false)
   }
@@ -260,7 +240,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('twinCreated')
     localStorage.removeItem('twinFormData')
     localStorage.removeItem('cvSkills')
-    localStorage.removeItem('comprehensiveCVAnalysis')
+    clearStoredCvAnalysis()
+    clearStoredCvFileName()
     localStorage.removeItem('cvFileName')
   }
 
