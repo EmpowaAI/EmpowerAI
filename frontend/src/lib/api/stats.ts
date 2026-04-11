@@ -1,20 +1,17 @@
 import { opportunitiesAPI } from './opportunities';
 import { twinAPI } from './twin';
+import { getStoredCvAnalysis } from '../sensitiveStorage';
 
 const getStoredCvScore = (): number => {
   try {
-    const comprehensive = localStorage.getItem('comprehensiveCVAnalysis');
-    if (comprehensive) {
-      const parsed = JSON.parse(comprehensive);
-      const score = Number(parsed?.score);
-      if (Number.isFinite(score) && score >= 0) return Math.round(score);
-    }
-
     const cvScore = localStorage.getItem('cvScore');
     if (cvScore) {
       const score = Number(cvScore);
       if (Number.isFinite(score) && score >= 0) return Math.round(score);
     }
+
+    const score = Number(getStoredCvAnalysis<any>()?.score);
+    if (Number.isFinite(score) && score >= 0) return Math.round(score);
   } catch (error) {
     console.warn('Failed to parse stored CV score:', error);
   }

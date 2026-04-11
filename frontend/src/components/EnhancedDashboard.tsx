@@ -18,6 +18,7 @@ import {
 import { twinAPI } from '../lib/api';
 import type { EnrichedProfile } from '../types/profile.types';
 import { cn } from '../lib/utils';
+import { getStoredCvAnalysis } from '../lib/sensitiveStorage';
 
 export const EnhancedDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -49,7 +50,7 @@ export const EnhancedDashboard: React.FC = () => {
       if (stored) {
         setProfile(JSON.parse(stored));
       } else {
-        const cvData = localStorage.getItem('cvAnalysisData');
+        const cvData = getStoredCvAnalysis<any>();
         if (cvData) {
           setError('Create your Digital Twin to see personalized insights');
         }

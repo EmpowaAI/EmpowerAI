@@ -1,4 +1,5 @@
 import { API_BASE_URL } from './apiBase';
+import { getStoredCvAnalysis } from './sensitiveStorage';
 
 const getToken = () => localStorage.getItem('empowerai-token');
 const USE_DEMO_MODE = import.meta.env.VITE_USE_DEMO_MODE === 'true';
@@ -36,12 +37,8 @@ export async function streamChat({
     // Extract CV context to ensure the AI knows who it's talking to
     let cvContext = null;
     try {
-      const stored = localStorage.getItem('comprehensiveCVAnalysis') || localStorage.getItem('cvAnalysisData');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        // Ensure cv_context is a plain object, as Pydantic Dict expects this
-        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) cvContext = parsed;
-      }
+      const parsed = getStoredCvAnalysis<any>();
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) cvContext = parsed;
     } catch (e) {
       console.warn('Failed to parse CV context');
     }

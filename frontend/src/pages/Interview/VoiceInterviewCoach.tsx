@@ -9,6 +9,7 @@ import AIAvatar from "../../components/ui/AIAvatar"
 import VoiceVisualizer from "../../components/ui/VoiceVisualizer"
 import { interviewService } from '../../services/interviewService'
 import { useToast } from '../../components/Toast'
+import { getStoredCvAnalysis } from '../../lib/sensitiveStorage'
 import { useAudioLevel } from '../../hooks/useAudioLevel'
 
 interface InterviewQuestion {
@@ -50,8 +51,7 @@ export default function VoiceInterviewCoach() {
     const startSession = async () => {
       try {
         setIsStarting(true);
-        const storedCV = localStorage.getItem('cvAnalysisData');
-        const cvData = storedCV ? JSON.parse(storedCV) : undefined;
+        const cvData = getStoredCvAnalysis<any>() || undefined;
 
         const session = await interviewService.startInterview(
           'behavioral', 
@@ -139,8 +139,7 @@ export default function VoiceInterviewCoach() {
     
     setIsProcessing(true)
     try {
-      const storedCV = localStorage.getItem('cvAnalysisData');
-      const cvData = storedCV ? JSON.parse(storedCV) : undefined;
+      const cvData = getStoredCvAnalysis<any>() || undefined;
 
       const feedbackData = await interviewService.submitAnswer(
         sessionId!,

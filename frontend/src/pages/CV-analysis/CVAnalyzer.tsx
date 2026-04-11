@@ -16,6 +16,14 @@ import RevampedCVDisplay from "../../components/RevampedCVDisplay"
 import type { RevampedCV, RevampedCVResponse } from '../../services/aiService'
 import { useToast } from "../../hooks/useToast"
 import { analyzeCV, revampCV, type CVAnalysis } from "../../services/cvService"
+import {
+  clearStoredCvAnalysis,
+  clearStoredCvFileName,
+  getStoredCvAnalysis,
+  getStoredCvFileName,
+  setStoredCvAnalysis,
+  setStoredCvFileName,
+} from "../../lib/sensitiveStorage"
 
 
 export default function CVAnalyzerPage() {
@@ -34,13 +42,7 @@ export default function CVAnalyzerPage() {
   const [changesSummary, setChangesSummary] = useState<string[]>([])
 
   const [cvData, setCvData] = useState<CVAnalysis | null>(() => {
-    try {
-      const saved = localStorage.getItem('comprehensiveCVAnalysis')
-      return saved ? JSON.parse(saved) : null
-    } catch (e) {
-      console.error('Failed to parse saved CV data:', e)
-      return null
-    }
+    return getStoredCvAnalysis<CVAnalysis>()
   })
 
   const [error, setError] = useState("")
@@ -48,27 +50,23 @@ export default function CVAnalyzerPage() {
   const [retryAfter, setRetryAfter] = useState(60)
 
   const [fileName, setFileName] = useState<string | null>(() => {
-    return localStorage.getItem('cvFileName') || null
+    return getStoredCvFileName()
   })
 
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const { showToast, ToastContainer } = useToast()
 
 
-  // Save to localStorage whenever cvData changes
+  // Persist CV analysis in session storage (avoid long-lived localStorage for PII)
   useEffect(() => {
     if (cvData) {
-      localStorage.setItem('comprehensiveCVAnalysis', JSON.stringify(cvData))
+      setStoredCvAnalysis(cvData)
     }
   }, [cvData])
 
-  // Save fileName to localStorage
+  // Persist filename in session storage
   useEffect(() => {
-    if (fileName) {
-      localStorage.setItem('cvFileName', fileName)
-    } else {
-      localStorage.removeItem('cvFileName')
-    }
+    setStoredCvFileName(fileName)
   }, [fileName])
 
 
@@ -249,8 +247,8 @@ export default function CVAnalyzerPage() {
     setOriginalScore(null)
     setNewScore(null)
     setChangesSummary([])
-    localStorage.removeItem("comprehensiveCVAnalysis")
-    localStorage.removeItem("cvFileName")
+    clearStoredCvAnalysis()
+    clearStoredCvFileName()
   }
 
 

@@ -11,6 +11,7 @@ import { interviewService } from '../../services/interviewService';
 import { TipsPanel } from '../../components/interview/TipsPanel';
 import GlassCard from '../../components/shared/GlassCard';
 import { useToast } from '../../components/Toast';
+import { getStoredCvAnalysis } from '../../lib/sensitiveStorage';
  
 type InterviewType = 'tech' | 'behavioral' | 'non-tech';
 type Difficulty = 'easy' | 'medium' | 'hard';
@@ -153,8 +154,7 @@ export default function InterviewCoach() {
   const handleStart = async (retryCount = 0) => {
     try {
       setIsStarting(true);
-      const storedCV = localStorage.getItem('cvAnalysisData');
-      const cvData = storedCV ? JSON.parse(storedCV) : undefined;
+      const cvData = getStoredCvAnalysis<any>() || undefined;
 
       const session = await interviewService.startInterview(
         selectedType,
@@ -196,8 +196,7 @@ export default function InterviewCoach() {
 
     try {
       setIsSubmitting(true);
-      const storedCV = localStorage.getItem('cvAnalysisData');
-      const cvData = storedCV ? JSON.parse(storedCV) : undefined;
+      const cvData = getStoredCvAnalysis<any>() || undefined;
 
       const feedback = await interviewService.submitAnswer(
         sessionId!,
