@@ -552,3 +552,53 @@ exports.revampCV = async (req, res, next) => {
     return next(error);
   }
 };
+
+// ────────────────────────────────────────────────────────────────────────────────
+// Stored CV profile (read/delete)
+// ────────────────────────────────────────────────────────────────────────────────
+
+const toBool = (value, defaultValue = false) => {
+  if (value === undefined || value === null) return defaultValue;
+  const normalized = String(value).trim().toLowerCase();
+  if (['1', 'true', 'yes', 'y', 'on'].includes(normalized)) return true;
+  if (['0', 'false', 'no', 'n', 'off'].includes(normalized)) return false;
+  return defaultValue;
+};
+
+exports.getCvProfile = async (req, res, next) => {
+  try {
+    const includeRawTextRequested =
+      req.query?.includeRawText === '1' ||
+      req.query?.includeRawText === 'true';
+
+    // Default: never return rawText to the browser. It can contain PII.
+    // Allow opt-in only when explicitly enabled.
+    const allowRawTextExport = toBool(process.env.CV_ALLOW_RAW_TEXT_EXPORT, false);
+
+    const profile = await cvService.getCvProfile(req.user.id);
+    if (!profile) {
+      return res.status(200).json({ status: 'success', data: { profile: null } });
+    }
+
+    const safeProfile = { ...profile };
+    if (!(includeRawTextRequested && allowRawTextExport)) {
+      delete safeProfile.rawText;
+    }
+
+    return res.status(200).json({
+      status: 'success',
+      data: { profile: safeProfile },
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+exports.deleteCvProfile = async (req, res, next) => {
+  try {
+    await cvService.deleteCvProfile(req.user.id);
+    return res.status(200).json({ status: 'success', message: 'CV profile deleted' });
+  } catch (error) {
+    return next(error);
+  }
+};

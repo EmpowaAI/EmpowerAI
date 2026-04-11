@@ -1,6 +1,6 @@
 const express = require('express');
 const multer = require('multer');
-const { analyzeCV, analyzeCVFile, revampCV } = require('../controllers/cvController');
+const { analyzeCV, analyzeCVFile, revampCV, getCvProfile, deleteCvProfile } = require('../controllers/cvController');
 const auth = require('../middleware/auth');
 const validateRequest = require('../middleware/validate');
 const { cvAnalysisSchema, cvRevampSchema } = require('../utils/validators');
@@ -33,6 +33,10 @@ router.post('/analyze', validateRequest(cvAnalysisSchema), analyzeCV);
 
 // File upload CV analysis
 router.post('/analyze-file', upload.single('cvFile'), analyzeCVFile);
+
+// Read/delete a user's stored CV profile (analysis summary + metadata)
+router.get('/profile', getCvProfile);
+router.delete('/profile', deleteCvProfile);
 
 // CV revamp (structured rewrite)
 router.post('/revamp', validateRequest(cvRevampSchema), revampCV);
