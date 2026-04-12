@@ -2,11 +2,11 @@ require('dotenv').config();
 
 const app = require('./app');
 const logger = require('./utils/logger');
-const { connectDatabase } = require('./config/database');
-const { pingAiServiceOnStartup } = require('./config/aiHealth');
+const { connectDatabase } = require('./infrastructures/database');
+const { pingAiServiceOnStartup } = require('./intergration/ai/ai.Health');
 const { runStartupTasks } = require('./config/seed');
 const { registerProcessHandlers } = require('./utils/shutdown');
-const { initAiQueue } = require('./queues/aiQueue');
+const { initAiQueue } = require('./intergration/queues/aiQueue');
 
 const PORT = process.env.PORT || 5000;
 

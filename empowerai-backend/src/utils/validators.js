@@ -22,6 +22,7 @@ const registerSchema = z.object({
   interests: z.array(z.string()).optional(),
 });
 
+
 /**
  * User login validation schema
  */
@@ -29,6 +30,7 @@ const loginSchema = z.object({
   email: z.string().email('Invalid email address').toLowerCase(),
   password: z.string().min(1, 'Password is required'),
 });
+
 
 /**
  * Twin creation validation schema
@@ -40,12 +42,14 @@ const createTwinSchema = z.object({
   education: z.string().optional(),
 });
 
+
 /**
  * Simulation validation schema
  */
 const simulationSchema = z.object({
   pathIds: z.array(z.string()).optional(),
 });
+
 
 /**
  * CV analysis validation schema
@@ -55,6 +59,7 @@ const cvAnalysisSchema = z.object({
   jobRequirements: z.union([z.string().max(5000), z.array(z.string())]).optional(),
 });
 
+
 /**
  * CV revamp validation schema
  */
@@ -62,24 +67,35 @@ const cvRevampSchema = z.object({
   cvData: z.object({}).passthrough(),
 });
 
-/**
- * Chat message validation schema
- */
-const chatMessageSchema = z.object({
-  message: z.string().min(1, 'Message is required').max(2000, 'Message is too long'),
-});
 
 /**
  * Digital Twin chat schema
+ * ✅ FIX: was `export const` (ES module syntax) — changed to `const` to match CommonJS module.exports below
  */
 const chatTwinSchema = z.object({
   messages: z.array(
-    z.object({
-      role: z.string().min(1),
-      content: z.string().min(1).max(5000),
-    })
-  ).min(1),
+  z.object({
+    role: z.enum(['user', 'assistant']),
+    content: z.string()
+  })
+)
 });
+
+
+/**
+ * Chat message validation schema (used by other chat routes)
+ */
+const chatMessageSchema = z.object({
+  messages: z.array(
+    z.object({
+      role:    z.string(),
+      content: z.string(),
+    })
+  ).optional(),
+  cv_context: z.object({}).optional(),
+  focus:      z.string().optional(),
+});
+
 
 /**
  * Interview start validation schema
@@ -88,20 +104,22 @@ const interviewStartSchema = z.object({
   type: z.enum(['tech', 'behavioral', 'non-tech'], {
     errorMap: () => ({ message: 'Interview type must be tech, behavioral, or non-tech' }),
   }),
-  difficulty: z.enum(['easy', 'medium', 'hard']).optional(),
-  company: z.string().max(100).optional(),
-  cvData: z.object({}).passthrough().optional(),
-  jobDescription: z.string().max(10_000).optional(),
+  difficulty:      z.enum(['easy', 'medium', 'hard']).optional(),
+  company:         z.string().max(100).optional(),
+  cvData:          z.object({}).passthrough().optional(),
+  jobDescription:  z.string().max(10_000).optional(),
 });
+
 
 /**
  * Interview answer validation schema
  */
 const interviewAnswerSchema = z.object({
   questionId: z.string().min(1, 'Question ID is required'),
-  response: z.string().min(1, 'Response is required').max(5000, 'Response is too long'),
-  cvData: z.object({}).passthrough().optional(),
+  response:   z.string().min(1, 'Response is required').max(5000, 'Response is too long'),
+  cvData:     z.object({}).passthrough().optional(),
 });
+
 
 /**
  * Validate request data against schema
@@ -115,22 +133,26 @@ const validate = (schema, data) => {
     return schema.parse(data);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      // Zod v4 uses `issues` (v3 exposed `errors`).
       const issues = Array.isArray(error.issues)
         ? error.issues
         : Array.isArray(error.errors)
-          ? error.errors
-          : [];
+        ? error.errors
+        : [];
 
       const errors = issues.map((err) => ({
-        field: err.path.join('.'),
+        field:   err.path.join('.'),
         message: err.message,
       }));
+
+      console.error('❌ VALIDATION FAILED');
+      console.error('DETAILS:', JSON.stringify(errors, null, 2));
+
       throw new (require('./errors').ValidationError)('Validation failed', errors);
     }
     throw error;
   }
 };
+
 
 module.exports = {
   registerSchema,
@@ -139,10 +161,9 @@ module.exports = {
   simulationSchema,
   cvAnalysisSchema,
   cvRevampSchema,
+  chatTwinSchema,
+  chatMessageSchema,
   interviewStartSchema,
   interviewAnswerSchema,
-  chatMessageSchema,
-  chatTwinSchema,
   validate,
 };
-

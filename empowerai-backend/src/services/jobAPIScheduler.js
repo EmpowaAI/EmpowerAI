@@ -10,7 +10,7 @@
  */
 
 const axios = require('axios');
-const Opportunity = require('../models/Opportunity');
+const Opportunity = require('../modules/opportunities/Opportunity.Model');
 const logger = require('../utils/logger');
 
 let schedulerInterval = null;

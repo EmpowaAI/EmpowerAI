@@ -15,6 +15,7 @@ import LiveInsightsFeed from "../../components/LiveInsightsFeed";
 import SkillGapAnalysis from "../../components/SkillGapAnalysis";
 import { useUser } from "../../contexts/user-context";
 import { applicationsAPI, statsAPI } from "../../lib/api";
+import { getStoredCvAnalysis } from "../../lib/sensitiveStorage";
 
 interface DashboardStats {
   empowermentScore: number;
@@ -180,8 +181,8 @@ export default function Dashboard() {
           let empowermentScore = 0;
           let skillsMatched = 0;
           try {
-            const storedScore = localStorage.getItem("cvScore");
-            if (storedScore) cvScore = Number(storedScore) || 0;
+            const analysis = getStoredCvAnalysis<any>();
+            if (analysis?.score) cvScore = Number(analysis.score) || 0;
             const rawSkills = localStorage.getItem("cvSkills");
             const parsedSkills = rawSkills ? JSON.parse(rawSkills) : [];
             skillsMatched = Array.isArray(parsedSkills) ? parsedSkills.length : 0;
