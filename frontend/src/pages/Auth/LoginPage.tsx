@@ -172,10 +172,10 @@ export default function LoginPage() {
               <div className="relative group">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors z-10" />
                 <label
-                  className={`absolute left-12 transition-all duration-200 pointer-events-none ${
+                  className={`auth-floating-label ${
                     emailFocused || email
-                      ? "text-xs -top-2.5 bg-card px-1 text-primary font-medium"
-                      : "top-1/2 -translate-y-1/2 text-sm text-muted-foreground"
+                      ? "auth-floating-label-shrink text-primary font-medium"
+                      : "text-sm text-muted-foreground"
                   }`}
                 >
                   Email Address
@@ -202,10 +202,10 @@ export default function LoginPage() {
               <div className="relative group">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors z-10" />
                 <label
-                  className={`absolute left-12 transition-all duration-200 pointer-events-none ${
+                  className={`auth-floating-label ${
                     passwordFocused || password
-                      ? "text-xs -top-2.5 bg-card px-1 text-primary font-medium"
-                      : "top-1/2 -translate-y-1/2 text-sm text-muted-foreground"
+                      ? "auth-floating-label-shrink text-primary font-medium"
+                      : "text-sm text-muted-foreground"
                   }`}
                 >
                   Password

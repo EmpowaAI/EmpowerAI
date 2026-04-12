@@ -325,6 +325,25 @@
       0 2px 8px hsl(var(--foreground) / 0.04) inset;
   }
 
+  .auth-floating-label {
+    position: absolute;
+    left: 3rem;
+    top: 50%;
+    transform: translateY(-50%);
+    line-height: 1;
+    pointer-events: none;
+    transition: all 0.2s ease;
+    z-index: 10;
+  }
+
+  .auth-floating-label-shrink {
+    top: 0.45rem;
+    transform: none;
+    font-size: 0.75rem;
+    padding: 0 0.35rem;
+    background: hsl(var(--card));
+  }
+
   .auth-icon-button-hover {
     transition: all 0.2s ease;
   }
