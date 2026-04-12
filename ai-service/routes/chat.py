@@ -289,6 +289,10 @@ def clean_user_name(raw_name: str) -> str:
     if not raw_name:
         return "there"
     
+    # Reject obviously malformed input (likely system context leaking)
+    if len(raw_name) > 200 or "undefined" in raw_name.lower() or "assistant" in raw_name.lower():
+        return "there"
+    
     name_lower = raw_name.lower()
     if "name is" in name_lower:
         name = raw_name.split("is")[-1].strip()
@@ -298,7 +302,40 @@ def clean_user_name(raw_name: str) -> str:
         name = raw_name
     
     cleaned = re.sub(r'[^\w\s]', '', name).strip().capitalize()
-    return cleaned if cleaned else "there"
+    
+    # Verify cleaned name is reasonable (not just symbols, has some substance)
+    if not cleaned or len(cleaned) < 2 or cleaned.count(' ') > 3:
+        return "there"
+    
+    return cleaned
+
+def _is_system_context(text: str) -> bool:
+    """Detect if text is leaked system context instead of user input"""
+    if not text:
+        return False
+    
+    # System context has distinctive markers
+    suspicious_markers = [
+        "undefined",
+        "currentrole",
+        "targetrole",
+        "seniorityLevel",
+        "employability",
+        "marketvalue",
+        "demandlevel",
+        "trendingskills",
+        "jobtitles",
+        "confidencescore",
+        "assistant",
+        "aigenerated"
+    ]
+    
+    text_lower = text.lower()
+    # If text is very long and has multiple markers, it's likely system context
+    if len(text) > 500 and sum(1 for marker in suspicious_markers if marker in text_lower) >= 3:
+        return True
+    
+    return False
 
 def generate_step_response(messages: List[ChatMessage], step: int, cv_context: Optional[Dict[str, Any]] = None, focus: Optional[str] = None) -> Dict[str, Any]:
     """
@@ -484,7 +521,7 @@ def build_profile_from_conversation(messages: List[ChatMessage], cv_context: Opt
     
     # Map fields following the fixed quiz order
     province = get_user_reply(conv_start_idx)
-    if province:
+    if province and not _is_system_context(province):
         if "Gauteng" in province:
             profile["province"] = "Gauteng"
         elif "Cape" in province:
@@ -495,7 +532,7 @@ def build_profile_from_conversation(messages: List[ChatMessage], cv_context: Opt
             profile["province"] = province
     
     industry = get_user_reply(conv_start_idx + 1)
-    if industry:
+    if industry and not _is_system_context(industry):
         if "IT" in industry or "Technology" in industry:
             profile["industry"] = "Information Technology"
         elif "Finance" in industry:
@@ -512,7 +549,7 @@ def build_profile_from_conversation(messages: List[ChatMessage], cv_context: Opt
             profile["industry"] = industry
     
     edu = get_user_reply(conv_start_idx + 2)
-    if edu:
+    if edu and not _is_system_context(edu):
         if "Matric" in edu:
             profile["education"] = "Matric"
         elif "Diploma" in edu:
@@ -525,18 +562,19 @@ def build_profile_from_conversation(messages: List[ChatMessage], cv_context: Opt
             profile["education"] = "Certificate"
     
     skills_text = get_user_reply(conv_start_idx + 3)
-    if skills_text:
+    if skills_text and not _is_system_context(skills_text):
         skill_keywords = ["Coding", "Customer Service", "Sales", "Administration", 
                          "Data Analysis", "Project Management", "Communication", "Leadership"]
         skills = [s for s in skill_keywords if s.lower() in skills_text.lower()]
         if skills:
             profile["skills"] = list(set(profile["skills"] + skills))
     
-    if get_user_reply(conv_start_idx + 4):
-        profile["challenges"] = get_user_reply(conv_start_idx + 4)
+    challenges_reply = get_user_reply(conv_start_idx + 4)
+    if challenges_reply and not _is_system_context(challenges_reply):
+        profile["challenges"] = challenges_reply
     
     goals_text = get_user_reply(conv_start_idx + 5)
-    if goals_text:
+    if goals_text and not _is_system_context(goals_text):
         if "job" in goals_text.lower():
             profile["goals"] = "Find a full-time job"
         elif "learnership" in goals_text.lower() or "internship" in goals_text.lower():

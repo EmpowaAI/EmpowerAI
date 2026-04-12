@@ -268,19 +268,11 @@ TWIN DATA:
     setIsTyping(true);
     setChatError("");
 
-    // Prepend system context so the AI always knows the twin state
-    const ctx = buildSystemContext();
-    const messagesWithContext: ChatMsg[] = ctx
-      ? [
-          { role: "user", content: ctx },
-          { role: "assistant", content: "Understood. I have your twin data loaded and I'm ready to help." },
-          ...history,
-        ]
-      : history;
-
+    // Note: System context is for AI understanding only, not for conversation history
+    // Including it as a message pollutes profile building logic on the backend
     try {
-      // Fixed: backend expects { messages: ChatMsg[] }, not { message: string }
-      const res = await apiChatWithTwin(messagesWithContext);
+      // Send only the actual conversation history, not system context
+      const res = await apiChatWithTwin(history);
       // Backend returns: { status: 'success', data: { reply, options, ... } }
       const reply: string =
         res?.data?.reply ||
