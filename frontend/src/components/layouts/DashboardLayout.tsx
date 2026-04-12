@@ -1,4 +1,4 @@
-// src/components/layouts/DashboardLayout.tsx
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import { useEffect, useState } from "react";
 import { Link, useLocation, Outlet, useNavigate } from "react-router-dom";
 import {
@@ -76,6 +76,51 @@ const getFilteredNavItems = (progress: Progress) => {
   return allItems;
 };
 
+// Moved outside to prevent re-declaration on every render (fixes focus loss issues)
+const NavLink = ({ item, isMobile = false, onClick, pathname, prefetchRoute }: { 
+  item: any; 
+  isMobile?: boolean;
+  onClick?: () => void;
+  pathname: string;
+  prefetchRoute: (path: string) => void;
+}) => {
+  const isActive = pathname === item.path;
+  const Icon = item.icon;
+  const isDisabled = item.disabled;
+
+  const baseClasses = cn(
+    "flex items-center transition-all",
+    isMobile 
+      ? "gap-3 px-4 py-3 rounded-xl text-base w-full" 
+      : "gap-1.5 px-3 py-2 rounded-lg text-sm font-medium",
+    isActive && !isDisabled 
+      ? "bg-primary/10 text-primary" + (isMobile ? " border border-primary/20" : "")
+      : "",
+    isDisabled 
+      ? "opacity-50 cursor-not-allowed text-muted-foreground" 
+      : "hover:bg-muted hover:text-foreground cursor-pointer"
+  );
+
+  const content = (
+    <>
+      <Icon className={cn(isMobile ? "h-5 w-5" : "h-4 w-4", isDisabled && "text-muted-foreground")} />
+      <span className={cn(isMobile ? "font-medium flex-1" : "whitespace-nowrap")}>{item.label}</span>
+      {isDisabled && <Lock className="h-3 w-3 text-muted-foreground ml-1" />}
+      {item.highlight && !isDisabled && (
+        <span className="w-2 h-2 rounded-full bg-[var(--sa-gold)] animate-pulse ml-1" />
+      )}
+    </>
+  );
+
+  if (isDisabled) return <div className={baseClasses} title={item.tooltip}>{content}</div>;
+
+  return (
+    <Link to={item.path} onClick={onClick} onMouseEnter={() => prefetchRoute(item.path)} className={baseClasses} title={item.tooltip}>
+      {content}
+    </Link>
+  );
+};
+
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
@@ -118,11 +163,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       // Clear all app-specific localStorage keys
       localStorage.removeItem('twinData');
       localStorage.removeItem('twinCreated');
-      
-      // Use helpers which handle both session and legacy local storage
       clearStoredCvAnalysis(); 
       clearStoredCvFileName();
-
       localStorage.removeItem('empowerai-token');
       localStorage.removeItem('empowerai-user');
       navigate('/', { replace: true });
@@ -240,71 +282,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     };
   }, []);
 
-  // Navigation link component with conditional rendering
-  const NavLink = ({ item, isMobile = false, onClick }: { 
-    item: typeof navItems[0]; 
-    isMobile?: boolean;
-    onClick?: () => void;
-  }) => {
-    const isActive = pathname === item.path;
-    const Icon = item.icon;
-    const isDisabled = item.disabled;
-
-    // Compact desktop styles, larger mobile styles
-    const baseClasses = cn(
-      "flex items-center transition-all",
-      isMobile 
-        ? "gap-3 px-4 py-3 rounded-xl text-base w-full" 
-        : "gap-1.5 px-3 py-2 rounded-lg text-sm font-medium",
-      isActive && !isDisabled 
-        ? isMobile 
-          ? "bg-primary/10 text-primary border border-primary/20"
-          : "bg-primary/10 text-primary"
-        : "",
-      isDisabled 
-        ? "opacity-50 cursor-not-allowed text-muted-foreground" 
-        : "hover:bg-muted hover:text-foreground cursor-pointer"
-    );
-
-    const content = (
-      <>
-        <Icon className={cn(
-          isMobile ? "h-5 w-5" : "h-4 w-4",
-          isDisabled && "text-muted-foreground"
-        )} />
-        <span className={cn(isMobile ? "font-medium flex-1" : "whitespace-nowrap")}>{item.label}</span>
-        {isDisabled && <Lock className={cn(isMobile ? "h-3 w-3" : "h-3 w-3", "text-muted-foreground ml-1")} />}
-        {item.highlight && !isDisabled && (
-          <span className={cn(isMobile ? "w-2 h-2" : "w-2 h-2", "rounded-full bg-[var(--sa-gold)] animate-pulse ml-1")} />
-        )}
-      </>
-    );
-
-    if (isDisabled) {
-      return (
-        <div 
-          className={baseClasses}
-          title={item.tooltip}
-        >
-          {content}
-        </div>
-      );
-    }
-
-    return (
-      <Link
-        to={item.path}
-        onClick={onClick}
-        onMouseEnter={() => prefetchRoute(item.path)}
-        onFocus={() => prefetchRoute(item.path)}
-        className={baseClasses}
-        title={item.tooltip}
-      >
-        {content}
-      </Link>
-    );
-  };
-
   return (
     <>
       <div className="min-h-[100dvh] bg-background flex overflow-hidden">
@@ -345,6 +322,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     key={item.path}
                     item={item}
                     isMobile
+                    pathname={pathname}
+                    prefetchRoute={prefetchRoute}
                     onClick={() => setMobileMenuOpen(false)}
                   />
                 ))}
@@ -414,7 +393,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <nav className="hidden lg:flex items-center">
               <div className="flex items-center gap-1 bg-muted/30 p-1 rounded-xl">
                 {navItems.map((item) => (
-                  <NavLink key={item.path} item={item} />
+                  <NavLink 
+                    key={item.path} 
+                    item={item} 
+                    pathname={pathname}
+                    prefetchRoute={prefetchRoute}
+                  />
                 ))}
               </div>
             </nav>
