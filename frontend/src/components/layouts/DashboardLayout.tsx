@@ -126,7 +126,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const navigate = useNavigate();
   const pathname = location.pathname;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { user, progress } = useUser();
+  const { user, progress, logout } = useUser();
   const isSubPage = pathname !== "/dashboard";
 
   // Use the progress directly from context

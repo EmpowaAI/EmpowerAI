@@ -27,6 +27,7 @@ import {
   setStoredCvAnalysis,
   setStoredCvFileName,
 } from "../../lib/sensitiveStorage"
+import { buildTwinFromCv } from "../../api/services/twinService"
 
 
 export default function CVAnalyzerPage() {
@@ -127,7 +128,16 @@ export default function CVAnalyzerPage() {
       // Mark CV step complete — unlocks twin builder and all protected routes
       updateProgress('cvCompleted', true)
 
-      showToast(`CV analyzed! Score: ${result.score}% — ${result.readinessLevel}`, "success")
+      // Build the economic twin from the CV analysis
+      try {
+        const twinResponse = await buildTwinFromCv()
+        console.log("Twin built successfully from CV analysis", twinResponse)
+        updateProgress('twinCompleted', true)
+        showToast(`CV analyzed and twin created! Score: ${result.score}% — ${result.readinessLevel}`, "success")
+      } catch (twinError) {
+        console.warn("Failed to build twin, but CV analysis succeeded:", twinError)
+        showToast(`CV analyzed! Score: ${result.score}% — ${result.readinessLevel}. Twin creation failed, but you can still continue manually.`, "warning")
+      }
 
       // Show post-analysis modal with next steps
       setShowPostAnalysisModal(true)
