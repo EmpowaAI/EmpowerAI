@@ -515,6 +515,30 @@ TWIN DATA:
           </CollapsibleSection>
         )}
 
+        {/* Next Steps */}
+        <CollapsibleSection title="Next Steps" icon={<Zap className="h-3.5 w-3.5 text-primary" />} defaultOpen={true}>
+          <div className="space-y-3">
+            <div className="flex items-start gap-2 text-xs text-muted-foreground">
+              <span className="h-4 w-4 rounded-full bg-primary/20 text-primary text-[9px] flex items-center justify-center flex-shrink-0 font-bold mt-0.5">
+                1
+              </span>
+              <span>Chat with your twin above to explore career paths, salary projections, and skill recommendations.</span>
+            </div>
+            <div className="flex items-start gap-2 text-xs text-muted-foreground">
+              <span className="h-4 w-4 rounded-full bg-primary/20 text-primary text-[9px] flex items-center justify-center flex-shrink-0 font-bold mt-0.5">
+                2
+              </span>
+              <span>Run simulations to see how different choices affect your income and employability over time.</span>
+            </div>
+            <div className="flex items-start gap-2 text-xs text-muted-foreground">
+              <span className="h-4 w-4 rounded-full bg-primary text-[9px] flex items-center justify-center flex-shrink-0 font-bold mt-0.5">
+                3
+              </span>
+              <span>Browse job opportunities matched to your profile and skills.</span>
+            </div>
+          </div>
+        </CollapsibleSection>
+
         {/* Confidence footer */}
         <div className="border border-border/40 rounded-xl p-3 flex items-center justify-between">
           <span className="text-[10px] text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
