@@ -1,5 +1,6 @@
 const express = require('express');
 const multer = require('multer');
+const path = require('path');
 const { analyzeCV, analyzeCVFile, revampCV, getCvProfile, deleteCvProfile } = require('./cvAnalyser.Controller');
 const auth = require('../../middleware/auth');
 const validateRequest = require('../../middleware/validate');
@@ -18,7 +19,7 @@ const upload = multer({
   fileFilter: (req, file, cb) => {
     const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
     const allowedExtensions = ['.pdf', '.docx', '.txt'];
-    const ext = require('path').extname(file.originalname).toLowerCase();
+    const ext = path.extname(file.originalname).toLowerCase();
     
     if (allowedTypes.includes(file.mimetype) || allowedExtensions.includes(ext)) {
       cb(null, true);
