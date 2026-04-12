@@ -5,6 +5,7 @@ import { UserProvider, useUser } from './contexts/user-context';
 import { ThemeProvider } from './lib/theme';
 import ProtectedRoute from './routes/ProtectedRoute';
 import NeuralLoading from './components/ui/NeuralLoading';
+import ErrorBoundary from './components/ErrorBoundary';
 import { Toaster } from 'react-hot-toast';
 
 const LandingPage = lazy(() => import('./pages/LandingPage'));
@@ -48,8 +49,9 @@ function App() {
             </div>
           }
         >
-          <RouteTransition>
-            <Routes>
+          <ErrorBoundary>
+            <RouteTransition>
+              <Routes>
               {/* Public routes */}
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<LoginPage />} />
@@ -154,6 +156,7 @@ function App() {
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </RouteTransition>
+          </ErrorBoundary>
         </Suspense>
       </UserProvider>
     </ThemeProvider>
