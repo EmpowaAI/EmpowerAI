@@ -32,7 +32,7 @@ import { useLanguageRotation } from "../hooks/use-language-rotation";
 import RotatingText from "../components/ui/RotatingText";
 import Logo from "../components/ui/Logo";
 import logo from "../assets/images/empoweraidemo.png";
-import siyandaImg from "../assets/images/result.jpg";
+import siyandaImg from "../assets/images/siyaimage.png";
 
 const navLinks = ["How It Works", "Features", "Ubuntu Stories", "Demo"];
 
