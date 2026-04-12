@@ -81,18 +81,20 @@ def fix_weaknesses_for_industry(result: dict, cv_text: str, experience: list = N
     # If it's retail and has tech weaknesses, replace them
     if is_retail and has_tech_weaknesses:
         # Keep only the "quantifiable achievements" weakness if present
+        quantifiable_weakness = None
         for w in weaknesses:
             if 'quantifiable' in w.lower() or 'metrics' in w.lower() or 'numbers' in w.lower():
                 quantifiable_weakness = w
-        
+                break
+
         # Build new weaknesses list
         new_weaknesses = []
         if quantifiable_weakness:
             new_weaknesses.append(quantifiable_weakness)
-        
+
         # Add retail-specific weaknesses
         new_weaknesses.extend(RETAIL_WEAKNESSES[:5])  # Add top 5 retail weaknesses
-        
+
         # Remove duplicates while preserving order
         seen = set()
         unique_weaknesses = []
@@ -100,9 +102,9 @@ def fix_weaknesses_for_industry(result: dict, cv_text: str, experience: list = N
             if w not in seen:
                 seen.add(w)
                 unique_weaknesses.append(w)
-        
-        result['weaknesses'] = unique_weaknesses[:6] # Limit to top 6
-    
+
+        result['weaknesses'] = unique_weaknesses[:6]  # Limit to top 6
+
     return result
 
 def extract_text_from_pdf(file_content: bytes) -> str:

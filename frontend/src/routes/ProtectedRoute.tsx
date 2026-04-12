@@ -37,14 +37,22 @@ const featureMap: Record<string, { name: string; description: string }> = {
 };
 
 export default function ProtectedRoute({ children, requiredStep = 'any' }: ProtectedRouteProps) {
-  const { user, progress } = useUser();
+  const { user, progress, isAuthReady } = useUser();
   const location = useLocation();
-  const [showFeatureLocked, setShowFeatureLocked] = useState(false);
   
   // Check if user is authenticated
   const token = localStorage.getItem('empowerai-token');
-  
+
+  // Wait for auth validation before deciding whether to redirect.
+  if (!isAuthReady) {
+    return null;
+  }
+
   if (!user && !token) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  if (!user && token) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
