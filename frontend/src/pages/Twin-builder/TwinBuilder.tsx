@@ -193,26 +193,27 @@ export default function MyTwin() {
   }, []);
 
   const seedGreeting = (data: EconomicTwin | null) => {
-    const text = data
-      ? `Your Economic Twin is loaded. I can see your **${data.skills?.core?.length ?? 0} core skills**, your industry (**${data.identity?.industry ?? "technology"}**), and your full career profile.\n\nAsk me anything — salary benchmarks, skill gaps, market demand, career paths, or what to focus on next.`
-      : `No twin data found. Analyze your CV first, then come back here to chat with your twin.`;
+    if (data) {
+      const text = `Your Economic Twin is loaded. I can see your **${data.skills?.core?.length ?? 0} core skills**, your industry (**${data.identity?.industry ?? "technology"}**), and your full career profile.\n\nAsk me anything — salary benchmarks, skill gaps, market demand, career paths, or what to focus on next.`;
 
-    const greeting: DisplayMessage = {
-      id: "ai-greeting",
-      sender: "ai",
-      text,
-      options: data
-        ? [
-            "What skills am I missing?",
-            "What's my market demand?",
-            "Give me career recommendations",
-            "What can I monetize?",
-          ]
-        : [],
-      timestamp: new Date(),
-    };
-    setMessages([greeting]);
-    setChatHistory([{ role: "assistant", content: text }]);
+      const greeting: DisplayMessage = {
+        id: "ai-greeting",
+        sender: "ai",
+        text,
+        options: [
+          "What skills am I missing?",
+          "What's my market demand?",
+          "Give me career recommendations",
+          "What can I monetize?",
+        ],
+        timestamp: new Date(),
+      };
+      setMessages([greeting]);
+      setChatHistory([{ role: "assistant", content: text }]);
+    } else {
+      // No twin yet, start the profile building quiz
+      sendToAI([]);
+    }
   };
 
   // ── System context injected at top of every request ──────────────────────────
@@ -253,17 +254,20 @@ TWIN DATA:
     try {
       // Fixed: backend expects { messages: ChatMsg[] }, not { message: string }
       const res = await apiChatWithTwin(messagesWithContext);
-      // Backend returns: { status: 'success', data: { reply, ... } }
+      // Backend returns: { status: 'success', data: { reply, options, ... } }
       const reply: string =
         res?.data?.reply ||
         res?.data?.message ||
         res?.reply ||
         "I couldn't generate a response. Please try again.";
 
+      const options: string[] = res?.data?.options || [];
+
       const aiMsg: DisplayMessage = {
         id: `ai-${Date.now()}`,
         sender: "ai",
         text: reply,
+        options,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, aiMsg]);
