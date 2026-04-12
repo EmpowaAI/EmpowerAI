@@ -379,6 +379,106 @@ class CVAnalyzer:
         }
 
     # ----------------------------------------------------------------------
+    # Data Quality Validation
+    # ----------------------------------------------------------------------
+    def _validate_and_fix_result(self, result: Dict[str, Any], cv_text: str) -> Dict[str, Any]:
+        """
+        Validate result data and ensure no critical fields are empty or None.
+        Fills gaps with smart fallbacks if needed.
+        """
+        industry = result.get('industry', 'general')
+        
+        # Fix strengths - must have at least 3
+        strengths = result.get('strengths', [])
+        if not strengths or len([s for s in strengths if s and s.strip()]) < 3:
+            # Extract basic strengths from experience/skills
+            extracted_skills = result.get('sections', {}).get('skills', [])
+            experience = result.get('sections', {}).get('experience', [])
+            
+            inferred_strengths = []
+            if extracted_skills:
+                inferred_strengths.append(f"Proficient in {', '.join(extracted_skills[:3])}")
+            if experience:
+                inferred_strengths.append(f"Demonstrated {len(experience)} years of relevant experience")
+            if result.get('score', 0) > 60:
+                inferred_strengths.append("Strong CV quality with clear career progression")
+            
+            inferred_strengths.extend([
+                "Ability to learn and adapt to new challenges",
+                "Reliable team contributor with professional communication"
+            ])
+            
+            result['strengths'] = inferred_strengths[:6]
+            self.logger.info(f"Inferred strengths for {industry}: {result['strengths']}")
+        
+        # Fix weaknesses - must have at least 3 and match industry
+        weaknesses = result.get('weaknesses', [])
+        if not weaknesses or len([w for w in weaknesses if w and w.strip()]) < 3:
+            weaknesses = self.industry_weaknesses.get(industry, [
+                "No specific weaknesses identified - add more detail to CV",
+                "Limited quantifiable achievements - add metrics and numbers",
+                "Missing industry-specific certifications or skills"
+            ])
+            result['weaknesses'] = weaknesses[:6]
+            self.logger.info(f"Applied industry weaknesses for {industry}")
+        
+        # Fix recommendations - must have at least 3
+        recommendations = result.get('recommendations', [])
+        if not recommendations or len([r for r in recommendations if r and r.strip()]) < 3:
+            recommendations = self.industry_recommendations.get(industry, [
+                "Add more quantifiable achievements with metrics",
+                "Include professional certifications or training",
+                "Format CV with clear sections and bullet points"
+            ])
+            result['recommendations'] = recommendations[:8]
+            self.logger.info(f"Applied industry recommendations for {industry}")
+        
+        # Fix missingKeywords - must have at least 3
+        missing_keywords = result.get('missingKeywords', [])
+        if not missing_keywords or len([k for k in missing_keywords if k and k.strip()]) < 3:
+            missing_keywords = self.industry_missing_keywords.get(industry, [
+                'Key Industry Skills',
+                'Professional Certifications',
+                'Quantifiable Metrics'
+            ])
+            result['missingKeywords'] = missing_keywords[:10]
+            self.logger.info(f"Applied industry keywords for {industry}")
+        
+        # Ensure score is valid
+        score = result.get('score', 50)
+        if not isinstance(score, (int, float)) or score < 0 or score > 100:
+            # Infer score from CV content
+            inferred_score = 50
+            if result.get('sections', {}).get('skills'):
+                inferred_score += 10
+            if result.get('sections', {}).get('experience'):
+                inferred_score += 15
+            if result.get('sections', {}).get('education'):
+                inferred_score += 10
+            if result.get('sections', {}).get('achievements'):
+                inferred_score += 10
+            result['score'] = min(100, inferred_score)
+            self.logger.warning(f"Fixed invalid score, set to {result['score']}")
+        
+        # Ensure readiness level is valid
+        valid_levels = ['EXCEPTIONAL', 'HIGH POTENTIAL', 'INTERMEDIATE', 'DEVELOPING', 'JUNIOR']
+        if result.get('readinessLevel') not in valid_levels:
+            score = result.get('score', 50)
+            if score >= 85:
+                result['readinessLevel'] = 'EXCEPTIONAL'
+            elif score >= 70:
+                result['readinessLevel'] = 'HIGH POTENTIAL'
+            elif score >= 55:
+                result['readinessLevel'] = 'INTERMEDIATE'
+            elif score >= 40:
+                result['readinessLevel'] = 'DEVELOPING'
+            else:
+                result['readinessLevel'] = 'JUNIOR'
+            self.logger.warning(f"Fixed readiness level to {result['readinessLevel']}")
+        
+        return result
+    
+    # ----------------------------------------------------------------------
     # Helper to clean AI weaknesses
     # ----------------------------------------------------------------------
     def _clean_weaknesses(self, weaknesses: List[str], industry: str) -> List[str]:
@@ -1252,6 +1352,10 @@ Return a JSON object with the exact structure specified."""
     # Main analysis method – async
     # ----------------------------------------------------------------------
     async def analyze_cv(self, cv_text: str, job_requirements: Optional[List[str]] = None) -> Dict[str, Any]:
+        """
+        Analyze CV with quality assurance - ensures no empty fallback data is returned.
+        Fresh analysis each time for consistency.
+        """
         # WARNING: CV analysis needs to be fresh each time for consistency
         # Removed caching to prevent inconsistent scores on repeated analyses
         
@@ -1266,7 +1370,14 @@ Return a JSON object with the exact structure specified."""
                 'experience': [],
                 'achievements': [],
                 'cvText': '',
-                'links': {'linkedin': False, 'github': False, 'portfolio': False, 'driversLicence': False}
+                'links': {'linkedin': False, 'github': False, 'portfolio': False, 'driversLicence': False},
+                'score': 0,
+                'readinessLevel': 'JUNIOR',
+                'strengths': [],
+                'weaknesses': [],
+                'industry': 'general',
+                'recommendations': [],
+                'missingKeywords': []
             }
             return result
 
@@ -1275,6 +1386,9 @@ Return a JSON object with the exact structure specified."""
 
         if ai_result:
             self.logger.info("✅ CV analysis used AI extraction")
+            
+            # Validate and fix any data quality issues
+            ai_result = self._validate_and_fix_result(ai_result, cv_text)
             
             score = ai_result.get('score', 50)
             readiness_level = ai_result.get('readinessLevel', 'DEVELOPING')
