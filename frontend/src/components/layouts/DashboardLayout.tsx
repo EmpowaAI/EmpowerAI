@@ -156,17 +156,21 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     e.preventDefault();
     e.stopPropagation();
     try {
-      await authService.logout();
-    } catch {
-      // Even if the server call fails, proceed with local cleanup
-    } finally {
-      // Clear all app-specific localStorage keys
-      localStorage.removeItem('twinData');
-      localStorage.removeItem('twinCreated');
-      clearStoredCvAnalysis(); 
-      clearStoredCvFileName();
-      localStorage.removeItem('empowerai-token');
-      localStorage.removeItem('empowerai-user');
+      // Try to notify server of logout, but don't block if it fails
+      try {
+        await authService.logout();
+      } catch (error) {
+        console.warn('Server logout failed, proceeding with local cleanup:', error);
+      }
+      
+      // Call context logout to clear all local state
+      logout();
+      
+      // Navigate after state is cleared
+      navigate('/', { replace: true });
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Always navigate even if logout fails
       navigate('/', { replace: true });
     }
   };
