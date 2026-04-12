@@ -59,9 +59,13 @@ export const getMyTwin = async () => {
 // =========================
 // CHAT WITH TWIN
 // =========================
-export const chatWithTwin = async (messages: ChatMsg[]) => {
+export const chatWithTwin = async (messages: ChatMsg[], cvContext?: any) => {
   try {
-    const res = await api.post('/chat/twin', { messages });
+    const payload: any = { messages };
+    if (cvContext) {
+      payload.cv_context = cvContext;
+    }
+    const res = await api.post('/chat/twin', payload);
     return res.data;
   } catch (error: any) {
     console.error('Chat error:', error.response?.data || error.message);

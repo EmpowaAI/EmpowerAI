@@ -70,6 +70,79 @@ TRENDS = [
 # Initialize AI client
 ai_client = AIClient()
 
+async def handle_twin_conversation(payload: ChatRequest, req: Request) -> ChatResponse:
+    """
+    Handle conversational chat with a loaded twin
+    Uses AI to provide personalized responses based on twin data
+    """
+    correlation_id = req.headers.get('X-Correlation-ID')
+    log = get_logger(correlation_id)
+    
+    try:
+        # Build system context from twin data
+        cv_context = payload.cv_context or {}
+        
+        system_prompt = f"""You are an AI career advisor chatting with a user about their Economic Twin — an AI-generated career profile built from their CV analysis. Be specific, practical, and South Africa-aware. Use markdown. Keep responses concise but actionable.
+
+TWIN DATA:
+- Identity: currentRole={cv_context.get('currentRole', 'N/A')}, targetRole={cv_context.get('targetRole', 'N/A')}, seniorityLevel={cv_context.get('yearsExperience', 0)} years experience, industry={cv_context.get('industry', 'N/A')}
+- Economy: employabilityScore={cv_context.get('score', 50)}, incomePotential=Based on experience and industry
+- Core Skills: {', '.join(cv_context.get('sections', {}).get('skills', []))}
+- Strengths: {', '.join(cv_context.get('strengths', []))}
+- Weaknesses: {', '.join(cv_context.get('weaknesses', []))}
+- Recommendations: {', '.join(cv_context.get('recommendations', []))}
+- Missing Skills: {', '.join(cv_context.get('missingSkills', []))}
+- Confidence: {cv_context.get('confidenceScore', 50)}/100
+
+Always reference the user's actual data in your responses. Be helpful and encouraging."""
+        
+        # Get user's last message
+        user_messages = [m for m in payload.messages if m.role == "user"]
+        last_user_message = user_messages[-1].content if user_messages else ""
+        
+        if not last_user_message:
+            return ChatResponse(
+                reply="Hello! I'm here to help you with your career questions. What would you like to know about your Economic Twin?",
+                options=["What skills do I have?", "What's my market value?", "Give me career advice", "Help with job search"],
+                isComplete=False,
+                profile=None
+            )
+        
+        # Generate AI response
+        response_text = await ai_client.generate_text_async(
+            prompt=last_user_message,
+            system_prompt=system_prompt,
+            temperature=0.7,
+            max_tokens=400,
+            correlation_id=correlation_id
+        )
+        
+        if response_text:
+            log.info("✅ Generated conversational twin response")
+            return ChatResponse(
+                reply=response_text,
+                options=None,  # No options in conversational mode
+                isComplete=False,
+                profile=None
+            )
+        else:
+            log.warning("❌ AI failed to generate response, using fallback")
+            return ChatResponse(
+                reply="I'm having trouble connecting right now. Please try again in a moment.",
+                options=None,
+                isComplete=False,
+                profile=None
+            )
+            
+    except Exception as e:
+        log.error(f"❌ Error in twin conversation: {str(e)}")
+        return ChatResponse(
+            reply="I apologize, but I'm experiencing some technical difficulties. Please try again.",
+            options=None,
+            isComplete=False,
+            profile=None
+        )
+
 # System prompts for each step to help AI understand context
 STEP_PROMPTS = {
     0: "You are greeting a new user. Be warm and welcoming. Ask for their name.",
@@ -95,7 +168,19 @@ async def chat_twin(payload: ChatRequest, req: Request):
     try:
         log.info(f"📋 Twin chat request with {len(payload.messages)} messages")
         
-        # Determine current step based on message count
+        # Check if we have a loaded twin (cv_context with twin data)
+        has_loaded_twin = payload.cv_context and (
+            payload.cv_context.get('currentRole') or 
+            payload.cv_context.get('strengths') or
+            payload.cv_context.get('skills')
+        )
+        
+        if has_loaded_twin:
+            # Conversational mode with loaded twin
+            log.info("🎯 Conversational mode with loaded twin")
+            return await handle_twin_conversation(payload, req)
+        
+        # Quiz building mode
         step = get_current_step(payload.messages, payload.cv_context, payload.focus)
         log.info(f"📍 Current step: {STEPS[step]} (step {step})")
         

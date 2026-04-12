@@ -268,11 +268,30 @@ TWIN DATA:
     setIsTyping(true);
     setChatError("");
 
-    // Note: System context is for AI understanding only, not for conversation history
-    // Including it as a message pollutes profile building logic on the backend
     try {
-      // Send only the actual conversation history, not system context
-      const res = await apiChatWithTwin(history);
+      // Pass twin data as cv_context parameter, not in message history
+      const cvContext = twin ? {
+        name: twin.identity?.currentRole || "User",
+        sections: {
+          about: twin.identity?.currentRole || "",
+          skills: twin.skills?.core || [],
+          education: twin.identity?.seniorityLevel || "",
+          experience: twin.identity?.industry || "",
+          achievements: twin.intelligence?.strengths || []
+        },
+        score: twin.economy?.employabilityScore || 50,
+        industry: twin.identity?.industry || "technology",
+        strengths: twin.intelligence?.strengths || [],
+        weaknesses: twin.intelligence?.weaknesses || [],
+        recommendations: twin.intelligence?.recommendations || [],
+        missingSkills: twin.skills?.missing || [],
+        currentRole: twin.identity?.currentRole || "",
+        targetRole: twin.identity?.targetRole || "",
+        yearsExperience: twin.identity?.seniorityLevel === "Senior" ? 7 : twin.identity?.seniorityLevel === "Mid" ? 3 : 0,
+        confidenceScore: twin.evolution?.confidenceScore || 50
+      } : null;
+
+      const res = await apiChatWithTwin(history, cvContext);
       // Backend returns: { status: 'success', data: { reply, options, ... } }
       const reply: string =
         res?.data?.reply ||
