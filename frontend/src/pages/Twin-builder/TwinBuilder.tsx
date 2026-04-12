@@ -13,6 +13,7 @@ import {
 import { cn } from "../../lib/utils";
 import ReactMarkdown from "react-markdown";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../../contexts/user-context";
 import { getMyTwin, chatWithTwin as apiChatWithTwin } from "../../api/services/twinService";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -145,6 +146,7 @@ export default function MyTwin() {
   const [twinError, setTwinError] = useState("");
 
   // Chat state
+  const { updateProgress } = useUser();
   const [messages, setMessages] = useState<DisplayMessage[]>([]);
   const [chatHistory, setChatHistory] = useState<ChatMsg[]>([]);
   const [isTyping, setIsTyping] = useState(false);
@@ -175,6 +177,9 @@ export default function MyTwin() {
         if (!cancelled) {
           setTwin(data);
           seedGreeting(data);
+          if (data && Object.keys(data).length > 0) {
+            updateProgress('twinCompleted', true);
+          }
         }
       } catch (err: any) {
         if (!cancelled) {
@@ -675,22 +680,28 @@ TWIN DATA:
 
       {/* Input bar */}
       <div className="flex-shrink-0 border-t border-border bg-card/60 backdrop-blur-md px-4 py-3">
-        <div className="flex items-center gap-2 bg-muted/40 border border-border rounded-xl px-3 py-2">
+        <div className="flex items-center gap-2 bg-muted/40 border border-border rounded-xl px-3 py-2 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20 transition-all">
           <Sparkles className="h-4 w-4 text-muted-foreground flex-shrink-0" />
           <input
             ref={inputRef}
             type="text"
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSend(userInput)}
-            placeholder={hasOptions ? "Or type your own question..." : "Ask your twin anything..."}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && userInput.trim()) {
+                handleSend(userInput);
+              }
+            }}
+            onFocus={(e) => e.currentTarget.style.outline = 'none'}
+            placeholder={hasOptions ? "Or type your own answer..." : "Ask your twin anything..."}
             className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/60 outline-none py-0.5"
             disabled={isTyping}
           />
           <button
             onClick={() => handleSend(userInput)}
             disabled={!userInput.trim() || isTyping}
-            className="h-7 w-7 rounded-lg bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="h-7 w-7 rounded-lg bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0"
+            title="Send"
           >
             <Send className="h-3.5 w-3.5" />
           </button>
