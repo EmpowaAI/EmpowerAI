@@ -342,6 +342,25 @@ EmpowerAI/
       <img src="https://img.shields.io/badge/JWT-000000?style=flat-square&logo=jsonwebtokens&logoColor=white"/>
       <img src="https://img.shields.io/badge/Bcrypt-003A70?style=flat-square&logo=letsencrypt&logoColor=white"/>
     </td>
+    <td align="center" width="220">
+      <a href="https://github.com/lindy-heyns-73">
+        <img src="https://github.com/lindy-heyns-73.png" width="100px" style="border-radius:50%" alt="Lindy"/>
+        <br/><br/>
+        <b>Lindy</b>
+      </a>
+      <br/>
+      <sub>📋 Project & Product Manager</sub>
+      <br/><br/>
+      <a href="https://github.com/lindy-heyns-73">
+        <img src="https://img.shields.io/badge/@lindy--heyns--73-181717?style=flat-square&logo=github&logoColor=white"/>
+      </a>
+      <br/><br/>
+      <sub>Product Strategy · Project Coordination · Roadmap Planning · Stakeholder Management</sub>
+      <br/><br/>
+      <img src="https://img.shields.io/badge/Agile-0052CC?style=flat-square&logo=jira&logoColor=white"/>
+      <img src="https://img.shields.io/badge/Notion-000000?style=flat-square&logo=notion&logoColor=white"/>
+      <img src="https://img.shields.io/badge/Figma-F24E1E?style=flat-square&logo=figma&logoColor=white"/>
+    </td>
   </tr>
 </table>
 
