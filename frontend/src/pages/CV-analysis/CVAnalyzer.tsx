@@ -130,14 +130,14 @@ export default function CVAnalyzerPage() {
 
       // Build the economic twin from the CV analysis
       try {
-        await buildTwinFromCv()
-        console.log("Twin built successfully from CV analysis")
+        const twinResponse = await buildTwinFromCv()
+        console.log("Twin built successfully from CV analysis", twinResponse)
+        updateProgress('twinCompleted', true)
+        showToast(`CV analyzed and twin created! Score: ${result.score}% — ${result.readinessLevel}`, "success")
       } catch (twinError) {
         console.warn("Failed to build twin, but CV analysis succeeded:", twinError)
-        // Don't fail the whole process if twin building fails
+        showToast(`CV analyzed! Score: ${result.score}% — ${result.readinessLevel}. Twin creation failed, but you can still continue manually.`, "warning")
       }
-
-      showToast(`CV analyzed! Score: ${result.score}% — ${result.readinessLevel}`, "success")
 
       // Show post-analysis modal with next steps
       setShowPostAnalysisModal(true)
