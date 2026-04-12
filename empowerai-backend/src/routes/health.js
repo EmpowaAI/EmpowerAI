@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const { checkAiHealth } = require('../config/aiHealth');
-const { getAiQueueHealth, getAiJobStatus } = require('../queues/aiQueue');
+const { checkAiHealth } = require('../intergration/ai/ai.Health');
+const { getAiQueueHealth, getAiJobStatus } = require('../intergration/queues/aiQueue');
 
 const router = express.Router();
 

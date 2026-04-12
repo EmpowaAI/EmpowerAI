@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   Sparkles, Upload, FileText, AlertCircle, Brain,
-  CheckCircle, XCircle, Zap, RotateCcw, Wand2
+  CheckCircle, XCircle, Zap, RotateCcw, Wand2, Cpu
 } from "lucide-react"
 import { cn } from "../../lib/utils"
 import { useUser } from "../../contexts/user-context"
@@ -16,6 +16,7 @@ import RevampedCVDisplay from "../../components/RevampedCVDisplay"
 import type { RevampedCV, RevampedCVResponse } from '../../services/aiService'
 import { useToast } from "../../hooks/useToast"
 import { analyzeCV, revampCV, type CVAnalysis } from "../../services/cvService"
+<<<<<<< HEAD
 import {
   clearStoredCvAnalysis,
   clearStoredCvFileName,
@@ -24,11 +25,14 @@ import {
   setStoredCvAnalysis,
   setStoredCvFileName,
 } from "../../lib/sensitiveStorage"
+=======
+import { userService } from "../../api/Index"
+>>>>>>> a3fbb82b032cd871fb97427e3f5f2a9ecf5e8475
 
 
 export default function CVAnalyzerPage() {
 
-  const { user, updateProgress } = useUser()
+  const { user, updateUser, updateProgress } = useUser()
   const navigate = useNavigate()
 
   const [file, setFile] = useState<File | null>(null)
@@ -69,6 +73,163 @@ export default function CVAnalyzerPage() {
     setStoredCvFileName(fileName)
   }, [fileName])
 
+  // ❌ REMOVED: extractNameFromCV - NEVER extract name from CV
+
+  // Helper: Extract phone from CV (filter out date ranges)
+  const isDateRange = (text: string): boolean => {
+    if (!text) return false
+    const dateRangePatterns = [
+      /^\d{4}[-–]\d{4}$/,           // 2022-2023 or 2022–2023
+      /^\d{4}\s*[-–]\s*\d{4}$/,     // 2022 - 2023
+      /^\d{2}\/\d{4}$/,              // 02/2024
+      /^\d{4}$/,                     // Just a year
+      /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{4}$/i,
+      /\([0-9]{4}[-–][0-9]{4}\)/,    // (2022-2023)
+      /[0-9]{4}[-–][0-9]{4}/,        // 2022-2023 without parentheses
+    ]
+    return dateRangePatterns.some(pattern => pattern.test(text.trim()))
+  }
+
+  const extractPhoneFromCV = (cvData: CVAnalysis): string => {
+    const allText = JSON.stringify(cvData)
+    const phoneMatches = allText.match(/(?:\+27|0|27)[0-9\s\-\(\)]{9,15}\b/g) || []
+    
+    for (const match of phoneMatches) {
+      const cleaned = match.trim()
+      if (isDateRange(cleaned)) continue
+      const digitsOnly = cleaned.replace(/\D/g, '')
+      if (digitsOnly.length >= 9 && digitsOnly.length <= 12) {
+        return cleaned
+      }
+    }
+    return ""
+  }
+
+  // Helper: Extract location from CV
+  const extractLocationFromCV = (cvData: CVAnalysis): string => {
+    const about = cvData?.sections?.about || ""
+    const patterns = [
+      /(?:based in|from|located in|residing in)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i,
+      /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s*,\s*South Africa/i,
+      /Johannesburg|Cape Town|Durban|Pretoria|Port Elizabeth|Bloemfontein/i
+    ]
+    
+    for (const pattern of patterns) {
+      const match = about.match(pattern)
+      if (match) {
+        const location = match[1] || match[0]
+        if (location && location.length < 30) return location
+      }
+    }
+    return ""
+  }
+
+  // Helper: Extract occupation from CV
+  const extractOccupationFromCV = (cvData: CVAnalysis): string => {
+    const experience = cvData?.sections?.experience || []
+    const about = cvData?.sections?.about || ""
+    
+    const jobTitles = [
+      /(?:as a|as an|position:?\s*)([A-Za-z\s]+(?:Developer|Engineer|Manager|Designer|Analyst|Specialist|Consultant|Intern|Assistant|Associate))/i,
+      /^([A-Za-z\s]+(?:Developer|Engineer|Manager|Designer|Analyst|Specialist|Consultant))/im
+    ]
+    
+    for (const exp of experience) {
+      for (const pattern of jobTitles) {
+        const match = exp.match(pattern)
+        if (match) return match[1].trim()
+      }
+    }
+    
+    for (const pattern of jobTitles) {
+      const match = about.match(pattern)
+      if (match) return match[1].trim()
+    }
+    
+    if (cvData.readinessLevel === "DEVELOPING" && cvData.score < 40) {
+      return "Student / Entry Level"
+    }
+    
+    return ""
+  }
+
+  // Helper: Extract education level from CV
+  const extractEducationFromCV = (cvData: CVAnalysis): string => {
+    const education = cvData?.sections?.education || []
+    if (education.length === 0) return ""
+    
+    const eduText = education.join(" ").toLowerCase()
+    
+    if (eduText.includes("phd") || eduText.includes("doctorate")) return "PhD"
+    if (eduText.includes("master") || eduText.includes("masters") || eduText.includes("msc") || eduText.includes("ma")) return "Master's Degree"
+    if (eduText.includes("bachelor") || eduText.includes("bsc") || eduText.includes("ba") || eduText.includes("bcom")) return "Bachelor's Degree"
+    if (eduText.includes("diploma") || eduText.includes("higher certificate")) return "Diploma"
+    if (eduText.includes("matric") || eduText.includes("grade 12") || eduText.includes("high school")) return "Matric / Grade 12"
+    
+    return "Other"
+  }
+
+  // Helper: Extract bio from CV
+  const extractBioFromCV = (cvData: CVAnalysis): string => {
+    const about = cvData?.sections?.about || ""
+    const strengths = cvData?.strengths || []
+    
+    if (about.length > 20) {
+      return about.length > 200 ? about.substring(0, 200) + "..." : about
+    }
+    
+    if (strengths.length > 0) {
+      return `I am a professional with strengths in ${strengths.slice(0, 3).join(", ")}.`
+    }
+    
+    return ""
+  }
+
+  // Auto-fill profile from CV data - ⚠️ NEVER updates name or email
+  const autoFillProfile = async (cvData: CVAnalysis) => {
+    try {
+      // ❌ REMOVED: name extraction - NEVER update user's name from CV
+      // ❌ REMOVED: email extraction - NEVER update user's email from CV
+      
+      const extractedProfile = {
+        // name is NOT included - user's name should never be auto-changed
+        phone: extractPhoneFromCV(cvData),
+        location: extractLocationFromCV(cvData),
+        occupation: extractOccupationFromCV(cvData),
+        education: extractEducationFromCV(cvData),
+        bio: extractBioFromCV(cvData),
+      }
+      
+      // Filter out empty values and date ranges
+      const cleanProfile: any = {}
+      if (extractedProfile.phone && !isDateRange(extractedProfile.phone)) {
+        cleanProfile.phone = extractedProfile.phone
+      }
+      if (extractedProfile.location) cleanProfile.location = extractedProfile.location
+      if (extractedProfile.occupation) cleanProfile.occupation = extractedProfile.occupation
+      if (extractedProfile.education) cleanProfile.education = extractedProfile.education
+      if (extractedProfile.bio) cleanProfile.bio = extractedProfile.bio
+      
+      const hasData = Object.keys(cleanProfile).length > 0
+      
+      if (hasData) {
+        await userService.updateProfile(cleanProfile)
+        if (updateUser) {
+          // ⚠️ IMPORTANT: Only update non-name, non-email fields
+          updateUser({
+            ...user,
+            // name is NOT included - preserve user's name
+            // email is NOT included - preserve user's email
+            ...cleanProfile,
+          })
+        }
+        console.log("✅ Profile auto-filled from CV (name and email unchanged):", cleanProfile)
+        showToast("✨ Profile info auto-filled from your CV! (Your name and email were not changed)", "success")
+      }
+    } catch (err) {
+      console.warn("Auto-profile fill failed:", err)
+    }
+  }
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -122,12 +283,10 @@ export default function CVAnalyzerPage() {
       // Mark CV step complete — unlocks twin builder and all protected routes
       updateProgress('cvCompleted', true)
 
-      showToast(`CV analyzed! Score: ${result.score}% — ${result.readinessLevel}`, "success")
+      // 🔥 AUTO-FILL PROFILE FROM CV (background) - NEVER changes name or email
+      await autoFillProfile(result)
 
-      // Navigate to twin builder after short delay so user sees the toast
-      setTimeout(() => {
-        navigate('/dashboard/twin')
-      }, 1500)
+      showToast(`CV analyzed! Score: ${result.score}% — ${result.readinessLevel}`, "success")
 
     } catch (err: any) {
       setError(err.message || "Failed to analyze CV.")
@@ -310,13 +469,38 @@ export default function CVAnalyzerPage() {
                 </p>
               )}
             </div>
-            <button
-              onClick={handleClear}
-              className="px-5 py-2.5 rounded-lg bg-secondary text-secondary-foreground font-medium text-sm hover:bg-muted transition-all flex items-center gap-2"
-            >
-              <RotateCcw className="h-4 w-4" /> Analyze New CV
-            </button>
+
+            {/* Action buttons */}
+            <div className="flex items-center gap-2">
+
+              {/* Refresh — icon only, clears localStorage and resets state */}
+              <button
+                onClick={handleClear}
+                title="Clear saved data and start fresh"
+                className="p-2.5 rounded-lg bg-secondary text-secondary-foreground hover:bg-muted transition-all flex items-center justify-center"
+              >
+                <RotateCcw className="h-4 w-4" />
+              </button>
+
+              {/* Analyze New CV */}
+              <button
+                onClick={handleClear}
+                className="px-4 py-2.5 rounded-lg bg-secondary text-secondary-foreground font-medium text-sm hover:bg-muted transition-all flex items-center gap-2"
+              >
+                <Brain className="h-4 w-4" /> Analyze New CV
+              </button>
+
+              {/* Build Twin — manual navigation to twin view */}
+              <button
+                onClick={() => navigate('/dashboard/twin')}
+                className="px-4 py-2.5 rounded-lg bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-all flex items-center gap-2 shadow-sm"
+              >
+                <Cpu className="h-4 w-4" /> Build Twin
+              </button>
+
+            </div>
           </motion.div>
+
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
@@ -361,7 +545,7 @@ export default function CVAnalyzerPage() {
               {/* Strengths */}
               {strengths.length > 0 && (
                 <div className="bg-card rounded-xl border border-border p-5">
-                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-green-500 mb-2">✔ Strengths</h4>
+                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-green-500 mb-2">✓ Strengths</h4>
                   <ul className="space-y-1.5">
                     {strengths.map((s: string, i: number) => (
                       <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
@@ -418,6 +602,7 @@ export default function CVAnalyzerPage() {
                 </button>
               </motion.div>
             </div>
+
 
             {/* Column 2-3: Details */}
             <div className="lg:col-span-2 space-y-5">
@@ -601,6 +786,7 @@ export default function CVAnalyzerPage() {
 
             </div>
           </div>
+
         </div>
       </div>
     )
