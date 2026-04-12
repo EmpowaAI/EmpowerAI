@@ -118,9 +118,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       // Clear all app-specific localStorage keys
       localStorage.removeItem('twinData');
       localStorage.removeItem('twinCreated');
-      clearStoredCvAnalysis(); // Clears from sessionStorage
+      
+      // Use helpers which handle both session and legacy local storage
+      clearStoredCvAnalysis(); 
       clearStoredCvFileName();
-      localStorage.removeItem('cvFileName');
+
       localStorage.removeItem('empowerai-token');
       localStorage.removeItem('empowerai-user');
       navigate('/', { replace: true });
