@@ -210,6 +210,33 @@ async function buildFromAnalysis(analysis, userId) {
   const emergingSkills    = deriveEmergingSkills(analysis, matchedOpportunities);
   const monetizableSkills = deriveMonetizableSkills(analysis.extractedSkills);
 
+  // CRITICAL: Ensure core skills are never empty
+  let coreSkills = analysis.extractedSkills || [];
+  if (!coreSkills || coreSkills.length === 0) {
+    const industry = (analysis.industry || 'general').toLowerCase();
+    if (industry.includes('technology')) {
+      coreSkills = ["problem solving", "communication", "basic coding"];
+    } else if (industry.includes('retail')) {
+      coreSkills = ["customer service", "cash handling", "inventory management"];
+    } else {
+      coreSkills = ["communication", "problem solving", "teamwork"];
+    }
+  }
+  
+  // CRITICAL: Ensure employability score is never 0
+  let employabilityScore = analysis.score || 0;
+  if (employabilityScore === 0) {
+    const yearsExp = analysis.yearsExperience || 0;
+    employabilityScore = 50 + (yearsExp * 5);
+    employabilityScore = Math.min(employabilityScore, 85);
+  }
+  
+  // CRITICAL: Ensure market value is never 0
+  let marketValueScore = Math.min(100, employabilityScore + (matchedOpportunities.length * 3));
+  if (marketValueScore === 0) {
+    marketValueScore = 45 + (coreSkills.length * 5);
+  }
+
   // 4. Derive current role from most recent experience entry
   const experienceList  = analysis.experience || [];
   const currentRole     = experienceList.length > 0
@@ -244,14 +271,14 @@ async function buildFromAnalysis(analysis, userId) {
     },
 
     economy: {
-      employabilityScore:  analysis.score || 0,
-      marketValueScore:    Math.min(100, (analysis.score || 0) + (matchedOpportunities.length * 3)),
+      employabilityScore,
+      marketValueScore,
       demandLevel,
       incomePotentialRange: incomePotential,
     },
 
     skills: {
-      core:        analysis.extractedSkills || [],
+      core:        coreSkills,
       missing:     analysis.missingSkills   || [],
       emerging:    emergingSkills,
       monetizable: monetizableSkills,
