@@ -11,6 +11,7 @@ import {
 import { cn } from "../../lib/utils"
 import { useUser } from "../../contexts/user-context"
 import RateLimitAlert from "../../components/ui/RateLimitAlert"
+import CVUploadError from "../../components/CVUploadError"
 import ScoreMeter from "../../components/ui/ScoreMeter"
 import CVScanAnimation from "./CVScanAnimation"
 import RevampedCVDisplay from "../../components/RevampedCVDisplay"
@@ -691,16 +692,13 @@ export default function CVAnalyzerPage() {
         {/* Error */}
         <AnimatePresence>
           {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="mb-4 p-3 rounded-lg bg-destructive/10 border border-destructive/30 flex items-center gap-3"
-            >
-              <AlertCircle className="h-4 w-4 text-destructive flex-shrink-0" />
-              <p className="text-sm text-destructive">{error}</p>
-              <button onClick={() => setError("")} className="ml-auto text-xs text-muted-foreground hover:text-foreground">✕</button>
-            </motion.div>
+            <CVUploadError
+              error={error}
+              isRateLimited={isRateLimited}
+              retryAfter={retryAfter}
+              onRetry={handleAnalyze}
+              onDismiss={() => setError("")}
+            />
           )}
 
           {isRateLimited && (

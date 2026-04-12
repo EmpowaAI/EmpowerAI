@@ -11,6 +11,7 @@ import { RefreshCcw } from "lucide-react";
 import ScoreMeter from "../../components/ui/ScoreMeter";
 import GlassCard from "../../components/shared/GlassCard";
 import AIThinkingIndicator from "../../components/AIThinkingIndicator";
+import FirstTimeUserOnboarding from "../../components/FirstTimeUserOnboarding";
 import LiveInsightsFeed from "../../components/LiveInsightsFeed";
 import SkillGapAnalysis from "../../components/SkillGapAnalysis";
 import { useUser } from "../../contexts/user-context";
@@ -271,6 +272,9 @@ export default function Dashboard() {
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 md:py-8 space-y-8">
 
         <AIThinkingIndicator messages={[aiMessage]} isVisible={aiThinking} />
+
+        {/* First-time user onboarding guide */}
+        {!twinCompleted && !cvCompleted && <FirstTimeUserOnboarding />}
 
         {/* Hero */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
