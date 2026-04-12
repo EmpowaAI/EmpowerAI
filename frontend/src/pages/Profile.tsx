@@ -7,7 +7,7 @@ import {
   Save, Loader2, CheckCircle, AlertCircle, Edit2, Camera,
   Brain, FileText, Award,
 } from "lucide-react";
-import { useUser } from "../lib/user-context";
+import { useUser } from "../contexts/user-context";
 import { userAPI } from "../lib/api";
 import { cn } from "../lib/utils";
 import { getStoredCvAnalysis } from "../lib/sensitiveStorage";
