@@ -24,7 +24,9 @@ export default function SignupPage() {
     email: "",
     password: "",
   });
-  const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [nameFocused, setNameFocused] = useState(false);
+  const [emailFocused, setEmailFocused] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
 
   // Real-time validation
   const validateField = (field: string, value: string) => {
@@ -198,13 +200,13 @@ export default function SignupPage() {
               {/* Name Input */}
               <div className="relative">
                 <label className={`absolute left-4 transition-all duration-200 pointer-events-none ${
-                  focusedField === 'name' || formData.name 
+                  nameFocused || formData.name 
                     ? "text-xs -top-2.5 bg-card px-2" 
                     : "top-4 text-base text-muted-foreground"
                 } ${
                   fieldErrors.name 
                     ? "text-destructive" 
-                    : focusedField === 'name' 
+                    : nameFocused 
                       ? "text-primary" 
                       : ""
                 }`}>
@@ -214,8 +216,8 @@ export default function SignupPage() {
                   type="text"
                   value={formData.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
-                  onFocus={() => setFocusedField('name')}
-                  onBlur={() => setFocusedField(null)}
+                  onFocus={() => setNameFocused(true)}
+                  onBlur={() => setNameFocused(false)}
                   autoComplete="name"
                   className={`w-full px-4 py-4 border rounded-xl text-base text-foreground transition-all min-h-[56px] auth-input ${
                     fieldErrors.name 
@@ -236,13 +238,13 @@ export default function SignupPage() {
               {/* Email Input */}
               <div className="relative">
                 <label className={`absolute left-4 transition-all duration-200 pointer-events-none ${
-                  focusedField === 'email' || formData.email 
+                  emailFocused || formData.email 
                     ? "text-xs -top-2.5 bg-card px-2" 
                     : "top-4 text-base text-muted-foreground"
                 } ${
                   fieldErrors.email 
                     ? "text-destructive" 
-                    : focusedField === 'email' 
+                    : emailFocused 
                       ? "text-primary" 
                       : ""
                 }`}>
@@ -252,8 +254,8 @@ export default function SignupPage() {
                   type="email"
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  onFocus={() => setFocusedField('email')}
-                  onBlur={() => setFocusedField(null)}
+                  onFocus={() => setEmailFocused(true)}
+                  onBlur={() => setEmailFocused(false)}
                   autoComplete="email"
                   inputMode="email"
                   spellCheck={false}
@@ -276,13 +278,13 @@ export default function SignupPage() {
               {/* Password Input */}
               <div className="relative">
                 <label className={`absolute left-4 transition-all duration-200 pointer-events-none ${
-                  focusedField === 'password' || formData.password 
+                  passwordFocused || formData.password 
                     ? "text-xs -top-2.5 bg-card px-2" 
                     : "top-4 text-base text-muted-foreground"
                 } ${
                   fieldErrors.password 
                     ? "text-destructive" 
-                    : focusedField === 'password' 
+                    : passwordFocused 
                       ? "text-primary" 
                       : ""
                 }`}>
@@ -292,8 +294,8 @@ export default function SignupPage() {
                   type={showPassword ? "text" : "password"}
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
-                  onFocus={() => setFocusedField('password')}
-                  onBlur={() => setFocusedField(null)}
+                  onFocus={() => setPasswordFocused(true)}
+                  onBlur={() => setPasswordFocused(false)}
                   autoComplete="new-password"
                   className={`w-full px-4 py-4 pr-12 border rounded-xl text-base text-foreground transition-all min-h-[56px] auth-input ${
                     fieldErrors.password 
