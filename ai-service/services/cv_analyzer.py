@@ -9,6 +9,7 @@ import sys
 import os
 import re
 import json
+import hashlib
 from datetime import datetime
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -18,7 +19,10 @@ from utils.ai_client import AIClient
 from utils.logger import get_logger
 
 class CVAnalyzer:
-    """Analyzes CVs and extracts information - No shared state between requests"""
+    """Analyzes CVs and extracts information - Ensures consistent results for same CV"""
+
+    # In-memory cache for analysis results to ensure consistency
+    _analysis_cache: Dict[str, Dict[str, Any]] = {}
 
     # Tech-specific keywords that should NEVER appear in non-tech weaknesses
     TECH_KEYWORDS = [
@@ -1248,8 +1252,16 @@ Return a JSON object with the exact structure specified."""
     # Main analysis method – async
     # ----------------------------------------------------------------------
     async def analyze_cv(self, cv_text: str, job_requirements: Optional[List[str]] = None) -> Dict[str, Any]:
+        # Generate hash of CV text for caching
+        cv_hash = hashlib.md5(cv_text.strip().encode('utf-8')).hexdigest()
+        
+        # Check cache first for consistency
+        if cv_hash in self._analysis_cache:
+            self.logger.info("✅ Returning cached CV analysis result")
+            return self._analysis_cache[cv_hash].copy()
+        
         if not cv_text or not cv_text.strip():
-            return {
+            result = {
                 'extractedSkills': [],
                 'missingSkills': [],
                 'marketKeywords': [],
@@ -1261,6 +1273,9 @@ Return a JSON object with the exact structure specified."""
                 'cvText': '',
                 'links': {'linkedin': False, 'github': False, 'portfolio': False, 'driversLicence': False}
             }
+            # Cache even empty results
+            self._analysis_cache[cv_hash] = result.copy()
+            return result
 
         self.logger.info("Attempting AI-powered CV analysis...")
         ai_result = await self._analyze_with_ai(cv_text)
@@ -1316,7 +1331,7 @@ Return a JSON object with the exact structure specified."""
             self.logger.info(f"   Score: {score}")
             self.logger.info(f"   Weaknesses: {weaknesses}")
             
-            return {
+            result = {
                 'extractedSkills': extracted_skills,
                 'missingSkills': missing_keywords if job_requirements else missing_keywords,
                 'marketKeywords': market_keywords,
@@ -1336,6 +1351,11 @@ Return a JSON object with the exact structure specified."""
                 'missingKeywords': missing_keywords,
                 'industry': industry
             }
+            
+            # Cache the result for consistency
+            self._analysis_cache[cv_hash] = result.copy()
+            
+            return result
         else:
             self.logger.warning("⚠️ AI extraction failed - using rule-based fallback")
             
@@ -1434,7 +1454,7 @@ Return a JSON object with the exact structure specified."""
             self.logger.info(f"   Industry: {industry}")
             self.logger.info(f"   Weaknesses: {weaknesses}")
 
-            return {
+            result = {
                 'extractedSkills': extracted_skills,
                 'missingSkills': missing_skills,
                 'marketKeywords': market_keywords,
@@ -1455,3 +1475,8 @@ Return a JSON object with the exact structure specified."""
                 'industry': industry,
                 'summary': summary
             }
+            
+            # Cache the result for consistency
+            self._analysis_cache[cv_hash] = result.copy()
+            
+            return result

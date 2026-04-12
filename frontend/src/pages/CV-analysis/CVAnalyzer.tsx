@@ -114,9 +114,9 @@ export default function CVAnalyzerPage() {
       setCvData(result)
 
       try {
-        const skills = Array.isArray((result as any)?.sections?.skills) ? (result as any).sections.skills : []
+        const skills = Array.isArray(result?.extractedSkills) ? result.extractedSkills : []
         localStorage.setItem('cvSkills', JSON.stringify(skills))
-        localStorage.setItem('cvScore', String((result as any)?.score ?? 0))
+        localStorage.setItem('cvScore', String(result?.score ?? 0))
       } catch {
         // ignore storage errors
       }
