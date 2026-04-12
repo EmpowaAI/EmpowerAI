@@ -160,7 +160,13 @@ def _find_missing_skills(
     Derive missing skills from:
       1. Skills required by available opportunities but not in core
       2. AI-identified gaps from CV analysis
+    
+    CRITICAL: If core_skills are empty, provide default tech skills for the field.
     """
+    # If no core skills, seed with common entry-level skills
+    if not core_skills:
+        core_skills = ["communication", "problem solving", "time management"]
+    
     required_by_opportunities: set = set()
     for opp in (opportunities or []):
         for key in ("requiredSkills", "skills", "requirements"):
@@ -319,6 +325,15 @@ class DigitalTwinGenerator:
         cv_confidence: float = float(cv_analysis.get("confidenceScore") or 0)
 
         # ── 2. Derive computed fields ──────────────────────────────────────────
+        # CRITICAL: If core skills are empty, seed with defaults based on industry
+        if not core_skills:
+            if industry == "technology":
+                core_skills = ["problem solving", "communication", "basic coding"]
+            elif industry == "retail":
+                core_skills = ["customer service", "cash handling", "inventory"]
+            else:
+                core_skills = ["communication", "problem solving", "teamwork"]
+        
         seniority: str = _infer_seniority(years_exp)
 
         missing_skills = _find_missing_skills(core_skills, opportunities, ai_missing)
@@ -336,29 +351,52 @@ class DigitalTwinGenerator:
 
         # Opportunities & threats derived from available jobs vs skill gaps
         opp_list: List[str] = []
+        
+        # First, try to derive from emerging skills x opportunities
         for s in emerging_skills[:3]:
             count = sum(1 for o in opportunities if s.lower() in str(o).lower())
             if count > 0:
-                opp_list.append(f"{s.title()} skills are actively sought across {count}+ open positions")
+                opp_list.append(f"{s.title()} is in-demand across {count}+ active opportunities")
         
-        # Fallback if no opportunities detected
+        # If no skill-based opportunities, provide industry-aware defaults
         if not opp_list:
-            opp_list = [
-                "Build foundational technical skills to compete in the SA market",
-                "Develop specialisation in your chosen industry"
-            ]
+            if industry == "technology":
+                opp_list = [
+                    f"Growing demand for {seniority.lower().replace('_', ' ')} level {core_skills[0] if core_skills else 'technical'} professionals",
+                    "Opportunities in cloud platforms, AI/ML, and full-stack development roles",
+                    "Freelance market shows strong demand for specialized technical skills"
+                ]
+            elif industry == "retail":
+                opp_list = [
+                    "High turnover in retail sector creates ongoing entry and mid-level opportunities",
+                    "E-commerce and omnichannel skills increasingly valued",
+                    "Management advancement path for high-performers"
+                ]
+            else:
+                opp_list = [
+                    f"Growing market for {industry} professionals in South Africa",
+                    f"Specialization in {core_skills[0] if core_skills else industry} can increase competitiveness",
+                    "Regional opportunities beyond major metros"
+                ]
         
         threats_list: List[str] = []
         for s in missing_skills[:3]:
             count = sum(1 for o in opportunities if s.lower() in str(o).lower())
             if count > 0:
-                threats_list.append(f"'{s.title()}' is in demand but missing from your profile ({count}+ listings require it)")
+                threats_list.append(f"'{s.title()}' is required in {count}+ roles but missing from profile")
         
-        # Fallback if no threats detected
-        if not threats_list and missing_skills:
-            threats_list = [
-                f"Upskilling in {missing_skills[0]} would significantly enhance market competitiveness"
-            ]
+        # If no specific threats, provide industry defaults
+        if not threats_list:
+            if missing_skills:
+                threats_list = [
+                    f"Lack of {missing_skills[0]} limits competitiveness in current market",
+                    f"Upskilling in {missing_skills[1] if len(missing_skills) > 1 else 'emerging trends'} is critical"
+                ]
+            else:
+                threats_list = [
+                    f"Competitive {industry} market requires continuous skill development",
+                    "Rapid changes in industry standards demand regular reskilling"
+                ]
 
         # Confidence: average of CV confidence + data completeness
         data_completeness = min(
@@ -371,6 +409,16 @@ class DigitalTwinGenerator:
             ) / 5.0, 1.0
         ) * 100
         confidence_score = round((cv_confidence + data_completeness) / 2, 2)
+        
+        # CRITICAL: Ensure scores are never zero
+        if employability == 0 and cv_score == 0:
+            # Default baseline employability if no CV score
+            employability = 50 + (years_exp * 5)  # Progressive based on experience
+            employability = min(employability, 85)  # Cap at 85
+        
+        if market_value == 0:
+            # Baseline market value if skills are empty
+            market_value = 45 + (len(core_skills) * 5) if core_skills else 45
 
         # ── 3. Assemble twin matching the model schema ─────────────────────────
         return {
