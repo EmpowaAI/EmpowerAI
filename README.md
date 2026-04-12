@@ -349,7 +349,7 @@ EmpowerAI/
         <b>Lindy</b>
       </a>
       <br/>
-      <sub>📋 Project & Product Manager</sub>
+      <sub>🚀 Delivery Lead</sub>
       <br/><br/>
       <a href="https://github.com/lindy-heyns-73">
         <img src="https://img.shields.io/badge/@lindy--heyns--73-181717?style=flat-square&logo=github&logoColor=white"/>
