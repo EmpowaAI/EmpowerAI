@@ -1252,13 +1252,8 @@ Return a JSON object with the exact structure specified."""
     # Main analysis method – async
     # ----------------------------------------------------------------------
     async def analyze_cv(self, cv_text: str, job_requirements: Optional[List[str]] = None) -> Dict[str, Any]:
-        # Generate hash of CV text for caching
-        cv_hash = hashlib.md5(cv_text.strip().encode('utf-8')).hexdigest()
-        
-        # Check cache first for consistency
-        if cv_hash in self._analysis_cache:
-            self.logger.info("✅ Returning cached CV analysis result")
-            return self._analysis_cache[cv_hash].copy()
+        # WARNING: CV analysis needs to be fresh each time for consistency
+        # Removed caching to prevent inconsistent scores on repeated analyses
         
         if not cv_text or not cv_text.strip():
             result = {
@@ -1273,8 +1268,6 @@ Return a JSON object with the exact structure specified."""
                 'cvText': '',
                 'links': {'linkedin': False, 'github': False, 'portfolio': False, 'driversLicence': False}
             }
-            # Cache even empty results
-            self._analysis_cache[cv_hash] = result.copy()
             return result
 
         self.logger.info("Attempting AI-powered CV analysis...")
@@ -1328,7 +1321,7 @@ Return a JSON object with the exact structure specified."""
                 recommendations = cleaned_recs[:8]
             
             self.logger.info(f"   Industry: {industry}")
-            self.logger.info(f"   Score: {score}")
+            self.logger.info(f"   Score: {score} (fresh analysis, not cached)")
             self.logger.info(f"   Weaknesses: {weaknesses}")
             
             result = {
@@ -1352,8 +1345,7 @@ Return a JSON object with the exact structure specified."""
                 'industry': industry
             }
             
-            # Cache the result for consistency
-            self._analysis_cache[cv_hash] = result.copy()
+            # DO NOT CACHE - Each analysis should be fresh for consistency
             
             return result
         else:

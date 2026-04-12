@@ -79,6 +79,7 @@ interface DisplayMessage {
   sender: "ai" | "user";
   text: string;
   options?: string[];
+  allowMultiple?: boolean;
   timestamp: Date;
 }
 
@@ -153,15 +154,36 @@ export default function MyTwin() {
   const [userInput, setUserInput] = useState("");
   const [chatError, setChatError] = useState("");
   const [mobileTab, setMobileTab] = useState<"profile" | "chat">("profile");
+  const [selectedMultiple, setSelectedMultiple] = useState<Set<string>>(new Set());
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   const scrollToBottom = useCallback(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, []);
 
+  const handleInputChange = useCallback((value: string) => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+    debounceRef.current = setTimeout(() => {
+      setUserInput(value);
+    }, 50);
+  }, []);
+
   useEffect(() => { scrollToBottom(); }, [messages, isTyping, scrollToBottom]);
+
+  useEffect(() => {
+    // Auto-focus input field when messages change or twin loads
+    if (inputRef.current && !isTyping && messages.length > 0) {
+      const timer = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [messages, isTyping]);
 
   // ── Fetch twin from API on mount ─────────────────────────────────────────────
   useEffect(() => {
@@ -267,16 +289,23 @@ TWIN DATA:
         "I couldn't generate a response. Please try again.";
 
       const options: string[] = res?.data?.options || [];
+      const allowMultiple: boolean = res?.data?.allowMultiple || false;
 
       const aiMsg: DisplayMessage = {
         id: `ai-${Date.now()}`,
         sender: "ai",
         text: reply,
         options,
+        allowMultiple,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, aiMsg]);
       setChatHistory((prev) => [...prev, { role: "assistant", content: reply }]);
+      
+      // Reset multi-select when showing new question
+      if (allowMultiple) {
+        setSelectedMultiple(new Set());
+      }
     } catch (err: any) {
       const msg = err?.response?.data?.message || err?.message || "Failed to get a response.";
       setChatError(msg);
@@ -288,21 +317,40 @@ TWIN DATA:
 
   const handleSend = (text: string) => {
     if (!text.trim() || isTyping) return;
+    
+    // Clear input immediately for instant feedback
+    const trimmedText = text.trim();
     setUserInput("");
 
     const userMsg: DisplayMessage = {
       id: `user-${Date.now()}`,
       sender: "user",
-      text: text.trim(),
+      text: trimmedText,
       timestamp: new Date(),
     };
 
     setMessages((prev) => [...prev.map((m) => ({ ...m, options: undefined })), userMsg]);
 
-    const newHistory: ChatMsg[] = [...chatHistory, { role: "user", content: text.trim() }];
+    const newHistory: ChatMsg[] = [...chatHistory, { role: "user", content: trimmedText }];
     setChatHistory(newHistory);
     setMobileTab("chat");
     sendToAI(newHistory);
+  };
+
+  const handleMultipleSelect = (option: string) => {
+    const updated = new Set(selectedMultiple);
+    if (updated.has(option)) {
+      updated.delete(option);
+    } else {
+      updated.add(option);
+    }
+    setSelectedMultiple(updated);
+  };
+
+  const handleMultipleSubmit = () => {
+    if (selectedMultiple.size === 0) return;
+    const selected = Array.from(selectedMultiple).join(", ");
+    handleSend(selected);
   };
 
   const lastMessage = messages[messages.length - 1];
@@ -601,11 +649,12 @@ TWIN DATA:
                   )}
                 </div>
 
-                {/* Quick reply chips */}
+                {/* Quick reply chips - Single select */}
                 {msg.sender === "ai" &&
                   msg.options && msg.options.length > 0 &&
                   msg === lastMessage &&
-                  !isTyping && (
+                  !isTyping &&
+                  !msg.allowMultiple && (
                     <motion.div
                       initial={{ opacity: 0, y: 4 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -621,6 +670,44 @@ TWIN DATA:
                           {opt}
                         </button>
                       ))}
+                    </motion.div>
+                  )}
+
+                {/* Quick reply chips - Multi select */}
+                {msg.sender === "ai" &&
+                  msg.options && msg.options.length > 0 &&
+                  msg === lastMessage &&
+                  !isTyping &&
+                  msg.allowMultiple && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.15 }}
+                      className="space-y-2 w-full"
+                    >
+                      <div className="flex flex-wrap gap-2">
+                        {msg.options.map((opt) => (
+                          <button
+                            key={opt}
+                            onClick={() => handleMultipleSelect(opt)}
+                            className={cn(
+                              "px-3 py-1.5 rounded-xl text-xs font-medium border transition-all",
+                              selectedMultiple.has(opt)
+                                ? "border-primary bg-primary/20 text-foreground"
+                                : "border-border/60 bg-secondary/40 hover:border-primary/50 hover:bg-primary/10 text-foreground"
+                            )}
+                          >
+                            {selectedMultiple.has(opt) ? "✓ " : ""}{opt}
+                          </button>
+                        ))}
+                      </div>
+                      <button
+                        onClick={handleMultipleSubmit}
+                        disabled={selectedMultiple.size === 0 || isTyping}
+                        className="w-full px-3 py-1.5 rounded-xl text-xs font-medium bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                      >
+                        Confirm Selection ({selectedMultiple.size} selected)
+                      </button>
                     </motion.div>
                   )}
               </div>
