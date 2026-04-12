@@ -1,7 +1,7 @@
 // components/Logo.tsx
 import { Link } from "react-router-dom"
 
-import logoImg from "../../assets/images/empowerLogo.jpg"
+import logoImg from "../../assets/images/empowerLogo.jpeg"
 
 interface LogoProps {
   variant?: "default" | "light";
