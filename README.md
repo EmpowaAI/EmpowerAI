@@ -305,25 +305,6 @@ EmpowerAI/
       <img src="https://img.shields.io/badge/OpenAI-412991?style=flat-square&logo=openai&logoColor=white"/>
     </td>
     <td align="center" width="220">
-      <a href="https://github.com/Lunga-Mashaba">
-        <img src="https://github.com/Lunga-Mashaba.png" width="100px" style="border-radius:50%" alt="Lunga"/>
-        <br/><br/>
-        <b>Lunga</b>
-      </a>
-      <br/>
-      <sub>💻 Senior Backend Engineer</sub>
-      <br/><br/>
-      <a href="https://github.com/Lunga-Mashaba">
-        <img src="https://img.shields.io/badge/@Lunga--Mashaba-181717?style=flat-square&logo=github&logoColor=white"/>
-      </a>
-      <br/><br/>
-      <sub>Authentication · Database Architecture · RESTful APIs · Performance Optimization</sub>
-      <br/><br/>
-      <img src="https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=nodedotjs&logoColor=white"/>
-      <img src="https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white"/>
-      <img src="https://img.shields.io/badge/Express-000000?style=flat-square&logo=express&logoColor=white"/>
-    </td>
-    <td align="center" width="220">
       <a href="https://github.com/Siya-tec">
         <img src="https://github.com/Siya-tec.png" width="100px" style="border-radius:50%" alt="Siyanda"/>
         <br/><br/>
