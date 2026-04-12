@@ -54,12 +54,16 @@ export default function DigitalTwinChatbot() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Focus input when chat opens
+  // Maintain focus on input during typing (mobile keyboard fix)
   useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 100);
+    if (isOpen && inputRef.current && inputText.length > 0) {
+      // Small delay to ensure DOM is ready
+      const timer = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 10);
+      return () => clearTimeout(timer);
     }
-  }, [isOpen]);
+  }, [inputText, isOpen]);
 
   const handleSendMessage = async () => {
     if (!inputText.trim() || isLoading) return;
@@ -270,6 +274,16 @@ export default function DigitalTwinChatbot() {
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+              onBlur={(e) => {
+                // On mobile, if user is still typing (input has value), refocus after a brief delay
+                if (inputText.trim() && !isLoading) {
+                  setTimeout(() => {
+                    if (inputRef.current && isOpen) {
+                      inputRef.current.focus();
+                    }
+                  }, 100);
+                }
+              }}
               placeholder="Ask your digital twin anything..."
               className="flex-1 px-3 sm:px-4 py-2 bg-gray-50 dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
               disabled={isLoading}
