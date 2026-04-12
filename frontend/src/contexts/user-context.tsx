@@ -259,29 +259,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
 
   const refreshCVData = useCallback(() => {
-<<<<<<< HEAD
     const stored = getStoredCvAnalysis<CVData>()
     setCvData(stored)
   }, []) // No dependencies!
-=======
-    try {
-      if (typeof window !== 'undefined' && window.localStorage) {
-        const saved = localStorage.getItem('comprehensiveCVAnalysis')
-        if (saved) {
-          const parsed = JSON.parse(saved)
-          setCvData(parsed)
-          console.log('CV data refreshed:', parsed.sections?.skills?.length || 0, 'skills found')
-        } else {
-          setCvData(null)
-        }
-      }
-    } catch (error) {
-      console.error('Error refreshing CV data:', error)
-      setCvData(null)
-    }
-  }, [])
-
->>>>>>> a3fbb82b032cd871fb97427e3f5f2a9ecf5e8475
 
   const clearCVData = () => {
     setCvData(null)
