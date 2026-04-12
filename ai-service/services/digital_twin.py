@@ -335,14 +335,30 @@ class DigitalTwinGenerator:
         trending = _trending_from_opportunities(opportunities)
 
         # Opportunities & threats derived from available jobs vs skill gaps
-        opp_list: List[str] = [
-            f"High demand for {s} in current listings" for s in emerging_skills[:3]
-        ]
-        threats_list: List[str] = [
-            f"Missing '{s}' required by {sum(1 for o in opportunities if s in str(o).lower())} active listings"
-            for s in missing_skills[:3]
-            if any(s in str(o).lower() for o in opportunities)
-        ]
+        opp_list: List[str] = []
+        for s in emerging_skills[:3]:
+            count = sum(1 for o in opportunities if s.lower() in str(o).lower())
+            if count > 0:
+                opp_list.append(f"{s.title()} skills are actively sought across {count}+ open positions")
+        
+        # Fallback if no opportunities detected
+        if not opp_list:
+            opp_list = [
+                "Build foundational technical skills to compete in the SA market",
+                "Develop specialisation in your chosen industry"
+            ]
+        
+        threats_list: List[str] = []
+        for s in missing_skills[:3]:
+            count = sum(1 for o in opportunities if s.lower() in str(o).lower())
+            if count > 0:
+                threats_list.append(f"'{s.title()}' is in demand but missing from your profile ({count}+ listings require it)")
+        
+        # Fallback if no threats detected
+        if not threats_list and missing_skills:
+            threats_list = [
+                f"Upskilling in {missing_skills[0]} would significantly enhance market competitiveness"
+            ]
 
         # Confidence: average of CV confidence + data completeness
         data_completeness = min(
@@ -377,11 +393,30 @@ class DigitalTwinGenerator:
                 "incomePotentialRange": income_range,
             },
             "intelligence": {
-                "strengths": strengths,
-                "weaknesses": weaknesses,
-                "opportunities": opp_list,
-                "threats": threats_list,
-                "recommendations": recommendations,
+                "strengths": strengths or [
+                    "Detail-oriented and methodical approach",
+                    "Willing to continuously learn new skills",
+                    "Capable of meeting deadlines and delivery targets"
+                ],
+                "weaknesses": weaknesses or [
+                    "Limited market-specific experience",
+                    "Opportunity to expand technical breadth"
+                ],
+                "opportunities": opp_list or [
+                    "Growing demand for digital skills in South Africa",
+                    "Opportunity to specialize in emerging technologies"
+                ],
+                "threats": threats_list or [
+                    "Competitive job market requires continued skill development",
+                    "Importance of building professional network early"
+                ],
+                "recommendations": recommendations or [
+                    "Build a portfolio demonstrating practical skills",
+                    "Obtain industry-recognized certifications",
+                    "Network actively within your industry",
+                    "Contribute to open-source projects or freelance work",
+                    "Stay updated with latest market trends in your field"
+                ],
             },
             "market": {
                 "trendingSkills": trending,
@@ -415,31 +450,51 @@ class DigitalTwinGenerator:
             return base
 
         try:
+            # Detailed profile context for AI enrichment
+            current_role = base['identity']['currentRole'] or 'Not Specified'
+            target_role = base['identity']['targetRole'] or 'Career Advancement'
+            core_skills_str = ', '.join(base['skills']['core'][:15]) or 'General'
+            missing_skills_str = ', '.join(base['skills']['missing'][:5]) or 'None identified'
+            
             prompt = f"""
-You are an economic twin enrichment engine for the South African job market.
+You are an expert career analyst specializing in the South African job market. 
+Your task is to enrich a user's digital twin profile with accurate, personalized insights.
+
+CRITICAL: Ensure all outputs are specific to THIS person's profile, NOT generic.
+Use the provided data to create meaningful, differentiated recommendations.
 
 Given this career profile, return a JSON object with these fields only:
-- employabilityScore (0-100 integer)
-- marketValueScore (0-100 integer)
-- demandLevel ("HIGH" | "MEDIUM" | "LOW")
-- incomeProjection: {{ min, max, currency: "ZAR" }}
-- emergingSkills: string[]
-- monetizable: string[]
-- trendingSkills: string[]
-- decliningSkills: string[]
-- competitorRoles: string[]
-- confidenceScore (0-100)
+- employabilityScore (0-100 integer): rate based on skills match + seniority + market demand
+- marketValueScore (0-100 integer): estimated earning power relative to SA market
+- demandLevel ("HIGH" | "MEDIUM" | "LOW"): based on skills + industry + experience
+- incomeProjection: {{ min, max, currency: "ZAR" }}: realistic ZAR ranges for this profile
+- emergingSkills: string[]: 2-4 trending skills TO ACQUIRE based on industry
+- monetizable: string[]: 2-4 skills with freelance/passive income potential
+- trendingSkills: string[]: 3-5 most in-demand skills in {base['identity']['industry']} industry right now
+- decliningSkills: string[]: 1-3 skills losing market relevance
+- competitorRoles: string[]: 2-4 similar job titles competitors hold
+- confidenceScore (0-100): confidence in this assessment
 
-PROFILE:
-- Core Skills: {', '.join(base['skills']['core'][:15])}
-- Missing Skills: {', '.join(base['skills']['missing'][:5])}
-- Industry: {base['identity']['industry']}
-- Seniority: {base['identity']['seniorityLevel']}
-- CV Score: {cv_analysis.get('score', 0)}
+SPECIFIC PROFILE DATA:
+- Current Role: {current_role}
+- Target Role: {target_role}
+- Years of Experience: {cv_analysis.get('yearsExperience', 0)} years
+- Seniority Level: {base['identity']['seniorityLevel']}
+- Core Skills: {core_skills_str}
+- Skill Gaps: {missing_skills_str}
+- Industry Focus: {base['identity']['industry'].title()}
+- CV Quality Score: {cv_analysis.get('score', 0)}/100
 - Province: {province}
-- Available opportunities count: {len(opportunities or [])}
+- Market Opportunities: {len(opportunities or [])} matching roles found
 
-Return ONLY valid JSON. No explanation.
+INSTRUCTIONS:
+1. If core skills are strong and aligned with industry, score employability HIGH (75-90+)
+2. If missing critical skills or gaps exist, recommend targeted upskilling in missing_skills
+3. Provide income ranges realistic for {province} market and seniority level
+4. Identify 2-3 emerging skills that will boost their competitiveness in {base['identity']['industry']}
+5. ALL outputs must relate directly to this person's data - NO generic fallbacks
+
+Return ONLY valid JSON. No explanation, no code blocks.
 """.strip()
 
             raw = self.ai_client.complete(prompt)
