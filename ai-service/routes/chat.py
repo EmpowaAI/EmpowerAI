@@ -37,6 +37,7 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     reply: str
     options: Optional[List[str]] = None
+    allowMultiple: Optional[bool] = False
     isComplete: Optional[bool] = False
     profile: Optional[Dict[str, Any]] = None
 
@@ -396,6 +397,7 @@ def generate_step_response(messages: List[ChatMessage], step: int, cv_context: O
         return {
             "reply": "Which skills do you already have? (You can select multiple)\n\n[OPTIONS: \"Basic Coding (HTML/CSS/Python)\", \"Customer Service\", \"Sales\", \"Administration\", \"Data Analysis\", \"Project Management\", \"Communication\", \"Leadership\"]",
             "options": ["Basic Coding (HTML/CSS/Python)", "Customer Service", "Sales", "Administration", "Data Analysis", "Project Management", "Communication", "Leadership"],
+            "allowMultiple": True,
             "isComplete": False,
             "profile": None
         }
@@ -403,8 +405,9 @@ def generate_step_response(messages: List[ChatMessage], step: int, cv_context: O
     # STEP 6: After skills - Ask challenges with options
     elif step == 6:
         return {
-            "reply": "What's your biggest career challenge right now?\n\n[OPTIONS: \"Finding entry-level roles\", \"Lack of experience\", \"Need more qualifications\", \"Competition is too high\", \"Don't know where to start\"]",
+            "reply": "What's your biggest career challenge right now? (You can select multiple)\n\n[OPTIONS: \"Finding entry-level roles\", \"Lack of experience\", \"Need more qualifications\", \"Competition is too high\", \"Don't know where to start\"]",
             "options": ["Finding entry-level roles", "Lack of experience", "Need more qualifications", "Competition is too high", "Don't know where to start"],
+            "allowMultiple": True,
             "isComplete": False,
             "profile": None
         }
@@ -412,8 +415,9 @@ def generate_step_response(messages: List[ChatMessage], step: int, cv_context: O
     # STEP 7: After challenges - Ask goals with options
     elif step == 7:
         return {
-            "reply": "What's your main career goal for the next year?\n\n[OPTIONS: \"Find a full-time job\", \"Get a learnership/internship\", \"Study further\", \"Start my own business\", \"Get certified in my field\"]",
+            "reply": "What's your main career goal for the next year? (You can select multiple)\n\n[OPTIONS: \"Find a full-time job\", \"Get a learnership/internship\", \"Study further\", \"Start my own business\", \"Get certified in my field\"]",
             "options": ["Find a full-time job", "Get a learnership/internship", "Study further", "Start my own business", "Get certified in my field"],
+            "allowMultiple": True,
             "isComplete": False,
             "profile": None
         }
