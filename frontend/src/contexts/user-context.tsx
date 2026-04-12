@@ -66,6 +66,7 @@ interface UserContextType {
   cvData: CVData | null
   refreshCVData: () => void
   clearCVData: () => void
+  isAuthReady: boolean
 }
 
 
@@ -112,6 +113,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   }
 
   const [progress, setProgress] = useState(getProgressFromStorage)
+  const [isAuthReady, setIsAuthReady] = useState(false)
 
   // FIX: Track whether we're in the middle of a fresh CV analysis flow.
   // When true, skip backend sync so it can't overwrite freshly-set local progress.
@@ -158,6 +160,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           // Network error — do NOT clear session
         }
       }
+
+      setIsAuthReady(true)
     }
 
     loadUserFromBackend()
@@ -305,6 +309,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       cvData,
       refreshCVData,
       clearCVData,
+      isAuthReady,
     }}>
       {children}
     </UserContext.Provider>
