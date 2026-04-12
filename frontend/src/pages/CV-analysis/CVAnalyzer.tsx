@@ -15,6 +15,7 @@ import CVUploadError from "../../components/CVUploadError"
 import ScoreMeter from "../../components/ui/ScoreMeter"
 import CVScanAnimation from "./CVScanAnimation"
 import RevampedCVDisplay from "../../components/RevampedCVDisplay"
+import PostCVAnalysisModal from "../../components/PostCVAnalysisModal"
 import type { RevampedCV, RevampedCVResponse } from '../../services/aiService'
 import { useToast } from "../../hooks/useToast"
 import { analyzeCV, revampCV, type CVAnalysis } from "../../services/cvService"
@@ -30,7 +31,7 @@ import {
 
 export default function CVAnalyzerPage() {
 
-  const { user, updateProgress } = useUser()
+  const { user, progress, updateProgress } = useUser()
   const navigate = useNavigate()
 
   const [file, setFile] = useState<File | null>(null)
@@ -54,6 +55,8 @@ export default function CVAnalyzerPage() {
   const [fileName, setFileName] = useState<string | null>(() => {
     return getStoredCvFileName()
   })
+
+  const [showPostAnalysisModal, setShowPostAnalysisModal] = useState(false)
 
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const { showToast, ToastContainer } = useToast()
@@ -125,6 +128,9 @@ export default function CVAnalyzerPage() {
       updateProgress('cvCompleted', true)
 
       showToast(`CV analyzed! Score: ${result.score}% — ${result.readinessLevel}`, "success")
+
+      // Show post-analysis modal with next steps
+      setShowPostAnalysisModal(true)
 
     } catch (err: any) {
       setError(err.message || "Failed to analyze CV.")
@@ -298,7 +304,7 @@ export default function CVAnalyzerPage() {
                   className="w-full px-6 py-3 rounded-lg bg-primary text-primary-foreground font-bold text-sm hover:bg-primary/90 transition-all flex items-center justify-center gap-2 shadow-lg group"
                 >
                   <Sparkles className="h-4 w-4" />
-                  Build Your Digital Twin
+                  {progress.twinCompleted ? 'View Your Digital Twin' : 'Build Your Digital Twin'}
                   <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </button>
               </motion.div>
@@ -419,8 +425,12 @@ export default function CVAnalyzerPage() {
                         <Bot className="h-4 w-4 text-blue-500" />
                       </div>
                       <div>
-                        <p className="text-sm font-semibold">Build Your Digital Twin</p>
-                        <p className="text-xs text-muted-foreground">Create AI-powered career simulation</p>
+                        <p className="text-sm font-semibold">
+                          {progress.twinCompleted ? 'View Your Digital Twin' : 'Build Your Digital Twin'}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {progress.twinCompleted ? 'Review your latest AI career insights' : 'Create AI-powered career simulation'}
+                        </p>
                       </div>
                       <ArrowRight className="h-4 w-4 text-blue-500 group-hover:translate-x-1 transition-transform ml-auto" />
                     </Link>
@@ -819,6 +829,17 @@ export default function CVAnalyzerPage() {
         )}
 
       </div>
+
+      {/* Post-Analysis Modal */}
+      <PostCVAnalysisModal
+        isOpen={showPostAnalysisModal}
+        onClose={() => setShowPostAnalysisModal(false)}
+        cvScore={cvData?.score ?? 0}
+        readinessLevel={cvData?.readinessLevel ?? 'UNKNOWN'}
+        twinCompleted={progress.twinCompleted}
+        onRevampClick={handleRevamp}
+      />
+
     </div>
   )
 }
