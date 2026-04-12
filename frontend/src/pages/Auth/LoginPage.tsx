@@ -3,7 +3,7 @@
 import type React from "react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, Loader2, Sparkles } from "lucide-react";
+import { Eye, EyeOff, Loader2, Sparkles, Mail, Lock } from "lucide-react";
 import toast from 'react-hot-toast';
 import { authAPI } from "../../lib/api";
 import { useUser } from "../../contexts/user-context";
@@ -168,13 +168,14 @@ export default function LoginPage() {
                 </div>
               )}
               
-              {/* Email Input with floating effect */}
-              <div className="relative">
+              {/* Email Input with icon */}
+              <div className="relative group">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors z-10" />
                 <label
-                  className={`absolute left-4 transition-all duration-200 pointer-events-none ${
+                  className={`absolute left-12 transition-all duration-200 pointer-events-none ${
                     emailFocused || email
-                      ? "text-xs -top-2.5 bg-card px-2 text-primary"
-                      : "top-4 text-base text-muted-foreground"
+                      ? "text-xs -top-2.5 bg-card px-1 text-primary font-medium"
+                      : "top-1/2 -translate-y-1/2 text-sm text-muted-foreground"
                   }`}
                 >
                   Email Address
@@ -188,22 +189,23 @@ export default function LoginPage() {
                   autoComplete="email"
                   inputMode="email"
                   spellCheck={false}
-                  className={`w-full px-4 py-4 border rounded-xl text-base text-foreground transition-all min-h-[56px] auth-input ${
+                  className={`w-full pl-12 pr-4 py-3.5 border-2 rounded-xl text-base text-foreground transition-all min-h-[52px] auth-input-enhanced ${
                     emailFocused 
-                      ? "border-primary/40" 
-                      : "border-border/60 hover:border-border/70"
+                      ? "border-primary/50 shadow-lg shadow-primary/10 bg-primary/5" 
+                      : "border-border/40 hover:border-border/60 bg-card/40"
                   }`}
                   required
                 />
               </div>
 
-              {/* Password Input with floating effect */}
-              <div className="relative">
+              {/* Password Input with icon */}
+              <div className="relative group">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors z-10" />
                 <label
-                  className={`absolute left-4 transition-all duration-200 pointer-events-none ${
+                  className={`absolute left-12 transition-all duration-200 pointer-events-none ${
                     passwordFocused || password
-                      ? "text-xs -top-2.5 bg-card px-2 text-primary"
-                      : "top-4 text-base text-muted-foreground"
+                      ? "text-xs -top-2.5 bg-card px-1 text-primary font-medium"
+                      : "top-1/2 -translate-y-1/2 text-sm text-muted-foreground"
                   }`}
                 >
                   Password
@@ -215,17 +217,17 @@ export default function LoginPage() {
                   onFocus={() => setPasswordFocused(true)}
                   onBlur={() => setPasswordFocused(false)}
                   autoComplete="current-password"
-                  className={`w-full px-4 py-4 pr-12 border rounded-xl text-base text-foreground transition-all min-h-[56px] auth-input ${
+                  className={`w-full pl-12 pr-12 py-3.5 border-2 rounded-xl text-base text-foreground transition-all min-h-[52px] auth-input-enhanced ${
                     passwordFocused 
-                      ? "border-primary/40" 
-                      : "border-border/60 hover:border-border/70"
+                      ? "border-primary/50 shadow-lg shadow-primary/10 bg-primary/5" 
+                      : "border-border/40 hover:border-border/60 bg-card/40"
                   }`}
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors min-w-[48px] min-h-[48px] flex items-center justify-center rounded-lg hover:bg-background auth-icon-button"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-2 hover:bg-primary/10 rounded-lg auth-icon-button-hover"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}

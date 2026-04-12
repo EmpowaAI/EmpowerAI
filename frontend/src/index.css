@@ -305,6 +305,30 @@
       0 1px 0 hsl(var(--foreground) / 0.06) inset;
   }
 
+  /* Enhanced auth input styling with icons */
+  .auth-input-enhanced {
+    background-color: hsl(var(--background) / 0.35);
+    backdrop-filter: blur(14px) saturate(1.1);
+    -webkit-backdrop-filter: blur(14px) saturate(1.1);
+    box-shadow: 0 2px 8px hsl(var(--foreground) / 0.04) inset;
+  }
+
+  .auth-input-enhanced::placeholder {
+    color: hsl(var(--muted-foreground) / 0.7);
+  }
+
+  .auth-input-enhanced:focus {
+    outline: none;
+    box-shadow: 
+      0 0 0 4px hsl(var(--primary) / 0.15),
+      0 0 12px hsl(var(--primary) / 0.2),
+      0 2px 8px hsl(var(--foreground) / 0.04) inset;
+  }
+
+  .auth-icon-button-hover {
+    transition: all 0.2s ease;
+  }
+
   .auth-icon-button {
     background-color: hsl(var(--background) / 0.35);
     backdrop-filter: blur(14px);

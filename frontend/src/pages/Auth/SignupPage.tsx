@@ -2,7 +2,7 @@
 import type React from "react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Eye, EyeOff, CheckCircle, Loader2, Sparkles, Shield, Zap, XCircle, Mail } from "lucide-react";
+import { Eye, EyeOff, CheckCircle, Loader2, Sparkles, Shield, Zap, XCircle, Mail, User, Lock } from "lucide-react";
 import toast from 'react-hot-toast';
 import { authService } from "../../api/Index";
 import Logo from "../../components/ui/Logo";
@@ -198,17 +198,20 @@ export default function SignupPage() {
 
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Name Input */}
-              <div className="relative">
-                <label className={`absolute left-4 transition-all duration-200 pointer-events-none ${
+              <div className="relative group">
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 transition-colors z-10" style={{
+                  color: fieldErrors.name ? 'hsl(var(--destructive))' : 'hsl(var(--muted-foreground))',
+                }} />
+                <label className={`absolute left-12 transition-all duration-200 pointer-events-none font-medium ${
                   nameFocused || formData.name 
-                    ? "text-xs -top-2.5 bg-card px-2" 
-                    : "top-4 text-base text-muted-foreground"
+                    ? "text-xs -top-2.5 bg-card px-1" 
+                    : "top-1/2 -translate-y-1/2 text-sm"
                 } ${
                   fieldErrors.name 
                     ? "text-destructive" 
                     : nameFocused 
                       ? "text-primary" 
-                      : ""
+                      : "text-muted-foreground"
                 }`}>
                   Full Name
                 </label>
@@ -219,34 +222,37 @@ export default function SignupPage() {
                   onFocus={() => setNameFocused(true)}
                   onBlur={() => setNameFocused(false)}
                   autoComplete="name"
-                  className={`w-full px-4 py-4 border rounded-xl text-base text-foreground transition-all min-h-[56px] auth-input ${
+                  className={`w-full pl-12 pr-4 py-3.5 border-2 rounded-xl text-base text-foreground transition-all min-h-[52px] auth-input-enhanced ${
                     fieldErrors.name 
-                      ? "border-destructive/50" 
-                      : focusedField === 'name' 
-                        ? "border-primary/40" 
-                        : "border-border/60 hover:border-border/70"
+                      ? "border-destructive/50 bg-destructive/5" 
+                      : nameFocused 
+                        ? "border-primary/50 shadow-lg shadow-primary/10 bg-primary/5" 
+                        : "border-border/40 hover:border-border/60 bg-card/40"
                   }`}
                   required
                 />
                 {fieldErrors.name && (
-                  <div className="flex items-center gap-1 mt-1.5 text-xs text-destructive animate-slide-up">
+                  <div className="flex items-center gap-1 mt-2 text-xs text-destructive animate-slide-up">
                     <XCircle className="h-3.5 w-3.5" /><span>{fieldErrors.name}</span>
                   </div>
                 )}
               </div>
 
               {/* Email Input */}
-              <div className="relative">
-                <label className={`absolute left-4 transition-all duration-200 pointer-events-none ${
+              <div className="relative group">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 transition-colors z-10" style={{
+                  color: fieldErrors.email ? 'hsl(var(--destructive))' : 'hsl(var(--muted-foreground))',
+                }} />
+                <label className={`absolute left-12 transition-all duration-200 pointer-events-none font-medium ${
                   emailFocused || formData.email 
-                    ? "text-xs -top-2.5 bg-card px-2" 
-                    : "top-4 text-base text-muted-foreground"
+                    ? "text-xs -top-2.5 bg-card px-1" 
+                    : "top-1/2 -translate-y-1/2 text-sm"
                 } ${
                   fieldErrors.email 
                     ? "text-destructive" 
                     : emailFocused 
                       ? "text-primary" 
-                      : ""
+                      : "text-muted-foreground"
                 }`}>
                   Email Address
                 </label>
@@ -259,34 +265,37 @@ export default function SignupPage() {
                   autoComplete="email"
                   inputMode="email"
                   spellCheck={false}
-                  className={`w-full px-4 py-4 border rounded-xl text-base text-foreground transition-all min-h-[56px] auth-input ${
+                  className={`w-full pl-12 pr-4 py-3.5 border-2 rounded-xl text-base text-foreground transition-all min-h-[52px] auth-input-enhanced ${
                     fieldErrors.email 
-                      ? "border-destructive/50" 
-                      : focusedField === 'email' 
-                        ? "border-primary/40" 
-                        : "border-border/60 hover:border-border/70"
+                      ? "border-destructive/50 bg-destructive/5" 
+                      : emailFocused 
+                        ? "border-primary/50 shadow-lg shadow-primary/10 bg-primary/5" 
+                        : "border-border/40 hover:border-border/60 bg-card/40"
                   }`}
                   required
                 />
                 {fieldErrors.email && (
-                  <div className="flex items-center gap-1 mt-1.5 text-xs text-destructive animate-slide-up">
+                  <div className="flex items-center gap-1 mt-2 text-xs text-destructive animate-slide-up">
                     <XCircle className="h-3.5 w-3.5" /><span>{fieldErrors.email}</span>
                   </div>
                 )}
               </div>
 
               {/* Password Input */}
-              <div className="relative">
-                <label className={`absolute left-4 transition-all duration-200 pointer-events-none ${
+              <div className="relative group">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 transition-colors z-10" style={{
+                  color: fieldErrors.password ? 'hsl(var(--destructive))' : 'hsl(var(--muted-foreground))',
+                }} />
+                <label className={`absolute left-12 transition-all duration-200 pointer-events-none font-medium ${
                   passwordFocused || formData.password 
-                    ? "text-xs -top-2.5 bg-card px-2" 
-                    : "top-4 text-base text-muted-foreground"
+                    ? "text-xs -top-2.5 bg-card px-1" 
+                    : "top-1/2 -translate-y-1/2 text-sm"
                 } ${
                   fieldErrors.password 
                     ? "text-destructive" 
                     : passwordFocused 
                       ? "text-primary" 
-                      : ""
+                      : "text-muted-foreground"
                 }`}>
                   Password
                 </label>
@@ -297,25 +306,25 @@ export default function SignupPage() {
                   onFocus={() => setPasswordFocused(true)}
                   onBlur={() => setPasswordFocused(false)}
                   autoComplete="new-password"
-                  className={`w-full px-4 py-4 pr-12 border rounded-xl text-base text-foreground transition-all min-h-[56px] auth-input ${
+                  className={`w-full pl-12 pr-12 py-3.5 border-2 rounded-xl text-base text-foreground transition-all min-h-[52px] auth-input-enhanced ${
                     fieldErrors.password 
-                      ? "border-destructive/50" 
-                      : focusedField === 'password' 
-                        ? "border-primary/40" 
-                        : "border-border/60 hover:border-border/70"
+                      ? "border-destructive/50 bg-destructive/5" 
+                      : passwordFocused 
+                        ? "border-primary/50 shadow-lg shadow-primary/10 bg-primary/5" 
+                        : "border-border/40 hover:border-border/60 bg-card/40"
                   }`}
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors min-w-[48px] min-h-[48px] flex items-center justify-center rounded-lg hover:bg-background auth-icon-button"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-2 hover:bg-primary/10 rounded-lg auth-icon-button-hover"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
                 {fieldErrors.password && (
-                  <div className="flex items-center gap-1 mt-1.5 text-xs text-destructive animate-slide-up">
+                  <div className="flex items-center gap-1 mt-2 text-xs text-destructive animate-slide-up">
                     <XCircle className="h-3.5 w-3.5" /><span>{fieldErrors.password}</span>
                   </div>
                 )}
