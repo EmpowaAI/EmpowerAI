@@ -202,10 +202,10 @@ export default function SignupPage() {
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 transition-colors z-10" style={{
                   color: fieldErrors.name ? 'hsl(var(--destructive))' : 'hsl(var(--muted-foreground))',
                 }} />
-                <label className={`absolute left-12 transition-all duration-200 pointer-events-none font-medium ${
+                <label className={`auth-floating-label ${
                   nameFocused || formData.name 
-                    ? "text-xs -top-2.5 bg-card px-1" 
-                    : "top-1/2 -translate-y-1/2 text-sm"
+                    ? "auth-floating-label-shrink" 
+                    : "text-sm"
                 } ${
                   fieldErrors.name 
                     ? "text-destructive" 
@@ -243,10 +243,10 @@ export default function SignupPage() {
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 transition-colors z-10" style={{
                   color: fieldErrors.email ? 'hsl(var(--destructive))' : 'hsl(var(--muted-foreground))',
                 }} />
-                <label className={`absolute left-12 transition-all duration-200 pointer-events-none font-medium ${
+                <label className={`auth-floating-label ${
                   emailFocused || formData.email 
-                    ? "text-xs -top-2.5 bg-card px-1" 
-                    : "top-1/2 -translate-y-1/2 text-sm"
+                    ? "auth-floating-label-shrink" 
+                    : "text-sm"
                 } ${
                   fieldErrors.email 
                     ? "text-destructive" 
@@ -286,10 +286,10 @@ export default function SignupPage() {
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 transition-colors z-10" style={{
                   color: fieldErrors.password ? 'hsl(var(--destructive))' : 'hsl(var(--muted-foreground))',
                 }} />
-                <label className={`absolute left-12 transition-all duration-200 pointer-events-none font-medium ${
+                <label className={`auth-floating-label ${
                   passwordFocused || formData.password 
-                    ? "text-xs -top-2.5 bg-card px-1" 
-                    : "top-1/2 -translate-y-1/2 text-sm"
+                    ? "auth-floating-label-shrink" 
+                    : "text-sm"
                 } ${
                   fieldErrors.password 
                     ? "text-destructive" 
