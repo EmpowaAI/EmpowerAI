@@ -123,7 +123,7 @@ Always reference the user's actual data in your responses. Be helpful and encour
             # Robust extraction of [OPTIONS] from AI text if present
             options = None
             clean_reply = response_text
-            options_match = re.search(r'\[OPTIONS:\s*(.+?)\]', response_text)
+            options_match = re.search(r'\[OPTIONS:\s*\[?(.+?)\]?\]', response_text)
             if options_match:
                 raw_opts = options_match.group(1)
                 # Handle both comma separated and quoted strings
