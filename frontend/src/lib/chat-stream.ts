@@ -38,16 +38,8 @@ export async function streamChat({
     // Extract CV context
     let cvContext = null;
     try {
-<<<<<<< HEAD
       const parsed = getStoredCvAnalysis<any>();
       if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) cvContext = parsed;
-=======
-      const stored = localStorage.getItem('comprehensiveCVAnalysis') || localStorage.getItem('cvAnalysisData');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) cvContext = parsed;
-      }
->>>>>>> a3fbb82b032cd871fb97427e3f5f2a9ecf5e8475
     } catch (e) {
       console.warn('Failed to parse CV context');
     }
@@ -73,7 +65,8 @@ export async function streamChat({
       .reverse()
       .find(m => m.role === 'user')?.content ?? '';
 
-    if (!lastUserMessage) {
+    // Allow empty last message only if it's the very first request (initial greeting)
+    if (!lastUserMessage && messages.length > 0) {
       onError("No message to send.");
       onDone({ reply: "", options: [], isComplete: false, profile: null });
       return;

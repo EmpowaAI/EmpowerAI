@@ -172,7 +172,8 @@ async def chat_twin(payload: ChatRequest, req: Request):
         has_loaded_twin = payload.cv_context and (
             payload.cv_context.get('currentRole') or 
             payload.cv_context.get('strengths') or
-            payload.cv_context.get('skills')
+            payload.cv_context.get('skills') or
+            payload.cv_context.get('sections', {}).get('skills')
         )
         
         if has_loaded_twin:

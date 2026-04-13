@@ -388,17 +388,20 @@ async function buildFromAnalysis(analysis, userId) {
   const monetizableSkills = deriveMonetizableSkills(analysis.extractedSkills);
 
   // CRITICAL: Ensure core skills are never empty
-  let coreSkills = analysis.extractedSkills || [];
-  if (!coreSkills || coreSkills.length === 0) {
-    const industry = (analysis.industry || 'general').toLowerCase();
-    if (industry.includes('technology')) {
-      coreSkills = ["problem solving", "communication", "basic coding"];
-    } else if (industry.includes('retail')) {
-      coreSkills = ["customer service", "cash handling", "inventory management"];
-    } else {
-      coreSkills = ["communication", "problem solving", "teamwork"];
-    }
-    logger.warn('[TwinService] CV analysis had no skills, using defaults', { userId, industry, defaultSkills: coreSkills });
+  const industry = (analysis.industry || 'general').toLowerCase();
+  let coreSkills = [];
+  if (industry.includes('technology')) {
+    coreSkills = ["problem solving", "communication", "basic coding"];
+  } else if (industry.includes('retail')) {
+    coreSkills = ["customer service", "cash handling", "inventory management"];
+  } else {
+    coreSkills = ["communication", "problem solving", "teamwork"];
+  }
+
+  // If we have meaningful extracted skills, use them instead
+  const extracted = analysis.extractedSkills || [];
+  if (extracted.length > 0 && extracted.length >= 3) {
+    coreSkills = extracted.slice(0, 10); // limit to 10
   }
   
   // CRITICAL: Ensure employability score is never 0

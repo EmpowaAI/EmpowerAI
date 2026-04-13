@@ -141,36 +141,27 @@ function CollapsibleSection({
 export default function MyTwin() {
   const navigate = useNavigate();
 
+  const { user, updateProgress, cvData } = useUser();
+
   // Twin data state
   const [twin, setTwin] = useState<EconomicTwin | null>(null);
   const [twinLoading, setTwinLoading] = useState(true);
   const [twinError, setTwinError] = useState("");
 
   // Chat state
-  const { updateProgress } = useUser();
   const [messages, setMessages] = useState<DisplayMessage[]>([]);
   const [chatHistory, setChatHistory] = useState<ChatMsg[]>([]);
   const [isTyping, setIsTyping] = useState(false);
+  const [mobileTab, setMobileTab] = useState<"profile" | "chat">("profile");
   const [userInput, setUserInput] = useState("");
   const [chatError, setChatError] = useState("");
-  const [mobileTab, setMobileTab] = useState<"profile" | "chat">("profile");
   const [selectedMultiple, setSelectedMultiple] = useState<Set<string>>(new Set());
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   const scrollToBottom = useCallback(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, []);
-
-  const handleInputChange = useCallback((value: string) => {
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-    }
-    debounceRef.current = setTimeout(() => {
-      setUserInput(value);
-    }, 50);
   }, []);
 
   useEffect(() => { scrollToBottom(); }, [messages, isTyping, scrollToBottom]);
@@ -286,10 +277,32 @@ TWIN DATA:
         recommendations: twin.intelligence?.recommendations || [],
         missingSkills: twin.skills?.missing || [],
         currentRole: twin.identity?.currentRole || "",
-        targetRole: twin.identity?.targetRole || "",
+        targetRole: twin.identity?.targetRole || twin.identity?.currentRole || "",
         yearsExperience: twin.identity?.seniorityLevel === "Senior" ? 7 : twin.identity?.seniorityLevel === "Mid" ? 3 : 0,
         confidenceScore: twin.evolution?.confidenceScore || 50
-      } : null;
+      } : cvData ? {
+        name: user?.name || "User",
+        sections: cvData.sections || {
+          about: cvData.sections?.about || "",
+          skills: cvData.sections?.skills || [],
+          education: cvData.sections?.education || [],
+          experience: cvData.sections?.experience || [],
+        },
+        score: cvData.score || 0,
+        industry: (cvData as any).industry || "Technology",
+        readinessLevel: cvData.readinessLevel,
+        strengths: (cvData as any).strengths || [],
+        weaknesses: (cvData as any).weaknesses || [],
+        recommendations: cvData.recommendations || [],
+        missingSkills: cvData.missingKeywords || [],
+        currentRole: cvData.sections?.experience?.[0]?.split('\n')[0] || "",
+        targetRole: cvData.sections?.experience?.[0]?.split('\n')[0] || "",
+        yearsExperience: 0,
+        confidenceScore: 50
+      } : {
+        name: user?.name || "User",
+        sections: { about: "", skills: [], education: [], experience: [], achievements: [] }
+      };
 
       const res = await apiChatWithTwin(history, cvContext);
       // Backend returns: { status: 'success', data: { reply, options, ... } }
@@ -301,10 +314,46 @@ TWIN DATA:
 
       const options: string[] = res?.data?.options || [];
       const allowMultiple: boolean = res?.data?.allowMultiple || false;
+      const isComplete: boolean = res?.data?.isComplete || false;
+      const aiProfile = res?.data?.profile;
+
+      // If the quiz is finished, map flat AI profile to nested EconomicTwin structure
+      if (isComplete && aiProfile) {
+        const mappedTwin: EconomicTwin = {
+          identity: {
+            currentRole: (cvData?.sections?.experience?.[0]?.split('\n')[0]) || aiProfile.industry || 'Professional',
+            seniorityLevel: aiProfile.careerStage || 'Early Career',
+            industry: aiProfile.industry || (cvData as any)?.industry || 'Technology',
+            targetRole: aiProfile.goals || (cvData as any)?.targetRole || ''
+          },
+          skills: {
+            core: Array.isArray(aiProfile.skills) ? aiProfile.skills : [],
+            missing: []
+          },
+          economy: {
+            employabilityScore: aiProfile.empowermentScore || 50,
+            demandLevel: 'MEDIUM',
+            incomePotentialRange: { min: 5000, max: 15000, currency: 'R' }
+          },
+          intelligence: {
+            strengths: [aiProfile.careerStage, "Market Ready"],
+            weaknesses: aiProfile.challenges ? [aiProfile.challenges] : [],
+            recommendations: aiProfile.goals ? [`Focus on achieving: ${aiProfile.goals}`] : ["Explore new skill paths"],
+          },
+          status: 'ACTIVE'
+        };
+        setTwin(mappedTwin);
+        updateProgress('twinCompleted', true);
+        
+        // Persist locally for dashboard fallback
+        try {
+          localStorage.setItem('twinData', JSON.stringify(mappedTwin));
+          window.dispatchEvent(new Event('twinCompleted'));
+        } catch (e) { console.error("Failed to persist twin", e); }
+      }
 
       const aiMsg: DisplayMessage = {
         id: `ai-${Date.now()}`,
-        sender: "ai",
         text: reply,
         options,
         allowMultiple,
@@ -630,7 +679,7 @@ TWIN DATA:
       <div className="flex-1 overflow-y-auto scrollbar-thin">
         <div className="px-4 py-5 space-y-1">
 
-          {messages.map((msg) => (
+          {messages.map((msg, idx) => (
             <motion.div
               key={msg.id}
               initial={{ opacity: 0, y: 8 }}
@@ -663,7 +712,7 @@ TWIN DATA:
                 {/* Quick reply chips - Single select */}
                 {msg.sender === "ai" &&
                   msg.options && msg.options.length > 0 &&
-                  msg === lastMessage &&
+                  idx === messages.length - 1 &&
                   !isTyping &&
                   !msg.allowMultiple && (
                     <motion.div
@@ -687,7 +736,7 @@ TWIN DATA:
                 {/* Quick reply chips - Multi select */}
                 {msg.sender === "ai" &&
                   msg.options && msg.options.length > 0 &&
-                  msg === lastMessage &&
+                  idx === messages.length - 1 &&
                   !isTyping &&
                   msg.allowMultiple && (
                     <motion.div

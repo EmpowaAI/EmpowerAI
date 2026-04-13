@@ -78,21 +78,22 @@ exports.sendTwinChat = async (req, res, next) => {
   const correlationId = req.correlationId || req.id;
 
   try {
-    const { messages } = req.body || {};
+    const { messages, cv_context, focus } = req.body || {};
 
-    if (!Array.isArray(messages) || messages.length === 0) {
+    // Allow empty messages for the initial greeting/start of conversation
+    if (!Array.isArray(messages)) {
       return res.status(400).json({
         status: 'error',
-        message: 'messages is required'
+        message: 'messages must be an array'
       });
     }
 
     const queuedResult = await runAiTask(
       'chat:twin',
-      { messages },
-      async ({ messages: taskMessages }) => {
+      { messages, cv_context, focus },
+      async (payload) => {
         // Twin chat can take longer than standard chat (profile building + reasoning)
-        const response = await aiServiceClient.post('/chat/twin', { messages: taskMessages }, { timeout: 45000 });
+        const response = await aiServiceClient.post('/chat/twin', payload, { timeout: 45000 });
         return response.data;
       },
       { timeout: 45000, includeJobId: true }
