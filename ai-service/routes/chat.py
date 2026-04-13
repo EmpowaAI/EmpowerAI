@@ -345,8 +345,9 @@ def get_current_step(messages: List[ChatMessage], cv_context: Optional[Dict[str,
     # Check if we should be in "CV-enhanced" mode (skipping first 2 steps)
     offset = 0
     if cv_context:
-        has_name = bool(cv_context.get('name') or cv_context.get('sections', {}).get('about'))
-        if has_name:
+        # More robust check for name or context
+        name = cv_context.get('name')
+        if name and name.lower() not in ["", "user", "there", "undefined"]:
             offset = 2
 
     # Step mapping based on user message count

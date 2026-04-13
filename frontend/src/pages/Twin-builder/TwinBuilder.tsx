@@ -185,9 +185,14 @@ export default function MyTwin() {
       setTwinError("");
       try {
         const res = await getMyTwin();
-        // Robust extraction: Check data.twin, then data, then the object itself if it looks like a twin
-        const rawData = res?.data || res;
-        const data: EconomicTwin = rawData?.twin || (rawData?._id ? rawData : null) || null;
+        
+        // Defensively extract the twin object to avoid saving the "success" envelope
+        let data: EconomicTwin | null = null;
+        if (res?.data?.twin) data = res.data.twin;
+        else if (res?.twin) data = res.twin;
+        else if (res?._id) data = res;
+        else if (res?.data?._id) data = res.data;
+
         if (!cancelled) {
           setTwin(data);
           seedGreeting(data);
@@ -244,22 +249,18 @@ export default function MyTwin() {
     setChatError("");
 
     try {
-      // Detect if the loaded twin actually has data. If not, use cvData fallback.
-      const isTwinPopulated = twin && twin._id && twin.identity?.currentRole !== "UNDEFINED";
+      const isTwinPopulated = !!(twin && twin._id && twin.identity?.currentRole && twin.identity.currentRole !== "UNDEFINED");
 
-      // Use the Twin if it exists, otherwise fall back to CV Analysis data
-      const cvContext = isTwinPopulated ? { ...twin, source: "twin" } : cvData ? {
+      const cvContext = isTwinPopulated ? { 
+        ...twin, 
+        source: "twin",
+        name: user?.name || "User" 
+      } : cvData ? {
         source: "cv",
         name: user?.name || "User",
-        sections: cvData.sections,
+        sections: cvData.sections || {},
         score: cvData.score || 0,
         industry: (cvData as any).industry || "Technology",
-        readinessLevel: cvData.readinessLevel,
-        strengths: (cvData as any).strengths || [],
-        weaknesses: (cvData as any).weaknesses || [],
-        recommendations: cvData.recommendations || [],
-        missingSkills: cvData.missingKeywords || [],
-        confidenceScore: 50
       } : {
         source: "quiz",
         name: user?.name || "User",
@@ -341,9 +342,12 @@ export default function MyTwin() {
     } catch (err: any) {
       const msg = err?.response?.data?.message || err?.message || "Failed to get a response.";
       setChatError(msg);
-    } finally {
       setIsTyping(false);
-      setTimeout(() => inputRef.current?.focus(), 100);
+    } finally {
+      setTimeout(() => {
+        setIsTyping(false);
+        inputRef.current?.focus();
+      }, 100);
     }
   };
 
@@ -416,13 +420,22 @@ export default function MyTwin() {
     if (!twin) return (
       <div className="flex flex-col items-center justify-center h-full gap-4 p-6 text-center">
         <Cpu className="h-10 w-10 text-muted-foreground" />
-        <p className="text-sm text-muted-foreground">No twin found. Analyze your CV to build one.</p>
-        <button
-          onClick={() => navigate("/dashboard/cv-analyzer")}
-          className="px-4 py-2 text-xs rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-        >
-          Analyze CV First
-        </button>
+        {cvData ? (
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-foreground">CV Analysis Detected</p>
+            <p className="text-xs text-muted-foreground">I'm building your twin using your background. Just answer a few questions in the chat!</p>
+          </div>
+        ) : (
+          <>
+            <p className="text-sm text-muted-foreground">No twin found. Analyze your CV to build one.</p>
+            <button
+              onClick={() => navigate("/dashboard/cv-analyzer")}
+              className="px-4 py-2 text-xs rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+            >
+              Analyze CV First
+            </button>
+          </>
+        )}
       </div>
     );
 
