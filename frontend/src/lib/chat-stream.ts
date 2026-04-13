@@ -65,8 +65,8 @@ export async function streamChat({
       .reverse()
       .find(m => m.role === 'user')?.content ?? '';
 
-    // Allow empty last message only if it's the very first request (initial greeting)
-    if (!lastUserMessage && messages.length > 0) {
+    // Only block if we have a history but the specific user input is missing
+    if (!lastUserMessage && sanitizedMessages.length > 0 && messages.some(m => m.role === 'user')) {
       onError("No message to send.");
       onDone({ reply: "", options: [], isComplete: false, profile: null });
       return;
