@@ -20,6 +20,18 @@ router = APIRouter(prefix="/twin", tags=["Digital Twin"])
 twin_generator = DigitalTwinGenerator()
 ai_client = AIClient()
 
+# TEMP Auth dependency (replace with real JWT)
+# NOTE: Must be defined before any route uses Depends(get_current_user_id),
+# because default argument expressions are evaluated at function definition time.
+async def get_current_user_id(request: Request) -> str:
+    """Extract user_id from Authorization header/JWT"""
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        raise HTTPException(401, "Unauthorized")
+
+    # TODO: Real JWT decode
+    return "demo-user-" + str(uuid.uuid4())[:8]
+
 class CreateTwinRequest(BaseModel):
     """Request for creating a new twin"""
     user_id: str  # Link to backend user
@@ -111,16 +123,6 @@ async def get_my_twin(req: Request, user_id: str = Depends(get_current_user_id))
     except Exception as e:
         logger.error("❌ Failed to get twin", extra={'error': str(e), 'user_id': user_id})
         raise HTTPException(503, "Twin service unavailable")
-
-# TEMP Auth dependency (replace with real JWT)
-async def get_current_user_id(request: Request) -> str:
-    """Extract user_id from Authorization header/JWT"""
-    auth_header = request.headers.get("Authorization")
-    if not auth_header or not auth_header.startswith("Bearer "):
-        raise HTTPException(401, "Unauthorized")
-    
-    # TODO: Real JWT decode
-    return "demo-user-" + str(uuid.uuid4())[:8]
 
 @router.get("/health")
 async def twin_health():
