@@ -36,5 +36,11 @@ export const buildTwinFromCv = async (cvAnalysis: any) => {
       cv_analysis: cvAnalysis
     })
   });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || `Failed to generate twin: ${res.status}`);
+  }
+
   return res.json();
 };
