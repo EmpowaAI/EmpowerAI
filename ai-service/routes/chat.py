@@ -18,7 +18,32 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from utils.ai_client import AIClient
 from utils.logger import get_logger
-from chat_mode import has_loaded_twin_context
+try:
+    from chat_mode import has_loaded_twin_context
+except Exception:
+    # Render/runtime import fallback: keep service bootable even if module
+    # resolution differs from local dev environment.
+    def has_loaded_twin_context(cv_context):
+        context = cv_context or {}
+        source = context.get("source")
+
+        if source == "twin":
+            return True
+        if source in ["cv", "quiz"]:
+            return False
+
+        return bool(
+            (context.get("currentRole") and context.get("currentRole") not in ["", "UNDEFINED"])
+            or (context.get("industry") and context.get("industry") not in ["", "Technology"])
+            or (context.get("skills") and len(context.get("skills")) > 0)
+            or (
+                context.get("sections")
+                and (
+                    (context["sections"].get("skills") and len(context["sections"]["skills"]) > 0)
+                    or (context["sections"].get("experience") and len(context["sections"]["experience"]) > 0)
+                )
+            )
+        )
 
 # Create router WITHOUT prefix here - we'll add it in main.py
 router = APIRouter(tags=["Chat"])
