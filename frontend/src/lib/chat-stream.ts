@@ -65,8 +65,8 @@ export async function streamChat({
       .reverse()
       .find(m => m.role === 'user')?.content ?? '';
 
-    // Only block if we have a history but the specific user input is missing
-    if (!lastUserMessage && sanitizedMessages.length > 0 && messages.some(m => m.role === 'user')) {
+    // Only block if the history is empty or if we are explicitly trying to send an empty user message
+    if (!lastUserMessage && messages.length > 0 && messages[messages.length - 1].role === 'user') {
       onError("No message to send.");
       onDone({ reply: "", options: [], isComplete: false, profile: null });
       return;
