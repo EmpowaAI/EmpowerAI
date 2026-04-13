@@ -237,26 +237,6 @@ export default function MyTwin() {
     }
   };
 
-  // ── System context injected at top of every request ──────────────────────────
-  const buildSystemContext = useCallback((): string => {
-    if (!twin) return "";
-    return `You are an AI career advisor chatting with a user about their Economic Twin — an AI-generated career profile built from their CV analysis. Be specific, practical, and South Africa-aware. Use markdown. Keep responses concise but actionable.
-
-TWIN DATA:
-- Identity: currentRole=${twin.identity?.currentRole}, targetRole=${twin.identity?.targetRole}, seniorityLevel=${twin.identity?.seniorityLevel}, industry=${twin.identity?.industry}
-- Economy: employabilityScore=${twin.economy?.employabilityScore}, marketValueScore=${twin.economy?.marketValueScore}, demandLevel=${twin.economy?.demandLevel}, incomePotential=${twin.economy?.incomePotentialRange?.currency} ${twin.economy?.incomePotentialRange?.min}–${twin.economy?.incomePotentialRange?.max}/mo
-- Core Skills (${twin.skills?.core?.length ?? 0}): ${twin.skills?.core?.join(", ")}
-- Missing Skills: ${twin.skills?.missing?.join(", ") || "none"}
-- Emerging Skills: ${twin.skills?.emerging?.join(", ") || "none yet"}
-- Monetizable: ${twin.skills?.monetizable?.join(", ") || "none identified yet"}
-- Strengths: ${twin.intelligence?.strengths?.join("; ")}
-- Weaknesses: ${twin.intelligence?.weaknesses?.join("; ")}
-- Recommendations: ${twin.intelligence?.recommendations?.join("; ")}
-- Trending in market: ${twin.market?.trendingSkills?.join(", ") || "none"}
-- Mapped job titles: ${twin.market?.jobTitlesMapped?.join(", ") || "none"}
-- Confidence: ${twin.evolution?.confidenceScore ?? 0}/100 (v${twin.evolution?.version ?? 1}, by ${twin.evolution?.lastUpdatedBy ?? "system"})`.trim();
-  }, [twin]);
-
   // ── Send to POST /chat/twin ───────────────────────────────────────────────────
   const sendToAI = async (history: ChatMsg[]) => {
     setIsTyping(true);
@@ -267,12 +247,13 @@ TWIN DATA:
       const isTwinPopulated = twin && twin.identity?.currentRole && twin.identity.currentRole !== "UNDEFINED" && (twin.skills?.core?.length ?? 0) > 0;
 
       const cvContext = isTwinPopulated ? {
+        source: "twin",
         name: user?.name || "User",
         sections: {
           about: "",
           skills: twin.skills?.core || [],
-          education: twin.identity?.seniorityLevel ? [twin.identity.seniorityLevel] : [], // Use twin's seniority as education context
-          experience: twin.identity?.industry ? [twin.identity.industry] : [], // Use twin's industry as experience context
+          education: cvData?.sections?.education || [],
+          experience: cvData?.sections?.experience || [],
           achievements: twin.intelligence?.strengths || []
         },
         score: twin.economy?.employabilityScore || 50,
@@ -287,13 +268,9 @@ TWIN DATA:
         yearsExperience: twin.identity?.seniorityLevel === "Senior" ? 7 : twin.identity?.seniorityLevel === "Mid" ? 3 : 0,
         confidenceScore: twin.evolution?.confidenceScore || 50
       } : cvData ? {
+        source: "cv",
         name: user?.name || "User",
-        sections: cvData.sections || {
-          about: cvData.sections?.about || "",
-          skills: cvData.sections?.skills || [],
-          education: cvData.sections?.education || [],
-          experience: cvData.sections?.experience || [],
-        },
+        sections: cvData.sections,
         score: cvData.score || 0,
         industry: (cvData as any).industry || "Technology",
         readinessLevel: cvData.readinessLevel,
@@ -301,11 +278,9 @@ TWIN DATA:
         weaknesses: (cvData as any).weaknesses || [],
         recommendations: cvData.recommendations || [],
         missingSkills: cvData.missingKeywords || [],
-        currentRole: cvData.sections?.experience?.[0]?.split('\n')[0] || "",
-        targetRole: cvData.sections?.experience?.[0]?.split('\n')[0] || "",
-        yearsExperience: 0,
         confidenceScore: 50
       } : {
+        source: "quiz",
         name: user?.name || "User",
         sections: { about: "", skills: [], education: [], experience: [], achievements: [] }
       };
@@ -315,9 +290,9 @@ TWIN DATA:
       const rawData = res?.data || res;
       const reply: string = rawData?.reply || rawData?.message || "I couldn't generate a response.";
       let options: string[] = Array.isArray(rawData?.options) ? rawData.options : [];
-      const allowMultiple: boolean = res?.data?.allowMultiple || false;
-      const isComplete: boolean = res?.data?.isComplete || false;
-      const aiProfile = res?.data?.profile;
+      const allowMultiple: boolean = rawData?.allowMultiple || false;
+      const isComplete: boolean = rawData?.isComplete || false;
+      const aiProfile = rawData?.profile;
 
       // FALLBACK: Parse [OPTIONS: "A", "B"] from text if the array is missing
       if (options.length === 0) {
@@ -336,10 +311,11 @@ TWIN DATA:
       if (isComplete && aiProfile) {
         const mappedTwin: EconomicTwin = {
           identity: {
-            currentRole: aiProfile.name || (cvData?.sections?.experience?.[0]?.split('\n')[0]) || aiProfile.industry || 'Professional',
+            // Prioritize CV experience over the AI's "name" field (which is the user's name) to avoid "Nicolette" appearing as a role
+            currentRole: (cvData?.sections?.experience?.[0]?.split('\n')[0]) || aiProfile.industry || 'Professional',
             seniorityLevel: aiProfile.careerStage || (cvData as any)?.readinessLevel || 'Early Career',
             industry: aiProfile.industry || (cvData as any)?.industry || 'Technology',
-            targetRole: aiProfile.goals || (cvData as any)?.targetRole || '' // Keep cvData targetRole as fallback
+            targetRole: aiProfile.goals || (cvData as any)?.targetRole || ''
           },
           skills: {
             core: Array.isArray(aiProfile.skills) ? aiProfile.skills : [],
@@ -369,6 +345,7 @@ TWIN DATA:
 
       const aiMsg: DisplayMessage = {
         id: `ai-${Date.now()}`,
+        sender: "ai",
         text: cleanText,
         options,
         allowMultiple,
