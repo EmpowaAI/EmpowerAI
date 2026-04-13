@@ -132,7 +132,9 @@ Always reference the user's actual data in your responses. Be helpful and encour
                 clean_reply = re.sub(r'\[OPTIONS:\s*.+?\]', '', response_text).strip()
 
             return ChatResponse(
-                reply=lete=False,
+                reply=clean_reply,
+                options=options,
+                isComplete=False,
                 profile=None
             )
         else:

@@ -271,8 +271,8 @@ TWIN DATA:
         sections: {
           about: "",
           skills: twin.skills?.core || [],
-          education: cvData?.sections?.education || [],
-          experience: cvData?.sections?.experience || [],
+          education: twin.identity?.seniorityLevel || "",
+          experience: twin.identity?.industry || "",
           achievements: twin.intelligence?.strengths || []
         },
         score: twin.economy?.employabilityScore || 50,
@@ -337,9 +337,9 @@ TWIN DATA:
         const mappedTwin: EconomicTwin = {
           identity: {
             currentRole: aiProfile.name || (cvData?.sections?.experience?.[0]?.split('\n')[0]) || 'Professional',
-            seniorityLevel: aiProfile.careerStage || (cvData as any)?.seniorityLevel || 'Early Career',
-            industry: aiProfile.industry || (cvData as any)?.industry || 'General',
-            targetRole: aiProfile.goals || ''
+            seniorityLevel: aiProfile.careerStage || (cvData as any)?.readinessLevel || 'Early Career',
+            industry: aiProfile.industry || (cvData as any)?.industry || (cvData as any)?.sector || 'Technology',
+            targetRole: aiProfile.goals || (cvData as any)?.targetRole || 'Growth'
           },
           skills: {
             core: Array.isArray(aiProfile.skills) ? aiProfile.skills : [],
