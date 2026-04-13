@@ -24,3 +24,17 @@ export const chatWithTwin = async (messages: any[], cv_context: any) => {
   });
   return res.json();
 };
+
+export const buildTwinFromCv = async (cvAnalysis: any) => {
+  const res = await fetch(`${API_BASE_URL}/twin/generate`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${getToken()}`
+    },
+    body: JSON.stringify({
+      cv_analysis: cvAnalysis
+    })
+  });
+  return res.json();
+};
