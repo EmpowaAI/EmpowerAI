@@ -111,6 +111,7 @@ async def root():
         "version": "1.0.0",
         "docs": "/docs",
         "health": "/health",
+        "health_api": "/api/health",
         "endpoints": {
             "cv_analyze": "/api/cv/analyze",
             "cv_analyze_file": "/api/cv/analyze-file",
@@ -136,6 +137,19 @@ async def health_check(request: Request):
         "status": "healthy",
         "service": "EmpowerAI AI Service",
         "openai_status": "enabled" if ai_client.enabled else "disabled",
+        "timestamp": datetime.now().isoformat(),
+    }
+
+
+@app.get("/api/health")
+async def health_check_api_alias():
+    """
+    Render / load balancers often default health checks to /api/health.
+    Keep this ultra-lightweight (no AI client init) so deploy probes always pass.
+    """
+    return {
+        "status": "ok",
+        "service": "EmpowerAI AI Service",
         "timestamp": datetime.now().isoformat(),
     }
 
