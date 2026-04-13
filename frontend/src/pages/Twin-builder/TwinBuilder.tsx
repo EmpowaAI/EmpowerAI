@@ -271,8 +271,8 @@ TWIN DATA:
         sections: {
           about: "",
           skills: twin.skills?.core || [],
-          education: cvData?.sections?.education || [],
-          experience: cvData?.sections?.experience || [],
+          education: twin.identity?.seniorityLevel ? [twin.identity.seniorityLevel] : [], // Use twin's seniority as education context
+          experience: twin.identity?.industry ? [twin.identity.industry] : [], // Use twin's industry as experience context
           achievements: twin.intelligence?.strengths || []
         },
         score: twin.economy?.employabilityScore || 50,
@@ -301,8 +301,8 @@ TWIN DATA:
         weaknesses: (cvData as any).weaknesses || [],
         recommendations: cvData.recommendations || [],
         missingSkills: cvData.missingKeywords || [],
-        currentRole: cvData.sections?.experience?.[0]?.split('\n')[0] || (cvData as any).industry || "Professional",
-        targetRole: (cvData as any).targetRole || "",
+        currentRole: cvData.sections?.experience?.[0]?.split('\n')[0] || "",
+        targetRole: cvData.sections?.experience?.[0]?.split('\n')[0] || "",
         yearsExperience: 0,
         confidenceScore: 50
       } : {
@@ -336,11 +336,10 @@ TWIN DATA:
       if (isComplete && aiProfile) {
         const mappedTwin: EconomicTwin = {
           identity: {
-            // Prioritize CV experience title over the AI's "name" field (which is often the user's name)
-            currentRole: (cvData?.sections?.experience?.[0]?.split('\n')[0]) || aiProfile.industry || 'Professional',
+            currentRole: aiProfile.name || (cvData?.sections?.experience?.[0]?.split('\n')[0]) || aiProfile.industry || 'Professional',
             seniorityLevel: aiProfile.careerStage || (cvData as any)?.readinessLevel || 'Early Career',
             industry: aiProfile.industry || (cvData as any)?.industry || 'Technology',
-            targetRole: aiProfile.goals || (cvData as any)?.targetRole || ''
+            targetRole: aiProfile.goals || (cvData as any)?.targetRole || '' // Keep cvData targetRole as fallback
           },
           skills: {
             core: Array.isArray(aiProfile.skills) ? aiProfile.skills : [],
