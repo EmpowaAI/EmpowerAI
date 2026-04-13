@@ -181,6 +181,183 @@ function deriveMonetizableSkills(extractedSkills = []) {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
+// INTERNAL: DEFAULT INTELLIGENCE HELPERS
+// Provide meaningful defaults when CV analysis lacks intelligence data.
+// ─────────────────────────────────────────────────────────────────────────────
+
+function _getDefaultStrengths(industry = '', coreSkills = []) {
+  const industryLower = (industry || '').toLowerCase();
+  
+  if (industryLower.includes('technology')) {
+    return [
+      'Strong analytical and problem-solving abilities',
+      'Quick learner with technology adaptation skills',
+      'Detail-oriented approach to coding and development',
+      'Ability to work independently and in team environments'
+    ];
+  } else if (industryLower.includes('retail')) {
+    return [
+      'Excellent customer service and communication skills',
+      'Proven ability to handle cash transactions accurately',
+      'Strong work ethic and reliability in fast-paced environments',
+      'Experience with inventory management and stock control'
+    ];
+  } else if (industryLower.includes('finance')) {
+    return [
+      'Strong numerical and analytical skills',
+      'Attention to detail in financial record keeping',
+      'Experience with accounting software and systems',
+      'Reliable and trustworthy with confidential information'
+    ];
+  } else {
+    return [
+      'Strong communication and interpersonal skills',
+      'Reliable and punctual work ethic',
+      'Quick learner and adaptable to new challenges',
+      'Team player with collaborative working style'
+    ];
+  }
+}
+
+function _getDefaultWeaknesses(industry = '', coreSkills = []) {
+  const industryLower = (industry || '').toLowerCase();
+  
+  if (industryLower.includes('technology')) {
+    return [
+      'Limited experience with advanced frameworks and tools',
+      'Opportunity to expand knowledge in emerging technologies',
+      'Could benefit from more industry-specific certifications'
+    ];
+  } else if (industryLower.includes('retail')) {
+    return [
+      'Limited experience with advanced POS systems',
+      'Opportunity to develop management and leadership skills',
+      'Could benefit from specialized retail certifications'
+    ];
+  } else if (industryLower.includes('finance')) {
+    return [
+      'Limited experience with advanced financial analysis',
+      'Opportunity to expand knowledge of regulatory compliance',
+      'Could benefit from professional accounting qualifications'
+    ];
+  } else {
+    return [
+      'Limited specialized industry experience',
+      'Opportunity to develop advanced technical skills',
+      'Could benefit from industry-specific training and certifications'
+    ];
+  }
+}
+
+function _getDefaultOpportunities(industry = '', seniorityLevel = '') {
+  const industryLower = (industry || '').toLowerCase();
+  const seniority = (seniorityLevel || '').toLowerCase();
+  
+  if (industryLower.includes('technology')) {
+    if (seniority.includes('junior') || seniority.includes('entry')) {
+      return [
+        'Growing demand for junior developers in South African tech companies',
+        'Opportunities in software development and IT support roles',
+        'Entry-level positions in web development and mobile app development'
+      ];
+    } else {
+      return [
+        'Strong demand for experienced developers in fintech and e-commerce',
+        'Opportunities in cloud computing and DevOps roles',
+        'Growing market for AI/ML and data science specialists'
+      ];
+    }
+  } else if (industryLower.includes('retail')) {
+    return [
+      'High turnover in retail sector creates ongoing opportunities',
+      'Growing e-commerce and online retail market',
+      'Management advancement opportunities for experienced staff',
+      'Specialized roles in visual merchandising and store management'
+    ];
+  } else if (industryLower.includes('finance')) {
+    return [
+      'Growing demand for accounting and financial services professionals',
+      'Opportunities in fintech and financial technology companies',
+      'Roles in compliance, auditing, and financial analysis'
+    ];
+  } else {
+    return [
+      'Growing South African economy creates diverse employment opportunities',
+      'Opportunities in both corporate and entrepreneurial ventures',
+      'Increasing demand for skilled professionals across industries',
+      'Potential for career advancement through continuous learning'
+    ];
+  }
+}
+
+function _getDefaultThreats(industry = '', missingSkills = []) {
+  const industryLower = (industry || '').toLowerCase();
+  
+  const threats = [];
+  
+  if (missingSkills && missingSkills.length > 0) {
+    threats.push(`Lack of ${missingSkills[0]} skills limits competitiveness in current market`);
+    if (missingSkills.length > 1) {
+      threats.push(`Need to develop ${missingSkills[1]} to advance career opportunities`);
+    }
+  }
+  
+  if (industryLower.includes('technology')) {
+    threats.push('Rapid technological changes require continuous upskilling');
+    threats.push('Increasing competition from global remote workers');
+  } else if (industryLower.includes('retail')) {
+    threats.push('E-commerce growth may reduce traditional retail positions');
+    threats.push('Automation of routine tasks in retail environments');
+  } else if (industryLower.includes('finance')) {
+    threats.push('Regulatory changes require ongoing compliance training');
+    threats.push('Increasing automation of routine financial tasks');
+  } else {
+    threats.push('Competitive job market requires continuous skill development');
+    threats.push('Economic changes may affect industry stability');
+  }
+  
+  return threats;
+}
+
+function _getDefaultRecommendations(industry = '', coreSkills = []) {
+  const industryLower = (industry || '').toLowerCase();
+  
+  if (industryLower.includes('technology')) {
+    return [
+      'Build a portfolio showcasing coding projects and applications',
+      'Obtain industry-recognized certifications (AWS, Azure, Google Cloud)',
+      'Contribute to open-source projects to build experience',
+      'Network with local tech communities and attend meetups',
+      'Stay updated with latest programming languages and frameworks'
+    ];
+  } else if (industryLower.includes('retail')) {
+    return [
+      'Develop strong customer service and communication skills',
+      'Learn modern POS systems and retail management software',
+      'Consider retail management or visual merchandising courses',
+      'Build experience in inventory management and loss prevention',
+      'Network with retail professionals and industry associations'
+    ];
+  } else if (industryLower.includes('finance')) {
+    return [
+      'Pursue professional accounting qualifications (SAICA, SAIPA)',
+      'Develop proficiency in accounting software (Sage, Pastel, SAP)',
+      'Build knowledge of tax compliance and financial regulations',
+      'Consider certifications in financial analysis or bookkeeping',
+      'Network with finance professionals and join industry associations'
+    ];
+  } else {
+    return [
+      'Identify and develop industry-specific skills and knowledge',
+      'Build a professional network in your chosen field',
+      'Consider relevant certifications or training programs',
+      'Gain practical experience through internships or part-time roles',
+      'Stay informed about industry trends and developments'
+    ];
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // EXPORTED: BUILD FROM ANALYSIS
 // Background trigger — called automatically after CV upload completes.
 // Signature matches the call in cvService:
@@ -293,14 +470,14 @@ async function buildFromAnalysis(analysis, userId) {
     },
 
     intelligence: {
-      strengths:       analysis.strengths       || [],
-      weaknesses:      analysis.weaknesses      || [],
-      opportunities:   opportunitiesIntelligence,
-      threats:         [],                          // requires market engine
-      recommendations: analysis.recommendations || [],
+      strengths:       analysis.strengths       || _getDefaultStrengths(analysis.industry, coreSkills),
+      weaknesses:      analysis.weaknesses      || _getDefaultWeaknesses(analysis.industry, coreSkills),
+      opportunities:   opportunitiesIntelligence.length > 0 ? opportunitiesIntelligence : _getDefaultOpportunities(analysis.industry, seniorityLevel),
+      threats:         _getDefaultThreats(analysis.industry, analysis.missingSkills || []),
+      recommendations: analysis.recommendations || _getDefaultRecommendations(analysis.industry, coreSkills),
     },
 
-    'analysis.latest': {
+    analysisLatest: {
       source:             'cv_analysis',
       employabilityScore: analysis.score || 0,
       skills: {

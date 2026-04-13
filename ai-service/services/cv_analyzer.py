@@ -1349,6 +1349,208 @@ Return a JSON object with the exact structure specified."""
         return missing
 
     # ----------------------------------------------------------------------
+    # Enhanced fallback helper methods
+    # ----------------------------------------------------------------------
+    def _generate_comprehensive_strengths(self, extracted_skills: List[str], education: List[str], 
+                                        experience: List[str], achievements: List[str], industry: str) -> List[str]:
+        """Generate comprehensive strengths based on actual CV content."""
+        strengths = []
+        
+        # Skills-based strengths
+        if extracted_skills:
+            if len(extracted_skills) >= 5:
+                strengths.append(f"Strong technical foundation with {len(extracted_skills)} relevant skills")
+            elif len(extracted_skills) >= 3:
+                strengths.append(f"Competent in key areas: {', '.join(extracted_skills[:3])}")
+            else:
+                strengths.append(f"Foundation skills in {', '.join(extracted_skills)}")
+        
+        # Education-based strengths
+        if education:
+            if any('degree' in edu.lower() or 'bachelor' in edu.lower() or 'master' in edu.lower() for edu in education):
+                strengths.append("Higher education qualification demonstrating academic capability")
+            elif any('diploma' in edu.lower() or 'certificate' in edu.lower() for edu in education):
+                strengths.append("Professional qualification with practical focus")
+            elif any('matric' in edu.lower() or 'grade 12' in edu.lower() for edu in education):
+                strengths.append("Completed secondary education with foundational knowledge")
+        
+        # Experience-based strengths
+        if experience:
+            if len(experience) >= 3:
+                strengths.append(f"Demonstrated career progression with {len(experience)} relevant roles")
+            elif len(experience) >= 1:
+                strengths.append("Practical work experience in relevant field")
+        
+        # Achievement-based strengths
+        if achievements:
+            if len(achievements) >= 3:
+                strengths.append("Proven track record of accomplishments and results")
+            elif any(re.search(r'\d+%|\d+\s*(customers|sales|units|items)|[R\$]\s*\d+', str(ach).lower()) for ach in achievements):
+                strengths.append("Quantifiable achievements demonstrating measurable impact")
+            else:
+                strengths.append("Documented achievements and contributions")
+        
+        # Industry-specific strengths
+        if industry == 'retail':
+            retail_skills = [s for s in extracted_skills if any(retail in s.lower() for retail in ['cash', 'till', 'stock', 'inventory', 'customer service', 'sales'])]
+            if retail_skills:
+                strengths.append("Proven retail operations and customer service capabilities")
+        elif industry == 'technology':
+            tech_skills = [s for s in extracted_skills if any(tech in s.lower() for tech in ['python', 'javascript', 'java', 'c#', 'html', 'css', 'sql', 'git'])]
+            if tech_skills:
+                strengths.append("Technical proficiency in modern development tools and languages")
+        elif industry == 'finance':
+            finance_skills = [s for s in extracted_skills if any(fin in s.lower() for fin in ['sage', 'pastel', 'sap', 'accounting', 'finance', 'excel'])]
+            if finance_skills:
+                strengths.append("Financial systems knowledge and accounting software proficiency")
+        
+        # Generic strengths if we don't have enough
+        if len(strengths) < 3:
+            generic_strengths = [
+                "Strong work ethic and commitment to professional development",
+                "Effective communication and interpersonal skills",
+                "Quick learner with adaptability to new environments",
+                "Reliable and responsible approach to tasks and deadlines",
+                "Team player with collaborative working style"
+            ]
+            strengths.extend(generic_strengths[:6-len(strengths)])
+        
+        return strengths[:6]
+
+    def _calculate_cv_score(self, extracted_skills: List[str], education: List[str], 
+                          experience: List[str], achievements: List[str], links: Dict[str, bool]) -> int:
+        """Calculate an intelligent CV score based on content quality."""
+        score = 30  # Base score
+        
+        # Skills scoring (up to 25 points)
+        if extracted_skills:
+            skill_count = len(extracted_skills)
+            if skill_count >= 8:
+                score += 25
+            elif skill_count >= 5:
+                score += 20
+            elif skill_count >= 3:
+                score += 15
+            else:
+                score += 10
+        
+        # Education scoring (up to 20 points)
+        if education:
+            if any('degree' in edu.lower() or 'bachelor' in edu.lower() or 'master' in edu.lower() for edu in education):
+                score += 20
+            elif any('diploma' in edu.lower() or 'certificate' in edu.lower() for edu in education):
+                score += 15
+            elif any('matric' in edu.lower() or 'grade 12' in edu.lower() for edu in education):
+                score += 10
+        
+        # Experience scoring (up to 25 points)
+        if experience:
+            exp_count = len(experience)
+            if exp_count >= 4:
+                score += 25
+            elif exp_count >= 3:
+                score += 20
+            elif exp_count >= 2:
+                score += 15
+            else:
+                score += 10
+        
+        # Achievements scoring (up to 15 points)
+        if achievements:
+            ach_count = len(achievements)
+            if ach_count >= 5:
+                score += 15
+            elif ach_count >= 3:
+                score += 12
+            elif ach_count >= 1:
+                score += 8
+            
+            # Bonus for quantifiable achievements
+            if any(re.search(r'\d+%|\d+\s*(customers|sales|units|items)|[R\$]\s*\d+', str(ach).lower()) for ach in achievements):
+                score += 3
+        
+        # Links scoring (up to 10 points)
+        link_score = 0
+        if links.get('linkedin'):
+            link_score += 4
+        if links.get('github'):
+            link_score += 3
+        if links.get('portfolio'):
+            link_score += 3
+        score += link_score
+        
+        return min(100, score)
+
+    def _generate_cv_summary(self, readiness_level: str, industry: str, education: List[str], 
+                           experience: List[str], extracted_skills: List[str], score: int) -> str:
+        """Generate a comprehensive CV summary."""
+        summary_parts = []
+        
+        # Readiness level
+        summary_parts.append(f"A {readiness_level.lower()} candidate")
+        
+        # Industry context
+        if industry != 'general':
+            summary_parts.append(f"in the {industry} sector")
+        
+        # Education
+        if education:
+            if any('degree' in edu.lower() for edu in education):
+                summary_parts.append("with higher education qualifications")
+            elif any('diploma' in edu.lower() for edu in education):
+                summary_parts.append("with professional qualifications")
+            else:
+                summary_parts.append("with secondary education")
+        
+        # Experience
+        if experience:
+            if len(experience) >= 3:
+                summary_parts.append(f"and {len(experience)} years of relevant experience")
+            elif len(experience) >= 1:
+                summary_parts.append("with practical work experience")
+        
+        # Skills
+        if extracted_skills:
+            if len(extracted_skills) >= 5:
+                summary_parts.append(f"demonstrating proficiency in {len(extracted_skills)} key skills")
+            else:
+                summary_parts.append(f"with skills in {', '.join(extracted_skills[:2])}")
+        
+        # Score context
+        if score >= 80:
+            summary_parts.append("- well-prepared for professional opportunities")
+        elif score >= 60:
+            summary_parts.append("- showing good potential with some development areas")
+        else:
+            summary_parts.append("- with foundational skills ready for entry-level roles")
+        
+        return " ".join(summary_parts) + "."
+
+    def _generate_about_section(self, extracted_skills: List[str], experience: List[str], industry: str) -> str:
+        """Generate a meaningful about section when one isn't available."""
+        about_parts = []
+        
+        if extracted_skills:
+            if len(extracted_skills) >= 3:
+                about_parts.append(f"Professional with expertise in {', '.join(extracted_skills[:3])}")
+            else:
+                about_parts.append(f"Skilled in {', '.join(extracted_skills)}")
+        
+        if experience:
+            if len(experience) >= 2:
+                about_parts.append("with demonstrated experience in relevant roles")
+            else:
+                about_parts.append("with practical work experience")
+        
+        if industry != 'general':
+            about_parts.append(f"seeking opportunities in the {industry} sector")
+        else:
+            about_parts.append("seeking to grow and contribute in a professional environment")
+        
+        about = " ".join(about_parts)
+        return about[0].upper() + about[1:] + "." if about else "Motivated professional seeking new opportunities."
+
+    # ----------------------------------------------------------------------
     # Main analysis method – async
     # ----------------------------------------------------------------------
     async def analyze_cv(self, cv_text: str, job_requirements: Optional[List[str]] = None) -> Dict[str, Any]:
@@ -1463,7 +1665,7 @@ Return a JSON object with the exact structure specified."""
             
             return result
         else:
-            self.logger.warning("⚠️ AI extraction failed - using rule-based fallback")
+            self.logger.warning("⚠️ AI extraction failed - using enhanced rule-based fallback")
             
             # Extract all the basic information
             about = self.extract_about_section(cv_text) or ""
@@ -1475,6 +1677,9 @@ Return a JSON object with the exact structure specified."""
             
             # Detect industry
             industry = self.detect_industry(cv_text, extracted_skills, experience)
+            
+            # Generate comprehensive strengths based on actual CV content
+            strengths = self._generate_comprehensive_strengths(extracted_skills, education, experience, achievements, industry)
             
             # Get industry-specific weaknesses
             weaknesses = self.get_industry_specific_weaknesses(industry, extracted_skills, experience, achievements)
@@ -1494,10 +1699,57 @@ Return a JSON object with the exact structure specified."""
             market_keywords = self.generate_market_keywords(extracted_skills)
             income_ideas = self.generate_income_ideas(extracted_skills, industry)
             
-            # Generate strengths based on extracted data
-            strengths = []
-            if education and len(education) > 0:
-                strengths.append(f"Educational background: {education[0][:100]}")
+            # Calculate intelligent score based on CV quality
+            score = self._calculate_cv_score(extracted_skills, education, experience, achievements, links)
+            
+            # Determine readiness level based on score
+            if score >= 85:
+                readiness_level = "EXCEPTIONAL"
+            elif score >= 70:
+                readiness_level = "HIGH POTENTIAL"
+            elif score >= 55:
+                readiness_level = "INTERMEDIATE"
+            elif score >= 40:
+                readiness_level = "DEVELOPING"
+            else:
+                readiness_level = "JUNIOR"
+
+            # Create a comprehensive summary
+            summary = self._generate_cv_summary(readiness_level, industry, education, experience, extracted_skills, score)
+
+            # Ensure about section is meaningful
+            if not about or len(about) < 30:
+                about = self._generate_about_section(extracted_skills, experience, industry)
+
+            self.logger.info(f"CV analysis results generated using enhanced fallback")   
+            self.logger.info(f"   Industry: {industry}")
+            self.logger.info(f"   Score: {score}")
+            self.logger.info(f"   Strengths: {strengths[:3]}")
+            self.logger.info(f"   Weaknesses: {weaknesses[:3]}")
+
+            result = {
+                'extractedSkills': extracted_skills,
+                'missingSkills': missing_skills,
+                'marketKeywords': market_keywords,
+                'suggestions': suggestions,
+                'about': about,
+                'education': education,
+                'experience': experience,
+                'achievements': achievements,
+                'cvText': cv_text[:2000],
+                'links': links,
+                'incomeIdeas': income_ideas,
+                'score': score,
+                'readinessLevel': readiness_level,
+                'strengths': strengths[:6],
+                'weaknesses': weaknesses[:6],
+                'recommendations': suggestions,
+                'missingKeywords': missing_keywords[:12],
+                'industry': industry,
+                'summary': summary
+            }
+
+            return result
             if experience and len(experience) > 0:
                 strengths.append(f"Work experience in {industry if industry != 'general' else 'relevant field'}")
             if len(extracted_skills) >= 5:
