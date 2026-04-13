@@ -119,10 +119,20 @@ Always reference the user's actual data in your responses. Be helpful and encour
         
         if response_text:
             log.info("✅ Generated conversational twin response")
+            
+            # Robust extraction of [OPTIONS] from AI text if present
+            options = None
+            clean_reply = response_text
+            options_match = re.search(r'\[OPTIONS:\s*(.+?)\]', response_text)
+            if options_match:
+                raw_opts = options_match.group(1)
+                # Handle both comma separated and quoted strings
+                matches = re.findall(r'"([^"]+)"', raw_opts)
+                options = matches if matches else [o.strip() for o in raw_opts.split(',')]
+                clean_reply = re.sub(r'\[OPTIONS:\s*.+?\]', '', response_text).strip()
+
             return ChatResponse(
-                reply=response_text,
-                options=None,  # No options in conversational mode
-                isComplete=False,
+                reply=lete=False,
                 profile=None
             )
         else:
@@ -168,10 +178,10 @@ async def chat_twin(payload: ChatRequest, req: Request):
     try:
         log.info(f"📋 Twin chat request with {len(payload.messages)} messages")
         
-        # FIX: Robust check for CV context. Trigger advisor mode if ANY career data is present.
+        # TRIGGER ADVISOR MODE if identity or any technical data is present
         has_loaded_twin = payload.cv_context and (
-            payload.cv_context.get('currentRole') or 
-            payload.cv_context.get('strengths') or
+            (payload.cv_context.get('currentRole') and payload.cv_context.get('currentRole') != 'UNDEFINED') or 
+            (payload.cv_context.get('skills') and len(payload.cv_context.get('skills')) > 0) or
             (payload.cv_context.get('sections') and (
                 len(payload.cv_context['sections'].get('skills', [])) > 0 or
                 len(payload.cv_context['sections'].get('experience', [])) > 0

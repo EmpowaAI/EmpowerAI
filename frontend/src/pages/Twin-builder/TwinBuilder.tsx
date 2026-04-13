@@ -211,7 +211,10 @@ export default function MyTwin() {
   }, []);
 
   const seedGreeting = (data: EconomicTwin | null) => {
-    if (data) {
+    // Only treat as loaded if it has identity and core skills
+    const isPopulated = data && data.identity?.currentRole && data.identity.currentRole !== "UNDEFINED" && (data.skills?.core?.length ?? 0) > 0;
+
+    if (isPopulated) {
       const text = `Your Economic Twin is loaded. I can see your **${data.skills?.core?.length ?? 0} core skills**, your industry (**${data.identity?.industry ?? "technology"}**), and your full career profile.\n\nAsk me anything — salary benchmarks, skill gaps, market demand, career paths, or what to focus on next.`;
 
       const greeting: DisplayMessage = {
@@ -260,14 +263,16 @@ TWIN DATA:
     setChatError("");
 
     try {
-      // Pass twin data as cv_context parameter, not in message history
-      const cvContext = twin ? {
-        name: twin.identity?.currentRole || "User",
+      // Detect if the loaded twin actually has data. If not, use cvData fallback.
+      const isTwinPopulated = twin && twin.identity?.currentRole && twin.identity.currentRole !== "UNDEFINED" && (twin.skills?.core?.length ?? 0) > 0;
+
+      const cvContext = isTwinPopulated ? {
+        name: user?.name || "User",
         sections: {
-          about: twin.identity?.currentRole || "",
+          about: "",
           skills: twin.skills?.core || [],
-          education: twin.identity?.seniorityLevel || "",
-          experience: twin.identity?.industry || "",
+          education: cvData?.sections?.education || [],
+          experience: cvData?.sections?.experience || [],
           achievements: twin.intelligence?.strengths || []
         },
         score: twin.economy?.employabilityScore || 50,
@@ -277,6 +282,7 @@ TWIN DATA:
         recommendations: twin.intelligence?.recommendations || [],
         missingSkills: twin.skills?.missing || [],
         currentRole: twin.identity?.currentRole || "",
+        skills: twin.skills?.core || [],
         targetRole: twin.identity?.targetRole || twin.identity?.currentRole || "",
         yearsExperience: twin.identity?.seniorityLevel === "Senior" ? 7 : twin.identity?.seniorityLevel === "Mid" ? 3 : 0,
         confidenceScore: twin.evolution?.confidenceScore || 50
@@ -306,16 +312,25 @@ TWIN DATA:
 
       const res = await apiChatWithTwin(history, cvContext);
       // Backend returns: { status: 'success', data: { reply, options, ... } }
-      const reply: string =
-        res?.data?.reply ||
-        res?.data?.message ||
-        res?.reply ||
-        "I couldn't generate a response. Please try again.";
-
-      const options: string[] = res?.data?.options || [];
+      const rawData = res?.data || res;
+      const reply: string = rawData?.reply || rawData?.message || "I couldn't generate a response.";
+      let options: string[] = Array.isArray(rawData?.options) ? rawData.options : [];
       const allowMultiple: boolean = res?.data?.allowMultiple || false;
       const isComplete: boolean = res?.data?.isComplete || false;
       const aiProfile = res?.data?.profile;
+
+      // FALLBACK: Parse [OPTIONS: "A", "B"] from text if the array is missing
+      if (options.length === 0) {
+        const match = reply.match(/\[OPTIONS:\s*(.+?)\]/);
+        if (match) {
+          const raw = match[1];
+          const matches = raw.match(/"([^"]+)"/g);
+          options = matches ? matches.map(s => s.replace(/"/g, '')) : raw.split(',').map(s => s.trim().replace(/^["']|["']$/g, ''));
+        }
+      }
+
+      // Clean the display text by removing the metadata blocks
+      const cleanText = reply.replace(/\[OPTIONS:\s*.+?\]/g, '').replace(/\[COMPLETE\]/g, '').trim();
 
       // If the quiz is finished, map flat AI profile to nested EconomicTwin structure
       if (isComplete && aiProfile) {
@@ -323,8 +338,8 @@ TWIN DATA:
           identity: {
             currentRole: aiProfile.name || (cvData?.sections?.experience?.[0]?.split('\n')[0]) || 'Professional',
             seniorityLevel: aiProfile.careerStage || (cvData as any)?.seniorityLevel || 'Early Career',
-            industry: aiProfile.industry || (cvData as any)?.industry || 'Technology',
-            targetRole: aiProfile.goals || (cvData as any)?.targetRole || ''
+            industry: aiProfile.industry || (cvData as any)?.industry || 'General',
+            targetRole: aiProfile.goals || ''
           },
           skills: {
             core: Array.isArray(aiProfile.skills) ? aiProfile.skills : [],
@@ -354,7 +369,7 @@ TWIN DATA:
 
       const aiMsg: DisplayMessage = {
         id: `ai-${Date.now()}`,
-        text: reply,
+        text: cleanText,
         options,
         allowMultiple,
         timestamp: new Date(),
