@@ -13,7 +13,7 @@ import GlassCard from "../../components/shared/GlassCard";
 import AIThinkingIndicator from "../../components/AIThinkingIndicator";
 import FirstTimeUserOnboarding from "../../components/FirstTimeUserOnboarding";
 import LiveInsightsFeed from "../../components/LiveInsightsFeed";
-import SkillGapAnalysis from "../../components/SkillGapAnalysis";
+import SAJobPlatforms from "../../components/SAJobPlatforms";
 import { useUser } from "../../contexts/user-context";
 import { applicationsAPI, statsAPI } from "../../lib/api";
 import { getStoredCvAnalysis } from "../../lib/sensitiveStorage";
@@ -513,13 +513,13 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Main Content Grid */}
+        {/* Main Content Grid - REPLACED SkillGapAnalysis with SAJobPlatforms */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }}>
             <LiveInsightsFeed />
           </motion.div>
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 }}>
-            <SkillGapAnalysis cvData={cvData} />
+            <SAJobPlatforms />
           </motion.div>
         </div>
 
