@@ -31,7 +31,7 @@ export const buildTwinFromCv = async () => {
 
 export const getMyTwin = async () => {
   try {
-    const res = await api.get('/my-twin');
+    const res = await api.get('/twin/my-twin');
     return res.data;
   } catch (error: any) {
     console.error('Get twin error:', error.response?.data || error.message);

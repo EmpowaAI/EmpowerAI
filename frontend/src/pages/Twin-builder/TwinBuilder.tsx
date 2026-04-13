@@ -1,6 +1,6 @@
 // frontend/src/pages/twin/MyTwin.tsx
 // Split layout: Twin data dashboard (left) + Chat with twin (right)
-// Fetches twin from GET /my-twin, chats via POST /chat/twin
+// Fetches twin from GET /api/twin/my-twin, chats via POST /api/chat/twin
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
