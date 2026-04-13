@@ -8,7 +8,7 @@ import {
   Brain, Send, Sparkles, User, Zap, TrendingUp,
   Target, ShieldCheck, AlertTriangle, Lightbulb, BarChart2,
   Cpu, Star, ChevronDown, ChevronUp, RefreshCw, CircleDot,
-  BadgeCheck, Layers, BookOpen, WifiOff
+  BadgeCheck, Layers, BookOpen, WifiOff, Volume2, VolumeX
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import ReactMarkdown from "react-markdown";
@@ -81,7 +81,100 @@ interface DisplayMessage {
   options?: string[];
   allowMultiple?: boolean;
   timestamp: Date;
+  isAnimating?: boolean;
 }
+
+// ─── Typewriter Component ─────────────────────────────────────────────────────
+
+const Typewriter = ({ text, speed = 25, isMuted = false, onComplete, onChar }: { 
+  text: string; 
+  speed?: number; 
+  isMuted?: boolean;
+  onComplete?: () => void;
+  onChar?: () => void;
+}) => {
+  const [displayedText, setDisplayedText] = useState("");
+  const audioContextRef = useRef<AudioContext | null>(null);
+
+  // Function to generate a subtle "mechanical" typing sound using Web Audio API
+  const playClick = useCallback(() => {
+    try {
+      if (!audioContextRef.current) {
+        const AudioContextClass = (window.AudioContext || (window as any).webkitAudioContext);
+        audioContextRef.current = new AudioContextClass();
+      }
+      const ctx = audioContextRef.current;
+      if (ctx.state === 'suspended') ctx.resume();
+
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'sine';
+      // Vary frequency slightly for a more natural, less repetitive feel
+      osc.frequency.setValueAtTime(150 + Math.random() * 50, ctx.currentTime);
+      
+      gain.gain.setValueAtTime(0.005, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.04);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start();
+      osc.stop(ctx.currentTime + 0.04);
+    } catch (e) { /* Audio context might be restricted by browser */ }
+  }, []);
+
+  useEffect(() => {
+    let i = 0;
+    let timeoutId: any;
+
+    const typeCharacter = () => {
+      if (i < text.length) {
+        const char = text.charAt(i);
+        setDisplayedText((prev) => prev + char);
+        
+        if (char !== " " && char !== "\n" && !isMuted) playClick();
+        if (onChar) onChar();
+        
+        i++;
+
+        // Calculate variable delay for human-like rhythm
+        let delay = speed;
+        if (/[.!?]/.test(char)) delay = speed * 12; // Pause at end of sentence
+        else if (/[,;:]/.test(char)) delay = speed * 6; // Mid-sentence pause
+        else if (char === "\n") delay = speed * 10;
+        
+        // Add "jitter" (random variation) to the typing speed
+        const jitter = (Math.random() - 0.5) * (speed * 0.5);
+        timeoutId = setTimeout(typeCharacter, Math.max(10, delay + jitter));
+      } else {
+        if (onComplete) onComplete();
+      }
+    };
+
+    timeoutId = setTimeout(typeCharacter, speed);
+    return () => clearTimeout(timeoutId);
+  }, [text, speed, onComplete, onChar, playClick, isMuted]);
+
+  // Pattern matching for [MATCH: Skill] highlighting with glow effect
+  const parts = displayedText.split(/(\[MATCH:[^\]]*\]?)/g);
+
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (part.startsWith('[MATCH:')) {
+          const skill = part.replace('[MATCH:', '').replace(']', '').trim();
+          return (
+            <span key={i} className="text-primary font-bold drop-shadow-[0_0_10px_rgba(59,130,246,0.8)] animate-pulse">
+              {skill}
+            </span>
+          );
+        }
+        return <ReactMarkdown key={i} components={{ p: 'span' }}>{part}</ReactMarkdown>;
+      })}
+    </>
+  );
+};
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -147,6 +240,11 @@ export default function MyTwin() {
   const [twin, setTwin] = useState<EconomicTwin | null>(null);
   const [twinLoading, setTwinLoading] = useState(true);
   const [twinError, setTwinError] = useState("");
+  const [isMuted, setIsMuted] = useState(() => localStorage.getItem('twin-chat-muted') === 'true');
+
+  useEffect(() => {
+    localStorage.setItem('twin-chat-muted', isMuted.toString());
+  }, [isMuted]);
 
   // Chat state
   const [messages, setMessages] = useState<DisplayMessage[]>([]);
@@ -223,6 +321,7 @@ export default function MyTwin() {
         id: "ai-greeting",
         sender: "ai",
         text,
+        isAnimating: true,
         options: [
           "What skills am I missing?",
           "What's my market demand?",
@@ -325,6 +424,7 @@ export default function MyTwin() {
         id: `ai-${Date.now()}`,
         sender: "ai",
         text: cleanText,
+        isAnimating: true,
         options,
         allowMultiple,
         timestamp: new Date(),
@@ -679,7 +779,18 @@ export default function MyTwin() {
                 )}>
                   {msg.sender === "ai" ? (
                     <div className="prose prose-sm prose-invert max-w-none">
-                      <ReactMarkdown>{msg.text}</ReactMarkdown>
+                      {msg.isAnimating ? (
+                        <Typewriter 
+                          text={msg.text} 
+                          isMuted={isMuted}
+                          onChar={scrollToBottom}
+                          onComplete={() => {
+                            setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, isAnimating: false } : m));
+                          }}
+                        />
+                      ) : (
+                        <ReactMarkdown>{msg.text}</ReactMarkdown>
+                      )}
                     </div>
                   ) : (
                     msg.text
@@ -691,6 +802,7 @@ export default function MyTwin() {
                   msg.options && msg.options.length > 0 &&
                   idx === messages.length - 1 && 
                   !isTyping &&
+                  !msg.isAnimating &&
                   !msg.allowMultiple && (
                     <motion.div
                       initial={{ opacity: 0, y: 4 }}
@@ -715,6 +827,7 @@ export default function MyTwin() {
                   msg.options && msg.options.length > 0 &&
                   idx === messages.length - 1 && 
                   !isTyping &&
+                  !msg.isAnimating &&
                   msg.allowMultiple && (
                     <motion.div
                       initial={{ opacity: 0, y: 4 }}
@@ -868,6 +981,14 @@ export default function MyTwin() {
               </p>
             </div>
           </div>
+
+          <button 
+            onClick={() => setIsMuted(!isMuted)} 
+            className="p-2 rounded-xl bg-card border border-border hover:bg-muted transition-all text-muted-foreground flex items-center justify-center"
+            title={isMuted ? "Unmute typing sounds" : "Mute typing sounds"}
+          >
+            {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+          </button>
 
           {/* Mobile tab switcher */}
           <div className="flex lg:hidden bg-muted rounded-lg p-0.5">
