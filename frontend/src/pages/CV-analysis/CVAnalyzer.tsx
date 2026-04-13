@@ -63,6 +63,16 @@ export default function CVAnalyzerPage() {
   const { showToast, ToastContainer } = useToast()
 
 
+  // Cleanup file input on unmount
+  useEffect(() => {
+    return () => {
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    }
+  }, [])
+
+
   // Persist CV analysis in session storage (avoid long-lived localStorage for PII)
   useEffect(() => {
     if (cvData) {
@@ -72,7 +82,9 @@ export default function CVAnalyzerPage() {
 
   // Persist filename in session storage
   useEffect(() => {
-    setStoredCvFileName(fileName)
+    if (fileName !== null) {
+      setStoredCvFileName(fileName)
+    }
   }, [fileName])
 
 
@@ -119,10 +131,18 @@ export default function CVAnalyzerPage() {
 
       try {
         const skills = Array.isArray(result?.extractedSkills) ? result.extractedSkills : []
-        localStorage.setItem('cvSkills', JSON.stringify(skills))
-        localStorage.setItem('cvScore', String(result?.score ?? 0))
-      } catch {
-        // ignore storage errors
+        const score = String(result?.score ?? 0)
+        
+        try {
+          localStorage.setItem('cvSkills', JSON.stringify(skills))
+          localStorage.setItem('cvScore', score)
+        } catch (storageError) {
+          console.warn('Failed to store CV data in localStorage:', storageError)
+          // Continue execution - this is not critical
+        }
+      } catch (dataError) {
+        console.warn('Failed to process CV data for storage:', dataError)
+        // Continue execution - this is not critical
       }
 
       // Mark CV step complete — unlocks twin builder and all protected routes
@@ -177,15 +197,15 @@ export default function CVAnalyzerPage() {
       if (result && typeof result === 'object') {
         if ('revampedCV' in result) {
           const response = result as RevampedCVResponse
-          setRevampedCV(response.revampedCV)
-          setOriginalScore(response.originalScore)
-          setNewScore(response.newScore)
+          setRevampedCV(response.revampedCV || null)
+          setOriginalScore(response.originalScore || cvData.score || 0)
+          setNewScore(response.newScore || Math.min((cvData.score || 0) + 15, 96))
           setChangesSummary(response.changesSummary || [])
-          showToast(`CV revamped! New score: ${response.newScore}%`, "success")
+          showToast(`CV revamped! New score: ${response.newScore || 'improved'}%`, "success")
         } else if ('professionalSummary' in result || 'name' in result) {
           setRevampedCV(result as RevampedCV)
-          setOriginalScore(cvData.score)
-          setNewScore(Math.min(cvData.score + 15, 96))
+          setOriginalScore(cvData.score || 0)
+          setNewScore(Math.min((cvData.score || 0) + 15, 96))
           setChangesSummary(generateChangesSummary(cvData))
           showToast("CV revamped successfully!", "success")
         } else {
@@ -262,6 +282,11 @@ export default function CVAnalyzerPage() {
     setChangesSummary([])
     clearStoredCvAnalysis()
     clearStoredCvFileName()
+    
+    // Clear file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
   }
 
 
@@ -369,9 +394,9 @@ export default function CVAnalyzerPage() {
                 </h4>
                 <div className="space-y-2">
                   {[
-                    { label: "LinkedIn", found: linkCheck.linkedin || false },
-                    { label: "GitHub/Portfolio", found: linkCheck.github || linkCheck.portfolio || false },
-                    { label: "Driver's Licence", found: false },
+                    { label: "LinkedIn", found: linkCheck.linkedin || false, key: 'linkedin' as const },
+                    { label: "GitHub/Portfolio", found: linkCheck.github || linkCheck.portfolio || false, key: 'portfolio' as const },
+                    { label: "Driver's Licence", found: linkCheck.driversLicence || false, key: 'driversLicence' as const },
                   ].map((link, i) => (
                     <div key={i} className={cn(
                       "flex items-center justify-between p-3 rounded-lg border",
@@ -660,12 +685,12 @@ export default function CVAnalyzerPage() {
                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                         {incomeIdeas.map((idea: any, i: number) => (
                           <div key={i} className="bg-primary-foreground/10 p-3 rounded-lg">
-                            <h6 className="font-semibold text-sm mb-1">{idea.title}</h6>
+                            <h6 className="font-semibold text-sm mb-1">{idea?.title || 'Income Opportunity'}</h6>
                             <div className="flex gap-2 text-[10px] mb-1.5">
-                              <span className="bg-primary-foreground/20 px-2 py-0.5 rounded-full">{idea.difficulty}</span>
-                              <span className="bg-primary-foreground/20 px-2 py-0.5 rounded-full">{idea.potential}</span>
+                              <span className="bg-primary-foreground/20 px-2 py-0.5 rounded-full">{idea?.difficulty || 'Medium'}</span>
+                              <span className="bg-primary-foreground/20 px-2 py-0.5 rounded-full">{idea?.potential || 'R5k-R10k/mo'}</span>
                             </div>
-                            <p className="text-xs opacity-80">{idea.description}</p>
+                            <p className="text-xs opacity-80">{idea?.description || 'Explore this income opportunity to boost your earnings.'}</p>
                           </div>
                         ))}
                       </div>
