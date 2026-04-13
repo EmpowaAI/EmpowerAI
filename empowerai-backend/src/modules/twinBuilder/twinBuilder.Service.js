@@ -44,11 +44,13 @@ async function matchOpportunities(analysis) {
     const oppReqs   = (opp.requirements  || []).map(r => r.toLowerCase());
 
     // Criteria 1: Skill overlap (weight 35)
-    const skillMatches = oppSkills.filter(s => userSkills.includes(s)).length;
+    const skillMatches = oppSkills.filter(s => 
+      userSkills.some(us => us.includes(s) || s.includes(us))
+    ).length;
     const skillScore   = oppSkills.length > 0 ? (skillMatches / oppSkills.length) * 35 : 0;
 
     // Criteria 2: Industry alignment (weight 20)
-    const industryScore = opp.description?.toLowerCase().includes(userIndustry) ? 20 : 0;
+    const industryScore = (opp.description?.toLowerCase().includes(userIndustry) || opp.title?.toLowerCase().includes(userIndustry)) ? 20 : 0;
 
     // Criteria 3: Seniority fit (weight 15)
     const oppTitle      = (opp.title || '').toLowerCase();
@@ -400,7 +402,7 @@ async function buildFromAnalysis(analysis, userId) {
 
   // If we have meaningful extracted skills, use them instead
   const extracted = analysis.extractedSkills || [];
-  if (extracted.length > 0 && extracted.length >= 3) {
+  if (extracted.length > 0) {
     coreSkills = extracted.slice(0, 10); // limit to 10
   }
   

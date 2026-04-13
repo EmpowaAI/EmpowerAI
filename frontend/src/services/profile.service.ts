@@ -182,7 +182,67 @@ export class ProfileService {
   }
 
   // Create action plan
- 
+  private createActionPlan(
+    cvAnalysis: CVAnalysisData | undefined,
+    twin: any,
+    skillGaps: SkillGap[],
+    marketInsights: MarketInsights
+  ): ActionPlan {
+    const immediate = [];
+
+    // 1. Immediate tasks from CV recommendations
+    if (cvAnalysis?.recommendations?.length) {
+      immediate.push({
+        task: cvAnalysis.recommendations[0],
+        priority: 'high' as const,
+        timeframe: 'This week',
+        reason: 'Direct improvement identified from your CV analysis'
+      });
+    }
+
+    // 2. Immediate task for missing keywords
+    if (cvAnalysis?.missingKeywords?.length) {
+      immediate.push({
+        task: `Optimize CV keywords: ${cvAnalysis.missingKeywords.slice(0, 3).join(', ')}`,
+        priority: 'high' as const,
+        timeframe: 'Next 48 hours',
+        reason: 'Improve ATS compatibility and market visibility'
+      });
+    }
+
+    // 3. Short term tasks from skill gaps
+    const shortTerm = skillGaps.map(gap => ({
+      task: `Acquire ${gap.skill} proficiency`,
+      targetDate: '1-3 months',
+      expectedOutcome: `Bridge the ${gap.importance} gap for ${twin.industry || 'your target industry'}`
+    }));
+
+    // 4. Long term goal based on goals
+    const longTerm = [{
+      goal: twin.goals || 'Career Advancement',
+      milestones: [
+        `Complete ${skillGaps.length > 0 ? skillGaps[0].skill : 'Key Skill'} certification`,
+        'Apply for 5 matched high-growth opportunities',
+        'Achieve target salary benchmark'
+      ],
+      projectedTimeline: '6-12 months'
+    }];
+
+    return {
+      immediate: immediate.length > 0 ? immediate : [{ 
+        task: 'Set specific career goals', 
+        priority: 'medium' as const, 
+        timeframe: 'Next week', 
+        reason: 'Provides clearer direction for AI recommendations' 
+      }],
+      shortTerm: shortTerm.length > 0 ? shortTerm : [{ 
+        task: 'Network with industry professionals', 
+        targetDate: '3 months', 
+        expectedOutcome: 'Gain hidden market insights' 
+      }],
+      longTerm
+    };
+  }
 
   // Generate career paths
   private generateCareerPaths(twin: any, insights: MarketInsights): CareerPath[] {
@@ -286,7 +346,8 @@ export class ProfileService {
   private calculateMatchScore(skills: string[], requirements: string[]): number {
     if (!requirements.length) return 50;
     const matched = skills.filter(s => 
-      requirements.some(r => r.toLowerCase().includes(s.toLowerCase()))
+      requirements.some(r => r.toLowerCase().includes(s.toLowerCase()) || 
+                            s.toLowerCase().includes(r.toLowerCase()))
     ).length;
     return Math.min(Math.round((matched / requirements.length) * 100), 100);
   }

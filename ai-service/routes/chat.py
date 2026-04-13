@@ -685,6 +685,11 @@ def build_profile_from_conversation(messages: List[ChatMessage], cv_context: Opt
         skill_keywords = ["Coding", "Customer Service", "Sales", "Administration", 
                          "Data Analysis", "Project Management", "Communication", "Leadership"]
         skills = [s for s in skill_keywords if s.lower() in skills_text.lower()]
+        
+        # Improved extraction: capture custom skills mentioned in text
+        additional_skills = [s.strip().title() for s in re.split(r'[,;]|\band\b', skills_text) if len(s.strip()) > 2]
+        skills = list(set(skills + additional_skills))
+        
         if skills:
             profile["skills"] = list(set(profile["skills"] + skills))
     
