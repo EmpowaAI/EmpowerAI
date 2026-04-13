@@ -80,10 +80,9 @@ export async function streamChat({
         'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify({
-        message: lastUserMessage,       // ← required string field the validator expects
-        messages: sanitizedMessages,    // ← history array for chatWithTwin context
-        cv_context: cvContext || null,
-        focus: focus || 'growth',
+        messages: sanitizedMessages,
+        cv_context: cvContext,
+        focus: focus,
       }),
     });
 

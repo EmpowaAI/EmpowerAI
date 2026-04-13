@@ -18,6 +18,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from utils.ai_client import AIClient
 from utils.logger import get_logger
+from chat_mode import has_loaded_twin_context
 
 # Create router WITHOUT prefix here - we'll add it in main.py
 router = APIRouter(tags=["Chat"])
@@ -180,16 +181,7 @@ async def chat_twin(payload: ChatRequest, req: Request):
     try:
         log.info(f"📋 Twin chat request with {len(payload.messages)} messages")
         
-        # Only trigger Advisor Mode if we have actual career content (skills or experience)
-        has_loaded_twin = payload.cv_context and (
-            (payload.cv_context.get('currentRole') and payload.cv_context.get('currentRole') != 'UNDEFINED') or 
-            (payload.cv_context.get('industry') and payload.cv_context.get('industry') != 'Technology') or
-            (payload.cv_context.get('skills') and len(payload.cv_context.get('skills')) > 0) or
-            (payload.cv_context.get('sections') and (
-                len(payload.cv_context['sections'].get('skills', [])) > 0 or
-                len(payload.cv_context['sections'].get('experience', [])) > 0
-            ))
-        )
+        has_loaded_twin = has_loaded_twin_context(payload.cv_context)
         
         if has_loaded_twin:
             # Conversational mode with loaded twin
