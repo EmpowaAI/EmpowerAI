@@ -146,13 +146,12 @@ Always reference the user's actual data in your responses. Be helpful and encour
         if response_text:
             log.info("✅ Generated conversational twin response")
             
-            # Robust extraction of [OPTIONS] from AI text if present
+            # Robust extraction of [OPTIONS] from AI text
             options = None
             clean_reply = response_text
             options_match = re.search(r'\[OPTIONS:\s*\[?(.+?)\]?\]', response_text)
             if options_match:
                 raw_opts = options_match.group(1)
-                # Handle both comma separated and quoted strings
                 matches = re.findall(r'"([^"]+)"', raw_opts)
                 options = matches if matches else [o.strip() for o in raw_opts.split(',')]
                 clean_reply = re.sub(r'\[OPTIONS:\s*.+?\]', '', response_text).strip()

@@ -185,8 +185,9 @@ export default function MyTwin() {
       setTwinError("");
       try {
         const res = await getMyTwin();
-        // Backend returns: { status: 'success', data: { twin } }
-        const data: EconomicTwin = res?.data?.twin ?? res?.twin ?? res;
+        // Robust extraction: Check data.twin, then data, then the object itself if it looks like a twin
+        const rawData = res?.data || res;
+        const data: EconomicTwin = rawData?.twin || (rawData?._id ? rawData : null) || null;
         if (!cancelled) {
           setTwin(data);
           seedGreeting(data);
@@ -244,30 +245,10 @@ export default function MyTwin() {
 
     try {
       // Detect if the loaded twin actually has data. If not, use cvData fallback.
-      const isTwinPopulated = twin && twin.identity?.currentRole && twin.identity.currentRole !== "UNDEFINED" && (twin.skills?.core?.length ?? 0) > 0;
+      const isTwinPopulated = twin && twin._id && twin.identity?.currentRole !== "UNDEFINED";
 
-      const cvContext = isTwinPopulated ? {
-        source: "twin",
-        name: user?.name || "User",
-        sections: {
-          about: "",
-          skills: twin.skills?.core || [],
-          education: cvData?.sections?.education || [],
-          experience: cvData?.sections?.experience || [],
-          achievements: twin.intelligence?.strengths || []
-        },
-        score: twin.economy?.employabilityScore || 50,
-        industry: twin.identity?.industry || "technology",
-        strengths: twin.intelligence?.strengths || [],
-        weaknesses: twin.intelligence?.weaknesses || [],
-        recommendations: twin.intelligence?.recommendations || [],
-        missingSkills: twin.skills?.missing || [],
-        currentRole: twin.identity?.currentRole || "",
-        skills: twin.skills?.core || [],
-        targetRole: twin.identity?.targetRole || twin.identity?.currentRole || "",
-        yearsExperience: twin.identity?.seniorityLevel === "Senior" ? 7 : twin.identity?.seniorityLevel === "Mid" ? 3 : 0,
-        confidenceScore: twin.evolution?.confidenceScore || 50
-      } : cvData ? {
+      // Use the Twin if it exists, otherwise fall back to CV Analysis data
+      const cvContext = isTwinPopulated ? { ...twin, source: "twin" } : cvData ? {
         source: "cv",
         name: user?.name || "User",
         sections: cvData.sections,
@@ -286,9 +267,8 @@ export default function MyTwin() {
       };
 
       const res = await apiChatWithTwin(history, cvContext);
-      // Backend returns: { status: 'success', data: { reply, options, ... } }
       const rawData = res?.data || res;
-      const reply: string = rawData?.reply || rawData?.message || "I couldn't generate a response.";
+      const reply: string = rawData?.reply || rawData?.message || (typeof rawData === 'string' ? rawData : "I couldn't generate a response.");
       let options: string[] = Array.isArray(rawData?.options) ? rawData.options : [];
       const allowMultiple: boolean = rawData?.allowMultiple || false;
       const isComplete: boolean = rawData?.isComplete || false;
