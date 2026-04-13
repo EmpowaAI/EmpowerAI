@@ -1,8 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+
 import { Bot, X, Send, Sparkles, User, Clock, ThumbsUp, ThumbsDown } from "lucide-react";
 import { cn } from "../lib/utils";
 import StatusPill from "./shared/StatusPill";
-import { chatAPI } from "../lib/api";
+import { getMyTwin, chatWithTwin } from "../../api/services/twinService";
+import { useUser } from "../../contexts/user-context";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 interface Message {
   id: string;
@@ -82,7 +84,7 @@ export default function DigitalTwinChatbot() {
 
     try {
       // Call the AI service chat endpoint
-      const response = await chatAPI.sendMessage(currentInput);
+      const response = await chatWithTwin([{ role: 'user', content: currentInput }]);
       
       const aiMessage: Message = {
         id: createMessageId(),

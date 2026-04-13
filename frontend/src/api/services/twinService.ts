@@ -1,38 +1,24 @@
 import axios from 'axios';
 import { API_BASE_URL } from '../Client';
 
-// =========================
-// AXIOS INSTANCE
-// =========================
 const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
 });
 
-// =========================
-// 🔥 AUTH INTERCEPTOR (FIXES YOUR 401)
-// =========================
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('empowerai-token');
-
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-
   return config;
 });
 
-// =========================
-// TYPES
-// =========================
 export interface ChatMsg {
   role: 'user' | 'assistant';
   content: string;
 }
 
-// =========================
-// BUILD TWIN FROM CV
-// =========================
 export const buildTwinFromCv = async () => {
   try {
     const res = await api.post('/twin/build-from-cv');
@@ -43,12 +29,9 @@ export const buildTwinFromCv = async () => {
   }
 };
 
-// =========================
-// GET MY TWIN
-// =========================
 export const getMyTwin = async () => {
   try {
-    const res = await api.get('/twin/my-twin');
+    const res = await api.get('/my-twin');
     return res.data;
   } catch (error: any) {
     console.error('Get twin error:', error.response?.data || error.message);
@@ -56,9 +39,6 @@ export const getMyTwin = async () => {
   }
 };
 
-// =========================
-// CHAT WITH TWIN
-// =========================
 export const chatWithTwin = async (messages: ChatMsg[], cvContext?: any) => {
   try {
     const payload: any = { messages };
@@ -73,9 +53,6 @@ export const chatWithTwin = async (messages: ChatMsg[], cvContext?: any) => {
   }
 };
 
-// =========================
-// RUN SIMULATION
-// =========================
 export const runSimulation = async (pathIds?: string[]) => {
   try {
     const res = await api.post('/twin/simulate', { pathIds });
@@ -85,3 +62,4 @@ export const runSimulation = async (pathIds?: string[]) => {
     throw error;
   }
 };
+

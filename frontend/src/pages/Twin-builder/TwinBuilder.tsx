@@ -336,10 +336,11 @@ TWIN DATA:
       if (isComplete && aiProfile) {
         const mappedTwin: EconomicTwin = {
           identity: {
-            currentRole: (cvData?.sections?.experience?.[0]?.split('\n')[0]) || aiProfile.industry || aiProfile.name || 'Professional',
+            // Prioritize CV experience title over the AI's "name" field (which is often the user's name)
+            currentRole: (cvData?.sections?.experience?.[0]?.split('\n')[0]) || aiProfile.industry || 'Professional',
             seniorityLevel: aiProfile.careerStage || (cvData as any)?.readinessLevel || 'Early Career',
             industry: aiProfile.industry || (cvData as any)?.industry || 'Technology',
-            targetRole: aiProfile.goals || ''
+            targetRole: aiProfile.goals || (cvData as any)?.targetRole || ''
           },
           skills: {
             core: Array.isArray(aiProfile.skills) ? aiProfile.skills : [],
