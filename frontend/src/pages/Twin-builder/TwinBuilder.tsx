@@ -249,7 +249,7 @@ export default function MyTwin() {
     setChatError("");
 
     try {
-      const isTwinPopulated = !!(twin && twin._id && twin.identity?.currentRole && twin.identity.currentRole !== "UNDEFINED");
+      const isTwinPopulated = !!(twin && (twin._id || twin.user) && twin.identity?.currentRole && twin.identity.currentRole !== "UNDEFINED");
 
       const cvContext = isTwinPopulated ? { 
         ...twin, 
@@ -257,7 +257,8 @@ export default function MyTwin() {
         name: user?.name || "User" 
       } : cvData ? {
         source: "cv",
-        name: user?.name || "User",
+        // Try to get name from user context, then from raw CV data, then default
+        name: user?.name && user.name !== "User" ? user.name : (cvData as any).name || (cvData as any).firstName || "User",
         sections: cvData.sections || {},
         score: cvData.score || 0,
         industry: (cvData as any).industry || "Technology",
@@ -342,12 +343,13 @@ export default function MyTwin() {
     } catch (err: any) {
       const msg = err?.response?.data?.message || err?.message || "Failed to get a response.";
       setChatError(msg);
-      setIsTyping(false);
     } finally {
-      setTimeout(() => {
-        setIsTyping(false);
+      // Remove artificial delay to make input feel responsive immediately after AI finishes
+      setIsTyping(false);
+      // Use requestAnimationFrame to ensure the DOM has re-enabled the input before focusing
+      requestAnimationFrame(() => {
         inputRef.current?.focus();
-      }, 100);
+      });
     }
   };
 

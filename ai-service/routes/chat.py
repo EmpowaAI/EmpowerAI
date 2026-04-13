@@ -205,7 +205,8 @@ async def chat_twin(payload: ChatRequest, req: Request):
     try:
         log.info(f"📋 Twin chat request with {len(payload.messages)} messages")
         
-        has_loaded_twin = has_loaded_twin_context(payload.cv_context)
+        cv_ctx = payload.cv_context or {}
+        has_loaded_twin = has_loaded_twin_context(cv_ctx)
         
         if has_loaded_twin:
             # Conversational mode with loaded twin
@@ -213,7 +214,7 @@ async def chat_twin(payload: ChatRequest, req: Request):
             return await handle_twin_conversation(payload, req)
         
         # Quiz building mode
-        step = get_current_step(payload.messages, payload.cv_context, payload.focus)
+        step = get_current_step(payload.messages, cv_ctx, payload.focus)
         log.info(f"📍 Current step: {STEPS[step]} (step {step})")
         
         # Extract user's last message if any
