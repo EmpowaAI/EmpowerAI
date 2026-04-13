@@ -271,8 +271,8 @@ TWIN DATA:
         sections: {
           about: "",
           skills: twin.skills?.core || [],
-          education: twin.identity?.seniorityLevel || "",
-          experience: twin.identity?.industry || "",
+          education: cvData?.sections?.education || [],
+          experience: cvData?.sections?.experience || [],
           achievements: twin.intelligence?.strengths || []
         },
         score: twin.economy?.employabilityScore || 50,
@@ -336,10 +336,10 @@ TWIN DATA:
       if (isComplete && aiProfile) {
         const mappedTwin: EconomicTwin = {
           identity: {
-            currentRole: aiProfile.name || (cvData?.sections?.experience?.[0]?.split('\n')[0]) || 'Professional',
+            currentRole: (cvData?.sections?.experience?.[0]?.split('\n')[0]) || aiProfile.careerStage || 'Professional',
             seniorityLevel: aiProfile.careerStage || (cvData as any)?.readinessLevel || 'Early Career',
-            industry: aiProfile.industry || (cvData as any)?.industry || (cvData as any)?.sector || 'Technology',
-            targetRole: aiProfile.goals || (cvData as any)?.targetRole || 'Growth'
+            industry: aiProfile.industry || (cvData as any)?.industry || 'Technology',
+            targetRole: aiProfile.goals || ''
           },
           skills: {
             core: Array.isArray(aiProfile.skills) ? aiProfile.skills : [],
@@ -727,7 +727,7 @@ TWIN DATA:
                 {/* Quick reply chips - Single select */}
                 {msg.sender === "ai" &&
                   msg.options && msg.options.length > 0 &&
-                  idx === messages.length - 1 && 
+                  idx === messages.length - 1 &&
                   !isTyping &&
                   !msg.allowMultiple && (
                     <motion.div
