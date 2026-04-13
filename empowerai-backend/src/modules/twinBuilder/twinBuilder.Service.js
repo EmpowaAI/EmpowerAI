@@ -221,6 +221,7 @@ async function buildFromAnalysis(analysis, userId) {
     } else {
       coreSkills = ["communication", "problem solving", "teamwork"];
     }
+    logger.warn('[TwinService] CV analysis had no skills, using defaults', { userId, industry, defaultSkills: coreSkills });
   }
   
   // CRITICAL: Ensure employability score is never 0
