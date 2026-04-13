@@ -336,10 +336,10 @@ TWIN DATA:
       if (isComplete && aiProfile) {
         const mappedTwin: EconomicTwin = {
           identity: {
-            currentRole: (cvData?.sections?.experience?.[0]?.split('\n')[0]) || aiProfile.careerStage || 'Professional',
+            currentRole: (cvData?.sections?.experience?.[0]?.split('\n')[0]) || aiProfile.industry || 'Professional',
             seniorityLevel: aiProfile.careerStage || (cvData as any)?.readinessLevel || 'Early Career',
             industry: aiProfile.industry || (cvData as any)?.industry || 'Technology',
-            targetRole: aiProfile.goals || ''
+            targetRole: aiProfile.goals || (cvData as any)?.targetRole || ''
           },
           skills: {
             core: Array.isArray(aiProfile.skills) ? aiProfile.skills : [],
@@ -727,7 +727,7 @@ TWIN DATA:
                 {/* Quick reply chips - Single select */}
                 {msg.sender === "ai" &&
                   msg.options && msg.options.length > 0 &&
-                  idx === messages.length - 1 &&
+                  idx === messages.length - 1 && 
                   !isTyping &&
                   !msg.allowMultiple && (
                     <motion.div
@@ -855,7 +855,7 @@ TWIN DATA:
               }
             }}
             onFocus={(e) => e.currentTarget.style.outline = 'none'}
-            placeholder={hasOptions ? "Or type your own answer..." : "Ask your twin anything..."}
+            placeholder={isTyping ? "AI is thinking..." : hasOptions ? "Select an option or type here..." : "Ask your twin anything..."}
             className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/60 outline-none py-0.5"
             disabled={isTyping}
           />
