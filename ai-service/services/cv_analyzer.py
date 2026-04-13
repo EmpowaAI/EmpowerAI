@@ -1582,7 +1582,7 @@ Return a JSON object with the exact structure specified."""
                 'summary': summary
             }
             
-            # Cache the result for consistency
-            self._analysis_cache[cv_hash] = result.copy()
+            # Cache disabled for consistency
+            # self._analysis_cache[cv_hash] = result.copy()
             
             return result
