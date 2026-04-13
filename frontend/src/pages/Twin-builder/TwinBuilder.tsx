@@ -167,14 +167,10 @@ export default function MyTwin() {
   useEffect(() => { scrollToBottom(); }, [messages, isTyping, scrollToBottom]);
 
   useEffect(() => {
-    // Auto-focus input field when messages change or twin loads
-    if (inputRef.current && !isTyping && messages.length > 0) {
-      const timer = setTimeout(() => {
-        inputRef.current?.focus();
-      }, 100);
-      return () => clearTimeout(timer);
+    if (inputRef.current && !isTyping) {
+      inputRef.current.focus();
     }
-  }, [messages, isTyping]);
+  }, [isTyping, messages.length]);
 
   // ── Fetch twin from API on mount ─────────────────────────────────────────────
   useEffect(() => {
@@ -249,7 +245,7 @@ export default function MyTwin() {
     setChatError("");
 
     try {
-      const isTwinPopulated = !!(twin && (twin._id || twin.user) && twin.identity?.currentRole && twin.identity.currentRole !== "UNDEFINED");
+      const isTwinPopulated = !!(twin && (twin._id || twin.user) && twin.identity?.currentRole && twin.identity.currentRole !== "UNDEFINED" && twin.status !== "DEMO");
 
       const cvContext = isTwinPopulated ? { 
         ...twin, 
@@ -344,12 +340,7 @@ export default function MyTwin() {
       const msg = err?.response?.data?.message || err?.message || "Failed to get a response.";
       setChatError(msg);
     } finally {
-      // Remove artificial delay to make input feel responsive immediately after AI finishes
       setIsTyping(false);
-      // Use requestAnimationFrame to ensure the DOM has re-enabled the input before focusing
-      requestAnimationFrame(() => {
-        inputRef.current?.focus();
-      });
     }
   };
 
@@ -393,10 +384,11 @@ export default function MyTwin() {
 
   const lastMessage = messages[messages.length - 1];
   const hasOptions = lastMessage?.sender === "ai" && (lastMessage?.options?.length ?? 0) > 0;
+  const currency = twin?.economy?.incomePotentialRange?.currency ?? "ZAR";
 
   // ─── Twin Profile Panel ──────────────────────────────────────────────────────
 
-  const TwinPanel = () => {
+  function renderTwinPanel() {
     if (twinLoading) return (
       <div className="flex flex-col items-center justify-center h-full gap-3">
         <motion.div animate={{ rotate: 360 }} transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}>
@@ -442,7 +434,6 @@ export default function MyTwin() {
     );
 
     const { identity, economy, skills, intelligence, market, evolution } = twin;
-    const currency = economy?.incomePotentialRange?.currency ?? "ZAR";
 
     return (
       <div className="h-full overflow-y-auto scrollbar-thin px-4 py-5 space-y-3">
@@ -653,16 +644,15 @@ export default function MyTwin() {
             <span className="text-xs text-muted-foreground font-normal">/100</span>
           </span>
         </div>
-
       </div>
     );
-  };
+  }
 
   // ─── Chat Panel ──────────────────────────────────────────────────────────────
 
-  const ChatPanel = () => (
+  function renderChatPanel() {
+    return (
     <div className="flex flex-col h-full">
-
       <div className="flex-1 overflow-y-auto scrollbar-thin">
         <div className="px-4 py-5 space-y-1">
 
@@ -845,7 +835,8 @@ export default function MyTwin() {
         </p>
       </div>
     </div>
-  );
+    );
+  }
 
   // ─── Root Layout ─────────────────────────────────────────────────────────────
 
@@ -907,17 +898,17 @@ export default function MyTwin() {
 
         {/* Desktop — left: twin profile */}
         <div className="hidden lg:flex lg:w-[380px] xl:w-[420px] flex-shrink-0 border-r border-border flex-col overflow-hidden">
-          <TwinPanel />
+          {renderTwinPanel()}
         </div>
 
         {/* Desktop — right: chat */}
         <div className="hidden lg:flex flex-1 flex-col overflow-hidden">
-          <ChatPanel />
+          {renderChatPanel()}
         </div>
 
         {/* Mobile — tab switched */}
         <div className="flex lg:hidden flex-1 flex-col overflow-hidden">
-          {mobileTab === "profile" ? <TwinPanel /> : <ChatPanel />}
+          {mobileTab === "profile" ? renderTwinPanel() : renderChatPanel()}
         </div>
 
       </div>
