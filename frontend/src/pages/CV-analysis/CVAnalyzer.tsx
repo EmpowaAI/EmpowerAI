@@ -130,7 +130,7 @@ export default function CVAnalyzerPage() {
       setCvData(result)
 
       try {
-        const skills = Array.isArray(result?.extractedSkills) ? result.extractedSkills : []
+        const skills = Array.isArray(result?.sections?.skills) ? result.sections.skills : []
         const score = String(result?.score ?? 0)
         
         try {
