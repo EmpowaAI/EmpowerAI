@@ -301,8 +301,8 @@ TWIN DATA:
         weaknesses: (cvData as any).weaknesses || [],
         recommendations: cvData.recommendations || [],
         missingSkills: cvData.missingKeywords || [],
-        currentRole: cvData.sections?.experience?.[0]?.split('\n')[0] || "",
-        targetRole: cvData.sections?.experience?.[0]?.split('\n')[0] || "",
+        currentRole: cvData.sections?.experience?.[0]?.split('\n')[0] || (cvData as any).industry || "Professional",
+        targetRole: (cvData as any).targetRole || "",
         yearsExperience: 0,
         confidenceScore: 50
       } : {
@@ -336,10 +336,10 @@ TWIN DATA:
       if (isComplete && aiProfile) {
         const mappedTwin: EconomicTwin = {
           identity: {
-            currentRole: (cvData?.sections?.experience?.[0]?.split('\n')[0]) || aiProfile.industry || 'Professional',
+            currentRole: (cvData?.sections?.experience?.[0]?.split('\n')[0]) || aiProfile.industry || aiProfile.name || 'Professional',
             seniorityLevel: aiProfile.careerStage || (cvData as any)?.readinessLevel || 'Early Career',
             industry: aiProfile.industry || (cvData as any)?.industry || 'Technology',
-            targetRole: aiProfile.goals || (cvData as any)?.targetRole || ''
+            targetRole: aiProfile.goals || ''
           },
           skills: {
             core: Array.isArray(aiProfile.skills) ? aiProfile.skills : [],
