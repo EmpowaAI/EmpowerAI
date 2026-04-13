@@ -168,12 +168,14 @@ async def chat_twin(payload: ChatRequest, req: Request):
     try:
         log.info(f"📋 Twin chat request with {len(payload.messages)} messages")
         
-        # Check if we have a loaded twin (cv_context with twin data)
+        # FIX: Robust check for CV context. Trigger advisor mode if ANY career data is present.
         has_loaded_twin = payload.cv_context and (
             payload.cv_context.get('currentRole') or 
             payload.cv_context.get('strengths') or
-            payload.cv_context.get('skills') or
-            payload.cv_context.get('sections', {}).get('skills')
+            (payload.cv_context.get('sections') and (
+                len(payload.cv_context['sections'].get('skills', [])) > 0 or
+                len(payload.cv_context['sections'].get('experience', [])) > 0
+            ))
         )
         
         if has_loaded_twin:

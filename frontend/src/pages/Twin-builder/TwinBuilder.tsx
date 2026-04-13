@@ -321,8 +321,8 @@ TWIN DATA:
       if (isComplete && aiProfile) {
         const mappedTwin: EconomicTwin = {
           identity: {
-            currentRole: (cvData?.sections?.experience?.[0]?.split('\n')[0]) || aiProfile.industry || 'Professional',
-            seniorityLevel: aiProfile.careerStage || 'Early Career',
+            currentRole: aiProfile.name || (cvData?.sections?.experience?.[0]?.split('\n')[0]) || 'Professional',
+            seniorityLevel: aiProfile.careerStage || (cvData as any)?.seniorityLevel || 'Early Career',
             industry: aiProfile.industry || (cvData as any)?.industry || 'Technology',
             targetRole: aiProfile.goals || (cvData as any)?.targetRole || ''
           },
@@ -712,7 +712,7 @@ TWIN DATA:
                 {/* Quick reply chips - Single select */}
                 {msg.sender === "ai" &&
                   msg.options && msg.options.length > 0 &&
-                  idx === messages.length - 1 &&
+                  idx === messages.length - 1 && 
                   !isTyping &&
                   !msg.allowMultiple && (
                     <motion.div
@@ -736,7 +736,7 @@ TWIN DATA:
                 {/* Quick reply chips - Multi select */}
                 {msg.sender === "ai" &&
                   msg.options && msg.options.length > 0 &&
-                  idx === messages.length - 1 &&
+                  idx === messages.length - 1 && 
                   !isTyping &&
                   msg.allowMultiple && (
                     <motion.div
