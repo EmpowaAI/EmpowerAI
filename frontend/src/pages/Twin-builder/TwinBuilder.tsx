@@ -86,15 +86,15 @@ interface DisplayMessage {
 
 // ─── Typewriter Component ─────────────────────────────────────────────────────
 
-const Typewriter = ({ text, speed = 25, isMuted = false, onComplete, onChar }: { 
+const Typewriter = ({ text, speed = 25, isMuted = false, audioContextRef, onComplete, onChar }: { 
   text: string; 
   speed?: number; 
   isMuted?: boolean;
+  audioContextRef: React.MutableRefObject<AudioContext | null>;
   onComplete?: () => void;
   onChar?: () => void;
 }) => {
   const [displayedText, setDisplayedText] = useState("");
-  const audioContextRef = useRef<AudioContext | null>(null);
 
   // Function to generate a subtle "mechanical" typing sound using Web Audio API
   const playClick = useCallback(() => {
@@ -243,6 +243,8 @@ export default function MyTwin() {
   const [twinLoading, setTwinLoading] = useState(true);
   const [twinError, setTwinError] = useState("");
   const [isMuted, setIsMuted] = useState(() => localStorage.getItem('twin-chat-muted') === 'true');
+
+  const audioContextRef = useRef<AudioContext | null>(null);
 
   useEffect(() => {
     localStorage.setItem('twin-chat-muted', isMuted.toString());
@@ -784,6 +786,7 @@ export default function MyTwin() {
                       {msg.isAnimating ? (
                         <Typewriter 
                           text={msg.text} 
+                          audioContextRef={audioContextRef}
                           isMuted={isMuted}
                           onChar={scrollToBottom}
                           onComplete={() => {
