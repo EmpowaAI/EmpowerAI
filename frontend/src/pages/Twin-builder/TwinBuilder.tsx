@@ -104,7 +104,9 @@ const Typewriter = ({ text, speed = 25, isMuted = false, onComplete, onChar }: {
         audioContextRef.current = new AudioContextClass();
       }
       const ctx = audioContextRef.current;
-      if (ctx.state === 'suspended') ctx.resume();
+      
+      // Only attempt to play if the context is allowed to run
+      if (ctx.state !== 'running') return;
 
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -954,7 +956,15 @@ export default function MyTwin() {
   // ─── Root Layout ─────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-background">
+    <div 
+      className="flex flex-col h-[100dvh] bg-background"
+      onClick={() => {
+        // Global gesture handler to unlock AudioContext for the typewriter
+        if (typeof window !== 'undefined' && (window as any).AudioContext && audioContextRef.current?.state === 'suspended') {
+          audioContextRef.current.resume();
+        }
+      }}
+    >
 
       {/* Top bar */}
       <div className="flex-shrink-0 border-b border-border bg-card/80 backdrop-blur-md">
