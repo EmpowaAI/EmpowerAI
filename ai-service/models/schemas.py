@@ -27,11 +27,24 @@ class GrowthModel(BaseModel):
     employabilityIndex: float
     recommendedPaths: List[str]
 
-class EconomicTwinResponse(BaseModel):
-    skillVector: List[float]
-    incomeProjection: IncomeProjection
-    empowermentScore: float
-    growthModel: GrowthModel
+class EconomicTwinDoc(BaseModel):
+    id: str
+    user_id: str
+    data: Dict[str, Any]
+    status: str = "ACTIVE"
+    version: int = 1
+    created_at: datetime
+    updated_at: datetime
+
+class EconomicTwinResponse(EconomicTwinDoc):
+    """Response version - flattens data for frontend"""
+    skillVector: Optional[List[float]] = None
+    incomeProjection: Optional[IncomeProjection] = None
+    empowermentScore: Optional[float] = None
+    growthModel: Optional[GrowthModel] = None
+
+    class Config:
+        from_attributes = True
 
 # Simulation Models
 class SimulationResult(BaseModel):

@@ -180,10 +180,10 @@ async def chat_twin(payload: ChatRequest, req: Request):
     try:
         log.info(f"📋 Twin chat request with {len(payload.messages)} messages")
         
-        # FIX: Much more robust trigger for Advisor Mode
+        # Only trigger Advisor Mode if we have actual career content (skills or experience)
         has_loaded_twin = payload.cv_context and (
-            bool(payload.cv_context.get('currentRole')) or 
-            bool(payload.cv_context.get('name')) or
+            (payload.cv_context.get('currentRole') and payload.cv_context.get('currentRole') != 'UNDEFINED') or 
+            (payload.cv_context.get('industry') and payload.cv_context.get('industry') != 'Technology') or
             (payload.cv_context.get('skills') and len(payload.cv_context.get('skills')) > 0) or
             (payload.cv_context.get('sections') and (
                 len(payload.cv_context['sections'].get('skills', [])) > 0 or

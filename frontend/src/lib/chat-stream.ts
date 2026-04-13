@@ -52,7 +52,8 @@ export async function streamChat({
     // Sanitize messages array
     const sanitizedMessages = messages
       .map(m => {
-        const role = m.role || (m as any).sender || 'user';
+        let role = m.role || (m as any).sender || 'user';
+        if (role === 'ai') role = 'assistant'; // Map frontend 'ai' to backend 'assistant'
         const content = m.content || (m as any).text || '';
         return { role, content };
       })
