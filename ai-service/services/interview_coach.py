@@ -512,11 +512,11 @@ The project successfully [quantifiable result], and I learned valuable lessons a
         # Task 4 Integration: If cv_data is missing, try to fetch the user's latest analysis from DB
         user_id = cv_data.get('userId') if cv_data else None
         if not cv_data and self.db is not None and user_id:
-            self.logger.info(f"Session start: Fetching existing CV for user {user_id}")
+            logger.info(f"Session start: Fetching existing CV for user {user_id}")
             stored_cv = await self.db.cv_analyses.find_one({"userId": user_id})
             if stored_cv:
                 cv_data = stored_cv
-                self.logger.info("✅ Successfully linked interview to stored CV analysis")
+                logger.info("✅ Successfully linked interview to stored CV analysis")
 
         # Generate a unique, searchable session ID
         session_id = f'sess_{datetime.utcnow().strftime("%Y%m%d%H%M")}_{random.randint(1000, 9999)}'

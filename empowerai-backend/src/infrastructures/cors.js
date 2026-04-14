@@ -5,7 +5,9 @@ const allowedOrigins = [
   'https://empower-ai-gamma.vercel.app',
   'https://empowerai.onrender.com',
   'https://www.empowa.org',
-  'https://empowa-ai.co.za/',
+  'https://empowa.org',
+  'https://empowa-ai.co.za',
+  'https://www.empowa-ai.co.za',
   process.env.FRONTEND_URL,
   process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
 ].filter(Boolean);

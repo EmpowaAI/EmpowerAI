@@ -9,7 +9,6 @@ import sys
 import os
 import json
 import numpy as np
-
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.logger import get_logger
 
@@ -574,7 +573,11 @@ INSTRUCTIONS:
 Return ONLY valid JSON. No explanation, no code blocks.
 """.strip()
 
-            raw = self.ai_client.complete(prompt)
+            raw = await self.ai_client.generate_text_async(
+                prompt=prompt,
+                temperature=0.2,
+                max_tokens=1000
+            )
 
             # Strip markdown fences if present
             clean = raw.strip()
@@ -614,6 +617,6 @@ Return ONLY valid JSON. No explanation, no code blocks.
             base["evolution"]["lastUpdatedBy"] = "ai_enrichment"
 
         except Exception as e:
-            print(f"[TwinGenerator] AI enrichment failed, using base twin: {e}")
+            get_logger().error(f"[TwinGenerator] AI enrichment failed, using base twin: {e}")
 
         return base
