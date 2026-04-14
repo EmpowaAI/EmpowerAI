@@ -11,7 +11,6 @@ import json
 import numpy as np
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.logger import get_logger
-
 from utils.ai_client import AIClient
 from utils.sa_market_data import get_province_multiplier, calculate_adjusted_income
 
@@ -57,7 +56,6 @@ MONETIZABLE_SKILLS = {
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
 
-@get_logger().catch
 async def _get_skill_similarity(ai_client: AIClient, skill_a: str, skill_b: str) -> float:
     """Compute cosine similarity between two skill embeddings."""
     try:
