@@ -8,7 +8,6 @@ import toast from 'react-hot-toast';
 import { authAPI } from "../../lib/api";
 import { useUser } from "../../contexts/user-context";
 import { syncProgressFromBackend, unlockAllPages } from "../../utils/progressSync";
-import Logo from "../../components/ui/Logo";
 import ThemeToggle from "../../components/ui/ThemeToggle";
 import loginBg from "../../assets/images/empowerlogin.png";
 
@@ -102,7 +101,6 @@ export default function LoginPage() {
       <div className="absolute inset-0 panel-image-accent opacity-70" />
 
       <div className="relative z-10 max-w-lg space-y-6 animate-slide-up">
-        <Logo variant="light" size="lg" linkTo="/" />
         <p className="text-sm font-semibold uppercase tracking-[0.24em] text-white/80 panel-copy-shadow">
           Welcome back
         </p>
@@ -143,10 +141,6 @@ export default function LoginPage() {
 
         <div className="w-full max-w-md animate-slide-up" style={{ animationDelay: "0.15s" }}>
           <div className="auth-card-surface p-6 sm:p-7 md:p-9 transition-all duration-300">
-            <div className="lg:hidden mb-6 sm:mb-8">
-              <Logo variant="default" size="md" linkTo="/" />
-            </div>
-
             <div className="mb-8">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-full mb-4">
                 <Sparkles className="h-3.5 w-3.5 text-primary" />
