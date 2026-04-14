@@ -9,6 +9,7 @@ import json
 import sys
 import os
 import traceback
+from datetime import datetime
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -20,8 +21,9 @@ logger = get_logger()
 class InterviewCoach:
     """Simulates interviews and provides coaching based on CV using Azure OpenAI (async)"""
 
-    def __init__(self, ai_client: Optional[AIClient] = None):
+    def __init__(self, ai_client: Optional[AIClient] = None, db_client: Any = None):
         self.ai_client = ai_client or AIClient()
+        self.db = db_client
 
         # Fallback question pools (only used if Azure is unavailable)
         self.fallback_questions = {
@@ -506,16 +508,65 @@ The project successfully [quantifiable result], and I learned valuable lessons a
             cv_context=cv_data,
             job_description=job_description  # 👈 pass it through
         )
-        import random
-        return {
-            'sessionId': f'session_{random.randint(10000, 99999)}',
+
+        # Task 4 Integration: If cv_data is missing, try to fetch the user's latest analysis from DB
+        user_id = cv_data.get('userId') if cv_data else None
+        if not cv_data and self.db is not None and user_id:
+            self.logger.info(f"Session start: Fetching existing CV for user {user_id}")
+            stored_cv = await self.db.cv_analyses.find_one({"userId": user_id})
+            if stored_cv:
+                cv_data = stored_cv
+                self.logger.info("✅ Successfully linked interview to stored CV analysis")
+
+        # Generate a unique, searchable session ID
+        session_id = f'sess_{datetime.utcnow().strftime("%Y%m%d%H%M")}_{random.randint(1000, 9999)}'
+        
+        session_data = {
+            'sessionId': session_id,
             'type': interview_type,
             'difficulty': difficulty,
             'company': company,
             'questions': questions,
             'currentQuestionIndex': 0,
             'feedback': [],
-            'startedAt': None,
+            'startedAt': datetime.utcnow().isoformat(),
             'cvUsed': bool(cv_data),
-            'jobDescriptionUsed': bool(job_description)  # 👈 track if JD was used
+            'jobDescriptionUsed': bool(job_description),
+            'status': 'IN_PROGRESS'
         }
+
+        # Persist to MongoDB if client is provided
+        if self.db is not None:
+            await self.db.interview_sessions.insert_one(session_data)
+            
+        return session_data
+
+    async def get_session(self, session_id: str) -> Optional[Dict[str, Any]]:
+        """
+        Task 4: Retrieve a session from MongoDB to resume an interview.
+        """
+        if self.db is not None:
+            return await self.db.interview_sessions.find_one({'sessionId': session_id})
+        return None
+
+    async def record_answer_and_feedback(
+        self, 
+        session_id: str, 
+        question_id: str, 
+        response: str, 
+        feedback: Dict[str, Any]
+    ) -> bool:
+        """
+        Task 4: Update the session in MongoDB with the candidate's answer and AI feedback.
+        """
+        if self.db is not None:
+            result = await self.db.interview_sessions.update_one(
+                {'sessionId': session_id},
+                {
+                    '$push': {'feedback': feedback},
+                    '$inc': {'currentQuestionIndex': 1},
+                    '$set': {'lastUpdatedAt': datetime.utcnow().isoformat()}
+                }
+            )
+            return result.modified_count > 0
+        return False

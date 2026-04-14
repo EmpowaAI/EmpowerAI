@@ -1553,35 +1553,35 @@ Return a JSON object with the exact structure specified."""
     # ----------------------------------------------------------------------
     # Main analysis method – async
     # ----------------------------------------------------------------------
-    async def analyze_cv(self, cv_text: str, job_requirements: Optional[List[str]] = None) -> Dict[str, Any]:
+    async def analyze_cv(self, cv_text: str, user_id: Optional[str] = None, job_requirements: Optional[List[str]] = None) -> Dict[str, Any]:
         """
         Analyze CV with quality assurance - ensures no empty fallback data is returned.
-        Fresh analysis each time for consistency.
+        Checks MongoDB for existing analysis by user_id and CV hash to avoid redundant AI calls.
         """
-        # WARNING: CV analysis needs to be fresh each time for consistency
-        # Removed caching to prevent inconsistent scores on repeated analyses
-        
         if not cv_text or not cv_text.strip():
-            result = {
+            return {
                 'extractedSkills': [],
                 'missingSkills': [],
-                'marketKeywords': [],
                 'suggestions': ['Please provide CV text for analysis'],
-                'about': '',
-                'education': [],
-                'experience': [],
-                'achievements': [],
-                'cvText': '',
-                'links': {'linkedin': False, 'github': False, 'portfolio': False, 'driversLicence': False},
-                'score': 0,
-                'readinessLevel': 'JUNIOR',
-                'strengths': [],
-                'weaknesses': [],
-                'industry': 'general',
-                'recommendations': [],
-                'missingKeywords': []
+                'score': 0
             }
-            return result
+
+        # Task 4 Integration: Generate hash for the CV text
+        cv_hash = hashlib.sha256(cv_text.encode()).hexdigest()
+        
+        # 1. Check if we can "carry on" with existing data
+        if self.db is not None and user_id:
+            self.logger.info(f"Checking for existing analysis for user {user_id}...")
+            existing = await self.db.cv_analyses.find_one({
+                "userId": user_id,
+                "cvHash": cv_hash
+            })
+            
+            if existing:
+                self.logger.info("✅ Found existing analysis in DB. Skipping AI run.")
+                # Clean up DB-specific fields before returning
+                if "_id" in existing: del existing["_id"]
+                return existing
 
         self.logger.info("Attempting AI-powered CV analysis...")
         ai_result = await self._analyze_with_ai(cv_text)
@@ -1661,8 +1661,18 @@ Return a JSON object with the exact structure specified."""
                 'industry': industry
             }
             
-            # DO NOT CACHE - Each analysis should be fresh for consistency
-            
+            # 2. Persist to MongoDB for future use
+            if self.db is not None and user_id:
+                result["userId"] = user_id
+                result["cvHash"] = cv_hash
+                result["lastUpdatedAt"] = datetime.utcnow().isoformat()
+                
+                await self.db.cv_analyses.update_one(
+                    {"userId": user_id}, 
+                    {"$set": result}, 
+                    upsert=True
+                )
+
             return result
         else:
             self.logger.warning("⚠️ AI extraction failed - using enhanced rule-based fallback")
@@ -1749,92 +1759,4 @@ Return a JSON object with the exact structure specified."""
                 'summary': summary
             }
 
-            return result
-            if experience and len(experience) > 0:
-                strengths.append(f"Work experience in {industry if industry != 'general' else 'relevant field'}")
-            if len(extracted_skills) >= 5:
-                strengths.append(f"Good skill set with {len(extracted_skills)} identified skills")
-            if achievements and len(achievements) >= 2:
-                strengths.append("Demonstrated achievements and accomplishments")
-            if links.get('driversLicence', False):
-                strengths.append("Valid driver's licence - valuable for many roles")
-            
-            if not strengths:
-                strengths = ["Motivated individual ready to develop skills and contribute"]
-            
-            # Ensure we have at least 3 strengths
-            while len(strengths) < 3:
-                strengths.append("Willingness to learn and grow professionally")
-            
-            # Calculate a simple score
-            score = 30  # Base score
-            if education:
-                score += 15
-            if experience:
-                score += 25
-            if len(extracted_skills) >= 5:
-                score += 15
-            if achievements:
-                score += 10
-            if links.get('linkedin', False):
-                score += 5
-            score = min(score, 100)
-            
-            # Determine readiness level
-            if score >= 85:
-                readiness_level = "EXCEPTIONAL"
-            elif score >= 70:
-                readiness_level = "HIGH POTENTIAL"
-            elif score >= 50:
-                readiness_level = "INTERMEDIATE"
-            elif score >= 35:
-                readiness_level = "DEVELOPING"
-            else:
-                readiness_level = "JUNIOR"
-            
-            # Create a summary
-            summary = f"A {readiness_level.lower()} candidate with "
-            if education:
-                summary += f"{education[0][:50]}"
-            if experience:
-                summary += f" and {len(experience)} work experience entries"
-            if extracted_skills:
-                summary += f". Key skills include {', '.join(extracted_skills[:3])}"
-            summary += "."
-            
-            if not about or len(about) < 30:
-                if extracted_skills:
-                    about = f"Professional with expertise in {', '.join(extracted_skills[:6])}."
-                else:
-                    about = "Motivated individual seeking opportunities to grow and contribute."
-
-            self.logger.info(f"CV analysis results generated using fallback")
-            self.logger.info(f"   Industry: {industry}")
-            self.logger.info(f"   Weaknesses: {weaknesses}")
-
-            result = {
-                'extractedSkills': extracted_skills,
-                'missingSkills': missing_skills,
-                'marketKeywords': market_keywords,
-                'suggestions': suggestions,
-                'about': about,
-                'education': education,
-                'experience': experience,
-                'achievements': achievements,
-                'cvText': cv_text[:2000],
-                'links': links,
-                'incomeIdeas': income_ideas,
-                'score': score,
-                'readinessLevel': readiness_level,
-                'strengths': strengths[:6],
-                'weaknesses': weaknesses[:6],
-                'recommendations': suggestions,
-                'missingKeywords': missing_keywords[:12],
-                'industry': industry,
-                'summary': summary
-            }
-            
-            # Cache disabled for consistency
-            # self._analysis_cache[cv_hash] = result.copy()
-            
             return result

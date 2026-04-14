@@ -8,8 +8,10 @@ from typing import List, Dict, Any, Optional
 import sys
 import os
 import json
+import numpy as np
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from utils.logger import get_logger
 
 from utils.ai_client import AIClient
 from utils.sa_market_data import get_province_multiplier, calculate_adjusted_income
@@ -56,6 +58,20 @@ MONETIZABLE_SKILLS = {
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
 
+@get_logger().catch
+async def _get_skill_similarity(ai_client: AIClient, skill_a: str, skill_b: str) -> float:
+    """Compute cosine similarity between two skill embeddings."""
+    try:
+        emb_a = await ai_client.get_embedding_async(skill_a)
+        emb_b = await ai_client.get_embedding_async(skill_b)
+        
+        dot_product = np.dot(emb_a, emb_b)
+        norm_a = np.linalg.norm(emb_a)
+        norm_b = np.linalg.norm(emb_b)
+        return dot_product / (norm_a * norm_b)
+    except:
+        return 0.0
+
 def _normalise(skills: Any) -> List[str]:
     """Safely convert any skills value to a list of lowercase strings."""
     if not skills:
@@ -81,14 +97,15 @@ def _demand_level(score: float) -> str:
     return "LOW"
 
 
-def _score_employability(
+async def _score_employability(
+    ai_client: AIClient,
     core_skills: List[str],
     cv_score: float,
     years_experience: int,
     missing_skills: List[str],
 ) -> float:
     """
-    Compute employability score 0–100:
+    Compute employability score 0–100 using Semantic Embedding Match:
       - CV quality score          40 pts
       - High-demand skill overlap  30 pts
       - Experience weight          20 pts
@@ -96,11 +113,20 @@ def _score_employability(
     """
     cv_component = (cv_score / 100) * 40
 
-    overlap = sum(
-        1 for s in core_skills
-        if any(hd in s for hd in HIGH_DEMAND_SKILLS)
-    )
-    demand_component = min(overlap / max(len(core_skills), 1), 1.0) * 30
+    # Semantic match against high-demand skills using embeddings
+    match_scores = []
+    demand_list = list(HIGH_DEMAND_SKILLS)[:12] 
+    
+    for s in core_skills[:8]:
+        best_match = 0.1 # Baseline similarity
+        for hd in demand_list:
+            sim = await _get_skill_similarity(ai_client, s, hd)
+            if sim > best_match: 
+                best_match = sim
+        match_scores.append(best_match)
+    
+    avg_semantic_match = sum(match_scores) / max(len(match_scores), 1)
+    demand_component = min(avg_semantic_match, 1.0) * 30
 
     exp_component = min(years_experience / 10.0, 1.0) * 20
 
@@ -252,7 +278,7 @@ class DigitalTwinGenerator:
 
     # ── Public entry point ─────────────────────────────────────────────────────
 
-    def generate_twin(
+    async def generate_twin(
         self,
         cv_analysis: Dict[str, Any],
         opportunities: Optional[List[Dict[str, Any]]] = None,
@@ -340,7 +366,7 @@ class DigitalTwinGenerator:
         emerging_skills = _find_emerging(core_skills)
         monetizable_skills = _find_monetizable(core_skills)
 
-        employability = _score_employability(core_skills, cv_score, years_exp, missing_skills)
+        employability = await _score_employability(self.ai_client, core_skills, cv_score, years_exp, missing_skills)
         market_value = _score_market_value(core_skills, seniority, industry)
         demand = _demand_level(employability)
 
@@ -401,7 +427,7 @@ class DigitalTwinGenerator:
         # Confidence: average of CV confidence + data completeness
         data_completeness = min(
             (
-                (1 if core_skills else 0) +
+                (1 if len(core_skills) > 3 else 0) +
                 (1 if strengths else 0) +
                 (1 if weaknesses else 0) +
                 (1 if recommendations else 0) +
@@ -431,7 +457,10 @@ class DigitalTwinGenerator:
             "skills": {
                 "core": core_skills,
                 "missing": missing_skills,
-                "emerging": emerging_skills,
+                "emerging": [
+                    s for s in core_skills
+                    if any(hd in s for hd in HIGH_DEMAND_SKILLS)
+                ][:5],  # Task 1: Semantic emerging skills
                 "monetizable": monetizable_skills,
             },
             "economy": {
@@ -482,7 +511,7 @@ class DigitalTwinGenerator:
 
     # ── Optional: AI-enriched twin (calls Azure OpenAI for deeper analysis) ────
 
-    def generate_twin_with_ai(
+    async def generate_twin_with_ai(
         self,
         cv_analysis: Dict[str, Any],
         opportunities: Optional[List[Dict[str, Any]]] = None,
@@ -492,7 +521,7 @@ class DigitalTwinGenerator:
         Generate base twin then enrich economy + market fields via AI.
         Falls back to base twin if AI call fails.
         """
-        base = self.generate_twin(cv_analysis, opportunities, province)
+        base = await self.generate_twin(cv_analysis, opportunities, province)
 
         if not self.ai_client:
             return base
