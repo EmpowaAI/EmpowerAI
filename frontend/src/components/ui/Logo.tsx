@@ -1,8 +1,6 @@
 // components/Logo.tsx
 import { Link } from "react-router-dom"
 
-import logoImg from "../../assets/images/empowerLogo.jpeg"
-
 interface LogoProps {
   variant?: "default" | "light";
   size?: "sm" | "md" | "lg" | "xl" | "2xl" | "full";
@@ -37,11 +35,11 @@ export default function Logo({
   const content = (
     <div className={`flex items-center gap-3 ${className}`}>
       <img
-        src={logoImg}
-        alt="EmpowaAI logo"
+        src="/images/empowa_icon.png"
+        alt="EmpowaAI"
         className={`${sizeClasses[size]} crisp-image shrink-0 object-contain`}
         style={{ 
-          imageRendering: "auto",
+          imageRendering: "crisp-edges",
           objectFit: size === "full" ? "cover" : "contain"
         }}
       />
@@ -52,7 +50,7 @@ export default function Logo({
             : "text-foreground"
         }`}
       >
-        {/* Text content if needed */}
+        EmpowaAI
       </span>
     </div>
   );

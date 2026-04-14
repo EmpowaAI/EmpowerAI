@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=200&section=header&text=EmpowerAI&fontSize=80&fontColor=fff&animation=twinkling&fontAlignY=35&desc=Your%20Future%2C%20Visualized.%20Your%20Potential%2C%20Unleashed.&descAlignY=60&descSize=18" width="100%"/>
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=200&section=header&text=EmpowaAI&fontSize=80&fontColor=fff&animation=twinkling&fontAlignY=35&desc=Your%20Future%2C%20Visualized.%20Your%20Potential%2C%20Unleashed.&descAlignY=60&descSize=18" width="100%"/>
 
 <br/>
 
@@ -19,11 +19,11 @@
 
 ---
 
-## 🌍 What is EmpowerAI?
+## 🌍 What is EmpowaAI?
 
 > *"What if you could see your future before it happens?"*
 
-**EmpowerAI** is South Africa's first **Digital Economic Twin** platform — a living AI model that mirrors your economic potential and simulates different career paths so you can make informed, confident decisions about your future.
+**EmpowaAI** is South Africa's first **Digital Economic Twin** platform — a living AI model that mirrors your economic potential and simulates different career paths so you can make informed, confident decisions about your future.
 
 We're not just another career tool. We're your **crystal ball for financial success**, built specifically for South African youth navigating a 63% unemployment landscape.
 
