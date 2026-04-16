@@ -222,6 +222,18 @@ Each question must end with a question mark."""
         logger.info(f"=== evaluate_response called for question {question.get('id')} ===")
         logger.info(f"AI client enabled: {self.ai_client.enabled if self.ai_client else False}")
 
+        # DATA LOSS PREVENTION: Early exit for empty responses to avoid LLM errors
+        if not response or len(response.strip()) < 5:
+            return {
+                'questionId': question.get('id'),
+                'response': response or "",
+                'score': 0,
+                'feedback': "Your response was too brief to evaluate. Please provide a more detailed answer.",
+                'strengths': [],
+                'improvements': ["Provide more detail", "Use the STAR method", "Describe a specific situation"],
+                'suggestedAnswer': "A strong answer should include a specific example of a challenge you faced and how you solved it."
+            }
+
         # Try Azure AI first
         if self.ai_client and self.ai_client.enabled:
             try:

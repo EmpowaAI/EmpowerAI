@@ -37,7 +37,9 @@ export default function LoginPage() {
           name: response.data.user.name,
           email: response.data.user.email,
           id: response.data.user.id || response.data.user._id,
-          empowermentScore: response.data.user.empowermentScore,
+          empowermentScore: response.data.user.empowermentScore || 0,
+          cvCompleted: response.data.user.cvCompleted || false,
+          twinCompleted: response.data.user.twinCompleted || false
         });
         
         toast.success(`Welcome back, ${response.data.user.name}!`);
@@ -53,15 +55,16 @@ export default function LoginPage() {
             updateProgress('empowermentScore', syncedProgress.empowermentScore);
           }
           
-          // If user has completed everything, unlock all pages and go to dashboard
+          // PERSISTENCE FIX: Ensure local flags match backend sync before redirecting
+          localStorage.setItem('cvCompleted', String(syncedProgress.cvCompleted));
+          localStorage.setItem('twinCompleted', String(syncedProgress.twinCompleted));
+
           if (syncedProgress.cvCompleted && syncedProgress.twinCompleted) {
-            unlockAllPages(syncedProgress.empowermentScore || undefined);
+            unlockAllPages(syncedProgress.empowermentScore || 0);
             navigate("/dashboard", { replace: true });
           } else if (syncedProgress.cvCompleted) {
-            // CV completed but twin not completed
             navigate("/dashboard/twin", { replace: true });
           } else {
-            // Nothing completed, start with CV
             navigate("/dashboard/cv-analyzer", { replace: true });
           }
         } catch (error) {

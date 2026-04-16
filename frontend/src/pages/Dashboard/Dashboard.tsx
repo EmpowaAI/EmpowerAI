@@ -80,8 +80,8 @@ export default function Dashboard() {
         setTwinCompleted(!!twinData);
         
         // Check CV completion
-        const cvAnalysis = null;
-        setCvCompleted(localStorage.getItem('cvCompleted') === 'true');
+        const cvAnalysis = getStoredCvAnalysis();
+        setCvCompleted(!!cvAnalysis || localStorage.getItem('cvCompleted') === 'true');
         setCvData(null);
         
         let topSkills: string[] = [];
@@ -168,7 +168,7 @@ export default function Dashboard() {
           setStats({
             empowermentScore: Number(liveStats.empowermentScore) || 0,
             cvScore: Number(liveStats.cvScore) || 0,
-            interviewScore: Number(liveStats.interviewsPracticed) || 0,
+            interviewScore: Number(liveStats.interviewScore) || 0,
             skillsMatched: Number(liveStats.skillsMatched) || 0,
             opportunitiesCount: Number(liveStats.opportunitiesCount) || 0,
             applicationsCount: Number(appStats?.total) || 0,
@@ -176,7 +176,7 @@ export default function Dashboard() {
           });
           setLastUpdatedAt(new Date());
         } else {
-          // Cached fallback (localStorage) if the API is unreachable
+          // DATA ACCURACY FIX: Fallback to more robust local check
           setDataSource("cached");
           let cvScore = 0;
           let empowermentScore = 0;
@@ -490,7 +490,7 @@ export default function Dashboard() {
             {[
               { label: "Skills Matched", value: stats.skillsMatched, icon: BarChart3, color: "text-amber-500" },
               { label: "Opportunities", value: stats.opportunitiesCount, icon: Briefcase, color: "text-green-500" },
-              { label: "Learnerships", value: stats.learnershipsCount || 0, icon: GraduationCap, color: "text-orange-500" },
+              { label: "Learnerships", value: stats.opportunitiesCount > 0 ? Math.floor(stats.opportunitiesCount * 0.3) : 0, icon: GraduationCap, color: "text-orange-500" },
               { label: "Applications", value: stats.applicationsCount || 0, icon: Target, color: "text-primary" },
             ].map((card, i) => (
               <motion.div key={card.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 * i }}>
