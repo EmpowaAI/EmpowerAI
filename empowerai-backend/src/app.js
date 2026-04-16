@@ -38,7 +38,12 @@ if (isEnabled(process.env.ENABLE_AI_RATE_LIMITER, true)) {
 }
 
 if (isEnabled(process.env.ENABLE_API_RATE_LIMITER, true)) {
-  app.use('/api', apiLimiter);
+  app.use('/api/account', apiLimiter);
+  app.use('/api/opportunities', apiLimiter);
+  app.use('/api/admin', apiLimiter);
+  app.use('/api/user', apiLimiter);
+  app.use('/api/applications', apiLimiter);
+  app.use('/api/rss', apiLimiter);
 }
 
 // Request logging
