@@ -1,21 +1,16 @@
 const mongoose = require('mongoose');
 
-/**
- * CvProfile — stores the AI analysis result for a user's uploaded CV.
- * Intentionally separate from User (identity-only).
- * One profile per user — upserted on every new upload.
- */
+
 const cvProfileSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
-      unique: true, // one profile per user, upserted on re-upload
+      unique: true, 
       index: true,
     },
 
-    // --- File metadata ---
     filename: {
       type: String,
       trim: true,
@@ -28,55 +23,58 @@ const cvProfileSchema = new mongoose.Schema(
       type: Number,
     },
 
-    // --- Raw extracted text (capped to avoid bloating the document) ---
+   
     rawText: {
       type: String,
-      maxlength: 10000,
+      maxlength: 20000, 
       default: '',
     },
 
-    // --- AI analysis result ---
+   
     analysis: {
-      score: { type: Number, default: 0 },
-      readinessLevel: { type: String, default: 'JUNIOR' },
-      summary: { type: String, default: '' },
-      about: { type: String, default: '' },
-      industry: { type: String, default: 'general' },
+    
+      score:          { type: Number,  default: 0 },
+      readinessLevel: { type: String,  default: 'JUNIOR' },
+      industry:       { type: String,  default: 'general' },
       analysisSource: {
         type: String,
         enum: ['ai', 'fallback'],
         default: 'ai',
       },
-
-      extractedSkills: [{ type: String }],
-      missingSkills: [{ type: String }],
-      marketKeywords: [{ type: String }],
-      strengths: [{ type: String }],
-      weaknesses: [{ type: String }],
-      suggestions: [{ type: String }],
-      recommendations: [{ type: String }],
-      missingKeywords: [{ type: String }],
-      achievements: [{ type: String }],
-
-      education: [{ type: mongoose.Schema.Types.Mixed }],
-      experience: [{ type: mongoose.Schema.Types.Mixed }],
-
       links: {
-        linkedin: { type: Boolean, default: false },
-        github: { type: Boolean, default: false },
-        portfolio: { type: Boolean, default: false },
+        linkedin:       { type: Boolean, default: false },
+        github:         { type: Boolean, default: false },
+        portfolio:      { type: Boolean, default: false },
         driversLicence: { type: Boolean, default: false },
       },
+
+      
+      summary: { type: String, default: '' },
+      about:   { type: String, default: '' },
+
+      extractedSkills:  { type: String, default: '' },
+      missingSkills:    { type: String, default: '' },
+      marketKeywords:   { type: String, default: '' },
+      strengths:        { type: String, default: '' },
+      weaknesses:       { type: String, default: '' },
+      suggestions:      { type: String, default: '' },
+      recommendations:  { type: String, default: '' },
+      missingKeywords:  { type: String, default: '' },
+      achievements:     { type: String, default: '' },
+
+      
+      education:  { type: String, default: '' },
+      experience: { type: String, default: '' },
     },
 
-    // --- Status flags ---
+   
     isComplete: {
       type: Boolean,
-      default: false, // true once a full AI analysis (not fallback) is saved
+      default: false, 
     },
     isFallback: {
       type: Boolean,
-      default: false, // true when saved from local fallback analysis
+      default: false, 
     },
 
     analyzedAt: {
@@ -84,8 +82,6 @@ const cvProfileSchema = new mongoose.Schema(
       default: Date.now,
     },
 
-    // Optional retention control (TTL). When set, MongoDB will auto-delete the document
-    // once this timestamp is reached. When null/absent, the profile is retained.
     expiresAt: {
       type: Date,
       default: null,
@@ -94,11 +90,11 @@ const cvProfileSchema = new mongoose.Schema(
     },
   },
   {
-    timestamps: true, // createdAt + updatedAt
+    timestamps: true, 
   }
 );
 
-// Virtual: full name alias for populated user
+
 cvProfileSchema.virtual('userId').get(function () {
   return this.user;
 });

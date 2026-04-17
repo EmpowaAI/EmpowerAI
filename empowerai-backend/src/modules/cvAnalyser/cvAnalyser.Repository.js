@@ -1,4 +1,5 @@
 const CvProfile = require('../cvAnalyser/cvAnalyser.Model');
+const { encryptAnalysis, decryptAnalysis, encryptField, decryptField } = require('../../utils/encryption.util');
 
 const toBool = (value, defaultValue = false) => {
   if (value === undefined || value === null) return defaultValue;
@@ -13,16 +14,18 @@ const toPositiveInt = (value) => {
   return Number.isFinite(n) && n > 0 ? n : null;
 };
 
-/**
- * Upsert a CvProfile for a user.
- * Uses findOneAndUpdate with upsert:true so re-uploads overwrite the previous profile.
- */
+
 async function saveOrUpdate({ userId, filename, mimetype, fileSize, rawText, analysis, isFallback }) {
   const isComplete = !isFallback && !!analysis?.score;
   const storeRawText = toBool(process.env.CV_STORE_RAW_TEXT, false);
 
   const ttlDays = process.env.CV_PROFILE_TTL_DAYS ? toPositiveInt(process.env.CV_PROFILE_TTL_DAYS) : null;
   const expiresAt = ttlDays ? new Date(Date.now() + ttlDays * 24 * 60 * 60 * 1000) : null;
+
+  
+  const encryptedAnalysis = encryptAnalysis(analysis);
+
+  const rawTextToStore = storeRawText ? encryptField((rawText || '').slice(0, 10000)) : '';
 
   const profile = await CvProfile.findOneAndUpdate(
     { user: userId },
@@ -32,29 +35,32 @@ async function saveOrUpdate({ userId, filename, mimetype, fileSize, rawText, ana
         filename,
         mimetype,
         fileSize,
-        rawText: storeRawText ? (rawText || '').slice(0, 10000) : '',
+        rawText: rawTextToStore,
         analysis: {
-          score: analysis?.score ?? 0,
-          readinessLevel: analysis?.readinessLevel ?? 'JUNIOR',
-          summary: analysis?.summary ?? '',
-          about: analysis?.about ?? '',
-          industry: analysis?.industry ?? 'general',
+          score:          encryptedAnalysis.score          ?? 0,
+          readinessLevel: encryptedAnalysis.readinessLevel ?? 'JUNIOR',
+          summary:        encryptedAnalysis.summary        ?? '',
+          about:          encryptedAnalysis.about          ?? '',
+          industry:       encryptedAnalysis.industry       ?? 'general',
           analysisSource: isFallback ? 'fallback' : 'ai',
-          extractedSkills: analysis?.extractedSkills ?? [],
-          missingSkills: analysis?.missingSkills ?? [],
-          marketKeywords: analysis?.marketKeywords ?? [],
-          strengths: analysis?.strengths ?? [],
-          weaknesses: analysis?.weaknesses ?? [],
-          suggestions: analysis?.suggestions ?? [],
-          recommendations: analysis?.recommendations ?? [],
-          missingKeywords: analysis?.missingKeywords ?? [],
-          achievements: analysis?.achievements ?? [],
-          education: analysis?.education ?? [],
-          experience: analysis?.experience ?? [],
-          links: analysis?.links ?? {
-            linkedin: false,
-            github: false,
-            portfolio: false,
+
+          extractedSkills:   encryptedAnalysis.extractedSkills   ?? [],
+          missingSkills:     encryptedAnalysis.missingSkills      ?? [],
+          marketKeywords:    encryptedAnalysis.marketKeywords     ?? [],
+          strengths:         encryptedAnalysis.strengths         ?? [],
+          weaknesses:        encryptedAnalysis.weaknesses        ?? [],
+          suggestions:       encryptedAnalysis.suggestions       ?? [],
+          recommendations:   encryptedAnalysis.recommendations   ?? [],
+          missingKeywords:   encryptedAnalysis.missingKeywords   ?? [],
+          achievements:      encryptedAnalysis.achievements      ?? [],
+
+          education:  encryptedAnalysis.education  ?? [],
+          experience: encryptedAnalysis.experience ?? [],
+
+          links: encryptedAnalysis.links ?? {
+            linkedin:       false,
+            github:         false,
+            portfolio:      false,
             driversLicence: false,
           },
         },
@@ -65,36 +71,47 @@ async function saveOrUpdate({ userId, filename, mimetype, fileSize, rawText, ana
       },
     },
     {
-      new: true,        // return updated document
-      upsert: true,     // create if doesn't exist
+      new: true,           
+      upsert: true,        
       runValidators: true,
       setDefaultsOnInsert: true,
     }
   );
 
-  return profile;
+
+  return _withDecryptedAnalysis(profile);
 }
 
-/**
- * Find a user's CV profile.
- */
+
 async function findByUserId(userId) {
-  return CvProfile.findOne({ user: userId }).lean();
+  const profile = await CvProfile.findOne({ user: userId }).lean();
+  if (!profile) return null;
+  return _withDecryptedAnalysis(profile);
 }
 
-/**
- * Check if a user has a complete (non-fallback) CV profile.
- */
 async function hasCompleteProfile(userId) {
   const profile = await CvProfile.findOne({ user: userId, isComplete: true }).select('_id').lean();
   return !!profile;
 }
 
-/**
- * Delete a user's CV profile (e.g. account deletion).
- */
 async function deleteByUserId(userId) {
   return CvProfile.deleteOne({ user: userId });
+}
+
+function _withDecryptedAnalysis(profile) {
+  if (!profile) return null;
+
+  const plain = typeof profile.toObject === 'function' ? profile.toObject() : { ...profile };
+
+  if (plain.analysis) {
+    plain.analysis = decryptAnalysis(plain.analysis);
+  }
+
+  if (plain.rawText && typeof plain.rawText === 'string' && plain.rawText.includes(':')) {
+    plain.rawText = decryptField(plain.rawText) ?? '';
+  }
+
+  return plain;
 }
 
 module.exports = {
