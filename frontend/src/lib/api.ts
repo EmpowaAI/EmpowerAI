@@ -857,7 +857,6 @@ export const accountAPIReal = {
 export const twinAPIReal = {
   create: async (data: any) => {
     try {
-      // Standardized to /create to match backend route implementation
       console.log('Creating twin with data:', data);
       const response = await request<any>('/twin/create', {
         method: 'POST',
