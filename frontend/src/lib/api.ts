@@ -857,7 +857,7 @@ export const accountAPIReal = {
 export const twinAPIReal = {
   create: async (data: any) => {
     try {
-      console.log('Creating twin with data:', data);
+      console.log('Generating twin with data:', data);
       const response = await request<any>('/twin/create', {
         method: 'POST',
         body: JSON.stringify(data),
