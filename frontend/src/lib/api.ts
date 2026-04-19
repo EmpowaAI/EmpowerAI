@@ -857,10 +857,9 @@ export const accountAPIReal = {
 export const twinAPIReal = {
   create: async (data: any) => {
     try {
-      // UI expects /generate based on recent logs, but backend standard is /create
-      // We use /twin/generate here to align with the frontend's new request pattern
-      console.log('Generating twin with data:', data);
-      const response = await request<any>('/twin/generate', {
+      // Standardized to /create to match backend route implementation
+      console.log('Creating twin with data:', data);
+      const response = await request<any>('/twin/create', {
         method: 'POST',
         body: JSON.stringify(data),
       });
