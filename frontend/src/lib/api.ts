@@ -857,14 +857,16 @@ export const accountAPIReal = {
 export const twinAPIReal = {
   create: async (data: any) => {
     try {
-      console.log('Creating twin with data:', data);
-      const response = await request<any>('/twin/create', {
+      // UI expects /generate based on recent logs, but backend standard is /create
+      // We use /twin/generate here to align with the frontend's new request pattern
+      console.log('Generating twin with data:', data);
+      const response = await request<any>('/twin/generate', {
         method: 'POST',
         body: JSON.stringify(data),
       });
 
       // Calculate empowerment score if not provided by backend
-      if (response .status === 'success') {
+      if (response.status === 'success') {
         if (!response.data?.twin && response.twin){
           return{
             status: 'success',
@@ -1158,7 +1160,7 @@ export const statsAPIReal = {
         // ignore parse errors
       }
 
-      # DATA ACCURACY: Attempt to retrieve cached interview stats
+      // DATA ACCURACY: Attempt to retrieve cached interview stats
       let interviewScore = 0;
       try {
         interviewScore = Number(localStorage.getItem('lastInterviewScore')) || 0;

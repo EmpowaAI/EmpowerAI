@@ -52,8 +52,6 @@ export default function LoginPage() {
           if (syncedProgress.empowermentScore) {
             updateProgress('empowermentScore', syncedProgress.empowermentScore);
           }
-          
-          // PERSISTENCE FIX: Completed', !!syncedProgress.twinCompleted);
 
           // Context progress already updated above, no need for redundant calls here
 
