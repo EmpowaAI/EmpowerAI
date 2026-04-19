@@ -74,16 +74,13 @@ export default function Dashboard() {
   // Check localStorage for completion status and profile data
   useEffect(() => {
     const checkCompletionStatus = () => {
+      // Initialize completion states to false, they will be updated by loadDashboard
+      // based on live data or robust cached checks.
+      setTwinCompleted(false);
+      setCvCompleted(false);
+      setCvData(null); // Clear any stale CV data
+
       try {
-        // Check twin completion
-        const twinData = localStorage.getItem('twinData');
-        setTwinCompleted(!!twinData);
-        
-        // Check CV completion
-        const cvAnalysis = getStoredCvAnalysis();
-        setCvCompleted(!!cvAnalysis || localStorage.getItem('cvCompleted') === 'true');
-        setCvData(null);
-        
         let topSkills: string[] = [];
         try {
           const raw = localStorage.getItem('cvSkills');
@@ -96,6 +93,7 @@ export default function Dashboard() {
         const baseName = user?.name || "Career Seeker";
         const baseLocation = user?.province || user?.location || "South Africa";
 
+        const twinData = localStorage.getItem('twinData');
         if (twinData) {
           // Prefer twin data when available
           const parsedTwin = JSON.parse(twinData);
@@ -165,12 +163,17 @@ export default function Dashboard() {
 
         if (liveStats) {
           setDataSource("live");
+          
+          // REACTIVE COMPLETION: Update flags based on live data
+          if (Number(liveStats.cvScore) > 0 || !!getStoredCvAnalysis()) setCvCompleted(true);
+          if (Number(liveStats.empowermentScore) > 0) setTwinCompleted(true);
+
           setStats({
             empowermentScore: Number(liveStats.empowermentScore) || 0,
             cvScore: Number(liveStats.cvScore) || 0,
             interviewScore: Number(liveStats.interviewScore) || 0,
             skillsMatched: Number(liveStats.skillsMatched) || 0,
-            opportunitiesCount: Number(liveStats.opportunitiesCount) || 0,
+            opportunitiesCount: Number(liveStats.opportunitiesCount || liveStats.totalOpportunities) || 0,
             applicationsCount: Number(appStats?.total) || 0,
             learnershipsCount: undefined,
           });
@@ -296,33 +299,7 @@ export default function Dashboard() {
                   <span className="text-xs text-muted-foreground">Updated {formatLastUpdated(lastUpdatedAt)}</span>
                   <button
                     type="button"
-                    onClick={() => {
-                      // trigger a silent refresh (keeps layout stable)
-                      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-                      (async () => {
-                        try {
-                          setIsRefreshing(true);
-                          const statsRes = await statsAPI.getDashboardStats();
-                          const appsRes = await applicationsAPI.getStats().catch(() => null);
-                          const liveStats = statsRes?.data || null;
-                          if (liveStats) {
-                            setDataSource("live");
-                            setStats({
-                              empowermentScore: Number(liveStats.empowermentScore) || 0,
-                              cvScore: Number(liveStats.cvScore) || 0,
-                              interviewScore: Number(liveStats.interviewsPracticed) || 0,
-                              skillsMatched: Number(liveStats.skillsMatched) || 0,
-                              opportunitiesCount: Number(liveStats.opportunitiesCount) || 0,
-                              applicationsCount: Number((appsRes as any)?.data?.total) || 0,
-                              learnershipsCount: undefined,
-                            });
-                            setLastUpdatedAt(new Date());
-                          }
-                        } finally {
-                          setIsRefreshing(false);
-                        }
-                      })();
-                    }}
+                    onClick={() => void loadDashboard({ silent: true })} // Use void to explicitly ignore Promise
                     disabled={isRefreshing}
                     className="ml-1 inline-flex items-center gap-1 rounded-full border border-border/60 bg-card/40 px-2.5 py-1 text-[11px] text-muted-foreground hover:text-foreground hover:border-border transition-colors disabled:opacity-50"
                     aria-label="Refresh dashboard"
@@ -490,7 +467,7 @@ export default function Dashboard() {
             {[
               { label: "Skills Matched", value: stats.skillsMatched, icon: BarChart3, color: "text-amber-500" },
               { label: "Opportunities", value: stats.opportunitiesCount, icon: Briefcase, color: "text-green-500" },
-              { label: "Learnerships", value: stats.opportunitiesCount > 0 ? Math.floor(stats.opportunitiesCount * 0.3) : 0, icon: GraduationCap, color: "text-orange-500" },
+              { label: "Learnerships", value: stats.learnershipsCount ?? 0, icon: GraduationCap, color: "text-orange-500" },
               { label: "Applications", value: stats.applicationsCount || 0, icon: Target, color: "text-primary" },
             ].map((card, i) => (
               <motion.div key={card.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 * i }}>

@@ -52,10 +52,10 @@ export async function streamChat({
     // Sanitize messages array
     const sanitizedMessages = messages
       .map(m => {
-        let role = m.role || (m as any).sender || 'user';
+        let role: any = m.role || (m as any).sender || 'user';
         if (role === 'ai') role = 'assistant'; // Map frontend 'ai' to backend 'assistant'
         const content = m.content || (m as any).text || '';
-        return { role, content };
+        return { role: role as "user" | "assistant", content };
       })
       .filter(m => m.content.trim() !== '');
 
@@ -87,13 +87,21 @@ export async function streamChat({
     });
 
     if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+
       if (response.status === 429) {
         onError("Rate limited — please wait a moment and try again.");
         onDone({ reply: "", options: [], isComplete: false, profile: null });
         return;
       }
 
-      const errorData = await response.json().catch(() => ({}));
+      // Handle Render Cold Starts specifically for better UX
+      if (errorData?.isRenderColdStart || response.status === 503) {
+        onDelta("Just a second... the AI is waking up from its nap (cold start). This usually takes about 30-60 seconds on our free tier.");
+        // We don't call onError yet to give it a chance to wake up
+        return;
+      }
+
       console.error('AI service error:', response.status, errorData);
       const serverMessage =
         errorData?.message ||
