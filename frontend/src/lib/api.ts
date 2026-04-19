@@ -1158,6 +1158,12 @@ export const statsAPIReal = {
         // ignore parse errors
       }
 
+      # DATA ACCURACY: Attempt to retrieve cached interview stats
+      let interviewScore = 0;
+      try {
+        interviewScore = Number(localStorage.getItem('lastInterviewScore')) || 0;
+      } catch (e) {}
+
       return {
         status: 'success',
         data: {
@@ -1165,7 +1171,7 @@ export const statsAPIReal = {
           threeMonthProjection: twin?.incomeProjections?.threeMonth || 0,
           skillsMatched,
           opportunitiesCount: typeof totalOpportunities === 'number' ? totalOpportunities : opportunities.length,
-          interviewsPracticed: 0,
+          interviewScore: interviewScore,
           cvScore: getStoredCvScore(),
         },
       };

@@ -37,9 +37,7 @@ export default function LoginPage() {
           name: response.data.user.name,
           email: response.data.user.email,
           id: response.data.user.id || response.data.user._id,
-          empowermentScore: response.data.user.empowermentScore || 0,
-          cvCompleted: response.data.user.cvCompleted || false,
-          twinCompleted: response.data.user.twinCompleted || false
+          empowermentScore: response.data.user.empowermentScore || 0
         });
         
         toast.success(`Welcome back, ${response.data.user.name}!`);
@@ -55,9 +53,9 @@ export default function LoginPage() {
             updateProgress('empowermentScore', syncedProgress.empowermentScore);
           }
           
-          // PERSISTENCE FIX: Ensure local flags match backend sync before redirecting
-          localStorage.setItem('cvCompleted', String(syncedProgress.cvCompleted));
-          localStorage.setItem('twinCompleted', String(syncedProgress.twinCompleted));
+          // PERSISTENCE FIX: Completed', !!syncedProgress.twinCompleted);
+
+          // Context progress already updated above, no need for redundant calls here
 
           if (syncedProgress.cvCompleted && syncedProgress.twinCompleted) {
             unlockAllPages(syncedProgress.empowermentScore || 0);
@@ -75,7 +73,7 @@ export default function LoginPage() {
           } else if (!progress.twinCompleted) {
             navigate("/dashboard/twin", { replace: true });
           } else {
-            unlockAllPages(progress.empowermentScore || undefined);
+            unlockAllPages(progress.empowermentScore || 0); // Standardize to 0
             navigate("/dashboard", { replace: true });
           }
         }

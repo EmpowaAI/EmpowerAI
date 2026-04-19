@@ -222,12 +222,12 @@ Each question must end with a question mark."""
         logger.info(f"=== evaluate_response called for question {question.get('id')} ===")
         logger.info(f"AI client enabled: {self.ai_client.enabled if self.ai_client else False}")
 
-        # DATA LOSS PREVENTION: Early exit for empty responses to avoid LLM errors
+        # DATA LOSS PREVENTION: Guard against empty/short responses to avoid LLM errors
         if not response or len(response.strip()) < 5:
             return {
                 'questionId': question.get('id'),
                 'response': response or "",
-                'score': 0,
+                'score': 5, # Assign a minimum score for effort, but provide feedback for brevity
                 'feedback': "Your response was too brief to evaluate. Please provide a more detailed answer.",
                 'strengths': [],
                 'improvements': ["Provide more detail", "Use the STAR method", "Describe a specific situation"],
@@ -566,19 +566,27 @@ The project successfully [quantifiable result], and I learned valuable lessons a
         session_id: str, 
         question_id: str, 
         response: str, 
-        feedback: Dict[str, Any]
+        feedback: Dict[str, Any],
+        total_questions: int # Added parameter to determine if it's the last question
     ) -> bool:
         """
         Task 4: Update the session in MongoDB with the candidate's answer and AI feedback.
         """
         if self.db is not None:
+            # Determine if this is the last question based on the current question index and total questions
+            session = await self.db.interview_sessions.find_one({'sessionId': session_id})
+            is_last_question = (session['currentQuestionIndex'] + 1) >= total_questions if session else False
             result = await self.db.interview_sessions.update_one(
                 {'sessionId': session_id},
                 {
-                    '$push': {'feedback': feedback},
-                    '$inc': {'currentQuestionIndex': 1},
-                    '$set': {'lastUpdatedAt': datetime.utcnow().isoformat()}
+                    '$push': {'feedback': feedback}, # Append feedback for the current question
+                    '$inc': {'currentQuestionIndex': 1}, # Move to the next question
+                    '$set': {
+                        'lastUpdatedAt': datetime.utcnow().isoformat(),
+                        'status': 'COMPLETED' if is_last_question else 'IN_PROGRESS' # Mark as completed if it's the last question
+                    }
                 }
             )
+            logger.info(f"Updated session {session_id}: modified={result.modified_count}")
             return result.modified_count > 0
         return False
