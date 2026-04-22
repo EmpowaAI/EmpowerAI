@@ -1,145 +1,114 @@
 /* ============================================
-   EMPOWERAI - DEFINITIVE COLOR SYSTEM
+   EMOWAI DESIGN SYSTEM SPECIFICATION
    ============================================
    Single Source of Truth for All Components
    ============================================ */
 
 :root {
   /* ============================================
-     BRAND COLORS - Professional & Clean
+     COLOR PALETTE (HSL Values for Opacity Support)
      ============================================ */
-  --primary: #2563eb;                    /* Professional Blue - Trust, Intelligence */
-  --primary-foreground: #ffffff;            /* White text on primary */
-  --primary-hover: #1d4ed8;                /* Darker blue for hover */
-  --primary-light: #dbeafe;                 /* Light blue for backgrounds */
-  
-  --secondary: #64748b;                  /* Professional Gray - Neutral, Sophisticated */
-  --secondary-foreground: #ffffff;          /* White text on secondary */
-  --secondary-hover: #475569;              /* Darker gray for hover */
-  
-  --accent: #059669;                     /* Success Green - Growth, Achievement */
-  --accent-foreground: #ffffff;              /* White text on accent */
-  --accent-hover: #047857;                /* Darker green for hover */
-  
-  /* ============================================
-     NEUTRAL COLORS - Clean Palette
-     ============================================ */
-  --background: #ffffff;                   /* Clean White - Professional */
-  --foreground: #1e293b;                 /* Dark Text - High Contrast */
-  --muted: #f8fafc;                       /* Light Background - Subtle */
-  --muted-foreground: #64748b;           /* Gray Text - Secondary */
-  --border: #e2e8f0;                     /* Light Border - Clean */
-  --border-hover: #cbd5e1;                 /* Medium Border - Interactive */
-  
-  /* ============================================
-     SEMANTIC COLORS - Clear Meaning
-     ============================================ */
-  --success: #10b981;                    /* Green - Success, Complete */
-  --success-foreground: #ffffff;
-  --warning: #f59e0b;                    /* Amber - Warning, Attention */
-  --warning-foreground: #ffffff;
-  --error: #ef4444;                      /* Red - Error, Critical */
-  --error-foreground: #ffffff;
-  --info: #3b82f6;                       /* Blue - Information, Help */
-  --info-foreground: #ffffff;
-  
-  /* ============================================
-     RADIUS & SPACING - Consistent Design
-     ============================================ */
-  --radius: 0.5rem;                      /* 8px - Professional */
-  --radius-sm: 0.375rem;                  /* 6px - Small elements */
-  --radius-lg: 0.75rem;                   /* 12px - Large elements */
-  
-  --spacing-xs: 0.25rem;                  /* 4px */
-  --spacing-sm: 0.5rem;                   /* 8px */
-  --spacing-md: 1rem;                     /* 16px */
-  --spacing-lg: 1.5rem;                    /* 24px */
-  --spacing-xl: 2rem;                     /* 32px */
-  
-  /* ============================================
-     TYPOGRAPHY - Professional & Readable
-     ============================================ */
+  --primary: 218 64% 28%;                /* Deep Ubuntu navy */
+  --secondary: 22 95% 55%;               /* Warm orange */
+  --background: 40 33% 98%;              /* Warm off-white */
+  --foreground: 220 55% 18%;             /* Body text */
+  --muted: 38 28% 94%;                   /* Cards / Subtle bg */
+  --card: 0 0% 100%;                     /* Pure white cards */
+  --border: 30 20% 88%;                  /* Subtle warm gray */
+
+  /* Gradients */
+  --gradient-hero: linear-gradient(110deg, hsl(218 64% 32%) 0%, hsl(218 60% 45%) 45%, hsl(22 88% 60%) 100%);
+  --gradient-cta: linear-gradient(180deg, hsl(22 95% 60%) 0%, hsl(18 92% 50%) 100%);
+  --gradient-ai: linear-gradient(135deg, hsl(218 64% 28%) 0%, hsl(22 95% 55%) 100%);
+
+  /* Shadows */
+  --shadow-card: 0 4px 20px -8px hsl(218 64% 28% / 0.15);
+  --shadow-cta: 0 8px 24px -8px hsl(22 95% 50% / 0.45);
+  --shadow-glow: 0 10px 30px -12px hsl(22 95% 50% / 0.35);
+
+  /* Typography Tokens */
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
-  --font-mono: "JetBrains Mono", "Fira Code", monospace;
-  --font-display: "Inter", system-ui, sans-serif;
-  
-  --text-xs: 0.75rem;                     /* 12px */
-  --text-sm: 0.875rem;                    /* 14px */
-  --text-base: 1rem;                      /* 16px */
-  --text-lg: 1.125rem;                    /* 18px */
-  --text-xl: 1.25rem;                     /* 20px */
-  --text-2xl: 1.5rem;                     /* 24px */
-  --text-3xl: 1.875rem;                    /* 30px */
-  --text-4xl: 2.25rem;                    /* 36px */
-  
-  /* ============================================
-     SHADOWS - Subtle & Professional
-     ============================================ */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --shadow-xl: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  
-  /* ============================================
-     ANIMATIONS - Subtle & Purposeful
-     ============================================ */
-  --duration-fast: 150ms;                 /* Quick interactions */
-  --duration-normal: 200ms;               /* Standard transitions */
-  --duration-slow: 300ms;                 /* Thoughtful animations */
-  
-  --ease-in: cubic-bezier(0.4, 0, 1, 1);
-  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --font-display: "Plus Jakarta Sans", system-ui, sans-serif;
+
+  --radius: 0.5rem;
+  --radius-sm: 0.375rem;
+  --radius-lg: 0.75rem;
+
+  /* Standard Timing */
+  --duration-normal: 250ms;
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ============================================
-   DARK MODE - Professional Dark Theme
+   ANIMATED UTILITY CLASSES
    ============================================ */
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* Dark Mode Colors */
-    --background: #0f172a;               /* Deep Space Black */
-    --foreground: #f8fafc;                 /* Clean White */
-    --muted: #1e293b;                     /* Dark Gray */
-    --muted-foreground: #94a3b8;           /* Light Gray */
-    --border: #334155;                     /* Medium Gray */
-    --border-hover: #475569;                 /* Light Gray */
-    
-    /* Adjust semantic colors for dark mode */
-    --success: #059669;                    /* Brighter Green */
-    --warning: #d97706;                    /* Brighter Amber */
-    --error: #dc2626;                      /* Brighter Red */
-    --info: #0ea5e9;                       /* Brighter Blue */
-  }
+
+/* AI mesh floating blobs */
+.ai-mesh { position: relative; overflow: hidden; }
+.ai-mesh::before, .ai-mesh::after {
+  content: ""; position: absolute; width: 540px; height: 540px;
+  border-radius: 9999px; filter: blur(90px); opacity: 0.55;
+  animation: floatBlob 14s ease-in-out infinite;
+  pointer-events: none; z-index: -1;
+}
+.ai-mesh::before { background: radial-gradient(circle, hsl(218 64% 32% / 0.45), transparent 65%); top: -120px; left: -120px; }
+.ai-mesh::after { background: radial-gradient(circle, hsl(22 95% 55% / 0.45), transparent 65%); bottom: -160px; right: -120px; animation-delay: -7s; }
+
+/* Shimmer sweep for CTAs */
+.shimmer { position: relative; overflow: hidden; }
+.shimmer::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(110deg, transparent 30%, hsl(0 0% 100% / 0.35) 50%, transparent 70%);
+  transform: translateX(-120%); animation: shimmerSweep 3.2s ease-in-out infinite;
+}
+
+/* Pulsing orange dot */
+.ai-dot {
+  width: 8px; height: 8px; border-radius: 9999px;
+  background: hsl(var(--secondary));
+  box-shadow: 0 0 0 0 hsl(var(--secondary) / 0.7);
+  animation: aiPulse 1.8s ease-out infinite;
+}
+
+/* Gradient text (white → soft orange) */
+.text-gradient-ai {
+  background: linear-gradient(90deg, #fff 0%, hsl(22 95% 78%) 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
+/* Grid backdrop with radial mask */
+.ai-grid {
+  background-image: linear-gradient(hsl(0 0% 100% / 0.08) 1px, transparent 1px), linear-gradient(90deg, hsl(0 0% 100% / 0.08) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse at center, black 40%, transparent 75%);
+}
+
+@keyframes floatBlob {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -50px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+}
+
+@keyframes shimmerSweep {
+  100% { transform: translateX(120%); }
+}
+
+@keyframes aiPulse {
+  0% { box-shadow: 0 0 0 0 hsl(var(--secondary) / 0.7); }
+  70% { box-shadow: 0 0 0 10px hsl(var(--secondary) / 0); }
+  100% { box-shadow: 0 0 0 0 hsl(var(--secondary) / 0); }
 }
 
 /* ============================================
    UTILITY CLASSES - Consistent Usage
    ============================================ */
 
+.transition-smooth {
+  transition: all var(--duration-normal) var(--ease-in-out);
+}
+
 /* Focus & Accessibility */
-.focus-ring {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-}
-
-.focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-}
-
-/* Screen Reader Only */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
-}
+.focus-ring { outline: 2px solid hsl(var(--primary)); outline-offset: 2px; }
 
 /* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
@@ -156,30 +125,27 @@
    COMPONENT OVERRIDES - Clean Implementation
    ============================================ */
 
-/* Remove all conflicting styles from other CSS files */
 .neural-button,
 .neural-card,
 .ai-avatar,
 .voice-visualizer,
 .neural-loading {
-  /* Use definitive color system */
-  background-color: var(--primary);
-  color: var(--primary-foreground);
-  border-color: var(--border);
+  background-color: hsl(var(--primary));
+  color: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-card);
   transition: all var(--duration-normal) var(--ease-in-out);
 }
 
 /* Professional hover states */
 .neural-button:hover {
-  background-color: var(--primary-hover);
-  border-color: var(--border-hover);
+  filter: brightness(1.1);
 }
 
 .neural-card:hover {
-  border-color: var(--border-hover);
-  box-shadow: var(--shadow-lg);
+  border-color: hsl(var(--secondary) / 0.3);
+  box-shadow: var(--shadow-glow);
 }
 
 /* Clean focus states */

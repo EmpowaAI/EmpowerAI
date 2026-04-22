@@ -1,57 +1,71 @@
-﻿@tailwind base;
+﻿@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=EMOWAI:wght@400;500;600;700&display=swap');
+
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  /* SA-inspired warm palette — gold, green, terracotta */
-  --background: oklch(0.965 0.007 80);
-  --foreground: oklch(0.22 0.02 50);
+  /* EMOWAI Design System - Ubuntu navy + warm orange */
+  --background: hsl(40 33% 98%);
+  --foreground: hsl(220 55% 18%);
 
-  --card: oklch(0.99 0.004 80);
-  --card-foreground: oklch(0.22 0.02 50);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(220 55% 18%);
 
-  --popover: oklch(0.99 0.004 80);
-  --popover-foreground: oklch(0.22 0.02 50);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(220 55% 18%);
 
-  --primary: oklch(0.72 0.17 70);
-  --primary-foreground: oklch(0.18 0.02 50);
+  --primary: hsl(218 64% 28%);
+  --primary-foreground: hsl(0 0% 100%);
 
-  --secondary: oklch(0.94 0.01 80);
-  --secondary-foreground: oklch(0.22 0.02 50);
+  --secondary: hsl(38 28% 94%);
+  --secondary-foreground: hsl(220 55% 18%);
 
-  --muted: oklch(0.94 0.008 80);
-  --muted-foreground: oklch(0.55 0.02 50);
+  --muted: hsl(38 28% 94%);
+  --muted-foreground: hsl(220 55% 18%);
 
-  --accent: oklch(0.93 0.04 160);
-  --accent-foreground: oklch(0.42 0.08 160);
+  --accent: hsl(38 28% 94%);
+  --accent-foreground: hsl(220 55% 18%);
 
-  --destructive: oklch(0.58 0.22 25);
-  --destructive-foreground: oklch(1 0 0);
+  --destructive: hsl(0 84% 60%);
+  --destructive-foreground: hsl(0 0% 100%);
 
-  --border: oklch(0.90 0.01 60);
-  --input: oklch(0.90 0.01 60);
-  --ring: oklch(0.72 0.17 70);
+  --border: hsl(30 20% 88%);
+  --input: hsl(30 20% 88%);
+  --ring: hsl(218 64% 28%);
 
   --radius: 0.75rem;
 
-  --sa-green: oklch(0.52 0.14 155);
-  --sa-gold: oklch(0.72 0.17 70);
-  --sa-red: oklch(0.55 0.2 25);
-  --sa-blue: oklch(0.52 0.15 250);
-  --sa-black: oklch(0.18 0.02 50);
-  --sa-terracotta: oklch(0.58 0.16 40);
+  /* EMOWAI Gradient System */
+  --gradient-hero: linear-gradient(110deg, hsl(218 64% 32%) 0%, hsl(218 60% 45%) 45%, hsl(22 88% 60%) 100%);
+  --gradient-cta: linear-gradient(180deg, hsl(22 95% 60%) 0%, hsl(18 92% 50%) 100%);
+  --gradient-ai: linear-gradient(135deg, hsl(218 64% 28%) 0%, hsl(22 95% 55%) 100%);
 
-  --sidebar-background: oklch(0.96 0.01 80);
-  --sidebar-foreground: oklch(0.35 0.02 50);
-  --sidebar-primary: oklch(0.22 0.02 50);
-  --sidebar-primary-foreground: oklch(0.965 0.007 80);
-  --sidebar-accent: oklch(0.95 0.008 80);
-  --sidebar-accent-foreground: oklch(0.22 0.02 50);
-  --sidebar-border: oklch(0.90 0.01 60);
-  --sidebar-ring: oklch(0.72 0.17 70);
+  /* EMOWAI Shadow System */
+  --shadow-card: 0 4px 20px -8px hsl(218 64% 28% / 0.15);
+  --shadow-cta: 0 8px 24px -8px hsl(22 95% 50% / 0.45);
+  --shadow-glow: 0 10px 30px -12px hsl(22 95% 50% / 0.35);
 
-  --success: oklch(0.52 0.14 155);
-  --success-foreground: oklch(1 0 0);
+  /* Legacy colors for compatibility */
+  --sa-green: hsl(155 63% 45%);
+  --sa-gold: hsl(45 90% 55%);
+  --sa-red: hsl(0 84% 60%);
+  --sa-blue: hsl(218 64% 28%);
+  --sa-black: hsl(220 55% 18%);
+  --sa-terracotta: hsl(15 70% 55%);
+
+  --sidebar-background: hsl(40 33% 98%);
+  --sidebar-foreground: hsl(220 55% 18%);
+  --sidebar-primary: hsl(218 64% 28%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(38 28% 94%);
+  --sidebar-accent-foreground: hsl(220 55% 18%);
+  --sidebar-border: hsl(30 20% 88%);
+  --sidebar-ring: hsl(218 64% 28%);
+
+  --success: hsl(155 63% 45%);
+  --success-foreground: hsl(0 0% 100%);
 }
 
 .dark {
@@ -109,8 +123,13 @@
   }
   
   body {
-    @apply bg-background text-foreground antialiased;
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    @apply bg-background text-foreground antialiased font-body;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+    font-family: 'Plus Jakarta Sans', sans-serif;
   }
 }
 
@@ -139,6 +158,80 @@
   .font-display {
     font-family: 'Plus Jakarta Sans', sans-serif;
     letter-spacing: -0.01em;
+  }
+
+  .font-body {
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* EMOWAI Animated Utilities */
+  
+  /* AI mesh floating blobs */
+  .ai-mesh::before, .ai-mesh::after {
+    content: ""; position: absolute; width: 540px; height: 540px;
+    border-radius: 9999px; filter: blur(90px); opacity: 0.55;
+    animation: floatBlob 14s ease-in-out infinite;
+  }
+  .ai-mesh::before { 
+    background: radial-gradient(circle, hsl(218 64% 32% / 0.45), transparent 65%); 
+    top: -120px; left: -120px; 
+  }
+  .ai-mesh::after { 
+    background: radial-gradient(circle, hsl(22 95% 55% / 0.45), transparent 65%); 
+    bottom: -160px; right: -120px; 
+    animation-delay: -7s; 
+  }
+
+  /* Shimmer sweep for CTAs */
+  .shimmer { position: relative; overflow: hidden; }
+  .shimmer::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(110deg, transparent 30%, hsl(0 0% 100% / 0.35) 50%, transparent 70%);
+    transform: translateX(-120%); animation: shimmerSweep 3.2s ease-in-out infinite;
+  }
+
+  /* Pulsing orange dot */
+  .ai-dot {
+    width: 8px; height: 8px; border-radius: 9999px;
+    background: hsl(22 95% 55%);
+    box-shadow: 0 0 0 0 hsl(22 95% 55% / 0.7);
+    animation: aiPulse 1.8s ease-out infinite;
+  }
+
+  /* Gradient text (white -> soft orange) */
+  .text-gradient-ai {
+    background: linear-gradient(90deg, #fff 0%, hsl(22 95% 78%) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+
+  /* Grid backdrop with radial mask */
+  .ai-grid {
+    background-image: linear-gradient(hsl(0 0% 100% / 0.08) 1px, transparent 1px), linear-gradient(90deg, hsl(0 0% 100% / 0.08) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(ellipse at center, black 40%, transparent 75%);
+  }
+
+  /* EMOWAI Animation Keyframes */
+  @keyframes floatBlob {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    33% { transform: translate(30px, -100px) rotate(120deg); }
+    66% { transform: translate(-20px, 100px) rotate(240deg); }
+  }
+
+  @keyframes shimmerSweep {
+    0% { transform: translateX(-120%); }
+    100% { transform: translateX(120%); }
+  }
+
+  @keyframes aiPulse {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 hsl(22 95% 55% / 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 10px hsl(22 95% 55% / 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 hsl(22 95% 55% / 0); }
+  }
+
+  /* Transition utilities */
+  .transition-smooth {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   /* Animation keyframes */
