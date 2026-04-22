@@ -545,7 +545,7 @@ export default function LandingPage() {
       <section id="ubuntu-stories" className="py-20 bg-secondary/30">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <span className="text-sa-terracotta text-sm font-semibold uppercase tracking-wider mb-2 inline-block">
+            <span className="text-secondary text-sm font-semibold uppercase tracking-wider mb-2 inline-block">
               <RotatingText
                 text={t("successStories")}
                 langKey={langIndex}
@@ -632,7 +632,7 @@ export default function LandingPage() {
       <section id="demo" className="py-20 bg-background">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <span className="text-sa-terracotta text-sm font-semibold uppercase tracking-wider mb-2 inline-block">
+            <span className="text-secondary text-sm font-semibold uppercase tracking-wider mb-2 inline-block">
               <RotatingText
                 text={t("watch")}
                 langKey={langIndex}
