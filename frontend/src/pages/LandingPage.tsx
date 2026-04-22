@@ -296,7 +296,7 @@ export default function LandingPage() {
             {/* Story Card Container - Added bottom padding for badge */}
             <div className="relative w-full max-w-md mx-auto lg:mx-0 pb-8">
               {/* Top Badge */}
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 sm:left-auto sm:right-4 sm:-translate-x-0 z-20 bg-gradient-to-r from-sa-green to-emerald-600 text-white text-xs sm:text-sm font-bold px-4 py-2 rounded-full shadow-lg flex items-center gap-2 whitespace-nowrap">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 sm:left-auto sm:right-4 sm:-translate-x-0 z-20 bg-gradient-to-r from-primary to-primary/80 text-white text-xs sm:text-sm font-bold px-4 py-2 rounded-full shadow-lg flex items-center gap-2 whitespace-nowrap">
                 <Zap className="w-3.5 h-3.5" />
                 CV Analyser · <RotatingText text={t("mahala")} langKey={langIndex} />
               </div>

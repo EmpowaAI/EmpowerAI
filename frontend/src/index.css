@@ -1,128 +1,149 @@
 ﻿@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=EMOWAI:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  /* Core Colors - EMOWAI Specification */
-  --background: hsl(40 33% 98%);
-  --foreground: hsl(220 55% 18%);
-  --primary: hsl(218 64% 28%);
-  --primary-foreground: hsl(40 33% 98%);
-  --secondary: hsl(22 95% 55%);
-  --secondary-foreground: hsl(0 0% 100%);
-  
-  /* Accents */
-  --accent: hsl(18 92% 58%);
-  --accent-foreground: hsl(220 55% 18%);
-  --accent-orange: hsl(18 92% 58%);
-  --muted: hsl(38 28% 94%);
-  --muted-foreground: hsl(220 20% 42%);
-  
-  /* Border & UI */
-  --border: hsl(30 20% 88%);
-  --input: hsl(30 20% 88%);
-  --ring: hsl(218 64% 28%);
-  --radius: 0.625rem;
-
-  /* Card & Popover */
-  --card: hsl(0 0% 100%);
-  --card-foreground: hsl(220 55% 18%);
-  --popover: hsl(0 0% 100%);
-  --popover-foreground: hsl(220 55% 18%);
-
-  /* Destructive */
-  --destructive: hsl(0 84% 60%);
-  --destructive-foreground: hsl(0 0% 100%);
-
-  /* Gradients (CRITICAL - Navy -> Orange ONLY) */
-  --gradient-ai: linear-gradient(135deg, hsl(218 64% 28%) 0%, hsl(22 95% 55%) 100%);
-  --gradient-hero: linear-gradient(110deg, hsl(218 64% 32%) 0%, hsl(218 60% 45%) 45%, hsl(22 88% 60%) 100%);
-  --gradient-cta: linear-gradient(180deg, hsl(22 95% 60%) 0%, hsl(18 92% 50%) 100%);
-  
-  /* Shadows */
-  --shadow-glow: 0 10px 30px -12px hsl(22 95% 50% / 0.35);
-  --shadow-card: 0 4px 20px -8px hsl(218 64% 28% / 0.15);
-  --shadow-cta: 0 8px 24px -8px hsl(22 95% 50% / 0.45);
-
-  /* Sidebar compatibility */
-  --sidebar-background: hsl(40 33% 98%);
-  --sidebar-foreground: hsl(220 55% 18%);
-  --sidebar-primary: hsl(218 64% 28%);
-  --sidebar-primary-foreground: hsl(0 0% 100%);
-  --sidebar-accent: hsl(38 28% 94%);
-  --sidebar-accent-foreground: hsl(220 55% 18%);
-  --sidebar-border: hsl(30 20% 88%);
-  --sidebar-ring: hsl(218 64% 28%);
-
-  --success: hsl(155 63% 45%);
-  --success-foreground: hsl(0 0% 100%);
-}
-
-.dark {
-  --background: oklch(0.18 0.015 50);
-  --foreground: oklch(0.92 0.01 80);
-
-  --card: oklch(0.22 0.015 50);
-  --card-foreground: oklch(0.92 0.01 80);
-
-  --popover: oklch(0.22 0.015 50);
-  --popover-foreground: oklch(0.92 0.01 80);
-
-  --primary: oklch(0.75 0.17 70);
-  --primary-foreground: oklch(0.15 0.015 50);
-
-  --secondary: oklch(0.26 0.012 50);
-  --secondary-foreground: oklch(0.90 0.01 80);
-
-  --muted: oklch(0.26 0.012 50);
-  --muted-foreground: oklch(0.60 0.02 60);
-
-  --accent: oklch(0.26 0.04 160);
-  --accent-foreground: oklch(0.72 0.1 160);
-
-  --destructive: oklch(0.42 0.16 25);
-  --destructive-foreground: oklch(0.92 0.01 80);
-
-  --border: oklch(0.30 0.012 50);
-  --input: oklch(0.30 0.012 50);
-  --ring: oklch(0.75 0.17 70);
-
-  --sa-green: oklch(0.60 0.14 155);
-  --sa-gold: oklch(0.75 0.17 70);
-  --sa-red: oklch(0.60 0.2 25);
-  --sa-blue: oklch(0.60 0.15 250);
-  --sa-black: oklch(0.92 0.01 80);
-  --sa-terracotta: oklch(0.64 0.16 40);
-
-  --sidebar-background: oklch(0.20 0.015 50);
-  --sidebar-foreground: oklch(0.90 0.008 80);
-  --sidebar-primary: oklch(0.70 0.16 70);
-  --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.26 0.01 50);
-  --sidebar-accent-foreground: oklch(0.90 0.008 80);
-  --sidebar-border: oklch(0.26 0.01 50);
-  --sidebar-ring: oklch(0.75 0.17 70);
-
-  --success: oklch(0.56 0.14 155);
-  --success-foreground: oklch(1 0 0);
-}
-
 @layer base {
+  :root {
+    /* =====================================================
+       EMOWAI DESIGN SYSTEM - COMPLETE TOKEN REFERENCE
+       Primary: Navy    hsl(218 64% 28%) #1a3a6b
+       Secondary: Orange hsl(22 95% 55%) #f97316
+       ===================================================== */
+
+    /* Background */
+    --background: 40 33% 98%;
+    --foreground: 220 55% 18%;
+
+    /* Card & Popover */
+    --card: 0 0% 100%;
+    --card-foreground: 220 55% 18%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 55% 18%;
+
+    /* Primary - Navy */
+    --primary: 218 64% 28%;
+    --primary-foreground: 40 33% 98%;
+
+    /* Secondary - Orange */
+    --secondary: 22 95% 55%;
+    --secondary-foreground: 0 0% 100%;
+
+    /* Muted */
+    --muted: 38 28% 94%;
+    --muted-foreground: 220 20% 42%;
+
+    /* Accent */
+    --accent: 18 92% 58%;
+    --accent-foreground: 220 55% 18%;
+    --accent-orange: 18 92% 58%;
+
+    /* Destructive */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Border & UI */
+    --border: 30 20% 88%;
+    --input: 30 20% 88%;
+    --ring: 218 64% 28%;
+    --radius: 0.625rem;
+
+    /* Gradients (CRITICAL: Navy -> Orange ONLY) */
+    --gradient-ai: linear-gradient(135deg, hsl(218 64% 28%) 0%, hsl(22 95% 55%) 100%);
+    --gradient-hero: linear-gradient(110deg, hsl(218 64% 32%) 0%, hsl(218 60% 45%) 45%, hsl(22 88% 60%) 100%);
+    --gradient-cta: linear-gradient(180deg, hsl(22 95% 60%) 0%, hsl(18 92% 50%) 100%);
+
+    /* Shadows */
+    --shadow-glow: 0 10px 30px -12px hsl(22 95% 50% / 0.35);
+    --shadow-card: 0 4px 20px -8px hsl(218 64% 28% / 0.15);
+    --shadow-cta: 0 8px 24px -8px hsl(22 95% 50% / 0.45);
+
+    /* Sidebar */
+    --sidebar-background: 40 33% 98%;
+    --sidebar-foreground: 220 55% 18%;
+    --sidebar-primary: 218 64% 28%;
+    --sidebar-primary-foreground: 40 33% 98%;
+    --sidebar-accent: 38 28% 94%;
+    --sidebar-accent-foreground: 220 55% 18%;
+    --sidebar-border: 30 20% 88%;
+    --sidebar-ring: 218 64% 28%;
+
+    /* Success */
+    --success: 155 63% 45%;
+    --success-foreground: 0 0% 100%;
+
+    /* Legacy compatibility (map to new system) */
+    --sa-green: 155 63% 45%;
+    --sa-gold: 22 95% 55%;
+    --sa-red: 0 84% 60%;
+    --sa-blue: 218 64% 28%;
+    --sa-black: 220 55% 18%;
+    --sa-terracotta: 18 92% 58%;
+  }
+
+  .dark {
+    /* Dark mode uses inverted navy with orange accents */
+    --background: 220 40% 8%;
+    --foreground: 40 33% 98%;
+
+    --card: 220 35% 12%;
+    --card-foreground: 40 33% 98%;
+    --popover: 220 35% 12%;
+    --popover-foreground: 40 33% 98%;
+
+    --primary: 218 64% 52%;
+    --primary-foreground: 220 40% 8%;
+
+    --secondary: 22 95% 55%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 220 30% 18%;
+    --muted-foreground: 220 20% 65%;
+
+    --accent: 18 92% 58%;
+    --accent-foreground: 220 40% 8%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 25% 20%;
+    --input: 220 25% 20%;
+    --ring: 218 64% 52%;
+
+    --sidebar-background: 220 40% 6%;
+    --sidebar-foreground: 40 33% 98%;
+    --sidebar-primary: 218 64% 52%;
+    --sidebar-primary-foreground: 220 40% 8%;
+    --sidebar-accent: 220 30% 18%;
+    --sidebar-accent-foreground: 40 33% 98%;
+    --sidebar-border: 220 25% 20%;
+    --sidebar-ring: 218 64% 52%;
+
+    --success: 155 63% 45%;
+    --success-foreground: 0 0% 100%;
+
+    /* Legacy dark mode compatibility */
+    --sa-green: 155 63% 45%;
+    --sa-gold: 22 95% 55%;
+    --sa-red: 0 84% 60%;
+    --sa-blue: 218 64% 52%;
+    --sa-black: 40 33% 98%;
+    --sa-terracotta: 18 92% 58%;
+  }
+
   * {
     @apply border-border;
   }
-  
+
   body {
-    @apply bg-background text-foreground antialiased font-body;
+    @apply bg-background text-foreground antialiased;
     font-family: 'Inter', system-ui, sans-serif;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-display;
     font-family: 'Plus Jakarta Sans', sans-serif;
+    letter-spacing: -0.01em;
   }
 }
 
