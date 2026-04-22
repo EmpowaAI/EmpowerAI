@@ -239,7 +239,7 @@ async def analyze_cv_file(
                 logger.info(f"[{request_id}] Parsed {len(job_requirements_list)} job requirements from CSV")
         
         # CREATE FRESH ANALYZER INSTANCE FOR THIS REQUEST
-        cv_analyzer = CVAnalyzer(db_client=getattr(req.app.state, 'db', None))
+        cv_analyzer = CVAnalyzer()
         
         result = await cv_analyzer.analyze_cv(
             cv_text=cv_text,
