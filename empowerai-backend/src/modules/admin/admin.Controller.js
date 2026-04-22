@@ -1,9 +1,3 @@
-/**
- * Admin Controller
- * 
- * Administrative endpoints for database seeding and maintenance
- * NOTE: In production, these should be protected with admin authentication
- */
 
 const mongoose = require('mongoose');
 const Opportunity = require('../opportunities/Opportunity.Model');
@@ -16,18 +10,13 @@ const { fetchAndSaveJobs } = require('../../services/jobAPIService');
 const { fetchAllFeeds } = require('../../services/rssFeedService');
 const { getCareerTaxonomy, setCareerTaxonomy } = require('../../services/taxonomyService');
 
-/**
- * Seed opportunities database
- * POST /api/admin/seed-opportunities
- */
+
 exports.seedOpportunities = async (req, res, next) => {
   try {
     logger.info('Admin: Seeding opportunities database');
     
-    // Import the seed script
     const { opportunities, seedOpportunities } = require('../../../scripts/seedOpportunities');
     
-    // Run the seeding function
     const result = await seedOpportunities();
     
     sendSuccess(res, {
@@ -42,10 +31,6 @@ exports.seedOpportunities = async (req, res, next) => {
   }
 };
 
-/**
- * Get database statistics
- * GET /api/admin/stats
- */
 exports.getStats = async (req, res, next) => {
   try {
     const opportunityCount = await Opportunity.countDocuments({ isActive: true });
@@ -67,10 +52,6 @@ exports.getStats = async (req, res, next) => {
   }
 };
 
-/**
- * Get career taxonomy
- * GET /api/admin/career-taxonomy
- */
 exports.getCareerTaxonomy = async (req, res, next) => {
   try {
     const taxonomy = await getCareerTaxonomy();
@@ -81,10 +62,6 @@ exports.getCareerTaxonomy = async (req, res, next) => {
   }
 };
 
-/**
- * Update career taxonomy
- * PUT /api/admin/career-taxonomy
- */
 exports.updateCareerTaxonomy = async (req, res, next) => {
   try {
     const incoming = req.body?.taxonomy;
@@ -100,10 +77,6 @@ exports.updateCareerTaxonomy = async (req, res, next) => {
   }
 };
 
-/**
- * Refresh opportunities and backfill skills
- * POST /api/admin/refresh-opportunities
- */
 async function performRefresh({ runBackfill, runFetch, triggeredBy }) {
   const startedAt = new Date();
   let refreshRecord;

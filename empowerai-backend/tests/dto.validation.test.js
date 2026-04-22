@@ -1,12 +1,12 @@
 const { validationResult } = require('express-validator');
 
-const { registerRules, validateRegister, toRegisterDTO } = require('../src/dtos/Authentication/RegisterDto');
-const { loginRules, validateLogin, toLoginDTO } = require('../src/dtos/Authentication/LoginDto');
-const { forgotPasswordRules, validateForgotPassword, toForgotPasswordDTO } = require('../src/dtos/Authentication/ForgotPasswordDto');
-const { resetPasswordRules, validateResetPassword, toResetPasswordDTO } = require('../src/dtos/Authentication/ResetPasswordDto');
-const { updateEmailRules, validateUpdateEmail, toUpdateEmailDTO } = require('../src/dtos/User/UpdateEmailDto');
-const { changePasswordRules, validateChangePassword, toChangePasswordDTO } = require('../src/dtos/User/ChangePasswordDto');
-const { updateUserRules, validateUpdateUser, toUpdateUserDTO } = require('../src/dtos/User/UpdateUserDto');
+const { registerRules, validateRegister, toRegisterDTO } = require('../src/modules/authentication/authentication.Dto/RegisterDto');
+const { loginRules, validateLogin, toLoginDTO } = require('../src//modules/authentication/authentication.Dto/LoginDto');
+const { forgotPasswordRules, validateForgotPassword, toForgotPasswordDTO } = require('../src/modules/userAccount/userAccount.Dto/ForgotPasswordDto');
+const { resetPasswordRules, validateResetPassword, toResetPasswordDTO } = require('../src/modules/userAccount/userAccount.Dto/ResetPasswordDto');
+const { updateEmailRules, validateUpdateEmail, toUpdateEmailDTO } = require('../src/modules/userAccount/userAccount.Dto/UpdateEmailDto');
+const { changePasswordRules, validateChangePassword, toChangePasswordDTO } = require('../src/modules/userAccount/userAccount.Dto/ChangePasswordDto');
+const { updateUserRules, validateUpdateUser, toUpdateUserDTO } = require('../src/modules/user/use.Dtos/UpdateUserDto');
 
 const runRules = async (rules, body) => {
   const req = { body };

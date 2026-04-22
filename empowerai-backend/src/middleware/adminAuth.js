@@ -1,20 +1,24 @@
-module.exports = (req, res, next) => {
-  const adminKey = process.env.ADMIN_API_KEY;
-  if (!adminKey) {
-    return res.status(500).json({
-      status: 'error',
-      message: 'Admin access is not configured'
-    });
-  }
+const logger = require('../utils/logger');
 
-  const provided = req.headers['x-admin-key'];
-  if (!provided || provided !== adminKey) {
+module.exports = (req, res, next) => {
+  
+  if (!req.user) {
     return res.status(401).json({
       status: 'error',
-      message: 'Unauthorized'
+      message: 'Authentication required',
     });
   }
 
-  req.refreshTriggeredBy = 'admin';
+  if (req.user.role !== 'admin') {
+    logger.warn('Admin access denied', {
+      userId: req.user._id,
+      email: req.user.email,
+    });
+    return res.status(403).json({
+      status: 'error',
+      message: 'Admin access required',
+    });
+  }
+
   return next();
 };
