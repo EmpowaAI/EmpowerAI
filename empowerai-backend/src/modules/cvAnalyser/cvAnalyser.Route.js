@@ -2,19 +2,17 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const { analyzeCV, analyzeCVFile, revampCV, getCvProfile, deleteCvProfile } = require('./cvAnalyser.Controller');
-const auth = require('../../middleware/auth');
+const { protect, restrictTo } = require('../../middleware/auth');
 const validateRequest = require('../../middleware/validate');
 const { cvAnalysisSchema, cvRevampSchema } = require('../../utils/validators');
 const router = express.Router();
 
-// All routes protected by authentication
-router.use(auth);
+router.use(protect);
 
-// Configure multer for file uploads
 const upload = multer({
-  storage: multer.memoryStorage(), // Store in memory
+  storage: multer.memoryStorage(),
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
+    fileSize: 5 * 1024 * 1024, 
   },
   fileFilter: (req, file, cb) => {
     const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
@@ -29,17 +27,12 @@ const upload = multer({
   }
 });
 
-// Text-based CV analysis
 router.post('/analyze', validateRequest(cvAnalysisSchema), analyzeCV);
-
-// File upload CV analysis
 router.post('/analyze-file', upload.single('cvFile'), analyzeCVFile);
 
-// Read/delete a user's stored CV profile (analysis summary + metadata)
-router.get('/profile', getCvProfile);
-router.delete('/profile', deleteCvProfile);
+router.get('/profile',protect, getCvProfile);
+router.delete('/profile',protect, deleteCvProfile);
 
-// CV revamp (structured rewrite)
 router.post('/revamp', validateRequest(cvRevampSchema), revampCV);
 
 module.exports = router;

@@ -1,25 +1,8 @@
-/**
- * Account Controller
- * Responsibility: all flows that send an email to the user for verification or confirmation.
- *   - Verify email (post-registration)
- *   - Forgot password
- *   - Reset password
- *   - Request email change + confirm email change
- *   - Request account deletion + confirm account deletion
- *
- * No business logic, no DTOs — fully delegates to userService.
- */
 
 const logger = require('../../utils/logger');
 const { sendSuccess } = require('../../utils/response');
 const userService = require('./account.Service');
 
-
-// ─────────────────────────────────────────────
-// Verify email
-// @route  GET /api/account/verify?token=abc
-// @access Public
-// ─────────────────────────────────────────────
 exports.verifyEmail = async (req, res, next) => {
   const correlationId = req.correlationId;
   const { token } = req.query;
@@ -40,11 +23,6 @@ exports.verifyEmail = async (req, res, next) => {
   }
 };
 
-// ─────────────────────────────────────────────
-// Forgot password
-// @route  POST /api/account/forgot-password
-// @access Public
-// ─────────────────────────────────────────────
 exports.forgotPassword = async (req, res, next) => {
   const correlationId = req.correlationId;
   try {
@@ -63,11 +41,6 @@ exports.forgotPassword = async (req, res, next) => {
   }
 };
 
-// ─────────────────────────────────────────────
-// Reset password
-// @route  POST /api/account/reset-password
-// @access Public
-// ─────────────────────────────────────────────
 exports.resetPassword = async (req, res, next) => {
   const correlationId = req.correlationId;
   try {
@@ -86,11 +59,6 @@ exports.resetPassword = async (req, res, next) => {
   }
 };
 
-// ─────────────────────────────────────────────
-// Request email change
-// @route  POST /api/account/change-email
-// @access Private
-// ─────────────────────────────────────────────
 exports.requestEmailChange = async (req, res, next) => {
   const correlationId = req.correlationId;
   try {
@@ -107,11 +75,6 @@ exports.requestEmailChange = async (req, res, next) => {
   }
 };
 
-// ─────────────────────────────────────────────
-// Confirm email change
-// @route  GET /api/account/confirm-email?token=abc
-// @access Public
-// ─────────────────────────────────────────────
 exports.confirmEmailChange = async (req, res, next) => {
   const correlationId = req.correlationId;
   const { token } = req.query;
@@ -132,11 +95,6 @@ exports.confirmEmailChange = async (req, res, next) => {
   }
 };
 
-// ─────────────────────────────────────────────
-// Request account deletion
-// @route  POST /api/account/delete-request
-// @access Private
-// ─────────────────────────────────────────────
 exports.requestAccountDeletion = async (req, res, next) => {
   const correlationId = req.correlationId;
   try {
@@ -153,11 +111,6 @@ exports.requestAccountDeletion = async (req, res, next) => {
   }
 };
 
-// ─────────────────────────────────────────────
-// Confirm account deletion
-// @route  GET /api/account/confirm-delete?token=abc
-// @access Public
-// ─────────────────────────────────────────────
 exports.confirmAccountDeletion = async (req, res, next) => {
   const correlationId = req.correlationId;
   const { token } = req.query;

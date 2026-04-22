@@ -36,6 +36,7 @@ class CVAnalyzer:
     def __init__(self, ai_client: Optional[AIClient] = None):
         self.ai_client = ai_client or AIClient()
         self.logger = get_logger()
+        self.db = None
         
         # Industry detection keywords
         self.industry_keywords = {
