@@ -47,12 +47,14 @@
     /* Gradients (Navy -> Orange ONLY) */
     --gradient-hero: linear-gradient(110deg, hsl(218 64% 32%) 0%, hsl(218 60% 45%) 45%, hsl(22 88% 60%) 100%);
     --gradient-cta: linear-gradient(180deg, hsl(22 95% 60%) 0%, hsl(18 92% 50%) 100%);
+    --gradient-cta-dark: linear-gradient(180deg, hsl(22 95% 60%) 0%, hsl(218 64% 28%) 130%);
     --gradient-ai: linear-gradient(135deg, hsl(218 64% 28%) 0%, hsl(22 95% 55%) 100%);
 
     /* Shadows */
     --shadow-cta: 0 8px 24px -8px hsl(22 95% 50% / 0.45);
     --shadow-glow: 0 10px 30px -12px hsl(22 95% 50% / 0.35);
     --shadow-card: 0 4px 20px -8px hsl(218 64% 28% / 0.15);
+    --shadow-soft: 0 2px 12px -4px hsl(220 30% 30% / 0.08);
     --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
     /* Sidebar */
@@ -79,52 +81,52 @@
   }
 
   .dark {
-    /* Dark mode uses inverted navy with orange accents */
-    --background: 220 40% 8%;
-    --foreground: 40 33% 98%;
+    /* Dark mode uses warm cream + orange on midnight navy */
+    --background: 222 47% 7%;
+    --foreground: 40 33% 96%;
 
-    --card: 220 35% 12%;
-    --card-foreground: 40 33% 98%;
-    --popover: 220 35% 12%;
-    --popover-foreground: 40 33% 98%;
+    --card: 222 42% 11%;
+    --card-foreground: 40 33% 96%;
+    --popover: 222 42% 11%;
+    --popover-foreground: 40 33% 96%;
 
-    --primary: 218 64% 52%;
-    --primary-foreground: 220 40% 8%;
+    --primary: 38 60% 92%;
+    --primary-foreground: 222 47% 10%;
 
-    --secondary: 22 95% 55%;
+    --secondary: 22 95% 60%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 220 30% 18%;
-    --muted-foreground: 220 20% 65%;
+    --muted: 222 35% 15%;
+    --muted-foreground: 40 20% 75%;
 
-    --accent: 18 92% 58%;
-    --accent-foreground: 220 40% 8%;
+    --accent: 222 35% 16%;
+    --accent-foreground: 40 33% 96%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 25% 20%;
-    --input: 220 25% 20%;
-    --ring: 218 64% 52%;
+    --border: 222 30% 20%;
+    --input: 222 30% 20%;
+    --ring: 22 95% 60%;
 
-    --sidebar-background: 220 40% 6%;
-    --sidebar-foreground: 40 33% 98%;
-    --sidebar-primary: 218 64% 52%;
-    --sidebar-primary-foreground: 220 40% 8%;
-    --sidebar-accent: 220 30% 18%;
-    --sidebar-accent-foreground: 40 33% 98%;
-    --sidebar-border: 220 25% 20%;
-    --sidebar-ring: 218 64% 52%;
+    --sidebar-background: 222 47% 7%;
+    --sidebar-foreground: 40 33% 96%;
+    --sidebar-primary: 38 60% 92%;
+    --sidebar-primary-foreground: 222 47% 10%;
+    --sidebar-accent: 222 35% 15%;
+    --sidebar-accent-foreground: 40 33% 96%;
+    --sidebar-border: 222 30% 20%;
+    --sidebar-ring: 22 95% 60%;
 
     --success: 155 63% 45%;
     --success-foreground: 0 0% 100%;
 
     /* Legacy dark mode compatibility */
     --sa-green: 155 63% 45%;
-    --sa-gold: 22 95% 55%;
+    --sa-gold: 22 95% 60%;
     --sa-red: 0 84% 60%;
-    --sa-blue: 218 64% 52%;
-    --sa-black: 40 33% 98%;
+    --sa-blue: 38 60% 92%;
+    --sa-black: 40 33% 96%;
     --sa-terracotta: 18 92% 58%;
   }
 
@@ -148,9 +150,11 @@
   
   /* Animated mesh blobs - gives hero a "living AI" feel */
   .ai-mesh::before, .ai-mesh::after {
-    content: ""; position: absolute; width: 540px; height: 540px;
-    border-radius: 9999px; filter: blur(90px); opacity: 0.55;
-    pointer-events: none; animation: floatBlob 14s ease-in-out infinite;
+    content: ""; position: absolute; width: 620px; height: 620px;
+    border-radius: 9999px; filter: blur(110px); opacity: 0.55;
+    pointer-events: none; z-index: 6;
+    animation: floatBlob 18s ease-in-out infinite;
+    will-change: transform;
   }
   .ai-mesh::before { 
     background: radial-gradient(circle, hsl(218 64% 32% / 0.45), transparent 65%); 
@@ -163,7 +167,8 @@
   }
   @keyframes floatBlob { 
     0%,100%{transform:translate(0,0) scale(1);} 
-    50%{transform:translate(40px,-30px) scale(1.08);} 
+    33%{transform:translate(54px,-42px) scale(1.10);} 
+    66%{transform:translate(-34px,28px) scale(0.98);} 
   }
 
   /* Tech grid backdrop */
@@ -173,6 +178,50 @@
       linear-gradient(90deg, hsl(0 0% 100% / 0.08) 1px, transparent 1px);
     background-size: 44px 44px;
     mask-image: radial-gradient(ellipse at center, black 40%, transparent 75%);
+  }
+
+  .dark .ai-grid {
+    background-image:
+      linear-gradient(hsl(22 95% 60% / 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(22 95% 60% / 0.06) 1px, transparent 1px);
+  }
+
+  /* Hero polish: spotlight + film grain + vignette */
+  .hero-spotlight {
+    pointer-events: none;
+    background: conic-gradient(
+      from 210deg at 50% 35%,
+      hsl(218 70% 45% / 0.22),
+      transparent 35%,
+      hsl(22 95% 55% / 0.18),
+      transparent 70%,
+      hsl(218 70% 45% / 0.22)
+    );
+    filter: blur(18px);
+    opacity: 0.9;
+    animation: spotlightSweep 22s linear infinite;
+    transform-origin: 50% 35%;
+  }
+
+  @keyframes spotlightSweep {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .hero-vignette {
+    pointer-events: none;
+    background:
+      linear-gradient(180deg, hsl(220 60% 6% / 0.70) 0%, hsl(220 60% 8% / 0.35) 30%, transparent 60%),
+      linear-gradient(0deg, hsl(220 60% 5% / 0.75) 0%, hsl(220 60% 8% / 0.40) 35%, transparent 70%);
+  }
+
+  .grain {
+    pointer-events: none;
+    opacity: 0.06;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.85'/%3E%3C/svg%3E");
+    background-size: 160px 160px;
+    mix-blend-mode: overlay;
   }
 
   /* Shimmer sweep across CTAs */
@@ -248,9 +297,11 @@
   
   /* AI mesh floating blobs */
   .ai-mesh::before, .ai-mesh::after {
-    content: ""; position: absolute; width: 540px; height: 540px;
-    border-radius: 9999px; filter: blur(90px); opacity: 0.55;
-    animation: floatBlob 14s ease-in-out infinite;
+    content: ""; position: absolute; width: 620px; height: 620px;
+    border-radius: 9999px; filter: blur(110px); opacity: 0.55;
+    pointer-events: none; z-index: 6;
+    animation: floatBlob 18s ease-in-out infinite;
+    will-change: transform;
   }
   .ai-mesh::before { 
     background: radial-gradient(circle, hsl(218 64% 32% / 0.45), transparent 65%); 
@@ -291,10 +342,41 @@
     mask-image: radial-gradient(ellipse at center, black 40%, transparent 75%);
   }
 
+  .dark .ai-grid {
+    background-image: linear-gradient(hsl(22 95% 60% / 0.06) 1px, transparent 1px), linear-gradient(90deg, hsl(22 95% 60% / 0.06) 1px, transparent 1px);
+  }
+
   /* EMOWAI Animation Keyframes */
   @keyframes floatBlob {
     0%, 100% { transform: translate(0, 0) scale(1); }
-    50% { transform: translate(40px, -30px) scale(1.08); }
+    33% { transform: translate(54px, -42px) scale(1.10); }
+    66% { transform: translate(-34px, 28px) scale(0.98); }
+  }
+
+  @keyframes spotlightSweep {
+    to { transform: rotate(360deg); }
+  }
+
+  .hero-spotlight {
+    pointer-events: none;
+    background: conic-gradient(from 210deg at 50% 35%, hsl(218 70% 45% / 0.22), transparent 35%, hsl(22 95% 55% / 0.18), transparent 70%, hsl(218 70% 45% / 0.22));
+    filter: blur(18px);
+    opacity: 0.9;
+    animation: spotlightSweep 22s linear infinite;
+    transform-origin: 50% 35%;
+  }
+
+  .hero-vignette {
+    pointer-events: none;
+    background: linear-gradient(180deg, hsl(220 60% 6% / 0.70) 0%, hsl(220 60% 8% / 0.35) 30%, transparent 60%), linear-gradient(0deg, hsl(220 60% 5% / 0.75) 0%, hsl(220 60% 8% / 0.40) 35%, transparent 70%);
+  }
+
+  .grain {
+    pointer-events: none;
+    opacity: 0.06;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.85'/%3E%3C/svg%3E");
+    background-size: 160px 160px;
+    mix-blend-mode: overlay;
   }
 
   @keyframes shimmerSweep {
