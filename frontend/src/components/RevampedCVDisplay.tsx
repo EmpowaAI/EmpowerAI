@@ -538,8 +538,8 @@ export default function RevampedCVDisplay({ cvData }: RevampedCVDisplayProps) {
       {/* Toolbar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4 p-4 rounded-xl bg-card border border-border">
         <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-full bg-neon-green/20 flex items-center justify-center">
-            <Award className="h-4 w-4 text-neon-green" />
+          <div className="h-8 w-8 rounded-full bg-success/20 flex items-center justify-center">
+            <Award className="h-4 w-4 text-success" />
           </div>
           <div>
             <h3 className="text-sm font-display font-bold">ATS-Optimized CV</h3>
@@ -558,7 +558,7 @@ export default function RevampedCVDisplay({ cvData }: RevampedCVDisplayProps) {
             onClick={() => { setIsEditing(!isEditing); }}
             className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all ${
               isEditing
-                ? "bg-neon-green/10 text-neon-green border border-neon-green/30"
+                ? "bg-success/10 text-success border border-success/30"
                 : "bg-secondary text-secondary-foreground border border-border hover:bg-muted"
             }`}
           >
@@ -580,7 +580,7 @@ export default function RevampedCVDisplay({ cvData }: RevampedCVDisplayProps) {
       </div>
 
       {isEditing && (
-        <div className="mb-3 px-4 py-2 rounded-lg bg-neon-orange/10 border border-neon-orange/20 text-xs text-neon-orange flex items-center gap-2">
+        <div className="mb-3 px-4 py-2 rounded-lg bg-muted border border-border text-primary flex items-center gap-2">
           <Edit3 className="h-3 w-3" />
           Click any text to edit. Education and language entries can be edited individually below.
         </div>

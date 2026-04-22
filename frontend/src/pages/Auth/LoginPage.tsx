@@ -156,7 +156,7 @@ export default function LoginPage() {
 
             <form onSubmit={handleSubmit} className="space-y-5">
               {warmupHint && (
-                <div className="p-4 bg-sky-500/10 border-2 border-sky-500/30 rounded-xl text-sm text-sky-700 animate-slide-up">
+                <div className="p-4 bg-primary/10 border-2 border-primary/30 rounded-xl text-sm text-primary animate-slide-up">
                   {warmupHint}
                 </div>
               )}

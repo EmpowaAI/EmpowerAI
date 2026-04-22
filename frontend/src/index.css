@@ -13,10 +13,10 @@
        ============================================= */
 
     /* Core Colors */
-    --background: 40 33% 98%;        /* warm off-white */
-    --foreground: 220 55% 18%;       /* deep navy text */
-    --primary: 218 64% 28%;          /* Ubuntu navy */
-    --primary-foreground: 40 33% 98%;
+    --background: 40 33% 98%; /* #FBF9F4: warm off-white */
+    --foreground: 218 46% 19%; /* #1A2B47: charcoal navy */
+    --primary: 218 64% 28%; /* #1A3A7A: Ubuntu navy */
+    --primary-foreground: 40 33% 98%; /* #FBF9F4 */
     --primary-glow: 218 70% 42%;
     --secondary: 22 95% 55%;         /* warm orange */
     --secondary-foreground: 0 0% 100%;
@@ -28,31 +28,30 @@
     --popover-foreground: 220 55% 18%;
 
     /* Accents */
-    --accent-orange: 18 92% 58%;
-    --muted: 38 28% 94%;
-    --muted-foreground: 220 20% 42%;
-    --accent: 38 50% 92%;
-    --accent-foreground: 220 55% 18%;
+    --accent-orange: 22 95% 55%;     /* Unified with secondary */
+    --muted: 42 33% 91%;             /* #F1EBE0 */
+    --muted-foreground: 220 20% 42%; /* #586580 */
+    --accent: 37 26% 85%;            /* #F1E8D6 */
+    --accent-foreground: 218 46% 19%;
 
     /* Border & UI */
-    --border: 30 20% 88%;
-    --input: 30 20% 88%;
+    --border: 37 26% 85%;            /* #E5DDD0 */
+    --input: 37 26% 85%;
     --ring: 218 64% 28%;
     --radius: 0.625rem;
 
     /* Destructive */
-    --destructive: 0 84% 60%;
+    --destructive: 0 84% 44%;        /* #EF4444 adjusted for contrast */
     --destructive-foreground: 0 0% 100%;
 
     /* Gradients (Navy -> Orange ONLY) */
-    --gradient-hero: linear-gradient(110deg, #1A3F8A 0%, #3066B5 45%, #F47A2E 100%);
-    --gradient-cta: linear-gradient(180deg, #F4783A 0%, #E85A1A 100%);
-    --gradient-cta-dark: linear-gradient(180deg, #F47033 0%, #1A3A75 130%);
-    --gradient-ai: linear-gradient(135deg, #1A3A75 0%, #F26A1F 100%);
+    --gradient-hero: linear-gradient(110deg, #1F4D8F 0%, #2C6FB8 45%, #F58234 100%);
+    --gradient-cta: linear-gradient(180deg, #F58234 0%, #E85D0F 100%);
+    --gradient-ai: linear-gradient(135deg, #1A3A7A 0%, #F26B1F 100%);
 
     /* Shadows */
-    --shadow-cta: 0 8px 24px -8px hsl(22 95% 50% / 0.45);
-    --shadow-glow: 0 10px 30px -12px hsl(22 95% 50% / 0.35);
+    --shadow-cta: 0 8px 24px -8px #E85D0F8C;
+    --shadow-glow: 0 10px 30px -12px #E85D0F59;
     --shadow-card: 0 4px 20px -8px hsl(218 64% 28% / 0.15);
     --shadow-soft: 0 2px 12px -4px hsl(220 30% 30% / 0.08);
     --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -72,10 +71,10 @@
     --success-foreground: 0 0% 100%;
 
     /* Legacy compatibility (map to new system) */
-    --sa-green: 155 63% 45%;
-    --sa-gold: 22 95% 55%;
-    --sa-red: 0 84% 60%;
-    --sa-blue: 218 64% 28%;
+    --sa-green: var(--success);
+    --sa-gold: var(--secondary);
+    --sa-red: var(--destructive);
+    --sa-blue: var(--primary);
     --sa-black: 220 55% 18%;
     --sa-terracotta: 18 92% 58%;
   }
@@ -90,7 +89,7 @@
     --popover: 222 42% 11%;
     --popover-foreground: 40 33% 96%;
 
-    --primary: 38 60% 92%;
+    --primary: 38 60% 92%; /* F5EAD6 */
     --primary-foreground: 222 47% 10%;
 
     --secondary: 22 95% 60%;
@@ -122,10 +121,10 @@
     --success-foreground: 0 0% 100%;
 
     /* Legacy dark mode compatibility */
-    --sa-green: 155 63% 45%;
-    --sa-gold: 22 95% 60%;
-    --sa-red: 0 84% 60%;
-    --sa-blue: 38 60% 92%;
+    --sa-green: var(--success);
+    --sa-gold: var(--secondary);
+    --sa-red: var(--destructive);
+    --sa-blue: var(--primary);
     --sa-black: 40 33% 96%;
     --sa-terracotta: 18 92% 58%;
   }
@@ -145,6 +144,13 @@
   }
 }
 
+@layer components {
+  .bg-ai-gradient { background: var(--gradient-ai); }
+  .bg-cta-gradient { background: var(--gradient-cta); }
+  .bg-hero-gradient { background: var(--gradient-hero); }
+  .shadow-glow { box-shadow: var(--shadow-glow); }
+}
+
 @layer utilities {
   /* AI-Feel Utility Classes - Premium AI Tech Experience */
   
@@ -157,11 +163,11 @@
     will-change: transform;
   }
   .ai-mesh::before { 
-    background: radial-gradient(circle, hsl(218 64% 32% / 0.45), transparent 65%); 
+    background: radial-gradient(circle, hsl(var(--primary) / 0.45), transparent 65%); 
     top: -120px; left: -120px; 
   }
   .ai-mesh::after { 
-    background: radial-gradient(circle, hsl(22 95% 55% / 0.45), transparent 65%); 
+    background: radial-gradient(circle, hsl(var(--secondary) / 0.45), transparent 65%); 
     bottom: -160px; right: -120px; 
     animation-delay: -7s; 
   }
@@ -191,11 +197,11 @@
     pointer-events: none;
     background: conic-gradient(
       from 210deg at 50% 35%,
-      hsl(218 70% 45% / 0.22),
+      hsl(var(--primary) / 0.22),
       transparent 35%,
-      hsl(22 95% 55% / 0.18),
+      hsl(var(--secondary) / 0.18),
       transparent 70%,
-      hsl(218 70% 45% / 0.22)
+      hsl(var(--primary) / 0.22)
     );
     filter: blur(18px);
     opacity: 0.9;
@@ -212,8 +218,8 @@
   .hero-vignette {
     pointer-events: none;
     background:
-      linear-gradient(180deg, hsl(220 60% 6% / 0.70) 0%, hsl(220 60% 8% / 0.35) 30%, transparent 60%),
-      linear-gradient(0deg, hsl(220 60% 5% / 0.75) 0%, hsl(220 60% 8% / 0.40) 35%, transparent 70%);
+      linear-gradient(180deg, hsl(var(--foreground) / 0.70) 0%, hsl(var(--foreground) / 0.35) 30%, transparent 60%),
+      linear-gradient(0deg, hsl(var(--foreground) / 0.75) 0%, hsl(var(--foreground) / 0.40) 35%, transparent 70%);
   }
 
   .grain {
@@ -228,7 +234,7 @@
   .shimmer { position: relative; overflow: hidden; }
   .shimmer::after {
     content: ""; position: absolute; inset: 0;
-    background: linear-gradient(110deg, transparent 30%, hsl(0 0% 100% / 0.35) 50%, transparent 70%);
+    background: linear-gradient(110deg, transparent 30%, hsl(var(--primary-foreground) / 0.35) 50%, transparent 70%);
     transform: translateX(-120%); animation: shimmerSweep 3.2s ease-in-out infinite;
   }
   @keyframes shimmerSweep { to { transform: translateX(120%); } }
@@ -248,7 +254,7 @@
 
   /* Gradient AI text - white -> soft orange */
   .text-gradient-ai {
-    background: linear-gradient(90deg, #fff 0%, hsl(22 95% 78%) 100%);
+    background: linear-gradient(90deg, hsl(var(--primary-foreground)) 0%, hsl(22 95% 78%) 100%);
     -webkit-background-clip: text; background-clip: text; color: transparent;
   }
 
@@ -458,7 +464,7 @@
   .auth-input:focus {
     outline: none;
     box-shadow:
-      0 0 0 4px hsl(var(--primary) / 0.12),
+      0 0 0 4px hsl(var(--ring) / 0.12),
       0 1px 0 hsl(var(--foreground) / 0.06) inset;
   }
 
@@ -477,8 +483,8 @@
   .auth-input-enhanced:focus {
     outline: none;
     box-shadow: 
-      0 0 0 4px hsl(var(--primary) / 0.15),
-      0 0 12px hsl(var(--primary) / 0.2),
+      0 0 0 4px hsl(var(--ring) / 0.15),
+      0 0 12px hsl(var(--ring) / 0.2),
       0 2px 8px hsl(var(--foreground) / 0.04) inset;
   }
 

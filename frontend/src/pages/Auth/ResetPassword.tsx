@@ -3,7 +3,7 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
-import { Eye, EyeOff, Loader2, CheckCircle, Lock } from "lucide-react"
+import { Eye, EyeOff, Loader2, CheckCircle, Lock, Shield, Mail, Sparkles } from "lucide-react"
 import { accountService } from "../../api/Index"
 import Logo from "../../components/ui/Logo"
 import backgroud from "../../assets/images/result.jpg"
@@ -62,8 +62,8 @@ return (
     {/* Left Panel */}
     <div className="hidden lg:flex flex-1 relative p-12 flex-col justify-between overflow-hidden">
         <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 hover:scale-105" style={{ backgroundImage: `url(${backgroud})` }}/>
-            <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/60 to-black/70 backdrop-blur-sm" />
-                <div className="absolute inset-0 bg-gradient-to-tr from-indigo-600/20 via-transparent to-cyan-600/20 opacity-50" />
+            <div className="absolute inset-0 panel-image-overlay" />
+                <div className="absolute inset-0 panel-image-accent opacity-70" />
                     <div className="relative z-10 animate-slide-up">
                         <Logo variant="light" size="md" linkTo="/" />
                     </div>
@@ -73,14 +73,14 @@ return (
                         </h1>
                         <ul className="space-y-4">
                             {[
-                                { text: "Create a strong password", icon: Lock },
-                                { text: "Secure your account", icon: CheckCircle },
-                                { text: "Easy recovery process", icon: CheckCircle },
-                                { text: "Enhanced protection", icon: CheckCircle },
+                                { text: "Create a strong password", icon: Lock }, 
+                                { text: "Secure your account", icon: Shield }, 
+                                { text: "Easy recovery process", icon: Mail }, 
+                                { text: "Enhanced protection", icon: Sparkles }, 
                             ].map((item, i) => (
                             <li key={i} className="flex items-center gap-3 text-white drop-shadow-md animate-slide-up" style={{ animationDelay: `${0.2 + i * 0.1}s` }}>
                                 <div className="h-8 w-8 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
-                                    <item.icon className="h-4 w-4 text-cyan-400" />
+                                    <item.icon className="h-4 w-4 text-primary" />
                                 </div>
                                 <span className="text-base">{item.text}</span>
                             </li>
@@ -102,8 +102,8 @@ return (
                             {isSuccess ? (
                             <div className="text-center space-y-6">
                                 <div className="flex justify-center">
-                                    <div className="bg-green-100 dark:bg-green-900/30 p-4 rounded-full">
-                                        <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
+                                    <div className="bg-success/10 dark:bg-success/30 p-4 rounded-full">
+                                        <CheckCircle className="h-8 w-8 text-success" />
                                     </div>
                                 </div>
                                 <h2 className="text-2xl font-bold text-foreground">Password reset!</h2>

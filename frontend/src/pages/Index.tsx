@@ -27,40 +27,28 @@ const navLinks = [
 
 const journeySteps = [
   {
-    number: "01",
-    titleZulu: "Indlela",
-    titleEn: "Onboarding & skills assessment",
-    description: "Share your story, upload your CV, and let AI discover your unique strengths"
+    zulu: "Indlela",
+    english: "Onboarding & skills assessment"
   },
   {
-    number: "02", 
-    titleZulu: "Izinsiza Zethu",
-    titleEn: "Matched to local opportunities",
-    description: "AI finds perfect opportunities in your province - from tech to trades"
+    zulu: "Izinsiza Zethu",
+    english: "Matched to local opportunities"
   },
   {
-    number: "03",
-    titleZulu: "Mahala", 
-    titleEn: "Free AI-powered training modules",
-    description: "Get personalized training at no cost - Ubuntu values in action"
+    zulu: "Mahala",
+    english: "Free AI-powered training modules"
   },
   {
-    number: "04",
-    titleZulu: "Ukukhula",
-    titleEn: "First income milestone", 
-    description: "Start earning and growing - your journey to economic freedom begins"
+    zulu: "Ukukhula",
+    english: "First income milestone reached"
   },
   {
-    number: "05",
-    titleZulu: "Siyaqala!",
-    titleEn: "Sustainable monthly earnings",
-    description: "Build lasting success - from R0 to R4,500+ per month"
+    zulu: "Siyaqala!",
+    english: "Sustainable monthly earnings"
   }
 ];
 
 const trustStats = [
-  { icon: "ZAR", value: "2.1M", label: "earned collectively" },
-  { icon: "9", value: "9", label: "Provinces reached" },
   { icon: "12.4K", value: "12,400+", label: "Ubuntu members" },
   { icon: "94%", value: "94%", label: "match accuracy" }
 ];
@@ -118,15 +106,22 @@ export default function Index() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {link.label}
-              </a>
-            ))}
+            {[
+              { label: "How It Works", href: "#how-it-works" },
+              { label: "Features", href: "#features" },
+              { label: "Ubuntu Stories", href: "#ubuntu-stories" },
+              { label: "Demo", href: "/demo", isRoute: true },
+            ].map((link) => 
+              link.isRoute ? (
+                <Link key={link.label} to={link.href} className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+                  {link.label}
+                </Link>
+              ) : (
+                <a key={link.label} href={link.href} className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+                  {link.label}
+                </a>
+              )
+            )}
           </nav>
 
           {/* Desktop CTA */}
@@ -193,7 +188,7 @@ export default function Index() {
         />
         
         {/* Layer 2: Navy Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[hsl(220_60%_8%/0.55)] via-[hsl(220_60%_10%/0.45)] to-[hsl(220_60%_8%/0.7)]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-foreground/55 via-foreground/45 to-foreground/70" />
         
         {/* Layer 3: Animated AI Blobs */}
         <div className="absolute inset-0 ai-mesh" />
@@ -202,8 +197,7 @@ export default function Index() {
         <div className="absolute inset-0 ai-grid" />
         
         {/* Layer 5: Content */}
-        <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
-          <div className="max-w-4xl mx-auto text-center space-y-8">
+        <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32 flex flex-col items-center text-center">
             {/* Badge */}
             <motion.span
               initial={{ opacity: 0, y: 20 }}
@@ -280,7 +274,6 @@ export default function Index() {
               </div>
             </motion.div>
           </div>
-        </div>
       </section>
 
       {/* Trust Strip */}
@@ -316,9 +309,9 @@ export default function Index() {
             <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mt-2">
               Siyanda's Journey: from R0 to R4,500/month
             </h2>
-            <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">
-              He didn't get lucky - he explored, compared, and chose. Here's exactly how it went.
-            </p>
+              <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">
+                He didn't get lucky — he explored, compared, and chose. Here's exactly how it went.
+              </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
@@ -328,13 +321,13 @@ export default function Index() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
             >
-              <div className="bg-card rounded-2xl shadow-card p-8 border border-border">
+              <div className="bg-card rounded-2xl shadow-card p-8 border border-border h-full flex flex-col justify-center">
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-2xl font-bold">
+                  <div className="w-16 h-16 rounded-full bg-ai-gradient flex items-center justify-center text-white text-2xl font-bold shadow-glow">
                     SK
                   </div>
                   <div>
-                    <h3 className="text-xl font-display font-bold">Siyanda Khumalo</h3>
+                    <h3 className="text-xl font-display font-bold text-primary">Siyanda Khumalo</h3>
                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
                       <MapPin className="h-3 w-3" />
                       <span>Khayelitsha, WC</span>
@@ -342,19 +335,18 @@ export default function Index() {
                   </div>
                 </div>
 
-                {/* Empowerment Score */}
                 <div className="mb-6">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium">Empowerment Score</span>
                     <span className="text-sm font-bold text-secondary">92%</span>
                   </div>
-                  <div className="h-3 bg-muted rounded-full overflow-hidden">
+                  <div className="h-2 bg-muted rounded-full overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       whileInView={{ width: "92%" }}
                       viewport={{ once: true }}
                       transition={{ duration: 1.5, delay: 0.5 }}
-                      className="h-full bg-gradient-to-r from-primary to-secondary rounded-full"
+                      className="h-full bg-ai-gradient rounded-full"
                     />
                   </div>
                 </div>
@@ -362,59 +354,64 @@ export default function Index() {
                 {/* Income Transformation */}
                 <div className="text-center py-6 border-t border-border">
                   <div className="text-3xl font-display font-bold text-gradient-ai mb-2">
-                    R0 <span className="text-white/60">to</span> R4,500/month
+                    R0 <span className="text-primary/40">to</span> R4,500/month
                   </div>
                   <div className="text-sm text-muted-foreground">12 weeks to first income</div>
                 </div>
               </div>
             </motion.div>
-
             {/* Right Column - 5-Step Journey */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
             >
-              <div className="space-y-4">
+              <div className="relative">
+                {/* Vertical connector line — runs through all step numbers */}
+                <div
+                  className="absolute left-6 top-6 bottom-6 w-px bg-gradient-to-b from-primary via-secondary to-primary/20"
+                  aria-hidden="true"
+                />
+
+                <ol className="space-y-6">
                 {journeySteps.map((step, i) => (
-                  <motion.div
-                    key={step.number}
+                  <motion.li
+                    key={step.zulu}
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: i * 0.1 }}
-                    className="flex gap-4"
+                    className="relative flex gap-5 group"
                   >
                     {/* Number Bubble */}
-                    <div className="relative">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold flex-shrink-0">
-                        {step.number}
+                    <div className="relative z-10 shrink-0">
+                      <div className="
+                        w-12 h-12 rounded-full
+                        bg-ai-gradient
+                        flex items-center justify-center
+                        text-white font-display font-bold text-lg
+                        shadow-glow
+                        ring-4 ring-background transition-all duration-300
+                        group-hover:scale-110 group-hover:rotate-6
+                      ">
+                        {i + 1}
                       </div>
-                      {i < journeySteps.length - 1 && (
-                        <div className="absolute top-12 left-1/2 -translate-x-1/2 w-0.5 h-16 bg-border" />
-                      )}
                     </div>
 
                     {/* Content */}
-                    <div className="flex-1 pb-8">
-                      <h4 className="font-display text-lg font-bold text-primary mb-1">
-                        {step.titleZulu}
+                    <div className="flex-1 pt-1">
+                      <h4 className="font-display text-lg font-bold text-primary leading-tight">
+                        {step.zulu}
                       </h4>
-                      <p className="text-sm text-muted-foreground mb-2">
-                        {step.titleEn}
-                      </p>
-                      <p className="text-sm text-foreground">
-                        {step.description}
-                      </p>
+                      <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{step.english}</p>
                     </div>
-                  </motion.div>
+                  </motion.li>
                 ))}
-              </div>
+                </ol>
             </motion.div>
           </div>
         </div>
       </section>
-
       {/* How It Works */}
       <section id="how-it-works" className="py-20 bg-background">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -460,8 +457,8 @@ export default function Index() {
                 className="group"
               >
                 <div className="bg-card rounded-2xl shadow-card p-8 border border-border hover:shadow-lg hover:-translate-y-1 transition-all duration-300 h-full">
-                  <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
-                    <step.icon className="h-8 w-8 text-primary" />
+                  <div className="w-16 h-16 rounded-2xl bg-ai-gradient flex items-center justify-center mb-6 group-hover:scale-105 transition-transform shadow-glow">
+                    <step.icon className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="font-display text-xl font-bold text-foreground mb-3">
                     {step.title}
@@ -480,7 +477,7 @@ export default function Index() {
       </section>
 
       {/* Testimonials */}
-      <section className="py-20 bg-gradient-to-b from-background to-secondary/20">
+      <section className="py-20 bg-muted">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <span className="text-secondary text-sm font-semibold uppercase tracking-wider mb-2 inline-block">

@@ -365,7 +365,7 @@ export default function SignupPage() {
                   <div className="flex gap-2">
                     {[1, 2, 3, 4].map((level) => (
                       <div
-                        key={level}
+                        key={`password-strength-${level}`}
                         className={`h-1.5 rounded-full flex-1 transition-all ${
                           formData.password.length >= level * 2
                             ? level <= 2 ? "bg-destructive" : level === 3 ? "bg-sa-gold" : "bg-success"
