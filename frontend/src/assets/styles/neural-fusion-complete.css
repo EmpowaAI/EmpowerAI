@@ -74,12 +74,12 @@ body {
 
 /* Holographic Button */
 .neural-button {
-  background: var(--holographic);
+  background: var(--gradient-ai);
   background-size: 400% 400%;
   animation: holographic-shift 5s ease infinite;
   border: none;
   border-radius: 12px;
-  color: white;
+  color: hsl(var(--card));
   font-weight: 600;
   padding: 12px 24px;
   position: relative;

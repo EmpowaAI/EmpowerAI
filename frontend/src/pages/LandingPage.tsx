@@ -4,7 +4,7 @@ import {
   ArrowRight,
   Play,
   Cpu,
-  Heart,
+  HeartHandshake,
   TrendingUp,
   Star,
   Upload,
@@ -71,13 +71,13 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 h-16 ${
           scrolled
-            ? "bg-background/80 backdrop-blur-xl shadow-sm border-b border-border"
+            ? "bg-background/85 backdrop-blur-md border-b border-border/60"
             : "bg-transparent"
         }`}
       >
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16 md:h-20">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
           <Logo />
 
           <nav className="hidden md:flex items-center gap-8">
@@ -148,38 +148,41 @@ export default function LandingPage() {
         )}
       </header>
 
-      <section className="relative pt-28 md:pt-32 pb-16 md:pb-20 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-sa-gold/10 via-background to-sa-green/5 -z-10" />
+      <section className="relative pt-28 md:pt-32 pb-16 md:pb-20 overflow-hidden ai-mesh">
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,hsl(220_60%_8%/0.55),transparent_30%,transparent_65%,hsl(220_60%_8%/0.45))] -z-10" />
+        <div className="absolute inset-0 ai-grid -z-10" />
 
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-4xl mx-auto space-y-6">
+          <div className="text-center max-w-3xl mx-auto space-y-8">
             <motion.span
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 bg-sa-gold/10 text-sa-gold text-sm font-semibold px-4 py-1.5 rounded-full border border-sa-gold/20"
+              className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 backdrop-blur-md text-white text-sm font-semibold px-4 py-2"
             >
               <Sparkles className="w-4 h-4" />
-              <RotatingText text={t("poweredBy")} langKey={langIndex} /> 🇿🇦
+              Amandla e-Ubuntu <RotatingText text={t("poweredBy")} langKey={langIndex} /> <span className="ai-dot"></span> 2025
             </motion.span>
 
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="text-4xl md:text-6xl lg:text-7xl font-heading font-bold italic leading-tight"
+              className="font-display text-4xl md:text-6xl lg:text-7xl font-bold leading-tight"
             >
-              Your Future, <br className="hidden sm:block" />
-              Powered by AI
+              Your Digital{' '}
+              <span className="text-gradient-ai">Economic Twin</span>
+              <br className="hidden sm:block" />
+              Awaits
             </motion.h1>
             
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto"
+              className="text-base md:text-lg max-w-2xl mx-auto text-white/90 font-body"
             >
-              Discover career pathways rooted in Ubuntu values. Join thousands of young South Africans building better futures.
+              Discover career pathways rooted in Ubuntu values. Join thousands of young South Africans building better futures with AI-powered guidance.
             </motion.p>
             
             <motion.div
@@ -190,13 +193,13 @@ export default function LandingPage() {
             >
               <a
                 href="/signup"
-                className="inline-flex items-center gap-2 bg-sa-gold text-primary-foreground px-6 py-3 rounded-lg text-sm font-heading font-semibold hover:opacity-90 transition-all shadow-lg hover:shadow-xl"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-primary/90 text-primary-foreground px-6 py-3 rounded-lg text-sm font-display font-semibold shadow-cta hover:brightness-105 hover:-translate-y-0.5 active:translate-y-0 transition-smooth shimmer"
               >
                 Start Your Journey <ArrowRight className="h-4 w-4" />
               </a>
               <a
                 href="#demo"
-                className="inline-flex items-center gap-2 border-2 border-border text-foreground px-6 py-3 rounded-lg text-sm font-heading font-semibold hover:bg-secondary transition-all"
+                className="inline-flex items-center gap-2 border-2 border-white/90 bg-white/0 text-white hover:bg-white/10 backdrop-blur-sm px-6 py-3 rounded-lg text-sm font-display font-semibold transition-smooth"
               >
                 <Play className="h-4 w-4" /> Watch Demo
               </a>
@@ -204,26 +207,72 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <div className="mt-16 border-y border-border bg-background/50">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
-              {[
-                { icon: Cpu, title: "AI-powered career", sub: "guidance in 60 seconds" },
-                { icon: Heart, title: "Rooted in", sub: "Ubuntu values" },
-                { icon: TrendingUp, title: "Personalized pathways", sub: "to income growth" },
-                { icon: Star, title: "Trusted by 2,000+ youth", sub: "Rated 4.9/5", fill: true },
-              ].map((item, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center shrink-0">
-                    <item.icon className={`h-5 w-5 ${item.fill ? "fill-sa-gold text-sa-gold" : "text-sa-gold"}`} />
-                  </div>
-                  <div>
-                    <p className="text-xs font-heading font-bold text-foreground leading-tight">{item.title}</p>
-                    <p className="text-xs text-muted-foreground">{item.sub}</p>
-                  </div>
-                </div>
-              ))}
+        {/* Tech Signals Strip */}
+        <div className="absolute bottom-0 left-0 right-0 border-t border-white/10 bg-black/20 backdrop-blur-sm">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-center justify-center gap-8 text-white/80 text-sm">
+              <div className="flex items-center gap-2">
+                <Cpu className="h-4 w-4" />
+                <span>AI Analysis</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Zap className="h-4 w-4" />
+                <span>60-Second Results</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4" />
+                <span>All 9 Provinces</span>
+              </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Trust Strip */}
+      <section className="border-b border-border bg-background">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[
+              { 
+                icon: Rocket, 
+                title: "AI-Powered Analysis", 
+                desc: "60-second career assessment",
+                color: "text-primary"
+              },
+              { 
+                icon: HeartHandshake, 
+                title: "Ubuntu Values", 
+                desc: "Rooted in African philosophy",
+                color: "text-primary"
+              },
+              { 
+                icon: Briefcase, 
+                title: "Real Opportunities", 
+                desc: "Across all 9 provinces",
+                color: "text-primary" 
+              },
+              { 
+                icon: Star, 
+                title: "Proven Success", 
+                desc: "2,000+ youth transformed",
+                color: "text-primary"
+              }
+            ].map((item, i) => (
+              <motion.div
+                key={item.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="text-center"
+              >
+                <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <item.icon className={`h-8 w-8 ${item.color}`} />
+                </div>
+                <h3 className="font-display text-xl font-bold mb-2">{item.title}</h3>
+                <p className="text-muted-foreground">{item.desc}</p>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
