@@ -55,6 +55,12 @@ export default function LandingPage() {
   const heroBackgroundUrl = encodeURI(
     `${import.meta.env.BASE_URL}images/Wide blue-orange gra.png`
   );
+  const navLinkClassName = scrolled
+    ? "text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+    : "text-sm font-medium text-white/90 hover:text-white transition-colors";
+  const navAuxLinkClassName = scrolled
+    ? "text-sm font-medium text-muted-foreground hover:text-foreground px-3 py-2 transition-colors"
+    : "text-sm font-medium text-white/90 hover:text-white px-3 py-2 transition-colors";
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -76,8 +82,8 @@ export default function LandingPage() {
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 h-16 ${
           scrolled
-            ? "bg-background/85 backdrop-blur-md border-b border-border/60"
-            : "bg-transparent"
+            ? "bg-background/85 backdrop-blur-md border-b border-border/60 shadow-soft"
+            : "bg-black/10 backdrop-blur-md border-b border-white/10"
         }`}
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
@@ -88,7 +94,7 @@ export default function LandingPage() {
               <a
                 key={link}
                 href={`#${link.toLowerCase().replace(/\s+/g, "-")}`}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                className={navLinkClassName}
               >
                 {link}
               </a>
@@ -96,7 +102,7 @@ export default function LandingPage() {
           </nav>
 
           <div className="hidden md:flex items-center gap-3">
-            <a href="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground px-3 py-2 transition-colors">
+            <a href="/login" className={navAuxLinkClassName}>
               Sign In
             </a>
             <ThemeToggle />

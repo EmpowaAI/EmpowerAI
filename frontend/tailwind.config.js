@@ -56,6 +56,7 @@ export default {
         'glow': '0 10px 30px -12px hsl(22 95% 50% / 0.35)',
         'card': '0 4px 20px -8px hsl(218 64% 28% / 0.15)',
         'cta': '0 8px 24px -8px hsl(22 95% 50% / 0.45)',
+        'soft': 'var(--shadow-soft)',
         'elevated': '0 10px 40px -10px hsl(218 64% 28% / 0.2)',
       },
       animation: {
