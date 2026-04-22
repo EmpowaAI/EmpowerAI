@@ -1,5 +1,6 @@
 const { body, validationResult } = require('express-validator');
 const logger = require('../../../utils/logger');
+const { removeListener } = require('../../user/user.Model');
 
 const registerRules = [
   body('name')
@@ -23,7 +24,6 @@ const registerRules = [
 
   // ─── POPIA Consent Validation ──────────────────────────────────────────────
 
-  // Consent 1 — Required: data processing per Privacy Policy
   body('consentDataProcessing')
     .exists().withMessage('You must accept the Privacy Policy to register')
     .isBoolean().withMessage('Invalid consent value')
@@ -34,7 +34,6 @@ const registerRules = [
       return true;
     }),
 
-  // Consent 2 — Required: profile sharing with employers
   body('consentProfileSharing')
     .exists().withMessage('You must consent to profile sharing to register')
     .isBoolean().withMessage('Invalid consent value')
@@ -45,7 +44,6 @@ const registerRules = [
       return true;
     }),
 
-  // Consent 3 — Optional: AI-based matching (defaults to false if omitted)
   body('consentAiProcessing')
     .optional()
     .isBoolean().withMessage('Invalid consent value'),
@@ -72,8 +70,8 @@ const toRegisterDTO = (body) => ({
   name:                  body.name,
   email:                 body.email,
   password:              body.password,
-  // Normalise to strict booleans regardless of whether frontend sends
-  // true (boolean) or "true" (string from FormData)
+  role:                  body.role || 'user',
+  
   consentDataProcessing: body.consentDataProcessing === true || body.consentDataProcessing === 'true',
   consentProfileSharing: body.consentProfileSharing === true || body.consentProfileSharing === 'true',
   consentAiProcessing:   body.consentAiProcessing   === true || body.consentAiProcessing   === 'true',

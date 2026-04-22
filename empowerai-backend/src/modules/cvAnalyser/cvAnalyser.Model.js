@@ -65,6 +65,9 @@ const cvProfileSchema = new mongoose.Schema(
       
       education:  { type: String, default: '' },
       experience: { type: String, default: '' },
+      age:        { type: String, default: '' },
+      province:   { type: String, default: '' },
+      
     },
 
    

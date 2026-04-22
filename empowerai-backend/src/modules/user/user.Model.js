@@ -5,13 +5,12 @@ const userSchema = new mongoose.Schema({
   name:     { type: String, required: true },
   email:    { type: String, required: true, unique: true, index: true, sparse: true },
   password: { type: String, required: true, select: false },
-
-  age:       { type: Number, index: true },
-  province:  { type: String, index: true },
-  education: { type: String },
-  skills:    [{ type: String }],
-  interests: [{ type: String }],
   avatar:    { type: String },
+  role: {
+  type: String,
+  enum: ['user', 'admin'],
+  default: 'user',
+},
 
   // ─── Verification ────────────────────────────────────────────────────────────
   isVerified:         { type: Boolean, default: false },
