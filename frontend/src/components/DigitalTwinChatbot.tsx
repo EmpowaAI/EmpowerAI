@@ -130,7 +130,7 @@ export default function DigitalTwinChatbot() {
       >
         <div className="relative">
           {/* Pulsing ring effect */}
-          <div className="absolute -inset-2 bg-gradient-to-r from-primary via-secondary to-accent rounded-full opacity-20 animate-pulse" />
+          <div className="absolute -inset-2 bg-gradient-to-r from-primary to-secondary rounded-full opacity-20 animate-pulse" />
           
           {/* Tooltip */}
           <div className="absolute bottom-full right-0 mb-3 hidden group-hover:block">
@@ -141,9 +141,9 @@ export default function DigitalTwinChatbot() {
           </div>
 
           {/* Main button */}
-          <div className="relative h-14 w-14 rounded-full bg-gradient-to-br from-primary via-secondary to-accent shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 flex items-center justify-center">
+          <div className="relative h-14 w-14 rounded-full bg-ai-gradient shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 flex items-center justify-center">
             <Bot className="h-7 w-7 text-white" />
-            <Sparkles className="absolute -top-1 -right-1 h-4 w-4 text-yellow-300 animate-pulse" />
+            <Sparkles className="absolute -top-1 -right-1 h-4 w-4 text-secondary animate-pulse" />
           </div>
         </div>
       </button>
@@ -164,7 +164,7 @@ export default function DigitalTwinChatbot() {
         <div className="bg-gradient-to-r from-primary via-primary/90 to-secondary p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center">
-              <Bot className="h-5 w-5 text-white" />
+              <Bot className="h-5 w-5 text-primary-foreground" />
             </div>
             <div>
               <h3 className="font-bold text-white">Digital Economic Twin</h3>
@@ -179,7 +179,7 @@ export default function DigitalTwinChatbot() {
             <button
               onClick={() => setIsOpen(false)}
               className="h-8 w-8 rounded-full hover:bg-white/20 flex items-center justify-center text-white transition-colors"
-              title="Close"
+              title="Close" 
             >
               <X className="h-4 w-4" />
             </button>
@@ -199,21 +199,21 @@ export default function DigitalTwinChatbot() {
               <div className={cn(
                 "h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0",
                 message.sender === 'user' 
-                  ? 'bg-accent/20 text-accent' 
+                  ? 'bg-secondary/20 text-secondary' 
                   : 'bg-primary/20 text-primary'
               )}>
                 {message.sender === 'user' ? (
                   <User className="h-4 w-4" />
                 ) : (
                   <Bot className="h-4 w-4" />
-                )}
+                )} 
               </div>
               <div className={cn(
                 "max-w-[80%] sm:max-w-[70%] rounded-2xl p-2.5 sm:p-3 shadow-sm",
                 message.sender === 'user'
-                  ? 'bg-accent text-white rounded-br-none'
+                  ? 'bg-secondary text-white rounded-br-none'
                   : 'bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-bl-none'
-              )}>
+              )}> 
                 <p className={cn(
                   "text-sm",
                   message.sender === 'user' 
@@ -311,13 +311,13 @@ export default function DigitalTwinChatbot() {
               <button
                 className="h-7 w-7 sm:h-8 sm:w-8 rounded-full hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center justify-center text-gray-500 dark:text-slate-400 hover:text-green-500 dark:hover:text-green-400 transition-colors active:scale-95"
                 title="Helpful"
-              >
+              > 
                 <ThumbsUp className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </button>
               <button
                 className="h-7 w-7 sm:h-8 sm:w-8 rounded-full hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center justify-center text-gray-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors active:scale-95"
                 title="Not helpful"
-              >
+              > 
                 <ThumbsDown className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </button>
             </div>

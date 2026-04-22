@@ -264,13 +264,13 @@ export default function Dashboard() {
     <div className="min-h-screen bg-background relative overflow-hidden">
       <div className="absolute inset-0 z-0 sa-pattern opacity-15" />
       {/* Enhanced gradient overlays */}
-      <div className="absolute inset-0 z-0 bg-gradient-to-br from-amber-500/4 via-transparent to-green-500/6" />
-      <div className="absolute -top-40 -right-32 h-96 w-96 rounded-full bg-amber-500/10 blur-3xl z-0" />
-      <div className="absolute -bottom-32 -left-24 h-80 w-80 rounded-full bg-green-500/10 blur-3xl z-0" />
+      <div className="absolute inset-0 z-0 bg-gradient-to-br from-secondary/4 via-transparent to-success/6" />
+      <div className="absolute -top-40 -right-32 h-96 w-96 rounded-full bg-secondary/10 blur-3xl z-0" />
+      <div className="absolute -bottom-32 -left-24 h-80 w-80 rounded-full bg-success/10 blur-3xl z-0" />
       
       {/* Additional atmospheric effects */}
-      <div className="absolute top-1/4 left-1/4 h-64 w-64 rounded-full bg-orange-500/5 blur-3xl z-0" />
-      <div className="absolute bottom-1/3 right-1/3 h-48 w-48 rounded-full bg-amber-500/5 blur-3xl z-0" />
+      <div className="absolute top-1/4 left-1/4 h-64 w-64 rounded-full bg-secondary/5 blur-3xl z-0" />
+      <div className="absolute bottom-1/3 right-1/3 h-48 w-48 rounded-full bg-secondary/5 blur-3xl z-0" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 md:py-8 space-y-8">
 
@@ -282,15 +282,15 @@ export default function Dashboard() {
         {/* Hero */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           <GlassCard className="relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-amber-500/20 to-transparent rounded-full blur-3xl -mr-32 -mt-32" />
-            <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-green-500/20 to-transparent rounded-full blur-3xl -ml-24 -mb-24" />
+            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-secondary/20 to-transparent rounded-full blur-3xl -mr-32 -mt-32" />
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-success/20 to-transparent rounded-full blur-3xl -ml-24 -mb-24" />
 
             <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-8">
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <motion.span
-                    initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}
-                    className="px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 text-xs font-semibold flex items-center gap-1.5"
+                    initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }} 
+                    className="px-3 py-1 rounded-full bg-secondary/10 border border-secondary/20 text-secondary text-xs font-semibold flex items-center gap-1.5"
                   >
                     <Sparkles className="h-3.5 w-3.5" /> AI Command Centre
                   </motion.span>
@@ -310,8 +310,8 @@ export default function Dashboard() {
                   </button>
                 </div>
                 <motion.h1 initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="text-4xl md:text-5xl font-display mb-3 font-bold">
-                  Welcome back,{' '}
-                  <span className="bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent font-bold">{displayName}</span>
+                  <span className="text-primary">Welcome back, </span>
+                  <span className="text-secondary font-bold">{displayName}</span>
                 </motion.h1>
                 <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="text-base md:text-lg text-muted-foreground font-medium leading-relaxed">
                   Your AI twin is actively analysing the SA career landscape for you.
@@ -319,7 +319,7 @@ export default function Dashboard() {
 
                 {loading && !stats ? (
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    {[0, 1, 2].map((k) => (
+                    {[0, 1, 2].map((k) => ( // Placeholder for loading state
                       <div key={k} className="rounded-xl border border-border/60 bg-card/40 px-4 py-3 animate-pulse">
                         <div className="h-3 w-24 bg-muted/50 rounded" />
                         <div className="h-4 w-16 bg-muted/50 rounded mt-2" />
@@ -346,7 +346,7 @@ export default function Dashboard() {
 
               {loading && (
                 <div className="flex items-center gap-4">
-                  <div className="text-center p-6 bg-amber-500/10 rounded-2xl border border-amber-500/20 shadow-lg animate-pulse">
+                  <div className="text-center p-6 bg-secondary/10 rounded-2xl border border-secondary/20 shadow-lg animate-pulse">
                     <div className="h-[120px] w-[120px] rounded-full bg-muted/50 mx-auto" />
                     <div className="h-4 w-40 bg-muted/50 rounded mt-4 mx-auto" />
                   </div>
@@ -354,8 +354,8 @@ export default function Dashboard() {
               )}
 
               {!loading && stats && stats.empowermentScore > 0 && (
-                <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.5 }} className="flex items-center gap-4">
-                  <div className="text-center p-6 bg-amber-500/15 rounded-2xl border border-amber-500/30 shadow-lg">
+                <motion.div initial={{ opacity: 0, scale: 1 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.5 }} className="flex items-center gap-4"> {/* Placeholder for loading state */}
+                  <div className="text-center p-6 bg-secondary/15 rounded-2xl border border-secondary/30 shadow-lg">
                     <ScoreMeter score={stats.empowermentScore} label="Empowerment" size="lg" />
                     <p className="mt-3 text-sm font-semibold text-foreground">Your current trajectory</p>
                   </div>
@@ -368,15 +368,15 @@ export default function Dashboard() {
         {/* Next best action */}
         <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, delay: 0.05 }}>
           <Link to={nextStep.path}>
-            <GlassCard className="group cursor-pointer hover:scale-[1.01] transition-all relative overflow-hidden border-amber-500/25">
-              <div className="absolute inset-0 bg-gradient-to-br from-amber-500/12 via-transparent to-green-500/10 opacity-70" />
+            <GlassCard className="group cursor-pointer hover:scale-[1.01] transition-all relative overflow-hidden border-secondary/25">
+              <div className="absolute inset-0 bg-gradient-to-br from-secondary/12 via-transparent to-success/10 opacity-70" />
               <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-start gap-3">
-                  <div className="h-11 w-11 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0">
-                    <Target className="h-5 w-5 text-amber-500" />
+                  <div className="h-11 w-11 rounded-xl bg-secondary/10 border border-secondary/20 flex items-center justify-center flex-shrink-0">
+                    <Target className="h-5 w-5 text-secondary" />
                   </div>
                   <div>
-                    <p className="text-[11px] uppercase tracking-widest text-amber-500 font-semibold">Recommended next step</p>
+                    <p className="text-[11px] uppercase tracking-widest text-secondary font-semibold">Recommended next step</p>
                     <p className="text-lg font-display font-bold">{nextStep.label}</p>
                     <p className="text-sm text-muted-foreground">
                       {nextStep.label.includes("CV")
@@ -389,7 +389,7 @@ export default function Dashboard() {
                     </p>
                   </div>
                 </div>
-                <div className="inline-flex items-center gap-2 text-sm font-semibold text-amber-500">
+                <div className="inline-flex items-center gap-2 text-sm font-semibold text-secondary">
                   Get started <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
                 </div>
               </div>
@@ -424,8 +424,8 @@ export default function Dashboard() {
               <motion.div key={card.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: card.delay }}>
                 <GlassCard className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-2 border-border/50 shadow-md">
                   <div className="flex items-center gap-4">
-                    <div className="h-14 w-14 rounded-xl bg-primary/20 flex items-center justify-center border border-primary/30">
-                      <card.icon className="h-7 w-7 text-primary" />
+                    <div className="h-14 w-14 rounded-xl bg-ai-gradient flex items-center justify-center border-none shadow-glow">
+                      <card.icon className="h-7 w-7 text-white" />
                     </div>
                     <div>
                       <p className="text-xs uppercase tracking-wide text-foreground font-bold">{card.label}</p>
@@ -435,7 +435,7 @@ export default function Dashboard() {
                   <div className="text-center md:text-right">
                     <ScoreMeter score={card.value} label="Score" size="lg" />
                     {card.value === 0 && (
-                      <p className="text-sm text-amber-500 mt-2 flex items-center justify-center md:justify-end gap-1 font-semibold">
+                      <p className="text-sm text-secondary mt-2 flex items-center justify-center md:justify-end gap-1 font-semibold">
                         <AlertCircle className="h-4 w-4" /> No data yet
                       </p>
                     )}
@@ -449,7 +449,7 @@ export default function Dashboard() {
         {/* Stats Grid */}
         {loading && (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {[0, 1, 2, 3].map((k) => (
+            {[0, 1, 2, 3].map((k) => ( // Placeholder for loading state
               <GlassCard key={k} className="group border-2 border-border/50 shadow-md animate-pulse">
                 <div className="flex items-start justify-between mb-4">
                   <div className="h-3 w-24 bg-muted/50 rounded" />
@@ -464,10 +464,10 @@ export default function Dashboard() {
 
         {!loading && stats && (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {[
-              { label: "Skills Matched", value: stats.skillsMatched, icon: BarChart3, color: "text-amber-500" },
-              { label: "Opportunities", value: stats.opportunitiesCount, icon: Briefcase, color: "text-green-500" },
-              { label: "Learnerships", value: stats.learnershipsCount ?? 0, icon: GraduationCap, color: "text-orange-500" },
+            {[ // Changed colors to use primary/secondary/success
+              { label: "Skills Matched", value: stats.skillsMatched, icon: BarChart3, color: "text-secondary" },
+              { label: "Opportunities", value: stats.opportunitiesCount, icon: Briefcase, color: "text-primary" },
+              { label: "Learnerships", value: stats.learnershipsCount ?? 0, icon: GraduationCap, color: "text-secondary" },
               { label: "Applications", value: stats.applicationsCount || 0, icon: Target, color: "text-primary" },
             ].map((card, i) => (
               <motion.div key={card.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 * i }}>
@@ -507,27 +507,27 @@ export default function Dashboard() {
               <GlassCard>
                 <div className="flex items-start justify-between gap-4 mb-6">
                   <div>
-                    <h3 className="font-display text-lg flex items-center gap-2">
-                      <Brain className="h-5 w-5 text-amber-500" /> Your AI Journey
+                    <h3 className="font-display text-lg flex items-center gap-2"> 
+                      <Brain className="h-5 w-5 text-secondary" /> Your AI Journey
                     </h3>
                     <p className="text-sm text-muted-foreground">Your next best action is highlighted below.</p>
                   </div>
                   <div className="text-right">
                     <p className="text-xs uppercase tracking-wide text-muted-foreground">Progress</p>
-                    <p className="text-sm font-semibold text-amber-500">{progressPercentage}%</p>
+                    <p className="text-sm font-semibold text-secondary">{progressPercentage}%</p>
                   </div>
                 </div>
 
-                <div className="mb-6 p-4 bg-amber-500/5 rounded-xl border border-amber-500/20">
+                <div className="mb-6 p-4 bg-secondary/5 rounded-xl border border-secondary/20">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-medium text-muted-foreground">Overall Progress</span>
-                    <span className="text-xs font-bold text-amber-500">{progressPercentage}%</span>
+                    <span className="text-xs font-bold text-secondary">{progressPercentage}%</span>
                   </div>
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }} animate={{ width: `${progressPercentage}%` }}
                       transition={{ delay: 0.8, duration: 1 }}
-                      className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full"
+                      className="h-full bg-ai-gradient rounded-full"
                     />
                   </div>
                   <p className="text-xs text-muted-foreground mt-3">Next step: <span className="text-foreground font-medium">{nextStep.label}</span></p>
@@ -560,7 +560,7 @@ export default function Dashboard() {
                       <Link
                         key={step.label}
                         to={step.path}
-                        className={`flex items-center justify-between p-4 rounded-xl border ${isNext ? "border-amber-500/50 bg-amber-500/10" : "border-border/50 bg-muted/20"} hover:border-amber-500/30 hover:bg-amber-500/5 transition-all group cursor-pointer`}
+                        className={`flex items-center justify-between p-4 rounded-xl border ${isNext ? "border-secondary/50 bg-secondary/10" : "border-border/50 bg-muted/20"} hover:border-secondary/30 hover:bg-secondary/5 transition-all group cursor-pointer`}
                       >
                         <div className="flex items-center gap-3">
                           <div className="h-8 w-8 rounded-full bg-primary/10 border border-primary/30 text-primary flex items-center justify-center text-xs font-display">
@@ -568,10 +568,10 @@ export default function Dashboard() {
                           </div>
                           <div>
                             <span className="text-sm font-medium">{step.label}</span>
-                            {isNext && <p className="text-[11px] text-amber-500">Recommended next action</p>}
+                            {isNext && <p className="text-[11px] text-secondary">Recommended next action</p>}
                           </div>
                         </div>
-                        <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-amber-500 transition-colors" />
+                        <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-secondary transition-colors" />
                       </Link>
                     );
                   })}
@@ -584,7 +584,7 @@ export default function Dashboard() {
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
               <GlassCard>
                 <h4 className="text-xs font-display uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
-                  <Users className="h-4 w-4 text-amber-500" /> AI Profile Snapshot
+                  <Users className="h-4 w-4 text-secondary" /> AI Profile Snapshot
                 </h4>
                 <div className="space-y-3">
                   <div>
@@ -607,7 +607,7 @@ export default function Dashboard() {
                     </p>
                   </div>
                 </div>
-                <Link to="/dashboard/twin" className="mt-4 inline-flex items-center gap-2 text-xs text-amber-500 hover:text-orange-500 transition-colors font-medium">
+                <Link to="/dashboard/twin" className="mt-4 inline-flex items-center gap-2 text-xs text-secondary hover:text-secondary/80 transition-colors font-medium">
                   Update profile <ArrowRight className="h-3 w-3" />
                 </Link>
               </GlassCard>
@@ -626,7 +626,7 @@ export default function Dashboard() {
                         <h4 className="font-bold text-lg text-foreground">{action.title}</h4>
                         <p className="text-sm text-muted-foreground font-medium">{action.desc}</p>
                       </div>
-                      <span className="text-xs uppercase tracking-wider text-amber-500 font-semibold border border-amber-500/30 rounded-full px-3 py-1.5">
+                      <span className="text-xs uppercase tracking-wider text-secondary font-semibold border border-secondary/30 rounded-full px-3 py-1.5">
                         {action.label}
                       </span>
                     </div>
@@ -635,12 +635,12 @@ export default function Dashboard() {
               </motion.div>
             ))}
 
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.2 }}>
-              <GlassCard className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-500/30">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.2 }}> 
+              <GlassCard className="bg-gradient-to-br from-secondary/10 to-secondary/10 border-secondary/30">
                 <div className="flex items-center gap-3">
                   <div className="relative">
-                    <div className="absolute inset-0 bg-amber-500 rounded-full animate-ping opacity-20" />
-                    <Brain className="h-8 w-8 text-amber-500 relative" />
+                    <div className="absolute inset-0 bg-secondary rounded-full animate-ping opacity-20" />
+                    <Brain className="h-8 w-8 text-secondary relative" />
                   </div>
                   <div>
                     <h4 className="font-display text-sm">AI Twin Active</h4>
