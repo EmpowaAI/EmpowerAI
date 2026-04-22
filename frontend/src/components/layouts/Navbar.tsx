@@ -89,8 +89,8 @@ export default function Navbar() {
                   to={item.path}
                   className={cn(
                     "relative px-4 py-2 rounded-xl text-sm font-medium transition-all",
-                    "hover:text-[var(--sa-gold)] group",
-                    isActive ? "text-[var(--sa-gold)]" : "text-muted-foreground"
+                    "hover:text-[var(--secondary)] group",
+                    isActive ? "text-[var(--secondary)]" : "text-muted-foreground"
                   )}
                   title={item.tooltip}
                 >
@@ -101,7 +101,7 @@ export default function Navbar() {
                   {isActive && (
                     <motion.div
                       layoutId="navbar-active"
-                      className="absolute inset-0 bg-[var(--sa-gold)]/10 rounded-xl border border-[var(--sa-gold)]/20"
+                      className="absolute inset-0 bg-[var(--secondary)]/10 rounded-xl border border-[var(--secondary)]/20"
                       transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                     />
                   )}
@@ -116,19 +116,19 @@ export default function Navbar() {
             {!progress.twinCompleted && (
               <Link
                 to={!progress.cvCompleted ? "/dashboard/cv-analyzer" : "/dashboard/twin"}
-                className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--sa-gold)]/10 border border-[var(--sa-gold)]/20 hover:bg-[var(--sa-gold)]/20 transition-colors"
+                className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--secondary)]/10 border border-[var(--secondary)]/20 hover:bg-[var(--secondary)]/20 transition-colors"
               >
-                <Sparkles className="h-4 w-4 text-[var(--sa-gold)]" />
-                <span className="text-xs font-medium text-[var(--sa-gold)]">
+                <Sparkles className="h-4 w-4 text-[var(--secondary)]" />
+                <span className="text-xs font-medium text-[var(--secondary)]">
                   {!progress.cvCompleted ? "Start CV Analysis" : "Build Digital Twin"}
                 </span>
-                <ArrowRight className="h-3 w-3 text-[var(--sa-gold)]" />
+                <ArrowRight className="h-3 w-3 text-[var(--secondary)]" />
               </Link>
             )}
 
             <Link
               to="/profile"
-              className="h-9 w-9 rounded-full bg-muted flex items-center justify-center hover:bg-[var(--sa-gold)]/10 transition-colors border border-border"
+              className="h-9 w-9 rounded-full bg-muted flex items-center justify-center hover:bg-[var(--secondary)]/10 transition-colors border border-border"
             >
               <User className="h-4 w-4" />
             </Link>
@@ -136,7 +136,7 @@ export default function Navbar() {
             {/* Mobile menu button */}
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="md:hidden h-9 w-9 rounded-full bg-muted flex items-center justify-center hover:bg-[var(--sa-gold)]/10 transition-colors border border-border"
+              className="md:hidden h-9 w-9 rounded-full bg-muted flex items-center justify-center hover:bg-[var(--secondary)]/10 transition-colors border border-border"
             >
               {isOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
             </button>
@@ -178,7 +178,7 @@ export default function Navbar() {
                     className={cn(
                       "flex items-center gap-3 px-4 py-3 rounded-xl transition-all",
                       isActive
-                        ? "bg-[var(--sa-gold)]/10 text-[var(--sa-gold)] border border-[var(--sa-gold)]/20"
+                        ? "bg-[var(--secondary)]/10 text-[var(--secondary)] border border-[var(--secondary)]/20"
                         : "text-muted-foreground hover:bg-muted"
                     )}
                   >
