@@ -20,12 +20,29 @@
     --primary-glow: 218 70% 42%;
     --secondary: 22 95% 55%;         /* warm orange */
     --secondary-foreground: 0 0% 100%;
+
+    /* Surfaces */
+    --card: 0 0% 100%;
+    --card-foreground: 220 55% 18%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 55% 18%;
+
+    /* Accents */
+    --accent-orange: 18 92% 58%;
     --muted: 38 28% 94%;
     --muted-foreground: 220 20% 42%;
     --accent: 38 50% 92%;
+    --accent-foreground: 220 55% 18%;
+
+    /* Border & UI */
     --border: 30 20% 88%;
+    --input: 30 20% 88%;
     --ring: 218 64% 28%;
     --radius: 0.625rem;
+
+    /* Destructive */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
     /* Gradients (Navy -> Orange ONLY) */
     --gradient-hero: linear-gradient(110deg, hsl(218 64% 32%) 0%, hsl(218 60% 45%) 45%, hsl(22 88% 60%) 100%);
