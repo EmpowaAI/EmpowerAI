@@ -153,15 +153,18 @@ export default function LandingPage() {
 
       <section className="relative isolate pt-28 md:pt-32 pb-16 md:pb-20 overflow-hidden ai-mesh">
         <div
-          className="absolute inset-0 bg-cover bg-center z-0"
+          className="absolute inset-0 bg-cover bg-center scale-105 transform-gpu z-0"
           style={{
             backgroundImage: `url("${heroBackgroundUrl}")`,
           }}
         />
-        <div className="absolute inset-0 bg-hero-gradient opacity-45 z-10" />
-        <div className="absolute inset-0 ai-grid z-10" />
+        <div className="absolute inset-0 hero-spotlight z-10" />
+        <div className="absolute inset-0 bg-hero-gradient opacity-35 z-20" />
+        <div className="absolute inset-0 ai-grid z-20" />
+        <div className="absolute inset-0 hero-vignette z-30" />
+        <div className="absolute inset-0 grain z-40" />
 
-        <div className="container relative z-20 mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="container relative z-50 mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto space-y-8">
             <motion.span
               initial={{ opacity: 0, y: 20 }}
@@ -226,7 +229,7 @@ export default function LandingPage() {
         </div>
 
         {/* Tech Signals Strip */}
-        <div className="absolute bottom-0 left-0 right-0 border-t border-white/10 bg-black/30 backdrop-blur-sm">
+        <div className="absolute z-50 bottom-0 left-0 right-0 border-t border-white/10 bg-black/30 backdrop-blur-sm">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex items-center justify-center gap-8 text-white/90 text-sm font-medium">
               <div className="flex items-center gap-2">
