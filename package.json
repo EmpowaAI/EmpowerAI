@@ -28,6 +28,9 @@
   ],
   "author": "Team Nicolette",
   "license": "MIT",
+  "engines": {
+    "node": "20.x"
+  },
   "dependencies": {},
   "devDependencies": {
     "concurrently": "^9.2.1"
