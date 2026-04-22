@@ -1,16 +1,6 @@
-/**
- * ChangePasswordDTO
- * Validates and sanitizes a change password request.
- * Requires the user's current password to confirm identity.
- *
- * Used by: PATCH /api/account/change-password → userService.changePassword
- */
 
 const { body, validationResult } = require('express-validator');
 
-// ─────────────────────────────────────────────
-// Validation rules
-// ─────────────────────────────────────────────
 const changePasswordRules = [
   body('currentPassword')
     .notEmpty().withMessage('Current password is required'),
@@ -31,9 +21,6 @@ const changePasswordRules = [
     .withMessage('Passwords do not match'),
 ];
 
-// ─────────────────────────────────────────────
-// Validation middleware
-// ─────────────────────────────────────────────
 const validateChangePassword = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -45,10 +32,6 @@ const validateChangePassword = (req, res, next) => {
   next();
 };
 
-// ─────────────────────────────────────────────
-// DTO builder — confirmPassword excluded,
-// only used for validation above
-// ─────────────────────────────────────────────
 const toChangePasswordDTO = (body) => ({
   currentPassword: body.currentPassword,
   newPassword:     body.newPassword,

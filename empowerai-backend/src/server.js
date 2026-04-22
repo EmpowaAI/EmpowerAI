@@ -7,6 +7,7 @@ const { pingAiServiceOnStartup } = require('./intergration/ai/ai.Health');
 const { runStartupTasks } = require('./config/seed');
 const { registerProcessHandlers } = require('./utils/shutdown');
 const { initAiQueue } = require('./intergration/queues/aiQueue');
+const seedAdmins = require('./utils/seedAdmin');
 
 const PORT = process.env.PORT || 5000;
 
@@ -29,6 +30,7 @@ async function boot() {
   // Connect to MongoDB
   const dbConnected = await connectDatabase();
 
+  await seedAdmins();
   // Run startup tasks (seed, schedulers) — skipped if DB is down
   await runStartupTasks(dbConnected);
 

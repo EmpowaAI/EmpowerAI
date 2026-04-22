@@ -41,6 +41,7 @@ class UserAccountService {
       name:       pending.name,
       email:      pending.email,
       password:   pending.password,
+      role: pending.role || 'user',
       isVerified: true,
 
       
