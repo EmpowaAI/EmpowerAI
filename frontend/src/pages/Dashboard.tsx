@@ -122,9 +122,9 @@ export default function Dashboard() {
   }, []);
 
   const quickActions = [
-    { icon: FileText, title: "Analyse CV", desc: "Get AI-powered CV insights for the SA market", path: "/dashboard/cv-analyzer", color: "sa-gold" },
-    { icon: MessageSquare, title: "Interview Coach", desc: "Practise with SA-specific interview questions", path: "/dashboard/interview-coach", color: "sa-terracotta" },
-    { icon: Briefcase, title: "Find Opportunities", desc: "AI-matched jobs, learnerships & graduate programmes", path: "/dashboard/opportunities", color: "sa-green" },
+    { icon: FileText, title: "Analyse CV", desc: "Get AI-powered CV insights for the SA market", path: "/dashboard/cv-analyzer", color: "secondary" },
+    { icon: MessageSquare, title: "Interview Coach", desc: "Practise with SA-specific interview questions", path: "/dashboard/interview-coach", color: "secondary" },
+    { icon: Briefcase, title: "Find Opportunities", desc: "AI-matched jobs, learnerships & graduate programmes", path: "/dashboard/opportunities", color: "primary" },
     { icon: Brain, title: "Digital Twin", desc: "Build and manage your AI twin profile", path: "/dashboard/twin-builder", color: "primary" },
   ];
 
@@ -143,29 +143,29 @@ export default function Dashboard() {
     <div className="min-h-screen p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="fixed inset-0 -z-10 sa-pattern opacity-20" />
-        <div className="fixed inset-0 -z-10 bg-gradient-to-br from-sa-gold/5 via-transparent to-sa-green/5" />
+        <div className="fixed inset-0 -z-10 bg-gradient-to-br from-secondary/5 via-transparent to-primary/5" />
 
         <AIThinkingIndicator messages={[aiMessage]} isVisible={aiThinking} />
 
         {/* Hero */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           <GlassCard glow="cyan" className="relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-sa-gold/20 to-transparent rounded-full blur-3xl -mr-32 -mt-32" />
-            <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-sa-green/20 to-transparent rounded-full blur-3xl -ml-24 -mb-24" />
+            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-secondary/20 to-transparent rounded-full blur-3xl -mr-32 -mt-32" />
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-primary/20 to-transparent rounded-full blur-3xl -ml-24 -mb-24" />
 
             <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-6">
               <div>
                 <div className="flex items-center gap-2 mb-3">
                   <motion.span
                     initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}
-                    className="px-3 py-1 rounded-full bg-sa-gold/10 border border-sa-gold/20 text-sa-gold text-xs font-semibold flex items-center gap-1.5"
+                    className="px-3 py-1 rounded-full bg-secondary/10 border border-secondary/20 text-secondary text-xs font-semibold flex items-center gap-1.5"
                   >
                     <Sparkles className="h-3.5 w-3.5" /> AI Command Centre
                   </motion.span>
                 </div>
                 <motion.h1 initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="text-3xl md:text-4xl font-display mb-2">
                   Welcome back,{" "}
-                  <span className="bg-gradient-to-r from-sa-gold to-sa-terracotta bg-clip-text text-transparent">{displayName}</span>
+                  <span className="bg-gradient-to-r from-secondary to-secondary bg-clip-text text-transparent">{displayName}</span>
                 </motion.h1>
                 <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="text-muted-foreground">
                   Your AI twin is actively analysing the SA career landscape for you.
@@ -174,7 +174,7 @@ export default function Dashboard() {
 
               {!loading && stats && stats.empowermentScore > 0 && (
                 <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.5 }} className="flex items-center gap-4">
-                  <div className="text-center p-4 bg-sa-gold/10 rounded-xl border border-sa-gold/20">
+                  <div className="text-center p-4 bg-secondary/10 rounded-xl border border-secondary/20">
                     <ScoreMeter score={stats.empowermentScore} label="Empowerment" size="md" />
                   </div>
                 </motion.div>
@@ -195,7 +195,7 @@ export default function Dashboard() {
                 <GlassCard className="text-center">
                   <ScoreMeter score={card.value} label={card.label} size="md" />
                   {card.value === 0 && (
-                    <p className="text-xs text-sa-gold mt-2 flex items-center justify-center gap-1">
+                    <p className="text-xs text-secondary mt-2 flex items-center justify-center gap-1">
                       <AlertCircle className="h-3 w-3" /> Not started
                     </p>
                   )}
@@ -209,9 +209,9 @@ export default function Dashboard() {
         {!loading && stats && (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { label: "Skills Matched", value: stats.skillsMatched, icon: BarChart3, color: "text-sa-gold" },
-              { label: "Opportunities", value: stats.opportunitiesCount, icon: Briefcase, color: "text-sa-green" },
-              { label: "Learnerships", value: stats.learnershipsCount || 0, icon: GraduationCap, color: "text-sa-terracotta" },
+              { label: "Skills Matched", value: stats.skillsMatched, icon: BarChart3, color: "text-secondary" },
+              { label: "Opportunities", value: stats.opportunitiesCount, icon: Briefcase, color: "text-primary" },
+              { label: "Learnerships", value: stats.learnershipsCount || 0, icon: GraduationCap, color: "text-secondary" },
               { label: "Applications", value: stats.applicationsCount || 0, icon: Target, color: "text-primary" },
             ].map((card, i) => (
               <motion.div key={card.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 * i }}>
@@ -249,23 +249,23 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <h3 className="font-display text-lg flex items-center gap-2">
-                      <Brain className="h-5 w-5 text-sa-gold" /> Your AI Journey
+                      <Brain className="h-5 w-5 text-secondary" /> Your AI Journey
                     </h3>
                     <p className="text-sm text-muted-foreground">Complete each step to unlock your full potential</p>
                   </div>
-                  <Target className="h-6 w-6 text-sa-terracotta" />
+                  <Target className="h-6 w-6 text-secondary" />
                 </div>
 
-                <div className="mb-6 p-4 bg-sa-gold/5 rounded-xl border border-sa-gold/20">
+                <div className="mb-6 p-4 bg-secondary/5 rounded-xl border border-secondary/20">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-medium text-muted-foreground">Overall Progress</span>
-                    <span className="text-xs font-bold text-sa-gold">{progressPercentage}%</span>
+                    <span className="text-xs font-bold text-secondary">{progressPercentage}%</span>
                   </div>
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }} animate={{ width: `${progressPercentage}%` }}
                       transition={{ delay: 0.8, duration: 1 }}
-                      className="h-full bg-gradient-to-r from-sa-gold to-sa-terracotta rounded-full"
+                      className="h-full bg-gradient-to-r from-secondary to-secondary rounded-full"
                     />
                   </div>
                 </div>
@@ -280,7 +280,7 @@ export default function Dashboard() {
                           className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-muted/20 opacity-75 cursor-not-allowed"
                         >
                           <div className="flex items-center gap-3">
-                            <div className="h-8 w-8 rounded-full bg-sa-green/20 border border-sa-green/50 text-sa-green flex items-center justify-center text-xs font-display">
+                            <div className="h-8 w-8 rounded-full bg-primary/20 border border-primary/50 text-primary flex items-center justify-center text-xs font-display">
                               <CheckCircle className="h-4 w-4" />
                             </div>
                             <span className="text-sm font-medium line-through text-muted-foreground">
@@ -297,7 +297,7 @@ export default function Dashboard() {
                       <Link
                         key={step.label}
                         to={step.path}
-                        className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-muted/20 hover:border-sa-gold/30 hover:bg-sa-gold/5 transition-all group cursor-pointer"
+                        className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-muted/20 hover:border-secondary/30 hover:bg-secondary/5 transition-all group cursor-pointer"
                       >
                         <div className="flex items-center gap-3">
                           <div className="h-8 w-8 rounded-full bg-primary/10 border border-primary/30 text-primary flex items-center justify-center text-xs font-display">
@@ -307,7 +307,7 @@ export default function Dashboard() {
                             {step.label}
                           </span>
                         </div>
-                        <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-sa-gold transition-colors" />
+                        <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-secondary transition-colors" />
                       </Link>
                     );
                   })}
@@ -320,14 +320,14 @@ export default function Dashboard() {
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
               <GlassCard>
                 <h4 className="text-xs font-display uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
-                  <Users className="h-4 w-4 text-sa-gold" /> Profile Snapshot
+                  <Users className="h-4 w-4 text-secondary" /> Profile Snapshot
                 </h4>
                 <div className="space-y-3">
                   <div><p className="text-xs text-muted-foreground">Province</p><p className="text-sm font-medium">Gauteng</p></div>
                   <div><p className="text-xs text-muted-foreground">Career Goals</p><p className="text-sm font-medium">Tech Career • Freelancing</p></div>
                   <div><p className="text-xs text-muted-foreground">Top Skills</p><p className="text-sm font-medium">JavaScript • React • TypeScript</p></div>
                 </div>
-                <Link to="/dashboard/twin-builder" className="mt-4 inline-flex items-center gap-2 text-xs text-sa-gold hover:text-sa-terracotta transition-colors font-medium">
+                <Link to="/dashboard/twin-builder" className="mt-4 inline-flex items-center gap-2 text-xs text-secondary hover:text-secondary transition-colors font-medium">
                   Update profile <ArrowRight className="h-3 w-3" />
                 </Link>
               </GlassCard>
@@ -353,11 +353,11 @@ export default function Dashboard() {
             ))}
 
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.2 }}>
-              <GlassCard className="bg-gradient-to-br from-sa-gold/10 to-sa-terracotta/10 border-sa-gold/30">
+              <GlassCard className="bg-gradient-to-br from-secondary/10 to-secondary/10 border-secondary/30">
                 <div className="flex items-center gap-3">
                   <div className="relative">
-                    <div className="absolute inset-0 bg-sa-gold rounded-full animate-ping opacity-20" />
-                    <Brain className="h-8 w-8 text-sa-gold relative" />
+                    <div className="absolute inset-0 bg-secondary rounded-full animate-ping opacity-20" />
+                    <Brain className="h-8 w-8 text-secondary relative" />
                   </div>
                   <div>
                     <h4 className="font-display text-sm">AI Twin Active</h4>
