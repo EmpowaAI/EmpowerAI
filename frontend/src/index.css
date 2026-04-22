@@ -6,55 +6,48 @@
 @tailwind utilities;
 
 :root {
-  /* EMOWAI Design System - Ubuntu navy + warm orange */
+  /* Core Colors - EMOWAI Specification */
   --background: hsl(40 33% 98%);
   --foreground: hsl(220 55% 18%);
-
-  --card: hsl(0 0% 100%);
-  --card-foreground: hsl(220 55% 18%);
-
-  --popover: hsl(0 0% 100%);
-  --popover-foreground: hsl(220 55% 18%);
-
   --primary: hsl(218 64% 28%);
-  --primary-foreground: hsl(0 0% 100%);
-
-  --secondary: hsl(38 28% 94%);
-  --secondary-foreground: hsl(220 55% 18%);
-
-  --muted: hsl(38 28% 94%);
-  --muted-foreground: hsl(220 55% 18%);
-
-  --accent: hsl(38 28% 94%);
+  --primary-foreground: hsl(40 33% 98%);
+  --secondary: hsl(22 95% 55%);
+  --secondary-foreground: hsl(0 0% 100%);
+  
+  /* Accents */
+  --accent: hsl(18 92% 58%);
   --accent-foreground: hsl(220 55% 18%);
-
-  --destructive: hsl(0 84% 60%);
-  --destructive-foreground: hsl(0 0% 100%);
-
+  --accent-orange: hsl(18 92% 58%);
+  --muted: hsl(38 28% 94%);
+  --muted-foreground: hsl(220 20% 42%);
+  
+  /* Border & UI */
   --border: hsl(30 20% 88%);
   --input: hsl(30 20% 88%);
   --ring: hsl(218 64% 28%);
+  --radius: 0.625rem;
 
-  --radius: 0.75rem;
+  /* Card & Popover */
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(220 55% 18%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(220 55% 18%);
 
-  /* EMOWAI Gradient System */
+  /* Destructive */
+  --destructive: hsl(0 84% 60%);
+  --destructive-foreground: hsl(0 0% 100%);
+
+  /* Gradients (CRITICAL - Navy -> Orange ONLY) */
+  --gradient-ai: linear-gradient(135deg, hsl(218 64% 28%) 0%, hsl(22 95% 55%) 100%);
   --gradient-hero: linear-gradient(110deg, hsl(218 64% 32%) 0%, hsl(218 60% 45%) 45%, hsl(22 88% 60%) 100%);
   --gradient-cta: linear-gradient(180deg, hsl(22 95% 60%) 0%, hsl(18 92% 50%) 100%);
-  --gradient-ai: linear-gradient(135deg, hsl(218 64% 28%) 0%, hsl(22 95% 55%) 100%);
-
-  /* EMOWAI Shadow System */
+  
+  /* Shadows */
+  --shadow-glow: 0 10px 30px -12px hsl(22 95% 50% / 0.35);
   --shadow-card: 0 4px 20px -8px hsl(218 64% 28% / 0.15);
   --shadow-cta: 0 8px 24px -8px hsl(22 95% 50% / 0.45);
-  --shadow-glow: 0 10px 30px -12px hsl(22 95% 50% / 0.35);
 
-  /* Legacy colors for compatibility */
-  --sa-green: hsl(155 63% 45%);
-  --sa-gold: hsl(45 90% 55%);
-  --sa-red: hsl(0 84% 60%);
-  --sa-blue: hsl(218 64% 28%);
-  --sa-black: hsl(220 55% 18%);
-  --sa-terracotta: hsl(15 70% 55%);
-
+  /* Sidebar compatibility */
   --sidebar-background: hsl(40 33% 98%);
   --sidebar-foreground: hsl(220 55% 18%);
   --sidebar-primary: hsl(218 64% 28%);
@@ -193,8 +186,8 @@
   /* Pulsing orange dot */
   .ai-dot {
     width: 8px; height: 8px; border-radius: 9999px;
-    background: hsl(22 95% 55%);
-    box-shadow: 0 0 0 0 hsl(22 95% 55% / 0.7);
+    background: hsl(var(--secondary));
+    box-shadow: 0 0 0 0 hsl(var(--secondary) / 0.7);
     animation: aiPulse 1.8s ease-out infinite;
   }
 
@@ -213,9 +206,8 @@
 
   /* EMOWAI Animation Keyframes */
   @keyframes floatBlob {
-    0%, 100% { transform: translate(0, 0) rotate(0deg); }
-    33% { transform: translate(30px, -100px) rotate(120deg); }
-    66% { transform: translate(-20px, 100px) rotate(240deg); }
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(40px, -30px) scale(1.08); }
   }
 
   @keyframes shimmerSweep {
