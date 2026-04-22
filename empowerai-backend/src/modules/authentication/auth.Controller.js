@@ -1,5 +1,3 @@
-
-
 const logger      = require('../../utils/logger');
 const { sendSuccess } = require('../../utils/response');
 const authService = require('./auth.Service');
@@ -54,8 +52,7 @@ exports.validate = async (req, res, next) => {
 exports.logout = async (req, res, next) => {
   const correlationId = req.correlationId;
   try {
-    // For JWT-based authentication, logout is handled client-side by clearing the token
-    // No server-side action needed since tokens are stateless
+  
     logger.info('User logged out successfully', { correlationId, userId: req.user.id });
     return sendSuccess(res, { message: 'Logged out successfully' });
   } catch (error) {

@@ -1,12 +1,12 @@
 const express = require('express');
-const auth = require('../../middleware/auth');
+const { protect, restrictTo } = require('../../middleware/auth');
 const { createApplication, getMyApplications, getMyApplicationStats } = require('./application.Controller');
 const router = express.Router();
 
-router.use(auth);
+router.use(protect);
 
-router.get('/', getMyApplications);
-router.get('/stats', getMyApplicationStats);
-router.post('/', createApplication);
+router.get('/', protect,getMyApplications);
+router.get('/stats', protect, getMyApplicationStats);
+router.post('/', protect, createApplication);
 
 module.exports = router;

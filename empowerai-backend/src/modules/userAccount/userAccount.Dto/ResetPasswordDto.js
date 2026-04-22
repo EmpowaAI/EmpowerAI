@@ -1,14 +1,6 @@
-/**
- * ResetPasswordDTO
- * Validates and sanitizes the reset password request body.
- * Used by: POST /api/account/reset → AccountController.resetPassword → userService.resetPassword
- */
 
 const { body, validationResult } = require('express-validator');
 
-// ─────────────────────────────────────────────
-// Validation rules
-// ─────────────────────────────────────────────
 const resetPasswordRules = [
   body('token')
     .trim()
@@ -30,9 +22,6 @@ const resetPasswordRules = [
     .withMessage('Passwords do not match'),
 ];
 
-// ─────────────────────────────────────────────
-// Validation middleware
-// ─────────────────────────────────────────────
 const validateResetPassword = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -44,10 +33,6 @@ const validateResetPassword = (req, res, next) => {
   next();
 };
 
-// ─────────────────────────────────────────────
-// DTO builder — confirmPassword is intentionally
-// excluded; it's only used for validation above
-// ─────────────────────────────────────────────
 const toResetPasswordDTO = (body) => ({
   token:       body.token,
   newPassword: body.newPassword,
