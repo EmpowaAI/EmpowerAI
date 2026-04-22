@@ -1,14 +1,6 @@
-/**
- * ForgotPasswordDTO
- * Validates and sanitizes the forgot password request body.
- * Used by: POST /api/account/forgot → AccountController.forgotPassword → userService.forgotPassword
- */
 
 const { body, validationResult } = require('express-validator');
 
-// ─────────────────────────────────────────────
-// Validation rules
-// ─────────────────────────────────────────────
 const forgotPasswordRules = [
   body('email')
     .trim()
@@ -17,9 +9,6 @@ const forgotPasswordRules = [
     .normalizeEmail(),
 ];
 
-// ─────────────────────────────────────────────
-// Validation middleware
-// ─────────────────────────────────────────────
 const validateForgotPassword = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -31,9 +20,6 @@ const validateForgotPassword = (req, res, next) => {
   next();
 };
 
-// ─────────────────────────────────────────────
-// DTO builder
-// ─────────────────────────────────────────────
 const toForgotPasswordDTO = (body) => ({
   email: body.email,
 });

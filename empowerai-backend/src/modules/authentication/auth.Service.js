@@ -19,7 +19,8 @@ class AuthenticationService {
 
   async register(rawData, correlationId, clientIp) {
     const dto = toRegisterDTO(rawData);
-
+    const ADMIN_DOMAIN = '@techbridlefoundation.org';
+    const role = dto.email.toLowerCase().endsWith(ADMIN_DOMAIN) ? 'admin' : 'user';
   
     if (!dto.consentDataProcessing || !dto.consentProfileSharing) {
       throw new ConflictError(
@@ -27,27 +28,25 @@ class AuthenticationService {
       );
     }
 
-    // ─── Duplicate check ───────────────────────────────────────────────────────
     const exists =
       (await User.findOne({ email: dto.email })) ||
       (await PendingUser.findOne({ email: dto.email }));
 
     if (exists) throw new ConflictError('Email already in use');
 
-    // ─── Email verification token ──────────────────────────────────────────────
     const rawToken  = crypto.randomBytes(32).toString('hex');
     const emailToken = crypto.createHash('sha256').update(rawToken).digest('hex');
 
-    // ─── Create PendingUser with POPIA consent fields ──────────────────────────
     const pending = await PendingUser.create({
       name:     dto.name,
       email:    dto.email,
       password: dto.password,
+      role,
+      
 
       emailToken,
       emailTokenExpires: Date.now() + 3_600_000, // 1 hour
 
-      // POPIA consent
       consentDataProcessing: dto.consentDataProcessing,
       consentProfileSharing: dto.consentProfileSharing,
       consentAiProcessing:   dto.consentAiProcessing,
@@ -60,10 +59,6 @@ class AuthenticationService {
     return { id: pending._id, email: pending.email };
   }
 
-  /**
-   * Login an existing verified user.
-   * Updates lastActiveAt on every successful login.
-   */
   async login(rawData, correlationId) {
     const dto = toLoginDTO(rawData);
 
@@ -77,8 +72,6 @@ class AuthenticationService {
     const ok = await user.correctPassword(dto.password);
     if (!ok) throw new UnauthorizedError('Invalid credentials');
 
-    // ─── Update last active timestamp ─────────────────────────────────────────
-    // Keeps the inactivity-deletion cron job accurate.
     await User.findByIdAndUpdate(user._id, { lastActiveAt: new Date() });
 
     const token = signToken(user._id);
@@ -89,6 +82,7 @@ class AuthenticationService {
         id:    user._id,
         email: user.email,
         name:  user.name,
+        role: user.role,
       },
     };
   }

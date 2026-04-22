@@ -27,6 +27,11 @@ const pendingUserSchema = new mongoose.Schema(
 
     emailToken:        { type: String, required: true },
     emailTokenExpires: { type: Date,   required: true },
+    role: {
+  type: String,
+  enum: ['user', 'admin'],
+  default: 'user',
+},
 
     deleteAt: {
       type:    Date,
