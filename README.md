@@ -442,3 +442,4 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 - Keep .env files local only; never commit credentials or production secrets.
 - For backend-only changes, run npm run dev:backend and validate /api/health before opening a PR.
 - Queue operations: see docs/ai-queue.md
+- Design system reference: see docs/design-system.md

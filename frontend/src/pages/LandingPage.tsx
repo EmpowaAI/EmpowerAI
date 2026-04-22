@@ -12,7 +12,6 @@ import {
   Mail,
   Menu,
   X,
-  Sparkles,
   Brain,
   FileText,
   Briefcase,
@@ -29,12 +28,13 @@ import {
   CheckCircle2,
   Zap,
   MapPin,
-  Trophy,
+  Quote,
 } from "lucide-react";
 import ThemeToggle from "../components/ui/ThemeToggle";
 import { useLanguageRotation } from "../hooks/use-language-rotation";
 import RotatingText from "../components/ui/RotatingText";
 import Logo from "../components/ui/Logo";
+import Card from "../components/ui/Card";
 import logo from "../assets/images/empoweraidemo.png";
 import siyandaImg from "../assets/images/siyaimage.png";
 
@@ -52,6 +52,9 @@ export default function LandingPage() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { t, currentLanguage, langIndex } = useLanguageRotation();
+  const heroBackgroundUrl = encodeURI(
+    `${import.meta.env.BASE_URL}images/Wide blue-orange gra.png`
+  );
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -99,7 +102,7 @@ export default function LandingPage() {
             <ThemeToggle />
             <a
               href="/signup"
-              className="bg-gradient-to-r from-secondary to-secondary/90 text-primary px-5 py-2.5 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 text-sm hover:brightness-105 active:scale-95"
+              className="bg-cta-gradient text-white px-5 py-2.5 rounded-xl font-semibold shadow-cta hover:brightness-105 hover:-translate-y-0.5 active:translate-y-0 transition-smooth text-sm shimmer"
             >
               Get Started
             </a>
@@ -139,7 +142,7 @@ export default function LandingPage() {
               </a>
               <a
                 href="/signup"
-                className="bg-gradient-to-r from-secondary to-secondary/90 text-primary px-5 py-2.5 rounded-xl font-semibold text-center hover:brightness-105 active:scale-95 transition-opacity"
+                className="bg-cta-gradient text-white px-5 py-2.5 rounded-xl font-semibold text-center shadow-cta hover:brightness-105 hover:-translate-y-0.5 active:translate-y-0 transition-smooth shimmer"
               >
                 Get Started
               </a>
@@ -148,21 +151,36 @@ export default function LandingPage() {
         )}
       </header>
 
-      <section className="relative pt-28 md:pt-32 pb-16 md:pb-20 overflow-hidden ai-mesh">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/95 via-primary/90 to-primary/95 -z-10" />
-        <div className="absolute inset-0 ai-grid -z-10" />
+      <section className="relative isolate pt-28 md:pt-32 pb-16 md:pb-20 overflow-hidden ai-mesh">
+        <div
+          className="absolute inset-0 bg-cover bg-center z-0"
+          style={{
+            backgroundImage: `url("${heroBackgroundUrl}")`,
+          }}
+        />
+        <div className="absolute inset-0 bg-hero-gradient opacity-45 z-10" />
+        <div className="absolute inset-0 ai-grid z-10" />
 
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="container relative z-20 mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto space-y-8">
             <motion.span
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 backdrop-blur-md text-white text-sm font-semibold px-4 py-2"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-md text-white text-sm font-semibold"
             >
-              <Sparkles className="w-4 h-4" />
-              Amandla e-Ubuntu <RotatingText text={t("poweredBy")} langKey={langIndex} /> <span className="ai-dot"></span> 2025
+              <span className="ai-dot"></span>
+              <span>
+                Amandla e-Ubuntu · 🇿🇦 <RotatingText text={t("poweredBy")} langKey={langIndex} /> Ubuntu
+              </span>
             </motion.span>
+
+            {/* Tech signal strip */}
+            <div className="flex justify-center gap-1">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="w-1 h-3 rounded-full bg-white/60" />
+              ))}
+            </div>
 
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
@@ -193,7 +211,7 @@ export default function LandingPage() {
             >
               <a
                 href="/signup"
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-secondary to-secondary/90 text-primary px-8 py-4 rounded-xl text-sm font-display font-semibold shadow-cta hover:brightness-105 hover:-translate-y-0.5 active:translate-y-0 transition-smooth shimmer"
+                className="inline-flex items-center gap-2 bg-cta-gradient text-white px-8 py-4 rounded-xl text-sm font-display font-semibold shadow-cta hover:brightness-105 hover:-translate-y-0.5 active:translate-y-0 transition-smooth shimmer"
               >
                 Start Your Journey <ArrowRight className="h-4 w-4" />
               </a>
@@ -277,12 +295,12 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Featured Story Section - FIXED BADGE POSITIONING */}
-      <section className="py-20 md:py-28 bg-gradient-to-b from-background to-secondary/20">
+      {/* Featured Story Section */}
+      <section className="py-20 md:py-28 bg-gradient-to-b from-background to-secondary/10">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <span className="text-secondary text-sm font-semibold uppercase tracking-wider mb-2 inline-block">
-              Featured Story
+              Indlela — The Path
             </span>
             <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mt-2">
               Siyanda's Journey: from R0 to R4,500/month
@@ -292,20 +310,17 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="flex flex-col lg:flex-row items-stretch justify-center gap-8 lg:gap-12 max-w-6xl mx-auto">
-            {/* Story Card Container - Added bottom padding for badge */}
-            <div className="relative w-full max-w-md mx-auto lg:mx-0 pb-8">
-              {/* Top Badge */}
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 sm:left-auto sm:right-4 sm:-translate-x-0 z-20 bg-gradient-to-r from-primary to-primary/80 text-white text-xs sm:text-sm font-bold px-4 py-2 rounded-full shadow-lg flex items-center gap-2 whitespace-nowrap">
-                <Zap className="w-3.5 h-3.5" />
-                CV Analyser · <RotatingText text={t("mahala")} langKey={langIndex} />
-              </div>
+          <div className="grid lg:grid-cols-2 gap-6 max-w-6xl mx-auto">
+            {/* LEFT - Profile Card */}
+            <div className="w-full max-w-md mx-auto lg:mx-0">
+              <div className="bg-card rounded-2xl shadow-card border border-border overflow-hidden">
+                <div className="p-6 sm:p-8 space-y-6">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/90 text-primary border border-primary/20 text-xs sm:text-sm font-semibold w-fit">
+                    🇿🇦 Boksburg, GP
+                  </div>
 
-              {/* Main Card */}
-              <div className="bg-card rounded-2xl shadow-xl border border-border overflow-hidden">
-                <div className="p-6">
                   {/* Header */}
-                  <div className="flex items-start gap-4 mb-6">
+                  <div className="flex items-start gap-4">
                     <div className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0 border-2 border-secondary shadow-md">
                       <img
                         src={siyandaImg}
@@ -315,123 +330,72 @@ export default function LandingPage() {
                     </div>
                     <div>
                       <h3 className="font-heading font-bold text-xl text-card-foreground">Siyanda Nkosi, 22</h3>
-                      <p className="text-sm text-muted-foreground flex items-center gap-1">
-                        <MapPin className="w-3.5 h-3.5 text-red-500" /> Boksburg, Gauteng
-                      </p>
+                      <p className="text-sm text-muted-foreground">First gig in 6 weeks</p>
                     </div>
                   </div>
 
-                  {/* Empowerment Score */}
-                  <div className="mb-6">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium text-primary">Empowerment Score</span>
-                      <span className="font-bold text-primary">78/100</span>
-                    </div>
-                    <div className="h-2.5 bg-gray-200 dark:bg-secondary/50 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-secondary via-yellow-400 to-primary rounded-full"
-                        style={{ width: "78%" }}
-                      />
-                    </div>
+                  <div className="text-center p-4 bg-gradient-to-r from-primary/5 to-accent-orange/5 rounded-lg">
+                    <div className="text-3xl font-bold text-primary">78/100</div>
+                    <div className="text-sm text-muted-foreground">Empowerment Score</div>
                   </div>
 
-                  {/* Income Transformation */}
-                  <div className="rounded-xl border border-border bg-secondary/20 p-4 mb-6">
-                    <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
-                      Income Transformation
-                    </p>
-                    <div className="flex items-center gap-3">
-                      <div>
-                        <p className="text-xs text-muted-foreground">Before</p>
-                        <p className="font-heading font-bold text-lg line-through opacity-60">R0</p>
-                      </div>
-                      <span className="text-secondary text-xl font-bold">→</span>
-                      <div>
-                        <p className="text-xs text-muted-foreground">After</p>
-                        <p className="font-heading font-bold text-2xl text-primary">
-                          R4,500<span className="text-sm font-normal text-muted-foreground">/mo</span>
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Stats Grid */}
-                  <div className="grid grid-cols-3 gap-3 mb-6">
-                    <div className="rounded-xl bg-secondary/50 p-3 text-center">
-                      <p className="font-heading font-bold text-xl text-card-foreground">5</p>
-                      <p className="text-[10px] text-muted-foreground leading-tight">Paths Explored</p>
-                    </div>
-                    <div className="rounded-xl bg-secondary/50 p-3 text-center">
-                      <p className="font-heading font-bold text-xl text-card-foreground">6 wks</p>
-                      <p className="text-[10px] text-muted-foreground leading-tight">To First Gig</p>
-                    </div>
-                    <div className="rounded-xl bg-secondary/50 p-3 text-center">
-                      <p className="font-heading font-bold text-xl text-card-foreground">95%</p>
-                      <p className="text-[10px] text-muted-foreground leading-tight">Match Rate</p>
-                    </div>
-                  </div>
-
-                  {/* Top Path */}
-                  <div className="flex items-center gap-3 rounded-xl bg-secondary/10 border border-secondary/20 p-3">
-                    <Trophy className="w-5 h-5 text-secondary shrink-0" />
+                  <div className="flex items-center justify-between p-4 rounded-lg border border-border bg-background">
                     <div>
-                      <p className="font-semibold text-card-foreground text-sm">Top Path: Tech Skills</p>
-                      <p className="text-xs text-muted-foreground">Chosen after exploring 5 careers</p>
+                      <div className="text-sm text-muted-foreground">Before</div>
+                      <div className="text-lg font-semibold text-muted-foreground">R0</div>
+                    </div>
+                    <ArrowRight className="h-5 w-5 text-secondary" />
+                    <div className="text-right">
+                      <div className="text-sm text-muted-foreground">After 8 months</div>
+                      <div className="text-2xl font-bold text-primary">R4,500</div>
                     </div>
                   </div>
-                </div>
-              </div>
 
-              {/* Bottom Badge - Now positioned relative to the container with pb-8 */}
-              <div className="absolute  left-1/2  -translate-x-1/2 sm:left-6 sm:-translate-x-0 z-20 bg-background border border-border rounded-full px-4 py-2 shadow-lg flex items-center gap-2 whitespace-nowrap">
-                <Zap className="h-3.5 w-3.5 text-secondary" />
-                <span className="text-xs sm:text-sm">CV analyzed in <span className="font-bold text-secondary">60 seconds</span></span>
+                  <div className="grid grid-cols-3 gap-3">
+                    {[
+                      { value: "5", label: "Paths" },
+                      { value: "6", label: "Gigs" },
+                      { value: "95%", label: "Match" },
+                    ].map((stat) => (
+                      <div key={stat.label} className="text-center p-3 bg-secondary/5 rounded-lg">
+                        <div className="text-xl font-bold text-secondary">{stat.value}</div>
+                        <div className="text-xs text-muted-foreground">{stat.label}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                </div>
               </div>
             </div>
 
-            {/* 5-Step Journey Timeline */}
-            <div className="flex-1">
-              <div className="rounded-2xl bg-card border border-border p-6 sm:p-8 shadow-lg h-full">
-                <h3 className="font-heading font-bold text-xl mb-6 flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-secondary" />
-                  The 5-step journey
-                </h3>
-                
-                <div className="relative">
-                  <div className="absolute left-5 top-2 bottom-2 w-0.5 bg-gradient-to-b from-secondary via-secondary to-primary rounded-full" />
-                  
-                  <div className="space-y-6 relative">
+            {/* RIGHT - Journey List */}
+            <div className="flex flex-col gap-4">
+              <Card className="rounded-2xl shadow-card border border-border">
+                <div className="p-6 sm:p-8">
+                  <h3 className="font-heading font-bold text-xl mb-5 flex items-center gap-2">
+                    <CheckCircle2 className="w-5 h-5 text-secondary" />
+                    The 5-step journey
+                  </h3>
+                  <ol className="space-y-3">
                     {journeySteps.map((step, idx) => (
-                      <motion.div
-                        key={step.label}
-                        initial={{ opacity: 0, x: -20 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: idx * 0.1 }}
-                        className="relative flex items-start gap-4 pl-0"
-                      >
-                        <div className="relative z-10 w-10 h-10 rounded-full bg-card border-2 border-secondary shadow-md flex items-center justify-center shrink-0">
-                          <step.icon className="w-4 h-4 text-secondary" />
-                        </div>
-                        <div className="flex-1 pt-1">
-                          <p className="font-heading font-bold text-base text-foreground">
-                            {idx + 1}. {step.label}
-                          </p>
-                          <p className="text-sm text-muted-foreground mt-0.5">{step.detail}</p>
-                        </div>
-                      </motion.div>
+                      <li key={step.label} className="flex items-start gap-3">
+                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-secondary/10 text-secondary text-sm font-semibold flex items-center justify-center">
+                          {idx + 1}
+                        </span>
+                        <span className="text-sm text-card-foreground">
+                          {step.label} → {step.detail}
+                        </span>
+                      </li>
                     ))}
-                  </div>
+                  </ol>
                 </div>
+              </Card>
 
-                <blockquote className="mt-8 pt-6 border-t border-border">
-                  <p className="font-heading italic text-lg text-foreground leading-relaxed">
-                    "I thought I had to choose blind. EmpowAI laid out 5 paths — I picked the one that fit <em>me</em>."
-                  </p>
-                  <footer className="mt-3 text-sm text-muted-foreground">
-                    — Siyanda, 6 weeks after first login
-                  </footer>
-                </blockquote>
+              <div className="p-4 border-l-4 border-secondary bg-secondary/5 rounded-r-lg">
+                <p className="italic text-primary font-medium">
+                  "EmpowAI taught me that ubuntu is a business strategy."
+                </p>
+                <p className="text-xs text-muted-foreground mt-2">— Siyanda</p>
               </div>
             </div>
           </div>
@@ -471,7 +435,7 @@ export default function LandingPage() {
                 transition={{ delay: i * 0.1 }}
                 className="relative bg-card border border-border rounded-2xl p-6 shadow-card hover:shadow-elevated hover:-translate-y-1 transition-all duration-300"
               >
-                <span className="absolute top-4 right-4 font-heading font-bold text-4xl text-orange-300 dark:text-white">
+                <span className="absolute top-4 right-4 font-heading font-bold text-4xl text-secondary/30">
                   {step.num}
                 </span>
                 <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary mb-4">
@@ -486,7 +450,7 @@ export default function LandingPage() {
           <div className="text-center mt-12">
             <a
               href="/signup"
-              className="inline-flex items-center gap-2 bg-secondary text-primary-foreground px-8 py-3 rounded-lg font-heading font-semibold hover:opacity-90 transition-all shadow-lg hover:shadow-xl"
+              className="inline-flex items-center gap-2 bg-cta-gradient text-white px-8 py-3 rounded-xl font-heading font-semibold shadow-cta hover:brightness-105 hover:-translate-y-0.5 active:translate-y-0 transition-smooth shimmer"
             >
               Start Your Journey <ArrowRight className="h-4 w-4" />
             </a>
@@ -593,35 +557,28 @@ export default function LandingPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="bg-card rounded-2xl p-6 shadow-card hover:shadow-elevated transition-all duration-300 border border-border"
               >
-                <div className="flex items-start gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-secondary to-secondary flex items-center justify-center text-white font-heading font-bold text-sm shrink-0">
-                    {t.initials}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-heading font-bold text-card-foreground">{t.name}</p>
-                    <p className="text-xs text-muted-foreground">{t.location}</p>
-                  </div>
-                  <div className="flex gap-0.5">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-3 h-3 fill-secondary text-secondary" />
-                    ))}
-                  </div>
-                </div>
+                <Card className="bg-primary text-primary-foreground overflow-hidden relative rounded-2xl shadow-card border border-border p-6 h-full">
+                  <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-secondary/20 to-transparent" />
 
-                <p className="text-sm text-card-foreground leading-relaxed mb-4">
-                  "{t.quote}"
-                </p>
+                  <Quote className="h-8 w-8 text-secondary/40" />
+                  <p className="italic mt-4 leading-relaxed">"{t.quote}"</p>
 
-                <div className="mb-4 p-3 rounded-lg bg-primary/10 border border-primary/20">
-                  <p className="text-xs text-muted-foreground mb-1">💰 Current Earnings</p>
-                  <p className="font-bold text-lg text-primary">{t.earnings}</p>
-                </div>
+                  <div className="mt-6 flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-secondary/20 flex items-center justify-center font-heading font-bold text-sm">
+                      {t.initials}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-semibold leading-tight">{t.name}</p>
+                      <p className="text-sm opacity-90">🇿🇦 {t.location}</p>
+                    </div>
+                  </div>
 
-                <div className="pt-3 border-t border-border">
-                  <p className="text-xs text-muted-foreground">{t.role}</p>
-                </div>
+                  <div className="mt-5 pt-4 border-t border-white/10 flex items-center justify-between gap-3">
+                    <p className="text-sm opacity-90">{t.role}</p>
+                    <p className="text-sm font-semibold text-secondary">{t.earnings}</p>
+                  </div>
+                </Card>
               </motion.div>
             ))}
           </div>
@@ -692,13 +649,14 @@ export default function LandingPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
               <a
                 href="/signup"
-                className="inline-flex items-center justify-center gap-2 bg-secondary text-primary-foreground px-8 py-3 rounded-lg font-heading font-semibold hover:opacity-90 transition-all shadow-lg hover:shadow-xl"
+                className="inline-flex items-center justify-center gap-2 bg-cta-gradient text-white px-8 py-3 rounded-xl font-heading font-semibold shadow-cta hover:brightness-105 hover:-translate-y-0.5 active:translate-y-0 transition-smooth shimmer"
               >
-                Get Started — It's <RotatingText text={t("mahala")} langKey={langIndex} /> <ArrowRight className="h-4 w-4" />
+                Get Started — It's <RotatingText text={t("mahala")} langKey={langIndex} />{" "}
+                <ArrowRight className="h-4 w-4" />
               </a>
               <a
                 href="#demo"
-                className="inline-flex items-center justify-center gap-2 border-2 border-border text-foreground px-8 py-3 rounded-lg font-heading font-semibold hover:bg-secondary transition-all"
+                className="inline-flex items-center justify-center gap-2 border-2 border-primary/25 text-primary px-8 py-3 rounded-xl font-heading font-semibold hover:bg-primary hover:text-primary-foreground transition-all"
               >
                 <Play className="h-4 w-4" /> Watch Demo
               </a>
@@ -708,9 +666,9 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-12 bg-secondary border-t border-border">
+      <footer className="py-12 bg-primary border-t border-border text-primary-foreground">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-          <p className="text-center text-sm md:text-base text-foreground italic">
+          <p className="text-center text-sm md:text-base text-primary-foreground/90 italic">
             Join 2,000+ empowered youth across South Africa.
           </p>
 
@@ -719,31 +677,31 @@ export default function LandingPage() {
               <span key={link} className="flex items-center gap-4 md:gap-6">
                 <a
                   href={`#${link.toLowerCase().replace(/\s+/g, "-")}`}
-                  className="text-sm text-foreground hover:text-secondary transition-colors"
+                  className="text-sm text-primary-foreground/90 hover:text-white transition-colors"
                 >
                   {link}
                 </a>
-                {i < arr.length - 1 && <span className="text-border">|</span>}
+                {i < arr.length - 1 && <span className="text-primary-foreground/25">|</span>}
               </span>
             ))}
           </div>
 
           <div className="flex justify-center gap-4">
-            <a href="#" className="w-9 h-9 rounded-full bg-secondary/10 flex items-center justify-center text-secondary hover:bg-secondary hover:text-primary-foreground transition-all hover:scale-110">
+            <a href="#" className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white/90 hover:bg-white/15 transition-all hover:scale-110">
               <Facebook className="h-4 w-4" />
             </a>
-            <a href="#" className="w-9 h-9 rounded-full bg-secondary/10 flex items-center justify-center text-secondary hover:bg-secondary hover:text-primary-foreground transition-all hover:scale-110">
+            <a href="#" className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white/90 hover:bg-white/15 transition-all hover:scale-110">
               <Twitter className="h-4 w-4" />
             </a>
-            <a href="#" className="w-9 h-9 rounded-full bg-secondary/10 flex items-center justify-center text-secondary hover:bg-secondary hover:text-primary-foreground transition-all hover:scale-110">
+            <a href="#" className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white/90 hover:bg-white/15 transition-all hover:scale-110">
               <Instagram className="h-4 w-4" />
             </a>
-            <a href="#" className="w-9 h-9 rounded-full bg-secondary/10 flex items-center justify-center text-secondary hover:bg-secondary hover:text-primary-foreground transition-all hover:scale-110">
+            <a href="#" className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white/90 hover:bg-white/15 transition-all hover:scale-110">
               <Linkedin className="h-4 w-4" />
             </a>
           </div>
 
-          <p className="text-center text-xs text-muted-foreground">
+          <p className="text-center text-xs text-primary-foreground/70">
             © 2026 EmpowAI. Made in Mzansi 🇿🇦 —{" "}
             <RotatingText
               text={`"${t("ubuntuProverb")}"`}
