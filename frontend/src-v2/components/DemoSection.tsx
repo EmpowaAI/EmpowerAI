@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -19,6 +18,8 @@ import {
   X,
 } from "lucide-react";
 import { useReveal } from "@/hooks/use-reveal";
+import { PremiumGate } from "@/components/PremiumGate";
+import { useAuth } from "@/hooks/use-auth";
 
 type Step = 0 | 1 | 2 | 3;
 
@@ -30,12 +31,14 @@ const PATHS = [
   { icon: Palette, name: "Creative Industries", match: 61, income: "R2,000 – R16,000", time: "10 wks", tone: "from-accent-orange to-secondary" },
 ] as const;
 
-export function DemoSection() {
+export const DemoSection = () => {
   const { ref, revealed } = useReveal<HTMLDivElement>();
+  const { isPremium } = useAuth();
   const [step, setStep] = useState<Step>(0);
   const [progress, setProgress] = useState(0);
   const [chosen, setChosen] = useState<number | null>(null);
 
+  // Animate the analyser progress on step 1
   useEffect(() => {
     if (step !== 1) return;
     setProgress(0);
@@ -44,11 +47,13 @@ export function DemoSection() {
     let raf = 0;
     const tick = (now: number) => {
       const t = Math.min(1, (now - start) / duration);
+      // ease-out cubic
       const eased = 1 - Math.pow(1 - t, 3);
       setProgress(Math.round(eased * 100));
       if (t < 1) {
         raf = requestAnimationFrame(tick);
       } else {
+        // auto-advance to results
         setTimeout(() => setStep(2), 400);
       }
     };
@@ -62,16 +67,25 @@ export function DemoSection() {
     setChosen(null);
   };
 
-  const stepLabels = useMemo(() => ["Upload", "Analyse", "Explore", "Match"], []);
+  const stepLabels = useMemo(
+    () => ["Upload", "Analyse", "Explore", "Match"],
+    []
+  );
 
   return (
-    <section id="demo" ref={ref} className="relative overflow-hidden bg-background py-16 sm:py-20 md:py-24">
+    <section
+      id="demo"
+      ref={ref}
+      className="relative overflow-hidden bg-background py-16 sm:py-20 md:py-24"
+    >
+      {/* Ambient backdrop */}
       <div className="pointer-events-none absolute inset-0 -z-10 opacity-60">
         <div className="absolute left-1/2 top-0 h-72 w-[120%] -translate-x-1/2 rounded-full bg-secondary/15 blur-3xl" />
         <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-primary/15 blur-3xl" />
       </div>
 
       <div className="container">
+        {/* Header */}
         <div
           className={`mx-auto max-w-2xl text-center transition-all duration-700 ${
             revealed ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
@@ -89,6 +103,7 @@ export function DemoSection() {
           </p>
         </div>
 
+        {/* Step indicator */}
         <div
           className={`mx-auto mt-8 flex max-w-md items-center justify-between gap-2 transition-all duration-700 delay-100 ${
             revealed ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
@@ -103,8 +118,10 @@ export function DemoSection() {
                 <div className="flex flex-col items-center gap-1.5">
                   <span
                     className={`flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-bold transition-all duration-500 ${
-                      active ? "scale-100 bg-primary text-primary-foreground" : "scale-90 bg-muted text-muted-foreground"
-                    } ${current ? "animate-glow-pulse ring-4 ring-secondary/30" : ""}`}
+                      active
+                        ? "bg-primary text-primary-foreground scale-100"
+                        : "bg-muted text-muted-foreground scale-90"
+                    } ${current ? "ring-4 ring-secondary/30 animate-glow-pulse" : ""}`}
                   >
                     {i + 1}
                   </span>
@@ -129,14 +146,17 @@ export function DemoSection() {
           })}
         </div>
 
+        {/* Stage card — single column on mobile, framed on desktop */}
         <div
           className={`mx-auto mt-8 max-w-3xl transition-all duration-700 delay-200 ${
             revealed ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
           }`}
         >
           <Card className="relative overflow-hidden border-border/70 bg-card p-5 shadow-card-soft sm:p-7 md:p-8">
+            {/* decorative top border */}
             <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-secondary/60 to-transparent" />
 
+            {/* === STEP 0: Upload === */}
             {step === 0 && (
               <div className="animate-fade-up">
                 <div className="flex flex-col items-center text-center">
@@ -150,16 +170,21 @@ export function DemoSection() {
                     Drop your CV — or use ours
                   </h3>
                   <p className="mt-2 max-w-sm text-sm text-muted-foreground">
-                    For this demo we&apos;ll use Siyanda&apos;s CV. Tap below and watch the AI go to work.
+                    For this demo we'll use Siyanda's CV. Tap below and watch the AI go to work.
                   </p>
 
                   <div className="mt-6 flex w-full flex-col items-stretch gap-2 sm:w-auto sm:flex-row sm:items-center">
-                    <Button variant="cta" size="lg" className="shimmer w-full sm:w-auto" onClick={() => setStep(1)}>
+                    <Button
+                      variant="cta"
+                      size="lg"
+                      className="shimmer w-full sm:w-auto"
+                      onClick={() => setStep(1)}
+                    >
                       <Play className="mr-1 h-4 w-4" />
                       Run the demo
                     </Button>
-                    <Button variant="outline" size="lg" className="w-full sm:w-auto" asChild>
-                      <Link to="/signup">Upload my own CV</Link>
+                    <Button variant="outline" size="lg" className="w-full sm:w-auto">
+                      Upload my own CV
                     </Button>
                   </div>
 
@@ -181,6 +206,7 @@ export function DemoSection() {
               </div>
             )}
 
+            {/* === STEP 1: Analyse (FREE — CV Analyser is Mahala) === */}
             {step === 1 && (
               <div className="animate-fade-up">
                 <div className="flex flex-col items-center text-center">
@@ -194,8 +220,12 @@ export function DemoSection() {
                     <Sparkles className="h-3 w-3" />
                     CV Analyser · Mahala
                   </span>
-                  <h3 className="mt-2 font-display text-lg font-bold text-primary sm:text-xl">Analysing your CV…</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">Neural matching engine · 11,400+ skills graph</p>
+                  <h3 className="mt-2 font-display text-lg font-bold text-primary sm:text-xl">
+                    Analysing your CV…
+                  </h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Neural matching engine · 11,400+ skills graph
+                  </p>
 
                   <div className="mt-6 w-full max-w-md">
                     <div className="flex items-center justify-between text-xs font-semibold">
@@ -265,6 +295,7 @@ export function DemoSection() {
               </div>
             )}
 
+            {/* === STEP 2: Explore paths === */}
             {step === 2 && (
               <div className="animate-fade-up">
                 <div className="flex items-center justify-between gap-3">
@@ -272,7 +303,9 @@ export function DemoSection() {
                     <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-secondary">
                       Step 3 of 4
                     </span>
-                    <h3 className="mt-1 font-display text-lg font-bold text-primary sm:text-xl">Your 5 best-fit paths</h3>
+                    <h3 className="mt-1 font-display text-lg font-bold text-primary sm:text-xl">
+                      Your 5 best-fit paths
+                    </h3>
                   </div>
                   <div className="text-right">
                     <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -289,7 +322,11 @@ export function DemoSection() {
                     const Icon = p.icon;
                     const isChosen = chosen === i;
                     return (
-                      <li key={p.name} style={{ animationDelay: `${i * 70}ms` }} className="animate-fade-up">
+                      <li
+                        key={p.name}
+                        style={{ animationDelay: `${i * 70}ms` }}
+                        className="animate-fade-up"
+                      >
                         <button
                           type="button"
                           onClick={() => setChosen(i)}
@@ -338,7 +375,7 @@ export function DemoSection() {
                     <RotateCcw className="mr-1 h-3.5 w-3.5" />
                     Restart
                   </Button>
-                  <div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:items-end">
+                  {isPremium ? (
                     <Button
                       variant="cta"
                       size="lg"
@@ -349,17 +386,19 @@ export function DemoSection() {
                       {chosen === null ? "Pick a path to continue" : "Lock it in"}
                       <ArrowRight className="ml-1 h-4 w-4" />
                     </Button>
-                    <Link
-                      to="/pricing"
-                      className="text-center text-[11px] text-muted-foreground underline-offset-4 hover:text-secondary hover:underline sm:text-right"
-                    >
-                      Full matching is R50/mo — CV Analyser stays Mahala
-                    </Link>
-                  </div>
+                  ) : (
+                    <div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:items-end">
+                      <PremiumGate inline feature="Career path matching" />
+                      <span className="text-center text-[11px] text-muted-foreground sm:text-right">
+                        Locking in your path is a Premium feature
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
 
+            {/* === STEP 3: Match summary === */}
             {step === 3 && chosen !== null && (
               <div className="animate-fade-up">
                 <div className="flex flex-col items-center text-center">
@@ -367,15 +406,15 @@ export function DemoSection() {
                     <CheckCircle2 className="h-10 w-10" strokeWidth={1.8} />
                   </div>
                   <span className="mt-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-secondary">
-                    Siyaqala! · Let&apos;s begin
+                    Siyaqala! · Let's begin
                   </span>
                   <h3 className="mt-1 font-display text-xl font-bold text-primary sm:text-2xl">
                     {PATHS[chosen].name} — your path
                   </h3>
                   <p className="mt-2 max-w-sm text-sm text-muted-foreground">
                     {PATHS[chosen].match}% match · projected{" "}
-                    <span className="font-semibold text-primary">{PATHS[chosen].income}/month</span> within{" "}
-                    {PATHS[chosen].time}.
+                    <span className="font-semibold text-primary">{PATHS[chosen].income}/month</span>{" "}
+                    within {PATHS[chosen].time}.
                   </p>
 
                   <div className="mt-5 grid w-full max-w-md grid-cols-3 gap-2 sm:gap-3">
@@ -384,8 +423,13 @@ export function DemoSection() {
                       { v: "3", l: "Mentors matched" },
                       { v: "47", l: "Local gigs" },
                     ].map((s) => (
-                      <div key={s.l} className="rounded-lg border border-border/60 bg-background p-3 text-center">
-                        <div className="font-display text-lg font-bold text-primary sm:text-xl">{s.v}</div>
+                      <div
+                        key={s.l}
+                        className="rounded-lg border border-border/60 bg-background p-3 text-center"
+                      >
+                        <div className="font-display text-lg font-bold text-primary sm:text-xl">
+                          {s.v}
+                        </div>
                         <div className="mt-0.5 text-[10px] leading-tight text-muted-foreground sm:text-[11px]">
                           {s.l}
                         </div>
@@ -398,11 +442,9 @@ export function DemoSection() {
                       <RotateCcw className="mr-1 h-4 w-4" />
                       Run again
                     </Button>
-                    <Button variant="cta" size="lg" className="shimmer w-full sm:w-auto" asChild>
-                      <Link to="/signup">
-                        Start my real journey
-                        <ArrowRight className="ml-1 h-4 w-4" />
-                      </Link>
+                    <Button variant="cta" size="lg" className="shimmer w-full sm:w-auto">
+                      Start my real journey
+                      <ArrowRight className="ml-1 h-4 w-4" />
                     </Button>
                   </div>
                 </div>
@@ -410,13 +452,14 @@ export function DemoSection() {
             )}
           </Card>
 
+          {/* helper microcopy */}
           <p className="mt-3 text-center text-[11px] text-muted-foreground">
-            Demo data based on Siyanda&apos;s actual journey · numbers anonymised
+            Demo data based on Siyanda's actual journey · numbers anonymised
           </p>
         </div>
       </div>
     </section>
   );
-}
+};
 
 export default DemoSection;

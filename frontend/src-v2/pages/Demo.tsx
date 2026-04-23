@@ -4,18 +4,26 @@ import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ProfileMenu } from "@/components/ProfileMenu";
 import { ContactWidget } from "@/components/ContactWidget";
-import DemoSection from "@/components/DemoSection";
+import { DemoSection } from "@/components/DemoSection";
+import logo from "/empowerLogo.jpg";
 
-const logoSrc = `${import.meta.env.BASE_URL}images/empowa_icon.png`;
-
-export default function Demo() {
+const Demo = () => {
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
+      {/* ===== Header ===== */}
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-md">
         <div className="container flex h-16 items-center justify-between gap-4">
           <Link to="/" className="flex items-center gap-2.5">
-            <img src={logoSrc} alt="EmpowAI logo" className="h-9 w-9 object-contain" width={36} height={36} />
-            <span className="font-display text-xl font-bold tracking-tight text-primary">EmpowAI</span>
+            <img
+              src={logo}
+              alt="EmpowAI logo"
+              className="h-9 w-9 rounded-md object-cover"
+              width={36}
+              height={36}
+            />
+            <span className="font-display text-xl font-bold tracking-tight text-primary">
+              EmpowAI
+            </span>
           </Link>
 
           <nav className="hidden items-center gap-8 md:flex">
@@ -37,13 +45,14 @@ export default function Demo() {
             </Button>
             <ProfileMenu />
             <Button asChild variant="cta" size="sm" className="shimmer">
-              <Link to="/signup">Get Started</Link>
+              <Link to="/pricing">Get Started</Link>
             </Button>
           </div>
         </div>
       </header>
 
       <main>
+        {/* Page intro */}
         <section className="border-b border-border/60 bg-muted/40 py-8 sm:py-10">
           <div className="container">
             <Link
@@ -59,15 +68,16 @@ export default function Demo() {
               Try EmpowAI in 60 seconds
             </h1>
             <p className="mt-2 max-w-xl text-sm text-muted-foreground sm:text-base">
-              CV Analyser is Mahala — always free. See the full 5-path flow, then unlock Premium on the pricing page when
-              you&apos;re ready.
+              CV Analyser is Mahala — always free. Unlock the full 5-path matching for R50/mo.
             </p>
           </div>
         </section>
 
+        {/* The interactive demo */}
         <DemoSection />
       </main>
 
+      {/* ===== Footer ===== */}
       <footer className="border-t border-border bg-background">
         <div className="container py-6 text-center text-xs text-muted-foreground">
           © {new Date().getFullYear()} EmpowAI · Amandla e-Ubuntu 🇿🇦
@@ -77,4 +87,6 @@ export default function Demo() {
       <ContactWidget />
     </div>
   );
-}
+};
+
+export default Demo;

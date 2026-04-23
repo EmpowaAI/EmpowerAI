@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -27,20 +26,29 @@ import {
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ProfileMenu } from "@/components/ProfileMenu";
 import { ContactWidget } from "@/components/ContactWidget";
-import siyanda from "../assets/images/siyaimage.png";
+import { Link } from "react-router-dom";
+import logo from "/empowerLogo.jpg";
+import siyanda from "@/assets/siyanda.jpg";
+import heroBg from "@/assets/hero-bg.png";
 
-const logoSrc = `${import.meta.env.BASE_URL}images/empowa_icon.png`;
-const heroBackgroundUrl = encodeURI(`${import.meta.env.BASE_URL}images/Wide blue-orange gra.png`);
-
-export default function LandingPage() {
+const Index = () => {
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
+      {/* ===== Header ===== */}
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-md">
         <div className="container flex h-16 items-center justify-between gap-4">
-          <Link to="/" className="flex items-center gap-2.5">
-            <img src={logoSrc} alt="EmpowAI logo" className="h-9 w-9 object-contain" width={36} height={36} />
-            <span className="font-display text-xl font-bold tracking-tight text-primary">EmpowAI</span>
-          </Link>
+          <a href="#" className="flex items-center gap-2.5">
+            <img
+              src={logo}
+              alt="EmpowAI logo"
+              className="h-9 w-9 rounded-md object-cover"
+              width={36}
+              height={36}
+            />
+            <span className="font-display text-xl font-bold tracking-tight text-primary">
+              EmpowAI
+            </span>
+          </a>
 
           <nav className="hidden items-center gap-8 md:flex">
             {[
@@ -50,7 +58,7 @@ export default function LandingPage() {
               { label: "Pricing", href: "/pricing", route: true },
               { label: "Demo", href: "/demo", route: true },
             ].map((l) =>
-              "route" in l && l.route ? (
+              l.route ? (
                 <Link
                   key={l.label}
                   to={l.href}
@@ -74,32 +82,28 @@ export default function LandingPage() {
             <ThemeToggle />
             <ProfileMenu />
             <Button asChild variant="cta" size="sm" className="shimmer">
-              <Link to="/signup">Get Started</Link>
+              <Link to="/pricing">Get Started</Link>
             </Button>
           </div>
         </div>
       </header>
 
       <main>
-        <section className="relative overflow-hidden text-white">
+        {/* ===== Hero ===== */}
+        <section className="ai-mesh ai-spotlight grain relative overflow-hidden text-white">
           <img
-            src={heroBackgroundUrl}
+            src={heroBg}
             alt=""
             aria-hidden
             className="absolute inset-0 h-full w-full scale-105 object-cover"
-            onError={(e) => {
-              (e.target as HTMLImageElement).style.display = "none";
-            }}
           />
           <div
             className="absolute inset-0 bg-[linear-gradient(180deg,hsl(220_60%_6%/0.7),hsl(220_60%_8%/0.35)_30%,hsl(220_60%_8%/0.4)_65%,hsl(220_60%_5%/0.75))]"
             aria-hidden
           />
-          <div className="pointer-events-none absolute inset-0 ai-mesh opacity-50" aria-hidden />
-          <div className="pointer-events-none absolute inset-0 hero-spotlight" aria-hidden />
-          <div className="pointer-events-none absolute inset-0 grain" aria-hidden />
+          <div className="ai-grid absolute inset-0 opacity-50" aria-hidden />
 
-          <div className="container relative z-10 py-20 md:py-32">
+          <div className="container relative py-20 md:py-32">
             <div className="mx-auto max-w-3xl text-center animate-fade-up">
               <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-xs font-semibold tracking-wide text-white/95 backdrop-blur-md">
                 <Sparkles className="h-3.5 w-3.5 text-secondary" />
@@ -108,25 +112,22 @@ export default function LandingPage() {
               </div>
 
               <h1 className="mt-6 font-display text-4xl font-bold leading-[1.05] drop-shadow-sm md:text-6xl lg:text-7xl">
-                Your Future, <span className="text-gradient-ai">Powered by AI</span>
+                Your Future,{" "}
+                <span className="text-gradient-ai">Powered by AI</span>
               </h1>
               <p className="mx-auto mt-5 max-w-xl text-base text-white/90 md:text-lg">
-                Discover career pathways rooted in Ubuntu values. Join thousands of young South Africans building better
-                futures.
+                Discover career pathways rooted in Ubuntu values. Join thousands
+                of young South Africans building better futures.
               </p>
 
               <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                <Button asChild variant="cta" size="xl" className="shimmer w-full sm:w-auto">
-                  <Link to="/signup">
-                    Start Your Journey
-                    <ArrowRight className="ml-1 h-4 w-4" />
-                  </Link>
+                <Button variant="cta" size="xl" className="shimmer w-full sm:w-auto">
+                  Start Your Journey
+                  <ArrowRight className="ml-1 h-4 w-4" />
                 </Button>
-                <Button asChild variant="outlineLight" size="xl" className="w-full sm:w-auto">
-                  <Link to="/demo">
-                    <Play className="mr-1 h-4 w-4" />
-                    Watch Demo
-                  </Link>
+                <Button variant="outlineLight" size="xl" className="w-full sm:w-auto">
+                  <Play className="mr-1 h-4 w-4" />
+                  Watch Demo
                 </Button>
               </div>
 
@@ -148,6 +149,7 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* ===== Trust strip ===== */}
         <section className="border-b border-border bg-background">
           <div className="container grid grid-cols-1 gap-6 py-7 sm:grid-cols-2 lg:grid-cols-4 stagger-children">
             {[
@@ -169,25 +171,32 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* ===== Featured story (mirrors live site layout) ===== */}
         <section id="ubuntu-stories" className="bg-muted/50 py-20">
           <div className="container">
             <div className="text-center">
-              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary">Featured Story</span>
+              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary">
+                Featured Story
+              </span>
               <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-primary md:text-5xl">
-                Siyanda&apos;s Journey: from R0 to R4,500/month
+                Siyanda's Journey: from R0 to R4,500/month
               </h2>
               <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
-                He didn&apos;t get lucky — he explored, compared, and chose. Here&apos;s exactly how it went.
+                He didn't get lucky — he explored, compared, and chose. Here's
+                exactly how it went.
               </p>
             </div>
 
             <div className="mx-auto mt-12 grid max-w-6xl gap-6 lg:grid-cols-2">
+              {/* LEFT — Profile + transformation card */}
               <Card className="relative overflow-hidden border-border/70 bg-card p-6 shadow-card-soft md:p-7">
+                {/* Mahala badge */}
                 <div className="mb-5 inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground">
                   <Zap className="h-3 w-3" />
                   CV Analyser · Mahala
                 </div>
 
+                {/* Profile header */}
                 <div className="flex items-start gap-4">
                   <img
                     src={siyanda}
@@ -198,7 +207,9 @@ export default function LandingPage() {
                     className="h-16 w-16 rounded-full object-cover ring-2 ring-secondary/30"
                   />
                   <div className="flex-1">
-                    <h3 className="font-display text-lg font-bold text-primary">Siyanda Nkosi, 22</h3>
+                    <h3 className="font-display text-lg font-bold text-primary">
+                      Siyanda Nkosi, 22
+                    </h3>
                     <p className="flex items-center gap-1 text-xs text-muted-foreground">
                       <MapPin className="h-3 w-3" /> Boksburg, Gauteng
                     </p>
@@ -213,6 +224,7 @@ export default function LandingPage() {
                   </div>
                 </div>
 
+                {/* Income transformation */}
                 <div className="mt-6 rounded-xl border border-border/70 bg-background p-5">
                   <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     <TrendingUp className="h-3.5 w-3.5 text-secondary" />
@@ -221,7 +233,9 @@ export default function LandingPage() {
                   <div className="mt-3 grid grid-cols-[1fr_auto_1fr] items-center gap-4 text-center">
                     <div>
                       <div className="text-xs text-muted-foreground">Before</div>
-                      <div className="mt-1 font-display text-2xl font-bold text-muted-foreground line-through">R0</div>
+                      <div className="mt-1 font-display text-2xl font-bold text-muted-foreground line-through">
+                        R0
+                      </div>
                     </div>
                     <ArrowRight className="h-5 w-5 text-secondary" />
                     <div>
@@ -233,19 +247,28 @@ export default function LandingPage() {
                   </div>
                 </div>
 
+                {/* Stat tiles */}
                 <div className="mt-4 grid grid-cols-3 gap-3">
                   {[
                     { v: "5", l: "Paths Explored" },
                     { v: "6 wks", l: "To First Gig" },
                     { v: "95%", l: "Match Rate" },
                   ].map((s) => (
-                    <div key={s.l} className="rounded-lg bg-accent/50 p-3 text-center">
-                      <div className="font-display text-xl font-bold text-primary">{s.v}</div>
-                      <div className="mt-0.5 text-[11px] leading-tight text-muted-foreground">{s.l}</div>
+                    <div
+                      key={s.l}
+                      className="rounded-lg bg-accent/50 p-3 text-center"
+                    >
+                      <div className="font-display text-xl font-bold text-primary">
+                        {s.v}
+                      </div>
+                      <div className="mt-0.5 text-[11px] leading-tight text-muted-foreground">
+                        {s.l}
+                      </div>
                     </div>
                   ))}
                 </div>
 
+                {/* Footer rows */}
                 <div className="mt-5 space-y-2 border-t border-border/70 pt-4 text-sm">
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Top Path</span>
@@ -261,9 +284,12 @@ export default function LandingPage() {
                 </div>
               </Card>
 
+              {/* RIGHT — 5-step journey */}
               <div className="flex flex-col">
                 <Card className="border-border/70 bg-card p-6 shadow-card-soft md:p-7">
-                  <h3 className="font-display text-xl font-bold text-primary">The 5-step journey</h3>
+                  <h3 className="font-display text-xl font-bold text-primary">
+                    The 5-step journey
+                  </h3>
                   <ol className="mt-5 space-y-3.5">
                     {[
                       { t: "Uploaded CV", d: "Analyzed in 60 seconds" },
@@ -272,12 +298,17 @@ export default function LandingPage() {
                       { t: "Hired in 6 weeks", d: "Junior dev, remote-friendly" },
                       { t: "R4,500/month", d: "Up from R0 — and growing" },
                     ].map((step, i) => (
-                      <li key={step.t} className="flex gap-4 rounded-xl border border-border/60 bg-background/70 px-4 py-3">
+                      <li
+                        key={step.t}
+                        className="flex gap-4 rounded-xl border border-border/60 bg-background/70 px-4 py-3"
+                      >
                         <div className="flex flex-col items-center">
                           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary font-display text-xs font-bold text-primary-foreground shadow-sm">
                             {i + 1}
                           </span>
-                          {i < 4 && <span className="mt-1 h-full w-px flex-1 bg-border/80" />}
+                          {i < 4 && (
+                            <span className="mt-1 h-full w-px flex-1 bg-border/80" />
+                          )}
                         </div>
                         <div className="flex-1 pb-1">
                           <div className="font-semibold leading-tight text-primary">{step.t}</div>
@@ -288,10 +319,11 @@ export default function LandingPage() {
                   </ol>
                 </Card>
 
+                {/* Quote */}
                 <div className="mt-5 rounded-xl border border-border/70 border-l-4 border-l-secondary bg-card p-5 shadow-card-soft">
                   <Quote className="h-5 w-5 text-secondary" />
                   <p className="mt-2 font-display italic text-primary">
-                    &quot;EmpowAI taught me that ubuntu is a business strategy.&quot;
+                    "EmpowAI taught me that ubuntu is a business strategy."
                   </p>
                   <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                     Siyanda <span className="text-secondary">·</span> Featured story
@@ -302,14 +334,19 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* ===== How it works ===== */}
         <section id="how-it-works" className="py-20">
-          <div id="features" className="container scroll-mt-24">
+          <div className="container">
             <div className="text-center">
               <span className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary">
                 Izinsiza Zethu — Our Tools
               </span>
-              <h2 className="mt-3 font-display text-3xl font-bold text-primary md:text-4xl">How It Works</h2>
-              <p className="mx-auto mt-3 max-w-xl text-muted-foreground">Three simple steps to discover your career potential.</p>
+              <h2 className="mt-3 font-display text-3xl font-bold text-primary md:text-4xl">
+                How It Works
+              </h2>
+              <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
+                Three simple steps to discover your career potential.
+              </p>
             </div>
 
             <div className="mt-10 grid gap-5 md:grid-cols-3">
@@ -335,23 +372,24 @@ export default function LandingPage() {
             </div>
 
             <div className="mt-12 flex justify-center">
-              <Button asChild variant="cta" size="xl" className="shimmer">
-                <Link to="/signup">
-                  Start Your Journey
-                  <ArrowRight className="ml-1 h-4 w-4" />
-                </Link>
+              <Button variant="cta" size="xl" className="shimmer">
+                Start Your Journey
+                <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
             </div>
           </div>
         </section>
 
+        {/* ===== Mzansi testimonials ===== */}
         <section className="bg-muted/40 py-20">
           <div className="container">
             <div className="text-center">
               <span className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary">
                 Izindaba Zempumelelo — Ubuntu Stories
               </span>
-              <h2 className="mt-3 font-display text-3xl font-bold text-primary md:text-4xl">Real Success Stories from Mzansi</h2>
+              <h2 className="mt-3 font-display text-3xl font-bold text-primary md:text-4xl">
+                Real Success Stories from Mzansi
+              </h2>
               <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
                 See how EmpowAI is transforming careers across all 9 provinces.
               </p>
@@ -359,32 +397,9 @@ export default function LandingPage() {
 
             <div className="mt-10 grid gap-5 md:grid-cols-3">
               {[
-                {
-                  initials: "LM",
-                  name: "Lerato Mokoena",
-                  loc: "Cape Town, WC",
-                  quote: "From Khayelitsha to a junior dev role. EmpowAI showed me tech skills I didn't know I had. Siyabonga!",
-                  earn: "R12,000/mo",
-                  path: "Student → Software Developer",
-                },
-                {
-                  initials: "SK",
-                  name: "Sipho Khumalo",
-                  loc: "Durban, KZN",
-                  quote:
-                    "The simulation showed me entrepreneurship was my path. Now I run my own spaza shop AND a marketing agency!",
-                  earn: "R18,500/mo",
-                  path: "Unemployed → Business Owner",
-                },
-                {
-                  initials: "NT",
-                  name: "Nomsa Tshabalala",
-                  loc: "Johannesburg, GP",
-                  quote:
-                    "From minimum wage to a career I love. The AI actually understood my reality as a young South African.",
-                  earn: "R15,000/mo",
-                  path: "Waitress → Marketing Pro",
-                },
+                { initials: "LM", name: "Lerato Mokoena", loc: "Cape Town, WC", quote: "From Khayelitsha to a junior dev role. EmpowAI showed me tech skills I didn't know I had. Siyabonga!", earn: "R12,000/mo", path: "Student → Software Developer" },
+                { initials: "SK", name: "Sipho Khumalo", loc: "Durban, KZN", quote: "The simulation showed me entrepreneurship was my path. Now I run my own spaza shop AND a marketing agency!", earn: "R18,500/mo", path: "Unemployed → Business Owner" },
+                { initials: "NT", name: "Nomsa Tshabalala", loc: "Johannesburg, GP", quote: "From minimum wage to a career I love. The AI actually understood my reality as a young South African.", earn: "R15,000/mo", path: "Waitress → Marketing Pro" },
               ].map((t) => (
                 <Card key={t.name} className="card-glow border-border/70 bg-card p-6 shadow-card-soft">
                   <div className="flex items-center gap-3">
@@ -398,7 +413,7 @@ export default function LandingPage() {
                       </div>
                     </div>
                   </div>
-                  <p className="mt-4 text-sm italic text-muted-foreground">&quot;{t.quote}&quot;</p>
+                  <p className="mt-4 text-sm italic text-muted-foreground">"{t.quote}"</p>
                   <div className="mt-4 rounded-md bg-accent/50 p-3 text-sm">
                     <div className="text-xs text-muted-foreground">💰 Current Earnings</div>
                     <div className="font-bold text-primary">{t.earn}</div>
@@ -410,61 +425,53 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* ===== Siyaqala band ===== */}
         <section className="relative overflow-hidden border-t border-border bg-primary py-14 text-center text-primary-foreground">
           <div className="ai-mesh absolute inset-0" aria-hidden />
           <div className="container relative">
-            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary">Siyaqala! — Let&apos;s Begin</span>
+            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary">
+              Siyaqala! — Let's Begin
+            </span>
             <p className="mt-3 font-display text-2xl italic md:text-3xl">
-              Join over <span className="text-gradient-ai font-bold not-italic">2,000+</span> young South Africans building better
-              careers with AI. Together, we rise. 🇿🇦
+              Join over <span className="text-gradient-ai font-bold not-italic">2,000+</span> young South Africans
+              building better careers with AI. Together, we rise. 🇿🇦
             </p>
             <div className="mt-6 flex justify-center">
-              <Button asChild variant="cta" size="xl" className="shimmer">
-                <Link to="/signup">
-                  Start Your Journey
-                  <ArrowRight className="ml-1 h-4 w-4" />
-                </Link>
+              <Button variant="cta" size="xl" className="shimmer">
+                Start Your Journey
+                <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
             </div>
           </div>
         </section>
       </main>
 
+      {/* ===== Footer ===== */}
       <footer className="border-t border-border bg-background">
         <div className="container flex flex-col items-center justify-between gap-6 py-7 md:flex-row">
           <nav className="flex flex-wrap items-center justify-center gap-x-7 gap-y-2 text-sm">
             {[
               { label: "Features", href: "#features" },
               { label: "Ubuntu Stories", href: "#ubuntu-stories" },
-              { label: "Demo", href: "/demo", route: true },
-              { label: "Pricing", href: "/pricing", route: true },
-            ].map((l) =>
-              "route" in l && l.route ? (
-                <Link
-                  key={l.label}
-                  to={l.href}
-                  className="font-semibold text-primary underline-offset-4 hover:text-secondary hover:underline"
-                >
-                  {l.label}
-                </Link>
-              ) : (
-                <a
-                  key={l.label}
-                  href={l.href}
-                  className="font-semibold text-primary underline-offset-4 hover:text-secondary hover:underline"
-                >
-                  {l.label}
-                </a>
-              )
-            )}
+              { label: "Demo", href: "/demo" },
+              { label: "Pricing", href: "/pricing" },
+            ].map((l) => (
+              <Link
+                key={l.label}
+                to={l.href}
+                className="font-semibold text-primary underline-offset-4 hover:text-secondary hover:underline"
+              >
+                {l.label}
+              </Link>
+            ))}
           </nav>
 
           <div className="flex items-center gap-2">
             {[Facebook, Twitter, Mail, Instagram, Linkedin].map((Icon, i) => (
               <a
                 key={i}
-                href="mailto:support@empowa.org"
-                aria-label="Contact EmpowAI"
+                href="#"
+                aria-label="social link"
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground transition-smooth hover:bg-secondary"
               >
                 <Icon className="h-4 w-4" />
@@ -480,4 +487,6 @@ export default function LandingPage() {
       <ContactWidget />
     </div>
   );
-}
+};
+
+export default Index;

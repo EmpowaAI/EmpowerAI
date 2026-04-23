@@ -35,7 +35,7 @@ export default function Logo({
   const content = (
     <div className={`flex items-center gap-3 ${className}`}>
       <img
-        src="/images/empowa_icon.png"
+        src={`${import.meta.env.BASE_URL}images/empowa_icon.png`}
         alt="EmpowaAI"
         className={`${sizeClasses[size]} crisp-image shrink-0 object-contain`}
         style={{ 
