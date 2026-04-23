@@ -11,7 +11,7 @@ import { useUser } from "@/contexts/user-context";
 import { syncProgressFromBackend, unlockAllPages } from "@/utils/progressSync";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import loginBg from "@/assets/images/empowerlogin.png";
-import { Button } from "@/components/ui/button"; // Ensure this matches the lowercase filename
+import { Button } from "@/components/ui/button";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
