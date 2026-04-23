@@ -75,7 +75,7 @@ export default function SAJobPlatforms() {
         </div>
         <div className="h-2 bg-muted rounded-full overflow-hidden">
           <motion.div
-            className="h-full rounded-full bg-gradient-to-r from-primary to-sa-green"
+            className="h-full rounded-full bg-gradient-to-r from-primary to-success"
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.8, ease: "easeOut" }}
@@ -108,9 +108,9 @@ export default function SAJobPlatforms() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.04 }}
-            className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all hover:shadow-sm ${
+            className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all hover:shadow-sm ${ // Changed border-sa-green to border-success
               checked[platform.id]
-                ? "border-sa-green/30 bg-sa-green/5"
+                ? "border-success/30 bg-success/5"
                 : "border-border bg-card/60 hover:border-primary/30"
             }`}
             onClick={() => toggle(platform.id)}
@@ -118,7 +118,7 @@ export default function SAJobPlatforms() {
             <button className="shrink-0">
               {checked[platform.id] ? (
                 <CheckCircle className="h-5 w-5 text-sa-green" />
-              ) : (
+              ) : ( // Changed text-sa-green to text-success
                 <Circle className="h-5 w-5 text-muted-foreground/40" />
               )}
             </button>

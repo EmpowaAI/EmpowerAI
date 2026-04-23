@@ -26,19 +26,19 @@ export function ToastContainer({ toasts, removeToast }: {
 
   const getIcon = (type: ToastType) => {
     switch(type) {
-      case 'success': return <CheckCircle className="h-5 w-5 text-green-500" />
-      case 'error': return <AlertCircle className="h-5 w-5 text-red-500" />
-      case 'warning': return <AlertTriangle className="h-5 w-5 text-amber-500" />
-      case 'info': return <Info className="h-5 w-5 text-blue-500" />
+      case 'success': return <CheckCircle className="h-5 w-5 text-success" />
+      case 'error': return <AlertCircle className="h-5 w-5 text-destructive" />
+      case 'warning': return <AlertTriangle className="h-5 w-5 text-secondary" />
+      case 'info': return <Info className="h-5 w-5 text-primary" />
     }
   }
 
   const getStyles = (type: ToastType) => {
     switch(type) {
-      case 'success': return 'border-green-500/20 bg-green-500/10'
-      case 'error': return 'border-red-500/20 bg-red-500/10'
-      case 'warning': return 'border-amber-500/20 bg-amber-500/10'
-      case 'info': return 'border-blue-500/20 bg-blue-500/10'
+      case 'success': return 'border-success/20 bg-success/10'
+      case 'error': return 'border-destructive/20 bg-destructive/10'
+      case 'warning': return 'border-secondary/20 bg-secondary/10'
+      case 'info': return 'border-primary/20 bg-primary/10'
     }
   }
 

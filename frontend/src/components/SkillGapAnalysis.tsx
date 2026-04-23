@@ -132,10 +132,10 @@ export default function SkillGapAnalysis({ cvData, cvText = "" }: SkillGapAnalys
   };
 
   const borderMap = {
-    missing: "border-neon-orange/30",
+    missing: "border-secondary/30", // Changed to secondary
     weak: "border-secondary/30",
-    opportunity: "border-neon-green/30",
-    achievement: "border-neon-green/30"
+    opportunity: "border-success/30", // Changed to success
+    achievement: "border-success/30" // Changed to success
   };
 
   if (isAnalyzing) {
@@ -172,9 +172,9 @@ export default function SkillGapAnalysis({ cvData, cvText = "" }: SkillGapAnalys
   // Only show empty state if there are TRULY no insights AND we have data
   if (insights.length === 0 && cvData) {
     return (
-      <div className="glass-panel-strong p-8 text-center">
-        <div className="h-12 w-12 rounded-full bg-neon-green/10 flex items-center justify-center mx-auto mb-3">
-          <Sparkles className="h-6 w-6 text-neon-green" />
+      <div className="glass-panel-strong p-8 text-center"> {/* Changed bg-neon-green to bg-success */}
+        <div className="h-12 w-12 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-3">
+          <Sparkles className="h-6 w-6 text-success" />
         </div>
         <h4 className="text-sm font-display font-semibold mb-1">Your Profile Looks Strong!</h4>
         <p className="text-xs text-muted-foreground max-w-md mx-auto">
@@ -274,8 +274,8 @@ export default function SkillGapAnalysis({ cvData, cvText = "" }: SkillGapAnalys
                                     {insight.beforeAfter.before}
                                   </p>
                                 </div>
-                                <div className="p-3 rounded-lg bg-neon-green/5 border border-neon-green/20">
-                                  <span className="text-[10px] font-bold uppercase tracking-widest text-neon-green mb-1 block">
+                                <div className="p-3 rounded-lg bg-success/5 border border-success/20"> {/* Changed bg-neon-green to bg-success */}
+                                  <span className="text-[10px] font-bold uppercase tracking-widest text-success mb-1 block">
                                     After
                                   </span>
                                   <p className="text-xs text-foreground">

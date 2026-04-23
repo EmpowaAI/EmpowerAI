@@ -210,13 +210,13 @@ export default function AIMentor247() {
 
   const getCategoryColor = (category?: string) => {
     switch (category) {
-      case 'career': return 'text-blue-400'
-      case 'job-search': return 'text-green-400'
-      case 'cv-help': return 'text-purple-400'
-      case 'interview': return 'text-yellow-400'
-      case 'salary': return 'text-pink-400'
-      case 'emotional': return 'text-red-400'
-      default: return 'text-primary'
+      case 'career': return 'text-primary' // Changed to primary
+      case 'job-search': return 'text-success' // Changed to success
+      case 'cv-help': return 'text-primary' // Changed to primary
+      case 'interview': return 'text-secondary' // Changed to secondary
+      case 'salary': return 'text-primary' // Changed to primary
+      case 'emotional': return 'text-destructive' // Changed to destructive
+      default: return 'text-primary' // Default to primary
     }
   }
 

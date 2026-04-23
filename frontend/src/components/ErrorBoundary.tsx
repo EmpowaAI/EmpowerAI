@@ -52,7 +52,7 @@ export default class ErrorBoundary extends React.Component<Props, State> {
   render(): ReactNode {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 via-white to-pink-50 p-4">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-destructive/10 via-background to-destructive/10 p-4">
           <div className="max-w-md w-full">
             {/* Error Icon */}
             <div className="flex justify-center mb-6">

@@ -33,11 +33,11 @@ export default function PostCVAnalysisModal({
 
   const getReadinessColor = (level: string) => {
     switch (level) {
-      case 'EXCEPTIONAL': return 'text-green-500';
-      case 'HIGH POTENTIAL': return 'text-amber-500';
-      case 'INTERMEDIATE': return 'text-blue-500';
-      case 'DEVELOPING': return 'text-orange-500';
-      default: return 'text-red-500';
+      case 'EXCEPTIONAL': return 'text-success';
+      case 'HIGH POTENTIAL': return 'text-secondary';
+      case 'INTERMEDIATE': return 'text-primary';
+      case 'DEVELOPING': return 'text-secondary';
+      default: return 'text-destructive';
     }
   };
 
@@ -57,7 +57,7 @@ export default function PostCVAnalysisModal({
         className="bg-card rounded-2xl max-w-lg w-full border border-border/40 shadow-2xl overflow-hidden"
       >
         {/* Header */}
-        <div className="relative bg-gradient-to-r from-primary/10 via-primary/5 to-amber-500/10 px-6 py-6 border-b border-border/40">
+        <div className="relative bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 px-6 py-6 border-b border-border/40">
           <button
             onClick={onClose}
             className="absolute top-4 right-4 p-1 rounded-full hover:bg-muted/50 transition-colors"
@@ -79,7 +79,7 @@ export default function PostCVAnalysisModal({
           <div className="flex items-center justify-center gap-6">
             <div className="text-center">
               <div className={cn("text-3xl font-bold", getScoreColor(cvScore))}>
-                {cvScore}
+                {cvScore} {/* Score color is dynamic */}
               </div>
               <div className="text-xs text-muted-foreground">CV Score</div>
             </div>
@@ -115,8 +115,8 @@ export default function PostCVAnalysisModal({
                 className="w-full p-4 rounded-xl border border-border/60 bg-card hover:border-primary/50 hover:bg-primary/5 transition-all text-left group-hover:shadow-md"
               >
                 <div className="flex items-start gap-3">
-                  <div className="p-2 bg-gradient-to-r from-amber-500/20 to-orange-500/20 rounded-lg group-hover:from-amber-500/30 group-hover:to-orange-500/30 transition-all">
-                    <Wand2 className="h-4 w-4 text-amber-500" />
+                  <div className="p-2 bg-gradient-to-r from-secondary/20 to-secondary/20 rounded-lg group-hover:from-secondary/30 group-hover:to-secondary/30 transition-all">
+                    <Wand2 className="h-4 w-4 text-secondary" />
                   </div>
                   <div className="flex-1">
                     <h3 className="font-semibold text-foreground mb-1">Revamp Your CV</h3>
@@ -146,7 +146,7 @@ export default function PostCVAnalysisModal({
                 className="block w-full p-4 rounded-xl border border-border/60 bg-card hover:border-primary/50 hover:bg-primary/5 transition-all text-left group-hover:shadow-md"
               >
                 <div className="flex items-start gap-3">
-                  <div className="p-2 bg-gradient-to-r from-primary/20 to-blue-500/20 rounded-lg group-hover:from-primary/30 group-hover:to-blue-500/30 transition-all">
+                  <div className="p-2 bg-gradient-to-r from-primary/20 to-primary/20 rounded-lg group-hover:from-primary/30 group-hover:to-primary/30 transition-all">
                     <Brain className="h-4 w-4 text-primary" />
                   </div>
                   <div className="flex-1">

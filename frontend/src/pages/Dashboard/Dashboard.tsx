@@ -545,7 +545,7 @@ export default function Dashboard() {
                         >
                           <div className="flex items-center gap-3">
                             <div className="h-8 w-8 rounded-full bg-green-500/20 border border-green-500/50 text-green-500 flex items-center justify-center text-xs font-display">
-                              <CheckCircle className="h-4 w-4" />
+                              <CheckCircle className="h-4 w-4 text-success" />
                             </div>
                             <span className="text-sm font-medium line-through text-muted-foreground">
                               {step.label}

@@ -87,9 +87,9 @@ export default function FirstTimeUserOnboarding() {
       </div>
 
       {/* Quick tip */}
-      <div className="mt-6 p-3 bg-blue-50/50 border border-blue-200/30 rounded-lg flex gap-3">
-        <CheckCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-        <p className="text-sm text-blue-900">
+      <div className="mt-6 p-3 bg-primary/10 border border-primary/20 rounded-lg flex gap-3">
+        <CheckCircle className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+        <p className="text-sm text-primary">
           💡 <strong>Pro Tip:</strong> Your CV is the foundation of everything. The more complete and detailed, the better our AI can help you!
         </p>
       </div>

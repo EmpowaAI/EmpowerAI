@@ -58,7 +58,7 @@ return (
                     {!isLoading && isSuccess && (
                     <div className="space-y-6">
                         <div className="flex justify-center">
-                            <div className="bg-green-100 dark:bg-green-900/30 p-4 rounded-full">
+                            <div className="bg-success/10 dark:bg-success/30 p-4 rounded-full">
                                 <CheckCircle className="h-16 w-16 text-green-600 dark:text-green-400" />
                             </div>
                         </div>
@@ -84,7 +84,7 @@ return (
                 {!isLoading && !isSuccess && error && (
                 <div className="space-y-6">
                     <div className="flex justify-center">
-                        <div className="bg-red-100 dark:bg-red-900/30 p-4 rounded-full">
+                        <div className="bg-destructive/10 dark:bg-destructive/30 p-4 rounded-full">
                             <XCircle className="h-16 w-16 text-red-600 dark:text-red-400" />
                         </div>
                     </div>

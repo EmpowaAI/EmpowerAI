@@ -25,16 +25,16 @@ export default function Toast({ message, type, isVisible, onClose, duration = 50
   }, [isVisible, duration, onClose]);
 
   const icons = {
-    success: <CheckCircle className="h-5 w-5 text-cv-success" />,
+    success: <CheckCircle className="h-5 w-5 text-success" />,
     error: <XCircle className="h-5 w-5 text-destructive" />,
-    warning: <AlertCircle className="h-5 w-5 text-cv-warning" />,
+    warning: <AlertCircle className="h-5 w-5 text-secondary" />,
     info: <Info className="h-5 w-5 text-primary" />,
   };
 
   const bgColors = {
-    success: "bg-cv-success/10 border-cv-success/30",
+    success: "bg-success/10 border-success/30",
     error: "bg-destructive/10 border-destructive/30",
-    warning: "bg-cv-warning/10 border-cv-warning/30",
+    warning: "bg-secondary/10 border-secondary/30",
     info: "bg-primary/10 border-primary/30",
   };
 
