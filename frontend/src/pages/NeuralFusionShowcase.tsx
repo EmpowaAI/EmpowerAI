@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Brain, Sparkles, Mic, FileText, TrendingUp, ArrowRight } from 'lucide-react'
+import HolographicButton from "../components/ui/HolographicButton"
 import NeuralCard from "../components/ui/NeuralCard"
 import AIAvatar from "../components/ui/AIAvatar"
 import VoiceVisualizer from "../components/ui/VoiceVisualizer"
@@ -154,7 +155,7 @@ export default function NeuralFusionShowcase() {
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-secondary">
-                <VoiceVisualizer isActive={true} intensity={0.6} /> {/* Assuming VoiceVisualizer is fine */}
+                <VoiceVisualizer isActive={true} volume={0.6} /> {/* Assuming VoiceVisualizer is fine */}
                 <span className="text-sm text-secondary">80% Readiness Rate</span>
               </div>
               <HolographicButton onClick={() => setActiveFeature('voice-coach')}>
@@ -189,9 +190,9 @@ export default function NeuralFusionShowcase() {
             <div className="space-y-4">
               <h4 className="font-semibold text-foreground">AI Avatars</h4>
               <div className="flex items-center justify-center gap-4">
-                <AIAvatar size="sm" variant="default" />
+                <AIAvatar size="md" variant="default" />
                 <AIAvatar size="md" variant="thinking" />
-                <AIAvatar size="lg" variant="speaking" />
+                <AIAvatar size="md" variant="speaking" />
               </div>
               <div className="text-center text-sm text-muted-foreground">
                 Dynamic states: Default, Thinking, Speaking
@@ -235,10 +236,10 @@ export default function NeuralFusionShowcase() {
             Join thousands of South African youth using AI to accelerate their careers
           </p>
           <div className="flex justify-center gap-4">
-            <HolographicButton variant="primary" size="lg">
+            <HolographicButton variant="cta" size="lg">
               Get Started Free
             </HolographicButton>
-            <HolographicButton variant="secondary" size="lg">
+            <HolographicButton variant="primary" size="lg">
               View Features
             </HolographicButton>
           </div>
