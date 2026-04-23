@@ -343,7 +343,7 @@ export default function LandingPage() {
                     </div>
                   </div>
 
-                  <div className="text-center p-4 bg-gradient-to-r from-primary/5 to-accent-orange/5 rounded-lg">
+                  <div className="text-center p-4 bg-gradient-to-r from-primary/5 to-sa-gold/5 rounded-lg">
                     <div className="text-3xl font-bold text-primary">78/100</div>
                     <div className="text-sm text-muted-foreground">Empowerment Score</div>
                   </div>
