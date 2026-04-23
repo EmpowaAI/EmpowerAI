@@ -12,11 +12,14 @@ import {
   Brain,
   Menu,
   X,
+  Rocket,
+  HeartHandshake,
+  Briefcase,
+  Award,
+  Cpu,
+  Zap,
 } from "lucide-react";
 import Button from "../components/ui/Button";
-
-// Hero background image - replace with actual image
-const heroBg = "/images/hero-bg.jpg";
 
 const navLinks = [
   { label: "How It Works", href: "#how-it-works" },
@@ -47,10 +50,10 @@ const journeySteps = [
 ];
 
 const trustStats = [
-  { icon: Rocket, title: "AI-Powered Analysis", desc: "60-second career assessment" },
-  { icon: HeartHandshake, title: "Ubuntu Values", desc: "Rooted in African philosophy" },
-  { icon: Briefcase, title: "Real Opportunities", desc: "Across all 9 provinces" },
-  { icon: Award, title: "Proven Success", desc: "2,000+ youth transformed" }
+  { icon: Rocket, label: "AI-Powered Analysis", value: "60s" },
+  { icon: HeartHandshake, label: "Ubuntu Values", value: "Core" },
+  { icon: Briefcase, label: "Real Opportunities", value: "Live" },
+  { icon: Award, label: "Proven Success", value: "2,000+" }
 ];
 
 const testimonials = [
@@ -123,7 +126,7 @@ export default function Index() {
           </nav>
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-3">
-            <Link to="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground px-3 py-2 transition-colors">
+            <Link to="/login" className="text-sm font-medium text-primary-foreground/90 hover:text-primary-foreground px-3 py-2 transition-colors">
               Sign In
             </Link>
             <Link to="/signup">
@@ -150,16 +153,27 @@ export default function Index() {
             className="md:hidden border-t border-border bg-background"
           >
             <div className="container mx-auto px-4 py-4 flex flex-col gap-3">
-              {navLinks.map((link) => ( // Use navLinks directly for mobile
-                <Link
-                  key={link.label} // Use Link for internal routes and external for external
-                  to={link.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="text-sm font-medium text-muted-foreground py-2 hover:text-foreground transition-colors"
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {navLinks.map((link) => 
+                link.href.startsWith('#') ? (
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="text-sm font-medium text-muted-foreground py-2 hover:text-foreground transition-colors"
+                  >
+                    {link.label}
+                  </a>
+                ) : (
+                  <Link
+                    key={link.label}
+                    to={link.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="text-sm font-medium text-muted-foreground py-2 hover:text-foreground transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                )
+              )}
               <Link to="/login" className="text-sm font-medium text-muted-foreground py-2 hover:text-foreground transition-colors">
                 Sign In
               </Link>
@@ -173,22 +187,11 @@ export default function Index() {
         )}
       </header>
 
-      {/* Hero Section - Layered Visual Stack */}
+      {/* Hero Section */}
       <section className="relative min-h-[92vh] overflow-hidden bg-hero-gradient">
-        {/* Layer 1: Hero Image */}
-        {/* Removed direct image as per recipe, replaced with gradient and patterns */}
-
-        {/* Layer 2: Navy Gradient Overlay */}
-        {/* This is handled by bg-hero-gradient and the vignette */}
-        <div className="absolute inset-0 bg-gradient-to-b from-background/70 to-background/75" />
-
-        {/* Layer 2.5: Spotlight Conic Gradient */}
-        <div className="absolute inset-0 hero-spotlight opacity-50 z-10" />
-        
-        {/* Layer 3: Animated AI Blobs */}
+        <div className="absolute inset-0 bg-background/20" />
+        <div className="absolute inset-0 hero-spotlight opacity-30 z-10" />
         <div className="absolute inset-0 ai-mesh" />
-        
-        {/* Layer 4: Tech Grid */}
         <div className="absolute inset-0 ai-grid opacity-30" />
         
         <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32 flex flex-col items-center text-center z-50">
@@ -240,7 +243,7 @@ export default function Index() {
               className="flex items-center justify-center gap-8 text-white/80 text-sm font-medium pt-8"
             >
               <div className="flex items-center gap-2">
-                <Cpu className="h-4 w-4 text-secondary" />
+                <Cpu className="h-4 w-4 text-primary-foreground" />
                 <span>AI Analysis</span>
               </div>
               <div className="flex items-center gap-2">
@@ -436,7 +439,7 @@ export default function Index() {
                 className="group relative" // Added relative for shadow-card
               >
                 <div className="bg-card rounded-2xl shadow-card p-8 border border-border hover:shadow-lg hover:-translate-y-1 transition-all duration-300 h-full">
-                  <div className="w-16 h-16 rounded-2xl bg-ai-gradient flex items-center justify-center mb-6 group-hover:scale-105 transition-transform shadow-glow">
+                  <div className="w-16 h-16 rounded-2xl bg-accent flex items-center justify-center mb-6 group-hover:scale-105 transition-transform">
                     <step.icon className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="font-display text-xl font-bold text-foreground mb-3">
@@ -485,7 +488,7 @@ export default function Index() {
                     "{testimonial.content}"
                   </p>
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center ring-secondary/30 ring-2"> {/* Added ring */}
+                    <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center ring-secondary/20 ring-2">
                       <span className="text-primary font-bold">
                         {testimonial.name.split(' ').map(n => n[0]).join('')}
                       </span>
