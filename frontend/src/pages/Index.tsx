@@ -20,9 +20,7 @@ const heroBg = "/images/hero-bg.jpg";
 
 const navLinks = [
   { label: "How It Works", href: "#how-it-works" },
-  { label: "Features", href: "#features" },
   { label: "Ubuntu Stories", href: "#ubuntu-stories" },
-  { label: "Demo", href: "#demo" },
 ];
 
 const journeySteps = [
@@ -110,9 +108,7 @@ export default function Index() {
           <nav className="hidden md:flex items-center gap-8">
             {[
               { label: "How It Works", href: "#how-it-works" },
-              { label: "Features", href: "#features" },
               { label: "Ubuntu Stories", href: "#ubuntu-stories" },
-              { label: "Demo", href: "/demo", isRoute: true }, // Changed to route to /demo
             ].map((link) => 
               link.isRoute ? (
                 <Link key={link.label} to={link.href} className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
@@ -187,13 +183,13 @@ export default function Index() {
         <div className="absolute inset-0 bg-gradient-to-b from-background/70 to-background/75" />
 
         {/* Layer 2.5: Spotlight Conic Gradient */}
-        <div className="absolute inset-0 hero-spotlight z-10" />
+        <div className="absolute inset-0 hero-spotlight opacity-50 z-10" />
         
         {/* Layer 3: Animated AI Blobs */}
         <div className="absolute inset-0 ai-mesh" />
         
         {/* Layer 4: Tech Grid */}
-        <div className="absolute inset-0 ai-grid" />
+        <div className="absolute inset-0 ai-grid opacity-30" />
         
         <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32 flex flex-col items-center text-center z-50">
             {/* Badge */}
@@ -233,12 +229,6 @@ export default function Index() {
               <Link to="/signup">
                 <Button variant="cta" size="xl" className="shimmer">
                   Start Your Journey <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              </Link>
-              <Link to="#demo">
-                <Button variant="outlineLight" size="xl" className="shimmer">
-                  <Play className="h-4 w-4 mr-2" />
-                  Watch Demo
                 </Button>
               </Link>
             </motion.div>
@@ -539,12 +529,6 @@ export default function Index() {
                   Start Free Today <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
               </Link>
-              <Link to="#demo">
-                <Button variant="outlineLight" size="xl" className="shimmer"> {/* Added shimmer */}
-                  <Play className="h-4 w-4 mr-2" />
-                  Watch Demo
-                </Button>
-              </Link>
             </div>
           </motion.div>
         </div>
@@ -570,9 +554,7 @@ export default function Index() {
               <h4 className="font-display font-semibold text-foreground mb-4">Product</h4>
               <ul className="space-y-2 text-sm text-muted-foreground"> {/* Changed text-foreground to text-primary on hover */}
                 <li><a href="#how-it-works" className="hover:text-secondary transition-colors">How It Works</a></li>
-                <li><a href="#features" className="hover:text-secondary transition-colors">Features</a></li>
                 <li><a href="#ubuntu-stories" className="hover:text-secondary transition-colors">Success Stories</a></li>
-                <li><a href="#demo" className="hover:text-secondary transition-colors">Demo</a></li>
               </ul>
             </div>
             

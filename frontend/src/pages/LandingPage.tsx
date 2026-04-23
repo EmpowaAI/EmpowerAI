@@ -38,7 +38,7 @@ import Card from "../components/ui/Card";
 import logo from "../assets/images/empoweraidemo.png";
 import siyandaImg from "../assets/images/siyaimage.png";
 
-const navLinks = ["How It Works", "Features", "Ubuntu Stories", "Demo"];
+const navLinks = ["How It Works", "Ubuntu Stories"];
 
 const journeySteps = [
   { icon: FileIcon, label: "Uploaded CV", detail: "Analyzed in 60 seconds" },
@@ -159,15 +159,15 @@ export default function LandingPage() {
 
       <section className="relative isolate pt-28 md:pt-32 pb-16 md:pb-20 overflow-hidden ai-mesh">
         <div
-          className="absolute inset-0 bg-cover bg-center scale-105 transform-gpu z-0"
+          className="absolute inset-0 bg-cover bg-center transform-gpu z-0"
           style={{
             backgroundImage: `url("${heroBackgroundUrl}")`,
           }}
         />
         <div className="absolute inset-0 hero-spotlight z-10" />
-        <div className="absolute inset-0 bg-hero-gradient opacity-35 z-20" />
+        <div className="absolute inset-0 bg-hero-gradient opacity-15 z-20" />
         <div className="absolute inset-0 ai-grid opacity-40 z-20" />
-        <div className="absolute inset-0 hero-vignette z-30" />
+        <div className="absolute inset-0 hero-vignette opacity-40 z-30" />
         <div className="absolute inset-0 grain opacity-20 z-40" />
 
         <div className="container relative z-50 mx-auto px-4 sm:px-6 lg:px-8">
@@ -223,12 +223,6 @@ export default function LandingPage() {
                 className="inline-flex items-center gap-2 bg-cta-gradient text-white px-8 py-4 rounded-xl text-sm font-display font-semibold shadow-cta hover:brightness-105 hover:-translate-y-0.5 active:translate-y-0 transition-smooth shimmer"
               >
                 Start Your Journey <ArrowRight className="h-4 w-4" />
-              </a>
-              <a
-                href="#demo"
-                className="inline-flex items-center gap-2 border-2 border-white/90 bg-white/0 text-white hover:bg-white/10 backdrop-blur-sm px-8 py-4 rounded-xl text-sm font-display font-semibold transition-smooth"
-              >
-                <Play className="h-4 w-4" /> Watch Demo
               </a>
             </motion.div>
           </div>
@@ -468,52 +462,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section id="features" className="py-20 bg-background">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <span className="text-secondary text-sm font-semibold uppercase tracking-wider mb-2 inline-block">
-              <RotatingText
-                text={t("ourTools")}
-                langKey={langIndex}
-                languageLabel={getLanguageDisplay(currentLanguage)}
-              /> — <span className="text-secondary">Izinsiza</span>
-            </span>
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mt-2">
-              Everything You Need to Succeed
-            </h2>
-            <p className="text-muted-foreground mt-3 max-w-xl mx-auto">
-              Built by South Africans, for South Africans. AI tools that understand our unique economy.
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-            {[
-              { icon: Brain, title: "Digital Economic Twin", desc: "AI-powered simulation of your economic future, rooted in South African market realities" },
-              { icon: TrendingUp, title: "Path Simulation", desc: "Visualize income projections across career paths — from SMMEs to corporate" },
-              { icon: FileText, title: "CV Analysis", desc: "Get instant AI feedback tailored for SA employers and the B-BBEE landscape" },
-              { icon: Briefcase, title: "Opportunity Matching", desc: "Find jobs, learnerships, and YES4Youth programmes matched to your profile" },
-              { icon: MessageSquare, title: "Interview Coach", desc: "Practice interviews with AI — from panel discussions to one-on-ones" },
-              { icon: Map, title: "Career Roadmap", desc: "Step-by-step guidance from matric to your dream career, wherever you are in SA" },
-            ].map((f, i) => (
-              <motion.div
-                key={f.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="bg-card rounded-2xl p-6 shadow-card hover:shadow-elevated hover:-translate-y-1 transition-all duration-300 border border-border group"
-              >
-                <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary mb-4 group-hover:scale-110 transition-transform">
-                  <f.icon className="h-6 w-6" />
-                </div>
-                <h3 className="font-display font-bold text-lg text-card-foreground mb-2">{f.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Ubuntu Stories Section */}
       <section id="ubuntu-stories" className="py-20 bg-secondary/30">
@@ -595,56 +543,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Demo Section */}
-      <section id="demo" className="py-20 bg-background">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <span className="text-secondary text-sm font-semibold uppercase tracking-wider mb-2 inline-block">
-              <RotatingText
-                text={t("watch")}
-                langKey={langIndex}
-                languageLabel={getLanguageDisplay(currentLanguage)}
-              /> — <span className="text-secondary">Demo</span>
-            </span>
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mt-2">
-              See EmpowAI in Action
-            </h2>
-            <p className="text-muted-foreground mt-3 max-w-xl mx-auto">
-              Watch how we're helping South African youth discover their economic potential
-            </p>
-          </div>
-
-          <div className="max-w-4xl mx-auto">
-            <div className="relative rounded-2xl overflow-hidden shadow-elevated bg-card aspect-video flex items-center justify-center border border-border group cursor-pointer">
-              <img
-                src={logo}
-                alt="EmpowAI Demo"
-                className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-              <div className="text-center space-y-4 relative z-10">
-                <div className="w-20 h-20 rounded-full bg-secondary flex items-center justify-center mx-auto cursor-pointer hover:scale-110 transition-transform shadow-elevated">
-                  <Play className="h-8 w-8 text-primary-foreground ml-1" />
-                </div>
-                <p className="text-white font-body text-sm font-medium">Demo Coming Soon</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8">
-              {[
-                { label: "Quick Setup", sub: "Under 5 minutes" },
-                { label: "95% Accurate", sub: "Career matching" },
-                { label: "All 9 Provinces", sub: "Across Mzansi" },
-              ].map((item, i) => (
-                <div key={i} className="text-center p-4 bg-card rounded-xl shadow-card border border-border hover:shadow-elevated transition-all">
-                  <p className="font-display font-bold text-foreground text-sm">{item.label}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{item.sub}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-r from-secondary/10 via-secondary/10 to-primary/10">
@@ -664,12 +562,6 @@ export default function LandingPage() {
                 Get Started — It's <RotatingText text={t("mahala")} langKey={langIndex} />{" "}
                 <ArrowRight className="h-4 w-4" />
               </a>
-              <a
-                href="#demo"
-                className="inline-flex items-center justify-center gap-2 border-2 border-primary/25 text-primary px-8 py-3 rounded-xl font-display font-semibold hover:bg-primary hover:text-primary-foreground transition-all"
-              >
-                <Play className="h-4 w-4" /> Watch Demo
-              </a>
             </div>
           </div>
         </div>
@@ -683,7 +575,7 @@ export default function LandingPage() {
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
-            {["Features", "Ubuntu Stories", "Demo", "Sign In", "Get Started"].map((link, i, arr) => (
+            {["How It Works", "Ubuntu Stories", "Sign In", "Get Started"].map((link, i, arr) => (
               <span key={link} className="flex items-center gap-4 md:gap-6">
                 <a
                   href={`#${link.toLowerCase().replace(/\s+/g, "-")}`}
