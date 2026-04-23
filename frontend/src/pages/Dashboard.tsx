@@ -165,7 +165,7 @@ export default function Dashboard() {
                 </div>
                 <motion.h1 initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="text-3xl md:text-4xl font-display mb-2">
                   Welcome back,{" "}
-                  <span className="bg-gradient-to-r from-secondary to-primary bg-clip-text text-transparent">{displayName}</span>
+                  <span className="bg-gradient-to-r from-secondary to-primary bg-clip-text text-transparent font-display">{displayName}</span>
                 </motion.h1>
                 <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="text-muted-foreground">
                   Your AI twin is actively analysing the SA career landscape for you.

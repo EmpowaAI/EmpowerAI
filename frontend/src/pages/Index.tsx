@@ -109,16 +109,13 @@ export default function Index() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
-            {[
-              { label: "How It Works", href: "#how-it-works" },
-              { label: "Ubuntu Stories", href: "#ubuntu-stories" },
-            ].map((link) => 
-              link.isRoute ? (
-                <Link key={link.label} to={link.href} className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
+            {navLinks.map((link) => 
+              !link.href.startsWith('#') ? (
+                <Link key={link.label} to={link.href} className={`text-sm font-medium transition-colors ${scrolled ? "text-foreground/80 hover:text-primary" : "text-white/90 hover:text-white"}`}>
                   {link.label}
                 </Link>
               ) : (
-                <a key={link.label} href={link.href} className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
+                <a key={link.label} href={link.href} className={`text-sm font-medium transition-colors ${scrolled ? "text-foreground/80 hover:text-primary" : "text-white/90 hover:text-white"}`}>
                   {link.label}
                 </a>
               )
@@ -126,7 +123,7 @@ export default function Index() {
           </nav>
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-3">
-            <Link to="/login" className="text-sm font-medium text-primary-foreground/90 hover:text-primary-foreground px-3 py-2 transition-colors">
+            <Link to="/login" className={`text-sm font-medium px-3 py-2 transition-colors ${scrolled ? "text-muted-foreground hover:text-foreground" : "text-white/90 hover:text-white"}`}>
               Sign In
             </Link>
             <Link to="/signup">
@@ -243,7 +240,7 @@ export default function Index() {
               className="flex items-center justify-center gap-8 text-white/80 text-sm font-medium pt-8"
             >
               <div className="flex items-center gap-2">
-                <Cpu className="h-4 w-4 text-primary-foreground" />
+                <Cpu className="h-4 w-4 text-secondary" />
                 <span>AI Analysis</span>
               </div>
               <div className="flex items-center gap-2">
@@ -269,8 +266,11 @@ export default function Index() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="text-center"
+                className="text-center group"
               >
+                <div className="w-12 h-12 rounded-xl bg-primary/5 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform border border-primary/10">
+                  <stat.icon className="h-6 w-6 text-primary" />
+                </div>
                 <div className="text-3xl md:text-4xl font-display font-bold text-primary mb-2">
                   {stat.value}
                 </div>
@@ -555,7 +555,7 @@ export default function Index() {
             
             <div>
               <h4 className="font-display font-semibold text-foreground mb-4">Product</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground"> {/* Changed text-foreground to text-primary on hover */}
+              <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><a href="#how-it-works" className="hover:text-secondary transition-colors">How It Works</a></li>
                 <li><a href="#ubuntu-stories" className="hover:text-secondary transition-colors">Success Stories</a></li>
               </ul>
@@ -563,7 +563,7 @@ export default function Index() {
             
             <div>
               <h4 className="font-display font-semibold text-foreground mb-4">Company</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground"> {/* Changed text-foreground to text-secondary on hover */}
+              <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><Link to="/about" className="hover:text-secondary transition-colors">About</Link></li>
                 <li><Link to="/blog" className="hover:text-secondary transition-colors">Blog</Link></li>
                 <li><Link to="/careers" className="hover:text-secondary transition-colors">Careers</Link></li>
@@ -573,7 +573,7 @@ export default function Index() {
             
             <div>
               <h4 className="font-display font-semibold text-foreground mb-4">Legal</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground"> {/* Changed text-foreground to text-secondary on hover */}
+              <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><Link to="/privacy" className="hover:text-secondary transition-colors">Privacy Policy</Link></li>
                 <li><Link to="/terms" className="hover:text-secondary transition-colors">Terms of Service</Link></li>
                 <li><Link to="/cookies" className="hover:text-secondary transition-colors">Cookie Policy</Link></li>
