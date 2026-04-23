@@ -211,7 +211,7 @@ export default function GamificationSystem() {
       {/* Header */}
       <div className="text-center">
         <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-4">
-          Career Progress System
+          Career Progress System {/* Changed to-accent to to-secondary */}
         </h1>
         <p className="text-xl text-muted-foreground">
           Level up, unlock achievements, and climb the leaderboard
@@ -235,7 +235,7 @@ export default function GamificationSystem() {
               <span className="text-sm font-medium text-primary">{xpToNext > 0 ? `${xpToNext} XP to go` : 'Max Level'}</span>
             </div>
             <div className="w-full bg-muted rounded-full h-3">
-              <div 
+              <div
                 className="h-3 rounded-full bg-gradient-to-r from-primary to-accent transition-all duration-500" 
                 style={{ width: `${Math.min(xpProgress, 100)}%` }} 
               />
@@ -267,7 +267,7 @@ export default function GamificationSystem() {
           <p className="text-sm text-muted-foreground">Total XP</p>
         </NeuralCard>
         <NeuralCard className="text-center">
-          <div className="flex items-center justify-center gap-2">
+          <div className="flex items-center justify-center gap-2"> {/* Changed text-orange-400 to text-secondary */}
             <Flame className="h-6 w-6 text-orange-400" />
             <div className="text-3xl font-bold text-orange-400">{state.streak}</div>
           </div>

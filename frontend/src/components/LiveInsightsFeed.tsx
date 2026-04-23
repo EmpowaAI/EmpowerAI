@@ -115,10 +115,10 @@ export default function LiveInsightsFeed() {
   }, [insights]);
 
   const typeColor = {
-    detection: "border-neon-orange/30 bg-neon-orange/5",
+    detection: "border-secondary/30 bg-secondary/5", // Changed to secondary
     insight: "border-primary/30 bg-primary/5",
-    market: "border-neon-green/30 bg-neon-green/5",
-    alert: "border-secondary/30 bg-secondary/5",
+    market: "border-success/30 bg-success/5", // Changed to success
+    alert: "border-secondary/30 bg-secondary/5", // Secondary is correct for alerts
   };
 
   return (

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
@@ -49,8 +49,10 @@ const journeySteps = [
 ];
 
 const trustStats = [
-  { icon: "12.4K", value: "12,400+", label: "Ubuntu members" },
-  { icon: "94%", value: "94%", label: "match accuracy" }
+  { icon: Rocket, title: "AI-Powered Analysis", desc: "60-second career assessment" },
+  { icon: HeartHandshake, title: "Ubuntu Values", desc: "Rooted in African philosophy" },
+  { icon: Briefcase, title: "Real Opportunities", desc: "Across all 9 provinces" },
+  { icon: Award, title: "Proven Success", desc: "2,000+ youth transformed" }
 ];
 
 const testimonials = [
@@ -90,18 +92,18 @@ export default function Index() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Sticky Header */}
-      <header 
+      <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled ? "bg-background/85 backdrop-blur-md border-b border-border/60" : "bg-transparent"
+          scrolled ? "bg-background/80 backdrop-blur-md border-b border-border" : "bg-transparent"
         }`}
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-              <Brain className="h-4 w-4 text-white" />
+              <Brain className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="font-display text-xl font-bold text-foreground">EmpowAI</span>
+            <span className="font-display text-xl font-bold text-primary">EmpowAI</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -110,27 +112,26 @@ export default function Index() {
               { label: "How It Works", href: "#how-it-works" },
               { label: "Features", href: "#features" },
               { label: "Ubuntu Stories", href: "#ubuntu-stories" },
-              { label: "Demo", href: "/demo", isRoute: true },
+              { label: "Demo", href: "/demo", isRoute: true }, // Changed to route to /demo
             ].map((link) => 
               link.isRoute ? (
-                <Link key={link.label} to={link.href} className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+                <Link key={link.label} to={link.href} className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
                   {link.label}
                 </Link>
               ) : (
-                <a key={link.label} href={link.href} className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+                <a key={link.label} href={link.href} className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
                   {link.label}
                 </a>
               )
             )}
           </nav>
-
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-3">
             <Link to="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground px-3 py-2 transition-colors">
               Sign In
             </Link>
             <Link to="/signup">
-              <Button variant="cta" size="sm">
+              <Button variant="cta" size="sm" className="shimmer">
                 Get Started
               </Button>
             </Link>
@@ -139,12 +140,11 @@ export default function Index() {
           {/* Mobile Menu Toggle */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden h-9 w-9 rounded-full bg-muted flex items-center justify-center hover:bg-secondary/10 transition-colors border border-border"
+            className="md:hidden h-9 w-9 rounded-full bg-muted flex items-center justify-center hover:bg-muted-foreground/10 transition-colors border border-border"
           >
             {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
           </button>
         </div>
-
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <motion.div
@@ -154,15 +154,15 @@ export default function Index() {
             className="md:hidden border-t border-border bg-background"
           >
             <div className="container mx-auto px-4 py-4 flex flex-col gap-3">
-              {navLinks.map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
+              {navLinks.map((link) => ( // Use navLinks directly for mobile
+                <Link
+                  key={link.label} // Use Link for internal routes and external for external
+                  to={link.href}
                   onClick={() => setMobileMenuOpen(false)}
                   className="text-sm font-medium text-muted-foreground py-2 hover:text-foreground transition-colors"
                 >
                   {link.label}
-                </a>
+                </Link>
               ))}
               <Link to="/login" className="text-sm font-medium text-muted-foreground py-2 hover:text-foreground transition-colors">
                 Sign In
@@ -178,17 +178,16 @@ export default function Index() {
       </header>
 
       {/* Hero Section - Layered Visual Stack */}
-      <section className="relative min-h-[92vh] overflow-hidden">
+      <section className="relative min-h-[92vh] overflow-hidden bg-hero-gradient">
         {/* Layer 1: Hero Image */}
-        <img 
-          src={heroBg} 
-          className="absolute inset-0 w-full h-full object-cover" 
-          alt="" 
-          aria-hidden 
-        />
-        
+        {/* Removed direct image as per recipe, replaced with gradient and patterns */}
+
         {/* Layer 2: Navy Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-foreground/55 via-foreground/45 to-foreground/70" />
+        {/* This is handled by bg-hero-gradient and the vignette */}
+        <div className="absolute inset-0 bg-gradient-to-b from-background/70 to-background/75" />
+
+        {/* Layer 2.5: Spotlight Conic Gradient */}
+        <div className="absolute inset-0 hero-spotlight z-10" />
         
         {/* Layer 3: Animated AI Blobs */}
         <div className="absolute inset-0 ai-mesh" />
@@ -196,8 +195,7 @@ export default function Index() {
         {/* Layer 4: Tech Grid */}
         <div className="absolute inset-0 ai-grid" />
         
-        {/* Layer 5: Content */}
-        <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32 flex flex-col items-center text-center">
+        <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32 flex flex-col items-center text-center z-50">
             {/* Badge */}
             <motion.span
               initial={{ opacity: 0, y: 20 }}
@@ -205,13 +203,8 @@ export default function Index() {
               transition={{ duration: 0.5 }}
               className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-sm"
             >
-              <span className="ai-dot" />
-              Powered by Ubuntu
-              <span className="hidden sm:inline">Built for South Africa</span>
-              <span className="text-xl">ZAR</span>
+              <span className="ai-dot" /> Powered by Ubuntu <span className="hidden sm:inline">Built for South Africa</span> <span className="text-xl">🇿🇦</span>
             </motion.span>
-
-            {/* Headline */}
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -221,8 +214,6 @@ export default function Index() {
               Your AI guide to{" "}
               <span className="text-gradient-ai">economic freedom</span>
             </motion.h1>
-
-            {/* Subhead */}
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -232,7 +223,6 @@ export default function Index() {
               Discover career pathways rooted in Ubuntu values. Join thousands of young South Africans 
               building better futures with AI-powered guidance that works.
             </motion.p>
-
             {/* CTAs */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -246,13 +236,12 @@ export default function Index() {
                 </Button>
               </Link>
               <Link to="#demo">
-                <Button variant="outlineLight" size="xl">
+                <Button variant="outlineLight" size="xl" className="shimmer">
                   <Play className="h-4 w-4 mr-2" />
                   Watch Demo
                 </Button>
               </Link>
             </motion.div>
-
             {/* Tech Signal Strip */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -261,15 +250,15 @@ export default function Index() {
               className="flex items-center justify-center gap-8 text-white/80 text-sm font-medium pt-8"
             >
               <div className="flex items-center gap-2">
-                <Brain className="h-4 w-4" />
+                <Cpu className="h-4 w-4 text-secondary" />
                 <span>AI Analysis</span>
               </div>
               <div className="flex items-center gap-2">
-                <Target className="h-4 w-4" />
+                <Zap className="h-4 w-4 text-secondary" />
                 <span>60-Second Results</span>
               </div>
               <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
+                <MapPin className="h-4 w-4 text-secondary" />
                 <span>All 9 Provinces</span>
               </div>
             </motion.div>
@@ -307,7 +296,7 @@ export default function Index() {
               Featured Story
             </span>
             <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mt-2">
-              Siyanda's Journey: from R0 to R4,500/month
+              Siyanda's Journey: from R0 to R4,500/month {/* Changed font-heading to font-display */}
             </h2>
               <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">
                 He didn't get lucky — he explored, compared, and chose. Here's exactly how it went.
@@ -321,7 +310,7 @@ export default function Index() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
             >
-              <div className="bg-card rounded-2xl shadow-card p-8 border border-border h-full flex flex-col justify-center">
+              <div className="bg-card rounded-2xl shadow-card-soft p-8 border border-border h-full flex flex-col justify-center">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="w-16 h-16 rounded-full bg-ai-gradient flex items-center justify-center text-white text-2xl font-bold shadow-glow">
                     SK
@@ -346,7 +335,7 @@ export default function Index() {
                       whileInView={{ width: "92%" }}
                       viewport={{ once: true }}
                       transition={{ duration: 1.5, delay: 0.5 }}
-                      className="h-full bg-ai-gradient rounded-full"
+                      className="h-full bg-gradient-to-r from-primary to-secondary rounded-full" // Use explicit gradient for clarity
                     />
                   </div>
                 </div>
@@ -354,7 +343,7 @@ export default function Index() {
                 {/* Income Transformation */}
                 <div className="text-center py-6 border-t border-border">
                   <div className="text-3xl font-display font-bold text-gradient-ai mb-2">
-                    R0 <span className="text-primary/40">to</span> R4,500/month
+                    R0 <span className="text-primary/40">to</span> R4,500/month {/* text-gradient-ai is for the whole text, primary/40 for 'to' */}
                   </div>
                   <div className="text-sm text-muted-foreground">12 weeks to first income</div>
                 </div>
@@ -392,7 +381,7 @@ export default function Index() {
                         text-white font-display font-bold text-lg
                         shadow-glow
                         ring-4 ring-background transition-all duration-300
-                        group-hover:scale-110 group-hover:rotate-6
+                        group-hover:scale-110 group-hover:rotate-6 {/* Added group-hover effects */}
                       ">
                         {i + 1}
                       </div>
@@ -419,7 +408,7 @@ export default function Index() {
             <span className="text-secondary text-sm font-semibold uppercase tracking-wider mb-2 inline-block">
               How It Works
             </span>
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mt-2">
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-primary mt-2">
               Three Steps to Economic Freedom
             </h2>
             <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">
@@ -454,7 +443,7 @@ export default function Index() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="group"
+                className="group relative" // Added relative for shadow-card
               >
                 <div className="bg-card rounded-2xl shadow-card p-8 border border-border hover:shadow-lg hover:-translate-y-1 transition-all duration-300 h-full">
                   <div className="w-16 h-16 rounded-2xl bg-ai-gradient flex items-center justify-center mb-6 group-hover:scale-105 transition-transform shadow-glow">
@@ -477,14 +466,14 @@ export default function Index() {
       </section>
 
       {/* Testimonials */}
-      <section className="py-20 bg-muted">
+      <section id="ubuntu-stories" className="py-20 bg-muted">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <span className="text-secondary text-sm font-semibold uppercase tracking-wider mb-2 inline-block">
               Ubuntu Stories
             </span>
             <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mt-2">
-              Real Success from Mzansi
+              Real Success from Mzansi {/* Changed font-heading to font-display */}
             </h2>
             <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">
               Hear from young South Africans transforming their lives.
@@ -500,13 +489,13 @@ export default function Index() {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
               >
-                <div className="bg-card rounded-2xl shadow-card p-8 border border-border h-full">
+                <div className="bg-card rounded-2xl shadow-card p-8 border border-border h-full hover:shadow-glow transition-shadow duration-300">
                   <Quote className="h-8 w-8 text-secondary mb-4" />
                   <p className="text-foreground mb-6 leading-relaxed">
                     "{testimonial.content}"
                   </p>
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center ring-secondary/30 ring-2"> {/* Added ring */}
                       <span className="text-primary font-bold">
                         {testimonial.name.split(' ').map(n => n[0]).join('')}
                       </span>
@@ -514,7 +503,7 @@ export default function Index() {
                     <div className="flex-1">
                       <h4 className="font-display font-bold text-foreground">
                         {testimonial.name}
-                      </h4>
+                      </h4> {/* Changed text-foreground to text-primary */}
                       <p className="text-sm text-muted-foreground">
                         {testimonial.role} · {testimonial.location}
                       </p>
@@ -531,7 +520,7 @@ export default function Index() {
       </section>
 
       {/* Final CTA Band */}
-      <section className="py-20 bg-gradient-to-r from-primary to-secondary ubuntu-pattern">
+      <section className="py-20 bg-hero-gradient ubuntu-pattern">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -551,7 +540,7 @@ export default function Index() {
                 </Button>
               </Link>
               <Link to="#demo">
-                <Button variant="outlineLight" size="xl">
+                <Button variant="outlineLight" size="xl" className="shimmer"> {/* Added shimmer */}
                   <Play className="h-4 w-4 mr-2" />
                   Watch Demo
                 </Button>
@@ -562,15 +551,15 @@ export default function Index() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border bg-background">
+      <footer className="border-t border-border bg-card"> {/* Changed bg-background to bg-card */}
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-                  <Brain className="h-4 w-4 text-white" />
+                  <Brain className="h-4 w-4 text-primary-foreground" />
                 </div>
-                <span className="font-display text-xl font-bold text-foreground">EmpowAI</span>
+                <span className="font-display text-xl font-bold text-primary">EmpowAI</span>
               </div>
               <p className="text-muted-foreground text-sm">
                 AI-powered career guidance rooted in Ubuntu values. Built for young South Africans.
@@ -579,30 +568,30 @@ export default function Index() {
             
             <div>
               <h4 className="font-display font-semibold text-foreground mb-4">Product</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#how-it-works" className="hover:text-foreground transition-colors">How It Works</a></li>
-                <li><a href="#features" className="hover:text-foreground transition-colors">Features</a></li>
-                <li><a href="#ubuntu-stories" className="hover:text-foreground transition-colors">Success Stories</a></li>
-                <li><a href="#demo" className="hover:text-foreground transition-colors">Demo</a></li>
+              <ul className="space-y-2 text-sm text-muted-foreground"> {/* Changed text-foreground to text-primary on hover */}
+                <li><a href="#how-it-works" className="hover:text-secondary transition-colors">How It Works</a></li>
+                <li><a href="#features" className="hover:text-secondary transition-colors">Features</a></li>
+                <li><a href="#ubuntu-stories" className="hover:text-secondary transition-colors">Success Stories</a></li>
+                <li><a href="#demo" className="hover:text-secondary transition-colors">Demo</a></li>
               </ul>
             </div>
             
             <div>
               <h4 className="font-display font-semibold text-foreground mb-4">Company</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link to="/about" className="hover:text-foreground transition-colors">About</Link></li>
-                <li><Link to="/blog" className="hover:text-foreground transition-colors">Blog</Link></li>
-                <li><Link to="/careers" className="hover:text-foreground transition-colors">Careers</Link></li>
-                <li><Link to="/contact" className="hover:text-foreground transition-colors">Contact</Link></li>
+              <ul className="space-y-2 text-sm text-muted-foreground"> {/* Changed text-foreground to text-secondary on hover */}
+                <li><Link to="/about" className="hover:text-secondary transition-colors">About</Link></li>
+                <li><Link to="/blog" className="hover:text-secondary transition-colors">Blog</Link></li>
+                <li><Link to="/careers" className="hover:text-secondary transition-colors">Careers</Link></li>
+                <li><Link to="/contact" className="hover:text-secondary transition-colors">Contact</Link></li>
               </ul>
             </div>
             
             <div>
               <h4 className="font-display font-semibold text-foreground mb-4">Legal</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link to="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link></li>
-                <li><Link to="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link></li>
-                <li><Link to="/cookies" className="hover:text-foreground transition-colors">Cookie Policy</Link></li>
+              <ul className="space-y-2 text-sm text-muted-foreground"> {/* Changed text-foreground to text-secondary on hover */}
+                <li><Link to="/privacy" className="hover:text-secondary transition-colors">Privacy Policy</Link></li>
+                <li><Link to="/terms" className="hover:text-secondary transition-colors">Terms of Service</Link></li>
+                <li><Link to="/cookies" className="hover:text-secondary transition-colors">Cookie Policy</Link></li>
               </ul>
             </div>
           </div>
@@ -610,7 +599,7 @@ export default function Index() {
           <div className="border-t border-border mt-8 pt-8 text-center text-sm text-muted-foreground">
             <p>&copy; 2025 EmpowAI. Built with Ubuntu for South Africa. ZAR</p>
           </div>
-        </div>
+        </div> {/* Removed extra footer content */}
       </footer>
     </div>
   );

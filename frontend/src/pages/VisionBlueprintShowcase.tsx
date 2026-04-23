@@ -102,7 +102,7 @@ export default function VisionBlueprintShowcase() {
         {/* Hero Section */}
         <NeuralCard className="text-center">
           <div className="flex items-center justify-center gap-6 mb-8">
-            <AIAvatar size="xl" variant="default" />
+            <AIAvatar size="xl" variant="default" /> {/* Assuming AIAvatar is fine */}
             <div>
               <h1 className="text-4xl font-bold text-foreground mb-4">
                 EmpowerAI Vision Blueprint

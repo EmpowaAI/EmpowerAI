@@ -165,7 +165,7 @@ export default function DigitalTwinChatbot() {
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center">
               <Bot className="h-5 w-5 text-primary-foreground" />
-            </div>
+            </div> 
             <div>
               <h3 className="font-bold text-white">Digital Economic Twin</h3>
               <p className="text-xs text-white/80 flex items-center gap-1">

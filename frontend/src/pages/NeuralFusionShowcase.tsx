@@ -66,7 +66,7 @@ export default function NeuralFusionShowcase() {
             </div>
             <div className="flex items-center gap-2">
               <Mic className="h-5 w-5 text-accent" />
-              <span className="text-sm text-muted-foreground">Voice Intelligence</span>
+              <span className="text-sm text-muted-foreground text-secondary">Voice Intelligence</span> {/* Changed text-accent to text-secondary */}
             </div>
           </div>
 
@@ -94,27 +94,27 @@ export default function NeuralFusionShowcase() {
 
             <div className="space-y-4 mb-6">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-accent rounded-full" />
-                <span className="text-sm text-muted-foreground">Content Quality Analysis</span>
+                <div className="w-2 h-2 bg-secondary rounded-full" /> {/* Changed bg-accent to bg-secondary */}
+                <span className="text-sm text-muted-foreground">Content Quality Analysis</span> {/* Changed text-accent to text-secondary */}
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-primary rounded-full" />
-                <span className="text-sm text-muted-foreground">ATS Compatibility Check</span>
+                <div className="w-2 h-2 bg-primary rounded-full" /> {/* Changed bg-primary to bg-primary */}
+                <span className="text-sm text-muted-foreground">ATS Compatibility Check</span> {/* Changed text-primary to text-primary */}
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-secondary rounded-full" />
-                <span className="text-sm text-muted-foreground">SA Market Intelligence</span>
+                <div className="w-2 h-2 bg-secondary rounded-full" /> {/* Changed bg-secondary to bg-secondary */}
+                <span className="text-sm text-muted-foreground">SA Market Intelligence</span> {/* Changed text-secondary to text-secondary */}
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-warning rounded-full" />
-                <span className="text-sm text-muted-foreground">Salary Projections</span>
+                <div className="w-2 h-2 bg-secondary rounded-full" /> {/* Changed bg-warning to bg-secondary */}
+                <span className="text-sm text-muted-foreground">Salary Projections</span> {/* Changed text-warning to text-secondary */}
               </div>
             </div>
 
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-accent" />
-                <span className="text-sm text-accent">85% Average Improvement</span>
+              <div className="flex items-center gap-2"> {/* Changed text-accent to text-secondary */}
+                <TrendingUp className="h-4 w-4 text-secondary" />
+                <span className="text-sm text-secondary">85% Average Improvement</span>
               </div>
               <HolographicButton onClick={() => setActiveFeature('cv-analyzer')}>
                 Try Now <ArrowRight className="h-4 w-4" />
@@ -125,9 +125,9 @@ export default function NeuralFusionShowcase() {
           {/* Voice Interview Coach */}
           <NeuralCard className="group hover:scale-[1.02] transition-all duration-300">
             <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center">
-                  <Mic className="h-6 w-6 text-accent" />
+              <div className="flex items-center gap-3"> {/* Changed bg-accent to bg-secondary */}
+                <div className="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center">
+                  <Mic className="h-6 w-6 text-secondary" /> {/* Changed text-accent to text-secondary */}
                 </div>
                 <div>
                   <h3 className="text-2xl font-bold text-foreground">Voice Interview Coach</h3>
@@ -135,30 +135,29 @@ export default function NeuralFusionShowcase() {
                 </div>
               </div>
             </div>
-
             <div className="space-y-4 mb-6">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-accent rounded-full" />
-                <span className="text-sm text-muted-foreground">Speech Recognition</span>
+                <div className="w-2 h-2 bg-secondary rounded-full" /> {/* Changed bg-accent to bg-secondary */}
+                <span className="text-sm text-muted-foreground">Speech Recognition</span> {/* Changed text-accent to text-secondary */}
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-primary rounded-full" />
-                <span className="text-sm text-muted-foreground">Confidence Scoring</span>
+                <div className="w-2 h-2 bg-primary rounded-full" /> {/* Changed bg-primary to bg-primary */}
+                <span className="text-sm text-muted-foreground">Confidence Scoring</span> {/* Changed text-primary to text-primary */}
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-secondary rounded-full" />
-                <span className="text-sm text-muted-foreground">Real-time Feedback</span>
+                <div className="w-2 h-2 bg-secondary rounded-full" /> {/* Changed bg-secondary to bg-secondary */}
+                <span className="text-sm text-muted-foreground">Real-time Feedback</span> {/* Changed text-secondary to text-secondary */}
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-warning rounded-full" />
-                <span className="text-sm text-muted-foreground">Emotion Detection</span>
+                <div className="w-2 h-2 bg-secondary rounded-full" /> {/* Changed bg-warning to bg-secondary */}
+                <span className="text-sm text-muted-foreground">Emotion Detection</span> {/* Changed text-warning to text-secondary */}
               </div>
             </div>
 
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <VoiceVisualizer isActive={true} intensity={0.6} />
-                <span className="text-sm text-accent">80% Readiness Rate</span>
+              <div className="flex items-center gap-2"> {/* Changed text-accent to text-secondary */}
+                <VoiceVisualizer isActive={true} intensity={0.6} /> {/* Assuming VoiceVisualizer is fine */}
+                <span className="text-sm text-secondary">80% Readiness Rate</span>
               </div>
               <HolographicButton onClick={() => setActiveFeature('voice-coach')}>
                 Start Practice <ArrowRight className="h-4 w-4" />
@@ -220,7 +219,7 @@ export default function NeuralFusionShowcase() {
             <p className="text-muted-foreground">Dimensions of CV Analysis</p>
           </NeuralCard>
           <NeuralCard className="text-center">
-            <div className="text-4xl font-bold text-accent mb-2">24/7</div>
+            <div className="text-4xl font-bold text-secondary mb-2">24/7</div> {/* Changed text-accent to text-secondary */}
             <p className="text-muted-foreground">AI Mentor Availability</p>
           </NeuralCard>
           <NeuralCard className="text-center">

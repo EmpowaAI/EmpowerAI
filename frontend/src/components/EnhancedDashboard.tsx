@@ -134,7 +134,7 @@ export const EnhancedDashboard: React.FC = () => {
           <button 
             onClick={() => loadProfile(true)}
             disabled={isRefreshing}
-            className="flex items-center gap-2 px-4 py-2 bg-secondary/50 border border-border rounded-lg text-sm font-medium hover:bg-secondary transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 bg-primary/10 border border-border rounded-lg text-sm font-medium hover:bg-primary/20 transition-colors disabled:opacity-50"
           >
             {isRefreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCcw className="h-4 w-4" />}
             Sync Data
@@ -160,7 +160,7 @@ export const EnhancedDashboard: React.FC = () => {
           <div className="bg-card rounded-xl border border-border p-4 sm:p-6">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-medium text-muted-foreground">CV Strength</h3>
-              <Award className="h-5 w-5 text-cv-success" />
+              <Award className="h-5 w-5 text-success" />
             </div>
             <div className="text-2xl sm:text-3xl font-display font-bold">{profile?.cvData?.score || 0}%</div>
             <div className="text-xs text-muted-foreground mt-1">{profile.cvData?.readinessLevel || 'Not analyzed'}</div>
@@ -169,7 +169,7 @@ export const EnhancedDashboard: React.FC = () => {
           <div className="bg-card rounded-xl border border-border p-6">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-medium text-muted-foreground">Skills Identified</h3>
-              <Target className="h-5 w-5 text-cv-gold" />
+              <Target className="h-5 w-5 text-secondary" />
             </div>
             <div className="text-3xl sm:text-3xl font-display font-bold">{profile?.skills?.length || 0}</div>
             <div className="text-xs text-muted-foreground mt-1">across your profile</div>
@@ -207,8 +207,8 @@ export const EnhancedDashboard: React.FC = () => {
                       <h3 className="font-semibold">{opp.title}</h3>
                       <span className={cn(
                         "px-2 py-1 rounded-full text-xs font-medium",
-                        opp.matchScore >= 80 ? "bg-cv-success/20 text-cv-success" :
-                        opp.matchScore >= 60 ? "bg-cv-gold/20 text-cv-gold" :
+                        opp.matchScore >= 80 ? "bg-success/20 text-success" :
+                        opp.matchScore >= 60 ? "bg-secondary/20 text-secondary" :
                         "bg-cv-warning/20 text-cv-warning"
                       )}>
                         {opp.matchScore}% Match
@@ -226,8 +226,8 @@ export const EnhancedDashboard: React.FC = () => {
                       </span>
                       <span className={cn(
                         "px-2 py-0.5 rounded-full",
-                        opp.demandLevel === 'High' ? "bg-cv-success/10 text-cv-success" :
-                        opp.demandLevel === 'Medium' ? "bg-cv-gold/10 text-cv-gold" :
+                        opp.demandLevel === 'High' ? "bg-success/10 text-success" :
+                        opp.demandLevel === 'Medium' ? "bg-secondary/10 text-secondary" :
                         "bg-muted text-muted-foreground"
                       )}>
                         {opp.demandLevel} Demand
@@ -270,8 +270,8 @@ export const EnhancedDashboard: React.FC = () => {
                         <h3 className="font-semibold">{gap.skill}</h3>
                         <span className={cn(
                           "px-2 py-1 rounded-full text-xs font-medium",
-                          gap.importance === 'critical' ? "bg-destructive/20 text-destructive" :
-                          gap.importance === 'recommended' ? "bg-cv-gold/20 text-cv-gold" :
+                        gap.importance === 'critical' ? "bg-destructive/20 text-destructive" : // Destructive is correct
+                        gap.importance === 'recommended' ? "bg-secondary/20 text-secondary" : // Changed to secondary
                           "bg-muted text-muted-foreground"
                         )}>
                           {gap.importance}
@@ -315,8 +315,8 @@ export const EnhancedDashboard: React.FC = () => {
                       <div className="flex items-start gap-2">
                         <span className={cn(
                           "mt-1 h-2 w-2 rounded-full flex-shrink-0",
-                          item.priority === 'high' ? "bg-destructive" :
-                          item.priority === 'medium' ? "bg-cv-gold" : "bg-muted"
+                          item.priority === 'high' ? "bg-destructive" : // Destructive is correct
+                          item.priority === 'medium' ? "bg-secondary" : "bg-muted" // Changed to secondary
                         )} />
                         <div>
                           <p className="text-sm font-medium">{item.task}</p>

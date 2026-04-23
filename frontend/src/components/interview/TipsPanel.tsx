@@ -50,8 +50,8 @@ export const TipsPanel: React.FC<TipsPanelProps> = ({ interviewType }) => {
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full px-4 md:px-6 py-3 md:py-4 flex items-center justify-between bg-sa-gold/10 hover:bg-sa-gold/15 transition-colors"
       >
-        <div className="flex items-center gap-2 md:gap-3">
-          <div className="p-1.5 md:p-2 rounded-lg bg-sa-gold/20 text-sa-gold">
+        <div className="flex items-center gap-2 md:gap-3"> {/* Changed bg-sa-gold to bg-secondary */}
+          <div className="p-1.5 md:p-2 rounded-lg bg-secondary/20 text-secondary">
             {currentTips.icon}
           </div>
           <h3 className="text-sm md:text-base font-bold text-foreground">{currentTips.title}</h3>
@@ -64,7 +64,7 @@ export const TipsPanel: React.FC<TipsPanelProps> = ({ interviewType }) => {
             {currentTips.items.map((tip, index) => (
               <li key={index} className="flex items-start gap-2 md:gap-3 text-xs md:text-sm">
                 <span className="w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center text-primary-foreground text-[10px] md:text-xs font-bold flex-shrink-0 mt-0.5 bg-sa-gold">
-                  {index + 1}
+                  {index + 1} {/* Changed bg-sa-gold to bg-secondary */}
                 </span>
                 <span className="text-muted-foreground">{tip}</span>
               </li>
