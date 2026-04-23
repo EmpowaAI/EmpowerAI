@@ -4,9 +4,9 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { Eye, EyeOff, Loader2, CheckCircle, Lock, Shield, Mail, Sparkles } from "lucide-react"
-import { accountService } from "../../api/Index"
-import Logo from "../../components/ui/Logo"
-import backgroud from "../../assets/images/result.jpg"
+import { accountService } from "@/api/Index"
+import Logo from "@/components/ui/Logo"
+import backgroud from "@/assets/images/result.jpg"
 
 export default function ResetPassword() {
     const [searchParams] = useSearchParams()
@@ -165,5 +165,5 @@ return (
                 </div>
             </div>
         </div>
-    </div>
-)}
+  )
+}

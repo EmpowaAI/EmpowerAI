@@ -6,12 +6,12 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Loader2, Sparkles, Mail, Lock } from "lucide-react";
 import toast from 'react-hot-toast';
-import { authAPI } from "../../lib/api";
-import { useUser } from "../../contexts/user-context";
-import { syncProgressFromBackend, unlockAllPages } from "../../utils/progressSync";
-import ThemeToggle from "../../components/ui/ThemeToggle";
-import loginBg from "../../assets/images/empowerlogin.png";
-import { Button } from "../../components/ui/button"; // Assuming shared UI components are updated
+import { authAPI } from "@/lib/api";
+import { useUser } from "@/contexts/user-context";
+import { syncProgressFromBackend, unlockAllPages } from "@/utils/progressSync";
+import ThemeToggle from "@/components/ui/ThemeToggle";
+import loginBg from "@/assets/images/empowerlogin.png";
+import { Button } from "@/components/ui/button";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
