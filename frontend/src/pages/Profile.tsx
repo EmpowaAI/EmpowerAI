@@ -283,8 +283,8 @@ export default function Profile() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Account Status</span>
-                  <span className="text-sm font-medium text-success flex items-center gap-1"> {/* Changed text-accent to text-success */}
-                    <span className="h-2 w-2 rounded-full bg-accent"></span>
+                  <span className="text-sm font-medium text-sa-green flex items-center gap-1">
+                    <span className="h-2 w-2 rounded-full bg-sa-green animate-pulse"></span>
                     Active
                   </span>
                 </div>

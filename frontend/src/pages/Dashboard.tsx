@@ -265,7 +265,7 @@ export default function Dashboard() {
                     <motion.div
                       initial={{ width: 0 }} animate={{ width: `${progressPercentage}%` }}
                       transition={{ delay: 0.8, duration: 1 }}
-                      className="h-full bg-gradient-to-r from-secondary to-secondary rounded-full"
+                      className="h-full bg-gradient-to-r from-secondary to-primary rounded-full"
                     />
                   </div>
                 </div>
