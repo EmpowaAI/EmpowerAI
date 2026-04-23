@@ -26,15 +26,14 @@ export default function EmailVerified() {
             await accountService.verifyEmail(token)
             setIsSuccess(true)
             setTimeout(() => navigate('/login'), 3000)
-            } catch (err: any) {
+        } catch (err: any) {
             setError(err.message || "Verification failed")
         } finally {
             setIsLoading(false)
         }
     }
-
-    verifyEmail()
-}, [searchParams, navigate])
+        verifyEmail()
+    }, [searchParams, navigate])
 
 return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/10 dark:from-background dark:via-background dark:to-muted/60 flex items-center justify-center p-4 animate-fade-in">
@@ -107,9 +106,9 @@ return (
                     </Link>
                 </div>
             </div>
-        </div>
+          </div>
         )}
-    </div>
+      </div>
     </div>
   )
 }
