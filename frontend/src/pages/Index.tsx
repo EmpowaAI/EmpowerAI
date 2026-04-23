@@ -2,51 +2,14 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
-  ArrowRight,
-  Play,
-  MapPin,
-  TrendingUp,
-  Target,
-  Upload,
-  Quote,
-  Brain,
-  Menu,
-  X,
-  Rocket,
-  HeartHandshake,
-  Briefcase,
-  Award,
-  Cpu,
-  Zap,
+  ArrowRight, Play, MapPin, TrendingUp, Target, Upload, Quote, Brain, Menu, X, Rocket, HeartHandshake, Briefcase, Award, Cpu, Zap
 } from "lucide-react";
 import Button from "../components/ui/Button";
 
 const navLinks = [
   { label: "How It Works", href: "#how-it-works" },
   { label: "Ubuntu Stories", href: "#ubuntu-stories" },
-];
-
-const journeySteps = [
-  {
-    zulu: "Indlela",
-    english: "Onboarding & skills assessment"
-  },
-  {
-    zulu: "Izinsiza Zethu",
-    english: "Matched to local opportunities"
-  },
-  {
-    zulu: "Mahala",
-    english: "Free AI-powered training modules"
-  },
-  {
-    zulu: "Ukukhula",
-    english: "First income milestone reached"
-  },
-  {
-    zulu: "Siyaqala!",
-    english: "Sustainable monthly earnings"
-  }
+  { label: "Demo", href: "/demo" },
 ];
 
 const trustStats = [
@@ -54,30 +17,6 @@ const trustStats = [
   { icon: HeartHandshake, label: "Ubuntu Values", value: "Core" },
   { icon: Briefcase, label: "Real Opportunities", value: "Live" },
   { icon: Award, label: "Proven Success", value: "2,000+" }
-];
-
-const testimonials = [
-  {
-    name: "Siyanda Khumalo",
-    location: "Khayelitsha, WC",
-    role: "Junior Developer",
-    content: "EmpowAI saw potential I didn't know I had. From unemployment to R4,500/month in just 12 weeks - Ubuntu in action.",
-    region: "WC"
-  },
-  {
-    name: "Thandi Nkosi", 
-    location: "Umlazi, KZN",
-    role: "Digital Marketing",
-    content: "The AI matched me with opportunities I never knew existed. Now I'm earning and helping my family.",
-    region: "KZN"
-  },
-  {
-    name: "Bongani Mokoena",
-    location: "Soweto, GP", 
-    role: "Data Analyst",
-    content: "Free training, real opportunities, actual income. This is what economic freedom looks like for young South Africans.",
-    region: "GP"
-  }
 ];
 
 export default function Index() {
@@ -109,21 +48,19 @@ export default function Index() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => 
-              !link.href.startsWith('#') ? (
-                <Link key={link.label} to={link.href} className={`text-sm font-medium transition-colors ${scrolled ? "text-foreground/80 hover:text-primary" : "text-white/90 hover:text-white"}`}>
-                  {link.label}
-                </Link>
-              ) : (
-                <a key={link.label} href={link.href} className={`text-sm font-medium transition-colors ${scrolled ? "text-foreground/80 hover:text-primary" : "text-white/90 hover:text-white"}`}>
-                  {link.label}
-                </a>
-              )
+            {navLinks.map((link) => (
+              <a 
+                key={link.label} 
+                href={link.href} 
+                className={`text-sm font-medium transition-colors ${scrolled ? "text-foreground/80 hover:text-primary" : "text-white/80 hover:text-white"}`}
+              >
+                {link.label}
+              </a>
             )}
           </nav>
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-3">
-            <Link to="/login" className={`text-sm font-medium px-3 py-2 transition-colors ${scrolled ? "text-muted-foreground hover:text-foreground" : "text-white/90 hover:text-white"}`}>
+            <Link to="/login" className={`text-sm font-medium px-3 py-2 transition-colors ${scrolled ? "text-muted-foreground hover:text-foreground" : "text-white/80 hover:text-white"}`}>
               Sign In
             </Link>
             <Link to="/signup">
@@ -150,27 +87,16 @@ export default function Index() {
             className="md:hidden border-t border-border bg-background"
           >
             <div className="container mx-auto px-4 py-4 flex flex-col gap-3">
-              {navLinks.map((link) => 
-                link.href.startsWith('#') ? (
-                  <a
-                    key={link.label}
-                    href={link.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="text-sm font-medium text-muted-foreground py-2 hover:text-foreground transition-colors"
-                  >
-                    {link.label}
-                  </a>
-                ) : (
-                  <Link
-                    key={link.label}
-                    to={link.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="text-sm font-medium text-muted-foreground py-2 hover:text-foreground transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                )
-              )}
+              {navLinks.map((link) => ( // Use navLinks directly for mobile
+                <Link
+                  key={link.label} // Use Link for internal routes and external for external
+                  to={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-sm font-medium text-muted-foreground py-2 hover:text-foreground transition-colors"
+                >
+                  {link.label}
+                </Link>
+              ))}
               <Link to="/login" className="text-sm font-medium text-muted-foreground py-2 hover:text-foreground transition-colors">
                 Sign In
               </Link>
@@ -184,407 +110,137 @@ export default function Index() {
         )}
       </header>
 
-      {/* Hero Section */}
-      <section className="relative min-h-[92vh] overflow-hidden bg-hero-gradient">
-        <div className="absolute inset-0 bg-background/20" />
-        <div className="absolute inset-0 hero-spotlight opacity-30 z-10" />
-        <div className="absolute inset-0 ai-mesh" />
-        <div className="absolute inset-0 ai-grid opacity-30" />
-        
-        <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32 flex flex-col items-center text-center z-50">
-            {/* Badge */}
+      {/* Hero Section - Layered Visual Stack */}
+      <section className="relative min-h-[85vh] overflow-hidden bg-hero-gradient flex items-center">
+        <div className="relative container mx-auto px-4 text-center z-10 pt-16">
             <motion.span
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-sm"
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm mb-8"
             >
-              <span className="ai-dot" /> Powered by Ubuntu <span className="hidden sm:inline">Built for South Africa</span> <span className="text-xl">🇿🇦</span>
+              🇿🇦 Amandla e-Ubuntu · Built for South Africa
             </motion.span>
             <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="font-display text-5xl md:text-7xl text-white leading-tight"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              className="font-display text-5xl md:text-8xl text-white font-bold leading-tight mb-6"
             >
               Your AI guide to{" "}
-              <span className="text-gradient-ai">economic freedom</span>
+              <span className="text-highlight">economic freedom</span>
             </motion.h1>
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto leading-relaxed"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto leading-relaxed mb-10"
             >
-              Discover career pathways rooted in Ubuntu values. Join thousands of young South Africans 
+              Discover career pathways rooted in Ubuntu values. Join thousands of young South Africans
               building better futures with AI-powered guidance that works.
             </motion.p>
-            {/* CTAs */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="flex flex-col sm:flex-row items-center justify-center gap-4"
-            >
-              <Link to="/signup">
-                <Button variant="cta" size="xl" className="shimmer">
-                  Start Your Journey <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              </Link>
-            </motion.div>
-            {/* Tech Signal Strip */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              className="flex items-center justify-center gap-8 text-white/80 text-sm font-medium pt-8"
-            >
-              <div className="flex items-center gap-2">
-                <Cpu className="h-4 w-4 text-secondary" />
-                <span>AI Analysis</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Zap className="h-4 w-4 text-secondary" />
-                <span>60-Second Results</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-secondary" />
-                <span>All 9 Provinces</span>
-              </div>
-            </motion.div>
-          </div>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Button variant="cta" size="xl">Get Started Free <ArrowRight className="h-4 w-4 ml-2" /></Button>
+              <Button variant="outlineLight" size="xl">Watch Demo <Play className="h-4 w-4 ml-2 fill-white" /></Button>
+            </div>
+        </div>
       </section>
 
       {/* Trust Strip */}
-      <section className="border-b border-border bg-background">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+      <section className="border-b border-border bg-background py-10">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {trustStats.map((stat, i) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="text-center group"
-              >
-                <div className="w-12 h-12 rounded-xl bg-primary/5 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform border border-primary/10">
-                  <stat.icon className="h-6 w-6 text-primary" />
+              <div key={i} className="flex items-center gap-4 px-4">
+                <div className="h-12 w-12 shrink-0 rounded-full bg-accent flex items-center justify-center">
+                  <stat.icon className="h-5 w-5 text-primary" />
                 </div>
-                <div className="text-3xl md:text-4xl font-display font-bold text-primary mb-2">
-                  {stat.value}
-                </div>
-                <div className="text-sm text-muted-foreground">{stat.label}</div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Story - Centerpiece */}
-      <section className="py-20 md:py-28 bg-gradient-to-b from-background to-secondary/20">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <span className="text-secondary text-sm font-semibold uppercase tracking-wider mb-2 inline-block">
-              Featured Story
-            </span>
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mt-2">
-              Siyanda's Journey: from R0 to R4,500/month {/* Changed font-heading to font-display */}
-            </h2>
-              <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">
-                He didn't get lucky — he explored, compared, and chose. Here's exactly how it went.
-              </p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
-            {/* Left Column - Profile Card */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-            >
-              <div className="bg-card rounded-2xl shadow-card-soft p-8 border border-border h-full flex flex-col justify-center">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-16 h-16 rounded-full bg-ai-gradient flex items-center justify-center text-white text-2xl font-bold shadow-glow">
-                    SK
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-display font-bold text-primary">Siyanda Khumalo</h3>
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                      <MapPin className="h-3 w-3" />
-                      <span>Khayelitsha, WC</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mb-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">Empowerment Score</span>
-                    <span className="text-sm font-bold text-secondary">92%</span>
-                  </div>
-                  <div className="h-2 bg-muted rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      whileInView={{ width: "92%" }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 1.5, delay: 0.5 }}
-                      className="h-full bg-gradient-to-r from-primary to-secondary rounded-full" // Use explicit gradient for clarity
-                    />
-                  </div>
-                </div>
-
-                {/* Income Transformation */}
-                <div className="text-center py-6 border-t border-border">
-                  <div className="text-3xl font-display font-bold text-gradient-ai mb-2">
-                    R0 <span className="text-primary/40">to</span> R4,500/month {/* text-gradient-ai is for the whole text, primary/40 for 'to' */}
-                  </div>
-                  <div className="text-sm text-muted-foreground">12 weeks to first income</div>
+                <div>
+                  <p className="text-sm font-bold text-foreground leading-none">{stat.value}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
                 </div>
               </div>
-            </motion.div>
-            {/* Right Column - 5-Step Journey */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-            >
-              <div className="relative">
-                {/* Vertical connector line — runs through all step numbers */}
-                <div
-                  className="absolute left-6 top-6 bottom-6 w-px bg-gradient-to-b from-primary via-secondary to-primary/20"
-                  aria-hidden="true"
-                />
-
-                <ol className="space-y-6">
-                {journeySteps.map((step, i) => (
-                  <motion.li
-                    key={step.zulu}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.1 }}
-                    className="relative flex gap-5 group"
-                  >
-                    {/* Number Bubble */}
-                    <div className="relative z-10 shrink-0">
-                      <div className="
-                        w-12 h-12 rounded-full
-                        bg-ai-gradient
-                        flex items-center justify-center
-                        text-white font-display font-bold text-lg
-                        shadow-glow
-                        ring-4 ring-background transition-all duration-300
-                        group-hover:scale-110 group-hover:rotate-6 {/* Added group-hover effects */}
-                      ">
-                        {i + 1}
-                      </div>
-                    </div>
-
-                    {/* Content */}
-                    <div className="flex-1 pt-1">
-                      <h4 className="font-display text-lg font-bold text-primary leading-tight">
-                        {step.zulu}
-                      </h4>
-                      <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{step.english}</p>
-                    </div>
-                  </motion.li>
-                ))}
-                </ol>
-            </motion.div>
+            ))}
           </div>
         </div>
       </section>
+
+      {/* Featured Story - Siyanda */}
+      <section id="ubuntu-stories" className="py-20 bg-subtle-gradient">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto items-center">
+            <div className="bg-card border border-border rounded-xl shadow-elegant p-8">
+              <h2 className="font-display text-3xl font-bold mb-6">Siyanda's Journey</h2>
+              <ol className="relative space-y-3.5">
+                {/* vertical connector */}
+                <span aria-hidden className="absolute left-[18px] top-3 bottom-3 w-px bg-border/80" />
+
+                {[
+                  { n: 1, label: "Uploaded CV",       sub: "Domestic worker, 7 years" },
+                  { n: 2, label: "Explored 5 Paths",  sub: "Tech, care, retail, admin" },
+                  { n: 3, label: "Chose Tech Skills", sub: "12-week digital fundamentals" },
+                  { n: 4, label: "Hired in 6 weeks",  sub: "Junior IT support, Cape Town" },
+                  { n: 5, label: "R4,500/month",      sub: "+180% income vs. previous" },
+                ].map((s) => (
+                  <li key={s.n} className="relative flex items-center gap-4 rounded-xl border border-border/60 bg-background/70 px-3 py-2.5 backdrop-blur-sm">
+                    <span className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold shadow-sm">
+                      {s.n}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold leading-tight text-foreground">{s.label}</p>
+                      <p className="text-xs leading-snug text-muted-foreground">{s.sub}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+
+              <blockquote className="mt-6 border-l-2 border-secondary pl-4 italic text-foreground/90">
+                "EmpowAI taught me that ubuntu is a business strategy."
+                <footer className="mt-1 not-italic text-xs text-muted-foreground">
+                  — Siyanda · Featured story
+                </footer>
+              </blockquote>
+            </div>
+            <div>
+               <h3 className="font-display text-4xl font-bold text-primary mb-6">Built for South African Reality</h3>
+               <p className="text-muted-foreground mb-8">We understand the unique challenges faced by youth in Mzansi. Our AI doesn't just scan skills; it finds paths to economic freedom.</p>
+               <Button variant="cta" size="xl">Join 2,000+ Youth <ArrowRight className="h-4 w-4 ml-2" /></Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* How It Works */}
       <section id="how-it-works" className="py-20 bg-background">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <span className="text-secondary text-sm font-semibold uppercase tracking-wider mb-2 inline-block">
-              How It Works
-            </span>
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-primary mt-2">
-              Three Steps to Economic Freedom
-            </h2>
-            <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">
-              Simple, powerful, and designed for young South Africans.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="font-display text-3xl md:text-5xl font-bold mb-12">How It Works</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              {
-                icon: Upload,
-                title: "Upload",
-                description: "Share your skills & story",
-                details: "Upload your CV and tell us about your dreams. Our AI understands your unique journey."
-              },
-              {
-                icon: Target,
-                title: "Match", 
-                description: "AI finds opportunities in your region",
-                details: "From tech to trades, government to private sector - we match you with real opportunities."
-              },
-              {
-                icon: TrendingUp,
-                title: "Earn",
-                description: "Get paid, grow, give back",
-                details: "Start earning, build skills, and contribute to your community. Ubuntu in action."
-              }
+              { icon: Upload, title: "Share Your Story", desc: "Upload your CV or build one with our AI coach." },
+              { icon: Target, title: "Discover Paths", desc: "See real income projections across 5 career paths." },
+              { icon: TrendingUp, title: "Start Earning", desc: "Get matched with learnerships and jobs in your province." }
             ].map((step, i) => (
-              <motion.div
-                key={step.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="group relative" // Added relative for shadow-card
-              >
-                <div className="bg-card rounded-2xl shadow-card p-8 border border-border hover:shadow-lg hover:-translate-y-1 transition-all duration-300 h-full">
-                  <div className="w-16 h-16 rounded-2xl bg-accent flex items-center justify-center mb-6 group-hover:scale-105 transition-transform">
-                    <step.icon className="h-8 w-8 text-white" />
-                  </div>
-                  <h3 className="font-display text-xl font-bold text-foreground mb-3">
-                    {step.title}
-                  </h3>
-                  <p className="text-muted-foreground mb-4">
-                    {step.description}
-                  </p>
-                  <p className="text-sm text-foreground">
-                    {step.details}
-                  </p>
+              <div key={i} className="text-center p-8 bg-card border border-border rounded-xl shadow-elegant">
+                <div className="h-16 w-16 bg-accent rounded-full flex items-center justify-center mx-auto mb-6">
+                  <step.icon className="h-8 w-8 text-primary" />
                 </div>
-              </motion.div>
+                <h3 className="font-display text-xl font-bold mb-3">{step.title}</h3>
+                <p className="text-muted-foreground text-sm">{step.desc}</p>
+              </div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section id="ubuntu-stories" className="py-20 bg-muted">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <span className="text-secondary text-sm font-semibold uppercase tracking-wider mb-2 inline-block">
-              Ubuntu Stories
-            </span>
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mt-2">
-              Real Success from Mzansi {/* Changed font-heading to font-display */}
-            </h2>
-            <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">
-              Hear from young South Africans transforming their lives.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {testimonials.map((testimonial, i) => (
-              <motion.div
-                key={testimonial.name}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-              >
-                <div className="bg-card rounded-2xl shadow-card p-8 border border-border h-full hover:shadow-glow transition-shadow duration-300">
-                  <Quote className="h-8 w-8 text-secondary mb-4" />
-                  <p className="text-foreground mb-6 leading-relaxed">
-                    "{testimonial.content}"
-                  </p>
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center ring-secondary/20 ring-2">
-                      <span className="text-primary font-bold">
-                        {testimonial.name.split(' ').map(n => n[0]).join('')}
-                      </span>
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-display font-bold text-foreground">
-                        {testimonial.name}
-                      </h4> {/* Changed text-foreground to text-primary */}
-                      <p className="text-sm text-muted-foreground">
-                        {testimonial.role} · {testimonial.location}
-                      </p>
-                    </div>
-                    <div className="px-2 py-1 rounded-full bg-secondary/10 text-secondary text-xs font-bold">
-                      {testimonial.region}
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Final CTA Band */}
-      <section className="py-20 bg-hero-gradient ubuntu-pattern">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="text-3xl md:text-5xl font-display font-bold text-white mb-6">
-              Ready to Start Your Journey?
-            </h2>
-            <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-              Join thousands of young South Africans building better futures with AI-powered guidance.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link to="/signup">
-                <Button variant="cta" size="xl" className="shimmer">
-                  Start Free Today <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              </Link>
-            </div>
-          </motion.div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border bg-card"> {/* Changed bg-background to bg-card */}
+      <footer className="bg-primary text-primary-foreground py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-                  <Brain className="h-4 w-4 text-primary-foreground" />
-                </div>
-                <span className="font-display text-xl font-bold text-primary">EmpowAI</span>
-              </div>
-              <p className="text-muted-foreground text-sm">
-                AI-powered career guidance rooted in Ubuntu values. Built for young South Africans.
-              </p>
-            </div>
-            
-            <div>
-              <h4 className="font-display font-semibold text-foreground mb-4">Product</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#how-it-works" className="hover:text-secondary transition-colors">How It Works</a></li>
-                <li><a href="#ubuntu-stories" className="hover:text-secondary transition-colors">Success Stories</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-display font-semibold text-foreground mb-4">Company</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link to="/about" className="hover:text-secondary transition-colors">About</Link></li>
-                <li><Link to="/blog" className="hover:text-secondary transition-colors">Blog</Link></li>
-                <li><Link to="/careers" className="hover:text-secondary transition-colors">Careers</Link></li>
-                <li><Link to="/contact" className="hover:text-secondary transition-colors">Contact</Link></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-display font-semibold text-foreground mb-4">Legal</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link to="/privacy" className="hover:text-secondary transition-colors">Privacy Policy</Link></li>
-                <li><Link to="/terms" className="hover:text-secondary transition-colors">Terms of Service</Link></li>
-                <li><Link to="/cookies" className="hover:text-secondary transition-colors">Cookie Policy</Link></li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="border-t border-border mt-8 pt-8 text-center text-sm text-muted-foreground">
-            <p>&copy; 2025 EmpowAI. Built with Ubuntu for South Africa. ZAR</p>
-          </div>
-        </div> {/* Removed extra footer content */}
+           <div className="flex flex-col items-center">
+             <Brain className="h-10 w-10 mb-4" />
+             <p className="text-primary-foreground/70 text-center max-w-sm mb-8 italic">"Umuntu Ngumuntu Ngabantu - Join 2,000+ empowered youth across South Africa."</p>
+             <div className="flex gap-8 mb-8">
+               <a href="#how-it-works" className="text-sm hover:text-secondary transition-colors">How It Works</a>
+               <a href="#ubuntu-stories" className="text-sm hover:text-secondary transition-colors">Success Stories</a>
+               <Link to="/privacy" className="text-sm hover:text-secondary transition-colors">Privacy</Link>
+             </div>
+             <p className="text-primary-foreground/40 text-xs">© 2025 EmpowAI. Built with Ubuntu. ZAR</p>
+           </div>
+        </div>
       </footer>
     </div>
   );
