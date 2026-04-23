@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react"
 import { useNavigate, useSearchParams, Link } from "react-router-dom"
 import { CheckCircle, Loader2, XCircle } from "lucide-react"
-import { accountService } from "../../api/Index"
-import Logo from "../../components/ui/Logo"
+import { accountService } from "@/api/Index"
+import Logo from "@/components/ui/Logo"
 
 export default function EmailVerified() {
     const [searchParams] = useSearchParams()
@@ -110,6 +110,6 @@ return (
         </div>
         )}
     </div>
-</div>
-</div>
-)}
+    </div>
+  )
+}

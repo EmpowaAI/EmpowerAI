@@ -1,190 +1,197 @@
 // pages/ForgotPassword.tsx
 
-import type React from "react";
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Loader2, Mail, Lock, Shield, Sparkles } from "lucide-react";
-import { accountService } from "../../api/Index";
-import Logo from "../../components/ui/Logo";
-import ThemeToggle from "../../components/ui/ThemeToggle";
-import backgroundImg from "../../assets/images/empowerlogin.png";
+import type React from "react"
+import { useState } from "react"
+import { Link, useNavigate } from "react-router-dom"
+import { Loader2, Mail, CheckCircle, Lock, Shield, Sparkles, ArrowLeft } from "lucide-react"
+import { accountService } from "@/api/Index"
+import Logo from "@/components/ui/Logo"
+import background from "@/assets/images/empowerlogin.png"
+import ThemeToggle from "@/components/ui/ThemeToggle"
 
 export default function ForgotPassword() {
-  const [email, setEmail] = useState("");
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
+    const [email, setEmail] = useState("")
+    const [error, setError] = useState("")
+    const [isLoading, setIsLoading] = useState(false)
+    const [isSuccess, setIsSuccess] = useState(false)
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setError("")
+        setIsLoading(true)
+            try {
+            // forgotPassword returns { message } — no status field, if it doesn't throw it succeeded
+                await accountService.forgotPassword({ email })
+                setIsSuccess(true)
+            } catch (err: any) {
+                setError(err.message || "Something went wrong")
+            } finally {
+                setIsLoading(false)
+            }
+        }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setIsLoading(true);
-    try {
-      await accountService.forgotPassword({ email });
-      setIsSuccess(true);
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Something went wrong";
-      setError(message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const leftPanel = (
-    <div className="relative hidden flex-1 flex-col justify-between overflow-hidden p-12 lg:flex">
-      <img
-        src={backgroundImg}
-        alt=""
-        loading="eager"
-        className="absolute inset-0 h-full w-full scale-105 object-cover object-center"
-      />
-      <div className="absolute inset-0 panel-image-overlay" />
-      <div className="absolute inset-0 panel-image-accent opacity-70" />
-
-      <div className="relative z-10 animate-slide-up">
-        <Logo variant="light" size="md" linkTo="/" />
-      </div>
-      <div className="relative z-10 max-w-lg space-y-6 animate-slide-up" style={{ animationDelay: "0.1s" }}>
-        <h1 className="mb-6 font-display text-4xl font-bold leading-tight text-white drop-shadow-lg">
-          Recover your account
-        </h1>
-        <ul className="space-y-4">
-          {[
-            { text: "Reset your password securely", icon: Lock },
-            { text: "Protect your account", icon: Shield },
-            { text: "Quick email recovery", icon: Mail },
-            { text: "Safe authentication process", icon: Sparkles },
-          ].map((item, i) => (
-            <li
-              key={item.text}
-              className="flex animate-slide-up items-center gap-3 text-white drop-shadow-md"
-              style={{ animationDelay: `${0.2 + i * 0.1}s` }}
-            >
-              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-white/10 backdrop-blur-sm">
-                <item.icon className="h-4 w-4 text-primary" strokeWidth={2.5} />
-              </div>
-              <span className="text-base">{item.text}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-      <p
-        className="relative z-10 max-w-sm animate-slide-up text-xs font-medium uppercase tracking-widest text-white/80 drop-shadow-md"
-        style={{ animationDelay: "0.6s" }}
-      >
-        Youth Economic Digital Twin Platform
-      </p>
-    </div>
-  );
-
+return (
+    <div className="me="ai-grid absolute inset-0 opacity-40 pointer-events-none" />
+    {/* Left Panel */}
+        <div className="hidden lg:flex flex-1 relative p-12 flex-col justify-between overflow-hidden">
+            <img src={backgroud} alt="Background" className="absolute inset-0 h-full w-full object-cover scale-105" />
+            <imtriodaas="ht" size="md" linkTo="/" />
   return (
-    <div className="flex min-h-screen flex-col animate-fade-in bg-gradient-to-br from-primary/10 via-background to-secondary/10 text-foreground sm:flex-row dark:from-background dark:via-background dark:to-muted/60">
-      {leftPanel}
+    <div className="ai-mesh ai-spotlight grain min-h-screen bg-background text-foreground flex flex-col sm:flex-row animate-fade-in relative overflow-hidden">
+      <div className="ai-grid absolute inset-0 opacity-40 pointer-events-none" />
+      
+      {/* Left Panel */}
+      <div className="hidden lg:flex flex-1 relative p-12 flex-col justify-between overflow-hidden">
+        <img src={background} alt="Background" className="absolute inset-0 h-full w-full object-cover scale-105" />
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/40 to-background/90" />
+        <div className="ai-grid absolute inset-0 opacity-30" />
+        
+        <div className="relative z-10 animate-slide-up">
+          <Logo variant="light" size="md" linkTo="/" />
+        </div>
+        
+        <div className="relative z-10 space-y-6 animate-slide-up max-w-lg" style={{ animationDelay: '0.1s' }}>
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-secondary">
+            Account Recovery
+          </p>
+          <h1 className="font-display text-4xl font-bold text-white mb-6 drop-shadow-md">
+            Recover your account
+          </h1>
+          <ul className="space-y-4">
+            {[
+              { text: "Recover your password securely", icon: Lock },
+              { text: "Protect your account", icon: Shield },
+              { text: "Quick email recovery", icon: Mail },
+              { text: "Safe authentication process", icon: Sparkles },
+            ].map((item, i) => (
+              <li key={i} className="flex items-center gap-3 text-white drop-shadow-md animate-slide-up" style={{ animationDelay: `${0.2 + i * 0.1}s` }}>
+                <div className="h-8 w-8 rounded-lg bg-ai-gradient flex items-center justify-center flex-shrink-0 shadow-glow">
+                  <item.icon className="h-4 w-4 text-white" strokeWidth={2.5} />
+                </div>
+                <span className="text-base">{item.text}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <p className="relative z-10 max-w-sm text-xs font-medium uppercase tracking-widest text-white/60 animate-slide-up" style={{ animationDelay: "0.6s" }}>
+          Youth Economic Digital Twin Platform
+        </p>
+      </div>
 
-      <div className="relative z-10 flex flex-1 items-center justify-center p-4 sm:p-6 md:p-8">
-        <div className="absolute right-4 top-4 z-30">
+      {/* Right Panel */}
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8 relative">
+        <div className="absolute top-4 right-4 z-20">
           <ThemeToggle />
         </div>
-
-        <div className="w-full max-w-md">
-          <div className="rounded-2xl border border-border bg-card p-6 shadow-xl sm:p-7 md:p-9 dark:bg-card">
-            <div className="mb-6 sm:mb-8 lg:hidden">
+        
+        <div className="w-full max-w-md animate-scale-in" style={{ animationDelay: '0.15s' }}>
+          <div className="card-glow bg-card/40 backdrop-blur-xl border border-border/50 p-6 sm:p-7 md:p-9 rounded-2xl shadow-card-soft">
+            <div className="lg:hidden mb-6 sm:mb-8">
               <Logo variant="default" size="md" linkTo="/" />
             </div>
 
             {isSuccess ? (
-              <div className="space-y-6 text-center">
+              <div className="text-center space-y-6">
                 <div className="flex justify-center">
-                  <div className="rounded-full bg-emerald-500/15 p-4 dark:bg-emerald-500/25">
-                    <Mail className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
+                  <div className="h-20 w-20 rounded-full bg-ai-gradient flex items-center justify-center animate-glow-pulse shadow-glow">
+                    <Mail className="h-10 w-10 text-white" />
                   </div>
                 </div>
-                <h2 className="font-display text-2xl font-bold text-foreground">Check your email</h2>
+                <h2 className="font-display text-2xl font-bold text-primary">Check your email</h2>
                 <p className="text-muted-foreground">
                   We sent a password reset link to <strong className="text-foreground">{email}</strong>
                 </p>
-                <p className="text-sm text-muted-foreground">Didn&apos;t receive the email? Check your spam folder.</p>
-                <Link
-                  to="/reset-password"
-                  className="inline-block w-full rounded-lg bg-primary px-4 py-2.5 text-center font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-                >
+                <p className="text-xs text-muted-foreground">
+                  Didn't receive the email? Check your spam folder.
+                </p>
+                <Link to="/reset-password" title="Code entry" className="shimmer inline-block w-full text-center px-4 py-3 bg-cta-gradient text-white rounded-xl font-bold shadow-cta hover:shadow-glow transition-all">
                   Enter reset code
                 </Link>
                 <div className="pt-1">
-                  <Link
-                    to="/login"
-                    className="text-sm font-medium text-primary transition-colors hover:text-primary/80 hover:underline"
-                  >
-                    ← Back to Login
+                  <Link to="/login" className="text-sm text-primary hover:text-primary/80 font-medium hover:underline transition-colors flex items-center justify-center gap-1">
+                    <ArrowLeft className="h-4 w-4" /> Back to Login
                   </Link>
                 </div>
               </div>
             ) : (
+            <>
+            <div className="mb-8">
+                <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-2 tracking-tight">Forgot password?</h2>
+                <p className="text-sm sm:text-base text-muted-foreground">
               <>
                 <div className="mb-8">
-                  <h2 className="mb-2 font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                    Forgot password?
-                  </h2>
-                  <p className="text-sm text-muted-foreground sm:text-base">
-                    No worries, we&apos;ll send you reset instructions.
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-secondary/10 border border-secondary/20 rounded-full mb-4">
+                    <Lock className="h-3 w-3 text-secondary" />
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-secondary">Security Portal</span>
+                  </div>
+                  <h2 className="font-display text-3xl sm:text-4xl font-bold text-primary mb-2 tracking-tight">Forgot password?</h2>
+                  <p className="text-sm sm:text-base text-muted-foreground">
+                    No worries, we'll send you reset instructions.
+                </p>
+            </div>
+            {error && (
+                <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
                   </p>
                 </div>
-
                 {error && (
-                  <div className="mb-6 rounded-lg border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
+                  <div className="mb-6 p-4 bg-destructive/10 border-2 border-destructive/30 rounded-xl text-destructive text-sm animate-fade-up">
                     {error}
-                  </div>
-                )}
-
-                <form onSubmit={handleSubmit} className="space-y-5">
-                  <div className="space-y-2">
-                    <label htmlFor="forgot-email" className="block text-sm font-medium text-foreground">
-                      Email address
+                </div>
+            )}
+            <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="space-y-2">
+                    <label htmlFor="email" className="text-sm font-medium text-foreground block">
+                        Email address
                     </label>
                     <div className="relative">
-                      <Mail className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-                      <input
-                        id="forgot-email"
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full rounded-lg border border-input bg-background py-3 pl-12 pr-4 text-foreground transition-all placeholder:text-muted-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-ring"
-                        placeholder="Enter your email"
-                        required
-                        disabled={isLoading}
-                        autoComplete="email"
-                      />
+                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none" />
+                        <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full pl-12 pr-4 py-3 bg-background border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all text-foreground placeholder:text-muted-foreground" placeholder="Enter your email" required disabled={isLoading}/>
                     </div>
+                </div>
+                <button type="submit" disabled={isLoading} className="w-full py-3 px-4 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2">
                   </div>
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
+                )}
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  <div className="relative group">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors z-10" />
+                    <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full pl-12 pr-4 py-3.5 border rounded-xl bg-background/50 border-border/60 focus:border-secondary/50 focus:ring-2 focus:ring-secondary/10 transition-all text-foreground" placeholder="Email address" required disabled={isLoading}/>
+                  </div>
+                  <button type="submit" disabled={isLoading} className="shimmer w-full py-4 bg-cta-gradient text-white rounded-xl font-bold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-cta hover:shadow-glow">
                     {isLoading ? (
+                    <>
                       <>
                         <Loader2 className="h-5 w-5 animate-spin" />
                         Sending...
+                    </>
                       </>
                     ) : (
-                      "Reset password"
+                    'Reset password'
+                      'Reset password'
                     )}
+                </button>
+            </form>
+            <div className="mt-6 text-center">
+                <Link to="/login" className="text-sm text-primary hover:text-primary/80 font-medium hover:underline transition-colors">
+                    ← Back to Login
+                </Link>
                   </button>
                 </form>
-
                 <div className="mt-6 text-center">
-                  <Link
-                    to="/login"
-                    className="text-sm font-medium text-primary transition-colors hover:text-primary/80 hover:underline"
-                  >
-                    ← Back to Login
+                  <Link to="/login" className="text-sm text-primary hover:text-primary/80 font-medium hover:underline transition-colors flex items-center justify-center gap-1">
+                    <ArrowLeft className="h-4 w-4" /> Back to Login
                   </Link>
                 </div>
+                </>
+                )}
+            </div>
               </>
             )}
           </div>
         </div>
       </div>
     </div>
-  );
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }
