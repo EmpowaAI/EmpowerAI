@@ -30,12 +30,6 @@ export default function ForgotPassword() {
         }
 
 return (
-    <div className="me="ai-grid absolute inset-0 opacity-40 pointer-events-none" />
-    {/* Left Panel */}
-        <div className="hidden lg:flex flex-1 relative p-12 flex-col justify-between overflow-hidden">
-            <img src={backgroud} alt="Background" className="absolute inset-0 h-full w-full object-cover scale-105" />
-            <imtriodaas="ht" size="md" linkTo="/" />
-  return (
     <div className="ai-mesh ai-spotlight grain min-h-screen bg-background text-foreground flex flex-col sm:flex-row animate-fade-in relative overflow-hidden">
       <div className="ai-grid absolute inset-0 opacity-40 pointer-events-none" />
       
@@ -113,10 +107,6 @@ return (
                 </div>
               </div>
             ) : (
-            <>
-            <div className="mb-8">
-                <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-2 tracking-tight">Forgot password?</h2>
-                <p className="text-sm sm:text-base text-muted-foreground">
               <>
                 <div className="mb-8">
                   <div className="inline-flex items-center gap-2 px-3 py-1 bg-secondary/10 border border-secondary/20 rounded-full mb-4">
@@ -126,28 +116,11 @@ return (
                   <h2 className="font-display text-3xl sm:text-4xl font-bold text-primary mb-2 tracking-tight">Forgot password?</h2>
                   <p className="text-sm sm:text-base text-muted-foreground">
                     No worries, we'll send you reset instructions.
-                </p>
-            </div>
-            {error && (
-                <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
                   </p>
                 </div>
                 {error && (
                   <div className="mb-6 p-4 bg-destructive/10 border-2 border-destructive/30 rounded-xl text-destructive text-sm animate-fade-up">
                     {error}
-                </div>
-            )}
-            <form onSubmit={handleSubmit} className="space-y-5">
-                <div className="space-y-2">
-                    <label htmlFor="email" className="text-sm font-medium text-foreground block">
-                        Email address
-                    </label>
-                    <div className="relative">
-                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none" />
-                        <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full pl-12 pr-4 py-3 bg-background border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all text-foreground placeholder:text-muted-foreground" placeholder="Enter your email" required disabled={isLoading}/>
-                    </div>
-                </div>
-                <button type="submit" disabled={isLoading} className="w-full py-3 px-4 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2">
                   </div>
                 )}
                 <form onSubmit={handleSubmit} className="space-y-5">
@@ -157,22 +130,13 @@ return (
                   </div>
                   <button type="submit" disabled={isLoading} className="shimmer w-full py-4 bg-cta-gradient text-white rounded-xl font-bold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-cta hover:shadow-glow">
                     {isLoading ? (
-                    <>
                       <>
                         <Loader2 className="h-5 w-5 animate-spin" />
-                        Sending...
-                    </>
+                        <span>Sending...</span>
                       </>
                     ) : (
-                    'Reset password'
                       'Reset password'
                     )}
-                </button>
-            </form>
-            <div className="mt-6 text-center">
-                <Link to="/login" className="text-sm text-primary hover:text-primary/80 font-medium hover:underline transition-colors">
-                    ← Back to Login
-                </Link>
                   </button>
                 </form>
                 <div className="mt-6 text-center">
@@ -180,15 +144,8 @@ return (
                     <ArrowLeft className="h-4 w-4" /> Back to Login
                   </Link>
                 </div>
-                </>
-                )}
-            </div>
               </>
             )}
-          </div>
-        </div>
-      </div>
-    </div>
           </div>
         </div>
       </div>
