@@ -166,9 +166,9 @@ export default function LandingPage() {
         />
         <div className="absolute inset-0 hero-spotlight z-10" />
         <div className="absolute inset-0 bg-hero-gradient opacity-35 z-20" />
-        <div className="absolute inset-0 ai-grid z-20" />
+        <div className="absolute inset-0 ai-grid opacity-40 z-20" />
         <div className="absolute inset-0 hero-vignette z-30" />
-        <div className="absolute inset-0 grain z-40" />
+        <div className="absolute inset-0 grain opacity-20 z-40" />
 
         <div className="container relative z-50 mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto space-y-8">
@@ -207,7 +207,7 @@ export default function LandingPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-base md:text-lg max-w-3xl mx-auto text-white/95 font-body leading-relaxed"
+              className="text-base md:text-lg max-w-3xl mx-auto text-white/90 font-sans leading-relaxed"
             >
               Discover career pathways rooted in Ubuntu values. Join thousands of young South Africans building better futures with AI-powered guidance that works.
             </motion.p>
@@ -312,7 +312,7 @@ export default function LandingPage() {
               Indlela — The Path
             </span>
             <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mt-2">
-              Siyanda's Journey: from R0 to R4,500/month
+              Siyanda's Journey: <span className="text-gradient-ai">from R0 to R4,500/month</span>
             </h2>
             <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">
               He didn't get lucky — he explored, compared, and chose. Here's exactly how it went.
@@ -338,12 +338,12 @@ export default function LandingPage() {
                       />
                     </div>
                     <div>
-                      <h3 className="font-heading font-bold text-xl text-card-foreground">Siyanda Nkosi, 22</h3>
+                      <h3 className="font-display font-bold text-xl text-card-foreground">Siyanda Nkosi, 22</h3>
                       <p className="text-sm text-muted-foreground">First gig in 6 weeks</p>
                     </div>
                   </div>
 
-                  <div className="text-center p-4 bg-gradient-to-r from-primary/5 to-sa-gold/5 rounded-lg">
+                  <div className="text-center p-4 bg-gradient-to-r from-primary/10 to-sa-gold/10 rounded-lg border border-primary/10">
                     <div className="text-3xl font-bold text-primary">78/100</div>
                     <div className="text-sm text-muted-foreground">Empowerment Score</div>
                   </div>
@@ -381,7 +381,7 @@ export default function LandingPage() {
             <div className="flex flex-col gap-4">
               <Card className="rounded-2xl shadow-card border border-border">
                 <div className="p-6 sm:p-8">
-                  <h3 className="font-heading font-bold text-xl mb-5 flex items-center gap-2">
+                  <h3 className="font-display font-bold text-xl mb-5 flex items-center gap-2">
                     <CheckCircle2 className="w-5 h-5 text-secondary" />
                     The 5-step journey
                   </h3>
@@ -420,9 +420,9 @@ export default function LandingPage() {
                 text={t("thePath")}
                 langKey={langIndex}
                 languageLabel={getLanguageDisplay(currentLanguage)}
-              /> — The Path
+              /> — <span className="text-secondary">Indlela</span>
             </span>
-            <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mt-2">
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mt-2">
               How It Works
             </h2>
             <p className="text-muted-foreground mt-3 max-w-xl mx-auto">
@@ -450,7 +450,7 @@ export default function LandingPage() {
                 <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary mb-4">
                   <step.icon className="h-6 w-6" />
                 </div>
-                <h3 className="font-heading font-bold text-lg text-card-foreground mb-2">{step.title}</h3>
+                <h3 className="font-display font-bold text-lg text-card-foreground mb-2">{step.title}</h3>
                 <p className="text-sm text-muted-foreground">{step.desc}</p>
               </motion.div>
             ))}
@@ -460,6 +460,7 @@ export default function LandingPage() {
             <a
               href="/signup"
               className="inline-flex items-center gap-2 bg-cta-gradient text-white px-8 py-3 rounded-xl font-heading font-semibold shadow-cta hover:brightness-105 hover:-translate-y-0.5 active:translate-y-0 transition-smooth shimmer"
+              className="inline-flex items-center gap-2 bg-cta-gradient text-white px-8 py-3 rounded-xl font-display font-semibold shadow-cta hover:brightness-105 hover:-translate-y-0.5 active:translate-y-0 transition-smooth shimmer"
             >
               Start Your Journey <ArrowRight className="h-4 w-4" />
             </a>
@@ -476,9 +477,9 @@ export default function LandingPage() {
                 text={t("ourTools")}
                 langKey={langIndex}
                 languageLabel={getLanguageDisplay(currentLanguage)}
-              /> — Our Tools
+              /> — <span className="text-secondary">Izinsiza</span>
             </span>
-            <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mt-2">
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mt-2">
               Everything You Need to Succeed
             </h2>
             <p className="text-muted-foreground mt-3 max-w-xl mx-auto">
@@ -506,7 +507,7 @@ export default function LandingPage() {
                 <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary mb-4 group-hover:scale-110 transition-transform">
                   <f.icon className="h-6 w-6" />
                 </div>
-                <h3 className="font-heading font-bold text-lg text-card-foreground mb-2">{f.title}</h3>
+                <h3 className="font-display font-bold text-lg text-card-foreground mb-2">{f.title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
               </motion.div>
             ))}
@@ -523,9 +524,9 @@ export default function LandingPage() {
                 text={t("successStories")}
                 langKey={langIndex}
                 languageLabel={getLanguageDisplay(currentLanguage)}
-              /> — Ubuntu Stories
+              /> — <span className="text-secondary">Ubuntu</span>
             </span>
-            <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mt-2">
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mt-2">
               Real Success Stories from Mzansi
             </h2>
             <p className="text-muted-foreground mt-3 max-w-xl mx-auto">
@@ -574,7 +575,7 @@ export default function LandingPage() {
                   <p className="italic mt-4 leading-relaxed">"{t.quote}"</p>
 
                   <div className="mt-6 flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-secondary/20 flex items-center justify-center font-heading font-bold text-sm">
+                    <div className="h-10 w-10 rounded-full bg-secondary/20 flex items-center justify-center font-display font-bold text-sm">
                       {t.initials}
                     </div>
                     <div className="min-w-0">
@@ -603,9 +604,9 @@ export default function LandingPage() {
                 text={t("watch")}
                 langKey={langIndex}
                 languageLabel={getLanguageDisplay(currentLanguage)}
-              /> — Watch
+              /> — <span className="text-secondary">Demo</span>
             </span>
-            <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mt-2">
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mt-2">
               See EmpowAI in Action
             </h2>
             <p className="text-muted-foreground mt-3 max-w-xl mx-auto">
@@ -636,7 +637,7 @@ export default function LandingPage() {
                 { label: "All 9 Provinces", sub: "Across Mzansi" },
               ].map((item, i) => (
                 <div key={i} className="text-center p-4 bg-card rounded-xl shadow-card border border-border hover:shadow-elevated transition-all">
-                  <p className="font-heading font-bold text-foreground text-sm">{item.label}</p>
+                  <p className="font-display font-bold text-foreground text-sm">{item.label}</p>
                   <p className="text-xs text-muted-foreground mt-1">{item.sub}</p>
                 </div>
               ))}
@@ -649,7 +650,7 @@ export default function LandingPage() {
       <section className="py-20 bg-gradient-to-r from-secondary/10 via-secondary/10 to-primary/10">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="max-w-2xl mx-auto space-y-6">
-            <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground">
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground">
               <RotatingText text={t("letsBegin")} langKey={langIndex} /> — Let's Begin
             </h2>
             <p className="text-muted-foreground text-base md:text-lg">
@@ -658,14 +659,14 @@ export default function LandingPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
               <a
                 href="/signup"
-                className="inline-flex items-center justify-center gap-2 bg-cta-gradient text-white px-8 py-3 rounded-xl font-heading font-semibold shadow-cta hover:brightness-105 hover:-translate-y-0.5 active:translate-y-0 transition-smooth shimmer"
+                className="inline-flex items-center justify-center gap-2 bg-cta-gradient text-white px-8 py-3 rounded-xl font-display font-semibold shadow-cta hover:brightness-105 hover:-translate-y-0.5 active:translate-y-0 transition-smooth shimmer"
               >
                 Get Started — It's <RotatingText text={t("mahala")} langKey={langIndex} />{" "}
                 <ArrowRight className="h-4 w-4" />
               </a>
               <a
                 href="#demo"
-                className="inline-flex items-center justify-center gap-2 border-2 border-primary/25 text-primary px-8 py-3 rounded-xl font-heading font-semibold hover:bg-primary hover:text-primary-foreground transition-all"
+                className="inline-flex items-center justify-center gap-2 border-2 border-primary/25 text-primary px-8 py-3 rounded-xl font-display font-semibold hover:bg-primary hover:text-primary-foreground transition-all"
               >
                 <Play className="h-4 w-4" /> Watch Demo
               </a>

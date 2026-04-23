@@ -65,8 +65,8 @@ export default function NeuralFusionShowcase() {
               <span className="text-sm text-muted-foreground">8D Analysis</span>
             </div>
             <div className="flex items-center gap-2">
-              <Mic className="h-5 w-5 text-accent" />
-              <span className="text-sm text-muted-foreground text-secondary">Voice Intelligence</span> {/* Changed text-accent to text-secondary */}
+              <Mic className="h-5 w-5 text-secondary" />
+              <span className="text-sm text-muted-foreground">Voice Intelligence</span>
             </div>
           </div>
 
@@ -112,7 +112,7 @@ export default function NeuralFusionShowcase() {
             </div>
 
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2"> {/* Changed text-accent to text-secondary */}
+              <div className="flex items-center gap-2 text-secondary">
                 <TrendingUp className="h-4 w-4 text-secondary" />
                 <span className="text-sm text-secondary">85% Average Improvement</span>
               </div>
@@ -155,7 +155,7 @@ export default function NeuralFusionShowcase() {
             </div>
 
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2"> {/* Changed text-accent to text-secondary */}
+              <div className="flex items-center gap-2 text-secondary">
                 <VoiceVisualizer isActive={true} intensity={0.6} /> {/* Assuming VoiceVisualizer is fine */}
                 <span className="text-sm text-secondary">80% Readiness Rate</span>
               </div>
@@ -219,7 +219,7 @@ export default function NeuralFusionShowcase() {
             <p className="text-muted-foreground">Dimensions of CV Analysis</p>
           </NeuralCard>
           <NeuralCard className="text-center">
-            <div className="text-4xl font-bold text-secondary mb-2">24/7</div> {/* Changed text-accent to text-secondary */}
+            <div className="text-4xl font-bold text-secondary mb-2">24/7</div>
             <p className="text-muted-foreground">AI Mentor Availability</p>
           </NeuralCard>
           <NeuralCard className="text-center">
