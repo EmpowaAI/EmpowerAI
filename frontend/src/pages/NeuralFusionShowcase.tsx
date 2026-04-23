@@ -1,7 +1,5 @@
 import { useState } from 'react'
 import { Brain, Sparkles, Mic, FileText, TrendingUp, ArrowRight } from 'lucide-react'
-import { useUser } from "../contexts/user-context"
-import HolographicButton from "../components/ui/HolographicButton"
 import NeuralCard from "../components/ui/NeuralCard"
 import AIAvatar from "../components/ui/AIAvatar"
 import VoiceVisualizer from "../components/ui/VoiceVisualizer"
@@ -46,7 +44,7 @@ export default function NeuralFusionShowcase() {
           <div className="flex items-center justify-center gap-6 mb-6">
             <AIAvatar size="xl" variant="default" />
             <div>
-              <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-2">
+              <h1 className="text-5xl font-bold text-gradient-ai mb-2">
                 Neural Fusion
               </h1>
               <p className="text-xl text-muted-foreground">
@@ -178,7 +176,7 @@ export default function NeuralFusionShowcase() {
                 <HolographicButton variant="primary" className="w-full">
                   Primary Action
                 </HolographicButton>
-                <HolographicButton variant="secondary" className="w-full">
+            <HolographicButton variant="cta" className="w-full">
                   Secondary Action
                 </HolographicButton>
                 <HolographicButton variant="accent" className="w-full">
