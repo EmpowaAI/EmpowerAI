@@ -139,22 +139,22 @@ export default function SignupPage() {
 
   // ─── Left panel ─────────────────────────────────────────────────────────────
   const leftPanel = (
-    <div className="hidden lg:flex flex-1 relative p-12 flex-col justify-between overflow-hidden">
+    <div className="relative hidden flex-1 flex-col justify-between overflow-hidden p-12 lg:flex">
       <img
         src={signupBg}
         alt="EmpowaAI"
         loading="eager"
-        className="absolute inset-0 h-full w-full object-cover object-center crisp-image"
+        className="absolute inset-0 h-full w-full scale-105 object-cover object-center crisp-image"
       />
       <div className="absolute inset-0 panel-image-overlay" />
       <div className="absolute inset-0 panel-image-accent opacity-70" />
 
       <div className="relative z-10 max-w-lg space-y-6 animate-slide-up">
         <Logo variant="light" size="lg" linkTo="/" />
-        <p className="text-sm font-semibold uppercase tracking-[0.24em] text-white/80 panel-copy-shadow">
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-secondary">
           Create your account
         </p>
-        <h1 className="text-4xl font-bold leading-tight text-white panel-copy-shadow">
+        <h1 className="font-display text-4xl font-bold leading-tight text-white drop-shadow-md">
           Start your journey to economic empowerment.
         </h1>
         <ul className="space-y-4">
@@ -169,8 +169,8 @@ export default function SignupPage() {
               className="flex items-center gap-3 text-white panel-copy-shadow animate-slide-up"
               style={{ animationDelay: `${0.2 + i * 0.1}s` }}
             >
-              <div className="h-8 w-8 rounded-lg bg-white/10 border border-white/15 flex items-center justify-center flex-shrink-0 backdrop-blur-sm">
-                <item.icon className="h-4 w-4 text-white" />
+              <div className="h-8 w-8 rounded-lg bg-ai-gradient flex items-center justify-center flex-shrink-0 shadow-glow">
+                <item.icon className="h-4 w-4 text-white" strokeWidth={2.5} />
               </div>
               <span className="text-base">{item.text}</span>
             </li>
@@ -178,7 +178,7 @@ export default function SignupPage() {
         </ul>
       </div>
 
-      <p className="relative z-10 max-w-sm text-sm text-white/80 panel-copy-shadow animate-slide-up" style={{ animationDelay: "0.6s" }}>
+      <p className="relative z-10 max-w-sm text-xs font-medium uppercase tracking-widest text-white/60 animate-slide-up" style={{ animationDelay: "0.6s" }}>
         Youth Economic Digital Twin Platform
       </p>
     </div>
@@ -187,19 +187,21 @@ export default function SignupPage() {
   // ─── Success screen ──────────────────────────────────────────────────────────
   if (registeredEmail) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/10 dark:from-background dark:via-background dark:to-muted/60 flex flex-col sm:flex-row animate-fade-in">
+      <div className="flex min-h-screen flex-col animate-fade-in bg-gradient-to-br from-primary/10 via-background to-secondary/10 text-foreground sm:flex-row dark:from-background dark:via-background dark:to-muted/60">
         {leftPanel}
-        <div className="flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8 relative">
-          <div className="absolute top-4 right-4 z-20"><ThemeToggle /></div>
-          <div className="w-full max-w-md animate-slide-up" style={{ animationDelay: "0.15s" }}>
-            <div className="auth-card-surface p-6 sm:p-7 md:p-9 transition-all duration-300">
+        <div className="relative z-10 flex flex-1 items-center justify-center p-4 sm:p-6 md:p-8">
+          <div className="absolute right-4 top-4 z-30">
+            <ThemeToggle />
+          </div>
+          <div className="w-full max-w-md">
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-xl sm:p-7 md:p-9 dark:bg-card">
               <div className="lg:hidden mb-6 sm:mb-8"><Logo variant="default" size="md" linkTo="/" /></div>
               <div className="flex flex-col items-center text-center space-y-6">
-                <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center animate-slide-up">
-                  <Mail className="h-10 w-10 text-primary" />
+                <div className="h-20 w-20 rounded-full bg-ai-gradient flex items-center justify-center animate-glow-pulse shadow-glow">
+                  <Mail className="h-10 w-10 text-white" />
                 </div>
-                <div className="space-y-2 animate-slide-up" style={{ animationDelay: "0.1s" }}>
-                  <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">Check your email</h2>
+                <div className="space-y-2 animate-fade-up" style={{ animationDelay: "0.1s" }}>
+                  <h2 className="font-display text-3xl sm:text-4xl font-bold text-primary tracking-tight">Check your email</h2>
                   <p className="text-muted-foreground text-sm sm:text-base">We sent a verification link to</p>
                   <p className="font-semibold text-foreground text-sm sm:text-base break-all">{registeredEmail}</p>
                 </div>
@@ -222,20 +224,22 @@ export default function SignupPage() {
 
   // ─── Registration form ───────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/10 dark:from-background dark:via-background dark:to-muted/60 flex flex-col sm:flex-row animate-fade-in">
+    <div className="flex min-h-screen flex-col animate-fade-in bg-gradient-to-br from-primary/10 via-background to-secondary/10 text-foreground sm:flex-row dark:from-background dark:via-background dark:to-muted/60">
       {leftPanel}
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8 relative">
-        <div className="absolute top-4 right-4 z-20"><ThemeToggle /></div>
-        <div className="w-full max-w-md animate-slide-up" style={{ animationDelay: "0.15s" }}>
-          <div className="auth-card-surface p-6 sm:p-7 md:p-9 transition-all duration-300">
+      <div className="relative z-10 flex flex-1 items-center justify-center p-4 sm:p-6 md:p-8">
+        <div className="absolute right-4 top-4 z-30">
+          <ThemeToggle />
+        </div>
+        <div className="w-full max-w-md">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-xl sm:p-7 md:p-9 dark:bg-card">
             <div className="lg:hidden mb-6 sm:mb-8"><Logo variant="default" size="md" linkTo="/" /></div>
 
             <div className="mb-8">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-full mb-4">
-                <Shield className="h-3.5 w-3.5 text-primary" />
-                <span className="text-xs font-semibold text-primary">Free Account</span>
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-secondary/10 border border-secondary/20 rounded-full mb-4">
+                <Shield className="h-3 w-3 text-secondary" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-secondary">Free Account</span>
               </div>
-              <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-2 tracking-tight">Create account</h2>
+              <h2 className="font-display text-3xl sm:text-4xl font-bold text-primary mb-2 tracking-tight">Create account</h2>
               <p className="text-sm sm:text-base text-muted-foreground">
                 Already have an account?{" "}
                 <Link to="/login" className="text-primary hover:text-primary/80 font-semibold hover:underline transition-colors">Sign in</Link>
@@ -263,12 +267,12 @@ export default function SignupPage() {
                   onFocus={() => setNameFocused(true)}
                   onBlur={() => setNameFocused(false)}
                   autoComplete="name"
-                  className={`w-full pl-12 pr-4 py-3.5 border-2 rounded-xl text-base text-foreground transition-all min-h-[52px] auth-input-enhanced ${
+                  className={`w-full pl-12 pr-4 py-3.5 border rounded-xl text-base text-foreground transition-all min-h-[52px] ${
                     fieldErrors.name
                       ? "border-destructive/50 bg-destructive/5"
                       : nameFocused
-                      ? "border-primary/50 shadow-lg shadow-primary/10 bg-primary/5"
-                      : "border-border/40 hover:border-border/60 bg-card/40"
+                      ? "border-secondary/50 ring-2 ring-secondary/10 bg-background" 
+                      : "border-border/60 bg-background"
                   }`}
                   required
                 />
@@ -300,12 +304,12 @@ export default function SignupPage() {
                   autoComplete="email"
                   inputMode="email"
                   spellCheck={false}
-                  className={`w-full pl-12 pr-4 py-3.5 border-2 rounded-xl text-base text-foreground transition-all min-h-[52px] auth-input-enhanced ${
+                  className={`w-full pl-12 pr-4 py-3.5 border rounded-xl text-base text-foreground transition-all min-h-[52px] ${
                     fieldErrors.email
                       ? "border-destructive/50 bg-destructive/5"
                       : emailFocused
-                      ? "border-primary/50 shadow-lg shadow-primary/10 bg-primary/5"
-                      : "border-border/40 hover:border-border/60 bg-card/40"
+                      ? "border-secondary/50 ring-2 ring-secondary/10 bg-background" 
+                      : "border-border/60 bg-background"
                   }`}
                   required
                 />
@@ -335,12 +339,12 @@ export default function SignupPage() {
                   onFocus={() => setPasswordFocused(true)}
                   onBlur={() => setPasswordFocused(false)}
                   autoComplete="new-password"
-                  className={`w-full pl-12 pr-12 py-3.5 border-2 rounded-xl text-base text-foreground transition-all min-h-[52px] auth-input-enhanced ${
+                  className={`w-full pl-12 pr-12 py-3.5 border rounded-xl text-base text-foreground transition-all min-h-[52px] ${
                     fieldErrors.password
                       ? "border-destructive/50 bg-destructive/5"
                       : passwordFocused
-                      ? "border-primary/50 shadow-lg shadow-primary/10 bg-primary/5"
-                      : "border-border/40 hover:border-border/60 bg-card/40"
+                      ? "border-secondary/50 ring-2 ring-secondary/10 bg-background" 
+                      : "border-border/60 bg-background"
                   }`}
                   required
                 />
@@ -366,9 +370,13 @@ export default function SignupPage() {
                     {[1, 2, 3, 4].map((level) => (
                       <div
                         key={`password-strength-${level}`}
-                        className={`h-1.5 rounded-full flex-1 transition-all ${
+                        className={`h-1.5 flex-1 rounded-full transition-all ${
                           formData.password.length >= level * 2
-                            ? level <= 2 ? "bg-destructive" : level === 3 ? "bg-sa-gold" : "bg-success"
+                            ? level <= 2
+                              ? "bg-destructive"
+                              : level === 3
+                                ? "bg-secondary"
+                                : "bg-emerald-500"
                             : "bg-muted"
                         }`}
                       />
@@ -401,11 +409,11 @@ export default function SignupPage() {
                       type="checkbox"
                       checked={consents.consentDataProcessing}
                       onChange={() => handleConsentChange('consentDataProcessing')}
-                      className="mt-1 rounded border border-border/60 text-primary focus:ring-2 focus:ring-primary/30 w-4 h-4 flex-shrink-0 cursor-pointer transition-all"
+                      className="mt-1 rounded border-border/60 text-secondary focus:ring-secondary/30 w-4 h-4 flex-shrink-0 cursor-pointer transition-all bg-background"
                     />
-                    <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+                    <span className="text-sm text-muted-foreground group-hover:text-primary transition-colors">
                       I agree to EmpowaAI processing my personal information in accordance with the{" "}
-                      <Link to="/privacy-policy" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">
+                      <Link to="/privacy-policy" className="text-secondary hover:underline" target="_blank" rel="noopener noreferrer">
                         Privacy Policy
                       </Link>. <span className="text-destructive">*</span>
                     </span>
@@ -424,9 +432,9 @@ export default function SignupPage() {
                       type="checkbox"
                       checked={consents.consentProfileSharing}
                       onChange={() => handleConsentChange('consentProfileSharing')}
-                      className="mt-1 rounded border border-border/60 text-primary focus:ring-2 focus:ring-primary/30 w-4 h-4 flex-shrink-0 cursor-pointer transition-all"
+                      className="mt-1 rounded border-border/60 text-secondary focus:ring-secondary/30 w-4 h-4 flex-shrink-0 cursor-pointer transition-all bg-background"
                     />
-                    <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+                    <span className="text-sm text-muted-foreground group-hover:text-primary transition-colors">
                       I consent to my profile being shared with potential employers for job opportunities.{" "}
                       <span className="text-destructive">*</span>
                     </span>
@@ -444,9 +452,9 @@ export default function SignupPage() {
                     type="checkbox"
                     checked={consents.consentAiProcessing}
                     onChange={() => handleConsentChange('consentAiProcessing')}
-                    className="mt-1 rounded border border-border/60 text-primary focus:ring-2 focus:ring-primary/30 w-4 h-4 flex-shrink-0 cursor-pointer transition-all"
+                      className="mt-1 rounded border-border/60 text-secondary focus:ring-secondary/30 w-4 h-4 flex-shrink-0 cursor-pointer transition-all bg-background"
                   />
-                  <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+                    <span className="text-sm text-muted-foreground group-hover:text-primary transition-colors">
                     I consent to my data being used for AI-based job matching and recommendations.{" "}
                     <span className="text-xs text-muted-foreground/70">(Recommended)</span>
                   </span>
@@ -474,7 +482,7 @@ export default function SignupPage() {
               <button
                 type="submit"
                 disabled={submitDisabled}
-                className="w-full py-4 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-100 min-h-[56px] text-base group"
+                className="shimmer w-full py-4 bg-cta-gradient text-white rounded-xl font-bold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-cta hover:shadow-glow hover:-translate-y-0.5 active:translate-y-0 min-h-[56px] text-base group"
               >
                 {isLoading ? (
                   <><Loader2 className="h-5 w-5 animate-spin" /><span>Creating account...</span></>

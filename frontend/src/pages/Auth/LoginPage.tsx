@@ -1,5 +1,6 @@
-
-// pages/LoginPage.tsx - Enhanced with beautiful animations
+/**
+ * LoginPage.tsx - Synchronized with Neural Fusion (v2) Design System
+ */
 import type React from "react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -10,6 +11,7 @@ import { useUser } from "../../contexts/user-context";
 import { syncProgressFromBackend, unlockAllPages } from "../../utils/progressSync";
 import ThemeToggle from "../../components/ui/ThemeToggle";
 import loginBg from "../../assets/images/empowerlogin.png";
+import { Button } from "../../components/ui/button"; // Assuming shared UI components are updated
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -89,21 +91,21 @@ export default function LoginPage() {
   };
 
   const leftPanel = (
-    <div className="hidden lg:flex flex-1 relative p-12 flex-col justify-between overflow-hidden">
+    <div className="relative hidden flex-1 flex-col justify-between overflow-hidden p-12 lg:flex">
       <img
         src={loginBg}
         alt="EmpowaAI"
         loading="eager"
-        className="absolute inset-0 h-full w-full object-cover object-center crisp-image"
+        className="absolute inset-0 h-full w-full scale-105 object-cover object-center crisp-image"
       />
       <div className="absolute inset-0 panel-image-overlay" />
       <div className="absolute inset-0 panel-image-accent opacity-70" />
 
       <div className="relative z-10 max-w-lg space-y-6 animate-slide-up">
-        <p className="text-sm font-semibold uppercase tracking-[0.24em] text-white/80 panel-copy-shadow">
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-secondary">
           Welcome back
         </p>
-        <h1 className="text-4xl font-bold leading-tight text-white panel-copy-shadow">
+        <h1 className="font-display text-4xl font-bold leading-tight text-white drop-shadow-md">
           Continue your journey to economic empowerment.
         </h1>
         <ul className="space-y-4">
@@ -113,8 +115,8 @@ export default function LoginPage() {
             { text: "Continue personalized career guidance", icon: Loader2 },
           ].map((item, i) => (
             <li key={i} className="flex items-center gap-3 text-white panel-copy-shadow animate-slide-up" style={{ animationDelay: `${0.2 + i * 0.1}s` }}>
-              <div className="h-8 w-8 rounded-lg bg-white/10 border border-white/15 flex items-center justify-center flex-shrink-0 backdrop-blur-sm">
-                <item.icon className="h-4 w-4 text-white" />
+              <div className="h-8 w-8 rounded-lg bg-ai-gradient flex items-center justify-center flex-shrink-0 shadow-glow">
+                <item.icon className="h-4 w-4 text-white" strokeWidth={2.5} />
               </div>
               <span className="text-base">{item.text}</span>
             </li>
@@ -122,32 +124,31 @@ export default function LoginPage() {
         </ul>
       </div>
 
-      <p className="relative z-10 max-w-sm text-sm text-white/80 panel-copy-shadow animate-slide-up" style={{ animationDelay: "0.6s" }}>
+      <p className="relative z-10 max-w-sm text-xs font-medium uppercase tracking-widest text-white/60 animate-slide-up" style={{ animationDelay: "0.6s" }}>
         Youth Economic Digital Twin Platform
       </p>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/10 dark:from-background dark:via-background dark:to-muted/60 flex flex-col sm:flex-row animate-fade-in">
+    <div className="flex min-h-screen flex-col animate-fade-in bg-gradient-to-br from-primary/10 via-background to-secondary/10 text-foreground sm:flex-row dark:from-background dark:via-background dark:to-muted/60">
       {leftPanel}
 
-      {/* Right Panel */}
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8 relative">
-        <div className="absolute top-4 right-4 z-20">
+      <div className="relative z-10 flex flex-1 items-center justify-center p-4 sm:p-6 md:p-8">
+        <div className="absolute right-4 top-4 z-30">
           <ThemeToggle />
         </div>
 
-        <div className="w-full max-w-md animate-slide-up" style={{ animationDelay: "0.15s" }}>
-          <div className="auth-card-surface p-6 sm:p-7 md:p-9 transition-all duration-300">
+        <div className="w-full max-w-md">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-xl sm:p-7 md:p-9 dark:bg-card">
             <div className="mb-8">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-full mb-4">
-                <Sparkles className="h-3.5 w-3.5 text-primary" />
-                <span className="text-xs font-semibold text-primary">Secure Login</span>
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-secondary/10 border border-secondary/20 rounded-full mb-4">
+                <Sparkles className="h-3 w-3 text-secondary" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-secondary">Secure Portal</span>
               </div>
-              <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-2 tracking-tight">Sign in</h2>
+              <h2 className="font-display text-3xl sm:text-4xl font-bold text-primary mb-2 tracking-tight">Sign in</h2>
               <p className="text-sm sm:text-base text-muted-foreground">
-                Don't have an account?{" "}
+                New to EmpowAI?{" "}
                 <Link to="/signup" className="text-primary hover:text-primary/80 font-semibold hover:underline transition-colors">
                   Sign up
                 </Link>
@@ -156,7 +157,7 @@ export default function LoginPage() {
 
             <form onSubmit={handleSubmit} className="space-y-5">
               {warmupHint && (
-                <div className="p-4 bg-primary/10 border-2 border-primary/30 rounded-xl text-sm text-primary animate-slide-up">
+                <div className="p-4 bg-secondary/10 border border-secondary/30 rounded-xl text-xs font-medium text-secondary animate-fade-up">
                   {warmupHint}
                 </div>
               )}
@@ -167,7 +168,7 @@ export default function LoginPage() {
                 <label
                   className={`auth-floating-label ${
                     emailFocused || email
-                      ? "auth-floating-label-shrink text-primary font-medium"
+                      ? "auth-floating-label-shrink text-secondary font-bold"
                       : "text-sm text-muted-foreground"
                   }`}
                 >
@@ -182,10 +183,10 @@ export default function LoginPage() {
                   autoComplete="email"
                   inputMode="email"
                   spellCheck={false}
-                  className={`w-full pl-12 pr-4 py-3.5 border-2 rounded-xl text-base text-foreground transition-all min-h-[52px] auth-input-enhanced ${
-                    emailFocused 
-                      ? "border-primary/50 shadow-lg shadow-primary/10 bg-primary/5" 
-                      : "border-border/40 hover:border-border/60 bg-card/40"
+                  className={`min-h-[52px] w-full rounded-xl border py-3.5 pl-12 pr-4 text-base text-foreground transition-all ${
+                    emailFocused
+                      ? "border-secondary/50 bg-background ring-2 ring-secondary/10"
+                      : "border-border/60 bg-background"
                   }`}
                   required
                 />
@@ -197,7 +198,7 @@ export default function LoginPage() {
                 <label
                   className={`auth-floating-label ${
                     passwordFocused || password
-                      ? "auth-floating-label-shrink text-primary font-medium"
+                      ? "auth-floating-label-shrink text-secondary font-bold"
                       : "text-sm text-muted-foreground"
                   }`}
                 >
@@ -210,10 +211,10 @@ export default function LoginPage() {
                   onFocus={() => setPasswordFocused(true)}
                   onBlur={() => setPasswordFocused(false)}
                   autoComplete="current-password"
-                  className={`w-full pl-12 pr-12 py-3.5 border-2 rounded-xl text-base text-foreground transition-all min-h-[52px] auth-input-enhanced ${
-                    passwordFocused 
-                      ? "border-primary/50 shadow-lg shadow-primary/10 bg-primary/5" 
-                      : "border-border/40 hover:border-border/60 bg-card/40"
+                  className={`min-h-[52px] w-full rounded-xl border py-3.5 pl-12 pr-12 text-base text-foreground transition-all ${
+                    passwordFocused
+                      ? "border-secondary/50 bg-background ring-2 ring-secondary/10"
+                      : "border-border/60 bg-background"
                   }`}
                   required
                 />
@@ -228,12 +229,12 @@ export default function LoginPage() {
               </div>
 
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-2 pt-1">
-                <label className="flex items-center gap-2.5 cursor-pointer group">
+                <label className="flex items-center gap-2.5 cursor-pointer group select-none">
                   <input 
                     type="checkbox" 
-                    className="rounded border border-border/60 text-primary focus:ring-2 focus:ring-primary/30 w-4 h-4 transition-all cursor-pointer" 
+                    className="rounded border-border/60 text-secondary focus:ring-secondary/30 w-4 h-4 transition-all cursor-pointer bg-background" 
                   />
-                  <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">Remember me</span>
+                  <span className="text-sm text-muted-foreground group-hover:text-primary transition-colors">Remember me</span>
                 </label>
                 <Link to="/forgot-password" className="text-sm text-primary hover:text-primary/80 hover:underline font-medium transition-colors">
                   Forgot password?
@@ -254,7 +255,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-4 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-100 min-h-[56px] text-base group"
+                className="shimmer w-full py-4 bg-cta-gradient text-white rounded-xl font-bold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-cta hover:shadow-glow hover:-translate-y-0.5 active:translate-y-0 min-h-[56px] text-base group"
               >
                 {isLoading ? (
                   <>

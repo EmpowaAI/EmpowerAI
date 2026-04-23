@@ -367,7 +367,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0 h-full">
           {/* Header */}
-          <header className="h-16 flex-shrink-0 bg-card/80 backdrop-blur-md border-b border-border flex items-center justify-between px-4 sm:px-6 sticky top-0 z-30">
+          <header className="sticky top-0 z-30 flex h-16 flex-shrink-0 items-center justify-between border-b border-border/60 bg-background/85 px-4 backdrop-blur-md sm:px-6">
             <div className="flex items-center gap-2">
               {/* Mobile Menu Button */}
               <button
@@ -426,7 +426,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               {/* Desktop Sign Out Button - CLEAR AND VISIBLE */}
               <button
                 onClick={handleLogout}
-                className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[--sa-terracotta] text-white hover:bg-[--sa-terracotta]/80 font-medium text-xs shadow-sm transition-all border border-[--sa-terracotta]/30"
+                className="hidden items-center gap-1.5 rounded-lg border border-secondary/30 bg-gradient-to-r from-secondary to-secondary/90 px-3 py-1.5 text-xs font-semibold text-white shadow-cta transition-smooth hover:brightness-105 lg:flex"
                 title="Sign Out"
                 type="button"
               >

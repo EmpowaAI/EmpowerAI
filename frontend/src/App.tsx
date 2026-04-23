@@ -1,4 +1,4 @@
-﻿﻿// frontend/src/App.tsx
+﻿// frontend/src/App.tsx
 import { lazy, Suspense, useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { UserProvider, useUser } from './contexts/user-context';
@@ -10,6 +10,7 @@ import { Toaster } from 'react-hot-toast';
 
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const Demo = lazy(() => import('./pages/Demo'));
+const Pricing = lazy(() => import('./pages/Pricing'));
 const LoginPage = lazy(() => import('./pages/Auth/LoginPage'));
 const SignupPage = lazy(() => import('./pages/Auth/SignupPage'));
 const ForgotPassword = lazy(() => import('./pages/Auth/ForgotPassword'));
@@ -56,6 +57,7 @@ function App() {
               {/* Public routes */}
               <Route path="/" element={<LandingPage />} />
               <Route path="/demo" element={<Demo />} />
+              <Route path="/pricing" element={<Pricing />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
