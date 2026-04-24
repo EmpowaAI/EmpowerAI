@@ -112,11 +112,12 @@ export async function streamChat({
         `Request failed (status ${response.status})`;
 
       if (response.status === 401) {
-        localStorage.removeItem('empowerai-token');
-        onError("Your session expired. Please log in again.");
-        setTimeout(() => window.location.href = '/login', 1500);
-        onDone({ reply: "", options: [], isComplete: false, profile: null });
-        return;
+          // Integrated cleanup
+          localStorage.removeItem('empowerai-token');
+          onError("Your session has expired. Please log in again.");
+          setTimeout(() => window.location.href = '/login', 2000);
+          onDone({ reply: "", options: [], isComplete: false, profile: null });
+          return;
       }
 
       if (USE_DEMO_MODE) {

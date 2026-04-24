@@ -8,6 +8,8 @@ import {
   ShieldCheck,
   HeadphonesIcon,
   Rocket,
+  Menu,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -56,6 +58,7 @@ const FAQS = [
 
 export default function Pricing() {
   const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
@@ -81,8 +84,42 @@ export default function Pricing() {
           <div className="flex items-center gap-2">
             <ThemeToggle />
             <ProfileMenu />
+            
+            {/* Hamburger Toggle */}
+            <button 
+              className="md:hidden p-2 text-primary hover:bg-primary/5 rounded-md transition-smooth"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label="Toggle Navigation"
+            >
+              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Nav Overlay */}
+        {isMenuOpen && (
+          <div className="md:hidden absolute top-16 left-0 w-full bg-background/95 backdrop-blur-lg border-b border-border/60 animate-in fade-in slide-in-from-top-4 duration-300 z-50">
+            <nav className="container py-8 flex flex-col gap-6">
+              <Link to="/" onClick={() => setIsMenuOpen(false)} className="text-xl font-bold text-primary">
+                Home
+              </Link>
+              <Link to="/demo" onClick={() => setIsMenuOpen(false)} className="text-xl font-bold text-primary">
+                Demo
+              </Link>
+              <Link to="/pricing" onClick={() => setIsMenuOpen(false)} className="text-xl font-bold text-secondary">
+                Pricing
+              </Link>
+              <div className="flex flex-col gap-3 pt-6 border-t border-border/40">
+                <Button asChild variant="outline" className="w-full h-12 text-lg" onClick={() => setIsMenuOpen(false)}>
+                  <Link to="/login">Sign In</Link>
+                </Button>
+                <Button asChild variant="cta" className="w-full h-12 text-lg shimmer" onClick={() => setIsMenuOpen(false)}>
+                  <Link to="/signup">Get Started</Link>
+                </Button>
+              </div>
+            </nav>
+          </div>
+        )}
       </header>
 
       <main>

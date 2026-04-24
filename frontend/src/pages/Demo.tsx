@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/Button";
@@ -5,10 +6,13 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { ProfileMenu } from "@/components/ProfileMenu";
 import { ContactWidget } from "@/components/ContactWidget";
 import DemoSection from "@/components/DemoSection";
+import { Menu, X } from "lucide-react";
 
 const logoSrc = `${import.meta.env.BASE_URL}images/empowa_icon.png`;
 
 export default function Demo() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-md">
@@ -36,11 +40,41 @@ export default function Demo() {
               </Link>
             </Button>
             <ProfileMenu />
-            <Button asChild variant="cta" size="sm" className="shimmer">
-              <Link to="/signup">Get Started</Link>
-            </Button>
+
+            {/* Hamburger Toggle */}
+            <button 
+              className="md:hidden p-2 text-primary hover:bg-primary/5 rounded-md transition-smooth"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Nav Overlay */}
+        {isMenuOpen && (
+          <div className="md:hidden absolute top-16 left-0 w-full bg-background/95 backdrop-blur-lg border-b border-border/60 animate-in fade-in slide-in-from-top-4 duration-300 z-50">
+            <nav className="container py-8 flex flex-col gap-6">
+              <Link to="/" onClick={() => setIsMenuOpen(false)} className="text-xl font-bold text-primary">
+                Home
+              </Link>
+              <Link to="/pricing" onClick={() => setIsMenuOpen(false)} className="text-xl font-bold text-primary">
+                Pricing
+              </Link>
+              <div className="flex flex-col gap-3 pt-6 border-t border-border/40">
+                <Button asChild variant="outline" className="w-full h-12 text-lg" onClick={() => setIsMenuOpen(false)}>
+                  <Link to="/">
+                    <ArrowLeft className="mr-1 h-4 w-4" />
+                    Back to site
+                  </Link>
+                </Button>
+                <Button asChild variant="cta" className="w-full h-12 text-lg shimmer" onClick={() => setIsMenuOpen(false)}>
+                  <Link to="/signup">Get Started</Link>
+                </Button>
+              </div>
+            </nav>
+          </div>
+        )}
       </header>
 
       <main>
