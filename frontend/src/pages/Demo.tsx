@@ -3,10 +3,11 @@ import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { ProfileMenu } from "@/components/ProfileMenu";
+import { ProfileMenu } from "@/components/ProfileMenu"; // Added import
 import { ContactWidget } from "@/components/ContactWidget";
 import DemoSection from "@/components/DemoSection";
 import { Menu, X } from "lucide-react";
+import { cn } from "@/lib/utils"; // Added import
 
 const logoSrc = `${import.meta.env.BASE_URL}images/empowa_icon.png`;
 
@@ -52,29 +53,30 @@ export default function Demo() {
         </div>
 
         {/* Mobile Nav Overlay */}
-        {isMenuOpen && (
-          <div className="md:hidden absolute top-16 left-0 w-full bg-background/95 backdrop-blur-lg border-b border-border/60 animate-in fade-in slide-in-from-top-4 duration-300 z-50">
-            <nav className="container py-8 flex flex-col gap-6">
-              <Link to="/" onClick={() => setIsMenuOpen(false)} className="text-xl font-bold text-primary">
+        <div className={cn( // Used cn for conditional classes
+          "md:hidden fixed inset-0 top-16 z-50 bg-background/95 backdrop-blur-xl transition-all duration-300 ease-in-out",
+          isMenuOpen ? "opacity-100 visible translate-y-0" : "opacity-0 invisible -translate-y-4"
+        )}>
+            <nav className="container py-12 flex flex-col items-center gap-8">
+              <Link to="/" onClick={() => setIsMenuOpen(false)} className="text-3xl font-display font-bold text-primary hover:text-secondary transition-colors">
                 Home
               </Link>
-              <Link to="/pricing" onClick={() => setIsMenuOpen(false)} className="text-xl font-bold text-primary">
+              <Link to="/pricing" onClick={() => setIsMenuOpen(false)} className="text-3xl font-display font-bold text-primary hover:text-secondary transition-colors">
                 Pricing
               </Link>
-              <div className="flex flex-col gap-3 pt-6 border-t border-border/40">
-                <Button asChild variant="outline" className="w-full h-12 text-lg" onClick={() => setIsMenuOpen(false)}>
+              <div className="flex flex-col w-full gap-4 pt-8 border-t border-border/40">
+                <Button asChild variant="outline" size="xl" className="w-full rounded-2xl" onClick={() => setIsMenuOpen(false)}>
                   <Link to="/">
                     <ArrowLeft className="mr-1 h-4 w-4" />
                     Back to site
                   </Link>
-                </Button>
-                <Button asChild variant="cta" className="w-full h-12 text-lg shimmer" onClick={() => setIsMenuOpen(false)}>
+                </Button> {/* Changed to size="xl" and rounded-2xl */}
+                <Button asChild variant="cta" size="xl" className="w-full rounded-2xl shimmer" onClick={() => setIsMenuOpen(false)}>
                   <Link to="/signup">Get Started</Link>
                 </Button>
               </div>
             </nav>
           </div>
-        )}
       </header>
 
       <main>

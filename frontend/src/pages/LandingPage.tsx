@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useState } from "react"; // Added import
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import {
@@ -22,6 +23,8 @@ import {
   MapPin,
   Quote,
   TrendingUp,
+  Menu, // Added import
+  X, // Added import
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ProfileMenu } from "@/components/ProfileMenu";
@@ -29,19 +32,47 @@ import { ContactWidget } from "@/components/ContactWidget";
 import siyanda from "../assets/images/siyaimage.png";
 import Logo from "@/components/ui/Logo";
 import TikTokIcon from "@/components/ui/TikTokIcon";
+import { cn } from "@/lib/utils"; // Added import
 
 const heroBackgroundUrl = encodeURI(`${import.meta.env.BASE_URL}images/Wide blue-orange gra.png`);
 
 export default function LandingPage() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
       <header className="sticky top-0 z-40 border-b border-border/10 bg-background">
+        {/* State for mobile menu */}
         <div className="container flex h-16 items-center justify-between gap-4">
-          <Link to="/" className="flex items-center gap-2.5">
-            <Logo variant="default" size="sm" />
-          </Link>
+          <Logo variant="default" size="sm" linkTo="" />
 
           <nav className="hidden items-center gap-8 md:flex">
+            {/* Navigation links */}
+          </nav>
+
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <ProfileMenu />
+            <Button asChild variant="cta" size="sm" className="hidden md:flex shimmer">
+              <Link to="/signup">Get Started</Link>
+            </Button>
+
+            {/* Hamburger Toggle */}
+            <button
+              className="md:hidden p-2 text-primary hover:bg-primary/5 rounded-md transition-smooth"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label="Toggle Navigation"
+            >
+              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Nav Overlay */}
+        <div className={cn(
+          "md:hidden fixed inset-x-0 top-16 z-50 bg-background/98 backdrop-blur-lg border-b border-border/20 transition-all duration-300 ease-in-out",
+          isMenuOpen ? "opacity-100 visible translate-y-0" : "opacity-0 invisible -translate-y-2"
+        )}>
+          <nav className="container py-6 px-4 flex flex-col items-center gap-2">
             {[
               { label: "How It Works", href: "#how-it-works" },
               { label: "Features", href: "#features" },
@@ -49,35 +80,25 @@ export default function LandingPage() {
               { label: "Pricing", href: "/pricing", route: true },
               { label: "Demo", href: "/demo", route: true },
             ].map((l) =>
-              "route" in l && l.route ? (
-                <Link
-                  key={l.label}
-                  to={l.href}
-                  className="text-sm font-medium text-muted-foreground transition-smooth hover:text-primary"
-                >
+              l.route ? (
+                <Link key={l.label} to={l.href} onClick={() => setIsMenuOpen(false)} className="text-lg font-medium text-primary hover:text-secondary transition-colors py-2 px-4 rounded-lg hover:bg-primary/5 w-full text-center">
                   {l.label}
                 </Link>
               ) : (
-                <a
-                  key={l.label}
-                  href={l.href}
-                  className="text-sm font-medium text-muted-foreground transition-smooth hover:text-primary"
-                >
+                <a key={l.label} href={l.href} onClick={() => setIsMenuOpen(false)} className="text-lg font-medium text-primary hover:text-secondary transition-colors py-2 px-4 rounded-lg hover:bg-primary/5 w-full text-center">
                   {l.label}
                 </a>
               )
             )}
+            <div className="flex flex-col w-full gap-3 pt-4 mt-2 border-t border-border/30">
+              <Button asChild variant="cta" size="lg" className="w-full rounded-xl shimmer" onClick={() => setIsMenuOpen(false)}>
+                <Link to="/signup">Get Started</Link>
+              </Button>
+            </div>
           </nav>
-
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <ProfileMenu />
-            <Button asChild variant="cta" size="sm" className="shimmer">
-              <Link to="/signup">Get Started</Link>
-            </Button>
-          </div>
         </div>
-      </header>
+
+              </header>
 
       <main>
         <section className="relative overflow-hidden text-white">
