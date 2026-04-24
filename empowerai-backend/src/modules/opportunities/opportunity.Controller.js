@@ -3,17 +3,42 @@ const logger = require('../../utils/logger');
 const { getMatchedOpportunities, extractUserProfile } = require('./opportunityMatchingService');
 const { getCareerTaxonomy } = require('../../services/taxonomyService');
 
+let attemptedAutoSeed = false;
+
 exports.getAllOpportunities = async (req, res, next) => {
   try {
     const { province, type, skills, minScore, page, limit, sort, q } = req.query;
     
     // First, check total count in database for debugging
-    const totalCount = await Opportunity.countDocuments({});
-    const activeCount = await Opportunity.countDocuments({ isActive: true });
+    let totalCount = await Opportunity.countDocuments({});
+    let activeCount = await Opportunity.countDocuments({ isActive: true });
+    let seededDefaults = false;
+
+    // If the DB is empty (or has no active opportunities), opportunistically seed defaults.
+    // This makes the Opportunities page usable even when startup tasks didn't run (or the DB was provisioned empty).
+    if (activeCount === 0 && !attemptedAutoSeed) {
+      attemptedAutoSeed = true;
+      try {
+        // Reuse the curated defaults from the seed script (without deleting anything).
+        // Path is relative to this controller file: src/modules/opportunities -> ../../../scripts
+        // eslint-disable-next-line global-require
+        const { opportunities: defaultOpportunities } = require('../../../scripts/seedOpportunities');
+        if (Array.isArray(defaultOpportunities) && defaultOpportunities.length > 0) {
+          await Opportunity.insertMany(defaultOpportunities, { ordered: false });
+          logger.info('Auto-seeded default opportunities (collection was empty)');
+          seededDefaults = true;
+          totalCount = await Opportunity.countDocuments({});
+          activeCount = await Opportunity.countDocuments({ isActive: true });
+        }
+      } catch (seedError) {
+        logger.warn('Auto-seed attempt failed (non-fatal)', { message: seedError?.message });
+      }
+    }
     
     logger.info('Opportunities query started', { 
       totalCount,
       activeCount,
+      seededDefaults,
       queryParams: { province, type, skills, minScore, page, limit, sort, q }
     });
     
