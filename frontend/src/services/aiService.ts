@@ -650,27 +650,93 @@ class AIService {
   ): string[] {
     const weaknesses: string[] = []
 
-    if (!education.some(edu => edu.includes('Matric') || edu.includes('Grade 12'))) {
-      weaknesses.push('Matric/Grade 12 details missing - important for SA graduate programs')
+    // Education weaknesses
+    const hasMatric = education.some(edu => 
+      edu.toLowerCase().includes('matric') || 
+      edu.toLowerCase().includes('grade 12') ||
+      edu.toLowerCase().includes('national senior certificate')
+    )
+    const hasHigherEd = education.some(edu => 
+      edu.toLowerCase().includes('degree') ||
+      edu.toLowerCase().includes('diploma') ||
+      edu.toLowerCase().includes('bachelor') ||
+      edu.toLowerCase().includes('master')
+    )
+
+    if (!hasMatric) {
+      weaknesses.push('Matric/Grade 12 details missing - essential for SA employer screening')
+    }
+    if (!hasHigherEd && experience.length < 2) {
+      weaknesses.push('No higher education qualifications - consider certifications or short courses')
     }
 
+    // Experience weaknesses - more detailed analysis
     if (experience.length === 0) {
-      weaknesses.push('No work experience listed - add internships, projects, or freelance work')
+      weaknesses.push('No work experience - add internships, volunteer work, or personal projects')
+    } else {
+      const hasQualityExperience = experience.some(exp => 
+        exp.length > 100 && /\d+/.test(exp) // Substantial with metrics
+      )
+      if (!hasQualityExperience) {
+        weaknesses.push('Experience descriptions lack quantifiable results - add metrics and impact statements')
+      }
+      
+      const hasRecentExperience = experience.some(exp => 
+        exp.toLowerCase().includes('202') || exp.toLowerCase().includes('present')
+      )
+      if (!hasRecentExperience) {
+        weaknesses.push('No recent experience listed - update with current or recent roles')
+      }
     }
 
-    if (achievements.length < 2) {
-      weaknesses.push('Few quantifiable achievements - add metrics and numbers to demonstrate impact')
+    // Skills weaknesses - more specific
+    const techSkills = skills.filter(s => 
+      ['javascript', 'python', 'java', 'react', 'node.js', 'aws'].includes(s.toLowerCase())
+    ).length
+    const businessSkills = skills.filter(s => 
+      ['project management', 'agile', 'scrum', 'leadership'].includes(s.toLowerCase())
+    ).length
+
+    if (skills.length < 8) {
+      weaknesses.push(`Insufficient skills listed (${skills.length}) - aim for 8+ relevant skills`)
+    }
+    if (techSkills < 3 && experience.length > 0) {
+      weaknesses.push('Limited technical skills - add in-demand technologies for your field')
+    }
+    if (businessSkills < 2 && experience.length > 1) {
+      weaknesses.push('Missing business skills - add project management or leadership competencies')
     }
 
+    // Achievements weaknesses
+    if (achievements.length < 3) {
+      weaknesses.push('Few achievements listed - add 3+ notable accomplishments with measurable outcomes')
+    } else {
+      const quantifiableAchievements = achievements.filter(ach => /\d+/.test(ach)).length
+      if (quantifiableAchievements < 2) {
+        weaknesses.push('Achievements lack metrics - add numbers, percentages, or measurable outcomes')
+      }
+    }
+
+    // Online presence weaknesses
+    if (!links.linkedin) {
+      weaknesses.push('LinkedIn profile missing - essential for professional networking and job applications')
+    }
+    if (!links.github && techSkills >= 3) {
+      weaknesses.push('GitHub portfolio missing - important for showcasing technical work')
+    }
+    if (!links.portfolio && (techSkills >= 2 || experience.length >= 1)) {
+      weaknesses.push('No portfolio website - create one to showcase your work and projects')
+    }
+
+    // Missing keywords weaknesses
     if (missingKeywords.includes('Drivers Licence')) {
-      weaknesses.push('Driver\'s licence not mentioned - critical for many SA junior roles')
+      weaknesses.push('Driver\'s licence not specified - critical for many SA junior positions')
+    }
+    if (missingKeywords.length > 5) {
+      weaknesses.push(`Missing key industry keywords (${missingKeywords.slice(0, 3).join(', ')}) - add to improve ATS ranking`)
     }
 
-    if (skills.length < 5) {
-      weaknesses.push('Limited skills listed - add more relevant skills to strengthen your profile')
-    }
-
-    return [...new Set(weaknesses)].slice(0, 5)
+    return [...new Set(weaknesses)].slice(0, 6)
   }
 
   private capitalizeSkills(skills: string[]): string[] {
@@ -761,18 +827,65 @@ class AIService {
   ): number {
     let score = 0
     
-    score += Math.min(skills.length * 2, 30)
-    if (education.length > 0) score += Math.min(education.length * 7, 20)
-    if (experience.length > 0) score += Math.min(experience.length * 8, 25)
-    if (achievements.length > 0) score += Math.min(achievements.length * 3, 15)
+    // Skills scoring - more nuanced
+    const techSkills = skills.filter(s => 
+      ['javascript', 'python', 'java', 'c#', 'react', 'node.js', 'aws', 'azure', 'docker', 'git'].includes(s.toLowerCase())
+    ).length
+    const businessSkills = skills.filter(s => 
+      ['project management', 'agile', 'scrum', 'leadership', 'communication'].includes(s.toLowerCase())
+    ).length
     
-    if (links.linkedin) score += 4
-    if (links.github) score += 3
-    if (links.portfolio) score += 3
+    score += Math.min(techSkills * 4, 35) // Tech skills weighted higher
+    score += Math.min(businessSkills * 3, 15) // Business skills
+    score += Math.min((skills.length - techSkills - businessSkills) * 2, 10) // Other skills
     
-    if (education.length >= 2) score += 2
-    if (experience.length >= 2) score += 2
-    if (achievements.length >= 3) score += 2
+    // Education scoring - check for Matric and higher education
+    const hasMatric = education.some(edu => 
+      edu.toLowerCase().includes('matric') || 
+      edu.toLowerCase().includes('grade 12') ||
+      edu.toLowerCase().includes('national senior certificate')
+    )
+    const hasHigherEd = education.some(edu => 
+      edu.toLowerCase().includes('degree') ||
+      edu.toLowerCase().includes('diploma') ||
+      edu.toLowerCase().includes('bachelor') ||
+      edu.toLowerCase().includes('master')
+    )
+    
+    if (hasMatric) score += 8
+    if (hasHigherEd) score += Math.min(education.length * 6, 25)
+    
+    // Experience scoring - check for quality and relevance
+    const qualityExperience = experience.filter(exp => 
+      exp.length > 100 && // Substantial description
+      (exp.toLowerCase().includes('developed') || 
+       exp.toLowerCase().includes('managed') ||
+       exp.toLowerCase().includes('implemented') ||
+       /\d+/.test(exp)) // Has metrics
+    ).length
+    
+    score += Math.min(qualityExperience * 10, 30)
+    score += Math.min((experience.length - qualityExperience) * 5, 10)
+    
+    // Achievements scoring - look for quantifiable results
+    const quantifiableAchievements = achievements.filter(ach => 
+      /\d+/.test(ach) || // Contains numbers
+      ach.toLowerCase().includes('increased') ||
+      ach.toLowerCase().includes('reduced') ||
+      ach.toLowerCase().includes('improved')
+    ).length
+    
+    score += Math.min(quantifiableAchievements * 5, 20)
+    score += Math.min((achievements.length - quantifiableAchievements) * 2, 10)
+    
+    // Online presence scoring
+    if (links.linkedin) score += 5
+    if (links.github) score += 4
+    if (links.portfolio) score += 4
+    
+    // Bonuses for comprehensive profiles
+    if (skills.length >= 8 && experience.length >= 2 && achievements.length >= 3) score += 5
+    if (hasMatric && hasHigherEd && experience.length >= 1) score += 3
     
     return Math.min(Math.round(score), 100)
   }

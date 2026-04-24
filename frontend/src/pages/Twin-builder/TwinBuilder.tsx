@@ -360,7 +360,37 @@ export default function MyTwin() {
         name: user?.name && user.name !== "User" ? user.name : (cvData as any).name || (cvData as any).firstName || "User",
         sections: cvData.sections || {},
         score: cvData.score || 0,
+        readinessLevel: cvData.readinessLevel || "",
         industry: (cvData as any).industry || "Technology",
+        strengths: cvData.strengths || [],
+        weaknesses: cvData.weaknesses || [],
+        recommendations: cvData.recommendations || [],
+        missingKeywords: cvData.missingKeywords || [],
+        incomeIdeas: cvData.incomeIdeas || [],
+        linkCheck: cvData.linkCheck || { linkedin: false, github: false, portfolio: false },
+        summary: cvData.summary || "",
+        // Add detailed breakdown for more personalized responses
+        skillsCount: cvData.sections?.skills?.length || 0,
+        experienceCount: cvData.sections?.experience?.length || 0,
+        educationCount: cvData.sections?.education?.length || 0,
+        achievementsCount: cvData.sections?.achievements?.length || 0,
+        hasMatric: cvData.sections?.education?.some((edu: string) => 
+          edu.toLowerCase().includes('matric') || 
+          edu.toLowerCase().includes('grade 12') ||
+          edu.toLowerCase().includes('national senior certificate')
+        ) || false,
+        hasHigherEd: cvData.sections?.education?.some((edu: string) => 
+          edu.toLowerCase().includes('degree') ||
+          edu.toLowerCase().includes('diploma') ||
+          edu.toLowerCase().includes('bachelor') ||
+          edu.toLowerCase().includes('master')
+        ) || false,
+        techSkills: cvData.sections?.skills?.filter((s: string) => 
+          ['javascript', 'python', 'java', 'c#', 'react', 'node.js', 'aws', 'azure', 'docker', 'git'].includes(s.toLowerCase())
+        ) || [],
+        businessSkills: cvData.sections?.skills?.filter((s: string) => 
+          ['project management', 'agile', 'scrum', 'leadership', 'communication'].includes(s.toLowerCase())
+        ) || [],
       } : {
         source: "quiz",
         name: user?.name || "User",
@@ -519,13 +549,36 @@ export default function MyTwin() {
       <div className="flex flex-col items-center justify-center h-full gap-4 p-6 text-center">
         <Cpu className="h-10 w-10 text-muted-foreground" />
         {cvData ? (
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-foreground">CV Analysis Detected</p>
-            <p className="text-xs text-muted-foreground">I'm building your twin using your background. Just answer a few questions in the chat!</p>
+          <div className="space-y-4 max-w-md">
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-foreground">✅ CV Analysis Complete</p>
+              <p className="text-xs text-muted-foreground">Your CV has been analyzed! I can see your skills, experience, and career profile.</p>
+              <div className="bg-card rounded-lg border border-border p-3 text-left">
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <span className="text-muted-foreground">Score:</span>
+                    <span className="ml-2 font-bold text-primary">{cvData.score}/100</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Readiness:</span>
+                    <span className="ml-2 font-bold text-primary">{cvData.readinessLevel}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Skills:</span>
+                    <span className="ml-2 font-bold text-primary">{cvData.sections?.skills?.length || 0}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Experience:</span>
+                    <span className="ml-2 font-bold text-primary">{cvData.sections?.experience?.length || 0}</span>
+                  </div>
+                </div>
+              </div>
+              <p className="text-xs text-primary font-medium">Start building your Digital Twin in the chat! →</p>
+            </div>
           </div>
         ) : (
           <>
-            <p className="text-sm text-muted-foreground">No twin found. Analyze your CV to build one.</p>
+            <p className="text-sm text-muted-foreground">No CV analysis found. Analyze your CV first to build your Digital Twin.</p>
             <button
               onClick={() => navigate("/dashboard/cv-analyzer")}
               className="px-4 py-2 text-xs rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"

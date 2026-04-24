@@ -40,6 +40,7 @@ export interface CVData {
     linkedin: boolean
     github: boolean
     portfolio: boolean
+    driversLicence?: boolean
   }
   recommendations?: string[]
   missingKeywords?: string[]
@@ -49,6 +50,17 @@ export interface CVData {
     potential: string
     description: string
   }>
+  strengths?: string[]
+  weaknesses?: string[]
+  industry?: string
+  name?: string
+  email?: string
+  phone?: string
+  location?: string
+  linkedin?: string
+  github?: string
+  citizenship?: string
+  driversLicence?: string
 }
 
 
@@ -67,6 +79,10 @@ interface UserContextType {
   refreshCVData: () => void
   clearCVData: () => void
   isAuthReady: boolean
+  // New functions for managing re-analysis and twin creation
+  reanalyzeCV: () => void
+  createNewTwin: () => void
+  hasExistingCV: () => boolean
 }
 
 
@@ -274,6 +290,29 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     updateProgress('cvCompleted', false)
   }
 
+  const reanalyzeCV = () => {
+    // Clear current CV data but keep progress flags
+    clearStoredCvAnalysis()
+    clearStoredCvFileName()
+    setCvData(null)
+    // User will need to upload a new CV
+  }
+
+  const createNewTwin = () => {
+    // Clear twin data but keep CV analysis
+    localStorage.removeItem('twinData')
+    localStorage.removeItem('twinCompleted')
+    updateProgress('twinCompleted', false)
+    // User can build a new twin from existing CV data
+  }
+
+  const hasExistingCV = () => {
+    return !!cvData && !!cvData.sections && (
+      cvData.sections.skills.length > 0 || 
+      cvData.sections.experience.length > 0 ||
+      cvData.sections.education.length > 0
+    )
+  }
 
   const logout = () => {
     setUser(null)
@@ -310,6 +349,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       refreshCVData,
       clearCVData,
       isAuthReady,
+      reanalyzeCV,
+      createNewTwin,
+      hasExistingCV,
     }}>
       {children}
     </UserContext.Provider>
