@@ -28,7 +28,7 @@ import {
   setStoredCvFileName,
 } from "../../lib/sensitiveStorage";
 import { buildTwinFromCv } from "../../api/services/twinService";
-import logo from "/images/empowerLogo.png";
+import logo from "/images/empowerLogo.jpg";
 
 type Phase = "idle" | "analyzing" | "complete";
 
