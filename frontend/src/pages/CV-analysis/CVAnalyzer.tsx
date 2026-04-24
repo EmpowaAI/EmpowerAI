@@ -16,7 +16,6 @@ import {
 import { Button } from "@/components/ui/Button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ProfileMenu } from "@/components/ProfileMenu";
-import { ContactWidget } from "@/components/ContactWidget";
 import { useUser } from "../../contexts/user-context";
 import { analyzeCV, type CVAnalysis } from "../../services/cvService";
 import {
@@ -402,14 +401,6 @@ export default function CVAnalyzerPage() {
           )}
         </section>
       </main>
-
-      <footer className="border-t border-border bg-background">
-        <div className="container py-6 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} EmpowAI
-        </div>
-      </footer>
-
-      <ContactWidget />
     </div>
   );
 }
