@@ -858,7 +858,10 @@ export const twinAPIReal = {
   create: async (data: any) => {
     try {
       console.log('Creating twin with data:', data);
-      const response = await request<any>('/twin/create', {
+      // Use /twin/create to match backend routes. 
+      // If your backend specifically uses /generate, change this string to '/twin/generate'
+      // However, the logs show /generate is returning a 404.
+      const response = await request<any>('/twin/create', { 
         method: 'POST',
         body: JSON.stringify(data),
       });
