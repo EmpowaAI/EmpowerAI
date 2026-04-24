@@ -172,11 +172,21 @@ export default function Opportunities() {
         filters.sort = debouncedSearch || careerGoalFilters.length > 0 ? 'relevance' : 'createdAt'
         
         setFallbackNotice("")
-        let response = await opportunitiesAPI.getAll(filters)
-        
-        if (response.status === 'success' && response.data?.opportunities) {
+        let response: any = await opportunitiesAPI.getAll(filters)
+
+        const getResponseOpportunities = (r: any) =>
+          r?.data?.opportunities ?? r?.data?.data?.opportunities ?? []
+        const getResponseMeta = (r: any) => r?.meta ?? r?.data?.meta ?? null
+
+        if (response?.status === 'success') {
+          let rawOpportunities = getResponseOpportunities(response)
+
+          if (!Array.isArray(rawOpportunities)) {
+            rawOpportunities = []
+          }
+
           const shouldFallback =
-            response.data.opportunities.length === 0 &&
+            rawOpportunities.length === 0 &&
             careerGoalFilters.length > 0 &&
             !debouncedSearch &&
             category === "all"
@@ -187,10 +197,12 @@ export default function Opportunities() {
             fallbackFilters.sort = 'createdAt'
             response = await opportunitiesAPI.getAll(fallbackFilters)
             setFallbackNotice("No exact matches for your goals yet. Showing all opportunities instead.")
+            rawOpportunities = getResponseOpportunities(response)
+            if (!Array.isArray(rawOpportunities)) rawOpportunities = []
           }
 
           // Transform backend data to match frontend Opportunity interface
-          const transformedOpportunities = response.data.opportunities.map((opp: any) => ({
+          const transformedOpportunities = rawOpportunities.map((opp: any) => ({
             id: opp._id || opp.id,
             title: opp.title,
             company: opp.company || 'Company Name',
@@ -214,12 +226,15 @@ export default function Opportunities() {
           }))
           
           setOpportunities(transformedOpportunities)
-          if (response.meta) {
-            setTotalPages(response.meta.totalPages || 1)
-            setHasMore(Boolean(response.meta.hasMore))
-            setTotalFiltered(
-              typeof response.meta.totalFiltered === 'number' ? response.meta.totalFiltered : null
-            )
+          const meta = getResponseMeta(response)
+          if (meta) {
+            setTotalPages(meta.totalPages || 1)
+            setHasMore(Boolean(meta.hasMore))
+            setTotalFiltered(typeof meta.totalFiltered === 'number' ? meta.totalFiltered : null)
+          } else {
+            setTotalPages(1)
+            setHasMore(false)
+            setTotalFiltered(null)
           }
         } else {
           // Fallback to empty array if no opportunities
