@@ -32,7 +32,7 @@ import { buildTwinFromCv } from "../../api/services/twinService"
 
 export default function CVAnalyzerPage() {
 
-  const { user, progress, updateProgress } = useUser()
+  const { user, progress, updateProgress, hasExistingCV, reanalyzeCV, createNewTwin } = useUser()
   const navigate = useNavigate()
 
   const [file, setFile] = useState<File | null>(null)
@@ -150,7 +150,7 @@ export default function CVAnalyzerPage() {
 
       // Build the economic twin from the CV analysis
       try {
-        const twinResponse = await buildTwinFromCv()
+        const twinResponse = await buildTwinFromCv(result)
         console.log("Twin built successfully from CV analysis", twinResponse)
         updateProgress('twinCompleted', true)
         showToast(`CV analyzed and twin created! Score: ${result.score}% — ${result.readinessLevel}`, "success")
@@ -733,6 +733,58 @@ export default function CVAnalyzerPage() {
             </p>
           )}
         </motion.div>
+
+        {/* Existing CV Data Section */}
+        {hasExistingCV() && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl border border-blue-500/20 p-6 mb-6"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-10 w-10 rounded-full bg-blue-500/20 flex items-center justify-center">
+                <FileText className="h-5 w-5 text-blue-500" />
+              </div>
+              <div>
+                <h3 className="font-display font-bold text-sm">Previous CV Analysis Found</h3>
+                <p className="text-xs text-muted-foreground">
+                  You already have a CV analysis with score: {cvData?.score}/100
+                </p>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                onClick={() => navigate('/dashboard/twin')}
+                className="flex items-center gap-2 p-3 rounded-lg bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800 border border-blue-500/20 hover:border-blue-500/40 transition-all group"
+              >
+                <Bot className="h-4 w-4 text-blue-500" />
+                <div className="text-left">
+                  <p className="text-sm font-semibold">View Digital Twin</p>
+                  <p className="text-xs text-muted-foreground">Continue with existing analysis</p>
+                </div>
+                <ArrowRight className="h-4 w-4 text-blue-500 group-hover:translate-x-1 transition-transform ml-auto" />
+              </button>
+              
+              <button
+                onClick={() => {
+                  reanalyzeCV()
+                  setFile(null)
+                  setFileName(null)
+                  setCvText("")
+                }}
+                className="flex items-center gap-2 p-3 rounded-lg bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800 border border-orange-500/20 hover:border-orange-500/40 transition-all group"
+              >
+                <RotateCcw className="h-4 w-4 text-orange-500" />
+                <div className="text-left">
+                  <p className="text-sm font-semibold">Re-analyze CV</p>
+                  <p className="text-xs text-muted-foreground">Upload a new CV file</p>
+                </div>
+                <ArrowRight className="h-4 w-4 text-orange-500 group-hover:translate-x-1 transition-transform ml-auto" />
+              </button>
+            </div>
+          </motion.div>
+        )}
 
         {/* Error */}
         <AnimatePresence>
