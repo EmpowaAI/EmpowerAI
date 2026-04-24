@@ -858,11 +858,13 @@ export const twinAPIReal = {
   create: async (data: any) => {
     try {
       console.log('Creating twin with data:', data);
-      // Use /twin/create to match backend routes. 
-      // If your backend specifically uses /generate, change this string to '/twin/generate'
-      // However, the logs show /generate is returning a 404.
+      /**
+       * FIX: Pointed to /twin/create to resolve 404 errors.
+       * The backend validator expects the structure defined here.
+       */
       const response = await request<any>('/twin/create', { 
         method: 'POST',
+        headers: { 'X-Action': 'create-twin' },
         body: JSON.stringify(data),
       });
 

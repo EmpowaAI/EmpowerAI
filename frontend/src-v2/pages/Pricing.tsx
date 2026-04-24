@@ -7,16 +7,19 @@ import {
   ShieldCheck,
   HeadphonesIcon,
   Rocket,
+  Menu,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ProfileMenu } from "@/components/ProfileMenu";
+import { cn } from "@/lib/utils";
 import { ContactWidget } from "@/components/ContactWidget";
 import { useAuth } from "@/hooks/use-auth";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { useState } from "react";
-import logo from "/empowerLogo.jpg";
+import logo from "@/assets/empowerLogo.jpg";
 
 const FREE_FEATURES = [
   "CV Analyser — always Mahala",
@@ -57,6 +60,7 @@ const FAQS = [
 const Pricing = () => {
   const { isPremium } = useAuth();
   const [open, setOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
@@ -91,7 +95,41 @@ const Pricing = () => {
           <div className="flex items-center gap-2">
             <ThemeToggle />
             <ProfileMenu />
+            
+            {/* Cool Hamburger Toggle */}
+            <button 
+              className="md:hidden p-2.5 text-primary hover:bg-primary/5 rounded-xl transition-all active:scale-95"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
           </div>
+        </div>
+
+        {/* Mobile Nav Overlay */}
+        <div className={cn(
+          "md:hidden fixed inset-0 top-16 z-50 bg-background/98 backdrop-blur-xl transition-all duration-300",
+          isMenuOpen ? "opacity-100 visible" : "opacity-0 invisible"
+        )}>
+          <nav className="container py-12 flex flex-col items-center gap-8">
+            <Link to="/" onClick={() => setIsMenuOpen(false)} className="text-3xl font-display font-bold text-primary">
+              Home
+            </Link>
+            <Link to="/demo" onClick={() => setIsMenuOpen(false)} className="text-3xl font-display font-bold text-primary">
+              Demo
+            </Link>
+            <Link to="/pricing" onClick={() => setIsMenuOpen(false)} className="text-3xl font-display font-bold text-secondary">
+              Pricing
+            </Link>
+            <div className="flex flex-col w-full gap-4 pt-8 border-t border-border/40">
+              <Button asChild variant="outline" size="xl" className="w-full rounded-2xl" onClick={() => setIsMenuOpen(false)}>
+                <Link to="/login">Sign In</Link>
+              </Button>
+              <Button asChild variant="cta" size="xl" className="w-full rounded-2xl shimmer" onClick={() => setIsMenuOpen(false)}>
+                <Link to="/signup">Get Started</Link>
+              </Button>
+            </div>
+          </nav>
         </div>
       </header>
 

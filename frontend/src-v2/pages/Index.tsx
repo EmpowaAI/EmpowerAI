@@ -1,5 +1,6 @@
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { useState } from "react";
+import { Button } from "../../src/components/ui/Button";
+import { Card } from "../../src/components/ui/Card";
 import {
   Rocket,
   HeartHandshake,
@@ -22,22 +23,35 @@ import {
   MapPin,
   Quote,
   TrendingUp,
+  Menu,
+  X,
 } from "lucide-react";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { ProfileMenu } from "@/components/ProfileMenu";
-import { ContactWidget } from "@/components/ContactWidget";
+import { ThemeToggle } from "../../src/components/ThemeToggle";
+import { ProfileMenu } from "../../src/components/ProfileMenu";
+import { cn } from "../../src/lib/utils";
+import { ContactWidget } from "../../src/components/ContactWidget";
 import { Link } from "react-router-dom";
-import logo from "/empowerLogo.jpg";
-import siyanda from "@/assets/siyanda.jpg";
-import heroBg from "@/assets/hero-bg.png";
+const logo = "/images/empowerLogo.png";
+const siyanda = "/images/siyaimage.png";
+const heroBg = "/images/hero-bg.png";
 
 const Index = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const navLinks = [
+    { label: "How It Works", href: "#how-it-works" },
+    { label: "Features", href: "#features" },
+    { label: "Ubuntu Stories", href: "#ubuntu-stories" },
+    { label: "Pricing", href: "/pricing", route: true },
+    { label: "Demo", href: "/demo", route: true },
+  ];
+
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
       {/* ===== Header ===== */}
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-md">
         <div className="container flex h-16 items-center justify-between gap-4">
-          <a href="#" className="flex items-center gap-2.5">
+          <Link to="/" className="flex items-center gap-2.5">
             <img
               src={logo}
               alt="EmpowAI logo"
@@ -48,30 +62,16 @@ const Index = () => {
             <span className="font-display text-xl font-bold tracking-tight text-primary">
               EmpowAI
             </span>
-          </a>
+          </Link>
 
           <nav className="hidden items-center gap-8 md:flex">
-            {[
-              { label: "How It Works", href: "#how-it-works" },
-              { label: "Features", href: "#features" },
-              { label: "Ubuntu Stories", href: "#ubuntu-stories" },
-              { label: "Pricing", href: "/pricing", route: true },
-              { label: "Demo", href: "/demo", route: true },
-            ].map((l) =>
+            {navLinks.map((l) =>
               l.route ? (
-                <Link
-                  key={l.label}
-                  to={l.href}
-                  className="text-sm font-medium text-muted-foreground transition-smooth hover:text-primary"
-                >
+                <Link key={l.label} to={l.href} className="text-sm font-medium text-muted-foreground transition-smooth hover:text-primary">
                   {l.label}
                 </Link>
               ) : (
-                <a
-                  key={l.label}
-                  href={l.href}
-                  className="text-sm font-medium text-muted-foreground transition-smooth hover:text-primary"
-                >
+                <a key={l.label} href={l.href} className="text-sm font-medium text-muted-foreground transition-smooth hover:text-primary">
                   {l.label}
                 </a>
               )
@@ -81,10 +81,43 @@ const Index = () => {
           <div className="flex items-center gap-2">
             <ThemeToggle />
             <ProfileMenu />
-            <Button asChild variant="cta" size="sm" className="shimmer">
+            <Button asChild variant="cta" size="sm" className="hidden sm:inline-flex shimmer">
               <Link to="/pricing">Get Started</Link>
             </Button>
+
+            {/* Cool Hamburger Toggle */}
+            <button 
+              className="md:hidden p-2 text-primary hover:bg-primary/5 rounded-md transition-smooth active:scale-90"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
           </div>
+        </div>
+
+        {/* Mobile Nav Overlay */}
+        <div className={cn(
+          "md:hidden fixed inset-0 top-16 z-50 bg-background/95 backdrop-blur-xl transition-all duration-300 ease-in-out",
+          isMenuOpen ? "opacity-100 visible translate-y-0" : "opacity-0 invisible -translate-y-4"
+        )}>
+          <nav className="container py-12 flex flex-col items-center gap-8">
+            {navLinks.map((l) => (
+              l.route ? (
+                <Link key={l.label} to={l.href} onClick={() => setIsMenuOpen(false)} className="text-3xl font-display font-bold text-primary hover:text-secondary transition-colors">
+                  {l.label}
+                </Link>
+              ) : (
+                <a key={l.label} href={l.href} onClick={() => setIsMenuOpen(false)} className="text-3xl font-display font-bold text-primary hover:text-secondary transition-colors">
+                  {l.label}
+                </a>
+              )
+            ))}
+            <div className="flex flex-col w-full gap-4 pt-8 border-t border-border/40">
+              <Button asChild variant="cta" size="xl" className="w-full rounded-2xl shimmer" onClick={() => setIsMenuOpen(false)}>
+                <Link to="/signup">Get Started</Link>
+              </Button>
+            </div>
+          </nav>
         </div>
       </header>
 
