@@ -9,9 +9,9 @@ import toast from 'react-hot-toast';
 import { authAPI } from "@/lib/api";
 import { useUser } from "@/contexts/user-context";
 import { syncProgressFromBackend, unlockAllPages } from "@/utils/progressSync";
-import ThemeToggle from "@/components/ui/ThemeToggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import loginBg from "@/assets/images/empowerlogin.png";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);

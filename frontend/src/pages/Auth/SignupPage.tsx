@@ -9,7 +9,7 @@ import {
 import toast from 'react-hot-toast';
 import { authService } from "@/api/Index";
 import Logo from "@/components/ui/Logo";
-import ThemeToggle from "@/components/ui/ThemeToggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import signupBg from "@/assets/images/empowersignin.jpg";
 
 export default function SignupPage() {
