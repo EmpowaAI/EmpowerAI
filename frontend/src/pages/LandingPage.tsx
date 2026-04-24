@@ -13,7 +13,6 @@ import {
   Compass,
   CheckCircle2,
   Facebook,
-  Twitter,
   Mail,
   Instagram,
   Linkedin,
@@ -29,13 +28,14 @@ import { ProfileMenu } from "@/components/ProfileMenu";
 import { ContactWidget } from "@/components/ContactWidget";
 import siyanda from "../assets/images/siyaimage.png";
 import Logo from "@/components/ui/Logo";
+import TikTokIcon from "@/components/ui/TikTokIcon";
 
 const heroBackgroundUrl = encodeURI(`${import.meta.env.BASE_URL}images/Wide blue-orange gra.png`);
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
-      <header className="sticky top-0 z-40 border-b border-border/20 bg-background/95 backdrop-blur-sm">
+      <header className="sticky top-0 z-40 border-b border-border/10 bg-background">
         <div className="container flex h-16 items-center justify-between gap-4">
           <Link to="/" className="flex items-center gap-2.5">
             <Logo variant="default" size="sm" />
@@ -459,16 +459,32 @@ export default function LandingPage() {
           </nav>
 
           <div className="flex items-center gap-2">
-            {[Facebook, Twitter, Mail, Instagram, Linkedin].map((Icon, i) => (
-              <a
-                key={i}
-                href="mailto:support@empowa.org"
-                aria-label="Contact EmpowAI"
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground transition-smooth hover:bg-secondary"
-              >
-                <Icon className="h-4 w-4" />
-              </a>
-            ))}
+            {[Facebook, TikTokIcon, Mail, Instagram, Linkedin].map((Icon, i) => {
+              const socialLinks = [
+                "https://www.facebook.com/empowaai",
+                "https://www.tiktok.com/@emp0wa_ai?_r=1&_t=ZS-95nC03PghEH",
+                "mailto:support@empowa.org",
+                "https://www.instagram.com/emp0wa_ai?igsh=MW53bXZxc21mdm9scA==",
+                "https://www.linkedin.com/company/empowaai/"
+              ];
+              const socialLabels = [
+                "Facebook",
+                "TikTok",
+                "Email",
+                "Instagram",
+                "LinkedIn"
+              ];
+              return (
+                <a
+                  key={i}
+                  href={socialLinks[i]}
+                  aria-label={socialLabels[i]}
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground transition-smooth hover:bg-secondary"
+                >
+                  <Icon className="h-4 w-4" />
+                </a>
+              );
+            })}
           </div>
         </div>
         <div className="border-t border-border/60 py-4 text-center text-xs text-muted-foreground">
