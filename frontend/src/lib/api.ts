@@ -1227,11 +1227,15 @@ export const chatAPIReal = {
           'Authorization': `Bearer ${getToken()}`,
         },
         body: JSON.stringify({ 
-          messages: [{ role: 'user', content: message }] 
+          message
         }),
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          removeToken();
+          window.location.href = '/login';
+        }
         const error = await response.json().catch(() => ({ message: 'Request failed' }));
         throw new Error(error.message || `HTTP error! status: ${response.status}`);
       }

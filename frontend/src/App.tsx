@@ -1,4 +1,4 @@
-﻿// frontend/src/App.tsx
+﻿﻿// frontend/src/App.tsx
 import { lazy, Suspense, useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { UserProvider, useUser } from './contexts/user-context';
