@@ -35,11 +35,10 @@ const heroBackgroundUrl = encodeURI(`${import.meta.env.BASE_URL}images/Wide blue
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
-      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-md">
+      <header className="sticky top-0 z-40 border-b border-border/20 bg-background/95 backdrop-blur-sm">
         <div className="container flex h-16 items-center justify-between gap-4">
           <Link to="/" className="flex items-center gap-2.5">
             <Logo variant="default" size="sm" />
-            <span className="font-display text-xl font-bold tracking-tight text-primary">EmpowAI</span>
           </Link>
 
           <nav className="hidden items-center gap-8 md:flex">
