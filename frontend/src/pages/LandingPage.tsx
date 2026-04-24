@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
 import {
   Rocket,
   HeartHandshake,
@@ -28,8 +28,8 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { ProfileMenu } from "@/components/ProfileMenu";
 import { ContactWidget } from "@/components/ContactWidget";
 import siyanda from "../assets/images/siyaimage.png";
+import Logo from "@/components/ui/Logo";
 
-const logoSrc = `${import.meta.env.BASE_URL}images/empowa_icon.png`;
 const heroBackgroundUrl = encodeURI(`${import.meta.env.BASE_URL}images/Wide blue-orange gra.png`);
 
 export default function LandingPage() {
@@ -38,7 +38,7 @@ export default function LandingPage() {
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-md">
         <div className="container flex h-16 items-center justify-between gap-4">
           <Link to="/" className="flex items-center gap-2.5">
-            <img src={logoSrc} alt="EmpowAI logo" className="h-9 w-9 object-contain" width={36} height={36} />
+            <Logo variant="default" size="sm" />
             <span className="font-display text-xl font-bold tracking-tight text-primary">EmpowAI</span>
           </Link>
 

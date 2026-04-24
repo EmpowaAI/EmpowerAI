@@ -7,7 +7,7 @@ import { Loader2, Mail, CheckCircle, Lock, Shield, Sparkles, ArrowLeft } from "l
 import { accountService } from "@/api/Index"
 import Logo from "@/components/ui/Logo"
 import background from "@/assets/images/empowerlogin.png"
-import ThemeToggle from "@/components/ui/ThemeToggle"
+import { ThemeToggle } from "@/components/ThemeToggle"
 
 export default function ForgotPassword() {
     const [email, setEmail] = useState("")
