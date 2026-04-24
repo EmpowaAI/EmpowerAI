@@ -77,10 +77,12 @@ export async function streamChat({
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json, text/event-stream',
         'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify({
         messages: sanitizedMessages,
+        message: lastUserMessage,
         cv_context: cvContext,
         focus: focus,
       }),
@@ -110,7 +112,9 @@ export async function streamChat({
         `Request failed (status ${response.status})`;
 
       if (response.status === 401) {
+        localStorage.removeItem('empowerai-token');
         onError("Your session expired. Please log in again.");
+        setTimeout(() => window.location.href = '/login', 1500);
         onDone({ reply: "", options: [], isComplete: false, profile: null });
         return;
       }
