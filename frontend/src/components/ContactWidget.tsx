@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { MessageCircle, X, Mail, Bug, HelpCircle, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
 import { BugReportDialog } from "@/components/BugReportDialog";
 
 const SUPPORT_EMAIL = "support@empowa.org";
