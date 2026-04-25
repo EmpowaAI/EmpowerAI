@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import logo from "/empowerLogo.jpg";
+import logo from "/images/empowerLogo.jpg";
 
 const AppPreloader = () => {
   const [visible, setVisible] = useState(true);
