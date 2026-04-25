@@ -1,9 +1,8 @@
 // frontend/src/pages/CV-analysis/CVAnalyzerNew.tsx
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
-  ArrowLeft,
   ArrowRight,
   Brain,
   CheckCircle2,
@@ -14,8 +13,6 @@ import {
   Upload,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { ProfileMenu } from "@/components/ProfileMenu";
 import { useUser } from "../../contexts/user-context";
 import { analyzeCV, type CVAnalysis } from "../../services/cvService";
 import {
@@ -190,22 +187,6 @@ export default function CVAnalyzerPage() {
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
-      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-md">
-        <div className="container flex h-16 items-center justify-between gap-4">
-          <Link to="/" className="flex items-center gap-2.5">
-            <img src={logo} alt="Logo" className="h-9 w-9 rounded-md object-cover" width={36} height={36} />
-            <span className="font-display text-xl font-bold tracking-tight text-primary">EmpowAI</span>
-          </Link>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
-              <Link to="/"><ArrowLeft className="mr-1 h-4 w-4" />Back</Link>
-            </Button>
-            <ProfileMenu />
-          </div>
-        </div>
-      </header>
-
       <main className="relative overflow-hidden">
         <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
           <div className="absolute -top-40 left-1/2 h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
