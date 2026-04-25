@@ -18,39 +18,37 @@ const AppPreloader = () => {
   if (!visible) return null;
 
   return (
-    <div 
+    <div
+      className={`fixed inset-0 z-[100] flex items-center justify-center bg-background transition-opacity duration-300 ${
+        leaving ? "pointer-events-none opacity-0" : "opacity-100"
+      }`}
       role="status"
       aria-live="polite"
       aria-label="Loading EmpowAI"
-      className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-background transition-opacity duration-300 ${
-        leaving ? "opacity-0 pointer-events-none" : "opacity-100"
-      }`}
     >
-      {/* Logo with spinning ring */}
-      <div className="relative mb-8">
-        {/* Spinning ring */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="h-20 w-20 rounded-full border-4 border-secondary/20 border-t-secondary animate-spin"></div>
-        </div>
-        
-        {/* Logo in center */}
-        <div className="relative h-16 w-16 flex items-center justify-center">
-          <img 
-            src={logo} 
+      <div className="flex flex-col items-center gap-5 animate-scale-in">
+        <div className="relative flex h-24 w-24 items-center justify-center">
+          <div className="absolute inset-0 rounded-full border border-border" />
+          <div className="absolute inset-2 rounded-full border-2 border-secondary border-t-transparent animate-spin" />
+
+          <img
+            src={logo}
             alt="EmpowAI logo"
-            className="h-12 w-12 rounded-md object-cover"
+            className="h-14 w-14 rounded-md object-cover shadow-card-soft"
+            width={56}
+            height={56}
+            decoding="async"
           />
         </div>
-      </div>
 
-      {/* Brand text */}
-      <div className="text-center space-y-2">
-        <h1 className="font-display text-2xl font-bold text-primary">
-          EmpowAI
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Preparing your career intelligence
-        </p>
+        <div className="text-center">
+          <p className="font-display text-2xl font-semibold text-foreground">
+            EmpowAI
+          </p>
+          <p className="mt-1 text-sm font-medium text-muted-foreground">
+            Preparing your career intelligence
+          </p>
+        </div>
       </div>
     </div>
   );
