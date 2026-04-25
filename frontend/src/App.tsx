@@ -5,6 +5,7 @@ import { UserProvider, useUser } from './contexts/user-context';
 import { ThemeProvider } from './lib/theme';
 import ProtectedRoute from './routes/ProtectedRoute';
 import NeuralLoading from './components/ui/NeuralLoading';
+import AppPreloader from './components/AppPreloader';
 import ErrorBoundary from './components/ErrorBoundary';
 import { Toaster } from 'react-hot-toast';
 
@@ -36,6 +37,7 @@ function App() {
   return (
     <ThemeProvider>
       <UserProvider>
+        <AppPreloader />
         <PreloadRoutes />
         <Toaster position="top-right" />
         <Suspense
