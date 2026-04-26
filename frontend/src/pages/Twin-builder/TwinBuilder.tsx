@@ -208,12 +208,12 @@ function CollapsibleSection({
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between px-4 py-3 bg-card/60 hover:bg-muted/30 transition-colors"
       >
-        <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+        <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-foreground">
           {icon}{title}
         </span>
         {open
-          ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" />
-          : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+          ? <ChevronUp className="h-3.5 w-3.5 text-foreground" />
+          : <ChevronDown className="h-3.5 w-3.5 text-foreground" />}
       </button>
       <AnimatePresence initial={false}>
         {open && (
