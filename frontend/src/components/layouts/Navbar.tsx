@@ -160,7 +160,7 @@ export default function Navbar() {
                   return (
                     <div
                       key={item.path}
-                      className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground opacity-50 cursor-not-allowed"
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl text-foreground opacity-50 cursor-not-allowed"
                       title={item.tooltip}
                     >
                       <Icon className="h-5 w-5" />
@@ -179,7 +179,7 @@ export default function Navbar() {
                       "flex items-center gap-3 px-4 py-3 rounded-xl transition-all",
                       isActive
                         ? "bg-[var(--secondary)]/10 text-[var(--secondary)] border border-[var(--secondary)]/20"
-                        : "text-muted-foreground hover:bg-muted"
+                        : "text-foreground hover:bg-muted"
                     )}
                   >
                     <Icon className="h-5 w-5" />

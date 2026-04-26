@@ -91,7 +91,7 @@ const NavLink = ({ item, isMobile = false, onClick, pathname, prefetchRoute }: {
   const baseClasses = cn(
     "flex items-center transition-all",
     isMobile 
-      ? "gap-3 px-4 py-3 rounded-xl text-base w-full" 
+      ? "gap-3 px-4 py-3 rounded-xl text-base w-full text-foreground" 
       : "gap-1.5 px-3 py-2 rounded-lg text-sm font-medium",
     isActive && !isDisabled 
       ? "bg-primary/10 text-primary" + (isMobile ? " border border-primary/20" : "")
@@ -481,8 +481,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       className="flex flex-col items-center justify-center py-2 px-1 opacity-40"
                       title={item.tooltip}
                     >
-                      <item.icon className="h-5 w-5 mb-1 text-muted-foreground" />
-                      <span className="text-[10px] font-medium text-muted-foreground">
+                      <item.icon className="h-5 w-5 mb-1 text-foreground" />
+                      <span className="text-[10px] font-medium text-foreground">
                         {item.label.split(" ")[0]}
                       </span>
                     </div>
@@ -498,7 +498,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       "flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-all relative",
                       isActive
                         ? "text-primary bg-primary/10"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                        : "text-foreground hover:text-foreground hover:bg-muted"
                     )}
                   >
                     <item.icon className={cn("h-5 w-5 mb-1", isActive && "text-primary")} />
