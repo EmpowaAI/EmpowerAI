@@ -69,7 +69,7 @@ export default function LandingPage() {
 
         {/* Mobile Nav Overlay */}
         <div className={cn(
-          "md:hidden fixed inset-x-0 top-16 z-50 bg-background/98 backdrop-blur-lg border-b border-border/20 transition-all duration-300 ease-in-out",
+          "md:hidden fixed inset-x-0 top-16 z-50 bg-background border-b border-border/20 transition-all duration-300 ease-in-out",
           isMenuOpen ? "opacity-100 visible translate-y-0" : "opacity-0 invisible -translate-y-2"
         )}>
           <nav className="container py-6 px-4 flex flex-col items-center gap-2">
@@ -81,11 +81,11 @@ export default function LandingPage() {
               { label: "Demo", href: "/demo", route: true },
             ].map((l) =>
               l.route ? (
-                <Link key={l.label} to={l.href} onClick={() => setIsMenuOpen(false)} className="text-lg font-medium text-primary hover:text-secondary transition-colors py-2 px-4 rounded-lg hover:bg-primary/5 w-full text-center">
+                <Link key={l.label} to={l.href} onClick={() => setIsMenuOpen(false)} className="text-lg font-medium text-foreground hover:text-secondary transition-colors py-2 px-4 rounded-lg hover:bg-primary/5 w-full text-center">
                   {l.label}
                 </Link>
               ) : (
-                <a key={l.label} href={l.href} onClick={() => setIsMenuOpen(false)} className="text-lg font-medium text-primary hover:text-secondary transition-colors py-2 px-4 rounded-lg hover:bg-primary/5 w-full text-center">
+                <a key={l.label} href={l.href} onClick={() => setIsMenuOpen(false)} className="text-lg font-medium text-foreground hover:text-secondary transition-colors py-2 px-4 rounded-lg hover:bg-primary/5 w-full text-center">
                   {l.label}
                 </a>
               )
