@@ -2,11 +2,8 @@ const User = require('../modules/user/user.Model');
 const logger = require('./logger');
 
 const SEED_ADMINS = [
-  'admin1@techbridlefoundation.org',
-  'admin2@techbridlefoundation.org',
-  'admin3@techbridlefoundation.org',
-  'admin4@techbridlefoundation.org',
-  'admin5@techbridlefoundation.org',
+  'khuliso.thavhiwa@techbridlefoundation.org',
+  
 ];
 
 // Replace the emails above with the real 5 addresses
