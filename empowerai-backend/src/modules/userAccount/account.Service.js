@@ -120,7 +120,7 @@ class UserAccountService {
 
 
   async requestEmailChange(userId, rawData) {
-    const user = await User.findById(userId).select('+password');
+    const user = await User.findById(userId).select('+password +pendingEmail +emailToken +emailTokenExpires');
     if (!user) throw new NotFoundError('User not found');
 
     const dto    = rawData;
@@ -136,22 +136,27 @@ class UserAccountService {
   }
 
 
-  async confirmEmailChange(rawToken) {
-    const hashed = crypto.createHash('sha256').update(rawToken).digest('hex');
+ async confirmEmailChange(rawToken) {
+  const hashed = crypto.createHash('sha256').update(rawToken).digest('hex');
 
-    const user = await User.findOne({
-      emailToken:        hashed,
-      emailTokenExpires: { $gt: Date.now() },
-    });
+  const user = await User.findOne({
+    emailToken: hashed,
+    emailTokenExpires: { $gt: Date.now() },
+  }).select('+pendingEmail +emailToken +emailTokenExpires');
 
-    if (!user) throw new NotFoundError('Invalid token');
+  if (!user) throw new NotFoundError('Invalid token');
 
-    user.email        = user.pendingEmail;
-    user.pendingEmail = null;
-
-    await user.save();
+  if (!user.pendingEmail) {
+    throw new AppError('No pending email change found for this user.', 400);
   }
 
+  user.email = user.pendingEmail;
+  user.pendingEmail = undefined;
+  user.emailToken = undefined;
+  user.emailTokenExpires = undefined;
+
+  await user.save();
+}
 
   async requestAccountDeletion(userId) {
     const user = await User.findById(userId);
