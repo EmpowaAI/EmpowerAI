@@ -10,6 +10,12 @@ const getClientIp = (req) =>
 
 // ─── Register ─────────────────────────────────────────────────────────────────
 exports.register = async (req, res, next) => {
+
+   return res.status(503).json({
+    success: false,
+    message: 'Registration is temporarily unavailable. Please try again later.',
+  });
+
   const correlationId = req.correlationId;
   try {
   
