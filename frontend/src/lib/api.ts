@@ -67,16 +67,22 @@ const request = async <T>(endpoint: string, options: RequestInit = {}): Promise<
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({
-        message: `Request failed with status ${response.status}`,
+        message: `HTTP error! status: ${response.status}`,
         status: response.status,
       }));
+
       // Robustly extract error message from FastAPI/OpenAI response formats
-      let errorMessage = error.detail || error.message || error.data?.message || `HTTP error! status: ${response.status}`;
+      let errorMessage = error.detail || (error.data && (error.data.message || error.data.detail)) || error.message;
       
       // Handle FastAPI validation error arrays
       if (Array.isArray(errorMessage)) {
         errorMessage = errorMessage.map((e: any) => e.msg || JSON.stringify(e)).join(', ');
       }
+
+      if (!errorMessage || (typeof errorMessage === 'string' && errorMessage.includes('status'))) {
+        errorMessage = `Request failed with status ${response.status}`;
+      }
+
       const apiError = new Error(errorMessage);
       (apiError as any).status = error.status || error.statusCode || response.status;
       (apiError as any).response = {
@@ -931,7 +937,7 @@ export const cvAPIReal = {
     try {
       const token = getToken();
       const formData = new FormData();
-      formData.append('cvFile', file);
+      formData.append('file', file); // Standardized key name for FastAPI UploadFile
       if (jobRequirements) {
         formData.append('jobRequirements', jobRequirements);
       }
@@ -958,7 +964,7 @@ export const cvAPIReal = {
         const retryAfterHeader = response.headers.get('Retry-After');
         const retryAfter = retryAfterHeader ? parseInt(retryAfterHeader, 10) : error.retryAfter || error.data?.retryAfter;
 
-        // Robustly extract error message from FastAPI/OpenAI response formats
+        // Robustly extract error message
         let errorMessage = error.detail || (error.data && (error.data.message || error.data.detail)) || error.message;
         
         // Handle FastAPI validation error arrays
@@ -966,7 +972,9 @@ export const cvAPIReal = {
           errorMessage = errorMessage.map((e: any) => e.msg || JSON.stringify(e)).join(', ');
         }
         
-        if (response.status === 429 && (!errorMessage || (typeof errorMessage === 'string' && errorMessage.includes('status')))) {
+        if (response.status === 400 && (!errorMessage || (typeof errorMessage === 'string' && errorMessage.includes('status')))) {
+          errorMessage = "The document was rejected by the AI. Please ensure it is a valid CV with readable text.";
+        } else if (response.status === 429 && (!errorMessage || (typeof errorMessage === 'string' && errorMessage.includes('status')))) {
           errorMessage = 'Too many requests. Please wait a moment and try again.';
         } else if (!errorMessage || (typeof errorMessage === 'string' && errorMessage.includes('status'))) {
           errorMessage = response.status === 400 
