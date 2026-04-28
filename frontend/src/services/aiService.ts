@@ -207,7 +207,7 @@ class AIService {
     const formData = new FormData()
     formData.append('cvFile', file)
     if (jobRequirements.length > 0) {
-      formData.append('jobRequirements', JSON.stringify(jobRequirements))
+      formData.append('jobRequirements', jobRequirements.join(', '))
     }
 
     try {
