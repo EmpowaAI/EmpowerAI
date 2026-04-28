@@ -958,17 +958,20 @@ export const cvAPIReal = {
         const retryAfterHeader = response.headers.get('Retry-After');
         const retryAfter = retryAfterHeader ? parseInt(retryAfterHeader, 10) : error.retryAfter || error.data?.retryAfter;
 
-        let errorMessage = error.detail || error.message || error.data?.message;
+        // Robustly extract error message from FastAPI/OpenAI response formats
+        let errorMessage = error.detail || (error.data && (error.data.message || error.data.detail)) || error.message;
         
         // Handle FastAPI validation error arrays
         if (Array.isArray(errorMessage)) {
           errorMessage = errorMessage.map((e: any) => e.msg || JSON.stringify(e)).join(', ');
         }
         
-        if (response.status === 429 && !errorMessage) {
+        if (response.status === 429 && (!errorMessage || (typeof errorMessage === 'string' && errorMessage.includes('status')))) {
           errorMessage = 'Too many requests. Please wait a moment and try again.';
-        } else if (!errorMessage) {
-          errorMessage = `HTTP error! status: ${response.status}`;
+        } else if (!errorMessage || (typeof errorMessage === 'string' && errorMessage.includes('status'))) {
+          errorMessage = response.status === 400 
+            ? "Invalid CV document. Please ensure it contains readable text and typical CV sections."
+            : `HTTP error! status: ${response.status}`;
         }
 
         const apiError = new Error(errorMessage);
