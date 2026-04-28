@@ -2,7 +2,7 @@ const User = require('../modules/user/user.Model');
 const logger = require('./logger');
 
 const SEED_ADMINS = [
-  'khuliso.thavhiwa@techbridlefoundation.org',
+  'aiempowa@gmail.com',
   
 ];
 

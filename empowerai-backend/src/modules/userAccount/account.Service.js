@@ -156,6 +156,7 @@ class UserAccountService {
   user.emailTokenExpires = undefined;
 
   await user.save();
+  return toGetUserDTO(user);
 }
 
   async requestAccountDeletion(userId) {
