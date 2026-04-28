@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://empowa-ai.co.za/sitemap.xml

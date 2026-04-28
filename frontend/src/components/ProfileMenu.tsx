@@ -107,17 +107,9 @@ Timestamp: ${new Date().toISOString()}`
             </span>
             <div className="min-w-0">
               <div className="truncate text-sm font-semibold text-primary">{user.name}</div>
-              <div className="text-[11px] text-muted-foreground">{user.email}</div>
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-
-          <DropdownMenuItem asChild>
-            <Link to="/pricing" className="cursor-pointer">
-              <CreditCard className="mr-2 h-4 w-4" />
-              Pricing
-            </Link>
-          </DropdownMenuItem>
 
           <DropdownMenuItem asChild>
             <Link to="/dashboard" className="cursor-pointer">
