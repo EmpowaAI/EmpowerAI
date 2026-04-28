@@ -1,11 +1,4 @@
-/**
- * cvAnalyser.Controller.js
- * HTTP layer only:
- *  - Parse request
- *  - Call service
- *  - Return response
- *  - Forward errors to next()
- */
+
 
 const cvService = require('./cvAnalyser.Service');
 const { AppError, BadRequestError, ServiceUnavailableError } = require('../../utils/errors');
