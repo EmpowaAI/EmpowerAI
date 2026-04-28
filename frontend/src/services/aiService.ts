@@ -227,7 +227,13 @@ class AIService {
 
       if (!response.ok) {
         const error = await response.json().catch(() => ({ detail: 'Unknown error' }))
-        console.error('AI Service error response:', { status: response.status, error })
+        console.error('AI Service error response:', { 
+          status: response.status, 
+          statusText: response.statusText,
+          url: `${API_BASE_URL}/cv/analyze-file`,
+          error,
+          headers: Object.fromEntries(response.headers.entries())
+        })
         
         if (response.status === 429) {
           const retryAfter = response.headers.get('Retry-After') || '60'
