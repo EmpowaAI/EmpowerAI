@@ -103,23 +103,23 @@ def is_cv_document(cv_text: str) -> tuple[bool, str]:
     for indicator in skill_indicators:
         skill_score += text_lower.count(indicator)
     
-    # Minimum thresholds
-    min_cv_indicators = 2
-    min_work_score = 3
-    min_total_score = min_work_score + edu_score + skill_score
+    # Minimum thresholds (made more lenient)
+    min_cv_indicators = 1
+    min_work_score = 1
+    min_total_score = 2
     
-    # Validation logic
+    # Validation logic (more lenient)
     if cv_score < min_cv_indicators:
         return False, "This document doesn't contain typical CV content like work experience, education, or skills sections."
     
-    if min_total_score < 5:
+    if min_total_score < min_total_score:
         return False, "This document doesn't appear to be a CV/resume. It lacks sufficient work, education, or skills content."
     
-    # Check document structure - CVs typically have multiple sections
+    # Check document structure - CVs typically have multiple sections (made more lenient)
     lines = cv_text.split('\n')
     non_empty_lines = [line.strip() for line in lines if line.strip()]
     
-    if len(non_empty_lines) < 10:
+    if len(non_empty_lines) < 5:
         return False, "This document appears too short to be a complete CV/resume."
     
     return True, "Document appears to be a valid CV/resume."
