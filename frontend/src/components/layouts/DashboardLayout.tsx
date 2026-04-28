@@ -341,7 +341,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition-colors group"
               >
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-[var(--sa-terracotta)] flex items-center justify-center text-primary-foreground font-bold flex-shrink-0 shadow-md">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-secondary to-primary flex items-center justify-center text-white font-bold flex-shrink-0 shadow-lg ring-2 ring-secondary/20 contrast-200">
                   {initials}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -418,7 +418,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     {displayEmail}
                   </p>
                 </div>
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-[var(--sa-terracotta)] flex items-center justify-center text-primary-foreground text-xs font-bold shadow-sm">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-secondary to-primary flex items-center justify-center text-white text-xs font-bold shadow-lg ring-2 ring-secondary/20">
                   {initials}
                 </div>
               </Link>
