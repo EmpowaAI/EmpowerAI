@@ -211,7 +211,7 @@ def extract_text_from_pdf(file_content: bytes) -> str:
         
         text = '\n'.join(text_parts)
         
-        if not text or len(text.strip()) < 10:
+        if not text or len(text.strip()) < 5:
             raise ValueError("PDF contains insufficient readable text")
             
         return text
@@ -238,7 +238,7 @@ def extract_text_from_docx(file_content: bytes) -> str:
         
         text = '\n'.join(paragraphs)
         
-        if not text or len(text.strip()) < 10:
+        if not text or len(text.strip()) < 5:
             raise ValueError("DOCX contains insufficient text")
             
         return text
@@ -295,19 +295,27 @@ async def analyze_cv_file(
         logger.info(f"[{request_id}] Processing file: {cvFile.filename} ({len(file_content)} bytes)")
         
         filename = cvFile.filename.lower()
+        logger.info(f"[{request_id}] File extension check: {filename}")
+        
         if filename.endswith('.pdf'):
+            logger.info(f"[{request_id}] Extracting PDF text...")
             cv_text = extract_text_from_pdf(file_content)
         elif filename.endswith('.docx'):
+            logger.info(f"[{request_id}] Extracting DOCX text...")
             cv_text = extract_text_from_docx(file_content)
         elif filename.endswith('.txt'):
+            logger.info(f"[{request_id}] Extracting TXT text...")
             cv_text = extract_text_from_txt(file_content)
         else:
+            logger.error(f"[{request_id}] Unsupported file type: {filename}")
             raise HTTPException(
                 status_code=400,
                 detail="Unsupported file type. Please upload PDF, DOCX, or TXT file."
             )
         
-        if not cv_text or len(cv_text.strip()) < 10:
+        logger.info(f"[{request_id}] Extracted {len(cv_text)} characters from file")
+        
+        if not cv_text or len(cv_text.strip()) < 5:
             raise HTTPException(
                 status_code=400,
                 detail="Could not extract sufficient text from file. Please ensure the file contains readable content."
