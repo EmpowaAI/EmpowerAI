@@ -110,6 +110,10 @@ export default function CVAnalyzerPage() {
         setError("Service is temporarily busy. Please wait a moment and try again.");
       } else if (err.status === 413) {
         setError("File is too large. Please upload a smaller CV file.");
+      } else if (err.status === 400) {
+        setError(err.message || "The document could not be validated as a CV. Please ensure it contains readable text and typical CV sections (Experience, Skills, Education).");
+      } else if (err.message && err.message.includes("not a valid CV")) {
+        setError("The document could not be validated as a CV. Please ensure it contains readable text and typical CV sections like Experience, Skills, and Education.");
       } else {
         setError(err.message || "Failed to analyze CV. Please try again or use a different file format.");
       }

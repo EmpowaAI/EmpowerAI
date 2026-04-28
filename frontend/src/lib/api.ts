@@ -1,6 +1,6 @@
 // frontend/src/lib/api.ts
 import { API_BASE_URL as API_BASE } from './apiBase';
-import { clearStoredCvAnalysis, clearStoredCvFileName, getStoredCvAnalysis } from './sensitiveStorage';
+import { clearStoredCvAnalysis, getStoredCvAnalysis } from './sensitiveStorage';
 
 // Demo mode is opt-in via env var; real APIs are used by default.
 const USE_DEMO_MODE = import.meta.env.VITE_USE_DEMO_MODE === 'true';
@@ -70,8 +70,13 @@ const request = async <T>(endpoint: string, options: RequestInit = {}): Promise<
         message: `Request failed with status ${response.status}`,
         status: response.status,
       }));
-      const errorMessage =
-        error.message || error.data?.message || error.detail || `HTTP error! status: ${response.status}`;
+      // Robustly extract error message from FastAPI/OpenAI response formats
+      let errorMessage = error.detail || error.message || error.data?.message || `HTTP error! status: ${response.status}`;
+      
+      // Handle FastAPI validation error arrays
+      if (Array.isArray(errorMessage)) {
+        errorMessage = errorMessage.map((e: any) => e.msg || JSON.stringify(e)).join(', ');
+      }
       const apiError = new Error(errorMessage);
       (apiError as any).status = error.status || error.statusCode || response.status;
       (apiError as any).response = {
@@ -953,7 +958,13 @@ export const cvAPIReal = {
         const retryAfterHeader = response.headers.get('Retry-After');
         const retryAfter = retryAfterHeader ? parseInt(retryAfterHeader, 10) : error.retryAfter || error.data?.retryAfter;
 
-        let errorMessage = error.message || error.data?.message || error.detail;
+        let errorMessage = error.detail || error.message || error.data?.message;
+        
+        // Handle FastAPI validation error arrays
+        if (Array.isArray(errorMessage)) {
+          errorMessage = errorMessage.map((e: any) => e.msg || JSON.stringify(e)).join(', ');
+        }
+        
         if (response.status === 429 && !errorMessage) {
           errorMessage = 'Too many requests. Please wait a moment and try again.';
         } else if (!errorMessage) {
