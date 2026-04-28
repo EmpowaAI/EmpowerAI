@@ -1,9 +1,8 @@
 // frontend/src/pages/CV-analysis/CVAnalyzerNew.tsx
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
-  ArrowLeft,
   ArrowRight,
   Brain,
   CheckCircle2,
@@ -17,18 +16,12 @@ import { Button } from "@/components/ui/Button";
 import { useUser } from "../../contexts/user-context";
 import { analyzeCV, type CVAnalysis } from "../../services/cvService";
 import {
-  clearStoredCvAnalysis,
-  clearStoredCvFileName,
   getStoredCvAnalysis,
   getStoredCvFileName,
   setStoredCvAnalysis,
   setStoredCvFileName,
 } from "../../lib/sensitiveStorage";
 import { buildTwinFromCv } from "../../api/services/twinService";
-import { ThemeToggle } from "../../components/ThemeToggle";
-import { ProfileMenu } from "../../components/ProfileMenu";
-
-const logo = "/images/empowerLogo.jpg";
 
 type Phase = "idle" | "analyzing" | "complete";
 
@@ -43,7 +36,7 @@ const STAGES = [
 const STAGE_DURATION = 1600; // ms per stage
 
 export default function CVAnalyzerPage() {
-  const { user, updateProgress, hasExistingCV, reanalyzeCV } = useUser();
+  const { updateProgress, hasExistingCV, reanalyzeCV } = useUser();
   const navigate = useNavigate();
   
   const [phase, setPhase] = useState<Phase>("idle");
@@ -181,25 +174,7 @@ export default function CVAnalyzerPage() {
   const overall = Math.round(((stageIndex + stageProgress / 100) / STAGES.length) * 100);
 
   return (
-    <div className="min-h-screen bg-background font-sans text-foreground">
-      {/* ===== Header ===== */}
-      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-md">
-        <div className="container flex h-16 items-center justify-between gap-4">
-          <Link to="/" className="flex items-center gap-2.5">
-            <img src={logo} alt="Logo" className="h-9 w-9 rounded-md object-cover" width={36} height={36} />
-            <span className="font-display text-xl font-bold tracking-tight text-primary">EmpowAI</span>
-          </Link>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
-              <Link to="/"><ArrowLeft className="mr-1 h-4 w-4" />Back</Link>
-            </Button>
-            <ProfileMenu />
-          </div>
-        </div>
-      </header>
-
-      <main className="relative overflow-hidden">
+    <main className="relative overflow-hidden">
         <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
           <div className="absolute -top-40 left-1/2 h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
           <div className="absolute bottom-0 right-0 h-96 w-96 rounded-full bg-secondary/10 blur-3xl" />
@@ -394,12 +369,5 @@ export default function CVAnalyzerPage() {
           )}
         </section>
       </main>
-
-      <footer className="border-t border-border bg-background">
-        <div className="container py-6 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} EmpowAI · Amandla e-Ubuntu <span className="emoji">🇿🇦</span>
-        </div>
-      </footer>
-    </div>
   );
 }
