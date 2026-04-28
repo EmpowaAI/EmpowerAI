@@ -26,10 +26,25 @@ const updateUserRules = [
     .trim()
     .isLength({ max: 100 }).withMessage('Province must be under 100 characters'),
 
+  body('phone')
+    .optional()
+    .trim()
+    .isMobilePhone().withMessage('Phone must be a valid mobile number'),
+
   body('education')
     .optional()
     .trim()
     .isLength({ max: 200 }).withMessage('Education must be under 200 characters'),
+
+    body('about')
+    .optional()
+    .trim()
+    .isLength({ max: 500 }).withMessage('About must be under 500 characters'),
+    
+    body('summary')
+    .optional()
+    .trim()
+    .isLength({ max: 500 }).withMessage('Summary must be under 500 characters'),
 
   body('skills')
     .optional()
@@ -74,7 +89,7 @@ const validateUpdateUser = (req, res, next) => {
 // DTO builder — only passes allowed fields to service
 // ─────────────────────────────────────────────
 const toUpdateUserDTO = (body) => {
-  const allowed = ['name', 'age', 'province', 'education', 'skills', 'interests', 'avatar'];
+  const allowed = ['name', 'age', 'province','phone', 'education', 'skills', 'interests', 'avatar', 'about', 'summary'];
   const dto = {};
 
   for (const field of allowed) {
