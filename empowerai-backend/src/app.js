@@ -63,6 +63,7 @@ app.use('/api/admin', require('./modules/admin/admin.Route'));
 app.use('/api/user', require('./modules/user/user.Route'));
 app.use('/api/applications', require('./modules/applications/applications.Route'));
 app.use('/api/contact', require('./modules/contact/contact.Route'));
+app.use('/api/admin', require('./modules/admin/admin.Route'));
 
 // Root — Render health check + API discovery
 app.get('/', (req, res) => {
@@ -79,6 +80,7 @@ app.get('/', (req, res) => {
       interview: '/api/interview',
       chat: '/api/chat',
       contact: '/api/contact',
+      admin: '/api/admin',
     },
     timestamp: new Date().toISOString(),
   });
