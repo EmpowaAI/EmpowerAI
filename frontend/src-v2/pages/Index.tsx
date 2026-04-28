@@ -31,8 +31,8 @@ import { ProfileMenu } from "../../src/components/ProfileMenu";
 import { cn } from "../../src/lib/utils";
 import { ContactWidget } from "../../src/components/ContactWidget";
 import { Link } from "react-router-dom";
-const logo = "/images/empowerLogo.png";
-const siyanda = "/images/siyaimage.png";
+const logo = "/images/empowerLogo.jpg";
+const siyanda = "/images/siyanda.jpg";
 const heroBg = "/images/hero-bg.png";
 
 const Index = () => {
@@ -42,7 +42,6 @@ const Index = () => {
     { label: "How It Works", href: "#how-it-works" },
     { label: "Features", href: "#features" },
     { label: "Ubuntu Stories", href: "#ubuntu-stories" },
-    { label: "Pricing", href: "/pricing", route: true },
     { label: "Demo", href: "/demo", route: true },
   ];
 
@@ -82,7 +81,7 @@ const Index = () => {
             <ThemeToggle />
             <ProfileMenu />
             <Button asChild variant="cta" size="sm" className="hidden sm:inline-flex shimmer">
-              <Link to="/pricing">Get Started</Link>
+              <Link to="/signup">Get Started</Link>
             </Button>
 
             {/* Cool Hamburger Toggle */}
@@ -214,10 +213,7 @@ const Index = () => {
               <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-primary md:text-5xl">
                 Siyanda's Journey: from R0 to R4,500/month
               </h2>
-              <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
-                He didn't get lucky — he explored, compared, and chose. Here's
-                exactly how it went.
-              </p>
+              <p className="mx-auto mt-4 max-w-xl text-muted-foreground">He didn't get lucky — he explored, compared, and chose. Here's exactly how it went.</p>
             </div>
 
             <div className="mx-auto mt-12 grid max-w-6xl gap-6 lg:grid-cols-2">
@@ -487,7 +483,6 @@ const Index = () => {
               { label: "Features", href: "#features" },
               { label: "Ubuntu Stories", href: "#ubuntu-stories" },
               { label: "Demo", href: "/demo" },
-              { label: "Pricing", href: "/pricing" },
             ].map((l) => (
               <Link
                 key={l.label}
@@ -503,7 +498,7 @@ const Index = () => {
             {[Facebook, Twitter, Mail, Instagram, Linkedin].map((Icon, i) => (
               <a
                 key={i}
-                href="#"
+                href={Icon === Mail ? "mailto:info@empowa-ai.co.za" : "#"}
                 aria-label="social link"
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground transition-smooth hover:bg-secondary"
               >
