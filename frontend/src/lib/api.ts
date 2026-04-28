@@ -937,7 +937,7 @@ export const cvAPIReal = {
     try {
       const token = getToken();
       const formData = new FormData();
-      formData.append('file', file); // Standardized key name for FastAPI UploadFile
+      formData.append('cvFile', file); // Match backend expectation
       if (jobRequirements) {
         formData.append('jobRequirements', jobRequirements);
       }
