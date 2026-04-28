@@ -1,8 +1,9 @@
 // frontend/src/pages/CV-analysis/CVAnalyzerNew.tsx
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import {
+  ArrowLeft,
   ArrowRight,
   Brain,
   CheckCircle2,
@@ -24,7 +25,10 @@ import {
   setStoredCvFileName,
 } from "../../lib/sensitiveStorage";
 import { buildTwinFromCv } from "../../api/services/twinService";
-import logo from "/images/empowerLogo.jpg";
+import { ThemeToggle } from "../../components/ThemeToggle";
+import { ProfileMenu } from "../../components/ProfileMenu";
+
+const logo = "/images/empowerLogo.jpg";
 
 type Phase = "idle" | "analyzing" | "complete";
 
@@ -43,6 +47,7 @@ export default function CVAnalyzerPage() {
   const navigate = useNavigate();
   
   const [phase, setPhase] = useState<Phase>("idle");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileName, setFileName] = useState<string | null>(() => {
     return getStoredCvFileName();
   });
@@ -78,6 +83,47 @@ export default function CVAnalyzerPage() {
     }
   }, [fileName]);
 
+  const performActualAnalysis = useCallback(async () => {
+    if (!selectedFile) {
+      setPhase("idle");
+      return;
+    }
+
+    try {
+      const result = await analyzeCV(selectedFile, "");
+      setCvData(result);
+      setPhase("complete");
+      updateProgress('cvCompleted', true);
+
+      // Try to build twin
+      try {
+        await buildTwinFromCv(result);
+        updateProgress('twinCompleted', true);
+      } catch (twinError) {
+        console.warn("Failed to build twin, but CV analysis succeeded:", twinError);
+      }
+
+    } catch (err: any) {
+      console.error("CV Analysis Error:", err);
+      
+      // Handle specific validation errors
+      if (err.message && err.message.includes("Invalid document format")) {
+        setError(err.message);
+      } else if (err.message && err.message.includes("Could not extract text")) {
+        setError("Unable to read the document. Please ensure it's not scanned or image-based. Try uploading a text-based PDF, DOCX, or TXT file.");
+      } else if (err.message && err.message.includes("Unsupported file type")) {
+        setError("Unsupported file format. Please upload a PDF, DOCX, or TXT file.");
+      } else if (err.status === 429) {
+        setError("Service is temporarily busy. Please wait a moment and try again.");
+      } else if (err.status === 413) {
+        setError("File is too large. Please upload a smaller CV file.");
+      } else {
+        setError(err.message || "Failed to analyze CV. Please try again or use a different file format.");
+      }
+      setPhase("idle");
+    }
+  }, [selectedFile, setCvData, updateProgress]);
+
   // Animation loop for analyzing phase
   useEffect(() => {
     if (phase !== "analyzing") return;
@@ -109,61 +155,10 @@ export default function CVAnalyzerPage() {
 
     rafRef.current = requestAnimationFrame(tick);
     return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
-  }, [phase]);
-
-  const performActualAnalysis = async () => {
-    if (!fileName) {
-      setPhase("idle");
-      return;
-    }
-
-    try {
-      // For now, simulate successful analysis
-      // In real implementation, you'd call the actual API here
-      const mockResult: CVAnalysis = {
-        score: 85,
-        readinessLevel: "HIGH POTENTIAL",
-        summary: "Professional with strong technical skills and experience.",
-        sections: {
-          about: "Experienced professional with expertise in software development.",
-          skills: ["JavaScript", "React", "Node.js", "Python", "AWS"],
-          education: ["Bachelor's Degree in Computer Science"],
-          experience: ["Senior Developer at Tech Company"],
-          achievements: ["Led successful project delivery", "Improved system performance"]
-        },
-        linkCheck: {
-          linkedin: true,
-          github: true,
-          portfolio: false
-        },
-        strengths: ["Strong technical foundation", "Leadership experience"],
-        weaknesses: ["Limited portfolio presence"],
-        recommendations: ["Build portfolio website", "Add more quantifiable achievements"],
-        missingKeywords: ["Agile", "Scrum", "Docker"],
-        incomeIdeas: [
-          { title: "Freelance Development", difficulty: "MEDIUM", potential: "HIGH", description: "Offer development services on platforms" }
-        ]
-      };
-
-      setCvData(mockResult);
-      setPhase("complete");
-      updateProgress('cvCompleted', true);
-
-      // Try to build twin
-      try {
-        await buildTwinFromCv(mockResult);
-        updateProgress('twinCompleted', true);
-      } catch (twinError) {
-        console.warn("Failed to build twin, but CV analysis succeeded:", twinError);
-      }
-
-    } catch (err: any) {
-      setError(err.message || "Failed to analyze CV.");
-      setPhase("idle");
-    }
-  };
+  }, [phase, performActualAnalysis]);
 
   const handleFile = useCallback((file: File) => {
+    setSelectedFile(file);
     setFileName(file.name);
     setPhase("analyzing");
     setError("");
@@ -187,6 +182,23 @@ export default function CVAnalyzerPage() {
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
+      {/* ===== Header ===== */}
+      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-md">
+        <div className="container flex h-16 items-center justify-between gap-4">
+          <Link to="/" className="flex items-center gap-2.5">
+            <img src={logo} alt="Logo" className="h-9 w-9 rounded-md object-cover" width={36} height={36} />
+            <span className="font-display text-xl font-bold tracking-tight text-primary">EmpowAI</span>
+          </Link>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+              <Link to="/"><ArrowLeft className="mr-1 h-4 w-4" />Back</Link>
+            </Button>
+            <ProfileMenu />
+          </div>
+        </div>
+      </header>
+
       <main className="relative overflow-hidden">
         <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
           <div className="absolute -top-40 left-1/2 h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
@@ -382,6 +394,12 @@ export default function CVAnalyzerPage() {
           )}
         </section>
       </main>
+
+      <footer className="border-t border-border bg-background">
+        <div className="container py-6 text-center text-xs text-muted-foreground">
+          © {new Date().getFullYear()} EmpowAI · Amandla e-Ubuntu <span className="emoji">🇿🇦</span>
+        </div>
+      </footer>
     </div>
   );
 }

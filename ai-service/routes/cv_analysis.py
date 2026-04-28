@@ -7,6 +7,7 @@ from openai import RateLimitError
 from models.schemas import CVAnalysisRequest, CVAnalysisResponse
 from services.cv_analyzer import CVAnalyzer
 from utils.logger import get_logger
+from routes.cv_analysis_file import is_cv_document
 
 router = APIRouter()
 cv_analyzer = CVAnalyzer()
@@ -29,6 +30,17 @@ async def analyze_cv(request: CVAnalysisRequest, req: Request):
             raise HTTPException(status_code=413, detail="CV text exceeds maximum length of 50000 characters")
         
         logger.info(f"CV analysis started - Text length: {len(request.cvText)} chars")
+        
+        # Validate that this is actually a CV document
+        is_cv, validation_reason = is_cv_document(request.cvText)
+        if not is_cv:
+            logger.warning(f"Document validation failed: {validation_reason}")
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid document format: {validation_reason} Please provide CV or resume text."
+            )
+        
+        logger.info(f"Document validation passed: {validation_reason}")
         
         result = await cv_analyzer.analyze_cv(
             request.cvText,

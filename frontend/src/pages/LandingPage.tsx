@@ -46,7 +46,10 @@ export default function LandingPage() {
           <Logo variant="default" size="sm" linkTo="" />
 
           <nav className="hidden items-center gap-8 md:flex">
-            {/* Navigation links */}
+            <a href="#how-it-works" className="text-sm font-medium text-foreground hover:text-primary transition-colors">How It Works</a>
+            <a href="#features" className="text-sm font-medium text-foreground hover:text-primary transition-colors">Features</a>
+            <a href="#ubuntu-stories" className="text-sm font-medium text-foreground hover:text-primary transition-colors">Ubuntu Stories</a>
+            <Link to="/demo" className="text-sm font-medium text-foreground hover:text-primary transition-colors">Demo</Link>
           </nav>
 
           <div className="flex items-center gap-2">
@@ -77,7 +80,6 @@ export default function LandingPage() {
               { label: "How It Works", href: "#how-it-works" },
               { label: "Features", href: "#features" },
               { label: "Ubuntu Stories", href: "#ubuntu-stories" },
-              { label: "Pricing", href: "/pricing", route: true },
               { label: "Demo", href: "/demo", route: true },
             ].map((l) =>
               l.route ? (
@@ -124,7 +126,7 @@ export default function LandingPage() {
               <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-xs font-semibold tracking-wide text-white/95 backdrop-blur-md">
                 <Sparkles className="h-3.5 w-3.5 text-secondary" />
                 Amandla e-Ubuntu
-                <span className="text-base leading-none">🇿🇦</span>
+                <span className="text-base leading-none emoji">🇿🇦</span>
               </div>
 
               <h1 className="mt-6 font-display text-4xl font-bold leading-[1.05] drop-shadow-sm md:text-6xl lg:text-7xl">
@@ -197,7 +199,7 @@ export default function LandingPage() {
                 Siyanda&apos;s Journey: from R0 to R4,500/month
               </h2>
               <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
-                He didn&apos;t get lucky — he explored, compared, and chose. Here&apos;s exactly how it went.
+                He didn't get lucky — he explored, compared, and chose. Here's exactly how it went.
               </p>
             </div>
 
@@ -436,7 +438,7 @@ export default function LandingPage() {
             <span className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary">Siyaqala! — Let&apos;s Begin</span>
             <p className="mt-3 font-display text-2xl italic md:text-3xl">
               Join over <span className="text-gradient-ai font-bold not-italic">2,000+</span> young South Africans building better
-              careers with AI. Together, we rise. 🇿🇦
+              careers with AI. Together, we rise. <span className="emoji">🇿🇦</span>
             </p>
             <div className="mt-6 flex justify-center">
               <Button asChild variant="cta" size="xl" className="shimmer">
@@ -457,7 +459,6 @@ export default function LandingPage() {
               { label: "Features", href: "#features" },
               { label: "Ubuntu Stories", href: "#ubuntu-stories" },
               { label: "Demo", href: "/demo", route: true },
-              { label: "Pricing", href: "/pricing", route: true },
             ].map((l) =>
               "route" in l && l.route ? (
                 <Link
@@ -482,11 +483,11 @@ export default function LandingPage() {
           <div className="flex items-center gap-2">
             {[Facebook, TikTokIcon, Mail, Instagram, Linkedin].map((Icon, i) => {
               const socialLinks = [
-                "https://www.facebook.com/empowaai",
-                "https://www.tiktok.com/@emp0wa_ai?_r=1&_t=ZS-95nC03PghEH",
-                "mailto:support@empowa.org",
-                "https://www.instagram.com/emp0wa_ai?igsh=MW53bXZxc21mdm9scA==",
-                "https://www.linkedin.com/company/empowaai/"
+                "https://www.facebook.com/profile.php?id=61562941456913",
+                "https://www.tiktok.com/@empowa.ai",
+                "mailto:info@empowa-ai.co.za",
+                "https://www.instagram.com/empowa.ai/",
+                "https://www.linkedin.com/company/empowaai"
               ];
               const socialLabels = [
                 "Facebook",
@@ -509,7 +510,7 @@ export default function LandingPage() {
           </div>
         </div>
         <div className="border-t border-border/60 py-4 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} EmpowAI · Amandla e-Ubuntu 🇿🇦 · Built in Mzansi
+          © {new Date().getFullYear()} EmpowAI · Amandla e-Ubuntu <span className="emoji">🇿🇦</span> · Built in Mzansi
         </div>
       </footer>
 

@@ -60,7 +60,7 @@ export default function SAJobPlatforms() {
   return (
     <GlassCard>
       <div className="flex items-center justify-between mb-1">
-        <h3 className="font-display font-bold text-base">🇿🇦 SA Job Platforms Checklist</h3>
+        <h3 className="font-display font-bold text-base"><span className="emoji">🇿🇦</span> SA Job Platforms Checklist</h3>
         <span className="text-xs font-semibold text-primary">{completedCount}/{SA_PLATFORMS.length}</span>
       </div>
       <p className="text-xs text-muted-foreground mb-4">
