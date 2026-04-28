@@ -83,7 +83,7 @@ exports.confirmEmailChange = async (req, res, next) => {
 
     const user = await userService.confirmEmailChange(token, correlationId);
 
-    logger.info('Email changed successfully', { correlationId, userId: user.id });
+    logger.info('Email changed successfully', { correlationId, userId: user?.id });
 
     return sendSuccess(res, {
       message: 'Your email address has been updated successfully.',
