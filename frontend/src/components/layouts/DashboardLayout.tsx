@@ -411,13 +411,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               {/* Desktop User Info - Compact */}
               <Link
                 to="/dashboard/profile"
-                className="hidden lg:flex items-center gap-2 hover:bg-muted px-2 py-1.5 rounded-lg transition-colors group"
+                className="hidden lg:flex items-center hover:bg-muted px-2 py-1.5 rounded-lg transition-colors group"
               >
-                <div className="text-right hidden xl:block">
-                  <p className="text-xs text-muted-foreground truncate max-w-[120px]">
-                    {displayEmail}
-                  </p>
-                </div>
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-secondary to-primary flex items-center justify-center text-white text-xs font-bold shadow-lg ring-2 ring-secondary/20">
                   {initials}
                 </div>
