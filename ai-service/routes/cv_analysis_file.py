@@ -38,6 +38,92 @@ RETAIL_WEAKNESSES = [
     "No references or character references - retail employers often value references from previous supervisors"
 ]
 
+def is_cv_document(cv_text: str) -> tuple[bool, str]:
+    """
+    Validate if the uploaded document is actually a CV/resume.
+    Returns (is_cv, reason) tuple.
+    """
+    text_lower = cv_text.lower()
+    
+    # CV indicators - strong signals this is a CV
+    cv_indicators = [
+        'curriculum vitae', 'resume', 'cv', 'employment history', 'work experience',
+        'education', 'qualifications', 'skills', 'experience', 'career', 'professional',
+        'objective', 'summary', 'profile', 'references', 'achievements', 'certifications'
+    ]
+    
+    # Non-CV indicators - signals this is NOT a CV
+    non_cv_indicators = [
+        'invoice', 'receipt', 'contract', 'agreement', 'terms and conditions',
+        'legal notice', 'court', 'lawsuit', 'medical report', 'prescription',
+        'lab results', 'test results', 'financial statement', 'tax return',
+        'bank statement', 'insurance policy', 'warranty', 'manual', 'instructions',
+        'recipe', 'menu', 'schedule', 'timetable', 'meeting minutes'
+    ]
+    
+    # Count CV indicators
+    cv_score = 0
+    for indicator in cv_indicators:
+        if indicator in text_lower:
+            cv_score += 1
+    
+    # Check for non-CV indicators (immediate rejection)
+    for indicator in non_cv_indicators:
+        if indicator in text_lower:
+            return False, f"This appears to be a {indicator.split()[0]} document, not a CV/resume."
+    
+    # Check for work-related content
+    work_indicators = [
+        'job', 'work', 'employment', 'position', 'role', 'company', 'organization',
+        'manager', 'supervisor', 'team', 'project', 'responsibilities', 'duties'
+    ]
+    
+    work_score = 0
+    for indicator in work_indicators:
+        # Count occurrences, not just presence
+        work_score += text_lower.count(indicator)
+    
+    # Check for education content
+    edu_indicators = [
+        'university', 'college', 'school', 'degree', 'diploma', 'certificate',
+        'matric', 'grade 12', 'education', 'studied', 'graduated'
+    ]
+    
+    edu_score = 0
+    for indicator in edu_indicators:
+        edu_score += text_lower.count(indicator)
+    
+    # Check for skills/qualifications
+    skill_indicators = [
+        'skills', 'abilities', 'competencies', 'qualifications', 'expertise',
+        'proficient', 'experienced', 'knowledge', 'training'
+    ]
+    
+    skill_score = 0
+    for indicator in skill_indicators:
+        skill_score += text_lower.count(indicator)
+    
+    # Minimum thresholds
+    min_cv_indicators = 2
+    min_work_score = 3
+    min_total_score = min_work_score + edu_score + skill_score
+    
+    # Validation logic
+    if cv_score < min_cv_indicators:
+        return False, "This document doesn't contain typical CV content like work experience, education, or skills sections."
+    
+    if min_total_score < 5:
+        return False, "This document doesn't appear to be a CV/resume. It lacks sufficient work, education, or skills content."
+    
+    # Check document structure - CVs typically have multiple sections
+    lines = cv_text.split('\n')
+    non_empty_lines = [line.strip() for line in lines if line.strip()]
+    
+    if len(non_empty_lines) < 10:
+        return False, "This document appears too short to be a complete CV/resume."
+    
+    return True, "Document appears to be a valid CV/resume."
+
 def is_retail_candidate(cv_text: str, experience: list = None, skills: list = None) -> bool:
     """Check if candidate is in retail based on CV content."""
     text_lower = cv_text.lower()
@@ -228,6 +314,17 @@ async def analyze_cv_file(
             )
         
         logger.info(f"[{request_id}] Successfully extracted {len(cv_text)} characters")
+        
+        # Validate that this is actually a CV document
+        is_cv, validation_reason = is_cv_document(cv_text)
+        if not is_cv:
+            logger.warning(f"[{request_id}] Document validation failed: {validation_reason}")
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid document format: {validation_reason} Please upload a CV or resume."
+            )
+        
+        logger.info(f"[{request_id}] Document validation passed: {validation_reason}")
         
         job_requirements_list = None
         if jobRequirements:
