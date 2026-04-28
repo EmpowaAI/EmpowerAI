@@ -111,7 +111,7 @@ export default function CVAnalyzerPage() {
       } else if (err.status === 413) {
         setError("File is too large. Please upload a smaller CV file.");
       } else if (err.status === 400 || (err.message && (err.message.includes("400") || err.message.includes("valid CV")))) {
-        setError("This document doesn't look like a valid CV. Please ensure it contains readable text (not a scanned image) and clear sections for Experience and Education.");
+        setError(err.message || "This document could not be validated as a CV. Please ensure it contains readable text and clear sections for Experience and Education.");
       } else {
         setError(err.message || "Failed to analyze CV. Please try again or use a different file format.");
       }
