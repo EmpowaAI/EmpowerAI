@@ -870,10 +870,10 @@ export const twinAPIReal = {
     try {
       console.log('Creating twin with data:', data);
       /**
-       * FIX: Pointed to /twin/create to resolve 404 errors.
+       * FIX: Pointed to /twin/generate to match AI service routes and resolve 404 errors.
        * The backend validator expects the structure defined here.
        */
-      const response = await request<any>('/twin/create', { 
+      const response = await request<any>('/twin/generate', { 
         method: 'POST',
         headers: { 'X-Action': 'create-twin' },
         body: JSON.stringify(data),

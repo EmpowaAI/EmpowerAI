@@ -36,7 +36,7 @@ const STAGES = [
 const STAGE_DURATION = 1600; // ms per stage
 
 export default function CVAnalyzerPage() {
-  const { updateProgress, hasExistingCV, reanalyzeCV } = useUser();
+  const { updateProgress, hasExistingCV, reanalyzeCV, refreshCVData } = useUser();
   const navigate = useNavigate();
   
   const [phase, setPhase] = useState<Phase>("idle");
@@ -84,6 +84,14 @@ export default function CVAnalyzerPage() {
 
     try {
       const result = await analyzeCV(selectedFile, "");
+      
+      // Persist to storage immediately so the context can read it
+      setStoredCvAnalysis(result);
+      if (selectedFile.name) setStoredCvFileName(selectedFile.name);
+      
+      // Sync the global UserContext state
+      refreshCVData();
+
       setCvData(result);
       setPhase("complete");
       updateProgress('cvCompleted', true);
@@ -117,7 +125,7 @@ export default function CVAnalyzerPage() {
       }
       setPhase("idle");
     }
-  }, [selectedFile, setCvData, updateProgress]);
+  }, [selectedFile, setCvData, updateProgress, refreshCVData]);
 
   // Animation loop for analyzing phase
   useEffect(() => {
