@@ -14,6 +14,7 @@ const chunkGroups: Record<string, string[]> = {
   'motion-vendor': ['framer-motion'],
   'ai-vendor': ['@google/genai', 'react-markdown', 'microsoft-cognitiveservices-speech-sdk'],
   'utils-vendor': ['axios', 'clsx', 'tailwind-merge'],
+  'docx-vendor': ['docx'],
 }
 
 function getManualChunk(id: string): string | undefined {
