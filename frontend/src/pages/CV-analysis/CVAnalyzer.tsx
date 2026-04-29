@@ -321,18 +321,19 @@ const CVAnalyzer = () => {
          setAiAnalysis(transformedAnalysis);
 
          try {
+           // Always mark CV as completed when analysis finishes — skills may be
+           // empty for some CVs but the analysis itself succeeded.
+           localStorage.setItem('cvCompleted', 'true');
+           localStorage.setItem('cvScore', String(data.score || 0));
+           updateProgress('cvCompleted', true);
+           setStoredCvAnalysis(data);
+           setStoredCvFileName(fileName || 'cv.txt');
+           refreshCVData();
+           window.dispatchEvent(new Event('cvCompleted'));
+
            const skills = data.sections?.skills || [];
            if (Array.isArray(skills) && skills.length > 0) {
              localStorage.setItem('cvSkills', JSON.stringify(skills));
-             localStorage.setItem('cvScore', String(data.score || 0));
-            
-            // CRITICAL: Update context state immediately to unlock protected routes
-            updateProgress('cvCompleted', true);
-            
-             setStoredCvAnalysis(data);
-             setStoredCvFileName(fileName || 'cv.txt');
-            refreshCVData(); // Syncs the new CV data to the UserContext
-             window.dispatchEvent(new Event('cvCompleted'));
            }
           } catch {
             // Ignore localStorage failures
