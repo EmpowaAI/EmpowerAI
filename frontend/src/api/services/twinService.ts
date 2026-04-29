@@ -26,7 +26,7 @@ export const chatWithTwin = async (messages: any[], cv_context: any) => {
 };
 
 export const buildTwinFromCv = async (cvAnalysis: any) => {
-  const res = await fetch(`${API_BASE_URL}/twin/generate`, {
+  const res = await fetch(`${API_BASE_URL}/twin/create`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
