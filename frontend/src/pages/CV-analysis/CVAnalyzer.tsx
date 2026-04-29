@@ -31,8 +31,11 @@ import { Button } from "@/components/ui/Button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ProfileMenu } from "@/components/ProfileMenu";
 import { ContactWidget } from "@/components/ContactWidget";
-import { supabase } from "@/integrations/supabase/client";
 import logo from "../../assets/images/empowerLogo.jpeg";
+import { analyzeCV } from "../../services/cvService";
+import { setStoredCvAnalysis, setStoredCvFileName } from "../../lib/sensitiveStorage";
+import { twinAPI } from "../../lib/api";
+import { useUser } from "../../contexts/user-context";
 
 type Phase = "idle" | "analyzing" | "complete" | "revamping" | "revamped";
 type ResultView = "overview" | "match" | "coaching";

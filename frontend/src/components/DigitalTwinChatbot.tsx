@@ -2,9 +2,8 @@
 import { Bot, X, Send, Sparkles, User, Clock, ThumbsUp, ThumbsDown } from "lucide-react";
 import { cn } from "../lib/utils";
 import StatusPill from "./shared/StatusPill";
-import { getMyTwin, chatWithTwin } from "../../api/services/twinService";
-import { useUser } from "../../contexts/user-context";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { initTwinChat, chatWithTwin } from "../../api/services/twinService";
+import { useState, useEffect, useRef } from "react";
 
 interface Message {
   id: string;
@@ -48,6 +47,8 @@ export default function DigitalTwinChatbot() {
   const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [twinContext, setTwinContext] = useState<any>(null);
+  const historyRef = useRef<{ role: 'user' | 'assistant'; content: string }[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -55,6 +56,16 @@ export default function DigitalTwinChatbot() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Initialise the twin chat session when the chatbot first opens
+  useEffect(() => {
+    if (!isOpen || twinContext) return;
+    const token = localStorage.getItem('empowerai-token');
+    if (!token) return;
+    initTwinChat()
+      .then(({ twinData }) => setTwinContext(twinData))
+      .catch(() => { /* init is best-effort; chat still works without context */ });
+  }, [isOpen, twinContext]);
 
   // Maintain focus on input during typing (mobile keyboard fix)
   useEffect(() => {
@@ -70,42 +81,50 @@ export default function DigitalTwinChatbot() {
   const handleSendMessage = async () => {
     if (!inputText.trim() || isLoading) return;
 
+    const currentInput = inputText;
     const userMessage: Message = {
       id: createMessageId(),
-      text: inputText,
+      text: currentInput,
       sender: 'user',
       timestamp: new Date(),
     };
 
     setMessages(prev => [...prev, userMessage]);
-    const currentInput = inputText;
     setInputText("");
     setIsLoading(true);
 
+    // Build history snapshot before this message
+    const history = [...historyRef.current];
+
     try {
-      // Call the AI service chat endpoint
-      const response = await chatWithTwin([{ role: 'user', content: currentInput }]);
-      
-      const aiMessage: Message = {
+      const response = await chatWithTwin(currentInput, history, twinContext ?? null);
+
+      historyRef.current = [
+        ...history,
+        { role: 'user', content: currentInput },
+        { role: 'assistant', content: response.reply || '' },
+      ];
+
+      // Update stored twin data if backend enriched it
+      if (response.twinData) {
+        try { localStorage.setItem('twinData', JSON.stringify(response.twinData)); } catch { /* ignore */ }
+        setTwinContext(response.twinData);
+      }
+
+      setMessages(prev => [...prev, {
         id: createMessageId(),
         text: response.reply || "I'm sorry, I couldn't process your request. Please try again.",
         sender: 'ai',
         timestamp: new Date(),
-      };
-
-      setMessages(prev => [...prev, aiMessage]);
+      }]);
     } catch (error: any) {
       console.error('Chat error:', error);
-      
-      // Fallback error message
-      const errorMessage: Message = {
+      setMessages(prev => [...prev, {
         id: createMessageId(),
         text: error.message || "I'm having trouble connecting to the AI service. Please try again in a moment.",
         sender: 'ai',
         timestamp: new Date(),
-      };
-
-      setMessages(prev => [...prev, errorMessage]);
+      }]);
     } finally {
       setIsLoading(false);
     }

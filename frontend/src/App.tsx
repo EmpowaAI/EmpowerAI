@@ -62,6 +62,7 @@ function App() {
               <Route path="/demo" element={<Demo />} />
               <Route path="/cv-analyzer" element={<CVAnalyzer />} />
               <Route path="/digital-twin" element={<DigitalTwin />} />
+              <Route path="/twin-preview" element={<TwinBuilder />} />
               {/* <Route path="/pricing" element={<Pricing />} /> */}
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
