@@ -25,6 +25,7 @@ const ConfirmDelete = lazy(() => import('./pages/User/ConfirmDelete'));
 const DashboardLayout = lazy(() => import('./components/layouts/DashboardLayout'));
 const Dashboard = lazy(() => import('./pages/Dashboard/Dashboard'));
 const TwinBuilder = lazy(() => import('./pages/Twin-builder/TwinBuilder'));
+const DigitalTwin = lazy(() => import('./pages/DigitalTwin'));
 const Simulations = lazy(() => import('./pages/Simulation/Simulations'));
 const Opportunities = lazy(() => import('./pages/Oportunities/Opportunities'));
 const CVAnalyzer = lazy(() => import('./pages/CV-analysis/CVAnalyzer'));
@@ -60,7 +61,7 @@ function App() {
               <Route path="/" element={<LandingPage />} />
               <Route path="/demo" element={<Demo />} />
               <Route path="/cv-analyzer" element={<CVAnalyzer />} />
-              <Route path="/digital-twin" element={<Navigate to="/dashboard/twin" replace />} />
+              <Route path="/digital-twin" element={<DigitalTwin />} />
               {/* <Route path="/pricing" element={<Pricing />} /> */}
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
