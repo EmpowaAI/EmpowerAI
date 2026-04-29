@@ -39,7 +39,6 @@ async function saveOrUpdate({ userId, filename, mimetype, fileSize, rawText, ana
         analysis: {
           score:          encryptedAnalysis.score          ?? 0,
           readinessLevel: encryptedAnalysis.readinessLevel ?? 'JUNIOR',
-          summary:        encryptedAnalysis.summary        ?? '',
           about:          encryptedAnalysis.about          ?? '',
           industry:       encryptedAnalysis.industry       ?? 'general',
           analysisSource: isFallback ? 'fallback' : 'ai',

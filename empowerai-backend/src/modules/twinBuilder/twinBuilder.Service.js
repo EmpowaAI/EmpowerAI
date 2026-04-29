@@ -6,11 +6,6 @@ const Opportunity = require('../opportunities/Opportunity.Model');
 const logger = require('../../utils/logger');
 const aiServiceClient = require('../../intergration/ai/ai.ServiceClient');
 
-// -----------------------------------------------------------------------------
-// INTERNAL: OPPORTUNITY MATCHING
-// Scores each active opportunity against the user's extracted skills.
-// Returns top 10 ranked matches.
-// -----------------------------------------------------------------------------
 
 async function matchOpportunities(analysis) {
   const userSkills = (analysis.extractedSkills || []).map(s => s.toLowerCase());
@@ -23,19 +18,16 @@ async function matchOpportunities(analysis) {
     const oppSkills = (opp.skills || []).map(s => s.toLowerCase());
     const oppReqs = (opp.requirements || []).map(r => r.toLowerCase());
 
-    // Criteria 1: Skill overlap (weight 35)
     const skillMatches = oppSkills.filter(s =>
       userSkills.some(us => us.includes(s) || s.includes(us))
     ).length;
     const skillScore = oppSkills.length > 0 ? (skillMatches / oppSkills.length) * 35 : 0;
 
-    // Criteria 2: Industry alignment (weight 20)
     const industryScore = (
       opp.description?.toLowerCase().includes(userIndustry) ||
       opp.title?.toLowerCase().includes(userIndustry)
     ) ? 20 : 0;
 
-    // Criteria 3: Seniority fit (weight 15)
     const oppTitle = (opp.title || '').toLowerCase();
     const seniorityScore = (
       (userLevel.includes('junior') && (oppTitle.includes('junior') || oppTitle.includes('trainee') || oppTitle.includes('intern'))) ||
@@ -43,21 +35,16 @@ async function matchOpportunities(analysis) {
       (userLevel.includes('senior') && oppTitle.includes('senior'))
     ) ? 15 : 5;
 
-    // Criteria 4: Requirements match (weight 10)
     const reqMatches = oppReqs.filter(r => userSkills.some(s => r.includes(s))).length;
     const reqScore = oppReqs.length > 0 ? (reqMatches / oppReqs.length) * 10 : 0;
 
-    // Criteria 5: Opportunity type (weight 10)
     const typeScore = ['job', 'freelance'].includes(opp.type) ? 10 :
       ['internship', 'learnership'].includes(opp.type) ? 7 : 5;
 
-    // Criteria 6: Has salary range (weight 5)
     const salaryScore = (opp.salaryRange?.min && opp.salaryRange?.max) ? 5 : 0;
 
-    // Criteria 7: Not expired (weight 3)
     const deadlineScore = (!opp.deadline || opp.deadline > new Date()) ? 3 : 0;
 
-    // Criteria 8: Has application URL (weight 2)
     const urlScore = opp.applicationUrl ? 2 : 0;
 
     return {
@@ -73,10 +60,6 @@ async function matchOpportunities(analysis) {
     .map(({ opp }) => opp);
 }
 
-// -----------------------------------------------------------------------------
-// INTERNAL: DERIVE SENIORITY LEVEL
-// Maps readinessLevel string from CV analysis to EconomicTwin enum values.
-// -----------------------------------------------------------------------------
 
 function deriveSeniorityLevel(readinessLevel = '', score = 0) {
   const level = readinessLevel.toLowerCase();
@@ -88,10 +71,6 @@ function deriveSeniorityLevel(readinessLevel = '', score = 0) {
   return 'ENTRY';
 }
 
-// -----------------------------------------------------------------------------
-// INTERNAL: DERIVE DEMAND LEVEL
-// Based on score and how many opportunities matched.
-// -----------------------------------------------------------------------------
 
 function deriveDemandLevel(score = 0, matchedCount = 0) {
   if (score >= 80 && matchedCount >= 7) return 'CRITICAL';
@@ -100,10 +79,6 @@ function deriveDemandLevel(score = 0, matchedCount = 0) {
   return 'LOW';
 }
 
-// -----------------------------------------------------------------------------
-// INTERNAL: DERIVE INCOME RANGE (ZAR monthly)
-// Conservative SA market estimates based on seniority and industry.
-// -----------------------------------------------------------------------------
 
 function deriveIncomeRange(seniorityLevel, industry = '') {
   const isTech = ['technology', 'software', 'it', 'engineering'].some(i =>
@@ -121,10 +96,6 @@ function deriveIncomeRange(seniorityLevel, industry = '') {
   return { ...(ranges[seniorityLevel] || ranges.ENTRY), currency: 'ZAR' };
 }
 
-// -----------------------------------------------------------------------------
-// INTERNAL: DERIVE EMERGING SKILLS
-// Skills appearing in matched opportunities that the user does NOT have.
-// -----------------------------------------------------------------------------
 
 function deriveEmergingSkills(analysis, matchedOpportunities) {
   const userSkills = new Set((analysis.extractedSkills || []).map(s => s.toLowerCase()));
@@ -141,10 +112,6 @@ function deriveEmergingSkills(analysis, matchedOpportunities) {
   return [...emerging].slice(0, 10);
 }
 
-// -----------------------------------------------------------------------------
-// INTERNAL: DERIVE MONETIZABLE SKILLS
-// High-value SA tech market skills the user already has.
-// -----------------------------------------------------------------------------
 
 const HIGH_VALUE_SKILLS = [
   'react', 'node.js', 'typescript', 'python', 'c#', 'asp.net', '.net',
@@ -159,10 +126,6 @@ function deriveMonetizableSkills(extractedSkills = []) {
   );
 }
 
-// -----------------------------------------------------------------------------
-// INTERNAL: DEFAULT INTELLIGENCE HELPERS
-// Provide meaningful defaults when CV analysis lacks intelligence data.
-// -----------------------------------------------------------------------------
 
 function _getDefaultStrengths(industry = '', coreSkills = []) {
   const industryLower = (industry || '').toLowerCase();
@@ -331,38 +294,23 @@ function _getDefaultRecommendations(industry = '', coreSkills = []) {
   }
 }
 
-// -----------------------------------------------------------------------------
-// EXPORTED: BUILD FROM ANALYSIS
-// NOTE: This function is no longer called automatically after CV upload.
-// It is triggered by twinChat.Service.js in the background after the user's
-// first chat message. It can also be called manually via buildFromCvProfile()
-// or createOrUpdateFromForm() for admin/manual rebuild flows.
-// -----------------------------------------------------------------------------
 
-async function buildFromAnalysis(analysis, userId) {
-  logger.info('[TwinService] buildFromAnalysis started', { userId });
-
-  // 1. Fetch CvProfile for the _id reference
-  const cvProfile = await cvRepository.findByUserId(userId);
-  if (!cvProfile) {
-    throw new Error(`[TwinService] CvProfile not found for userId: ${userId}`);
-  }
-
-  // 2. Match opportunities from DB
+async function _assembleTwinData(analysis, userId, cvProfileId) {
+  // 1. Match opportunities from DB using CV analysis
   const matchedOpportunities = await matchOpportunities(analysis);
   logger.info('[TwinService] Opportunities matched', {
     userId,
     count: matchedOpportunities.length,
   });
 
-  // 3. Derive all twin fields from analysis + matched opportunities
-  const seniorityLevel = deriveSeniorityLevel(analysis.readinessLevel, analysis.score);
-  const demandLevel = deriveDemandLevel(analysis.score, matchedOpportunities.length);
-  const incomePotential = deriveIncomeRange(seniorityLevel, analysis.industry);
-  const emergingSkills = deriveEmergingSkills(analysis, matchedOpportunities);
+  // 2. Derive all twin fields from analysis + matched opportunities
+  const seniorityLevel    = deriveSeniorityLevel(analysis.readinessLevel, analysis.score);
+  const demandLevel       = deriveDemandLevel(analysis.score, matchedOpportunities.length);
+  const incomePotential   = deriveIncomeRange(seniorityLevel, analysis.industry);
+  const emergingSkills    = deriveEmergingSkills(analysis, matchedOpportunities);
   const monetizableSkills = deriveMonetizableSkills(analysis.extractedSkills);
 
-  // CRITICAL: Ensure core skills are never empty
+  // 3. Ensure core skills are never empty
   const industry = (analysis.industry || 'general').toLowerCase();
   let coreSkills = [];
   if (industry.includes('technology')) {
@@ -372,50 +320,49 @@ async function buildFromAnalysis(analysis, userId) {
   } else {
     coreSkills = ['communication', 'problem solving', 'teamwork'];
   }
-
   const extracted = analysis.extractedSkills || [];
   if (extracted.length > 0) {
     coreSkills = extracted.slice(0, 10);
   }
 
-  // CRITICAL: Ensure employability score is never 0
+  // 4. Ensure employability score is never 0
   let employabilityScore = analysis.score || 0;
   if (employabilityScore === 0) {
     const yearsExp = analysis.yearsExperience || 0;
     employabilityScore = Math.min(50 + (yearsExp * 5), 85);
   }
 
-  // CRITICAL: Ensure market value is never 0
+  // 5. Ensure market value is never 0
   let marketValueScore = Math.min(100, employabilityScore + (matchedOpportunities.length * 3));
   if (marketValueScore === 0) {
     marketValueScore = 45 + (coreSkills.length * 5);
   }
 
-  // 4. Derive current role from most recent experience entry
+  // 6. Derive current role from most recent experience entry
   const experienceList = analysis.experience || [];
   const currentRole = experienceList.length > 0
     ? String(experienceList[0]).split(' - ')[0].trim()
     : '';
 
-  // 5. Derive target role from best matched opportunity title
+  // 7. Derive target role from best matched opportunity title
   const targetRole = matchedOpportunities.length > 0
     ? matchedOpportunities[0].title
     : currentRole;
 
-  // 6. Derive market intelligence from matched opportunities
+  // 8. Derive market intelligence from matched opportunities
   const jobTitlesMapped = matchedOpportunities.map(o => o.title);
   const trendingSkills = [...new Set(
     matchedOpportunities.flatMap(o => o.skills || [])
   )].slice(0, 10);
 
-  // 7. Build opportunities array from matched opportunity titles + descriptions
+  // 9. Build opportunities array from matched opportunity titles + descriptions
   const opportunitiesIntelligence = matchedOpportunities.slice(0, 5).map(o =>
     `${o.title}${o.company ? ` at ${o.company}` : ''}${o.location ? ` (${o.location})` : ''}`
   );
 
-  // 8. Upsert EconomicTwin
-  const twin = await twinRepository.upsertTwin(userId, {
-    cvProfile: cvProfile._id,
+  // 10. Return assembled twin data — NOT persisted yet
+  return {
+    cvProfile: cvProfileId,
 
     identity: {
       currentRole,
@@ -440,9 +387,9 @@ async function buildFromAnalysis(analysis, userId) {
 
     market: {
       trendingSkills,
-      decliningSkills: [],     // requires market engine — populated later
+      decliningSkills: [],       
       jobTitlesMapped,
-      competitorRoles: [],     // requires market engine — populated later
+      competitorRoles: [],       
     },
 
     intelligence: {
@@ -483,25 +430,81 @@ async function buildFromAnalysis(analysis, userId) {
 
     status: 'ACTIVE',
     lastCalculatedAt: new Date(),
+
+   
+    _matchedOpportunities: matchedOpportunities,
+  };
+}
+
+
+
+async function buildTwinData(userId) {
+  logger.info('[TwinService] buildTwinData started (no DB save)', { userId });
+
+  const cvProfile = await cvRepository.findByUserId(userId);
+  if (!cvProfile) {
+    throw new Error(`[TwinService] CvProfile not found for userId: ${userId}`);
+  }
+
+  const twinData = await _assembleTwinData(cvProfile.analysis, userId, cvProfile._id);
+
+  logger.info('[TwinService] Twin data assembled (not persisted)', {
+    userId,
+    employabilityScore: twinData.economy?.employabilityScore,
+    seniorityLevel:     twinData.identity?.seniorityLevel,
+    demandLevel:        twinData.economy?.demandLevel,
+    opportunitiesUsed:  twinData._matchedOpportunities.length,
   });
 
-  logger.info('[TwinService] Economic Twin built successfully', {
+  return twinData;
+}
+
+
+
+
+async function persistTwinFromChat(userId, enrichedTwinData) {
+  logger.info('[TwinService] persistTwinFromChat called', { userId });
+
+  // Strip internal metadata fields before saving
+  const { _matchedOpportunities, ...twinPayload } = enrichedTwinData;
+
+  const twin = await twinRepository.upsertTwin(userId, twinPayload);
+
+  logger.info('[TwinService] Economic Twin persisted from chat', {
     userId,
     twinId: twin._id,
     employabilityScore: twin.economy?.employabilityScore,
-    seniorityLevel,
-    demandLevel,
-    opportunitiesUsed: matchedOpportunities.length,
   });
 
   return twin;
 }
 
-// -----------------------------------------------------------------------------
-// EXPORTED: CREATE / UPDATE FROM FORM
-// Calls Python AI service POST /twin/generate with UserData payload.
-// Merges AI response (income projections, skill vectors) into the twin.
-// -----------------------------------------------------------------------------
+
+async function buildFromAnalysis(analysis, userId) {
+  logger.info('[TwinService] buildFromAnalysis started (legacy — saves to DB)', { userId });
+
+  const cvProfile = await cvRepository.findByUserId(userId);
+  if (!cvProfile) {
+    throw new Error(`[TwinService] CvProfile not found for userId: ${userId}`);
+  }
+
+  const twinData = await _assembleTwinData(analysis, userId, cvProfile._id);
+  const { _matchedOpportunities, ...twinPayload } = twinData;
+
+  const twin = await twinRepository.upsertTwin(userId, twinPayload);
+
+  logger.info('[TwinService] Economic Twin built successfully (legacy)', {
+    userId,
+    twinId: twin._id,
+    employabilityScore: twin.economy?.employabilityScore,
+    seniorityLevel:     twinData.identity?.seniorityLevel,
+    demandLevel:        twinData.economy?.demandLevel,
+    opportunitiesUsed:  _matchedOpportunities.length,
+  });
+
+  return twin;
+}
+
 
 async function createOrUpdateFromForm(userId, formData) {
   const cvProfile = await cvRepository.findByUserId(userId);
@@ -510,12 +513,12 @@ async function createOrUpdateFromForm(userId, formData) {
   let aiResult = null;
   try {
     const payload = {
-      name:       formData.name     || '',
-      age:        formData.age      || 25,
-      province:   formData.province || '',
+      name:       formData.name       || '',
+      age:        formData.age        || 25,
+      province:   formData.province   || '',
       skills:     cvProfile.analysis?.extractedSkills || [],
-      education:  (cvProfile.analysis?.education || []).join(', '),
-      interests:  formData.interests || [],
+      education:  (cvProfile.analysis?.education  || []).join(', '),
+      interests:  formData.interests  || [],
       experience: (cvProfile.analysis?.experience || []).join(', '),
     };
 
@@ -533,16 +536,14 @@ async function createOrUpdateFromForm(userId, formData) {
   if (aiResult) {
     await twinRepository.upsertTwin(userId, {
       'economy.marketValueScore': aiResult.empowermentScore || twin.economy?.marketValueScore,
-      'evolution.lastUpdatedBy': 'twin_builder',
+      'evolution.lastUpdatedBy':  'twin_builder',
     });
   }
 
   return { twin, meta: { generatedFrom: 'form', aiModel: !!aiResult } };
 }
 
-// -----------------------------------------------------------------------------
-// EXPORTED: BUILD FROM CV PROFILE (manual trigger)
-// -----------------------------------------------------------------------------
+
 
 async function buildFromCvProfile(userId) {
   const cvProfile = await cvRepository.findByUserId(userId);
@@ -550,9 +551,7 @@ async function buildFromCvProfile(userId) {
   return buildFromAnalysis(cvProfile.analysis, userId);
 }
 
-// -----------------------------------------------------------------------------
-// EXPORTED: RUN CAREER SIMULATION
-// -----------------------------------------------------------------------------
+
 
 async function runSimulation(userId, pathIds) {
   const twin = await twinRepository.findByUserId(userId);
@@ -595,12 +594,13 @@ Be realistic and use South African job market assumptions.
   }
 
   const updatedTwin = await twinRepository.appendSimulation(userId, {
-    results: parsed.results,
+    results:   parsed.results,
     createdAt: new Date(),
   });
 
   return { simulation: parsed, twin: updatedTwin };
 }
+
 
 // -----------------------------------------------------------------------------
 // EXPORTED: GET TWIN
@@ -610,8 +610,10 @@ async function getTwin(userId) {
   return twinRepository.findByUserId(userId);
 }
 
+
 module.exports = {
-  buildFromAnalysis,
+  buildTwinData,          
+  persistTwinFromChat,    
   createOrUpdateFromForm,
   buildFromCvProfile,
   runSimulation,

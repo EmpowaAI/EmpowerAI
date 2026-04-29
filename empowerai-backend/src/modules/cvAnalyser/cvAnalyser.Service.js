@@ -1,7 +1,6 @@
 
 const cvProfileRepository = require('./cvAnalyser.Repository');
 const logger = require('../../utils/logger');
-const twinService = require('../twinBuilder/twinBuilder.Service');
 const aiServiceClient = require('../../intergration/ai/ai.ServiceClient');
 const { runAiTask } = require('../../intergration/queues/aiQueue');
 const { buildFallbackAnalysis } = require('../../utils/cvFallback.util');
@@ -32,7 +31,6 @@ const callWithRateLimitRetry = async (fn) => {
 
 /**
  * Save or update a CvProfile after a successful AI analysis.
- * Triggers economic twin build after save.
  */
 async function saveAnalysisResult({ userId, file, rawText, analysis, isFallback = false }) {
   try {
@@ -55,15 +53,6 @@ async function saveAnalysisResult({ userId, file, rawText, analysis, isFallback 
     });
 
     
-   if (profile) {
-  twinService.buildFromAnalysis(profile.analysis, userId).catch((err) => {
-    logger.error('[CvService] Failed to build economic twin', {
-      userId,
-      error: err.message,
-      stack: err.stack,
-    }); 
-  });
-} 
     return profile; 
   } catch (error) {
     logger.error('[CvService] Failed to save CvProfile', {
@@ -115,12 +104,6 @@ async function analyzeFromText({ userId, cvText, jobRequirementsArray }) {
   }
 }
 
-// ─── File-based CV analysis ────────────────────────────────────────────────────
-
-/**
- * Analyse a CV submitted as a file upload.
- * Returns { analysis, profileId, isFallback, fallbackMessage?, meta? }
- */
 async function analyzeFromFile({ userId, file, jobRequirementsArray }) {
   const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
   const aiServiceApiKey = process.env.AI_SERVICE_API_KEY;
