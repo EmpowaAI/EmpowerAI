@@ -33,8 +33,8 @@ import { Button } from "@/components/ui/Button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ProfileMenu } from "@/components/ProfileMenu";
 import { ContactWidget } from "@/components/ContactWidget";
-import { supabase } from "@/integrations/supabase/client";
-import logo from "/empowerLogo.jpg";
+import { analyzeCV } from "@/services/cvService";
+import logo from "@/assets/images/empowerLogo.jpg";
 
 type Phase = "idle" | "analyzing" | "complete" | "revamping" | "revamped";
 type ResultView = "overview" | "match" | "coaching";
@@ -292,17 +292,42 @@ const CVAnalyzer = () => {
     let cancelled = false;
     const runAiAnalysis = async () => {
       setAnalysisError("");
-      const { data, error } = await supabase.functions.invoke("career-analysis", {
-        body: { cvText, jobDescription },
-      });
-
-      if (cancelled) return;
-      if (error) {
+      try {
+        // Create a File object from the CV text for the existing service
+        const cvFile = new File([cvText], "cv.txt", { type: "text/plain" });
+        const data = await analyzeCV(cvFile, jobDescription);
+        
+        if (cancelled) return;
+        
+        // Transform the existing CV analysis to match our expected format
+        const transformedAnalysis: CvAnalysis = {
+          score: data.score || 75,
+          breakdown: [
+            { label: "ATS parsing", score: data.score || 75, note: data.weaknesses?.join(', ') || "Good ATS compatibility" },
+            { label: "Keywords", score: data.sections?.skills?.length ? 85 : 70, note: data.missingKeywords?.length ? "Add missing keywords" : "Good keyword coverage" },
+            { label: "Impact", score: data.sections?.achievements?.length ? 80 : 65, note: data.recommendations?.join(', ') || "Add more measurable impacts" },
+            { label: "Structure", score: data.sections?.about ? 85 : 70, note: data.sections?.about ? "Good structure" : "Add summary section" }
+          ],
+          missingSections: [],
+          missingKeywords: data.missingKeywords || [],
+          matchedKeywords: data.sections?.skills || [],
+          issues: [],
+          opportunityMatches: data.incomeIdeas?.map(idea => ({
+            type: "Income",
+            title: idea.title,
+            projection: idea.potential,
+            nextStep: idea.description
+          })) || [
+            { type: "Jobs", title: "Entry-level positions", projection: "R8k–R15k/month", nextStep: "Apply for entry-level roles" },
+            { type: "Learning", title: "Skills development", projection: "Improve earning potential", nextStep: "Focus on technical skills" }
+          ]
+        };
+        
+        setAiAnalysis(transformedAnalysis);
+      } catch (error) {
+        if (cancelled) return;
         setAnalysisError("AI analysis could not finish right now, so we are showing the local CV scan.");
-        return;
       }
-      setAiAnalysis(data as CvAnalysis);
-      if ((data as CvAnalysis).revampedCv) setRevampedCv((data as CvAnalysis).revampedCv || "");
     };
 
     runAiAnalysis();
