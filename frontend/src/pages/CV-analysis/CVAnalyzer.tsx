@@ -28,8 +28,6 @@ const uploadSchema = z.object({
 
 const jobDescriptionSchema = z.string().trim().max(6000, "Job description must be shorter than 6,000 characters");
 import { Button } from "@/components/ui/Button";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { ProfileMenu } from "@/components/ProfileMenu";
 import { analyzeCV } from "@/services/cvService";
 
 type Phase = "idle" | "analyzing" | "complete" | "revamping" | "revamped";
@@ -406,16 +404,7 @@ const CVAnalyzer = () => {
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
-      {/* ===== Simple Header ===== */}
-      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-md">
-        <div className="container flex h-16 items-center justify-end gap-4 px-4">
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <ProfileMenu />
-          </div>
-        </div>
-      </header>
-
+      
       
       <main className="relative overflow-hidden">
         {/* Ambient background orbs */}
