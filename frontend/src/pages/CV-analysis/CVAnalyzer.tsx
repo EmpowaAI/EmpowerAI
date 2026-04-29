@@ -936,7 +936,7 @@ const CVAnalyzer = () => {
                   </Button>
                 )}
                 {phase !== "revamping" && (
-                  <Button variant="outline" size="lg" onClick={() => navigate("/digital-twin")}>
+                  <Button variant="outline" size="lg" onClick={() => navigate("/dashboard/twin")}>
                     Build digital twin
                     <ArrowRight className="ml-1 h-4 w-4" />
                   </Button>
