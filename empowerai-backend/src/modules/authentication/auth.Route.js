@@ -1,13 +1,10 @@
 const express = require('express');
 const { register, login, validate, logout } = require('./auth.Controller');
-const { authLimiter } = require('../../middleware/rateLimiter');
 const { protect, restrictTo } = require('../../middleware/auth');
 const { registerRules, validateRegister } = require('./authentication.Dto/RegisterDto');
 const { loginRules, validateLogin }       = require('./authentication.Dto/LoginDto');
 
 const router = express.Router();
-
-router.use(authLimiter);
 
 
 router.post('/register', registerRules, validateRegister, register);
