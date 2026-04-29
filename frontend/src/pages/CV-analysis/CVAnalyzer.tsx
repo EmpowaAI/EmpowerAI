@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   AlertTriangle,
-  ArrowLeft,
   ArrowRight,
   Brain,
   Briefcase,
@@ -12,14 +11,12 @@ import {
   Gauge,
   Languages,
   ListChecks,
-  Menu,
   Search,
   ShieldCheck,
   Sparkles,
   Target,
   Upload,
   Wand2,
-  X,
 } from "lucide-react";
 import { z } from "zod";
 
@@ -33,9 +30,7 @@ const jobDescriptionSchema = z.string().trim().max(6000, "Job description must b
 import { Button } from "@/components/ui/Button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ProfileMenu } from "@/components/ProfileMenu";
-import { ContactWidget } from "@/components/ContactWidget";
 import { analyzeCV } from "@/services/cvService";
-import logo from "@/assets/images/empowerLogo.jpg";
 
 type Phase = "idle" | "analyzing" | "complete" | "revamping" | "revamped";
 type ResultView = "overview" | "match" | "coaching";
@@ -228,7 +223,6 @@ const CVAnalyzer = () => {
   const [aiAnalysis, setAiAnalysis] = useState<CvAnalysis | null>(null);
   const [analysisError, setAnalysisError] = useState("");
   const [resultView, setResultView] = useState<ResultView>("overview");
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const rafRef = useRef<number | null>(null);
 
@@ -412,101 +406,17 @@ const CVAnalyzer = () => {
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
-      {/* ===== Header ===== */}
+      {/* ===== Simple Header ===== */}
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-md">
-        <div className="container flex h-16 items-center justify-between gap-2 px-4 sm:gap-4 sm:px-0">
-          <Link to="/" className="flex items-center gap-2.5">
-            <img
-              src={logo}
-              alt="EmpowAI logo"
-              className="h-8 w-8 rounded-md object-cover sm:h-9 sm:w-9"
-              width={36}
-              height={36}
-            />
-            <span className="font-display text-lg font-bold tracking-tight text-primary sm:text-xl">
-              EmpowAI
-            </span>
-          </Link>
+        <div className="container flex h-16 items-center justify-end gap-4 px-4">
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            {/* Mobile hamburger menu */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="md:hidden"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-            </Button>
-            {/* Desktop navigation */}
-            <Button asChild variant="ghost" size="sm" className="hidden md:inline-flex">
-              <Link to="/">
-                <ArrowLeft className="mr-1 h-4 w-4" />
-                Back
-              </Link>
-            </Button>
             <ProfileMenu />
           </div>
         </div>
       </header>
 
-      {/* Mobile Navigation Menu */}
-      {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          <div className="fixed inset-0 bg-black/50" onClick={() => setMobileMenuOpen(false)} />
-          <div className="fixed right-0 top-0 h-full w-80 bg-background shadow-xl">
-            <div className="flex h-16 items-center justify-between border-b border-border px-4">
-              <span className="font-display text-lg font-bold text-primary">Menu</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            <nav className="flex flex-col p-4 space-y-2">
-              <Button asChild variant="ghost" className="justify-start" onClick={() => setMobileMenuOpen(false)}>
-                <Link to="/" className="w-full">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to Home
-                </Link>
-              </Button>
-              <Button asChild variant="ghost" className="justify-start" onClick={() => setMobileMenuOpen(false)}>
-                <Link to="/#how-it-works" className="w-full">
-                  How It Works
-                </Link>
-              </Button>
-              <Button asChild variant="ghost" className="justify-start" onClick={() => setMobileMenuOpen(false)}>
-                <Link to="/#features" className="w-full">
-                  Features
-                </Link>
-              </Button>
-              <Button asChild variant="ghost" className="justify-start" onClick={() => setMobileMenuOpen(false)}>
-                <Link to="/#ubuntu-stories" className="w-full">
-                  Ubuntu Stories
-                </Link>
-              </Button>
-              <Button asChild variant="ghost" className="justify-start" onClick={() => setMobileMenuOpen(false)}>
-                <Link to="/demo" className="w-full">
-                  Demo
-                </Link>
-              </Button>
-              <Button asChild variant="secondary" className="justify-start" onClick={() => setMobileMenuOpen(false)}>
-                <Link to="/login" className="w-full">
-                  Sign In
-                </Link>
-              </Button>
-              <Button asChild variant="default" className="justify-start" onClick={() => setMobileMenuOpen(false)}>
-                <Link to="/signup" className="w-full">
-                  Get Started
-                </Link>
-              </Button>
-            </nav>
-          </div>
-        </div>
-      )}
-
+      
       <main className="relative overflow-hidden">
         {/* Ambient background orbs */}
         <div
@@ -1015,8 +925,7 @@ const CVAnalyzer = () => {
         </div>
       </footer>
 
-      <ContactWidget />
-    </div>
+          </div>
   );
 };
 
