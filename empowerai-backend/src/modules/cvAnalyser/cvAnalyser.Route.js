@@ -30,8 +30,8 @@ const upload = multer({
 router.post('/analyze', validateRequest(cvAnalysisSchema), analyzeCV);
 router.post('/analyze-file', upload.single('cvFile'), analyzeCVFile);
 
-router.get('/profile',protect, getCvProfile);
-router.delete('/profile',protect, deleteCvProfile);
+router.get('/profile', getCvProfile);
+router.delete('/profile', deleteCvProfile);
 
 router.post('/revamp', validateRequest(cvRevampSchema), revampCV);
 
