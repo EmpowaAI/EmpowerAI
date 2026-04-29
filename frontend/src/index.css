@@ -222,8 +222,8 @@
       transparent 70%,
       hsl(var(--primary) / 0.22)
     );
-    filter: blur(18px);
-    opacity: 0.9;
+    filter: blur(14px);
+    opacity: 0.6;
     animation: spotlightSweep 22s linear infinite;
     transform-origin: 50% 35%;
   }
