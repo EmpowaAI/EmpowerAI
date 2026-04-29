@@ -3,30 +3,47 @@ import { API_BASE_URL } from '../../lib/apiBase';
 const getToken = () => localStorage.getItem('empowerai-token');
 
 export const getMyTwin = async () => {
-  const res = await fetch(`${API_BASE_URL}/twin/my-twin`, {
+  const res = await fetch(`${API_BASE_URL}/twin/`, {
     headers: { 'Authorization': `Bearer ${getToken()}` }
   });
   return res.json();
 };
 
-export const chatWithTwin = async (messages: any[], cv_context: any) => {
-  const res = await fetch(`${API_BASE_URL}/chat/twin`, {
+export const initTwinChat = async (): Promise<{ twinData: any }> => {
+  const res = await fetch(`${API_BASE_URL}/twin/chat/init`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${getToken()}`
+      'Authorization': `Bearer ${getToken()}`,
     },
-    body: JSON.stringify({
-      messages,
-      cv_context,
-      focus: localStorage.getItem('careerFocus') || 'growth'
-    })
+    body: JSON.stringify({}),
   });
-  return res.json();
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || `Init failed: ${res.status}`);
+  return json.data;
+};
+
+export const chatWithTwin = async (
+  message: string,
+  history: { role: 'user' | 'assistant'; content: string }[],
+  twinContext: any,
+  isLastPrompt = false,
+): Promise<{ reply: string; twinData?: any }> => {
+  const res = await fetch(`${API_BASE_URL}/twin/chat/message`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${getToken()}`,
+    },
+    body: JSON.stringify({ message, history, twinContext, isLastPrompt }),
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || `Chat failed: ${res.status}`);
+  return json.data;
 };
 
 export const buildTwinFromCv = async (cvAnalysis: any) => {
-  const res = await fetch(`${API_BASE_URL}/twin/create`, {
+  const res = await fetch(`${API_BASE_URL}/twin/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

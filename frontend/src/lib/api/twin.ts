@@ -5,7 +5,7 @@ export const twinAPI = {
   create: async (data: any) => {
     try {
       console.log('Creating twin with data:', data);
-      const response = await request<any>('/twin/create', {
+      const response = await request<any>('/twin/', {
         method: 'POST',
         body: JSON.stringify(data),
       });
@@ -23,7 +23,7 @@ export const twinAPI = {
 
   get: async () => {
     try {
-      return await request<any>('/twin/my-twin');
+      return await request<any>('/twin/');
     } catch (error) {
       console.error('Failed to get twin:', error);
       throw error;
@@ -38,6 +38,30 @@ export const twinAPI = {
       });
     } catch (error) {
       console.error('Simulation failed:', error);
+      throw error;
+    }
+  },
+
+  chatInit: async () => {
+    try {
+      return await request<any>('/twin/chat/init', {
+        method: 'POST',
+        body: JSON.stringify({}),
+      });
+    } catch (error) {
+      console.error('Twin chat init failed:', error);
+      throw error;
+    }
+  },
+
+  chatMessage: async (message: string, history: { role: string; content: string }[], twinContext: any, isLastPrompt = false) => {
+    try {
+      return await request<any>('/twin/chat/message', {
+        method: 'POST',
+        body: JSON.stringify({ message, history, twinContext, isLastPrompt }),
+      });
+    } catch (error) {
+      console.error('Twin chat message failed:', error);
       throw error;
     }
   },
