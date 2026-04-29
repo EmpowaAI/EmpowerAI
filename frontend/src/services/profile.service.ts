@@ -15,6 +15,22 @@ import type {
 } from '../types/profile.types';
 
 export class ProfileService {
+  private createEmptyMarketInsights(province?: string): MarketInsights {
+    const loc = province || 'South Africa';
+    return {
+      topOpportunities: [],
+      inDemandSkills: [],
+      growingIndustries: [],
+      salaryBenchmarks: {
+        entry: 0,
+        mid: 0,
+        senior: 0,
+        byLocation: {
+          [loc]: { entry: 0, mid: 0, senior: 0 },
+        },
+      },
+    };
+  }
   
   // Create or update twin with CV context
   async createTwinFromCV(cvAnalysis: CVAnalysisData, userResponses: Record<string, any> = {}): Promise<EnrichedProfile> {
@@ -52,65 +68,57 @@ export class ProfileService {
       throw new Error('Failed to create twin');
     } catch (error) {
       console.error('Error creating twin from CV:', error);
-      return this.getMockEnrichedProfile({}, cvAnalysis);
+      throw error;
     }
   }
 
   // Enrich profile with market insights
   async enrichProfile(twin: any, cvAnalysis?: CVAnalysisData): Promise<EnrichedProfile> {
+    const province = twin?.province || 'South Africa';
+    const skills = Array.isArray(twin?.skills) ? twin.skills : [];
+
+    let opportunities: any[] = [];
     try {
-      // Fetch market opportunities based on skills
+      // Authenticated requests will be matched server-side using stored CV + user signals.
       const opportunitiesResponse = await opportunitiesAPI.getAll({
-        skills: twin.skills?.join(','),
-        province: twin.province,
-        limit: 10
+        limit: 10,
+        sort: 'relevance',
       });
-
-      const opportunities = opportunitiesResponse.data?.opportunities || [];
-
-      // Generate skill gaps and recommendations
-      const skillGaps = this.identifySkillGaps(twin.skills || [], twin.industry);
-      
-      // Generate market insights
-      const marketInsights = this.generateMarketInsights(
-        twin.skills || [],
-        twin.province || 'Gauteng',
-        opportunities
-      );
-
-      // Create action plan
-      const actionPlan = this.createActionPlan(
-        cvAnalysis,
-        twin,
-        skillGaps,
-        marketInsights
-      );
-
-      // Generate career paths
-      const recommendedPaths = this.generateCareerPaths(twin, marketInsights);
-
-      return {
-        ...twin,
-        cvData: cvAnalysis ? {
-          skills: cvAnalysis.sections?.skills || [],
-          experience: cvAnalysis.sections?.experience || [],
-          education: cvAnalysis.sections?.education || [],
-          achievements: cvAnalysis.sections?.achievements || [],
-          recommendations: cvAnalysis.recommendations || [],
-          score: cvAnalysis.score || 0,
-          readinessLevel: cvAnalysis.readinessLevel || '',
-          analysisDate: new Date().toISOString()
-        } : undefined,
-        marketInsights,
-        skillGaps,
-        actionPlan,
-        recommendedPaths,
-        empowermentScore: twin.empowermentScore || this.calculateEmpowermentScore(twin, marketInsights)
-      };
+      opportunities = opportunitiesResponse?.data?.opportunities || [];
+      if (!Array.isArray(opportunities)) opportunities = [];
     } catch (error) {
-      console.error('Error enriching profile:', error);
-      return this.getMockEnrichedProfile(twin, cvAnalysis);
+      console.error('Error loading matched opportunities for enrichment:', error);
+      opportunities = [];
     }
+
+    const skillGaps = this.identifySkillGaps(skills, twin?.industry);
+
+    const marketInsights =
+      opportunities.length > 0
+        ? this.generateMarketInsights(skills, province, opportunities)
+        : this.createEmptyMarketInsights(province);
+
+    const actionPlan = this.createActionPlan(cvAnalysis, twin, skillGaps, marketInsights);
+    const recommendedPaths = this.generateCareerPaths(twin, marketInsights);
+
+    return {
+      ...twin,
+      cvData: cvAnalysis ? {
+        skills: cvAnalysis.sections?.skills || [],
+        experience: cvAnalysis.sections?.experience || [],
+        education: cvAnalysis.sections?.education || [],
+        achievements: cvAnalysis.sections?.achievements || [],
+        recommendations: cvAnalysis.recommendations || [],
+        score: cvAnalysis.score || 0,
+        readinessLevel: cvAnalysis.readinessLevel || '',
+        analysisDate: new Date().toISOString()
+      } : undefined,
+      marketInsights,
+      skillGaps,
+      actionPlan,
+      recommendedPaths,
+      empowermentScore: twin.empowermentScore || this.calculateEmpowermentScore(twin, marketInsights)
+    };
   }
 
   // Identify skill gaps based on market demand
@@ -408,122 +416,6 @@ export class ProfileService {
       default:
         return 50;
     }
-  }
-
-  // Mock data for fallback
-  getMockEnrichedProfile(twin: any, cvAnalysis?: CVAnalysisData): EnrichedProfile {
-    const defaultTwin = twin || {
-      name: 'User',
-      skills: cvAnalysis?.sections?.skills || ['JavaScript', 'React', 'Communication'],
-      industry: 'Technology',
-      province: 'Gauteng'
-    };
-
-    const defaultInsights: MarketInsights = {
-      topOpportunities: [
-        {
-          title: 'Software Developer',
-          matchScore: 85,
-          reason: 'Your technical skills match current market demand',
-          salary: { min: 300000, max: 600000, currency: 'ZAR' },
-          demandLevel: 'High',
-          growthRate: 20,
-          locations: ['Johannesburg', 'Cape Town', 'Remote']
-        },
-        {
-          title: 'Frontend Developer',
-          matchScore: 78,
-          reason: 'Strong match with your React experience',
-          salary: { min: 280000, max: 550000, currency: 'ZAR' },
-          demandLevel: 'High',
-          growthRate: 18,
-          locations: ['Johannesburg', 'Remote']
-        }
-      ],
-      inDemandSkills: ['React', 'Node.js', 'TypeScript', 'AWS', 'Python'],
-      growingIndustries: [
-        { name: 'Technology', growth: 25, relevantRoles: ['Developer', 'Data Scientist', 'Cloud Architect'] },
-        { name: 'FinTech', growth: 30, relevantRoles: ['Developer', 'Security Analyst'] }
-      ],
-      salaryBenchmarks: {
-        entry: 250000,
-        mid: 450000,
-        senior: 750000,
-        byLocation: {
-          'Gauteng': { entry: 250000, mid: 450000, senior: 750000 },
-          'Western Cape': { entry: 230000, mid: 420000, senior: 700000 },
-          'KwaZulu-Natal': { entry: 200000, mid: 380000, senior: 650000 }
-        }
-      }
-    };
-
-    return {
-      ...defaultTwin,
-      cvData: cvAnalysis ? {
-        skills: cvAnalysis.sections?.skills || [],
-        experience: cvAnalysis.sections?.experience || [],
-        education: cvAnalysis.sections?.education || [],
-        achievements: cvAnalysis.sections?.achievements || [],
-        recommendations: cvAnalysis.recommendations || [],
-        score: cvAnalysis.score || 0,
-        readinessLevel: cvAnalysis.readinessLevel || '',
-        analysisDate: new Date().toISOString()
-      } : undefined,
-      marketInsights: defaultInsights,
-      skillGaps: [
-        {
-          skill: 'TypeScript',
-          importance: 'recommended',
-          resources: [{ title: 'TypeScript Course', type: 'course', provider: 'Udemy', duration: '20 hours', cost: 'R400' }]
-        },
-        {
-          skill: 'AWS',
-          importance: 'critical',
-          resources: [{ title: 'AWS Certification', type: 'certification', provider: 'AWS', duration: '30 hours', cost: 'R1500' }]
-        }
-      ],
-      actionPlan: {
-        immediate: [
-          { 
-            task: 'Update your CV with missing keywords', 
-            priority: 'high', 
-            timeframe: 'This week', 
-            reason: 'Improve ATS compatibility' 
-          }
-        ],
-        shortTerm: [
-          { 
-            task: 'Complete TypeScript certification', 
-            targetDate: '3 months', 
-            expectedOutcome: 'Better job prospects' 
-          }
-        ],
-        longTerm: [
-          { 
-            goal: 'Secure a senior developer position', 
-            milestones: ['Complete AWS certification', 'Build portfolio'], 
-            projectedTimeline: '6 months' 
-          }
-        ]
-      },
-      recommendedPaths: [
-        {
-          title: 'Technology Professional',
-          description: 'Pursue a career in tech',
-          matchPercentage: 85,
-          steps: ['Update CV', 'Apply to jobs', 'Prepare for interviews'],
-          potentialIncome: 450000
-        },
-        {
-          title: 'Skills Development',
-          description: 'Enhance your qualifications',
-          matchPercentage: 75,
-          steps: ['Get certified', 'Build portfolio'],
-          potentialIncome: 350000
-        }
-      ],
-      empowermentScore: 72
-    };
   }
 
   // CV data extraction helpers
