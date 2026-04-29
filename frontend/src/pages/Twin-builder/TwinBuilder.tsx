@@ -1,779 +1,380 @@
-// Digital Twin Builder — guided step-by-step career profile creator
-import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import {
-  ArrowLeft, ArrowRight, Bot, Briefcase, CheckCircle,
-  FileText, Loader2, MapPin, Sparkles, Target, User,
-} from "lucide-react";
+// Digital Twin Builder - Modern UI/UX from lovable design
+// Clean sidebar layout with chat interface and insight cards
+
+import { type FormEvent, type ReactNode, useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
-import { twinAPI } from "../../lib/api";
-import { useUser } from "../../contexts/user-context";
-import { getStoredCvAnalysis } from "../../lib/sensitiveStorage";
-import toast from "react-hot-toast";
+import { 
+  Bot, 
+  BriefcaseBusiness, 
+  ChevronDown, 
+  CircleDollarSign, 
+  Lightbulb, 
+  Send, 
+  Sparkles, 
+  Target, 
+  UserRound, 
+  Zap,
+  ArrowRight,
+  BookOpen
+} from "lucide-react";
 
-// ── Types ──────────────────────────────────────────────────────────────────
-
-interface TwinProfile {
-  name: string;
-  province: string;
-  careerStage: string;
-  skills: string[];
-  experience: string;
-  education: string;
-  projects: string;
-  desiredRole: string;
-  industries: string[];
-  interests: string[];
-  salaryGoal: string;
-  workPreference: string;
-}
-
-interface SavedTwin {
-  identity?: { currentRole?: string; targetRole?: string; industry?: string; seniorityLevel?: string };
-  economy?: { employabilityScore?: number; marketValueScore?: number; demandLevel?: string; incomePotentialRange?: { min?: number; max?: number } };
-  skills?: { core?: string; missing?: string; emerging?: string };
-  intelligence?: { strengths?: string; recommendations?: string };
-  status?: string;
-}
-
-// ── Step config ────────────────────────────────────────────────────────────
-
-const STEPS = [
-  { id: "identity", label: "Identity", icon: User },
-  { id: "skills", label: "Skills", icon: Sparkles },
-  { id: "experience", label: "Experience", icon: Briefcase },
-  { id: "goals", label: "Goals", icon: Target },
-  { id: "summary", label: "Summary", icon: Bot },
-] as const;
-
-type StepId = typeof STEPS[number]["id"];
-
-const PROGRESS_MAP: Record<StepId, number> = {
-  identity: 20,
-  skills: 40,
-  experience: 60,
-  goals: 80,
-  summary: 100,
+// Profile data from lovable design
+const profile = {
+  name: "Economic Twin Profile",
+  path: "Retail-ready career profile",
+  industry: "Retail",
+  level: "Entry-level / learnership ready",
+  value: "ZAR 18,000 – 35,000 /mo",
+  skills: ["Customer service", "Stock control", "Cash handling", "Communication", "Basic computer skills"],
 };
 
-// ── Suggested data ─────────────────────────────────────────────────────────
-
-const SUGGESTED_SKILLS = [
-  "Communication", "Excel", "Customer Service", "Data Analysis", "Sales",
-  "Marketing", "Project Management", "Problem Solving", "Leadership",
-  "Python", "Design", "Administration", "Research", "Writing",
-  "Social Media", "JavaScript", "SQL", "Teamwork", "Presentation",
+const issues = [
+  "No specific POS/till systems mentioned",
+  "Limited measurable achievements",
+  "No driver's licence indicated",
+  "Matric subjects not listed",
+  "Missing specific retail terminology",
+  "No clear indication of shift flexibility",
 ];
 
-const INDUSTRIES = [
-  "Technology", "Finance", "Healthcare", "Education",
-  "Retail", "Creative", "Government", "Entrepreneurship",
-  "Engineering", "Media", "Logistics",
+const recommendations = [
+  "Add specific POS/till systems used",
+  "Include measurable achievements such as sales targets met",
+  "List matric subjects for ATS keyword matching",
+  "Mention availability for weekends and shifts",
+  "Add retail-specific terminology like 'merchandising', 'inventory control', 'loss prevention'",
 ];
 
-const CAREER_STAGES = ["Student", "Graduate", "Entry level", "Experienced", "Career switcher"];
-const WORK_PREFS = ["Remote", "Hybrid", "On-site", "Any"];
-const SA_PROVINCES = [
-  "Gauteng", "Western Cape", "KwaZulu-Natal", "Eastern Cape",
-  "Limpopo", "Mpumalanga", "North West", "Free State", "Northern Cape",
+const mappedJobs = [
+  "Photo Retoucher at BaubleBar Inc.",
+  "Styling Enablement Communications Associate",
+  "RETAIL LEARNERSHIP TONGAAT",
+  "Learnership?- TimberCity Stikland",
+  "Learnership?- TimberCity Tokai",
+  "Learnership?- HHL Claremont",
+  "Learnership - BUCO Nelspruit",
+  "Learnership - BUCO Thabazimbi",
+  "ENTRY-LEVEL Retail Store Agent",
+  "Entry level Sales Assistant",
 ];
 
-// ── Helper: parse comma-separated string to array ──────────────────────────
+const nextSteps = [
+  "Chat with your twin above to explore career paths, salary projections, and skill recommendations.",
+  "Run simulations to see how different choices affect your income and employability over time.",
+  "Browse job opportunities matched to your profile and skills.",
+];
 
-function parseToArray(str?: string): string[] {
-  if (!str) return [];
-  return str.split(",").map(s => s.trim()).filter(Boolean);
-}
+const quickQuestions = [
+  "What skills am I missing?",
+  "What's my market demand?",
+  "Give me career recommendations",
+  "What can I monetize?",
+];
 
-// ── Main component ─────────────────────────────────────────────────────────
+type ChatMessage = {
+  id: number;
+  role: "assistant" | "user";
+  text: string;
+  options?: string[];
+};
 
-export default function TwinBuilder() {
-  const navigate = useNavigate();
-  const { user, updateProgress } = useUser();
+// Insight card component from lovable design
+const InsightCard = ({
+  icon: Icon,
+  title,
+  children,
+}: {
+  icon: typeof Lightbulb;
+  title: string;
+  children: ReactNode;
+}) => (
+  <article className="rounded-xl border border-border bg-card">
+    <button type="button" className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left">
+      <span className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-primary">
+        <Icon className="h-4 w-4" />
+        {title}
+      </span>
+      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+    </button>
+    <div className="border-t border-border px-4 py-4">{children}</div>
+  </article>
+);
 
-  const [activeStep, setActiveStep] = useState<StepId>("identity");
-  const [submitting, setSubmitting] = useState(false);
-  const [loadingExisting, setLoadingExisting] = useState(true);
-  const [savedTwin, setSavedTwin] = useState<SavedTwin | null>(null);
-  const [hasCvProfile, setHasCvProfile] = useState(false);
-  const [twinProfile, setTwinProfile] = useState<TwinProfile>({
-    name: user?.name ?? "",
-    province: user?.province ?? "",
-    careerStage: "",
-    skills: [],
-    experience: "",
-    education: "",
-    projects: "",
-    desiredRole: "",
-    industries: [],
-    interests: [],
-    salaryGoal: "",
-    workPreference: "",
-  });
+const getTwinReply = (prompt: string) => {
+  const normalized = prompt.toLowerCase();
 
-  const progress = PROGRESS_MAP[activeStep];
-  const currentIndex = STEPS.findIndex(s => s.id === activeStep);
-
-  // ── Initialise: pre-fill from CV + check for existing twin ──────────────
-
-  useEffect(() => {
-    const init = async () => {
-      setLoadingExisting(true);
-
-      // Pre-fill from stored CV analysis
-      const cvAnalysis = getStoredCvAnalysis<any>();
-      if (cvAnalysis) {
-        setHasCvProfile(true);
-        setTwinProfile(prev => ({
-          ...prev,
-          name: prev.name || user?.name || "",
-          skills: cvAnalysis.sections?.skills?.slice(0, 8) ?? prev.skills,
-          experience: Array.isArray(cvAnalysis.sections?.experience)
-            ? cvAnalysis.sections.experience.slice(0, 3).join("\n")
-            : prev.experience,
-          education: Array.isArray(cvAnalysis.sections?.education)
-            ? cvAnalysis.sections.education.slice(0, 2).join(", ")
-            : prev.education,
-        }));
-      }
-
-      // Try to load existing twin
-      try {
-        const res = await twinAPI.get();
-        const twin = res?.data?.twin;
-        if (twin) {
-          setSavedTwin(twin);
-          setActiveStep("summary");
-        }
-      } catch {
-        // No twin yet — that's fine
-      } finally {
-        setLoadingExisting(false);
-      }
+  if (normalized.includes("missing") || normalized.includes("skills")) {
+    return {
+      text: "The strongest gaps are POS/till systems, measurable sales achievements, merchandising, inventory control, loss prevention, and customer retention. Add these as proof-based CV bullets before applying widely.",
+      options: ["How do I write this on my CV?", "What course should I take?", "What's my market demand?"],
     };
-
-    void init();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const update = (field: keyof TwinProfile, value: string | string[]) =>
-    setTwinProfile(prev => ({ ...prev, [field]: value }));
-
-  const toggleArrayItem = (field: "skills" | "industries" | "interests", item: string) => {
-    setTwinProfile(prev => {
-      const arr = prev[field] as string[];
-      return {
-        ...prev,
-        [field]: arr.includes(item) ? arr.filter(i => i !== item) : [...arr, item],
-      };
-    });
-  };
-
-  const goNext = () => {
-    const next = STEPS[currentIndex + 1];
-    if (next) setActiveStep(next.id);
-  };
-
-  const goPrev = () => {
-    const prev = STEPS[currentIndex - 1];
-    if (prev) setActiveStep(prev.id);
-  };
-
-  const handleBuild = async () => {
-    if (!hasCvProfile) {
-      toast.error("Please complete your CV analysis first before building your Twin.");
-      void navigate("/dashboard/cv-analyzer");
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      const payload = {
-        name: twinProfile.name || user?.name || "",
-        province: twinProfile.province,
-        interests: [
-          ...twinProfile.interests,
-          ...twinProfile.industries,
-          twinProfile.desiredRole,
-        ].filter(Boolean),
-        age: 25,
-      };
-
-      const res = await twinAPI.create(payload);
-      const twin = res?.data?.twin;
-
-      if (twin) {
-        setSavedTwin(twin);
-
-        localStorage.setItem("twinData", JSON.stringify(twin));
-        localStorage.setItem("twinCreated", "true");
-        localStorage.setItem("twinCompleted", "true");
-        if (twin.economy?.employabilityScore) {
-          localStorage.setItem("empowermentScore", String(twin.economy.employabilityScore));
-        }
-        updateProgress("twinCompleted", true);
-        window.dispatchEvent(new Event("twinCompleted"));
-
-        toast.success("Your AI Twin has been built!");
-        setActiveStep("summary");
-      }
-    } catch (err: any) {
-      const msg = err?.message ?? "Failed to build twin. Please try again.";
-      toast.error(msg as string);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  // ── Loading state ──────────────────────────────────────────────────────
-
-  if (loadingExisting) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <div className="flex flex-col items-center gap-3 text-muted-foreground">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm">Loading your twin profile…</p>
-        </div>
-      </div>
-    );
   }
 
-  // ── Render ─────────────────────────────────────────────────────────────
+  if (normalized.includes("market") || normalized.includes("demand")) {
+    return {
+      text: "Your current market demand is medium. Retail and entry-level sales roles are available, but your demand rises when the CV proves POS experience, stock control, sales targets, and shift flexibility.",
+      options: ["Which jobs match me?", "How do I raise demand?", "Show salary benchmarks"],
+    };
+  }
+
+  if (normalized.includes("recommend") || normalized.includes("career") || normalized.includes("next")) {
+    return {
+      text: "Focus on one practical path first: improve the CV evidence, then apply for retail assistant, cashier, stockroom, sales assistant, and retail learnership roles. This keeps your path clear and realistic.",
+      options: ["What skills am I missing?", "Which jobs match me?", "What can I monetize?"],
+    };
+  }
+
+  if (normalized.includes("monetize") || normalized.includes("money") || normalized.includes("income")) {
+    return {
+      text: "You can monetize customer service and stock control by helping small stores with weekend stock counts, product organization, basic sales admin, and customer support. Start with a simple one-day service package.",
+      options: ["Create a 7-day action plan", "What should I charge?", "Which skill should I learn first?"],
+    };
+  }
+
+  if (normalized.includes("salary") || normalized.includes("charge")) {
+    return {
+      text: "Use salary benchmarks by role, location, shift type, and commission potential. For side services, start with a fixed package price so the offer is simple and easy for small businesses to understand.",
+      options: ["What's my market demand?", "What can I monetize?", "Give me career recommendations"],
+    };
+  }
+
+  return {
+    text: "I hear you. Based on your Economic Twin, the best move is to strengthen your CV evidence, focus on one income path, and compare opportunities by skills required, salary range, and how fast you can qualify.",
+    options: quickQuestions,
+  };
+};
+
+const TwinBuilder = () => {
+  const [message, setMessage] = useState("");
+  const [isBotTyping, setIsBotTyping] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement | null>(null);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
+    {
+      id: 1,
+      role: "assistant",
+      text: "Your Economic Twin is loaded. I can see your 5 core skills, your industry (retail), and your full career profile. Ask me anything — salary benchmarks, skill gaps, market demand, career paths, or what to focus on next.",
+      options: quickQuestions,
+    },
+  ]);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [chatMessages, isBotTyping]);
+
+  const sendTwinMessage = (prompt: string) => {
+    const cleanPrompt = prompt.trim();
+    if (!cleanPrompt || isBotTyping) return;
+
+    const reply = getTwinReply(cleanPrompt);
+    setChatMessages((current) => [...current, { id: Date.now(), role: "user", text: cleanPrompt }]);
+    setIsBotTyping(true);
+
+    window.setTimeout(() => {
+      setChatMessages((current) => [
+        ...current,
+        { id: Date.now() + 1, role: "assistant", text: reply.text, options: reply.options },
+      ]);
+      setIsBotTyping(false);
+    }, 850);
+  };
+
+  const submitMessage = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!message.trim()) return;
+    sendTwinMessage(message);
+    setMessage("");
+  };
 
   return (
-    <div className="min-h-screen bg-background">
+    <main className="min-h-screen bg-background font-sans text-foreground">
+      <div className="mx-auto grid min-h-screen max-w-[1070px] border-x border-border bg-background lg:grid-cols-[390px_minmax(0,1fr)]">
+        <aside className="h-screen overflow-y-auto border-b border-border bg-background px-4 py-4 lg:border-b-0 lg:border-r">
+          <div className="space-y-3">
+            <section className="rounded-xl border border-border bg-card p-4">
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <UserRound className="h-5 w-5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Profile</p>
+                  <h1 className="mt-1 text-lg font-bold leading-tight text-primary">{profile.name}</h1>
+                  <p className="mt-1 text-sm font-semibold leading-5 text-foreground">{profile.path}</p>
+                </div>
+              </div>
 
-      {/* Header */}
-      <section className="border-b bg-card/50">
-        <div className="mx-auto max-w-7xl px-4 py-8">
-          <span className="mb-3 inline-block rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-            AI Twin Builder
-          </span>
-          <h1 className="text-3xl font-bold md:text-4xl">Build your AI career twin</h1>
-          <p className="mt-2 max-w-2xl text-muted-foreground">
-            Create a personal career model that helps EmpowerAI understand your skills, goals, and opportunities.
-          </p>
-          {!hasCvProfile && (
-            <div className="mt-4 flex items-center gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm">
-              <FileText className="h-4 w-4 text-amber-500 shrink-0" />
-              <span className="text-amber-700 dark:text-amber-400">
-                Your Twin is powered by your CV data.{" "}
-                <Link to="/dashboard/cv-analyzer" className="font-semibold underline">Analyse your CV first</Link>
-                {" "}for the best results.
-              </span>
-            </div>
-          )}
-        </div>
-      </section>
+              <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
+                <div className="rounded-lg bg-muted/60 p-3">
+                  <BriefcaseBusiness className="h-4 w-4 text-primary" />
+                  <p className="mt-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">Industry</p>
+                  <p className="font-semibold text-foreground">{profile.industry}</p>
+                </div>
+                <div className="rounded-lg bg-muted/60 p-3">
+                  <CircleDollarSign className="h-4 w-4 text-secondary" />
+                  <p className="mt-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">Value</p>
+                  <p className="font-semibold text-foreground">Medium</p>
+                </div>
+              </div>
 
-      <section className="mx-auto max-w-7xl space-y-6 px-4 py-6">
+              <div className="mt-4 rounded-lg border border-secondary/30 bg-secondary/10 px-3 py-2 text-sm font-semibold text-foreground">
+                Income potential · {profile.value}
+              </div>
+            </section>
 
-        {/* Step progress */}
-        <div className="rounded-xl border bg-card/60 p-4">
-          <div className="mb-3 flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Twin creation progress</span>
-            <span className="font-semibold text-primary">{progress}% complete</span>
+            <InsightCard icon={Sparkles} title="Core skills · retail · v1">
+              <div className="flex flex-wrap gap-2">
+                {profile.skills.map((skill) => (
+                  <span key={skill} className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary">
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </InsightCard>
+
+            <InsightCard icon={Lightbulb} title="Potential gaps">
+              <ul className="space-y-2.5">
+                {issues.map((issue) => (
+                  <li key={issue} className="flex gap-2 text-sm font-medium leading-5 text-foreground">
+                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-secondary" />
+                    <span>{issue}</span>
+                  </li>
+                ))}
+              </ul>
+            </InsightCard>
+
+            <InsightCard icon={Lightbulb} title="Recommendations">
+              <ol className="space-y-3">
+                {recommendations.map((item, index) => (
+                  <li key={item} className="flex gap-3 text-sm font-medium leading-5 text-foreground">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold text-primary">
+                      {index + 1}
+                    </span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ol>
+            </InsightCard>
+
+            <InsightCard icon={Target} title="Mapped job titles">
+              <div className="flex flex-wrap gap-2">
+                {mappedJobs.map((job) => (
+                  <span key={job} className="rounded-md border border-border bg-muted/60 px-2.5 py-1 text-xs font-semibold text-foreground">
+                    {job}
+                  </span>
+                ))}
+              </div>
+            </InsightCard>
+
+            <InsightCard icon={Zap} title="Next steps">
+              <ol className="space-y-3">
+                {nextSteps.map((step, index) => (
+                  <li key={step} className="flex gap-3 text-sm font-medium leading-5 text-foreground">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                      {index + 1}
+                    </span>
+                    <span>{step}</span>
+                  </li>
+                ))}
+              </ol>
+            </InsightCard>
+
+            {/* Start Here Section */}
+            <section className="rounded-xl border border-primary bg-card p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Zap className="h-4 w-4 text-primary" />
+                <h3 className="font-bold text-primary">Start Here</h3>
+              </div>
+              <p className="text-sm text-muted-foreground mb-3">
+                Your strongest next move is to improve your CV evidence before applying widely.
+              </p>
+              <Link to="/cv-analyzer">
+                <Button className="w-full">
+                  Open CV Analyzer
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </section>
           </div>
-          <div className="h-2 overflow-hidden rounded-full bg-muted">
-            <div
-              className="h-full rounded-full bg-primary transition-all duration-500"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-          <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
-            {STEPS.map(step => {
-              const Icon = step.icon;
-              const isActive = activeStep === step.id;
-              const isDone = PROGRESS_MAP[step.id] < PROGRESS_MAP[activeStep];
-              return (
-                <button
-                  key={step.id}
-                  onClick={() => setActiveStep(step.id)}
-                  className={cn(
-                    "flex shrink-0 items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors",
-                    isActive
-                      ? "border-primary bg-primary/10 text-primary font-semibold"
-                      : isDone
-                        ? "border-green-500/30 bg-green-500/10 text-green-600 dark:text-green-400"
-                        : "border-border bg-background text-muted-foreground hover:border-primary/40"
+        </aside>
+
+        <section className="flex h-screen min-h-0 flex-col bg-background">
+          <div className="flex-1 overflow-y-auto px-4 pb-8 pt-12 sm:px-5">
+            <div className="space-y-5">
+              {chatMessages.map((chat) => (
+                <div key={chat.id} className={`flex gap-3 ${chat.role === "user" ? "justify-end" : "justify-start"}`}>
+                  {chat.role === "assistant" && (
+                    <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                      <Bot className="h-4 w-4" />
+                    </div>
                   )}
-                >
-                  {isDone ? <CheckCircle className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
-                  {step.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
 
-        {/* Main layout: step content + preview */}
-        <div className="grid gap-6 lg:grid-cols-[1.4fr_0.8fr]">
-
-          {/* ── Step content ──────────────────────────────────────────── */}
-          <div className="space-y-4">
-
-            {/* Step 1: Identity */}
-            {activeStep === "identity" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Start with your basics</CardTitle>
-                  <CardDescription>This helps your Twin understand your current career position.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="name">Your name</Label>
-                    <Input
-                      id="name"
-                      value={twinProfile.name}
-                      onChange={e => update("name", e.target.value)}
-                      placeholder="e.g. Thando"
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label>Province</Label>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {SA_PROVINCES.map(p => (
-                        <button
-                          key={p}
-                          type="button"
-                          onClick={() => update("province", twinProfile.province === p ? "" : p)}
-                          className={cn(
-                            "rounded-full border px-3 py-1.5 text-sm transition-colors",
-                            twinProfile.province === p
-                              ? "border-primary bg-primary text-primary-foreground"
-                              : "border-border bg-background hover:border-primary/50"
-                          )}
-                        >
-                          {p}
-                        </button>
-                      ))}
+                  <div className="max-w-[496px]">
+                    <div
+                      className={`px-4 py-3 text-sm font-bold leading-6 shadow-sm ${
+                        chat.role === "user"
+                          ? "rounded-2xl bg-primary text-primary-foreground"
+                          : "rounded-[14px] border border-border bg-card text-foreground"
+                      }`}
+                    >
+                      {chat.text}
                     </div>
-                  </div>
-                  <div>
-                    <Label>Career stage</Label>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {CAREER_STAGES.map(stage => (
-                        <button
-                          key={stage}
-                          type="button"
-                          onClick={() => update("careerStage", twinProfile.careerStage === stage ? "" : stage)}
-                          className={cn(
-                            "rounded-full border px-3 py-1.5 text-sm transition-colors",
-                            twinProfile.careerStage === stage
-                              ? "border-primary bg-primary text-primary-foreground"
-                              : "border-border bg-background hover:border-primary/50"
-                          )}
-                        >
-                          {stage}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
 
-            {/* Step 2: Skills */}
-            {activeStep === "skills" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Map your skills</CardTitle>
-                  <CardDescription>
-                    {hasCvProfile
-                      ? "Skills detected from your CV are pre-selected. Add or remove as needed."
-                      : "Select the skills that best describe you."}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {hasCvProfile && twinProfile.skills.length > 0 && (
-                    <p className="rounded-lg border border-primary/20 bg-primary/10 px-3 py-2 text-xs text-primary">
-                      {twinProfile.skills.length} skills detected from your CV analysis
-                    </p>
-                  )}
-                  <div className="flex flex-wrap gap-2">
-                    {SUGGESTED_SKILLS.map(skill => {
-                      const selected = twinProfile.skills.includes(skill);
-                      return (
-                        <button
-                          key={skill}
-                          type="button"
-                          onClick={() => toggleArrayItem("skills", skill)}
-                          className={cn(
-                            "rounded-full border px-4 py-1.5 text-sm transition-colors",
-                            selected
-                              ? "border-primary bg-primary text-primary-foreground"
-                              : "border-border bg-background hover:border-primary/50"
-                          )}
-                        >
-                          {skill}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    {twinProfile.skills.length} skill{twinProfile.skills.length !== 1 ? "s" : ""} selected
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Step 3: Experience */}
-            {activeStep === "experience" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Add your experience</CardTitle>
-                  <CardDescription>
-                    Include work, school, projects, volunteering, or anything that shows your ability.
-                    {hasCvProfile && " Pre-filled from your CV — edit as needed."}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="experience">Experience summary</Label>
-                    <Textarea
-                      id="experience"
-                      value={twinProfile.experience}
-                      onChange={e => update("experience", e.target.value)}
-                      placeholder="Tell us about your work, internships, volunteering, or projects."
-                      className="mt-1 min-h-[100px]"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="education">Education</Label>
-                    <Textarea
-                      id="education"
-                      value={twinProfile.education}
-                      onChange={e => update("education", e.target.value)}
-                      placeholder="Your school, college, university, certificates, or training."
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="projects">Projects</Label>
-                    <Textarea
-                      id="projects"
-                      value={twinProfile.projects}
-                      onChange={e => update("projects", e.target.value)}
-                      placeholder="Any personal, school, freelance, or community projects."
-                      className="mt-1"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Step 4: Goals */}
-            {activeStep === "goals" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Set your career direction</CardTitle>
-                  <CardDescription>Your Twin uses this to suggest better career moves.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="desiredRole">Desired role</Label>
-                    <Input
-                      id="desiredRole"
-                      value={twinProfile.desiredRole}
-                      onChange={e => update("desiredRole", e.target.value)}
-                      placeholder="e.g. Data Analyst, Software Developer, HR Assistant"
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label>Preferred industries</Label>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {INDUSTRIES.map(industry => {
-                        const selected = twinProfile.industries.includes(industry);
-                        return (
-                          <button
-                            key={industry}
-                            type="button"
-                            onClick={() => toggleArrayItem("industries", industry)}
-                            className={cn(
-                              "rounded-full border px-4 py-1.5 text-sm transition-colors",
-                              selected
-                                ? "border-primary bg-primary text-primary-foreground"
-                                : "border-border bg-background hover:border-primary/50"
-                            )}
-                          >
-                            {industry}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div>
-                      <Label htmlFor="salaryGoal">Salary goal</Label>
-                      <Input
-                        id="salaryGoal"
-                        value={twinProfile.salaryGoal}
-                        onChange={e => update("salaryGoal", e.target.value)}
-                        placeholder="e.g. R18,000/month"
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label>Work preference</Label>
+                    {chat.role === "assistant" && chat.options && (
                       <div className="mt-2 flex flex-wrap gap-2">
-                        {WORK_PREFS.map(pref => (
+                        {chat.options.map((option) => (
                           <button
-                            key={pref}
+                            key={option}
                             type="button"
-                            onClick={() => update("workPreference", twinProfile.workPreference === pref ? "" : pref)}
-                            className={cn(
-                              "rounded-full border px-3 py-1.5 text-sm transition-colors",
-                              twinProfile.workPreference === pref
-                                ? "border-primary bg-primary text-primary-foreground"
-                                : "border-border bg-background hover:border-primary/50"
-                            )}
+                            disabled={isBotTyping}
+                            onClick={() => sendTwinMessage(option)}
+                            className="rounded-xl bg-secondary/30 px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-secondary/40 disabled:cursor-not-allowed disabled:opacity-60"
                           >
-                            {pref}
+                            {option}
                           </button>
                         ))}
                       </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Step 5: Summary */}
-            {activeStep === "summary" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>
-                    {savedTwin ? "Your AI Twin is active" : "Your AI Twin is taking shape"}
-                  </CardTitle>
-                  <CardDescription>
-                    {savedTwin
-                      ? "Here is what EmpowerAI understands about your career profile."
-                      : "Review your details and build your twin."}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-5">
-
-                  {savedTwin ? (
-                    <>
-                      {/* Readiness bar */}
-                      <div className="rounded-lg border bg-muted/40 p-4">
-                        <div className="mb-2 flex items-center justify-between text-sm">
-                          <span className="font-semibold">Twin readiness</span>
-                          <span className="font-semibold text-primary">
-                            {savedTwin.economy?.employabilityScore ?? 100}%
-                          </span>
-                        </div>
-                        <div className="h-2.5 overflow-hidden rounded-full bg-muted">
-                          <div
-                            className="h-full rounded-full bg-primary"
-                            style={{ width: `${savedTwin.economy?.employabilityScore ?? 100}%` }}
-                          />
-                        </div>
-                        {savedTwin.economy?.demandLevel && (
-                          <p className="mt-2 text-xs text-muted-foreground">
-                            Market demand: <span className="font-medium text-foreground">{savedTwin.economy.demandLevel}</span>
-                          </p>
-                        )}
-                      </div>
-
-                      {/* Insight cards */}
-                      <div className="grid gap-3 sm:grid-cols-3">
-                        {[
-                          {
-                            icon: Sparkles,
-                            title: "Strongest signal",
-                            value: parseToArray(savedTwin.skills?.core)[0] || twinProfile.skills[0] || "Add more skills",
-                          },
-                          {
-                            icon: Target,
-                            title: "Career direction",
-                            value: savedTwin.identity?.targetRole || twinProfile.desiredRole || "Not selected",
-                          },
-                          {
-                            icon: MapPin,
-                            title: "Market location",
-                            value: twinProfile.province || user?.province || "Not added",
-                          },
-                        ].map(card => {
-                          const Icon = card.icon;
-                          return (
-                            <div key={card.title} className="rounded-lg border bg-card p-4">
-                              <Icon className="mb-2 h-4 w-4 text-primary" />
-                              <p className="text-xs text-muted-foreground">{card.title}</p>
-                              <p className="mt-0.5 text-sm font-semibold">{card.value}</p>
-                            </div>
-                          );
-                        })}
-                      </div>
-
-                      {/* Income range */}
-                      {savedTwin.economy?.incomePotentialRange?.min != null && (
-                        <div className="rounded-lg border border-green-500/30 bg-green-500/10 p-4">
-                          <p className="mb-1 text-xs text-muted-foreground">Income potential range</p>
-                          <p className="font-bold text-green-700 dark:text-green-400">
-                            R{savedTwin.economy.incomePotentialRange.min.toLocaleString()}
-                            {savedTwin.economy.incomePotentialRange.max != null && (
-                              <> – R{savedTwin.economy.incomePotentialRange.max.toLocaleString()}</>
-                            )}
-                            /month
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Recommendations */}
-                      {savedTwin.intelligence?.recommendations && (
-                        <div>
-                          <p className="mb-2 text-sm font-semibold">Recommendations</p>
-                          <ul className="space-y-1.5">
-                            {parseToArray(savedTwin.intelligence.recommendations).slice(0, 4).map((rec, i) => (
-                              <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                                <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                                {rec}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    /* Pre-build review */
-                    <div className="space-y-2.5">
-                      {[
-                        { label: "Name", value: twinProfile.name || "Not set" },
-                        { label: "Province", value: twinProfile.province || "Not set" },
-                        { label: "Career stage", value: twinProfile.careerStage || "Not set" },
-                        { label: "Skills", value: twinProfile.skills.length > 0 ? `${twinProfile.skills.length} selected` : "None selected" },
-                        { label: "Desired role", value: twinProfile.desiredRole || "Not set" },
-                        { label: "Industries", value: twinProfile.industries.length > 0 ? twinProfile.industries.join(", ") : "None selected" },
-                      ].map(row => (
-                        <div key={row.label} className="flex justify-between gap-4 border-b border-border/40 pb-2 text-sm">
-                          <span className="text-muted-foreground">{row.label}</span>
-                          <span className="font-medium text-right">{row.value}</span>
-                        </div>
-                      ))}
-
-                      {!hasCvProfile && (
-                        <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-700 dark:text-amber-400">
-                          No CV analysis found. Your Twin will have limited insights.{" "}
-                          <Link to="/dashboard/cv-analyzer" className="font-semibold underline">Analyse your CV</Link> for best results.
-                        </p>
-                      )}
-                    </div>
-                  )}
-
-                  {/* CTAs */}
-                  <div className="flex flex-wrap gap-3 pt-1">
-                    {savedTwin ? (
-                      <>
-                        <Button asChild>
-                          <Link to="/dashboard/opportunities">
-                            Explore my path <ArrowRight className="h-4 w-4" />
-                          </Link>
-                        </Button>
-                        <Button variant="outline" asChild>
-                          <Link to="/dashboard/cv-analyzer">Improve my CV</Link>
-                        </Button>
-                        <Button variant="ghost" size="sm" onClick={() => { setSavedTwin(null); setActiveStep("identity"); }}>
-                          Rebuild Twin
-                        </Button>
-                      </>
-                    ) : (
-                      <Button onClick={handleBuild} disabled={submitting || !hasCvProfile} className="min-w-[160px]">
-                        {submitting ? (
-                          <><Loader2 className="h-4 w-4 animate-spin" /> Building…</>
-                        ) : (
-                          <><Bot className="h-4 w-4" /> Build my Twin</>
-                        )}
-                      </Button>
                     )}
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                </div>
+              ))}
 
-            {/* Navigation */}
-            {activeStep !== "summary" && (
-              <div className="flex items-center justify-between pt-1">
-                <Button variant="outline" onClick={goPrev} disabled={currentIndex === 0}>
-                  <ArrowLeft className="h-4 w-4" /> Back
-                </Button>
-                <Button onClick={activeStep === "goals" ? () => setActiveStep("summary") : goNext}>
-                  Continue <ArrowRight className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
+              {isBotTyping && (
+                <div className="flex gap-3">
+                  <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <Bot className="h-4 w-4" />
+                  </div>
+                  <div className="flex items-center gap-2 rounded-[14px] border border-border bg-card px-5 py-4 shadow-sm" aria-live="polite" aria-label="Economic Twin is typing">
+                    <span className="h-2 w-2 animate-bounce rounded-full bg-primary" />
+                    <span className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:120ms]" />
+                    <span className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:240ms]" />
+                    <span className="ml-2 text-sm font-medium text-muted-foreground">Thinking...</span>
+                  </div>
+                </div>
+              )}
+              <div ref={chatEndRef} />
+            </div>
           </div>
 
-          {/* ── Live Twin preview (sticky sidebar) ────────────────────── */}
-          <aside>
-            <Card className="sticky top-24">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">Your Twin Preview</CardTitle>
-                <CardDescription className="text-xs">Updates as you add information.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-
-                <div className="flex items-center gap-3">
-                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                    <Bot className="h-7 w-7" />
-                  </div>
-                  <div>
-                    <p className="font-semibold">{twinProfile.name || "Your AI Twin"}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {twinProfile.desiredRole || "Career path not selected yet"}
-                    </p>
-                  </div>
-                </div>
-
-                <div>
-                  <div className="mb-1.5 flex justify-between text-xs">
-                    <span className="text-muted-foreground">Readiness</span>
-                    <span className="font-semibold">{progress}%</span>
-                  </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-muted">
-                    <div
-                      className="h-full rounded-full bg-primary transition-all duration-500"
-                      style={{ width: `${progress}%` }}
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  {[
-                    { label: "Province", value: twinProfile.province || "Not added" },
-                    { label: "Career stage", value: twinProfile.careerStage || "Not selected" },
-                    { label: "Skills", value: twinProfile.skills.length > 0 ? `${twinProfile.skills.length} selected` : "None yet" },
-                    { label: "Industries", value: twinProfile.industries.length > 0 ? `${twinProfile.industries.length} selected` : "None yet" },
-                    { label: "CV data", value: hasCvProfile ? "Loaded ✓" : "Not analysed yet" },
-                  ].map(row => (
-                    <div key={row.label} className="flex justify-between gap-3 border-b border-border/30 pb-2 text-xs">
-                      <span className="text-muted-foreground">{row.label}</span>
-                      <span className={cn("font-medium text-right", row.label === "CV data" && hasCvProfile ? "text-green-600 dark:text-green-400" : "")}>
-                        {row.value}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                {!hasCvProfile && (
-                  <Link to="/dashboard/cv-analyzer">
-                    <Button variant="outline" size="sm" className="mt-1 w-full">
-                      <FileText className="h-4 w-4" /> Analyse CV first
-                    </Button>
-                  </Link>
-                )}
-              </CardContent>
-            </Card>
-          </aside>
-        </div>
-      </section>
-    </div>
+          <form className="border-t border-border bg-background px-4 py-3 sm:px-5" onSubmit={submitMessage}>
+            <div className="flex h-12 items-center gap-2 rounded-[14px] border border-border bg-card px-3 shadow-sm">
+              <Sparkles className="h-4 w-4 shrink-0 text-primary" />
+              <input
+                value={message}
+                onChange={(event) => setMessage(event.target.value)}
+                disabled={isBotTyping}
+                placeholder={isBotTyping ? "Economic Twin is thinking..." : "Select an option or type here..."}
+                className="h-full flex-1 bg-transparent text-sm font-semibold text-foreground outline-none placeholder:text-muted-foreground"
+              />
+              <Button type="submit" size="icon" variant="secondary" disabled={isBotTyping || !message.trim()} aria-label="Send message" className="h-8 w-8 rounded-xl">
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
+            <p className="mt-2 text-center text-[11px] font-semibold text-muted-foreground">Powered by your Economic Twin · SA career intelligence</p>
+          </form>
+        </section>
+      </div>
+    </main>
   );
-}
+};
+
+export default TwinBuilder;
