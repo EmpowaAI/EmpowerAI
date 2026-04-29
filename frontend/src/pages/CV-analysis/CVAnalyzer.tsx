@@ -21,15 +21,6 @@ import {
   Wand2,
   X,
 } from "lucide-react";
-import {
-  AlignmentType,
-  BorderStyle,
-  Document,
-  HeadingLevel,
-  Packer,
-  Paragraph,
-  TextRun,
-} from "docx";
 import { z } from "zod";
 
 const uploadSchema = z.object({
@@ -399,80 +390,15 @@ const CVAnalyzer = () => {
 
   const exportRevampedCv = async () => {
     const baseName = fileName?.replace(/\.[^/.]+$/, "") || "ats-cv";
-    const sections = revampedCv.split("\n\n").filter(Boolean);
     
-    const children = sections.flatMap((section, sectionIndex) => {
-      const [heading, ...bodyLines] = section.split("\n");
-      const isTitle = sectionIndex === 0;
-
-      if (isTitle) {
-        const [name, contact] = section.split("\n");
-        return [
-          new Paragraph({
-            alignment: AlignmentType.CENTER,
-            spacing: { after: 80 },
-            children: [new TextRun({ text: name, bold: true, size: 34, color: "17345C" })],
-          }),
-          new Paragraph({
-            alignment: AlignmentType.CENTER,
-            spacing: { after: 280 },
-            children: [new TextRun({ text: contact || "City, Country | phone@email.com | LinkedIn URL", size: 20, color: "5B677A" })],
-          }),
-        ];
-      }
-
-      return [
-        new Paragraph({
-          heading: HeadingLevel.HEADING_2,
-          border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: "E86B2D", space: 1 } },
-          spacing: { before: 160, after: 120 },
-          children: [new TextRun({ text: heading, bold: true, size: 22, color: "17345C" })],
-        }),
-        ...bodyLines.map((line) =>
-          new Paragraph({
-            bullet: line.trim().startsWith("-") ? { level: 0 } : undefined,
-            spacing: { after: 90 },
-            children: [new TextRun({ text: line.replace(/^-\s*/, ""), size: 21, color: "1F2937" })],
-          }),
-        ),
-      ];
-    });
-
-    const doc = new Document({
-      styles: {
-        default: { document: { run: { font: "Arial", size: 21, color: "1F2937" } } },
-        paragraphStyles: [
-          {
-            id: "Heading2",
-            name: "Heading 2",
-            basedOn: "Normal",
-            next: "Normal",
-            quickFormat: true,
-            run: {
-              font: "Arial",
-              size: 22,
-              color: "17345C",
-            },
-          },
-        ],
-      },
-      sections: [
-        {
-          properties: {
-            page: {
-              margin: { top: 900, right: 900, bottom: 900, left: 900 },
-            },
-          },
-          children,
-        },
-      ],
-    });
-
-    const blob = await Packer.toBlob(doc);
+    // Create a formatted text content for download
+    const content = revampedCv;
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
+    
     const link = document.createElement("a");
     link.href = url;
-    link.download = `${baseName}-ats-revamp.docx`;
+    link.download = `${baseName}-ats-revamp.txt`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -1064,7 +990,7 @@ const CVAnalyzer = () => {
                 )}
                 {phase === "revamped" && (
                   <Button variant="cta" size="lg" onClick={exportRevampedCv} className="shimmer">
-                    Export Word CV
+                    Download CV
                     <Download className="ml-1 h-4 w-4" />
                   </Button>
                 )}
