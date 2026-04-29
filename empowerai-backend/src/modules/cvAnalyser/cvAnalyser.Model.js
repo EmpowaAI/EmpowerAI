@@ -48,8 +48,7 @@ const cvProfileSchema = new mongoose.Schema(
         driversLicence: { type: Boolean, default: false },
       },
 
-      
-      summary: { type: String, default: '' },
+    
       about:   { type: String, default: '' },
 
       extractedSkills:  { type: String, default: '' },

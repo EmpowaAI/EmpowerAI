@@ -1,14 +1,14 @@
-/**
- * EconomicTwin Controller
- * Thin layer — only handles HTTP in/out. All logic lives in the service.
- */
+'use strict';
 
-const twinService = require('./twinBuilder.Service');
+const twinService  = require('./twinBuilder.Service');
+const twinChatService = require('../twinChat/twinChat.Service');
 
-/**
- * POST /api/twin
- * Create or update the twin from onboarding form data.
- */
+
+// -----------------------------------------------------------------------------
+// POST /api/twin
+// Create or update the twin from onboarding form data.
+// -----------------------------------------------------------------------------
+
 exports.createEconomicTwin = async (req, res, next) => {
   try {
     const { twin, meta } = await twinService.createOrUpdateFromForm(req.user.id, req.body);
@@ -27,12 +27,11 @@ exports.createEconomicTwin = async (req, res, next) => {
 };
 
 
+// -----------------------------------------------------------------------------
+// POST /api/twin/build-from-cv
+// Triggered after CV analysis — links CvProfile data into the twin.
+// -----------------------------------------------------------------------------
 
-/**
- * POST /api/twin/build-from-cv
- * Triggered after CV analysis — links CvProfile data into the twin.
- * Call this from your CV analysis service after saving the CvProfile.
- */
 exports.buildTwinFromCv = async (req, res, next) => {
   try {
     const twin = await twinService.buildFromCvProfile(req.user.id);
@@ -47,53 +46,83 @@ exports.buildTwinFromCv = async (req, res, next) => {
   }
 };
 
-/**
- * GET /api/twin
- * Fetch the current user's twin.
- */
+
+// -----------------------------------------------------------------------------
+// GET /api/twin
+// Fetch the current user's twin.
+// -----------------------------------------------------------------------------
+
 exports.getEconomicTwin = async (req, res, next) => {
   try {
     const twin = await twinService.getTwin(req.user.id);
 
     return res.status(200).json({
       status: 'success',
-      data: { twin },
+      data:   { twin },
     });
   } catch (error) {
     next(error);
   }
 };
 
-/**
- * POST /api/chat/twin
- * Send a message to the economic twin. Stores full conversation on the twin model.
- */
+
+
+exports.initialiseTwinChat = async (req, res, next) => {
+  try {
+    const { twinData } = await twinChatService.initialiseChatSession(req.user.id);
+
+    return res.status(200).json({
+      status:  'success',
+      message: 'Twin chat session initialised',
+      data:    { twinData },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+
 exports.chatWithTwin = async (req, res, next) => {
   try {
-  const { messages } = req.body;
+    const { message, history, twinContext, isLastPrompt } = req.body;
 
-if (!messages || messages.length === 0) {
-  return res.status(400).json({
-    status: 'error',
-    message: 'No messages provided',
-  });
-}
+    if (!message) {
+      return res.status(400).json({
+        status:  'error',
+        message: 'message is required',
+      });
+    }
 
-const result = await twinService.chatWithTwin(req.user.id, messages);
+    if (!twinContext) {
+      return res.status(400).json({
+        status:  'error',
+        message: 'twinContext is required — call /chat/init first',
+      });
+    }
+
+    const { reply, twinData, twin } = await twinChatService.sendMessage(
+      req.user.id,
+      message,
+      history || [],
+      twinContext,
+      isLastPrompt === true,
+    );
 
     return res.status(200).json({
       status: 'success',
-      data:   result,
+      data: {
+        reply,
+        twinData,                          
+      },
     });
   } catch (error) {
     next(error);
   }
 };
 
-/**
- * POST /api/twin/simulate
- * Run career path simulations. Stores results in simulationHistory on the twin.
- */
+
+
 exports.runSimulation = async (req, res, next) => {
   try {
     const { pathIds } = req.body;
