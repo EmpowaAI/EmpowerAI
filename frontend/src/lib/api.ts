@@ -900,11 +900,7 @@ export const twinAPIReal = {
   create: async (data: any) => {
     try {
       console.log('Creating twin with data:', data);
-      /**
-       * FIX: Reverted to /twin/create as /twin/generate resulted in 404 errors.
-       * The backend validator expects the structure defined here.
-       */
-      const response = await request<any>('/twin/create', { 
+      const response = await request<any>('/twin/', {
         method: 'POST',
         headers: { 'X-Action': 'create-twin' },
         body: JSON.stringify(data),
@@ -931,7 +927,7 @@ export const twinAPIReal = {
 
   buildFromCv: async () => {
     try {
-      return await request<any>('/twin/twin/build-from-cv', {
+      return await request<any>('/twin/build-from-cv', {
         method: 'POST',
         body: JSON.stringify({}),
       });
@@ -943,7 +939,7 @@ export const twinAPIReal = {
 
   get: async () => {
     try {
-      return await request<any>('/twin/my-twin');
+      return await request<any>('/twin/');
     } catch (error) {
       console.error('Failed to get twin:', error);
       throw error;
@@ -958,6 +954,30 @@ export const twinAPIReal = {
       });
     } catch (error) {
       console.error('Simulation failed:', error);
+      throw error;
+    }
+  },
+
+  chatInit: async () => {
+    try {
+      return await request<any>('/twin/chat/init', {
+        method: 'POST',
+        body: JSON.stringify({}),
+      });
+    } catch (error) {
+      console.error('Twin chat init failed:', error);
+      throw error;
+    }
+  },
+
+  chatMessage: async (message: string, history: { role: string; content: string }[], twinContext: any, isLastPrompt = false) => {
+    try {
+      return await request<any>('/twin/chat/message', {
+        method: 'POST',
+        body: JSON.stringify({ message, history, twinContext, isLastPrompt }),
+      });
+    } catch (error) {
+      console.error('Twin chat message failed:', error);
       throw error;
     }
   },
