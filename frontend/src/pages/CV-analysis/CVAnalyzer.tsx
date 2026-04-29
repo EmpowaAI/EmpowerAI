@@ -213,7 +213,7 @@ const analyseCv = (cvText: string, jobDescription: string): CvAnalysis => {
 
 const CVAnalyzer = () => {
   const navigate = useNavigate();
-  const { updateProgress } = useUser();
+  const { updateProgress, refreshCVData } = useUser();
   const [phase, setPhase] = useState<Phase>("idle");
   const [fileName, setFileName] = useState<string | null>(null);
   const [stageIndex, setStageIndex] = useState(0);
@@ -321,9 +321,13 @@ const CVAnalyzer = () => {
            if (Array.isArray(skills) && skills.length > 0) {
              localStorage.setItem('cvSkills', JSON.stringify(skills));
              localStorage.setItem('cvScore', String(data.score || 0));
-             localStorage.setItem('cvCompleted', 'true');
+            
+            // CRITICAL: Update context state immediately to unlock protected routes
+            updateProgress('cvCompleted', true);
+            
              setStoredCvAnalysis(data);
              setStoredCvFileName(fileName || 'cv.txt');
+            refreshCVData(); // Syncs the new CV data to the UserContext
              window.dispatchEvent(new Event('cvCompleted'));
            }
           } catch {
@@ -363,7 +367,7 @@ const CVAnalyzer = () => {
     return () => {
       cancelled = true;
     };
-  }, [phase, cvText, jobDescription, fileName]);
+  }, [phase, cvText, jobDescription, fileName, updateProgress, refreshCVData]);
 
   const handleFile = useCallback(async (file: File) => {
     const parsed = uploadSchema.safeParse({ name: file.name, size: file.size, type: file.type });
