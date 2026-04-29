@@ -494,33 +494,31 @@ const CVAnalyzer = () => {
     <div className="min-h-screen bg-background font-sans text-foreground">
       {/* ===== Header ===== */}
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-md">
-        <div className="container flex h-16 items-center justify-between gap-4">
+        <div className="container flex h-16 items-center justify-between gap-2 px-4 sm:gap-4 sm:px-0">
           <Link to="/" className="flex items-center gap-2.5">
             <img
               src={logo}
               alt="EmpowAI logo"
-              className="h-9 w-9 rounded-md object-cover"
+              className="h-8 w-8 rounded-md object-cover sm:h-9 sm:w-9"
               width={36}
               height={36}
             />
-            <span className="font-display text-xl font-bold tracking-tight text-primary">
+            <span className="font-display text-lg font-bold tracking-tight text-primary sm:text-xl">
               EmpowAI
             </span>
           </Link>
           <div className="flex items-center gap-2">
             <ThemeToggle />
+            {/* Mobile-first navigation */}
+            <Button asChild variant="outline" size="sm" className="sm:hidden">
+              <Link to="/login">Sign In</Link>
+            </Button>
             <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
               <Link to="/">
                 <ArrowLeft className="mr-1 h-4 w-4" />
                 Back
               </Link>
             </Button>
-            {/* Mobile navigation */}
-            <div className="sm:hidden">
-              <Button asChild variant="outline" size="sm">
-                <Link to="/login">Sign In</Link>
-              </Button>
-            </div>
             <ProfileMenu />
           </div>
         </div>
