@@ -114,10 +114,10 @@ export default function LandingPage() {
             }}
           />
           <div
-            className="absolute inset-0 bg-[linear-gradient(180deg,hsl(220_60%_6%/0.7),hsl(220_60%_8%/0.35)_30%,hsl(220_60%_8%/0.4)_65%,hsl(220_60%_5%/0.75))]"
+            className="absolute inset-0 bg-[linear-gradient(180deg,hsl(220_60%_6%/0.45),hsl(220_60%_8%/0.20)_30%,hsl(220_60%_8%/0.26)_65%,hsl(220_60%_5%/0.55))]"
             aria-hidden
           />
-          <div className="pointer-events-none absolute inset-0 ai-mesh opacity-50" aria-hidden />
+          <div className="pointer-events-none absolute inset-0 ai-mesh opacity-35" aria-hidden />
           <div className="pointer-events-none absolute inset-0 hero-spotlight" aria-hidden />
           <div className="pointer-events-none absolute inset-0 grain" aria-hidden />
 
