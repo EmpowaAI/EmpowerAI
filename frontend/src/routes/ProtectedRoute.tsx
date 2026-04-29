@@ -1,6 +1,6 @@
 // src/routes/ProtectedRoute.tsx
 import { useState, useEffect } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/user-context';
 import FeatureLocked from '../components/FeatureLocked';
 
@@ -39,6 +39,7 @@ const featureMap: Record<string, { name: string; description: string }> = {
 export default function ProtectedRoute({ children, requiredStep = 'any' }: ProtectedRouteProps) {
   const { user, progress, isAuthReady } = useUser();
   const location = useLocation();
+  const navigate = useNavigate();
   
   // Check if user is authenticated
   const token = localStorage.getItem('empowerai-token');
@@ -80,10 +81,7 @@ export default function ProtectedRoute({ children, requiredStep = 'any' }: Prote
           featureName={featureInfo.name}
           featureDescription={featureInfo.description}
           requiredStep={neededStep}
-          onClose={() => {
-            // Go back when user closes modal
-            window.history.back();
-          }}
+          onClose={() => navigate('/dashboard', { replace: true })}
         />
         {/* Keep the children in case they're heavy components that need to unmount */}
         <div style={{ display: 'none' }}>{children}</div>
