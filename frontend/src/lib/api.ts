@@ -269,6 +269,37 @@ export const twinAPIDemo = {
     };
   },
 
+  buildFromCv: async () => {
+    console.log('🤖 Demo: Building twin from CV');
+    await new Promise((resolve) => setTimeout(resolve, 900));
+
+    const existing = localStorage.getItem('demo-twin');
+    if (existing) {
+      return {
+        status: 'success',
+        data: JSON.parse(existing),
+      };
+    }
+
+    const fallbackTwin = {
+      twin: {
+        id: `twin_${Date.now()}`,
+        name: 'Demo User',
+        skills: ['Communication', 'Problem solving'],
+        empowermentScore: 60,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+    };
+
+    localStorage.setItem('demo-twin', JSON.stringify(fallbackTwin));
+
+    return {
+      status: 'success',
+      data: fallbackTwin,
+    };
+  },
+
   get: async () => {
     console.log('🤖 Demo: Getting twin');
     await new Promise((resolve) => setTimeout(resolve, 800));
