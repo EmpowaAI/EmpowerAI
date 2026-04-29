@@ -12,12 +12,14 @@ import {
   Gauge,
   Languages,
   ListChecks,
+  Menu,
   Search,
   ShieldCheck,
   Sparkles,
   Target,
   Upload,
   Wand2,
+  X,
 } from "lucide-react";
 // Dynamic import for docx to avoid build issues
 const loadDocx = async () => {
@@ -241,6 +243,7 @@ const CVAnalyzer = () => {
   const [aiAnalysis, setAiAnalysis] = useState<CvAnalysis | null>(null);
   const [analysisError, setAnalysisError] = useState("");
   const [resultView, setResultView] = useState<ResultView>("overview");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const rafRef = useRef<number | null>(null);
 
@@ -509,10 +512,16 @@ const CVAnalyzer = () => {
           </Link>
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            {/* Mobile-first navigation */}
-            <Button asChild variant="outline" size="sm" className="sm:hidden">
-              <Link to="/login">Sign In</Link>
+            {/* Mobile hamburger menu */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="sm:hidden"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
             </Button>
+            {/* Desktop navigation */}
             <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
               <Link to="/">
                 <ArrowLeft className="mr-1 h-4 w-4" />
@@ -523,6 +532,63 @@ const CVAnalyzer = () => {
           </div>
         </div>
       </header>
+
+      {/* Mobile Navigation Menu */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-50 sm:hidden">
+          <div className="fixed inset-0 bg-black/50" onClick={() => setMobileMenuOpen(false)} />
+          <div className="fixed right-0 top-0 h-full w-80 bg-background shadow-xl">
+            <div className="flex h-16 items-center justify-between border-b border-border px-4">
+              <span className="font-display text-lg font-bold text-primary">Menu</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <nav className="flex flex-col p-4 space-y-2">
+              <Button asChild variant="ghost" className="justify-start" onClick={() => setMobileMenuOpen(false)}>
+                <Link to="/" className="w-full">
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to Home
+                </Link>
+              </Button>
+              <Button asChild variant="ghost" className="justify-start" onClick={() => setMobileMenuOpen(false)}>
+                <Link to="/#how-it-works" className="w-full">
+                  How It Works
+                </Link>
+              </Button>
+              <Button asChild variant="ghost" className="justify-start" onClick={() => setMobileMenuOpen(false)}>
+                <Link to="/#features" className="w-full">
+                  Features
+                </Link>
+              </Button>
+              <Button asChild variant="ghost" className="justify-start" onClick={() => setMobileMenuOpen(false)}>
+                <Link to="/#ubuntu-stories" className="w-full">
+                  Ubuntu Stories
+                </Link>
+              </Button>
+              <Button asChild variant="ghost" className="justify-start" onClick={() => setMobileMenuOpen(false)}>
+                <Link to="/demo" className="w-full">
+                  Demo
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="justify-start" onClick={() => setMobileMenuOpen(false)}>
+                <Link to="/login" className="w-full">
+                  Sign In
+                </Link>
+              </Button>
+              <Button asChild variant="default" className="justify-start" onClick={() => setMobileMenuOpen(false)}>
+                <Link to="/signup" className="w-full">
+                  Get Started
+                </Link>
+              </Button>
+            </nav>
+          </div>
+        </div>
+      )}
 
       <main className="relative overflow-hidden">
         {/* Ambient background orbs */}
