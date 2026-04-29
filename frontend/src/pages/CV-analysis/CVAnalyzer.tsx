@@ -515,6 +515,12 @@ const CVAnalyzer = () => {
                 Back
               </Link>
             </Button>
+            {/* Mobile navigation */}
+            <div className="sm:hidden">
+              <Button asChild variant="outline" size="sm">
+                <Link to="/login">Sign In</Link>
+              </Button>
+            </div>
             <ProfileMenu />
           </div>
         </div>
