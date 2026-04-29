@@ -575,7 +575,7 @@ const CVAnalyzer = () => {
                   Demo
                 </Link>
               </Button>
-              <Button asChild variant="outline" className="justify-start" onClick={() => setMobileMenuOpen(false)}>
+              <Button asChild variant="secondary" className="justify-start" onClick={() => setMobileMenuOpen(false)}>
                 <Link to="/login" className="w-full">
                   Sign In
                 </Link>
