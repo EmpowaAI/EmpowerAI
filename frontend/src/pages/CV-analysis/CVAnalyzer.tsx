@@ -21,30 +21,24 @@ import {
   Wand2,
   X,
 } from "lucide-react";
-// Dynamic import for docx to avoid build issues
-const loadDocx = async () => {
-  const docx = await import('docx');
-  return {
-    AlignmentType: docx.AlignmentType,
-    BorderStyle: docx.BorderStyle,
-    Document: docx.Document,
-    HeadingLevel: docx.HeadingLevel,
-    Packer: docx.Packer,
-    Paragraph: docx.Paragraph,
-    TextRun: docx.TextRun,
-  };
-};
-// Simple validation functions to avoid zod build issues
-const validateUpload = (name: string, size: number, _type?: string) => {
-  if (name.length > 255) return { success: false, error: { issues: [{ message: "File name too long" }] } };
-  if (size > 10 * 1024 * 1024) return { success: false, error: { issues: [{ message: "CV must be smaller than 10MB" }] } };
-  return { success: true, data: null };
-};
+import {
+  AlignmentType,
+  BorderStyle,
+  Document,
+  HeadingLevel,
+  Packer,
+  Paragraph,
+  TextRun,
+} from "docx";
+import { z } from "zod";
 
-const validateJobDescription = (value: string) => {
-  if (value.trim().length > 6000) return { success: false, error: { issues: [{ message: "Job description must be shorter than 6,000 characters" }] } };
-  return { success: true, data: value };
-};
+const uploadSchema = z.object({
+  name: z.string().max(255),
+  size: z.number().max(10 * 1024 * 1024, "CV must be smaller than 10MB"),
+  type: z.string().optional(),
+});
+
+const jobDescriptionSchema = z.string().trim().max(6000, "Job description must be shorter than 6,000 characters");
 import { Button } from "@/components/ui/Button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ProfileMenu } from "@/components/ProfileMenu";
@@ -347,9 +341,9 @@ const CVAnalyzer = () => {
   }, [phase, cvText, jobDescription]);
 
   const handleFile = useCallback(async (file: File) => {
-    const parsed = validateUpload(file.name, file.size, file.type);
+    const parsed = uploadSchema.safeParse({ name: file.name, size: file.size, type: file.type });
     if (!parsed.success) {
-      setInputError(parsed.error?.issues[0]?.message || "Please upload a valid CV file.");
+      setInputError(parsed.error.issues[0]?.message || "Please upload a valid CV file.");
       return;
     }
 
@@ -383,13 +377,13 @@ const CVAnalyzer = () => {
   };
 
   const handleJobDescriptionChange = (value: string) => {
-    const parsed = validateJobDescription(value);
+    const parsed = jobDescriptionSchema.safeParse(value);
     if (!parsed.success) {
-      setInputError(parsed.error?.issues[0]?.message || "Job description is too long.");
+      setInputError(parsed.error.issues[0]?.message || "Job description is too long.");
       return;
     }
     setInputError("");
-    setJobDescription(parsed.data || value);
+    setJobDescription(parsed.data);
   };
 
   const buildRevampedCv = () => {
@@ -406,9 +400,6 @@ const CVAnalyzer = () => {
   const exportRevampedCv = async () => {
     const baseName = fileName?.replace(/\.[^/.]+$/, "") || "ats-cv";
     const sections = revampedCv.split("\n\n").filter(Boolean);
-    
-    // Load docx dynamically
-    const { AlignmentType, BorderStyle, Document, HeadingLevel, Packer, Paragraph, TextRun } = await loadDocx();
     
     const children = sections.flatMap((section, sectionIndex) => {
       const [heading, ...bodyLines] = section.split("\n");
@@ -516,13 +507,13 @@ const CVAnalyzer = () => {
             <Button
               variant="ghost"
               size="sm"
-              className="sm:hidden"
+              className="md:hidden"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
             </Button>
             {/* Desktop navigation */}
-            <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+            <Button asChild variant="ghost" size="sm" className="hidden md:inline-flex">
               <Link to="/">
                 <ArrowLeft className="mr-1 h-4 w-4" />
                 Back
@@ -535,7 +526,7 @@ const CVAnalyzer = () => {
 
       {/* Mobile Navigation Menu */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 sm:hidden">
+        <div className="fixed inset-0 z-50 md:hidden">
           <div className="fixed inset-0 bg-black/50" onClick={() => setMobileMenuOpen(false)} />
           <div className="fixed right-0 top-0 h-full w-80 bg-background shadow-xl">
             <div className="flex h-16 items-center justify-between border-b border-border px-4">
