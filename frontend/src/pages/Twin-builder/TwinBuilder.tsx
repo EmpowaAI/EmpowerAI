@@ -25,6 +25,7 @@ interface TwinProfile {
   skills: string[];
   experience: string;
   education: string;
+  projects: string;
   desiredRole: string;
   industries: string[];
   interests: string[];
@@ -107,6 +108,7 @@ export default function TwinBuilder() {
     skills: [],
     experience: "",
     education: "",
+    projects: "",
     desiredRole: "",
     industries: [],
     interests: [],
@@ -449,6 +451,16 @@ export default function TwinBuilder() {
                       value={twinProfile.education}
                       onChange={e => update("education", e.target.value)}
                       placeholder="Your school, college, university, certificates, or training."
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="projects">Projects</Label>
+                    <Textarea
+                      id="projects"
+                      value={twinProfile.projects}
+                      onChange={e => update("projects", e.target.value)}
+                      placeholder="Any personal, school, freelance, or community projects."
                       className="mt-1"
                     />
                   </div>
