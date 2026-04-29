@@ -29,6 +29,7 @@ const uploadSchema = z.object({
 const jobDescriptionSchema = z.string().trim().max(6000, "Job description must be shorter than 6,000 characters");
 import { Button } from "@/components/ui/Button";
 import { analyzeCV } from "@/services/cvService";
+import { setStoredCvAnalysis, setStoredCvFileName } from "@/lib/sensitiveStorage";
 
 type Phase = "idle" | "analyzing" | "complete" | "revamping" | "revamped";
 type ResultView = "overview" | "match" | "coaching";
@@ -277,18 +278,18 @@ const CVAnalyzer = () => {
     if (phase !== "complete") return;
 
     let cancelled = false;
-    const runAiAnalysis = async () => {
+      const runAiAnalysis = async () => {
       setAnalysisError("");
       try {
         // Create a File object from the CV text for the existing service
         const cvFile = new File([cvText], "cv.txt", { type: "text/plain" });
-        const data = await analyzeCV(cvFile, jobDescription);
-        
+        const data = await analyzeCV(cvFile, cvText, jobDescription);
+         
         if (cancelled) return;
         
         // Transform the existing CV analysis to match our expected format
-        const transformedAnalysis: CvAnalysis = {
-          score: data.score || 75,
+         const transformedAnalysis: CvAnalysis = {
+           score: data.score || 75,
           breakdown: [
             { label: "ATS parsing", score: data.score || 75, note: data.weaknesses?.join(', ') || "Good ATS compatibility" },
             { label: "Keywords", score: data.sections?.skills?.length ? 85 : 70, note: data.missingKeywords?.length ? "Add missing keywords" : "Good keyword coverage" },
@@ -308,20 +309,34 @@ const CVAnalyzer = () => {
             { type: "Jobs", title: "Entry-level positions", projection: "R8k–R15k/month", nextStep: "Apply for entry-level roles" },
             { type: "Learning", title: "Skills development", projection: "Improve earning potential", nextStep: "Focus on technical skills" }
           ]
-        };
-        
-        setAiAnalysis(transformedAnalysis);
-      } catch (error) {
-        if (cancelled) return;
-        setAnalysisError("AI analysis could not finish right now, so we are showing the local CV scan.");
-      }
-    };
+         };
+         
+         setAiAnalysis(transformedAnalysis);
+
+         try {
+           const skills = data.sections?.skills || [];
+           if (Array.isArray(skills) && skills.length > 0) {
+             localStorage.setItem('cvSkills', JSON.stringify(skills));
+             localStorage.setItem('cvScore', String(data.score || 0));
+             localStorage.setItem('cvCompleted', 'true');
+             setStoredCvAnalysis(data);
+             setStoredCvFileName(fileName || 'cv.txt');
+             window.dispatchEvent(new Event('cvCompleted'));
+           }
+         } catch {
+           // Ignore localStorage failures
+         }
+       } catch (error) {
+         if (cancelled) return;
+         setAnalysisError("AI analysis could not finish right now, so we are showing the local CV scan.");
+       }
+     };
 
     runAiAnalysis();
     return () => {
       cancelled = true;
     };
-  }, [phase, cvText, jobDescription]);
+  }, [phase, cvText, jobDescription, fileName]);
 
   const handleFile = useCallback(async (file: File) => {
     const parsed = uploadSchema.safeParse({ name: file.name, size: file.size, type: file.type });

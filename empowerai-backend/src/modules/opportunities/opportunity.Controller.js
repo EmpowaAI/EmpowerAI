@@ -2,6 +2,7 @@ const Opportunity = require('./Opportunity.Model');
 const logger = require('../../utils/logger');
 const { getMatchedOpportunities, extractUserProfile } = require('./opportunityMatchingService');
 const { getCareerTaxonomy } = require('../../services/taxonomyService');
+const cvProfileRepository = require('../cvAnalyser/cvAnalyser.Repository');
 
 let attemptedAutoSeed = false;
 
@@ -152,9 +153,31 @@ exports.getAllOpportunities = async (req, res, next) => {
     let processedOpportunities = [];
     
     const userProfile = extractUserProfile(req);
+
+    // If authenticated and the user profile has no skills yet, hydrate from their stored CV profile.
+    if (req.user && (!Array.isArray(userProfile.skills) || userProfile.skills.length === 0)) {
+      try {
+        const cvProfile = await cvProfileRepository.findByUserId(req.user.id);
+        const cvSkills = cvProfile?.analysis?.extractedSkills;
+        if (Array.isArray(cvSkills) && cvSkills.length > 0) {
+          userProfile.skills = cvSkills;
+        }
+      } catch (e) {
+        logger.warn('Failed to hydrate user skills from CV profile (non-fatal)', { message: e?.message });
+      }
+    }
     const hasCareerFilter = careerTerms.length > 0;
     const hasSearchQuery = typeof q === 'string' && q.trim().length > 0;
-    const matchingActive = userProfile && (skills || province || minScore || hasCareerFilter || hasSearchQuery);
+
+    const hasProfileSignals =
+      (Array.isArray(userProfile.skills) && userProfile.skills.length > 0) ||
+      (Array.isArray(userProfile.careerGoals) && userProfile.careerGoals.length > 0) ||
+      !!userProfile.province;
+
+    // For authenticated users, default to matched results when we have enough signals.
+    const matchingActive =
+      userProfile &&
+      (skills || province || minScore || hasCareerFilter || hasSearchQuery || (req.user && hasProfileSignals));
 
     const strictMatch = process.env.OPPORTUNITY_STRICT_MATCH === 'true';
     if (matchingActive) {

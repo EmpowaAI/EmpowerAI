@@ -1,12 +1,30 @@
 import { request } from './core';
 
 export const opportunitiesAPI = {
-  getAll: async (filters?: { province?: string; type?: string; skills?: string }) => {
+  getAll: async (filters?: {
+    province?: string;
+    type?: string;
+    skills?: string;
+    careerGoals?: string;
+    q?: string;
+    page?: number;
+    limit?: number;
+    sort?: string;
+    minScore?: number;
+    strictCareer?: boolean;
+  }) => {
     try {
       const queryParams = new URLSearchParams();
       if (filters?.province) queryParams.append('province', filters.province);
       if (filters?.type) queryParams.append('type', filters.type);
       if (filters?.skills) queryParams.append('skills', filters.skills);
+      if (filters?.careerGoals) queryParams.append('careerGoals', filters.careerGoals);
+      if (filters?.q) queryParams.append('q', filters.q);
+      if (typeof filters?.page === 'number') queryParams.append('page', String(filters.page));
+      if (typeof filters?.limit === 'number') queryParams.append('limit', String(filters.limit));
+      if (filters?.sort) queryParams.append('sort', filters.sort);
+      if (typeof filters?.minScore === 'number') queryParams.append('minScore', String(filters.minScore));
+      if (typeof filters?.strictCareer === 'boolean') queryParams.append('strictCareer', String(filters.strictCareer));
 
       const queryString = queryParams.toString();
       const url = `/opportunities${queryString ? `?${queryString}` : ''}`;
