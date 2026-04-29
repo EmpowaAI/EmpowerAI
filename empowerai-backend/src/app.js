@@ -34,7 +34,7 @@ if (isEnabled(process.env.ENABLE_AI_RATE_LIMITER, true)) {
   app.use('/api/cv', aiServiceLimiter);
   app.use('/api/twin', aiServiceLimiter);
   app.use('/api/interview', aiServiceLimiter);
-  app.use('/api/chat', aiServiceLimiter);
+  
 }
 
 if (isEnabled(process.env.ENABLE_API_RATE_LIMITER, true)) {
@@ -57,7 +57,6 @@ app.use('/api/twin', require('./modules/twinBuilder/twinBuilder.Route'));
 app.use('/api/opportunities', require('./modules/opportunities/opportunities.Route'));
 app.use('/api/cv', require('./modules/cvAnalyser/cvAnalyser.Route'));
 app.use('/api/interview', require('./modules/interview/interview.Route'));
-app.use('/api/chat', require('./modules/twinChat/twinChat.Route'));
 app.use('/api/rss', require('./routes/rss'));
 app.use('/api/admin', require('./modules/admin/admin.Route'));
 app.use('/api/user', require('./modules/user/user.Route'));
@@ -78,7 +77,7 @@ app.get('/', (req, res) => {
       opportunities: '/api/opportunities',
       cv: '/api/cv',
       interview: '/api/interview',
-      chat: '/api/chat',
+      chat: '/api/twin/chat',
       contact: '/api/contact',
       admin: '/api/admin',
     },
