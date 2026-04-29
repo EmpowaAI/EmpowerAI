@@ -54,16 +54,17 @@ async function saveAnalysisResult({ userId, file, rawText, analysis, isFallback 
       isComplete: profile.isComplete,
     });
 
-    if (profile) {
+    
+   if (profile) {
   twinService.buildFromAnalysis(profile.analysis, userId).catch((err) => {
     logger.error('[CvService] Failed to build economic twin', {
       userId,
       error: err.message,
       stack: err.stack,
-    });
+    }); 
   });
-}
-    return profile;
+} 
+    return profile; 
   } catch (error) {
     logger.error('[CvService] Failed to save CvProfile', {
       userId,
@@ -71,8 +72,9 @@ async function saveAnalysisResult({ userId, file, rawText, analysis, isFallback 
       stack: error.stack,
     });
     return null;
-  }
+  } 
 }
+  
 
 // ─── Text-based CV analysis ────────────────────────────────────────────────────
 
