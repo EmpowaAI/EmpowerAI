@@ -212,7 +212,7 @@ export default function Opportunities() {
             salary: opp.salaryRange 
               ? `R${opp.salaryRange.min?.toLocaleString() || 0} - R${opp.salaryRange.max?.toLocaleString() || 0}`
               : undefined,
-            match: calculateMatchScore(opp, user),
+            match: typeof opp.matchScore === 'number' ? opp.matchScore : calculateMatchScore(opp, user),
             matchReason: opp.matchReason,
             source: opp.source,
             updatedAt: opp.updatedAt,

@@ -334,7 +334,10 @@ async function getMatchedOpportunities(opportunities, userProfile) {
   const filtered = scoredOpportunities.filter(opp => opp.matchScore >= minScore);
 
   // Sort by match score descending
-  filtered.sort((a, b) => b.matchScore - a.matchScore);
+  filtered.sort((a, b) => {
+    if ((b.matchScore || 0) !== (a.matchScore || 0)) return (b.matchScore || 0) - (a.matchScore || 0);
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
 
   return filtered;
 }
