@@ -51,12 +51,13 @@ export default defineConfig({
   build: {
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
-      external: ['docx'],
+      external: ['docx', 'zod'],
       output: {
         // Vite 8 uses Rolldown for dep optimization which currently expects manualChunks to be a function.
         manualChunks: getManualChunk,
         globals: {
-          'docx': 'Docx'
+          'docx': 'Docx',
+          'zod': 'z'
         }
       },
     },

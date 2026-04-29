@@ -32,7 +32,17 @@ const loadDocx = async () => {
     TextRun: docx.TextRun,
   };
 };
-import { z } from "zod";
+// Simple validation functions to avoid zod build issues
+const validateUpload = (name: string, size: number, _type?: string) => {
+  if (name.length > 255) return { success: false, error: { issues: [{ message: "File name too long" }] } };
+  if (size > 10 * 1024 * 1024) return { success: false, error: { issues: [{ message: "CV must be smaller than 10MB" }] } };
+  return { success: true, data: null };
+};
+
+const validateJobDescription = (value: string) => {
+  if (value.trim().length > 6000) return { success: false, error: { issues: [{ message: "Job description must be shorter than 6,000 characters" }] } };
+  return { success: true, data: value };
+};
 import { Button } from "@/components/ui/Button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ProfileMenu } from "@/components/ProfileMenu";
@@ -72,13 +82,6 @@ type CvAnalysis = {
   revampedCv?: string;
 };
 
-const uploadSchema = z.object({
-  name: z.string().max(255),
-  size: z.number().max(10 * 1024 * 1024, "CV must be smaller than 10MB"),
-  type: z.string().optional(),
-});
-
-const jobDescriptionSchema = z.string().trim().max(6000, "Job description must be shorter than 6,000 characters");
 
 const STAGES = [
   {
@@ -341,9 +344,9 @@ const CVAnalyzer = () => {
   }, [phase, cvText, jobDescription]);
 
   const handleFile = useCallback(async (file: File) => {
-    const parsed = uploadSchema.safeParse({ name: file.name, size: file.size, type: file.type });
+    const parsed = validateUpload(file.name, file.size, file.type);
     if (!parsed.success) {
-      setInputError(parsed.error.issues[0]?.message || "Please upload a valid CV file.");
+      setInputError(parsed.error?.issues[0]?.message || "Please upload a valid CV file.");
       return;
     }
 
@@ -377,13 +380,13 @@ const CVAnalyzer = () => {
   };
 
   const handleJobDescriptionChange = (value: string) => {
-    const parsed = jobDescriptionSchema.safeParse(value);
+    const parsed = validateJobDescription(value);
     if (!parsed.success) {
-      setInputError(parsed.error.issues[0]?.message || "Job description is too long.");
+      setInputError(parsed.error?.issues[0]?.message || "Job description is too long.");
       return;
     }
     setInputError("");
-    setJobDescription(parsed.data);
+    setJobDescription(parsed.data || value);
   };
 
   const buildRevampedCv = () => {
