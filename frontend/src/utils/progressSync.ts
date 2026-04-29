@@ -1,10 +1,5 @@
-/**
- * Progress Sync Utility
- * Ensures user progress is always synced correctly across the app
- * This is a PERMANENT solution to prevent pages from being locked incorrectly
- */
-
 import { twinAPI } from '../lib/api'
+import { API_BASE_URL } from '../lib/apiBase'
 
 export interface ProgressData {
   cvCompleted: boolean
@@ -12,66 +7,59 @@ export interface ProgressData {
   empowermentScore: number | null
 }
 
-/**
- * Sync progress from backend - checks if user has completed steps
- * This runs on app load and ensures pages are unlocked if they should be
- */
+const localProgress = (): ProgressData => ({
+  cvCompleted: localStorage.getItem('cvCompleted') === 'true',
+  twinCompleted: localStorage.getItem('twinCompleted') === 'true',
+  empowermentScore: localStorage.getItem('empowermentScore')
+    ? parseInt(localStorage.getItem('empowermentScore')!)
+    : null,
+})
+
 export async function syncProgressFromBackend(): Promise<ProgressData> {
-  const defaultProgress: ProgressData = {
-    cvCompleted: false,
-    twinCompleted: false,
-    empowermentScore: null
-  }
+  const token = localStorage.getItem('empowerai-token')
+  if (!token) return localProgress()
 
-  try {
-    const token = localStorage.getItem('empowerai-token')
-    if (!token) {
-      // Not authenticated: do not call protected endpoints
-      return {
-        cvCompleted: localStorage.getItem('cvCompleted') === 'true',
-        twinCompleted: localStorage.getItem('twinCompleted') === 'true',
-        empowermentScore: localStorage.getItem('empowermentScore')
-          ? parseInt(localStorage.getItem('empowermentScore')!)
-          : null
-      }
-    }
+  const headers = { Authorization: `Bearer ${token}` }
 
-    // Check if twin exists - if it does, user has completed both CV and Twin
-    const twinResponse = await twinAPI.get()
-    
-    if (twinResponse?.status === 'success' && twinResponse.data?.twin) {
-      const twin = twinResponse.data.twin
-      
-      // If twin exists, both CV and Twin are completed
-      const progress: ProgressData = {
-        cvCompleted: true,
-        twinCompleted: true,
-        empowermentScore: twin.empowermentScore || null
-      }
-      
-      // Update localStorage immediately
-      localStorage.setItem('cvCompleted', 'true')
-      localStorage.setItem('twinCompleted', 'true')
-      if (progress.empowermentScore) {
-        localStorage.setItem('empowermentScore', String(progress.empowermentScore))
-      }
-      localStorage.setItem('twinData', JSON.stringify(twin))
-      localStorage.setItem('twinCreated', 'true')
-      
-      return progress
-    }
-  } catch (error) {
-    console.log('No twin found or error syncing progress:', error)
-    // If error, check localStorage as fallback
-  }
+  // Run both checks in parallel — twin existence implies CV exists too.
+  const [twinResult, cvResult] = await Promise.allSettled([
+    twinAPI.get(),
+    fetch(`${API_BASE_URL}/cv/profile`, { headers }).then(r => r.json()),
+  ])
 
-  // Fallback to localStorage
-  return {
-    cvCompleted: localStorage.getItem('cvCompleted') === 'true',
-    twinCompleted: localStorage.getItem('twinCompleted') === 'true',
-    empowermentScore: localStorage.getItem('empowermentScore') 
-      ? parseInt(localStorage.getItem('empowermentScore')!) 
+  const twin =
+    twinResult.status === 'fulfilled' &&
+    twinResult.value?.status === 'success' &&
+    twinResult.value?.data?.twin
+      ? twinResult.value.data.twin
       : null
+
+  const hasCvProfile =
+    cvResult.status === 'fulfilled' &&
+    (cvResult.value?.status === 'success' || cvResult.value?.data?.profile)
+
+  const cvCompleted = !!(twin || hasCvProfile || localStorage.getItem('cvCompleted') === 'true')
+  const twinCompleted = !!(twin || localStorage.getItem('twinCompleted') === 'true')
+
+  if (cvCompleted) localStorage.setItem('cvCompleted', 'true')
+  if (twinCompleted) localStorage.setItem('twinCompleted', 'true')
+
+  if (twin) {
+    if (twin.empowermentScore) {
+      localStorage.setItem('empowermentScore', String(twin.empowermentScore))
+    }
+    localStorage.setItem('twinData', JSON.stringify(twin))
+    localStorage.setItem('twinCreated', 'true')
+  }
+
+  return {
+    cvCompleted,
+    twinCompleted,
+    empowermentScore: twin?.empowermentScore
+      ? twin.empowermentScore
+      : localStorage.getItem('empowermentScore')
+        ? parseInt(localStorage.getItem('empowermentScore')!)
+        : null,
   }
 }
 
