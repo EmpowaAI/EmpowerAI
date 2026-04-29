@@ -19,15 +19,19 @@ import {
   Upload,
   Wand2,
 } from "lucide-react";
-import {
-  AlignmentType,
-  BorderStyle,
-  Document,
-  HeadingLevel,
-  Packer,
-  Paragraph,
-  TextRun,
-} from "docx";
+// Dynamic import for docx to avoid build issues
+const loadDocx = async () => {
+  const docx = await import('docx');
+  return {
+    AlignmentType: docx.AlignmentType,
+    BorderStyle: docx.BorderStyle,
+    Document: docx.Document,
+    HeadingLevel: docx.HeadingLevel,
+    Packer: docx.Packer,
+    Paragraph: docx.Paragraph,
+    TextRun: docx.TextRun,
+  };
+};
 import { z } from "zod";
 import { Button } from "@/components/ui/Button";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -396,6 +400,10 @@ const CVAnalyzer = () => {
   const exportRevampedCv = async () => {
     const baseName = fileName?.replace(/\.[^/.]+$/, "") || "ats-cv";
     const sections = revampedCv.split("\n\n").filter(Boolean);
+    
+    // Load docx dynamically
+    const { AlignmentType, BorderStyle, Document, HeadingLevel, Packer, Paragraph, TextRun } = await loadDocx();
+    
     const children = sections.flatMap((section, sectionIndex) => {
       const [heading, ...bodyLines] = section.split("\n");
       const isTitle = sectionIndex === 0;
@@ -443,8 +451,11 @@ const CVAnalyzer = () => {
             basedOn: "Normal",
             next: "Normal",
             quickFormat: true,
-            run: { font: "Arial", bold: true, size: 22, color: "17345C" },
-            paragraph: { spacing: { before: 160, after: 120 }, outlineLevel: 1 },
+            run: {
+              font: "Arial",
+              size: 22,
+              color: "17345C",
+            },
           },
         ],
       },
@@ -452,7 +463,6 @@ const CVAnalyzer = () => {
         {
           properties: {
             page: {
-              size: { width: 12240, height: 15840 },
               margin: { top: 900, right: 900, bottom: 900, left: 900 },
             },
           },

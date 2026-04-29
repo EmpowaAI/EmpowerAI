@@ -14,7 +14,6 @@ const chunkGroups: Record<string, string[]> = {
   'motion-vendor': ['framer-motion'],
   'ai-vendor': ['@google/genai', 'react-markdown', 'microsoft-cognitiveservices-speech-sdk'],
   'utils-vendor': ['axios', 'clsx', 'tailwind-merge'],
-  'docx-vendor': ['docx'],
 }
 
 function getManualChunk(id: string): string | undefined {
@@ -52,9 +51,13 @@ export default defineConfig({
   build: {
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
+      external: ['docx'],
       output: {
         // Vite 8 uses Rolldown for dep optimization which currently expects manualChunks to be a function.
         manualChunks: getManualChunk,
+        globals: {
+          'docx': 'Docx'
+        }
       },
     },
     // Enable source maps for debugging but keep them external
