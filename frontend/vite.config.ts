@@ -51,14 +51,9 @@ export default defineConfig({
   build: {
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
-      external: ['docx', 'zod'],
       output: {
         // Vite 8 uses Rolldown for dep optimization which currently expects manualChunks to be a function.
         manualChunks: getManualChunk,
-        globals: {
-          'docx': 'Docx',
-          'zod': 'z'
-        }
       },
     },
     // Enable source maps for debugging but keep them external
