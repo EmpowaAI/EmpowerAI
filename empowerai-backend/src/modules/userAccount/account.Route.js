@@ -11,7 +11,7 @@ const { updateEmailRules, validateUpdateEmail }        = require('./userAccount.
 router.get('/verify', accountController.verifyEmail);
 router.post('/forgot-password', forgotPasswordRules, validateForgotPassword, accountController.forgotPassword);
 router.post('/reset-password', resetPasswordRules, validateResetPassword, accountController.resetPassword);
-router.get('/confirm-email', accountController.confirmEmailChange);
+router.get('/confirm-email', protect, accountController.confirmEmailChange);
 router.get('/confirm-delete', accountController.confirmAccountDeletion);
 router.post('/change-email', protect, updateEmailRules, validateUpdateEmail, accountController.requestEmailChange);
 router.post('/delete-request', protect, accountController.requestAccountDeletion);
