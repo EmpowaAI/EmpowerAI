@@ -898,6 +898,18 @@ export const twinAPIReal = {
     }
   },
 
+  buildFromCv: async () => {
+    try {
+      return await request<any>('/twin/twin/build-from-cv', {
+        method: 'POST',
+        body: JSON.stringify({}),
+      });
+    } catch (error) {
+      console.error('Failed to build twin from CV:', error);
+      throw error;
+    }
+  },
+
   get: async () => {
     try {
       return await request<any>('/twin/my-twin');

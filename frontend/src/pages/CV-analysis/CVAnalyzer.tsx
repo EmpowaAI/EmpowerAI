@@ -30,6 +30,8 @@ const jobDescriptionSchema = z.string().trim().max(6000, "Job description must b
 import { Button } from "@/components/ui/Button";
 import { analyzeCV } from "@/services/cvService";
 import { setStoredCvAnalysis, setStoredCvFileName } from "@/lib/sensitiveStorage";
+import { twinAPI } from "@/lib/api";
+import { useUser } from "@/contexts/user-context";
 
 type Phase = "idle" | "analyzing" | "complete" | "revamping" | "revamped";
 type ResultView = "overview" | "match" | "coaching";
@@ -211,6 +213,7 @@ const analyseCv = (cvText: string, jobDescription: string): CvAnalysis => {
 
 const CVAnalyzer = () => {
   const navigate = useNavigate();
+  const { updateProgress } = useUser();
   const [phase, setPhase] = useState<Phase>("idle");
   const [fileName, setFileName] = useState<string | null>(null);
   const [stageIndex, setStageIndex] = useState(0);
@@ -323,14 +326,38 @@ const CVAnalyzer = () => {
              setStoredCvFileName(fileName || 'cv.txt');
              window.dispatchEvent(new Event('cvCompleted'));
            }
-         } catch {
-           // Ignore localStorage failures
-         }
-       } catch (error) {
-         if (cancelled) return;
-         setAnalysisError("AI analysis could not finish right now, so we are showing the local CV scan.");
-       }
-     };
+          } catch {
+            // Ignore localStorage failures
+          }
+
+          // Auto-build the Economic Twin for authenticated users (CV analysis already saved server-side).
+          // This avoids forcing the user to manually visit the Twin page just to unlock features.
+          try {
+            const token = localStorage.getItem('empowerai-token');
+            if (token) {
+              await twinAPI.buildFromCv();
+              const twinResponse = await twinAPI.get();
+              const twin = twinResponse?.data?.twin;
+
+              if (twin) {
+                localStorage.setItem('twinData', JSON.stringify(twin));
+                localStorage.setItem('twinCreated', 'true');
+                localStorage.setItem('twinCompleted', 'true');
+                if (twin.empowermentScore) {
+                  localStorage.setItem('empowermentScore', String(twin.empowermentScore));
+                }
+                updateProgress('twinCompleted', true);
+                window.dispatchEvent(new Event('twinCompleted'));
+              }
+            }
+          } catch (e) {
+            console.warn('Auto twin build skipped/failed (non-fatal):', e);
+          }
+        } catch (error) {
+          if (cancelled) return;
+          setAnalysisError("AI analysis could not finish right now, so we are showing the local CV scan.");
+        }
+      };
 
     runAiAnalysis();
     return () => {
