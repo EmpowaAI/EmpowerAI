@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { Link } from "react-router-dom"
 import { Loader2, Mail, CheckCircle, Lock, Shield, Sparkles, ArrowLeft } from "lucide-react"
 import { accountService } from "@/api/Index"
 import Logo from "@/components/ui/Logo"
@@ -87,7 +87,7 @@ return (
               <div className="text-center space-y-6">
                 <div className="flex justify-center">
                   <div className="h-20 w-20 rounded-full bg-ai-gradient flex items-center justify-center animate-glow-pulse shadow-glow">
-                    <Mail className="h-10 w-10 text-white" />
+                    <CheckCircle className="h-10 w-10 text-white" />
                   </div>
                 </div>
                 <h2 className="font-display text-2xl font-bold text-primary">Check your email</h2>
