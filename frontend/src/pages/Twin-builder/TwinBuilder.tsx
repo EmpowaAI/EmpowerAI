@@ -1,5 +1,5 @@
 import { type FormEvent, type ReactNode, useCallback, useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
 import {
   Bot,
@@ -133,6 +133,7 @@ function normalizeTwin(raw: any): TwinData | null {
 
 const TwinBuilder = () => {
   const { progress } = useUser();
+  const navigate = useNavigate();
   const [message, setMessage] = useState("");
   const [isBotTyping, setIsBotTyping] = useState(false);
   const [isLoadingTwin, setIsLoadingTwin] = useState(true);
@@ -208,8 +209,18 @@ const TwinBuilder = () => {
             applyTwin(builtTwin);
             return;
           }
-        } catch {
-          // build failed, fall through to error
+        } catch (buildErr: any) {
+          // 404 means the CV profile was never saved server-side (stale localStorage).
+          // Clear the stale flags and redirect the user to re-upload their CV.
+          if (buildErr?.status === 404 || buildErr?.response?.status === 404) {
+            localStorage.removeItem("cvCompleted");
+            localStorage.removeItem("twinCompleted");
+            localStorage.removeItem("twinData");
+            localStorage.removeItem("cvAnalysisData");
+            navigate("/dashboard/cv-analysis");
+            return;
+          }
+          // Other errors (network, 500) — fall through to the error message below
         }
       }
 
