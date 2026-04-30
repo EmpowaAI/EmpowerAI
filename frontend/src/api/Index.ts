@@ -1,8 +1,5 @@
-// Core client utilities
-export { getToken, setToken, removeToken, request } from './Client';
-
-// Services
-export { authService } from './services/authService';
-export {accountService } from './services/accountService';
-export { userService } from './services/userService';
-
+// Re-exports from the canonical API layer
+export { getToken, setToken, removeToken } from '../lib/api';
+export { authAPI as authService } from '../lib/api';
+export { accountAPI as accountService } from '../lib/api';
+export { userAPI as userService } from '../lib/api';

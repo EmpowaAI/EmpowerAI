@@ -2,7 +2,7 @@
 import { Bot, X, Send, Sparkles, User, Clock, ThumbsUp, ThumbsDown } from "lucide-react";
 import { cn } from "../lib/utils";
 import StatusPill from "./shared/StatusPill";
-import { initTwinChat, chatWithTwin } from "../../api/services/twinService";
+import { twinAPIReal } from "../lib/api";
 import { useState, useEffect, useRef } from "react";
 
 interface Message {
@@ -62,8 +62,8 @@ export default function DigitalTwinChatbot() {
     if (!isOpen || twinContext) return;
     const token = localStorage.getItem('empowerai-token');
     if (!token) return;
-    initTwinChat()
-      .then(({ twinData }) => setTwinContext(twinData))
+    twinAPIReal.chatInit()
+      .then(res => setTwinContext(res.data?.twinData ?? res.twinData ?? null))
       .catch(() => { /* init is best-effort; chat still works without context */ });
   }, [isOpen, twinContext]);
 
@@ -97,7 +97,8 @@ export default function DigitalTwinChatbot() {
     const history = [...historyRef.current];
 
     try {
-      const response = await chatWithTwin(currentInput, history, twinContext ?? null);
+      const raw = await twinAPIReal.chatMessage(currentInput, history, twinContext ?? null);
+      const response = { reply: raw.data?.reply ?? raw.reply, twinData: raw.data?.twinData ?? raw.twinData };
 
       historyRef.current = [
         ...history,
@@ -295,7 +296,7 @@ export default function DigitalTwinChatbot() {
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-              onBlur={(e) => {
+              onBlur={(_e) => {
                 // On mobile, if user is still typing (input has value), refocus after a brief delay
                 if (inputText.trim() && !isLoading) {
                   setTimeout(() => {
