@@ -217,7 +217,7 @@ const TwinBuilder = () => {
             localStorage.removeItem("twinCompleted");
             localStorage.removeItem("twinData");
             localStorage.removeItem("cvAnalysisData");
-            navigate("/dashboard/cv-analysis");
+            navigate("/dashboard/cv-analyzer");
             return;
           }
           // Other errors (network, 500) — fall through to the error message below
