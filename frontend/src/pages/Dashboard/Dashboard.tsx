@@ -1,480 +1,295 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  ArrowRight, BarChart3, Bot, Briefcase, CheckCircle,
-  ChevronRight, Compass, FileText, Send, Sparkles,
-  Target, X, UserRound, BriefcaseBusiness, CircleDollarSign,
-  Lightbulb, Zap,
+  ArrowRight,
+  BarChart3,
+  Bot,
+  BriefcaseBusiness,
+  CheckCircle2,
+  ClipboardCheck,
+  Compass,
+  FileText,
+  GraduationCap,
+  LayoutDashboard,
+  Moon,
+  Sparkles,
+  Target,
+  X,
 } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { cn } from "@/lib/utils";
-import { useUser } from "../../contexts/user-context";
-import { applicationsAPI, statsAPI } from "../../lib/api";
-import { getStoredCvAnalysis } from "../../lib/sensitiveStorage";
+import { Card } from "@/components/ui/Card";
+import { ProfileMenu } from "@/components/ProfileMenu";
+import { ContactWidget } from "@/components/ContactWidget";
 
-// ── Types ──────────────────────────────────────────────────────────────
+const logo = "/empowerLogo.jpg";
 
-interface DashboardStats {
-  empowermentScore: number;
-  cvScore: number;
-  skillsMatched: number;
-  opportunitiesCount: number;
-  applicationsCount: number;
-}
+const navItems = [
+  { label: "Dashboard", icon: LayoutDashboard, to: "/demo", active: true },
+  { label: "CV Analyzer", icon: ClipboardCheck, to: "/cv-analyzer" },
+  { label: "Digital Twin", icon: Bot, to: "/digital-twin" },
+  { label: "Opportunities", icon: BriefcaseBusiness, to: "/features" },
+];
 
-// ── Static data ────────────────────────────────────────────────────────
-
-const onboardingSteps = [
+const primaryActions = [
   {
-    number: "01",
-    icon: FileText,
-    title: "Upload CV",
-    text: "Analyze your CV so EmpowerAI understands your skills and experience.",
-    to: "/dashboard/cv-analyzer",
+    icon: ClipboardCheck,
+    title: "Analyse CV",
+    text: "Find strengths, proof gaps, and your next best move.",
+    cta: "Improve CV",
+    to: "/cv-analyzer",
   },
   {
-    number: "02",
     icon: Bot,
-    title: "Create Twin",
-    text: "Build your AI Twin using your CV, goals, and career signals.",
-    to: "/dashboard/twin",
+    title: "Digital Twin",
+    text: "Build your AI career profile from real evidence.",
+    cta: "Build twin",
+    to: "/digital-twin",
   },
   {
-    number: "03",
-    icon: Compass,
-    title: "Explore Path",
-    text: "Get suggested careers, skills, opportunities, and next steps.",
-    to: "/dashboard/opportunities",
+    icon: BriefcaseBusiness,
+    title: "Find Opportunities",
+    text: "Explore jobs, learnerships, funding, and starter ventures.",
+    cta: "Explore",
+    to: "/features",
   },
+];
+
+const quietStats = [
+  { label: "CV strength", value: "0", note: "Analyse your CV first" },
+  { label: "Readiness", value: "0", note: "Build your twin next" },
+  { label: "Live opportunities", value: "7,564", note: "South Africa" },
 ];
 
 const journeySteps = [
+  { title: "Analyse your CV", status: "Start here", active: true },
+  { title: "Build your Digital Twin", status: "Next" },
+  { title: "Choose a path", status: "Jobs · study · income" },
+  { title: "Apply with confidence", status: "When ready" },
+];
+
+const onboardingSteps = [
   {
-    title: "Analyze CV",
-    description: "Upload your CV and discover your strengths.",
-    status: "Start here",
-    to: "/dashboard/cv-analyzer",
     icon: FileText,
-    completedKey: "cvCompleted",
+    title: "Upload CV",
+    text: "Start with your CV so EmpowAI can understand your real skills.",
+    to: "/cv-analyzer",
   },
   {
-    title: "Build Twin",
-    description: "Create your personal AI career twin.",
-    status: "Next",
-    to: "/dashboard/twin",
     icon: Bot,
-    completedKey: "twinCompleted",
+    title: "Create Twin",
+    text: "Turn your experience into a clear career and income profile.",
+    to: "/digital-twin",
   },
   {
-    title: "Choose Path",
-    description: "Explore roles, skills, and career options.",
-    status: "Recommended",
-    to: "/dashboard/opportunities",
     icon: Compass,
-    completedKey: null,
-  },
-  {
-    title: "Apply",
-    description: "Use your insights to take action.",
-    status: "Coming soon",
-    to: "/dashboard/opportunities",
-    icon: Send,
-    completedKey: null,
+    title: "Explore Path",
+    text: "See jobs, study options, funding, and side-income ideas that fit you.",
+    to: "/features",
   },
 ];
 
-// ── Component ──────────────────────────────────────────────────────────
-
-export default function Dashboard() {
-  const { user, progress } = useUser();
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [profileSkills, setProfileSkills] = useState<string[]>([]);
-  const [showWelcomeGuide, setShowWelcomeGuide] = useState(() => {
-    try { return localStorage.getItem("empowerai:guideHidden") !== "true"; } catch { return true; }
-  });
-
-  const displayName = user?.name?.split(" ")[0] || "Explorer";
-  const cvCompleted = progress.cvCompleted;
-  const twinCompleted = progress.twinCompleted;
-
-  const dismissGuide = () => {
-    setShowWelcomeGuide(false);
-    try { localStorage.setItem("empowerai:guideHidden", "true"); } catch { /* ignore */ }
-  };
-
-  const loadDashboard = useCallback(async () => {
-    try {
-      setLoading(true);
-
-      const [statsRes, appsRes] = await Promise.allSettled([
-        statsAPI.getDashboardStats(),
-        applicationsAPI.getStats(),
-      ]);
-
-      const liveStats = statsRes.status === "fulfilled" ? statsRes.value?.data : null;
-      const appStats = appsRes.status === "fulfilled" ? appsRes.value?.data : null;
-
-      if (liveStats) {
-        setStats({
-          empowermentScore: Number(liveStats.empowermentScore) || 0,
-          cvScore: Number(liveStats.cvScore) || 0,
-          skillsMatched: Number(liveStats.skillsMatched) || 0,
-          opportunitiesCount: Number(liveStats.opportunitiesCount || (liveStats as any).totalOpportunities) || 0,
-          applicationsCount: Number(appStats?.total) || 0,
-        });
-      } else {
-        // Fall back to localStorage
-        let cvScore = 0;
-        let empowermentScore = 0;
-        let skillsMatched = 0;
-        try {
-          const analysis = getStoredCvAnalysis<any>();
-          if (analysis?.score) cvScore = Number(analysis.score) || 0;
-          const rawSkills = localStorage.getItem("cvSkills");
-          const parsedSkills = rawSkills ? JSON.parse(rawSkills) : [];
-          if (Array.isArray(parsedSkills)) {
-            skillsMatched = parsedSkills.length;
-            setProfileSkills(parsedSkills.slice(0, 5));
-          }
-        } catch { /* ignore */ }
-        try {
-          const twinData = localStorage.getItem("twinData");
-          if (twinData) {
-            const parsed = JSON.parse(twinData);
-            empowermentScore = Number(parsed?.economy?.employabilityScore || parsed?.empowermentScore) || 0;
-          }
-        } catch { /* ignore */ }
-        setStats({ empowermentScore, cvScore, skillsMatched, opportunitiesCount: 0, applicationsCount: 0 });
-      }
-    } catch {
-      setStats({ empowermentScore: 0, cvScore: 0, skillsMatched: 0, opportunitiesCount: 0, applicationsCount: 0 });
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void loadDashboard();
-    // Also read skills from localStorage
-    try {
-      const raw = localStorage.getItem("cvSkills");
-      const parsed = raw ? JSON.parse(raw) : [];
-      if (Array.isArray(parsed)) setProfileSkills(parsed.slice(0, 5));
-    } catch { /* ignore */ }
-  }, [loadDashboard]);
-
-  const quietStats = [
-    {
-      label: "CV Strength",
-      value: loading ? "—" : stats ? `${stats.cvScore}%` : "—",
-      helper: cvCompleted ? "Based on your CV analysis" : "Upload CV to get started",
-      icon: FileText,
-    },
-    {
-      label: "Twin Readiness",
-      value: loading ? "—" : stats ? `${stats.empowermentScore}%` : "—",
-      helper: twinCompleted ? "Your AI twin is active" : "Build your twin to activate",
-      icon: Bot,
-    },
-    {
-      label: "Live Opportunities",
-      value: loading ? "—" : stats ? String(stats.opportunitiesCount) : "—",
-      helper: "South Africa focused",
-      icon: Briefcase,
-    },
-    {
-      label: "Skills Matched",
-      value: loading ? "—" : stats ? String(stats.skillsMatched) : "—",
-      helper: "From your CV analysis",
-      icon: BarChart3,
-    },
-  ];
-
-  // Which journey step to highlight as "next"
-  const nextStep = cvCompleted
-    ? twinCompleted
-      ? journeySteps[2]
-      : journeySteps[1]
-    : journeySteps[0];
+const Dashboard = () => {
+  const [showWelcomeGuide, setShowWelcomeGuide] = useState(true);
 
   return (
-    <main className="bg-background font-sans text-foreground">
-      <div className="mx-auto grid max-w-[1070px] border-border bg-background lg:border-x lg:grid-cols-[390px_minmax(0,1fr)]">
-        {/* Sidebar - Profile and Overview — shown below content on mobile, left column on desktop */}
-        <aside className="order-2 overflow-y-auto border-t border-border bg-background px-4 py-4 lg:order-1 lg:h-screen lg:border-r lg:border-t-0">
-          <div className="space-y-3">
-            {/* Profile Section */}
-            <section className="rounded-xl border border-border bg-card p-4">
-              <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <UserRound className="h-5 w-5" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Welcome</p>
-                  <h1 className="mt-1 text-lg font-bold leading-tight text-primary">{displayName}</h1>
-                  <p className="mt-1 text-sm font-semibold leading-5 text-foreground">Your AI career journey continues here</p>
-                </div>
-              </div>
+    <div className="min-h-screen bg-background font-sans text-foreground">
+      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/90 backdrop-blur-md">
+        <div className="container flex min-h-16 flex-wrap items-center justify-between gap-3 py-3">
+          <Link to="/" className="flex items-center gap-2.5">
+            <img src={logo} alt="EmpowAI logo" className="h-10 w-10 rounded-md object-cover" width={40} height={40} />
+            <span className="font-display text-2xl font-bold text-primary">EmpowAI</span>
+          </Link>
 
-              <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
-                <div className="rounded-lg bg-muted/60 p-3">
-                  <BriefcaseBusiness className="h-4 w-4 text-primary" />
-                  <p className="mt-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">Status</p>
-                  <p className="font-semibold text-foreground">
-                    {twinCompleted ? "Twin Ready" : cvCompleted ? "CV Complete" : "Getting Started"}
-                  </p>
-                </div>
-                <div className="rounded-lg bg-muted/60 p-3">
-                  <CircleDollarSign className="h-4 w-4 text-secondary" />
-                  <p className="mt-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">Score</p>
-                  <p className="font-semibold text-foreground">{stats?.empowermentScore || 0}%</p>
-                </div>
-              </div>
+          <nav className="order-3 flex w-full justify-start overflow-x-auto rounded-xl bg-muted/60 p-1 md:order-2 md:w-auto">
+            {navItems.map(({ label, icon: Icon, to, active }) => (
+              <Link
+                key={label}
+                to={to}
+                className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
+                  active ? "bg-background text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                {label}
+              </Link>
+            ))}
+          </nav>
 
-              <div className="mt-4 rounded-lg border border-secondary/30 bg-secondary/10 px-3 py-2 text-sm font-semibold text-foreground">
-                {twinCompleted ? "Ready for opportunities" : cvCompleted ? "Build your Twin next" : "Start with CV analysis"}
-              </div>
-            </section>
-
-            {/* Quick Stats */}
-            <section className="rounded-xl border border-border bg-card p-4">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-primary mb-3">Your Progress</h3>
-              <div className="space-y-3">
-                {quietStats.map((stat) => {
-                  const Icon = stat.icon;
-                  return (
-                    <div key={stat.label} className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Icon className="h-4 w-4 text-primary" />
-                        <span className="text-sm font-medium text-foreground">{stat.label}</span>
-                      </div>
-                      <span className="text-sm font-bold text-primary">{stat.value}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-
-            {/* Journey Steps */}
-            <section className="rounded-xl border border-border bg-card p-4">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-primary mb-3">Your Journey</h3>
-              <div className="space-y-2">
-                {journeySteps.map((step, index) => {
-                  const Icon = step.icon;
-                  const isCompleted = step.completedKey && progress[step.completedKey as keyof typeof progress];
-                  const isNext = index === journeySteps.findIndex(s => !s.completedKey || !progress[s.completedKey as keyof typeof progress]);
-                  
-                  return (
-                    <Link
-                      key={step.title}
-                      to={step.to}
-                      className={cn(
-                        "flex items-center gap-3 rounded-lg p-3 transition-colors",
-                        isCompleted 
-                          ? "bg-muted/30 text-muted-foreground" 
-                          : isNext 
-                            ? "bg-primary/10 text-primary border border-primary/20" 
-                            : "bg-muted/10 text-muted-foreground"
-                      )}
-                    >
-                      <div className={cn(
-                        "flex h-8 w-8 items-center justify-center rounded-lg",
-                        isCompleted 
-                          ? "bg-muted text-muted-foreground" 
-                          : isNext 
-                            ? "bg-primary text-primary-foreground" 
-                            : "bg-muted text-muted-foreground"
-                      )}>
-                        {isCompleted ? <CheckCircle className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className={cn(
-                          "text-sm font-medium",
-                          isCompleted 
-                            ? "text-muted-foreground" 
-                            : isNext 
-                              ? "text-primary" 
-                              : "text-muted-foreground"
-                        )}>
-                          {step.title}
-                        </p>
-                        <p className="text-xs text-muted-foreground">{step.description}</p>
-                      </div>
-                      {isNext && (
-                        <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded-full">
-                          {step.status}
-                        </span>
-                      )}
-                    </Link>
-                  );
-                })}
-              </div>
-            </section>
-
-            {/* Quick Actions */}
-            <section className="rounded-xl border border-primary bg-card p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <Zap className="h-4 w-4 text-primary" />
-                <h3 className="font-bold text-primary">Quick Actions</h3>
-              </div>
-              <div className="space-y-2">
-                {!cvCompleted && (
-                  <Link to="/dashboard/cv-analyzer">
-                    <Button className="w-full">
-                      <FileText className="mr-2 h-4 w-4" />
-                      Analyze CV
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </Link>
-                )}
-                {cvCompleted && !twinCompleted && (
-                  <Link to="/dashboard/twin">
-                    <Button className="w-full">
-                      <Bot className="mr-2 h-4 w-4" />
-                      Build Twin
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </Link>
-                )}
-                {twinCompleted && (
-                  <Link to="/dashboard/opportunities">
-                    <Button className="w-full">
-                      <Compass className="mr-2 h-4 w-4" />
-                      Explore Opportunities
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </Link>
-                )}
-              </div>
-            </section>
+          <div className="order-2 flex items-center gap-2 md:order-3">
+            <ProfileMenu />
+            <Button variant="ghost" size="icon" aria-label="Toggle theme preview">
+              <Moon className="h-4 w-4" />
+            </Button>
           </div>
-        </aside>
+        </div>
+      </header>
 
-        {/* Main Content Area — shown first on mobile */}
-        <section className="order-1 flex flex-col bg-background lg:order-2 lg:h-screen lg:min-h-0">
-          <div className="px-4 pb-8 pt-6 sm:px-5 lg:flex-1 lg:overflow-y-auto lg:pt-12">
+      <main className="bg-gradient-to-b from-muted/35 via-background to-background">
+        <section className="container py-8 md:py-10">
+          <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[1.45fr_0.85fr]">
             <div className="space-y-6">
-              {/* Welcome Guide */}
               {showWelcomeGuide && (
-                <div className="rounded-xl border border-primary/20 bg-card p-6 relative">
-                  <button
-                    onClick={dismissGuide}
-                    className="absolute right-4 top-4 z-10 rounded-full p-1 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                <Card className="relative overflow-hidden border-primary/20 bg-card p-6 shadow-card-soft md:p-8">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-4 top-4 text-primary hover:bg-muted"
                     aria-label="Close welcome guide"
+                    onClick={() => setShowWelcomeGuide(false)}
                   >
-                    <X className="h-4 w-4" />
-                  </button>
+                    <X className="h-5 w-5" />
+                  </Button>
 
-                  <div className="mb-4">
-                    <p className="text-xs font-semibold uppercase tracking-widest text-primary">Welcome to EmpowerAI</p>
-                    <h2 className="text-xl font-bold text-primary mt-1">Your career journey starts here</h2>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Follow these three steps to turn your CV into a clear, personalised career path.
+                  <div className="pr-10">
+                    <h1 className="font-display text-2xl font-bold text-primary md:text-3xl">Welcome to EmpowerAI! 🚀</h1>
+                    <p className="mt-2 text-sm font-semibold text-muted-foreground md:text-base">
+                      Let&apos;s get you started. Here&apos;s your journey to career empowerment:
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                    {onboardingSteps.map((step) => {
-                      const Icon = step.icon;
-                      return (
-                        <Link
-                          key={step.number}
-                          to={step.to}
-                          className="flex flex-col gap-2 rounded-lg border border-border/60 bg-muted/30 p-4 hover:border-primary/40 hover:bg-primary/5 transition-all"
-                        >
-                          <div className="flex items-center gap-3">
-                            <span className="text-xs font-bold text-primary/60">{step.number}</span>
-                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                              <Icon className="h-4 w-4" />
-                            </div>
+                  <div className="mt-6 grid gap-4 sm:grid-cols-3">
+                    {onboardingSteps.map(({ icon: Icon, title, text, to }) => (
+                      <Link
+                        key={title}
+                        to={to}
+                        className="group rounded-xl border border-border/70 bg-card p-4 shadow-sm transition-all hover:border-primary/30 hover:shadow-md"
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                            <Icon className="h-5 w-5" />
+                          </span>
+                          <div>
+                            <h3 className="font-display text-base font-bold text-primary group-hover:text-secondary">
+                              {title}
+                            </h3>
                           </div>
-                          <p className="font-semibold text-sm">{step.title}</p>
-                          <p className="text-xs text-muted-foreground leading-relaxed">{step.text}</p>
-                        </Link>
-                      );
-                    })}
+                        </div>
+                        <p className="mt-2 text-xs leading-5 text-muted-foreground">{text}</p>
+                      </Link>
+                    ))}
                   </div>
-
-                  <p className="mt-4 text-xs text-muted-foreground border-t border-border/40 pt-3">
-                    <span className="font-medium text-foreground">Pro tip:</span>{" "}
-                    Start with your CV. The stronger your CV data, the better your Twin and career recommendations.
-                  </p>
-                </div>
+                </Card>
               )}
 
-              {/* Recommended Next Step */}
-              <Link to={nextStep.to}>
-                <div className="rounded-xl border border-primary/30 bg-primary/5 p-6 cursor-pointer hover:border-primary/60 transition-all group">
-                  <div className="flex items-center gap-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary shrink-0">
+              <Card className="border-secondary/25 bg-secondary/5 p-5 shadow-sm md:p-6">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-start gap-4">
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-secondary/15 text-secondary">
                       <Target className="h-6 w-6" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-[11px] uppercase tracking-widest text-primary font-semibold">Recommended next step</p>
-                      <p className="font-bold text-lg">{nextStep.title}</p>
-                      <p className="text-sm text-muted-foreground">{nextStep.description}</p>
-                    </div>
-                    <ArrowRight className="h-5 w-5 text-primary group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </div>
-              </Link>
-
-              {/* Recent Activity */}
-              <div className="rounded-xl border border-border bg-card p-6">
-                <h3 className="text-lg font-bold text-primary mb-4">Recent Activity</h3>
-                <div className="space-y-4">
-                  {profileSkills.length > 0 && (
+                    </span>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground mb-2">Skills from your CV</p>
-                      <div className="flex flex-wrap gap-2">
-                        {profileSkills.slice(0, 8).map((skill, index) => (
-                          <span key={index} className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary">
-                            {skill}
-                          </span>
-                        ))}
-                        {profileSkills.length > 8 && (
-                          <span className="rounded-full border border-border bg-muted/60 px-3 py-1.5 text-xs font-semibold text-muted-foreground">
-                            +{profileSkills.length - 8} more
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                  
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div className="rounded-lg border border-border bg-muted/30 p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Bot className="h-4 w-4 text-primary" />
-                        <p className="text-sm font-medium text-foreground">AI Twin Status</p>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {twinCompleted 
-                          ? "Your Economic Twin is ready and waiting for your questions." 
-                          : cvCompleted 
-                            ? "Build your AI Twin to get personalized career insights." 
-                            : "Complete CV analysis first to unlock your AI Twin."
-                        }
-                      </p>
-                    </div>
-                    
-                    <div className="rounded-lg border border-border bg-muted/30 p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Compass className="h-4 w-4 text-primary" />
-                        <p className="text-sm font-medium text-foreground">Opportunities</p>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {stats?.opportunitiesCount || 0} roles matched to your profile
+                      <p className="text-xs font-bold uppercase tracking-wider text-secondary">Recommended next step</p>
+                      <h2 className="mt-1 font-display text-2xl font-bold text-primary">Analyse CV</h2>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        This unlocks stronger guidance and makes every next recommendation more personal.
                       </p>
                     </div>
                   </div>
+                  <Button asChild variant="outline" className="shrink-0 border-secondary/40 text-secondary hover:bg-secondary/10">
+                    <Link to="/cv-analyzer">Improve CV</Link>
+                  </Button>
                 </div>
+              </Card>
+
+              <div className="grid gap-4 md:grid-cols-3">
+                {quietStats.map((stat) => (
+                  <Card key={stat.label} className="border-border/70 p-5 shadow-sm">
+                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{stat.label}</p>
+                    <p className="mt-4 font-display text-4xl font-bold text-primary">{stat.value}</p>
+                    <p className="mt-1 text-sm text-muted-foreground">{stat.note}</p>
+                  </Card>
+                ))}
               </div>
+
+              <Card className="border-border/70 p-5 shadow-sm md:p-6">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h2 className="font-display text-2xl font-bold text-primary">Your AI Journey</h2>
+                    <p className="mt-1 text-sm text-muted-foreground">Simple, calm, and one action at a time.</p>
+                  </div>
+                  <span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground">0% complete</span>
+                </div>
+                <div className="mt-6 space-y-3">
+                  {journeySteps.map((step, index) => (
+                    <Link
+                      key={step.title}
+                      to={index === 0 ? "/cv-analyzer" : index === 1 ? "/digital-twin" : "/features"}
+                      className={`flex items-center justify-between gap-4 rounded-xl border p-4 transition-colors ${
+                        step.active ? "border-secondary/35 bg-secondary/5" : "border-border/70 bg-background hover:border-primary/30"
+                      }`}
+                    >
+                      <span className="flex items-center gap-3">
+                        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                          {String(index + 1).padStart(2, "0")}
+                        </span>
+                        <span className="font-semibold text-foreground">{step.title}</span>
+                      </span>
+                      <span className="text-right text-xs font-semibold text-muted-foreground">{step.status}</span>
+                    </Link>
+                  ))}
+                </div>
+              </Card>
             </div>
+
+            <aside className="space-y-5 lg:sticky lg:top-24 lg:self-start">
+              <Card className="border-border/70 p-5 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <Compass className="h-5 w-5" />
+                  </span>
+                  <div>
+                    <h2 className="font-display text-xl font-bold text-primary">Profile snapshot</h2>
+                    <p className="text-xs text-muted-foreground">South Africa · Professional growth</p>
+                  </div>
+                </div>
+                <div className="mt-5 space-y-4 text-sm">
+                  <div>
+                    <p className="font-semibold text-foreground">Top skills</p>
+                    <p className="text-muted-foreground">No skills detected yet</p>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-foreground">Twin status</p>
+                    <p className="text-muted-foreground">Not built yet</p>
+                  </div>
+                </div>
+              </Card>
+
+              <div className="space-y-3">
+                {primaryActions.map(({ icon: Icon, title, text, cta, to }) => (
+                  <Card key={title} className="border-border/70 p-5 shadow-sm transition-smooth hover:border-primary/30">
+                    <div className="flex gap-4">
+                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                        <Icon className="h-5 w-5" />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-display text-lg font-bold text-primary">{title}</h3>
+                        <p className="mt-1 text-sm leading-5 text-muted-foreground">{text}</p>
+                        <Button asChild variant="link" className="mt-2 h-auto p-0 text-secondary">
+                          <Link to={to}>{cta}</Link>
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+
+              <Card className="border-primary/20 bg-primary/5 p-5 shadow-sm">
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-secondary" />
+                  <div>
+                    <p className="font-semibold text-primary">AI Twin ready when you are</p>
+                    <p className="mt-1 text-sm text-muted-foreground">We keep the dashboard quiet until your CV gives us better evidence.</p>
+                  </div>
+                </div>
+              </Card>
+            </aside>
           </div>
         </section>
-      </div>
-    </main>
+      </main>
+
+      <ContactWidget />
+    </div>
   );
-}
+};
+
+export default Dashboard;
