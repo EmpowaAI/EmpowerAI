@@ -60,8 +60,8 @@ async function saveAnalysisResult({ userId, file, rawText, analysis, isFallback 
       error: error.message,
       stack: error.stack,
     });
-    return null;
-  } 
+    throw error;
+  }
 }
   
 
