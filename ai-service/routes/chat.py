@@ -107,20 +107,61 @@ async def handle_twin_conversation(payload: ChatRequest, req: Request) -> ChatRe
     try:
         # Build system context from twin data
         cv_context = payload.cv_context or {}
-        
-        system_prompt = f"""You are an AI career advisor chatting with a user about their Economic Twin — an AI-generated career profile built from their CV analysis. Be specific, practical, and South Africa-aware. Use markdown. Keep responses concise but actionable.
 
-TWIN DATA:
-- Identity: currentRole={cv_context.get('currentRole', 'N/A')}, targetRole={cv_context.get('targetRole', 'N/A')}, seniorityLevel={cv_context.get('yearsExperience', 0)} years experience, industry={cv_context.get('industry', 'N/A')}
-- Economy: employabilityScore={cv_context.get('score', 50)}, incomePotential=Based on experience and industry
-- Core Skills: {', '.join(cv_context.get('sections', {}).get('skills', []))}
-- Strengths: {', '.join(cv_context.get('strengths', []))}
-- Weaknesses: {', '.join(cv_context.get('weaknesses', []))}
-- Recommendations: {', '.join(cv_context.get('recommendations', []))}
-- Missing Skills: {', '.join(cv_context.get('missingSkills', []))}
-- Confidence: {cv_context.get('confidenceScore', 50)}/100
+        # Use Python 'or' so empty strings fall back to a readable label
+        current_role   = cv_context.get('currentRole')   or 'Not yet specified'
+        target_role    = cv_context.get('targetRole')    or current_role or 'Not yet specified'
+        industry       = cv_context.get('industry')      or 'General'
+        seniority      = cv_context.get('seniorityLevel') or 'ENTRY'
+        score          = cv_context.get('score', 50)
+        confidence     = cv_context.get('confidenceScore', 50)
+        demand         = cv_context.get('demandLevel', 'MEDIUM')
+        core_skills    = cv_context.get('sections', {}).get('skills', []) or []
+        strengths      = cv_context.get('strengths', []) or []
+        weaknesses     = cv_context.get('weaknesses', []) or []
+        recommendations = cv_context.get('recommendations', []) or []
+        missing_skills = cv_context.get('missingSkills', []) or []
+        trending       = cv_context.get('trendingSkills', []) or []
+        opportunities  = cv_context.get('matchedOpportunities', []) or []
 
-Always reference the user's actual data in your responses. Be helpful and encouraging."""
+        skills_str          = ', '.join(core_skills)          if core_skills          else 'No skills recorded yet'
+        strengths_str       = ', '.join(strengths)            if strengths            else 'Not yet analysed'
+        weaknesses_str      = ', '.join(weaknesses)           if weaknesses           else 'Not yet analysed'
+        recommendations_str = ', '.join(recommendations[:5])  if recommendations      else 'See career advice below'
+        missing_str         = ', '.join(missing_skills[:5])   if missing_skills       else 'None identified'
+        trending_str        = ', '.join(trending[:5])         if trending             else 'General SA market skills'
+        opps_str            = '\n  • '.join(opportunities)    if opportunities        else 'Browse opportunities in the platform'
+
+        system_prompt = f"""You are an AI career advisor for a South African job seeker. You have access to their Economic Twin — a personalised career profile built from their CV analysis. Be specific, practical, and grounded in real SA market data. Use markdown for formatting. Keep responses concise but actionable.
+
+TWIN PROFILE:
+- Current Role: {current_role}
+- Target Role: {target_role}
+- Industry: {industry}
+- Seniority Level: {seniority}
+- Employability Score: {score}/100
+- Market Demand: {demand}
+- Profile Confidence: {confidence}/100
+
+SKILLS:
+- Core Skills: {skills_str}
+- Missing Skills: {missing_str}
+- Trending in SA Market: {trending_str}
+
+INTELLIGENCE:
+- Strengths: {strengths_str}
+- Weaknesses: {weaknesses_str}
+- Recommendations: {recommendations_str}
+
+MATCHED OPPORTUNITIES:
+  • {opps_str}
+
+INSTRUCTIONS:
+- Always reference the user's ACTUAL data above — never say "not specified" if data is present.
+- Be encouraging and practical. Reference South African context (salary in ZAR, SA job portals, BBBEE, learnerships, YES Programme where relevant).
+- For career recommendations, reference their actual industry ({industry}), skills ({skills_str}), and seniority ({seniority}).
+- If driver's licence is in their skills or the role requires one, mention it.
+- Keep responses under 300 words unless a detailed breakdown is asked for."""
         
         # Get user's last message
         user_messages = [m for m in payload.messages if m.role == "user"]

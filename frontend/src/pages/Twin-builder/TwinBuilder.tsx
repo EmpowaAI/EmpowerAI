@@ -1,4 +1,5 @@
 import { type FormEvent, type ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
 import {
@@ -142,6 +143,8 @@ const TwinBuilder = () => {
   const [twinError, setTwinError] = useState("");
   const [chatHistory, setChatHistory] = useState<{ role: string; content: string }[]>([]);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
+  // Keep raw API twin shape so the chat context has all fields (identity, intelligence, etc.)
+  const rawTwinRef = useRef<any>(null);
 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {
@@ -156,6 +159,7 @@ const TwinBuilder = () => {
     const twin = normalizeTwin(raw);
     if (!twin) return false;
     setTwinData(twin);
+    rawTwinRef.current = raw; // preserve raw shape for chat context
     const skills = twin.profile?.skills ?? twin.skills ?? [];
     const industry = twin.profile?.industry ?? twin.industry ?? "General";
     localStorage.setItem("twinData", JSON.stringify(raw)); // persist raw so next load can re-normalize
@@ -298,7 +302,7 @@ const TwinBuilder = () => {
       const response = await twinAPIReal.chatMessage(
         cleanPrompt,
         newHistory,
-        twinData ?? {},
+        rawTwinRef.current ?? twinData ?? {},
         false
       );
 
@@ -537,7 +541,27 @@ const TwinBuilder = () => {
                           : "rounded-[14px] border border-border bg-card text-foreground"
                       }`}
                     >
-                      {chat.text}
+                      {chat.role === "assistant" ? (
+                        <ReactMarkdown
+                          components={{
+                            p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                            strong: ({ children }) => <strong className="font-bold">{children}</strong>,
+                            em: ({ children }) => <em className="italic">{children}</em>,
+                            h1: ({ children }) => <p className="font-bold text-base mb-1">{children}</p>,
+                            h2: ({ children }) => <p className="font-bold mb-1">{children}</p>,
+                            h3: ({ children }) => <p className="font-semibold mb-1">{children}</p>,
+                            ul: ({ children }) => <ul className="list-disc pl-4 mb-2 space-y-1">{children}</ul>,
+                            ol: ({ children }) => <ol className="list-decimal pl-4 mb-2 space-y-1">{children}</ol>,
+                            li: ({ children }) => <li className="leading-5">{children}</li>,
+                            hr: () => <hr className="my-2 border-border" />,
+                            code: ({ children }) => <code className="rounded bg-muted px-1 py-0.5 text-xs font-mono">{children}</code>,
+                          }}
+                        >
+                          {chat.text}
+                        </ReactMarkdown>
+                      ) : (
+                        chat.text
+                      )}
                     </div>
 
                     {chat.role === "assistant" && chat.options && chat.options.length > 0 && (

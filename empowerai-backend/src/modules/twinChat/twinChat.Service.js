@@ -6,32 +6,45 @@ const logger             = require('../../utils/logger');
 
 
 function _buildCvContext(twinData) {
-  return {
+  // Support both the raw API shape (identity/economy/skills.core) and the
+  // normalized TwinBuilder shape (profile/skills-as-array/gaps) so the chat
+  // works regardless of which object the frontend hands us.
+  const identity      = twinData.identity      || {};
+  const economy       = twinData.economy       || {};
+  const intelligence  = twinData.intelligence  || {};
+  const analysisLatest = twinData.analysisLatest || {};
+  const profile       = twinData.profile       || {};   // normalized shape
 
+  // skills: { core: [...], missing: [...] }  (raw)  OR  [...] (normalized)
+  const rawSkills     = twinData.skills;
+  const coreSkills    = Array.isArray(rawSkills) ? rawSkills       : (rawSkills?.core    || []);
+  const missingSkills = Array.isArray(rawSkills) ? (twinData.gaps || []) : (rawSkills?.missing || []);
+
+  return {
     source: 'twin',
 
-    // Identity
-    currentRole:    twinData.identity?.currentRole    || '',
-    targetRole:     twinData.identity?.targetRole     || '',
-    industry:       twinData.identity?.industry       || '',
-    seniorityLevel: twinData.identity?.seniorityLevel || 'ENTRY',
+    // Identity — raw shape first, fall back to normalized fields
+    currentRole:    identity.currentRole    || profile.name     || twinData.name     || '',
+    targetRole:     identity.targetRole     || profile.path     || '',
+    industry:       identity.industry       || profile.industry || twinData.industry || '',
+    seniorityLevel: identity.seniorityLevel || profile.level    || twinData.level    || 'ENTRY',
 
     // Economy
-    score:            twinData.economy?.employabilityScore ?? 50,
-    marketValueScore: twinData.economy?.marketValueScore   ?? 50,
-    demandLevel:      twinData.economy?.demandLevel        || 'LOW',
-    yearsExperience:  twinData.analysisLatest?.skills?.extracted?.length ?? 0,
+    score:            economy.employabilityScore ?? profile.empowermentScore ?? twinData.empowermentScore ?? 50,
+    marketValueScore: economy.marketValueScore   ?? 50,
+    demandLevel:      economy.demandLevel        || profile.marketDemand || 'LOW',
+    yearsExperience:  analysisLatest?.skills?.extracted?.length ?? 0,
     confidenceScore:  Math.round((twinData.evolution?.confidenceScore ?? 0.5) * 100),
 
-    // Intelligence
-    strengths:       twinData.intelligence?.strengths       || [],
-    weaknesses:      twinData.intelligence?.weaknesses      || [],
-    recommendations: twinData.intelligence?.recommendations || [],
-    missingSkills:   twinData.skills?.missing               || [],
+    // Intelligence — only available in raw shape
+    strengths:       intelligence.strengths       || [],
+    weaknesses:      intelligence.weaknesses      || [],
+    recommendations: intelligence.recommendations || twinData.recommendations || [],
+    missingSkills,
 
     // Skills — FastAPI reads from sections.skills
     sections: {
-      skills: twinData.skills?.core || [],
+      skills: coreSkills.length > 0 ? coreSkills : (profile.skills || []),
     },
 
     // Market context (extra richness for the system prompt)
