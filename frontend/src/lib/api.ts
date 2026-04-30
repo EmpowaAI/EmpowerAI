@@ -225,8 +225,8 @@ export const accountAPIDemo = {
       message: 'Email verified successfully'
     };
   },
-  forgotPassword: async (email: string) => {
-    console.log('🔐 Demo: Forgot password for:', email);
+  forgotPassword: async (payload: { email: string }) => {
+    console.log('🔐 Demo: Forgot password for:', payload.email);
     await new Promise(resolve => setTimeout(resolve, 500));
     return {
       status: 'success',
