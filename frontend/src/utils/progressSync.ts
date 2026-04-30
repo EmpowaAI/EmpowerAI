@@ -36,7 +36,7 @@ export async function syncProgressFromBackend(): Promise<ProgressData> {
 
   const hasCvProfile =
     cvResult.status === 'fulfilled' &&
-    (cvResult.value?.status === 'success' || cvResult.value?.data?.profile)
+    cvResult.value?.data?.profile != null
 
   const cvCompleted = !!(twin || hasCvProfile || localStorage.getItem('cvCompleted') === 'true')
   const twinCompleted = !!(twin || localStorage.getItem('twinCompleted') === 'true')
