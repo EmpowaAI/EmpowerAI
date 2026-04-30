@@ -379,19 +379,22 @@ const CVAnalyzer = () => {
          setAiAnalysis(transformedAnalysis);
 
          try {
-           // Always mark CV as completed when analysis finishes — skills may be
-           // empty for some CVs but the analysis itself succeeded.
-           localStorage.setItem('cvCompleted', 'true');
-           localStorage.setItem('cvScore', String(data.score || 0));
-           updateProgress('cvCompleted', true);
-           setStoredCvAnalysis(data);
-           setStoredCvFileName(fileName || 'cv.txt');
-           refreshCVData();
-           window.dispatchEvent(new Event('cvCompleted'));
+           // Only mark CV as completed when the profile was actually saved server-side.
+           // profileId is null when the backend failed to persist the analysis.
+           const profileSaved = !!data.profileId;
+           if (profileSaved) {
+             localStorage.setItem('cvCompleted', 'true');
+             localStorage.setItem('cvScore', String(data.score || 0));
+             updateProgress('cvCompleted', true);
+             setStoredCvAnalysis(data);
+             setStoredCvFileName(fileName || 'cv.txt');
+             refreshCVData();
+             window.dispatchEvent(new Event('cvCompleted'));
 
-           const skills = data.sections?.skills || [];
-           if (Array.isArray(skills) && skills.length > 0) {
-             localStorage.setItem('cvSkills', JSON.stringify(skills));
+             const skills = data.sections?.skills || [];
+             if (Array.isArray(skills) && skills.length > 0) {
+               localStorage.setItem('cvSkills', JSON.stringify(skills));
+             }
            }
           } catch {
             // Ignore localStorage failures
@@ -401,10 +404,9 @@ const CVAnalyzer = () => {
           // This avoids forcing the user to manually visit the Twin page just to unlock features.
           try {
             const token = localStorage.getItem('empowerai-token');
-            if (token) {
-              await twinAPI.buildFromCv();
-              const twinResponse = await twinAPI.get();
-              const twin = twinResponse?.data?.twin;
+            if (token && data.profileId) {
+              const buildResp = await twinAPI.buildFromCv();
+              const twin = buildResp?.data?.twin ?? null;
 
               if (twin) {
                 localStorage.setItem('twinData', JSON.stringify(twin));
