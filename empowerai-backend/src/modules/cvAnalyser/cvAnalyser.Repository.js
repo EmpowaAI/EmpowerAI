@@ -70,9 +70,8 @@ async function saveOrUpdate({ userId, filename, mimetype, fileSize, rawText, ana
       },
     },
     {
-      new: true,           
-      upsert: true,        
-      runValidators: true,
+      new: true,
+      upsert: true,
       setDefaultsOnInsert: true,
     }
   );
