@@ -1,34 +1,18 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  ArrowRight,
-  BarChart3,
   Bot,
   BriefcaseBusiness,
   CheckCircle2,
   ClipboardCheck,
   Compass,
   FileText,
-  GraduationCap,
-  LayoutDashboard,
-  Moon,
-  Sparkles,
   Target,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { ProfileMenu } from "@/components/ProfileMenu";
 import { ContactWidget } from "@/components/ContactWidget";
-
-const logo = "/empowerLogo.jpg";
-
-const navItems = [
-  { label: "Dashboard", icon: LayoutDashboard, to: "/demo", active: true },
-  { label: "CV Analyzer", icon: ClipboardCheck, to: "/cv-analyzer" },
-  { label: "Digital Twin", icon: Bot, to: "/digital-twin" },
-  { label: "Opportunities", icon: BriefcaseBusiness, to: "/features" },
-];
 
 const primaryActions = [
   {
@@ -93,37 +77,6 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
-      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/90 backdrop-blur-md">
-        <div className="container flex min-h-16 flex-wrap items-center justify-between gap-3 py-3">
-          <Link to="/" className="flex items-center gap-2.5">
-            <img src={logo} alt="EmpowAI logo" className="h-10 w-10 rounded-md object-cover" width={40} height={40} />
-            <span className="font-display text-2xl font-bold text-primary">EmpowAI</span>
-          </Link>
-
-          <nav className="order-3 flex w-full justify-start overflow-x-auto rounded-xl bg-muted/60 p-1 md:order-2 md:w-auto">
-            {navItems.map(({ label, icon: Icon, to, active }) => (
-              <Link
-                key={label}
-                to={to}
-                className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
-                  active ? "bg-background text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                {label}
-              </Link>
-            ))}
-          </nav>
-
-          <div className="order-2 flex items-center gap-2 md:order-3">
-            <ProfileMenu />
-            <Button variant="ghost" size="icon" aria-label="Toggle theme preview">
-              <Moon className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </header>
-
       <main className="bg-gradient-to-b from-muted/35 via-background to-background">
         <section className="container py-8 md:py-10">
           <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[1.45fr_0.85fr]">
