@@ -251,7 +251,7 @@ class AIService {
             message: 'AI service is temporarily unavailable. Please try again later.'
           }
         }
-        throw new Error(error.detail || `Failed to analyze CV file (Status: ${response.status})`)
+        throw new Error(error.message || error.detail || `Failed to analyze CV file (Status: ${response.status})`)
       }
 
       const raw = await response.json()
