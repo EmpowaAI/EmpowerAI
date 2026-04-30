@@ -410,8 +410,9 @@ const CVAnalyzer = () => {
                 localStorage.setItem('twinData', JSON.stringify(twin));
                 localStorage.setItem('twinCreated', 'true');
                 localStorage.setItem('twinCompleted', 'true');
-                if (twin.empowermentScore) {
-                  localStorage.setItem('empowermentScore', String(twin.empowermentScore));
+                const twinScore = twin.economy?.employabilityScore ?? twin.empowermentScore;
+                if (twinScore) {
+                  localStorage.setItem('empowermentScore', String(twinScore));
                 }
                 updateProgress('twinCompleted', true);
                 window.dispatchEvent(new Event('twinCompleted'));
