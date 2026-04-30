@@ -188,6 +188,58 @@ async function revampCv({ cvData }) {
   return { revamp, meta };
 }
 
+// ─── Restore from cached frontend analysis ────────────────────────────────────
+
+/**
+ * Upserts a CvProfile from a cached frontend TransformedCVAnalysis object.
+ * Used when the user already analyzed their CV but the profile was never
+ * persisted (e.g. old runValidators bug) — avoids forcing a re-upload.
+ */
+async function restoreFromCachedAnalysis({ userId, cachedAnalysis }) {
+  // Map frontend TransformedCVAnalysis → backend CVAnalysisResponse shape
+  const analysis = {
+    score:           cachedAnalysis.score          ?? 0,
+    readinessLevel:  cachedAnalysis.readinessLevel ?? 'JUNIOR',
+    industry:        cachedAnalysis.industry       ?? 'general',
+    about:           cachedAnalysis.sections?.about ?? cachedAnalysis.summary ?? '',
+    extractedSkills: cachedAnalysis.sections?.skills        ?? [],
+    missingSkills:   cachedAnalysis.missingSkills            ?? [],
+    marketKeywords:  cachedAnalysis.missingKeywords          ?? [],
+    strengths:       cachedAnalysis.strengths                ?? [],
+    weaknesses:      cachedAnalysis.weaknesses               ?? [],
+    suggestions:     cachedAnalysis.recommendations          ?? [],
+    recommendations: cachedAnalysis.recommendations          ?? [],
+    missingKeywords: cachedAnalysis.missingKeywords          ?? [],
+    achievements:    cachedAnalysis.sections?.achievements   ?? [],
+    education:       cachedAnalysis.sections?.education      ?? [],
+    experience:      cachedAnalysis.sections?.experience     ?? [],
+    links: {
+      linkedin:       cachedAnalysis.linkCheck?.linkedin       ?? false,
+      github:         cachedAnalysis.linkCheck?.github         ?? false,
+      portfolio:      cachedAnalysis.linkCheck?.portfolio      ?? false,
+      driversLicence: cachedAnalysis.linkCheck?.driversLicence ?? false,
+    },
+  };
+
+  const profile = await cvProfileRepository.saveOrUpdate({
+    userId,
+    filename:   null,
+    mimetype:   null,
+    fileSize:   null,
+    rawText:    '',
+    analysis,
+    isFallback: false,
+  });
+
+  logger.info('[CvService] CvProfile restored from cached analysis', {
+    userId,
+    profileId: profile._id,
+    score: profile.analysis?.score,
+  });
+
+  return profile;
+}
+
 // ─── Profile queries ───────────────────────────────────────────────────────────
 
 async function getCvProfile(userId) {
@@ -290,6 +342,7 @@ module.exports = {
   analyzeFromText,
   analyzeFromFile,
   revampCv,
+  restoreFromCachedAnalysis,
   getCvProfile,
   hasCompleteProfile,
   deleteCvProfile,
