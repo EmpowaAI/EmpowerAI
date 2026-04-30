@@ -37,8 +37,16 @@ export function getStoredCvAnalysis<T = any>(): T | null {
 
 export function setStoredCvAnalysis(value: unknown): void {
   if (typeof window === 'undefined') return;
+  const serialised = JSON.stringify(value);
   try {
-    window.sessionStorage?.setItem(SESSION_CV_ANALYSIS_KEY, JSON.stringify(value));
+    window.sessionStorage?.setItem(SESSION_CV_ANALYSIS_KEY, serialised);
+  } catch {
+    // ignore
+  }
+  // Also persist to localStorage so analysis survives tab close / new sessions.
+  // Cleared on logout via clearStoredCvAnalysis → removeToken.
+  try {
+    window.localStorage?.setItem('cvAnalysisData', serialised);
   } catch {
     // ignore storage errors
   }
