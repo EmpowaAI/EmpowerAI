@@ -554,7 +554,7 @@ export default function Opportunities() {
         {listWithSelected.map((opp) => (
           <div
             key={opp.id}
-            className="bg-card border border-border rounded-none sm:rounded-xl p-5 sm:p-6 hover:border-primary/50 transition-colors shadow-sm"
+            className="bg-card border border-border rounded-xl p-5 sm:p-6 hover:border-primary/50 transition-colors shadow-sm"
           >
             {selectedOpportunity?.id === opp.id && (
               <div className="mb-3 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">

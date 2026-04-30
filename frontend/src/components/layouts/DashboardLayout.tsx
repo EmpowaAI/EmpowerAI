@@ -341,7 +341,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition-colors group"
               >
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-secondary to-primary flex items-center justify-center text-white font-bold flex-shrink-0 shadow-lg ring-2 ring-secondary/20 contrast-200">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-secondary to-primary flex items-center justify-center text-white font-bold flex-shrink-0 shadow-lg ring-2 ring-secondary/20">
                   {initials}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -418,10 +418,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 </div>
               </Link>
 
-              {/* Desktop Sign Out Button - CLEAR AND VISIBLE */}
+              {/* Desktop Sign Out */}
               <button
                 onClick={handleLogout}
-                className="hidden items-center gap-1.5 rounded-lg border border-secondary/30 bg-gradient-to-r from-secondary to-secondary/90 px-3 py-1.5 text-xs font-semibold text-white shadow-cta transition-smooth hover:brightness-105 lg:flex"
+                className="hidden lg:flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:text-destructive hover:border-destructive/40 hover:bg-destructive/5 transition-colors"
                 title="Sign Out"
                 type="button"
               >
