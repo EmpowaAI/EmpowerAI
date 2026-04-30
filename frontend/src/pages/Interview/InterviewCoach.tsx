@@ -12,7 +12,7 @@ import { TipsPanel } from '../../components/interview/TipsPanel';
 import GlassCard from '../../components/shared/GlassCard';
 import { useToast } from '../../components/Toast';
 import { getStoredCvAnalysis } from '../../lib/sensitiveStorage';
- 
+
 type InterviewType = 'tech' | 'behavioral' | 'non-tech';
 type Difficulty = 'easy' | 'medium' | 'hard';
 
@@ -94,7 +94,7 @@ export default function InterviewCoach() {
     const recognition = new SR();
     recognition.continuous = true;
     recognition.interimResults = true;
-    recognition.lang = 'en-ZA'; // Consistent with VoiceInterviewCoach for SA market
+    recognition.lang = 'en-ZA';
     recognition.onstart = () => setIsListening(true);
     recognition.onerror = () => setIsListening(false);
     recognition.onend = () => setIsListening(false);
@@ -127,10 +127,10 @@ export default function InterviewCoach() {
 
   const toggleListening = () => {
     if (isListening) recognitionRef.current?.stop();
-    else { 
-      setInterimTranscript(''); 
-      processedIndexRef.current = -1; // Reset index for new recording session
-      try { recognitionRef.current?.start(); } catch {} 
+    else {
+      setInterimTranscript('');
+      processedIndexRef.current = -1;
+      try { recognitionRef.current?.start(); } catch {}
     }
   };
 
@@ -190,8 +190,8 @@ export default function InterviewCoach() {
 
   const handleSubmit = async () => {
     if (!currentQuestion || !userInput.trim()) return;
-    
-    window.speechSynthesis?.cancel(); // Stop AI speaking immediately on submit
+
+    window.speechSynthesis?.cancel();
     if (isListening) recognitionRef.current?.stop();
 
     try {
@@ -244,6 +244,13 @@ export default function InterviewCoach() {
 
   const wordCount = userInput.trim() ? userInput.trim().split(/\s+/).length : 0;
 
+  // Score color helper using design system colors
+  const scoreColor = (score: number) =>
+    score >= 70 ? 'text-success' : score >= 50 ? 'text-secondary' : 'text-destructive';
+
+  const scoreBg = (score: number) =>
+    score >= 70 ? 'bg-success/10 text-success' : score >= 50 ? 'bg-secondary/10 text-secondary' : 'bg-destructive/10 text-destructive';
+
   // Results view
   if (showResults && feedbacks.size > 0) {
     const passed = averageScore >= 70;
@@ -254,24 +261,24 @@ export default function InterviewCoach() {
             <button onClick={() => setShowResults(false)} className="text-muted-foreground hover:text-foreground text-sm mb-2 flex items-center gap-1 transition-colors">
               ← Back to Questions
             </button>
-            <h1 className="text-3xl font-display font-bold flex items-center gap-3">
-              <BarChart3 className="h-8 w-8 text-amber-500" />
-              <span className="bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">Interview Summary</span>
+            <h1 className="text-2xl md:text-3xl font-display font-bold flex items-center gap-3">
+              <BarChart3 className="h-7 w-7 text-secondary shrink-0" />
+              <span className="text-primary">Interview Summary</span>
             </h1>
           </div>
-          <button onClick={reset} className="px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-all flex items-center gap-2 shadow-lg">
+          <button onClick={reset} className="px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-all flex items-center gap-2 shadow-lg text-sm">
             <RefreshCw className="h-4 w-4" /> Start New
           </button>
         </div>
 
         {/* Global Score */}
         <GlassCard className="text-center relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-8 opacity-10"><Trophy className="h-32 w-32 text-amber-500" /></div>
+          <div className="absolute top-0 right-0 p-6 opacity-10"><Trophy className="h-28 w-28 text-secondary" /></div>
           <div className="relative z-10">
-            <div className="text-7xl font-display font-bold text-amber-500 mb-2">{Math.round(averageScore)}%</div>
-            <div className="text-lg font-bold uppercase tracking-widest text-foreground">Global Readiness Score</div>
+            <div className="font-display text-6xl md:text-7xl font-bold text-secondary mb-2">{Math.round(averageScore)}%</div>
+            <div className="text-base font-bold uppercase tracking-widest text-foreground">Global Readiness Score</div>
             <div className="mt-4">
-              <span className={cn("px-4 py-2 rounded-full text-xs font-bold", passed ? 'bg-green-500/10 text-green-500' : 'bg-amber-500/10 text-amber-500')}>
+              <span className={cn("px-4 py-2 rounded-full text-xs font-bold", passed ? 'bg-success/10 text-success' : 'bg-secondary/10 text-secondary')}>
                 {passed ? '✓ Passed' : '⚠ Needs Practice'}
               </span>
             </div>
@@ -288,8 +295,8 @@ export default function InterviewCoach() {
               <GlassCard key={q.id}>
                 <div className="border-b border-border pb-4 mb-4">
                   <div className="flex justify-between items-start mb-2">
-                    <span className="text-xs font-bold text-amber-500 uppercase">Question {idx + 1}</span>
-                    <span className={cn("text-lg font-bold font-display", f.score >= 70 ? 'text-green-500' : f.score >= 50 ? 'text-amber-500' : 'text-red-500')}>{f.score}%</span>
+                    <span className="text-xs font-bold text-secondary uppercase">Question {idx + 1}</span>
+                    <span className={cn("text-lg font-bold font-display", scoreColor(f.score))}>{f.score}%</span>
                   </div>
                   <p className="text-sm font-medium text-foreground">{q.text}</p>
                 </div>
@@ -300,19 +307,19 @@ export default function InterviewCoach() {
                 <div className="space-y-4">
                   {f.strengths.length > 0 && (
                     <div>
-                      <h4 className="text-xs font-bold text-green-500 mb-2 flex items-center gap-2"><CheckCircle className="h-4 w-4" /> Strengths</h4>
-                      <ul className="space-y-1">{f.strengths.map((s, i) => <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground"><span className="text-green-500 mt-0.5">•</span>{s}</li>)}</ul>
+                      <h4 className="text-xs font-bold text-success mb-2 flex items-center gap-2"><CheckCircle className="h-4 w-4" /> Strengths</h4>
+                      <ul className="space-y-1">{f.strengths.map((s, i) => <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground"><span className="text-success mt-0.5">•</span>{s}</li>)}</ul>
                     </div>
                   )}
                   {f.improvements.length > 0 && (
                     <div>
-                      <h4 className="text-xs font-bold text-amber-500 mb-2 flex items-center gap-2"><Zap className="h-4 w-4" /> How to Improve</h4>
-                      <ul className="space-y-1">{f.improvements.map((s, i) => <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground"><span className="text-amber-500 mt-0.5">•</span>{s}</li>)}</ul>
+                      <h4 className="text-xs font-bold text-secondary mb-2 flex items-center gap-2"><Zap className="h-4 w-4" /> How to Improve</h4>
+                      <ul className="space-y-1">{f.improvements.map((s, i) => <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground"><span className="text-secondary mt-0.5">•</span>{s}</li>)}</ul>
                     </div>
                   )}
                   {f.suggestedAnswer && (
-                    <div className="bg-blue-500/10 rounded-xl p-4 border border-blue-500/20">
-                      <h4 className="text-xs font-bold text-blue-500 mb-2 flex items-center gap-2"><Award className="h-4 w-4" /> Model Answer</h4>
+                    <div className="bg-primary/5 rounded-xl p-4 border border-primary/20">
+                      <h4 className="text-xs font-bold text-primary mb-2 flex items-center gap-2"><Award className="h-4 w-4" /> Model Answer</h4>
                       <p className="text-xs text-muted-foreground leading-relaxed">{f.suggestedAnswer}</p>
                     </div>
                   )}
@@ -330,11 +337,11 @@ export default function InterviewCoach() {
     return (
       <div className="max-w-2xl mx-auto space-y-6">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-6">
-          <h1 className="text-3xl md:text-4xl font-display font-bold mb-2 flex items-center justify-center gap-3">
-            <Brain className="h-8 w-8 text-orange-500" />
-            <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">AI Interview Coach</span>
+          <h1 className="text-2xl md:text-3xl font-display font-bold mb-2 flex items-center justify-center gap-3">
+            <Brain className="h-7 w-7 text-secondary shrink-0" />
+            <span className="text-primary">AI Interview Coach</span>
           </h1>
-          <p className="text-muted-foreground">Practise with AI-powered interview questions tailored for SA professionals</p>
+          <p className="text-muted-foreground text-sm">Practise with AI-powered interview questions tailored for SA professionals</p>
         </motion.div>
 
         <GlassCard>
@@ -350,9 +357,11 @@ export default function InterviewCoach() {
                 ]).map((t) => (
                   <button key={t.id} onClick={() => setSelectedType(t.id)}
                     className={cn("p-4 rounded-2xl border-2 transition-all text-center",
-                      selectedType === t.id ? 'border-amber-500 bg-amber-500/10 ring-4 ring-amber-500/10' : 'border-border hover:border-amber-500/30')}>
+                      selectedType === t.id
+                        ? 'border-secondary bg-secondary/10 ring-4 ring-secondary/10'
+                        : 'border-border hover:border-secondary/30')}>
                     <span className="text-2xl mb-1 block">{t.icon}</span>
-                    <span className={cn("text-xs font-bold", selectedType === t.id ? 'text-amber-500' : 'text-muted-foreground')}>{t.label}</span>
+                    <span className={cn("text-xs font-bold", selectedType === t.id ? 'text-secondary' : 'text-muted-foreground')}>{t.label}</span>
                   </button>
                 ))}
               </div>
@@ -364,8 +373,10 @@ export default function InterviewCoach() {
               <div className="flex gap-2">
                 {(['easy', 'medium', 'hard'] as Difficulty[]).map((d) => (
                   <button key={d} onClick={() => setSelectedDifficulty(d)}
-                    className={cn("flex-1 py-3 rounded-xl font-bold capitalize border-2 transition-all",
-                      selectedDifficulty === d ? 'border-amber-500 bg-amber-500 text-primary-foreground' : 'border-border text-muted-foreground hover:border-amber-500/30')}>
+                    className={cn("flex-1 py-3 rounded-xl font-bold capitalize border-2 transition-all text-sm",
+                      selectedDifficulty === d
+                        ? 'border-secondary bg-secondary text-secondary-foreground'
+                        : 'border-border text-muted-foreground hover:border-secondary/30')}>
                     {d}
                   </button>
                 ))}
@@ -377,27 +388,27 @@ export default function InterviewCoach() {
               <label className="block text-sm font-bold text-foreground mb-3">Company (Optional)</label>
               <input type="text" value={company} onChange={(e) => setCompany(e.target.value)}
                 placeholder="e.g. Google, Vodacom, Discovery"
-                className="w-full px-4 py-4 rounded-xl border-2 border-border focus:border-amber-500 focus:outline-none bg-muted/30 font-medium text-foreground" />
+                className="w-full px-4 py-3 rounded-xl border-2 border-border focus:border-secondary focus:outline-none bg-muted/30 font-medium text-foreground text-sm transition-colors" />
             </div>
 
             {/* Job Description */}
             <div>
-              <label className="block text-sm font-bold text-foreground mb-3 flex items-center gap-2">
+              <label className="flex items-center gap-2 text-sm font-bold text-foreground mb-3">
                 <FileText className="h-4 w-4" /> Job Description (Optional)
               </label>
               <textarea value={jobDescription} onChange={(e) => setJobDescription(e.target.value)}
                 placeholder="Paste the job description here to tailor questions..."
                 rows={4}
-                className="w-full px-4 py-4 rounded-xl border-2 border-border focus:border-amber-500 focus:outline-none bg-muted/30 font-medium text-foreground resize-none" />
+                className="w-full px-4 py-3 rounded-xl border-2 border-border focus:border-secondary focus:outline-none bg-muted/30 font-medium text-foreground resize-none text-sm transition-colors" />
             </div>
 
             <button onClick={() => handleStart(0)} disabled={isStarting}
-              className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-primary-foreground py-5 rounded-2xl font-bold text-xl hover:opacity-90 transition-all flex items-center justify-center gap-3 shadow-xl disabled:opacity-70">
-              {isStarting ? <Loader2 className="h-6 w-6 animate-spin" /> : <Sparkles className="h-6 w-6" />}
+              className="w-full bg-secondary text-secondary-foreground py-4 rounded-2xl font-bold text-base hover:opacity-90 transition-all flex items-center justify-center gap-3 shadow-glow disabled:opacity-70">
+              {isStarting ? <Loader2 className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}
               {isStarting ? 'Preparing AI...' : 'Start Simulation'}
             </button>
           </div>
-        </GlassCard> 
+        </GlassCard>
 
         <TipsPanel interviewType={selectedType} />
       </div>
@@ -407,22 +418,21 @@ export default function InterviewCoach() {
   // Active interview
   return (
     <div className="max-w-6xl mx-auto">
-      {/* Render Toast once at the top level to avoid conflicts */}
       <ToastComponent />
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-xl md:text-2xl font-display font-bold flex items-center gap-2">
-          <Brain className="h-6 w-6 text-orange-500" />
+      <div className="flex justify-between items-center mb-6 gap-4">
+        <h1 className="text-lg md:text-xl font-display font-bold flex items-center gap-2">
+          <Brain className="h-5 w-5 text-secondary shrink-0" />
           <span className="text-foreground">AI Interview Coach</span>
         </h1>
         <div className="flex items-center gap-2">
           <button onClick={() => setAudioEnabled(!audioEnabled)}
-            className="p-2 rounded-lg bg-secondary text-secondary-foreground hover:bg-muted transition-colors">
+            className="p-2 rounded-lg bg-muted text-muted-foreground hover:bg-muted/80 transition-colors">
             {audioEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
           </button>
           {feedbacks.size > 0 && (
             <button onClick={() => setShowResults(true)}
-              className="bg-amber-500 text-primary-foreground px-4 py-2 rounded-xl font-bold text-sm transition-all flex items-center gap-2 shadow-lg hover:opacity-90">
+              className="bg-secondary text-secondary-foreground px-4 py-2 rounded-xl font-bold text-sm transition-all flex items-center gap-2 shadow-glow hover:opacity-90">
               <BarChart3 className="h-4 w-4" /> Results
             </button>
           )}
@@ -432,13 +442,13 @@ export default function InterviewCoach() {
       {/* Completion banner */}
       {sessionComplete && !showResults && (
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-          className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 mb-6 flex items-start gap-3">
-          <Trophy className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+          className="bg-success/10 border border-success/30 rounded-xl p-4 mb-6 flex items-start gap-3">
+          <Trophy className="h-5 w-5 text-success flex-shrink-0 mt-0.5" />
           <div className="flex-1">
             <p className="text-sm font-bold text-foreground">Interview Complete! 🎉</p>
             <p className="text-xs text-muted-foreground mt-1">Your average score is {Math.round(averageScore)}%.</p>
           </div>
-          <button onClick={() => setShowResults(true)} className="bg-green-500 text-primary-foreground px-4 py-2 rounded-lg text-xs font-bold hover:opacity-90">
+          <button onClick={() => setShowResults(true)} className="bg-success text-primary-foreground px-4 py-2 rounded-lg text-xs font-bold hover:opacity-90">
             View Results
           </button>
         </motion.div>
@@ -449,24 +459,25 @@ export default function InterviewCoach() {
         <div className="lg:col-span-8">
           {currentQuestion && (
             <GlassCard className="min-h-[400px] flex flex-col">
-              <div className="flex justify-between items-center mb-6">
+              <div className="flex justify-between items-center mb-6 gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 bg-amber-500 rounded-xl flex items-center justify-center text-primary-foreground font-bold">
+                  <div className="h-10 w-10 bg-secondary rounded-xl flex items-center justify-center text-secondary-foreground font-bold shrink-0">
                     {currentIndex + 1}
                   </div>
                   <div>
-                    <h2 className="text-xs font-bold text-amber-500 uppercase tracking-widest">Question {currentIndex + 1} of {totalQuestions}</h2>
+                    <h2 className="text-xs font-bold text-secondary uppercase tracking-widest">Question {currentIndex + 1} of {totalQuestions}</h2>
                     <p className="text-muted-foreground text-xs">{currentQuestion.type} • {currentQuestion.difficulty}</p>
                   </div>
                 </div>
                 <button onClick={() => speak(currentQuestion.text)} disabled={isSpeaking}
-                  className={cn("p-3 rounded-full transition-all", isSpeaking ? 'bg-amber-500 text-primary-foreground animate-pulse' : 'bg-secondary text-secondary-foreground hover:bg-muted')}>
+                  className={cn("p-3 rounded-full transition-all shrink-0",
+                    isSpeaking ? 'bg-secondary text-secondary-foreground animate-pulse' : 'bg-muted text-muted-foreground hover:bg-muted/80')}>
                   <Volume2 className="h-5 w-5" />
                 </button>
               </div>
 
               <div className="flex-1 flex items-center justify-center mb-6">
-                <h3 className="text-xl md:text-2xl font-bold text-foreground text-center leading-tight">{currentQuestion.text}</h3>
+                <h3 className="text-lg md:text-xl font-bold text-foreground text-center leading-tight">{currentQuestion.text}</h3>
               </div>
 
               <div className="space-y-4">
@@ -475,33 +486,32 @@ export default function InterviewCoach() {
                     value={userInput}
                     onChange={(e) => setUserInput(e.target.value)}
                     placeholder="Type your response here... (Use STAR method for best results)"
-                    className="w-full bg-muted/30 border-2 border-border rounded-2xl p-4 md:p-6 h-32 md:h-40 focus:outline-none focus:border-amber-500 transition-all text-foreground font-medium resize-none text-sm"
+                    className="w-full bg-muted/30 border-2 border-border rounded-2xl p-4 md:p-5 h-32 md:h-40 focus:outline-none focus:border-secondary transition-all text-foreground font-medium resize-none text-sm"
                   />
-                  {/* Overlay interim transcript separately so it doesn't mess with the cursor position */}
                   {isListening && interimTranscript && (
-                    <div className="absolute top-4 md:top-6 left-4 md:left-6 right-16 pointer-events-none">
+                    <div className="absolute top-4 md:top-5 left-4 md:left-5 right-16 pointer-events-none">
                       <span className="text-sm font-medium text-transparent select-none">{userInput}</span>
-                      <span className="text-sm font-medium text-amber-500/60 ml-1 italic">{interimTranscript}</span>
+                      <span className="text-sm font-medium text-secondary/60 ml-1 italic">{interimTranscript}</span>
                     </div>
                   )}
                   {recognitionSupported && (
                     <button type="button" onClick={toggleListening}
                       className={cn("absolute bottom-4 right-4 p-3 rounded-full transition-all",
-                        isListening ? 'bg-red-500 text-primary-foreground animate-pulse' : 'bg-secondary text-secondary-foreground hover:bg-muted')}>
+                        isListening ? 'bg-destructive text-destructive-foreground animate-pulse' : 'bg-muted text-muted-foreground hover:bg-muted/80')}>
                       {isListening ? <Volume2 className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
                     </button>
                   )}
                 </div>
 
                 <div className="flex justify-between items-center">
-                  <span className={cn("text-xs font-medium", wordCount < 30 ? 'text-amber-500' : 'text-green-500')}>
+                  <span className={cn("text-xs font-medium", wordCount < 30 ? 'text-secondary' : 'text-success')}>
                     {wordCount} words{wordCount < 30 && ' (aim for 50+)'}
                   </span>
                 </div>
 
                 <button onClick={handleSubmit} disabled={isSubmitting || !userInput.trim() || userInput.trim().length < 20}
-                  className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-primary-foreground py-4 rounded-2xl font-bold text-lg hover:opacity-90 transition-all shadow-xl flex items-center justify-center gap-2 disabled:opacity-50">
-                  {isSubmitting ? <><Loader2 className="h-5 w-5 animate-spin" /> Analysing...</> : <><Send className="h-5 w-5" /> Submit & Continue</>}
+                  className="w-full bg-secondary text-secondary-foreground py-4 rounded-2xl font-bold text-base hover:opacity-90 transition-all shadow-glow flex items-center justify-center gap-2 disabled:opacity-50">
+                  {isSubmitting ? <><Loader2 className="h-5 w-5 animate-spin" /> Analysing...</> : <><Send className="h-5 w-5" /> Submit &amp; Continue</>}
                 </button>
               </div>
             </GlassCard>
@@ -511,18 +521,18 @@ export default function InterviewCoach() {
         {/* Sidebar */}
         <div className="lg:col-span-4 space-y-6">
           {/* Progress */}
-          <GlassCard className="bg-foreground text-background">
-            <h4 className="font-bold mb-4 flex items-center gap-2">
-              <Clock className="h-5 w-5 text-amber-500" /> Session Progress
+          <GlassCard className="bg-primary text-primary-foreground">
+            <h4 className="font-bold mb-4 flex items-center gap-2 text-sm">
+              <Clock className="h-5 w-5 text-secondary" /> Session Progress
             </h4>
             <div className="space-y-4">
               <div>
                 <div className="flex justify-between text-xs font-bold uppercase mb-2">
                   <span className="opacity-60">Completion</span>
-                  <span className="text-amber-500">{Math.round(progress)}%</span>
+                  <span className="text-secondary">{Math.round(progress)}%</span>
                 </div>
-                <div className="h-2 bg-background/20 rounded-full overflow-hidden">
-                  <div className="h-full bg-amber-500 transition-all duration-500 rounded-full" style={{ width: `${progress}%` }} />
+                <div className="h-2 bg-primary-foreground/20 rounded-full overflow-hidden">
+                  <div className="h-full bg-secondary transition-all duration-500 rounded-full" style={{ width: `${progress}%` }} />
                 </div>
               </div>
 
@@ -532,20 +542,20 @@ export default function InterviewCoach() {
                   {questions.map((q, i) => (
                     <button key={i} onClick={() => setCurrentIndex(i)}
                       className={cn("h-2 rounded-full transition-all",
-                        feedbacks.has(q.id) ? 'bg-green-500' : i === currentIndex ? 'bg-amber-500' : 'bg-background/20 hover:bg-background/30')} />
+                        feedbacks.has(q.id) ? 'bg-success' : i === currentIndex ? 'bg-secondary' : 'bg-primary-foreground/20 hover:bg-primary-foreground/30')} />
                   ))}
                 </div>
               </div>
 
               {feedbacks.size > 0 && (
-                <div className="pt-4 border-t border-background/20">
+                <div className="pt-4 border-t border-primary-foreground/20">
                   <p className="text-xs opacity-60 mb-2">Current Average</p>
                   <div className="flex items-center gap-3">
-                    <span className={cn("text-2xl font-bold font-display", averageScore >= 70 ? 'text-green-500' : averageScore >= 50 ? 'text-amber-500' : 'text-red-500')}>
+                    <span className={cn("text-2xl font-bold font-display", averageScore >= 70 ? 'text-success' : averageScore >= 50 ? 'text-secondary' : 'text-destructive')}>
                       {Math.round(averageScore)}%
                     </span>
-                    <div className="flex-1 h-2 bg-background/20 rounded-full overflow-hidden">
-                      <div className={cn("h-full rounded-full", averageScore >= 70 ? 'bg-green-500' : averageScore >= 50 ? 'bg-amber-500' : 'bg-red-500')} style={{ width: `${averageScore}%` }} />
+                    <div className="flex-1 h-2 bg-primary-foreground/20 rounded-full overflow-hidden">
+                      <div className={cn("h-full rounded-full", averageScore >= 70 ? 'bg-success' : averageScore >= 50 ? 'bg-secondary' : 'bg-destructive')} style={{ width: `${averageScore}%` }} />
                     </div>
                   </div>
                 </div>
@@ -567,8 +577,8 @@ export default function InterviewCoach() {
                   return (
                     <div key={id} className="bg-muted/50 p-3 rounded-xl">
                       <div className="flex justify-between mb-1">
-                        <span className="text-[10px] font-bold text-amber-500">Question {qi + 1}</span>
-                        <span className={cn("text-[10px] font-bold", f.score >= 70 ? 'text-green-500' : f.score >= 50 ? 'text-amber-500' : 'text-red-500')}>{f.score}%</span>
+                        <span className="text-[10px] font-bold text-secondary">Question {qi + 1}</span>
+                        <span className={cn("text-[10px] font-bold", scoreColor(f.score))}>{f.score}%</span>
                       </div>
                       <p className="text-[10px] text-muted-foreground line-clamp-2">{f.feedback}</p>
                     </div>
@@ -576,7 +586,7 @@ export default function InterviewCoach() {
                 })}
               </div>
               <button onClick={() => setShowResults(true)}
-                className="w-full mt-4 text-center text-xs font-bold text-amber-500 hover:underline flex items-center justify-center gap-1">
+                className="w-full mt-4 text-center text-xs font-bold text-secondary hover:underline flex items-center justify-center gap-1">
                 View full breakdown <ChevronRight className="h-3 w-3" />
               </button>
             </GlassCard>
