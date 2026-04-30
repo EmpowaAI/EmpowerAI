@@ -276,8 +276,29 @@ async function _handleAnalysisError({ error, userId, cvText, jobRequirementsArra
     error.code === 'ETIMEDOUT' ||
     !error.response;
 
-  // Errors that should NOT fall back — rethrow so controller can handle properly
-  if (status === 400) throw error;
+  // 400 from Python means bad input, but file extraction failures (scanned PDFs, etc.)
+  // can sometimes be recovered by Node-side text extraction (pdf-parse > PyPDF2).
+  if (status === 400) {
+    if (file) {
+      try {
+        const rawText = await extractTextFromUploadedFile(file);
+        if (rawText && rawText.trim().length > 50) {
+          logger.info('[CvService] Python file extraction returned 400; retrying with Node-side text extraction', {
+            userId,
+            filename: file.originalname,
+            extractedLength: rawText.length,
+          });
+          return await analyzeFromText({ userId, cvText: rawText, jobRequirementsArray });
+        }
+      } catch (fallbackError) {
+        logger.warn('[CvService] Node-side text extraction fallback failed', {
+          userId,
+          error: fallbackError.message,
+        });
+      }
+    }
+    throw error;
+  }
 
   if (isRateLimit || isServiceDown) {
     const retryAfter = error.retryAfter || error.response?.data?.retryAfter || 60;
