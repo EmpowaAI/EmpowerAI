@@ -201,18 +201,23 @@ const TwinBuilder = () => {
           options: [],
         }]);
         try {
-          await twinAPI.buildFromCv();
-          const retryResponse = await twinAPI.get();
-          const builtTwin = retryResponse?.data?.twin ?? null;
-          if (builtTwin) {
+          const buildResp = await twinAPI.buildFromCv();
+          const builtTwin = buildResp?.data?.twin ?? null;
+          if (builtTwin && applyTwin(builtTwin)) {
             localStorage.setItem("twinCompleted", "true");
-            applyTwin(builtTwin);
+            return;
+          }
+          // Fallback: build response had no twin shape — try a separate GET
+          const retryResponse = await twinAPI.get();
+          const fetchedTwin = retryResponse?.data?.twin ?? null;
+          if (fetchedTwin && applyTwin(fetchedTwin)) {
+            localStorage.setItem("twinCompleted", "true");
             return;
           }
         } catch (buildErr: any) {
-          // 404 means the CV profile was never saved server-side (stale localStorage).
-          // Clear the stale flags and redirect the user to re-upload their CV.
-          if (buildErr?.status === 404 || buildErr?.response?.status === 404) {
+          const status = buildErr?.status ?? buildErr?.response?.status;
+          if (status === 404) {
+            // CV profile was never saved server-side (stale localStorage) — clear and redirect
             localStorage.removeItem("cvCompleted");
             localStorage.removeItem("twinCompleted");
             localStorage.removeItem("twinData");
@@ -220,7 +225,7 @@ const TwinBuilder = () => {
             navigate("/dashboard/cv-analyzer");
             return;
           }
-          // Other errors (network, 500) — fall through to the error message below
+          // Other errors (422, 500, network) fall through to the error message below
         }
       }
 
