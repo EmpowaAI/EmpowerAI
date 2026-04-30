@@ -84,6 +84,51 @@ const InsightCard = ({
   </article>
 );
 
+// Map the backend's nested twin shape to the flat TwinData interface the UI expects.
+// Backend: identity.industry, economy.employabilityScore, skills.core, intelligence.recommendations, market.jobTitlesMapped
+// Frontend: TwinData.industry, TwinData.empowermentScore, TwinData.skills (string[]), TwinData.recommendations, TwinData.mappedJobs
+function normalizeTwin(raw: any): TwinData | null {
+  if (!raw) return null;
+  const isNested = (raw.identity || raw.economy) && !Array.isArray(raw.skills);
+  if (!isNested) return raw as TwinData;
+
+  const employabilityScore: number = raw.economy?.employabilityScore ?? 0;
+  const incomeRange = raw.economy?.incomePotentialRange
+    ? `R${(raw.economy.incomePotentialRange.min ?? 0).toLocaleString()} – R${(raw.economy.incomePotentialRange.max ?? 0).toLocaleString()}/month`
+    : undefined;
+  const coreSkills: string[] = Array.isArray(raw.skills?.core) ? raw.skills.core : [];
+  const industry: string = raw.identity?.industry || "General";
+  const demandRaw: string = raw.economy?.demandLevel ?? "";
+  const marketDemand = demandRaw
+    ? demandRaw.charAt(0) + demandRaw.slice(1).toLowerCase()
+    : employabilityScore > 70 ? "High" : employabilityScore > 40 ? "Medium" : "Developing";
+
+  return {
+    profile: {
+      name: raw.identity?.currentRole || "Economic Twin Profile",
+      path: raw.identity?.targetRole || "Career profile",
+      industry,
+      level: raw.identity?.seniorityLevel || "",
+      value: incomeRange || "—",
+      skills: coreSkills,
+      empowermentScore: employabilityScore,
+      marketDemand,
+    },
+    skills: coreSkills,
+    gaps: Array.isArray(raw.skills?.missing) ? raw.skills.missing : [],
+    recommendations: Array.isArray(raw.intelligence?.recommendations) ? raw.intelligence.recommendations : [],
+    mappedJobs: Array.isArray(raw.market?.jobTitlesMapped) ? raw.market.jobTitlesMapped : [],
+    careerPaths: Array.isArray(raw.market?.jobTitlesMapped)
+      ? raw.market.jobTitlesMapped.map((title: string) => ({ title }))
+      : [],
+    empowermentScore: employabilityScore,
+    economy: { employabilityScore, incomeRange },
+    name: raw.identity?.currentRole,
+    industry,
+    level: raw.identity?.seniorityLevel,
+  };
+}
+
 // ── Component ──────────────────────────────────────────────────────────
 
 const TwinBuilder = () => {
@@ -105,72 +150,93 @@ const TwinBuilder = () => {
     },
   ]);
 
-  // Load twin data from localStorage first, then fallback to API
+  const applyTwin = (raw: any) => {
+    const twin = normalizeTwin(raw);
+    if (!twin) return false;
+    setTwinData(twin);
+    const skills = twin.profile?.skills ?? twin.skills ?? [];
+    const industry = twin.profile?.industry ?? twin.industry ?? "General";
+    localStorage.setItem("twinData", JSON.stringify(raw)); // persist raw so next load can re-normalize
+    setChatMessages([{
+      id: 1,
+      role: "assistant",
+      text: `Your Economic Twin is loaded. I can see your ${skills.length > 0 ? `${skills.length} core skills` : "profile"}, your industry (${industry}), and your full career profile. Ask me anything — salary benchmarks, skill gaps, market demand, career paths, or what to focus on next.`,
+      options: DEFAULT_QUICK_QUESTIONS,
+    }]);
+    return true;
+  };
+
+  // Load twin data from localStorage first, then fallback to API, then auto-build if CV is done
   const loadTwinData = useCallback(async () => {
     setIsLoadingTwin(true);
     setTwinError("");
 
     try {
-      // Try localStorage first (fastest)
+      // 1. Try localStorage first (fastest)
       const raw = localStorage.getItem("twinData");
       if (raw) {
-        const parsed: TwinData = JSON.parse(raw);
-        setTwinData(parsed);
-        const industry = parsed.profile?.industry ?? parsed.industry ?? "General";
-        const skills = parsed.profile?.skills ?? parsed.skills ?? [];
-        setChatMessages([
-          {
-            id: 1,
-            role: "assistant",
-            text: `Your Economic Twin is loaded. I can see your ${skills.length > 0 ? `${skills.length} core skills` : "profile"}, your industry (${industry}), and your full career profile. Ask me anything — salary benchmarks, skill gaps, market demand, career paths, or what to focus on next.`,
-            options: DEFAULT_QUICK_QUESTIONS,
-          },
-        ]);
-        setIsLoadingTwin(false);
+        const parsed = JSON.parse(raw);
+        if (applyTwin(parsed)) {
+          setIsLoadingTwin(false);
+          return;
+        }
+      }
+
+      // 2. Fetch from API
+      const response = await twinAPI.get();
+      const apiTwin = response?.data?.twin ?? null;
+
+      if (apiTwin) {
+        applyTwin(apiTwin);
         return;
       }
 
-      // Fallback: fetch from API
-      const response = await twinAPI.get();
-      const twin: TwinData | null = response?.data?.twin ?? null;
-
-      if (twin) {
-        localStorage.setItem("twinData", JSON.stringify(twin));
-        setTwinData(twin);
-        const skills = twin.profile?.skills ?? twin.skills ?? [];
-        const industry = twin.profile?.industry ?? twin.industry ?? "General";
-        setChatMessages([
-          {
-            id: 1,
-            role: "assistant",
-            text: `Your Economic Twin is loaded. I can see your ${skills.length > 0 ? `${skills.length} core skills` : "profile"}, your industry (${industry}), and your full career profile. Ask me anything — salary benchmarks, skill gaps, market demand, career paths, or what to focus on next.`,
-            options: DEFAULT_QUICK_QUESTIONS,
-          },
-        ]);
-      } else {
-        setTwinError("No twin data found. Please complete the CV analysis first.");
-        setChatMessages([
-          {
-            id: 1,
-            role: "assistant",
-            text: "I couldn't find your Economic Twin data. Please upload and analyze your CV first to build your twin.",
-            options: [],
-          },
-        ]);
+      // 3. No twin in DB — if CV analysis was done, try to build one now
+      const cvDone = localStorage.getItem("cvCompleted") === "true";
+      if (cvDone) {
+        setChatMessages([{
+          id: 1, role: "assistant",
+          text: "Building your Economic Twin from your CV analysis — this takes a moment...",
+          options: [],
+        }]);
+        try {
+          await twinAPI.buildFromCv();
+          const retryResponse = await twinAPI.get();
+          const builtTwin = retryResponse?.data?.twin ?? null;
+          if (builtTwin) {
+            localStorage.setItem("twinCompleted", "true");
+            applyTwin(builtTwin);
+            return;
+          }
+        } catch {
+          // build failed, fall through to error
+        }
       }
+
+      setTwinError(cvDone
+        ? "Your twin could not be built right now. Please try again in a moment."
+        : "No twin data found. Please complete the CV analysis first."
+      );
+      setChatMessages([{
+        id: 1,
+        role: "assistant",
+        text: cvDone
+          ? "I had trouble building your Economic Twin. Please try refreshing the page."
+          : "I couldn't find your Economic Twin data. Please upload and analyze your CV first to build your twin.",
+        options: [],
+      }]);
     } catch {
       setTwinError("Failed to load twin data. Please try again.");
-      setChatMessages([
-        {
-          id: 1,
-          role: "assistant",
-          text: "There was an issue loading your Economic Twin. Please check your connection and try again.",
-          options: [],
-        },
-      ]);
+      setChatMessages([{
+        id: 1,
+        role: "assistant",
+        text: "There was an issue loading your Economic Twin. Please check your connection and try again.",
+        options: [],
+      }]);
     } finally {
       setIsLoadingTwin(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -201,8 +267,9 @@ const TwinBuilder = () => {
       );
 
       const replyText: string =
+        response?.data?.reply ??
+        response?.reply ??
         response?.data?.message ??
-        response?.message ??
         "I couldn't process your request right now. Please try again.";
 
       const assistantMsg: ChatMessage = {

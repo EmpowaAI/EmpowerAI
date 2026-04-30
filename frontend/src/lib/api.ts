@@ -1288,7 +1288,7 @@ export const statsAPIReal = {
       return {
         status: 'success',
         data: {
-          empowermentScore: twin?.empowermentScore || 0,
+          empowermentScore: twin?.economy?.employabilityScore || twin?.empowermentScore || 0,
           threeMonthProjection: twin?.incomeProjections?.threeMonth || 0,
           skillsMatched,
           opportunitiesCount: typeof totalOpportunities === 'number' ? totalOpportunities : opportunities.length,

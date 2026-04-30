@@ -44,9 +44,11 @@ export async function syncProgressFromBackend(): Promise<ProgressData> {
   if (cvCompleted) localStorage.setItem('cvCompleted', 'true')
   if (twinCompleted) localStorage.setItem('twinCompleted', 'true')
 
+  const twinScore = twin?.economy?.employabilityScore ?? twin?.empowermentScore ?? null;
+
   if (twin) {
-    if (twin.empowermentScore) {
-      localStorage.setItem('empowermentScore', String(twin.empowermentScore))
+    if (twinScore) {
+      localStorage.setItem('empowermentScore', String(twinScore))
     }
     localStorage.setItem('twinData', JSON.stringify(twin))
     localStorage.setItem('twinCreated', 'true')
@@ -55,11 +57,8 @@ export async function syncProgressFromBackend(): Promise<ProgressData> {
   return {
     cvCompleted,
     twinCompleted,
-    empowermentScore: twin?.empowermentScore
-      ? twin.empowermentScore
-      : localStorage.getItem('empowermentScore')
-        ? parseInt(localStorage.getItem('empowermentScore')!)
-        : null,
+    empowermentScore: twinScore
+      ?? (localStorage.getItem('empowermentScore') ? parseInt(localStorage.getItem('empowermentScore')!) : null),
   }
 }
 
