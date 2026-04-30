@@ -38,8 +38,19 @@ export async function syncProgressFromBackend(): Promise<ProgressData> {
     cvResult.status === 'fulfilled' &&
     cvResult.value?.data?.profile != null
 
-  const cvCompleted = !!(twin || hasCvProfile || localStorage.getItem('cvCompleted') === 'true')
-  const twinCompleted = !!(twin || localStorage.getItem('twinCompleted') === 'true')
+  // Only fall back to localStorage when the API call itself failed (network error).
+  // If the call succeeded but returned no profile, that is authoritative — don't
+  // let stale localStorage override it.
+  const cvApiCallFailed = cvResult.status === 'rejected'
+  const twinApiCallFailed = twinResult.status === 'rejected'
+
+  const cvCompleted = cvApiCallFailed
+    ? !!(twin || hasCvProfile || localStorage.getItem('cvCompleted') === 'true')
+    : !!(twin || hasCvProfile)
+
+  const twinCompleted = twinApiCallFailed
+    ? !!(twin || localStorage.getItem('twinCompleted') === 'true')
+    : !!twin
 
   if (cvCompleted) localStorage.setItem('cvCompleted', 'true')
   if (twinCompleted) localStorage.setItem('twinCompleted', 'true')
