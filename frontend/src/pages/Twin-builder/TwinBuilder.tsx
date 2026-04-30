@@ -132,7 +132,7 @@ function normalizeTwin(raw: any): TwinData | null {
 // ── Component ──────────────────────────────────────────────────────────
 
 const TwinBuilder = () => {
-  const { progress } = useUser();
+  const { progress, updateProgress } = useUser();
   const navigate = useNavigate();
   const [message, setMessage] = useState("");
   const [isBotTyping, setIsBotTyping] = useState(false);
@@ -217,11 +217,14 @@ const TwinBuilder = () => {
         } catch (buildErr: any) {
           const status = buildErr?.status ?? buildErr?.response?.status;
           if (status === 404) {
-            // CV profile was never saved server-side (stale localStorage) — clear and redirect
+            // CV profile was never saved server-side — clear both localStorage AND React state
+            // so ProtectedRoute doesn't let the user back through immediately.
             localStorage.removeItem("cvCompleted");
             localStorage.removeItem("twinCompleted");
             localStorage.removeItem("twinData");
             localStorage.removeItem("cvAnalysisData");
+            updateProgress("cvCompleted", false);
+            updateProgress("twinCompleted", false);
             navigate("/dashboard/cv-analyzer");
             return;
           }
@@ -252,8 +255,7 @@ const TwinBuilder = () => {
     } finally {
       setIsLoadingTwin(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [navigate, updateProgress]);
 
   useEffect(() => {
     void loadTwinData();
