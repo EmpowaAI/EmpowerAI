@@ -200,10 +200,10 @@ export default function Dashboard() {
     : journeySteps[0];
 
   return (
-    <main className="min-h-screen bg-background font-sans text-foreground">
-      <div className="mx-auto grid min-h-screen max-w-[1070px] border-x border-border bg-background lg:grid-cols-[390px_minmax(0,1fr)]">
-        {/* Sidebar - Profile and Overview */}
-        <aside className="h-screen overflow-y-auto border-b border-border bg-background px-4 py-4 lg:border-b-0 lg:border-r">
+    <main className="bg-background font-sans text-foreground">
+      <div className="mx-auto grid max-w-[1070px] border-border bg-background lg:border-x lg:grid-cols-[390px_minmax(0,1fr)]">
+        {/* Sidebar - Profile and Overview — shown below content on mobile, left column on desktop */}
+        <aside className="order-2 overflow-y-auto border-t border-border bg-background px-4 py-4 lg:order-1 lg:h-screen lg:border-r lg:border-t-0">
           <div className="space-y-3">
             {/* Profile Section */}
             <section className="rounded-xl border border-border bg-card p-4">
@@ -352,9 +352,9 @@ export default function Dashboard() {
           </div>
         </aside>
 
-        {/* Main Content Area */}
-        <section className="flex h-screen min-h-0 flex-col bg-background">
-          <div className="flex-1 overflow-y-auto px-4 pb-8 pt-12 sm:px-5">
+        {/* Main Content Area — shown first on mobile */}
+        <section className="order-1 flex flex-col bg-background lg:order-2 lg:h-screen lg:min-h-0">
+          <div className="px-4 pb-8 pt-6 sm:px-5 lg:flex-1 lg:overflow-y-auto lg:pt-12">
             <div className="space-y-6">
               {/* Welcome Guide */}
               {showWelcomeGuide && (
