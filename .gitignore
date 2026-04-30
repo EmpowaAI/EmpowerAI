@@ -74,6 +74,12 @@ Thumbs.db
 *.temp
 .cache/
 
+# TypeScript incremental build info (generated artifacts)
+*.tsbuildinfo
+
+# Bun binary lockfile (bun.lock text file is sufficient)
+bun.lockb
+
 # Team messages (temporary)
 TEAM_MESSAGE.txt
 
