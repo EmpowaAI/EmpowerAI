@@ -233,18 +233,32 @@ export const accountAPIDemo = {
       message: 'If that email exists, a reset link has been sent.'
     };
   },
-  resetPassword: async (token: string, newPassword: string) => {
-    console.log('🔐 Demo: Resetting password with token:', token);
-    // Using newPassword to avoid unused variable warning
-    if (newPassword) {
-      console.log('New password provided (length:', newPassword.length, ')');
-    }
+  resetPassword: async (payload: { token: string; newPassword: string; confirmPassword: string }) => {
+    console.log('🔐 Demo: Resetting password with token:', payload.token);
     await new Promise(resolve => setTimeout(resolve, 500));
-    return {
-      status: 'success',
-      message: 'Password reset successful'
-    };
-  }
+    return { status: 'success', message: 'Password reset successful' };
+  },
+  requestEmailChange: async (payload: { newEmail: string; password: string }) => {
+    console.log('📧 Demo: Requesting email change to:', payload.newEmail);
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return { message: 'Verification email sent to your new address.' };
+  },
+  confirmEmailChange: async (token: string) => {
+    console.log('📧 Demo: Confirming email change with token:', token);
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return { message: 'Email address updated successfully.' };
+  },
+  requestAccountDeletion: async () => {
+    console.log('🗑️ Demo: Requesting account deletion');
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return { message: 'Deletion confirmation email sent.' };
+  },
+  confirmAccountDeletion: async (token: string) => {
+    console.log('🗑️ Demo: Confirming account deletion with token:', token);
+    await new Promise(resolve => setTimeout(resolve, 500));
+    removeToken();
+    return { message: 'Account deleted successfully.' };
+  },
 };
 
 // Demo Twin API
@@ -880,19 +894,36 @@ export const authAPIReal = {
 
 export const accountAPIReal = {
   verifyEmail: async (token: string) => {
-    return await request<any>(`/account/verify-email/${token}`);
+    return await request<any>(`/account/verify?token=${encodeURIComponent(token)}`);
   },
-  forgotPassword: async (email: string) => {
-    return await request<any>('/account/forgot-password', { 
-      method: 'POST', 
-      body: JSON.stringify({ email }) 
+  forgotPassword: async (payload: { email: string }) => {
+    return await request<any>('/account/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify(payload),
     });
   },
-  resetPassword: async (token: string, newPassword: string) => {
-    return await request<any>('/account/reset-password', { 
-      method: 'POST', 
-      body: JSON.stringify({ token, newPassword }) 
+  resetPassword: async (payload: { token: string; newPassword: string; confirmPassword: string }) => {
+    return await request<any>('/account/reset-password', {
+      method: 'POST',
+      body: JSON.stringify(payload),
     });
+  },
+  requestEmailChange: async (payload: { newEmail: string; password: string }) => {
+    return await request<any>('/account/change-email', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+  confirmEmailChange: async (token: string) => {
+    return await request<any>(`/account/confirm-email?token=${encodeURIComponent(token)}`);
+  },
+  requestAccountDeletion: async () => {
+    return await request<any>('/account/delete-request', { method: 'POST' });
+  },
+  confirmAccountDeletion: async (token: string) => {
+    const response = await request<any>(`/account/confirm-delete?token=${encodeURIComponent(token)}`);
+    removeToken();
+    return response;
   },
 };
 
