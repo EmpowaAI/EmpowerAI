@@ -375,7 +375,7 @@ export default function Simulations() {
         <button
           onClick={runSimulation}
           disabled={selectedPaths.length === 0 || isLoading}
-          className="hidden md:flex w-full sm:w-auto px-6 py-3 sm:py-2 bg-primary text-white rounded-lg text-base sm:text-base font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed items-center justify-center gap-2 min-h-[52px] sm:min-h-[44px] touch-manipulation"
+          className="flex w-full sm:w-auto px-6 py-3 bg-primary text-white rounded-lg text-base font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed items-center justify-center gap-2 min-h-[52px] touch-manipulation"
         >
           {isLoading ? (
             <>

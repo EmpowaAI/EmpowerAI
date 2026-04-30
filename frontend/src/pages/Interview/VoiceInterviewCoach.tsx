@@ -288,7 +288,7 @@ export default function VoiceInterviewCoach() {
                   <VoiceVisualizer isActive={true} volume={micVolume} />
                   <AnimatePresence>
                     {isLowVolume && (
-                      <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-xs text-amber-400 flex items-center justify-center gap-1">
+                      <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-xs text-secondary flex items-center justify-center gap-1">
                         <AlertCircle className="h-3 w-3" /> Speak a bit louder, the AI is having trouble hearing you
                       </motion.p>
                     )}
@@ -323,7 +323,7 @@ export default function VoiceInterviewCoach() {
             <div className="md:col-span-3 text-center p-4 bg-primary/5 rounded-xl border border-primary/10">
               <div className={cn(
                 "text-5xl font-bold mb-1",
-                feedback.score >= 70 ? "text-green-400" : feedback.score >= 50 ? "text-amber-400" : "text-red-400"
+                feedback.score >= 70 ? "text-success" : feedback.score >= 50 ? "text-secondary" : "text-destructive"
               )}>
                 {Math.round(feedback.score)}%
               </div>
@@ -354,7 +354,7 @@ export default function VoiceInterviewCoach() {
               <ul className="space-y-2">
                 {feedback.improvements.filter(s => s).map((s, i) => (
                   <li key={i} className="flex items-start gap-2">
-                    <div className="w-2 h-2 bg-amber-400 rounded-full mt-2 flex-shrink-0" />
+                    <div className="w-2 h-2 bg-secondary rounded-full mt-2 flex-shrink-0" />
                     <span className="text-sm text-muted-foreground">{s}</span>
                   </li>
                 ))}

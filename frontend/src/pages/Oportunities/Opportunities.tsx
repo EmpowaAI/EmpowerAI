@@ -430,8 +430,8 @@ export default function Opportunities() {
             className={cn(
               "flex items-center gap-2 sm:gap-2 px-4 sm:px-4 py-2.5 sm:py-2.5 text-sm sm:text-sm rounded-lg transition-colors min-h-[44px] sm:min-h-[40px] touch-manipulation",
               careerGoalFilters.includes(goal)
-                ? "bg-accent text-white"
-                : "bg-card border border-border text-muted-foreground hover:text-foreground",
+                ? "bg-primary text-primary-foreground border border-primary"
+                : "bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/40",
             )}
           >
             <span>{goal}</span>
@@ -518,7 +518,7 @@ export default function Opportunities() {
             className="bg-card border border-border rounded-none sm:rounded-xl p-5 sm:p-6 hover:border-primary/50 transition-colors shadow-sm"
           >
             {selectedOpportunity?.id === opp.id && (
-              <div className="mb-3 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 text-accent text-xs font-medium">
+              <div className="mb-3 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
                 Selected opportunity
               </div>
             )}
@@ -561,7 +561,7 @@ export default function Opportunities() {
                 </div>
               </div>
               <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-                <span className="px-2 sm:px-3 py-1 bg-accent/20 text-accent text-xs sm:text-sm rounded-full font-medium whitespace-nowrap">
+                <span className="px-2 sm:px-3 py-1 bg-secondary/10 text-secondary text-xs sm:text-sm rounded-full font-medium whitespace-nowrap">
                   {opp.match}% match
                 </span>
                 <button

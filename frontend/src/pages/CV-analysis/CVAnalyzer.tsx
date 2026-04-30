@@ -28,10 +28,6 @@ const uploadSchema = z.object({
 
 const jobDescriptionSchema = z.string().trim().max(6000, "Job description must be shorter than 6,000 characters");
 import { Button } from "@/components/ui/Button";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { ProfileMenu } from "@/components/ProfileMenu";
-import { ContactWidget } from "@/components/ContactWidget";
-import logo from "../../assets/images/empowerLogo.jpeg";
 import { analyzeCV } from "../../services/cvService";
 import { setStoredCvAnalysis, setStoredCvFileName } from "../../lib/sensitiveStorage";
 import { twinAPI } from "../../lib/api";
@@ -107,7 +103,8 @@ const ATS_IMPROVEMENTS = [
   "Clean formatting with no tables, graphics, or parsing blockers",
 ];
 
-const REVAMPED_SCORE = 94;
+// Revamped score: original score + 15 points (ATS fixes always improve the score), capped at 98
+const getRevampedScore = (base: number) => Math.min(98, base + 15);
 
 const IMPROVEMENT_AREAS = [
   {
@@ -903,9 +900,9 @@ const CVAnalyzer = () => {
                 <div className="mt-8 grid gap-5 text-left lg:grid-cols-[0.75fr_1.25fr]">
                   <div className="rounded-3xl border border-border bg-card p-4 shadow-sm sm:p-6">
                     <p className="text-sm font-semibold text-muted-foreground">New ATS score</p>
-                    <p className="mt-1 font-display text-4xl font-bold text-primary sm:text-5xl">{REVAMPED_SCORE}<span className="text-2xl text-muted-foreground">/100</span></p>
+                    <p className="mt-1 font-display text-4xl font-bold text-primary sm:text-5xl">{getRevampedScore(analysis.score)}<span className="text-2xl text-muted-foreground">/100</span></p>
                     <div className="mt-5 h-3 overflow-hidden rounded-full bg-muted">
-                      <div className="h-full rounded-full bg-secondary" style={{ width: `${REVAMPED_SCORE}%` }} />
+                      <div className="h-full rounded-full bg-secondary" style={{ width: `${getRevampedScore(analysis.score)}%` }} />
                     </div>
                     <div className="mt-5 space-y-3">
                       {ATS_IMPROVEMENTS.map((item) => (
