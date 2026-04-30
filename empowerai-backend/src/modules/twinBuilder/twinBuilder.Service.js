@@ -5,6 +5,7 @@ const twinRepository = require('./twinBuilder.Repository');
 const Opportunity = require('../opportunities/Opportunity.Model');
 const logger = require('../../utils/logger');
 const aiServiceClient = require('../../intergration/ai/ai.ServiceClient');
+const { NotFoundError } = require('../../utils/errors');
 
 
 async function matchOpportunities(analysis) {
@@ -443,7 +444,7 @@ async function buildTwinData(userId) {
 
   const cvProfile = await cvRepository.findByUserId(userId);
   if (!cvProfile) {
-    throw new Error(`[TwinService] CvProfile not found for userId: ${userId}`);
+    throw new NotFoundError('CV profile not found. Please upload and analyse your CV first.');
   }
 
   const twinData = await _assembleTwinData(cvProfile.analysis, userId, cvProfile._id);
@@ -485,7 +486,7 @@ async function buildFromAnalysis(analysis, userId) {
 
   const cvProfile = await cvRepository.findByUserId(userId);
   if (!cvProfile) {
-    throw new Error(`[TwinService] CvProfile not found for userId: ${userId}`);
+    throw new NotFoundError('CV profile not found. Please upload and analyse your CV first.');
   }
 
   const twinData = await _assembleTwinData(analysis, userId, cvProfile._id);
@@ -508,7 +509,7 @@ async function buildFromAnalysis(analysis, userId) {
 
 async function createOrUpdateFromForm(userId, formData) {
   const cvProfile = await cvRepository.findByUserId(userId);
-  if (!cvProfile) throw new Error('CV profile not found');
+  if (!cvProfile) throw new NotFoundError('CV profile not found. Please upload and analyse your CV first.');
 
   let aiResult = null;
   try {
@@ -547,7 +548,7 @@ async function createOrUpdateFromForm(userId, formData) {
 
 async function buildFromCvProfile(userId) {
   const cvProfile = await cvRepository.findByUserId(userId);
-  if (!cvProfile) throw new Error('CV profile not found');
+  if (!cvProfile) throw new NotFoundError('CV profile not found. Please upload and analyse your CV first.');
   return buildFromAnalysis(cvProfile.analysis, userId);
 }
 
