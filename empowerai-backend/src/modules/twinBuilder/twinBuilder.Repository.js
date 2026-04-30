@@ -138,7 +138,6 @@ const upsertTwin = async (userId, data) => {
     {
       new: true,
       upsert: true,
-      runValidators: true,
       setDefaultsOnInsert: true,
     }
   );
