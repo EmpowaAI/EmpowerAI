@@ -33,12 +33,20 @@ export default class ErrorBoundary extends React.Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
-    // Log error details for debugging
     console.error('ErrorBoundary caught an error:', error, errorInfo);
-    this.setState({
-      error,
-      errorInfo,
-    });
+
+    const isChunkLoadError =
+      error?.message?.includes('Failed to fetch dynamically imported module') ||
+      error?.message?.includes('Loading chunk') ||
+      error?.message?.includes('Loading CSS chunk') ||
+      error?.name === 'ChunkLoadError';
+
+    if (isChunkLoadError) {
+      window.location.reload();
+      return;
+    }
+
+    this.setState({ error, errorInfo });
   }
 
   resetError = (): void => {
