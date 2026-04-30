@@ -3,6 +3,27 @@
 const cvService = require('./cvAnalyser.Service');
 const { AppError, BadRequestError, ServiceUnavailableError } = require('../../utils/errors');
 
+// ─── Restore from cached analysis ─────────────────────────────────────────────
+
+exports.restoreFromCachedAnalysis = async (req, res, next) => {
+  try {
+    const { analysis } = req.body;
+    if (!analysis || typeof analysis !== 'object') {
+      return res.status(400).json({ status: 'error', message: 'analysis object is required' });
+    }
+    const profile = await cvService.restoreFromCachedAnalysis({
+      userId: req.user.id,
+      cachedAnalysis: analysis,
+    });
+    return res.status(200).json({
+      status: 'success',
+      data: { profileId: profile._id },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // ─── analyzeCV (text-based) ────────────────────────────────────────────────────
 
 exports.analyzeCV = async (req, res, next) => {

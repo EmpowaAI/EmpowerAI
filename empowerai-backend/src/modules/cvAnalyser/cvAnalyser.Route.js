@@ -1,7 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
-const { analyzeCV, analyzeCVFile, revampCV, getCvProfile, deleteCvProfile } = require('./cvAnalyser.Controller');
+const { analyzeCV, analyzeCVFile, revampCV, getCvProfile, deleteCvProfile, restoreFromCachedAnalysis } = require('./cvAnalyser.Controller');
 const { protect, restrictTo } = require('../../middleware/auth');
 const validateRequest = require('../../middleware/validate');
 const { cvAnalysisSchema, cvRevampSchema } = require('../../utils/validators');
@@ -29,6 +29,7 @@ const upload = multer({
 
 router.post('/analyze', validateRequest(cvAnalysisSchema), analyzeCV);
 router.post('/analyze-file', upload.single('cvFile'), analyzeCVFile);
+router.post('/restore-from-cache', restoreFromCachedAnalysis);
 
 router.get('/profile', getCvProfile);
 router.delete('/profile', deleteCvProfile);

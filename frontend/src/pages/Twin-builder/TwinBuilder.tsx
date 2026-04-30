@@ -16,8 +16,9 @@ import {
   ArrowRight,
   AlertCircle,
 } from "lucide-react";
-import { twinAPI, twinAPIReal } from "../../lib/api";
+import { twinAPI, twinAPIReal, cvAPI } from "../../lib/api";
 import { useUser } from "../../contexts/user-context";
+import { getStoredCvAnalysis } from "../../lib/sensitiveStorage";
 
 // ── Types ──────────────────────────────────────────────────────────────
 
@@ -217,8 +218,25 @@ const TwinBuilder = () => {
         } catch (buildErr: any) {
           const status = buildErr?.status ?? buildErr?.response?.status;
           if (status === 404) {
-            // CV profile was never saved server-side — clear both localStorage AND React state
-            // so ProtectedRoute doesn't let the user back through immediately.
+            // CV profile not in DB — try to restore from locally-cached analysis
+            // so users who already analyzed their CV don't need to re-upload.
+            const cachedAnalysis = getStoredCvAnalysis<Record<string, unknown>>();
+            if (cachedAnalysis) {
+              try {
+                await cvAPI.restoreFromCache(cachedAnalysis);
+                // Profile restored — retry the build
+                const retryBuild = await twinAPI.buildFromCv();
+                const restoredTwin = retryBuild?.data?.twin ?? null;
+                if (restoredTwin && applyTwin(restoredTwin)) {
+                  localStorage.setItem("twinCompleted", "true");
+                  updateProgress("twinCompleted", true);
+                  return;
+                }
+              } catch {
+                // Restore or retry failed — fall through to redirect
+              }
+            }
+            // No cache or restore failed — clear state and send to cv-analyzer
             localStorage.removeItem("cvCompleted");
             localStorage.removeItem("twinCompleted");
             localStorage.removeItem("twinData");

@@ -420,7 +420,11 @@ export const cvAPIDemo = {
         summary: 'Strong technical profile with good experience'
       }
     };
-  }
+  },
+
+  restoreFromCache: async (_analysis: Record<string, unknown>) => {
+    return { status: 'success', data: { profileId: 'demo-profile' } };
+  },
 };
 
 // Demo Interview API
@@ -1098,6 +1102,18 @@ export const cvAPIReal = {
       return response.json();
     } catch (error) {
       console.error('CV file analysis failed:', error);
+      throw error;
+    }
+  },
+
+  restoreFromCache: async (analysis: Record<string, unknown>) => {
+    try {
+      return await request<any>('/cv/restore-from-cache', {
+        method: 'POST',
+        body: JSON.stringify({ analysis }),
+      });
+    } catch (error) {
+      console.error('CV profile restore failed:', error);
       throw error;
     }
   },
