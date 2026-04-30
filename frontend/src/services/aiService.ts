@@ -70,6 +70,7 @@ export interface TransformedCVAnalysis {
   citizenship?: string;
   driversLicence?: string;
   industry?: string;
+  profileId?: string | null;
 }
 
 export interface RevampedCV {
@@ -195,8 +196,9 @@ class AIService {
 
       const raw = await response.json()
       const data: CVAnalysisResponse = raw?.data?.analysis || raw
+      const profileId: string | null = raw?.data?.profileId ?? null
       console.log('AI Service response received:', data)
-      return this.transformResponse(data)
+      return { ...this.transformResponse(data), profileId }
     } catch (error) {
       console.error('CV Analysis Error:', error)
       throw error
@@ -254,10 +256,11 @@ class AIService {
 
       const raw = await response.json()
       const data: CVAnalysisResponse = (raw as any)?.data?.analysis || raw
+      const profileId: string | null = (raw as any)?.data?.profileId ?? null
       console.log('✅ AI Service file analysis response received:', data)
       console.log('📊 Weaknesses from API:', data.weaknesses)
-      
-      return this.transformResponse(data)
+
+      return { ...this.transformResponse(data), profileId }
     } catch (error) {
       console.error('CV File Analysis Error:', error)
       throw error
