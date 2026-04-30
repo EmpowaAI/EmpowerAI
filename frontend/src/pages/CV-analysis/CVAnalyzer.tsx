@@ -29,7 +29,7 @@ const uploadSchema = z.object({
 const jobDescriptionSchema = z.string().trim().max(6000, "Job description must be shorter than 6,000 characters");
 import { Button } from "@/components/ui/Button";
 import { analyzeCV } from "../../services/cvService";
-import { setStoredCvAnalysis, setStoredCvFileName } from "../../lib/sensitiveStorage";
+import { getStoredCvAnalysis, getStoredCvFileName, setStoredCvAnalysis, setStoredCvFileName } from "../../lib/sensitiveStorage";
 import { twinAPI } from "../../lib/api";
 import { useUser } from "../../contexts/user-context";
 
@@ -228,6 +228,7 @@ const CVAnalyzer = () => {
   const [resultView, setResultView] = useState<ResultView>("overview");
   const inputRef = useRef<HTMLInputElement>(null);
   const rafRef = useRef<number | null>(null);
+  const isRestoredRef = useRef(false);
 
   const localAnalysis = useMemo(() => analyseCv(cvText, jobDescription), [cvText, jobDescription]);
   const analysis = aiAnalysis || localAnalysis;
@@ -240,6 +241,65 @@ const CVAnalyzer = () => {
     return map;
   }, [analysis.issues]);
   const previewLines = useMemo(() => cvText.split(/\r?\n/).filter((line) => line.trim().length > 0), [cvText]);
+
+  // Restore previous analysis on mount so user doesn't have to re-upload
+  useEffect(() => {
+    const cvDone = localStorage.getItem('cvCompleted') === 'true';
+    if (!cvDone) return;
+
+    const storedAnalysis = getStoredCvAnalysis<any>();
+    const storedFileName = getStoredCvFileName();
+
+    if (storedAnalysis) {
+      const reconstructed: CvAnalysis = {
+        score: storedAnalysis.score || 75,
+        breakdown: [
+          { label: "ATS parsing", score: storedAnalysis.score || 75, note: storedAnalysis.weaknesses?.join(', ') || "Good ATS compatibility" },
+          { label: "Keywords", score: storedAnalysis.sections?.skills?.length ? 85 : 70, note: storedAnalysis.missingKeywords?.length ? "Add missing keywords" : "Good keyword coverage" },
+          { label: "Impact", score: storedAnalysis.sections?.achievements?.length ? 80 : 65, note: storedAnalysis.recommendations?.join(', ') || "Add more measurable impacts" },
+          { label: "Structure", score: storedAnalysis.sections?.about ? 85 : 70, note: storedAnalysis.sections?.about ? "Good structure" : "Add summary section" },
+        ],
+        missingSections: [],
+        missingKeywords: storedAnalysis.missingKeywords || [],
+        matchedKeywords: storedAnalysis.sections?.skills || [],
+        issues: [],
+        opportunityMatches: storedAnalysis.incomeIdeas?.map((idea: any) => ({
+          type: "Income",
+          title: idea.title,
+          projection: idea.potential,
+          nextStep: idea.description,
+        })) || [],
+      };
+      isRestoredRef.current = true;
+      setAiAnalysis(reconstructed);
+      if (storedFileName) setFileName(storedFileName);
+      setPhase('complete');
+      return;
+    }
+
+    // Fallback: reconstruct partial results from localStorage primitives
+    const score = Number(localStorage.getItem('cvScore'));
+    if (score > 0) {
+      const skills = (() => { try { return JSON.parse(localStorage.getItem('cvSkills') || '[]'); } catch { return []; } })();
+      const partial: CvAnalysis = {
+        score,
+        breakdown: [
+          { label: "ATS parsing", score, note: "Previously analysed" },
+          { label: "Keywords", score: skills.length > 3 ? 85 : 70, note: skills.length ? `Skills found: ${skills.slice(0, 3).join(', ')}` : "Upload CV again for keyword analysis" },
+          { label: "Impact", score: 70, note: "Upload a new CV for detailed impact analysis" },
+          { label: "Structure", score: 80, note: "Based on your uploaded CV" },
+        ],
+        missingSections: [],
+        missingKeywords: [],
+        matchedKeywords: skills,
+        issues: [],
+        opportunityMatches: [],
+      };
+      isRestoredRef.current = true;
+      setAiAnalysis(partial);
+      setPhase('complete');
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Drive the multi-stage progress
   useEffect(() => {
@@ -280,6 +340,7 @@ const CVAnalyzer = () => {
 
   useEffect(() => {
     if (phase !== "complete") return;
+    if (isRestoredRef.current) return; // skip re-analysis when restoring saved session
 
     let cancelled = false;
       const runAiAnalysis = async () => {
@@ -396,6 +457,7 @@ const CVAnalyzer = () => {
   };
 
   const reset = () => {
+    isRestoredRef.current = false;
     setPhase("idle");
     setFileName(null);
     setStageIndex(0);
@@ -695,6 +757,19 @@ const CVAnalyzer = () => {
           {/* ===== STATE: COMPLETE ===== */}
           {(phase === "complete" || phase === "revamping" || phase === "revamped") && (
             <div className="mt-8 w-full max-w-6xl animate-fade-up text-center sm:mt-12">
+              {isRestoredRef.current && phase === "complete" && (
+                <div className="mx-auto mb-6 flex max-w-3xl items-center justify-between gap-4 rounded-2xl border border-secondary/30 bg-secondary/5 px-5 py-3 text-left">
+                  <p className="text-sm text-muted-foreground">
+                    <span className="font-semibold text-foreground">Showing your previous CV analysis.</span> Upload a new CV to re-analyse.
+                  </p>
+                  <button
+                    onClick={reset}
+                    className="shrink-0 rounded-xl border border-border px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted transition-colors"
+                  >
+                    Upload new CV
+                  </button>
+                </div>
+              )}
               <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-secondary/10 text-secondary">
                 {phase === "revamping" ? (
                   <Wand2 className="h-9 w-9 animate-pulse" />

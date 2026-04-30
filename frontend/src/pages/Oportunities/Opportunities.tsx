@@ -45,6 +45,7 @@ export default function Opportunities() {
   const [reloadTick, setReloadTick] = useState(0)
   const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity | null>(null)
   const [fallbackNotice, setFallbackNotice] = useState("")
+  const [profileSkills, setProfileSkills] = useState<string[]>([])
   const { user } = useUser()
 
   useEffect(() => {
@@ -68,6 +69,16 @@ export default function Opportunities() {
       }
     } catch (e) {
       // Ignore parse errors
+    }
+
+    try {
+      const stored = localStorage.getItem('cvSkills')
+      if (stored) {
+        const skills = JSON.parse(stored)
+        if (Array.isArray(skills) && skills.length > 0) setProfileSkills(skills.slice(0, 6))
+      }
+    } catch {
+      // ignore
     }
   }, [])
 
@@ -386,19 +397,47 @@ export default function Opportunities() {
         </p>
       </div>
 
-      {/* Career Goals Prompt */}
-      {careerGoalFilters.length === 0 && (
+      {/* Profile match context */}
+      {(profileSkills.length > 0 || careerGoalFilters.length > 0) ? (
+        <div className="mx-3 sm:mx-0 rounded-xl border border-secondary/30 bg-secondary/5 p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-foreground">Personalised for your profile</p>
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {profileSkills.map((s) => (
+                <span key={s} className="px-2 py-0.5 rounded-full bg-secondary/10 text-secondary text-xs font-medium">{s}</span>
+              ))}
+              {careerGoalFilters.slice(0, 3).map((g) => (
+                <span key={g} className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium">{g}</span>
+              ))}
+            </div>
+          </div>
+          <Link
+            to="/dashboard/cv-analysis"
+            className="shrink-0 inline-flex items-center justify-center px-4 py-2 text-xs sm:text-sm rounded-lg border border-border text-muted-foreground hover:text-foreground bg-card transition-colors"
+          >
+            Update CV
+          </Link>
+        </div>
+      ) : (
         <div className="mx-3 sm:mx-0 rounded-xl border border-border bg-card p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <p className="text-sm font-medium text-foreground">Get matched opportunities</p>
-            <p className="text-xs text-muted-foreground">Select a career goal below or update your Digital Twin to personalize results.</p>
+            <p className="text-xs text-muted-foreground">Upload your CV or update your Digital Twin to personalise results.</p>
           </div>
-          <Link
-            to="/dashboard/twin"
-            className="inline-flex items-center justify-center px-4 py-2 text-xs sm:text-sm rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors"
-          >
-            Update Digital Twin
-          </Link>
+          <div className="flex gap-2">
+            <Link
+              to="/dashboard/cv-analysis"
+              className="inline-flex items-center justify-center px-4 py-2 text-xs sm:text-sm rounded-lg border border-border text-muted-foreground hover:text-foreground bg-card transition-colors"
+            >
+              Upload CV
+            </Link>
+            <Link
+              to="/dashboard/twin"
+              className="inline-flex items-center justify-center px-4 py-2 text-xs sm:text-sm rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors"
+            >
+              Update Twin
+            </Link>
+          </div>
         </div>
       )}
 
