@@ -444,6 +444,8 @@ const CVAnalyzer = () => {
 
     setInputError("");
     setFileName(file.name);
+    // Clear stale twin so TwinBuilder fetches fresh data after this new CV analysis.
+    localStorage.removeItem("twinData");
     try {
       const text = await file.text();
       setCvText(text.trim().length > 80 ? text.slice(0, 20000) : SAMPLE_CV);
