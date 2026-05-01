@@ -32,7 +32,6 @@ export default function Opportunities() {
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [category, setCategory] = useState("all")
-  const [careerGoalFilters, setCareerGoalFilters] = useState<string[]>([])
   const [saved, setSaved] = useState<string[]>([])
   const [opportunities, setOpportunities] = useState<Opportunity[]>([])
   const [loading, setLoading] = useState(true)
@@ -45,7 +44,6 @@ export default function Opportunities() {
   const [reloadTick, setReloadTick] = useState(0)
   const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity | null>(null)
   const [fallbackNotice, setFallbackNotice] = useState("")
-  const [profileSkills, setProfileSkills] = useState<string[]>([])
   const { user } = useUser()
 
   useEffect(() => {
@@ -55,53 +53,7 @@ export default function Opportunities() {
 
   useEffect(() => {
     setPage(1)
-  }, [debouncedSearch, category, careerGoalFilters.join(',')])
-
-  useEffect(() => {
-    try {
-      const twinDataRaw = localStorage.getItem('twinData')
-      if (twinDataRaw) {
-        const twinData = JSON.parse(twinDataRaw)
-        const goals = twinData?.careerGoals || twinData?.interests || []
-        if (Array.isArray(goals) && goals.length > 0) {
-          setCareerGoalFilters(goals)
-        }
-      }
-    } catch (e) {
-      // Ignore parse errors
-    }
-
-    try {
-      const stored = localStorage.getItem('cvSkills')
-      if (stored) {
-        const skills = JSON.parse(stored)
-        if (Array.isArray(skills) && skills.length > 0) setProfileSkills(skills.slice(0, 6))
-      }
-    } catch {
-      // ignore
-    }
-  }, [])
-
-  useEffect(() => {
-    const twinFetch = async () => {
-      try {
-        if (careerGoalFilters.length === 0 && user) {
-          const { twinAPI } = await import("../../lib/api")
-          const twinResponse = await twinAPI.get()
-          const twin = twinResponse?.data?.twin
-          const goals = twin?.careerGoals || twin?.interests || []
-          if (Array.isArray(goals) && goals.length > 0) {
-            setCareerGoalFilters(goals)
-            localStorage.setItem('twinData', JSON.stringify(twin))
-          }
-        }
-      } catch (e) {
-        // Ignore fetch errors
-      }
-    }
-
-    twinFetch()
-  }, [user, careerGoalFilters.length])
+  }, [debouncedSearch, category])
 
   useEffect(() => {
     const fetchSelectedByHash = async () => {
@@ -156,24 +108,21 @@ export default function Opportunities() {
         setLoading(true)
         setError("")
         
-        // Get user's career goals from their Digital Twin (localStorage)
-        const filters: { province?: string; type?: string; skills?: string; careerGoals?: string; q?: string; page?: number; limit?: number; sort?: string } = {}
-        if (careerGoalFilters.length > 0) {
-          filters.careerGoals = careerGoalFilters.join(',')
-        }
+        // Never send careerGoals as a query param — the live server treats it as a hard
+        // MongoDB regex filter (reducing the result pool to only docs mentioning that term)
+        // rather than a scoring hint, which causes 0 results for most users.
+        // Skills matching is handled server-side from the authenticated user's CV profile.
+        const filters: { province?: string; type?: string; skills?: string; q?: string; page?: number; limit?: number; sort?: string; minScore?: number } = {}
         if (category && category !== "all") {
           filters.type = category
         }
-        // Skills are NOT sent in the initial request — the live server's fallback path
-        // requires !skills to fire when career-goal matching returns zero results.
-        // Skills matching is handled server-side via the authenticated user's CV profile.
         if (debouncedSearch) {
           filters.q = debouncedSearch
         }
         filters.page = page
         filters.limit = 24
-        filters.sort = debouncedSearch || careerGoalFilters.length > 0 ? 'relevance' : 'createdAt'
-        
+        filters.sort = debouncedSearch ? 'relevance' : 'createdAt'
+
         setFallbackNotice("")
         let response: any = await opportunitiesAPI.getAll(filters)
 
@@ -188,22 +137,18 @@ export default function Opportunities() {
             rawOpportunities = []
           }
 
-          // Fallback: matching returned 0 → retry without skills.
-          // Keep careerGoals (or add a generic one) so the server's career-goal fallback
-          // path fires: old server requires hasCareerFilter=true to return all active when
-          // scores are below threshold. New server has a broader fallback regardless.
+          // Fallback: smart matching returned 0 → retry with minScore=1.
+          // minScore=1 overrides the server's default threshold (45) so that any opportunity
+          // with a non-zero match score (even just "type=job" = 5 pts) is returned.
+          // This works on both old and new Render deployments without touching MongoDB filters.
           const shouldFallback =
             rawOpportunities.length === 0 &&
             !debouncedSearch &&
             category === "all"
 
           if (shouldFallback) {
-            const fallbackFilters = { ...filters }
+            const fallbackFilters = { ...filters, minScore: 1, sort: 'createdAt' as const }
             delete fallbackFilters.skills
-            if (!fallbackFilters.careerGoals) {
-              fallbackFilters.careerGoals = 'Career'
-            }
-            fallbackFilters.sort = 'createdAt'
             response = await opportunitiesAPI.getAll(fallbackFilters)
             setFallbackNotice("Showing all available opportunities. Upload your CV for personalised matches.")
             rawOpportunities = getResponseOpportunities(response)
@@ -266,7 +211,7 @@ export default function Opportunities() {
     }
 
     fetchOpportunities()
-  }, [user, careerGoalFilters, category, debouncedSearch, page, reloadTick])
+  }, [user, category, debouncedSearch, page, reloadTick])
 
   const calculateMatchScore = (opportunity: any, _user: any): number => {
     // Simple matching algorithm based on skills and province
@@ -347,28 +292,9 @@ export default function Opportunities() {
     { id: "course", label: "Courses", icon: GraduationCap },
   ]
 
-  const careerGoals = [
-    "Tech Career",
-    "Freelancing",
-    "Corporate Job",
-    "Entrepreneurship",
-    "Creative Industry",
-    "Finance",
-    "Healthcare",
-    "Education",
-  ]
-
-  const toggleCareerGoal = (goal: string) => {
-    setCareerGoalFilters((prev) =>
-      prev.includes(goal) ? prev.filter((g) => g !== goal) : [...prev, goal]
-    )
-    setPage(1)
-  }
-
   const clearFilters = () => {
     setSearch("")
     setCategory("all")
-    setCareerGoalFilters([])
     setPage(1)
   }
 
@@ -396,18 +322,11 @@ export default function Opportunities() {
       </div>
 
       {/* Profile match context */}
-      {(profileSkills.length > 0 || careerGoalFilters.length > 0) ? (
-        <div className="mx-3 sm:mx-0 rounded-xl border border-secondary/30 bg-secondary/5 p-4 flex flex-col sm:flex-row sm:items-center gap-3">
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-foreground">Personalised for your profile</p>
-            <div className="flex flex-wrap gap-1.5 mt-2">
-              {profileSkills.map((s) => (
-                <span key={s} className="px-2 py-0.5 rounded-full bg-secondary/10 text-secondary text-xs font-medium">{s}</span>
-              ))}
-              {careerGoalFilters.slice(0, 3).map((g) => (
-                <span key={g} className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium">{g}</span>
-              ))}
-            </div>
+      {user ? (
+        <div className="mx-3 sm:mx-0 rounded-xl border border-secondary/30 bg-secondary/5 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold text-foreground">Matched to your profile</p>
+            <p className="text-xs text-muted-foreground">Results are personalised using your CV skills and experience.</p>
           </div>
           <Link
             to="/dashboard/cv-analysis"
@@ -456,36 +375,6 @@ export default function Opportunities() {
           <span className="sm:inline">Filters</span>
         </button>
       </div>
-
-      {/* Career Goals Filter */}
-      <div className="flex flex-wrap gap-2.5 sm:gap-2 px-3 sm:px-0">
-        {careerGoals.map((goal) => (
-          <button
-            key={goal}
-            onClick={() => toggleCareerGoal(goal)}
-            aria-pressed={careerGoalFilters.includes(goal)}
-            className={cn(
-              "flex items-center gap-2 sm:gap-2 px-4 sm:px-4 py-2.5 sm:py-2.5 text-sm sm:text-sm rounded-lg transition-colors min-h-[44px] sm:min-h-[40px] touch-manipulation",
-              careerGoalFilters.includes(goal)
-                ? "bg-primary text-primary-foreground border border-primary"
-                : "bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/40",
-            )}
-          >
-            <span>{goal}</span>
-          </button>
-        ))}
-        {careerGoalFilters.length > 0 && (
-          <button
-            onClick={() => setCareerGoalFilters([])}
-            className="px-4 py-2.5 text-sm rounded-lg border border-border text-muted-foreground hover:text-foreground bg-card"
-          >
-            Clear goals
-          </button>
-        )}
-      </div>
-      <p className="text-xs text-muted-foreground px-3 sm:px-0">
-        Match scores consider your skills, location, and career goals. Adjust filters to refine results.
-      </p>
 
       {/* Categories */}
       <div className="flex flex-wrap gap-2.5 sm:gap-2 px-3 sm:px-0">
@@ -661,9 +550,9 @@ export default function Opportunities() {
           <EmptyState
             icon={Briefcase}
             title="No opportunities found"
-            description="Try adjusting your search, category, or career goals to see more results."
+            description="Try adjusting your search or category filter to see more results."
           />
-          {(debouncedSearch || category !== "all" || careerGoalFilters.length > 0) && (
+          {(debouncedSearch || category !== "all") && (
             <div className="flex justify-center">
               <button
                 onClick={clearFilters}
