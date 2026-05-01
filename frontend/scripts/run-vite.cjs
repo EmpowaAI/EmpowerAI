@@ -1,17 +1,16 @@
+'use strict';
 /**
- * Finds the vite binary via Node's module resolution (handles workspace hoisting)
- * and pre-loads the Windows net-use shim before running vite.
+ * Finds the vite binary via Node module resolution (handles workspace hoisting),
+ * then spawns it with the Windows net-use shim pre-loaded via --require.
+ *
+ * Using spawnSync instead of require() because vite's bin/vite.js is ESM with
+ * top-level await and cannot be require()'d from a CJS module.
  *
  * Usage: node ./scripts/run-vite.cjs [vite args...]
  */
-'use strict';
-
 const path = require('path');
+const { spawnSync } = require('child_process');
 
-// Apply the Windows net-use shim before vite loads anything
-require('./vite-net-use-shim.cjs');
-
-// Resolve vite's package root from wherever npm installed it (hoisted or local)
 let viteBin;
 try {
   viteBin = path.join(path.dirname(require.resolve('vite/package.json')), 'bin', 'vite.js');
@@ -20,6 +19,13 @@ try {
   process.exit(1);
 }
 
-// Forward all CLI args to vite
-process.argv.splice(1, 1, viteBin);
-require(viteBin);
+const shimPath = path.resolve(__dirname, 'vite-net-use-shim.cjs');
+const viteArgs = process.argv.slice(2);
+
+const result = spawnSync(
+  process.execPath,
+  ['--require', shimPath, viteBin, ...viteArgs],
+  { stdio: 'inherit', env: process.env }
+);
+
+process.exit(result.status ?? 1);
