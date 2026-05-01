@@ -1159,22 +1159,22 @@ export const opportunitiesAPIReal = {
     province?: string;
     type?: string;
     skills?: string;
-    careerGoals?: string;
     q?: string;
     page?: number;
     limit?: number;
     sort?: string;
+    minScore?: number;
   }) => {
     try {
       const queryParams = new URLSearchParams();
       if (filters?.province) queryParams.append('province', filters.province);
       if (filters?.type) queryParams.append('type', filters.type);
       if (filters?.skills) queryParams.append('skills', filters.skills);
-      if (filters?.careerGoals) queryParams.append('careerGoals', filters.careerGoals);
       if (filters?.q) queryParams.append('q', filters.q);
       if (typeof filters?.page === 'number') queryParams.append('page', String(filters.page));
       if (typeof filters?.limit === 'number') queryParams.append('limit', String(filters.limit));
       if (filters?.sort) queryParams.append('sort', filters.sort);
+      if (typeof filters?.minScore === 'number') queryParams.append('minScore', String(filters.minScore));
 
       const queryString = queryParams.toString();
       const url = `/opportunities${queryString ? `?${queryString}` : ''}`;
@@ -1262,23 +1262,9 @@ export const adminAPIReal = {
 export const statsAPIReal = {
   getDashboardStats: async () => {
     try {
-      let careerGoalsFilter: string | undefined;
-      try {
-        const twinDataRaw = localStorage.getItem('twinData');
-        if (twinDataRaw) {
-          const twinData = JSON.parse(twinDataRaw);
-          const goals = twinData?.careerGoals || twinData?.interests || [];
-          if (Array.isArray(goals) && goals.length > 0) {
-            careerGoalsFilter = goals.join(',');
-          }
-        }
-      } catch (e) {
-        // Ignore parse errors
-      }
-
       const [twinResponse, opportunitiesResponse] = await Promise.allSettled([
         twinAPIReal.get(),
-        opportunitiesAPIReal.getAll(careerGoalsFilter ? { careerGoals: careerGoalsFilter, limit: 1 } : { limit: 1 }),
+        opportunitiesAPIReal.getAll({ limit: 1 }),
       ]);
 
       const twin = twinResponse.status === 'fulfilled' ? twinResponse.value.data?.twin : null;
