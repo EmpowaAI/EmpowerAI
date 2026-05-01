@@ -18,7 +18,6 @@ import {
   Instagram,
   Linkedin,
   Sparkles,
-  Cpu,
   Zap,
   MapPin,
   Quote,
@@ -121,50 +120,137 @@ export default function LandingPage() {
           <div className="pointer-events-none absolute inset-0 hero-spotlight" aria-hidden />
           <div className="pointer-events-none absolute inset-0 grain" aria-hidden />
 
-          <div className="container relative z-10 py-20 md:py-32">
-            <div className="mx-auto max-w-3xl text-center animate-fade-up">
-              <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-xs font-semibold tracking-wide text-white/95 backdrop-blur-md">
-                <Sparkles className="h-3.5 w-3.5 text-secondary" />
-                Amandla e-Ubuntu
-                <span className="text-base leading-none emoji">🇿🇦</span>
+          <div className="container relative z-10 py-16 md:py-24 lg:py-28">
+            <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+              {/* Left — copy */}
+              <div className="text-center lg:text-left animate-fade-up">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-xs font-semibold tracking-wide text-white/95 backdrop-blur-md">
+                  <Sparkles className="h-3.5 w-3.5 text-secondary" />
+                  Amandla e-Ubuntu
+                  <span className="text-base leading-none emoji">🇿🇦</span>
+                </div>
+
+                <h1 className="mt-6 font-display text-4xl font-bold leading-[1.05] drop-shadow-sm md:text-5xl lg:text-6xl">
+                  Your Future,{" "}
+                  <span className="text-gradient-ai whitespace-nowrap">Powered by AI</span>
+                </h1>
+                <p className="mt-5 max-w-xl text-base text-white/90 md:text-lg lg:max-w-none">
+                  Upload your CV, get your Empowerment Score, and discover career pathways built for young South Africans — free, in 60 seconds.
+                </p>
+
+                <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row lg:justify-start">
+                  <Button asChild variant="cta" size="xl" className="shimmer w-full sm:w-auto shadow-[0_0_24px_rgba(255,107,35,0.45)] hover:shadow-[0_0_36px_rgba(255,107,35,0.6)]">
+                    <Link to="/signup">
+                      Start Free — No CV? No problem
+                      <ArrowRight className="ml-1 h-4 w-4" />
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outlineLight" size="xl" className="w-full sm:w-auto opacity-80 hover:opacity-100">
+                    <Link to="/demo">
+                      <Play className="mr-1 h-4 w-4" />
+                      See Demo
+                    </Link>
+                  </Button>
+                </div>
+
+                {/* Trust strip — right under CTAs */}
+                <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-white/70 lg:justify-start">
+                  <span className="inline-flex items-center gap-1.5">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-secondary" />
+                    2,000+ youth helped
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <Star className="h-3.5 w-3.5 text-secondary" />
+                    Rated 4.9 / 5
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <MapPin className="h-3.5 w-3.5 text-secondary" />
+                    All 9 provinces
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <Zap className="h-3.5 w-3.5 text-secondary" />
+                    60-second analysis
+                  </span>
+                </div>
               </div>
 
-              <h1 className="mt-6 font-display text-4xl font-bold leading-[1.05] drop-shadow-sm md:text-6xl lg:text-7xl">
-                Your Future, <span className="text-gradient-ai">Powered by AI</span>
-              </h1>
-              <p className="mx-auto mt-5 max-w-xl text-base text-white/90 md:text-lg">
-                Discover career pathways rooted in Ubuntu values. Join thousands of young South Africans building better
-                futures.
-              </p>
+              {/* Right — product mockup card */}
+              <div className="hidden lg:block animate-fade-up" style={{ animationDelay: "120ms" }}>
+                <div className="relative mx-auto w-full max-w-sm">
+                  {/* Glow ring */}
+                  <div className="absolute -inset-4 rounded-3xl bg-secondary/20 blur-2xl" aria-hidden />
+                  <div className="relative rounded-2xl border border-white/15 bg-white/10 p-5 shadow-2xl backdrop-blur-xl">
+                    {/* Header row */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary/80 text-white">
+                          <Sparkles className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <div className="text-xs font-bold text-white">Economic Twin</div>
+                          <div className="text-[10px] text-white/60">Live profile</div>
+                        </div>
+                      </div>
+                      <span className="flex items-center gap-1 rounded-full bg-green-500/20 px-2 py-0.5 text-[10px] font-semibold text-green-300">
+                        <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
+                        Active
+                      </span>
+                    </div>
 
-              <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                <Button asChild variant="cta" size="xl" className="shimmer w-full sm:w-auto">
-                  <Link to="/signup">
-                    Start Your Journey
-                    <ArrowRight className="ml-1 h-4 w-4" />
-                  </Link>
-                </Button>
-                <Button asChild variant="outlineLight" size="xl" className="w-full sm:w-auto">
-                  <Link to="/demo">
-                    <Play className="mr-1 h-4 w-4" />
-                    Watch Demo
-                  </Link>
-                </Button>
-              </div>
+                    {/* Score ring */}
+                    <div className="mt-4 flex items-center gap-4">
+                      <div className="relative flex h-20 w-20 shrink-0 items-center justify-center rounded-full border-4 border-secondary/60 bg-white/5">
+                        <div className="text-center">
+                          <div className="font-display text-2xl font-bold text-white">78</div>
+                          <div className="text-[9px] font-semibold uppercase tracking-wider text-white/60">Score</div>
+                        </div>
+                      </div>
+                      <div className="flex-1 space-y-2">
+                        <div>
+                          <div className="mb-1 flex justify-between text-[10px] text-white/70">
+                            <span>Employability</span><span className="text-secondary font-semibold">78%</span>
+                          </div>
+                          <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+                            <div className="h-full w-[78%] rounded-full bg-secondary" />
+                          </div>
+                        </div>
+                        <div>
+                          <div className="mb-1 flex justify-between text-[10px] text-white/70">
+                            <span>Market demand</span><span className="text-green-400 font-semibold">High</span>
+                          </div>
+                          <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+                            <div className="h-full w-[85%] rounded-full bg-green-400" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
 
-              <div className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-xs text-white/80">
-                <span className="inline-flex items-center gap-2">
-                  <Cpu className="h-3.5 w-3.5 text-secondary" />
-                  Neural matching engine
-                </span>
-                <span className="inline-flex items-center gap-2">
-                  <Zap className="h-3.5 w-3.5 text-secondary" />
-                  60-second analysis
-                </span>
-                <span className="inline-flex items-center gap-2">
-                  <MapPin className="h-3.5 w-3.5 text-secondary" />
-                  All 9 provinces · Mzansi
-                </span>
+                    {/* Skills */}
+                    <div className="mt-4">
+                      <div className="text-[10px] font-semibold uppercase tracking-wider text-white/50 mb-2">Core skills matched</div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {["React", "Node.js", "Python", "SQL", "AWS"].map((s) => (
+                          <span key={s} className="rounded-full border border-secondary/40 bg-secondary/10 px-2.5 py-0.5 text-[11px] font-semibold text-white/90">{s}</span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Matched job */}
+                    <div className="mt-4 rounded-xl border border-white/10 bg-white/5 p-3">
+                      <div className="text-[10px] font-semibold uppercase tracking-wider text-white/50 mb-1.5">Top matched role</div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-sm font-bold text-white">Junior Developer</div>
+                          <div className="text-[10px] text-white/60 flex items-center gap-1"><MapPin className="h-2.5 w-2.5" /> Remote · Gauteng</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-xs font-bold text-secondary">R15,000</div>
+                          <div className="text-[10px] text-white/60">/month</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -432,6 +518,54 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* FAQ */}
+        <section className="py-20">
+          <div className="container">
+            <div className="text-center">
+              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary">Got questions?</span>
+              <h2 className="mt-3 font-display text-3xl font-bold text-primary md:text-4xl">Frequently Asked Questions</h2>
+            </div>
+            <div className="mx-auto mt-10 max-w-2xl space-y-3">
+              {[
+                {
+                  q: "Is EmpowAI free to use?",
+                  a: "Yes — the CV analyser, Empowerment Score, and career path explorer are completely free (mahala). Advanced simulations and AI coaching are available on a premium tier.",
+                },
+                {
+                  q: "Do I need a CV to get started?",
+                  a: "No. You can paste your work history as text, upload a PDF or Word file, or answer a few quick questions and we'll build a starter CV with you.",
+                },
+                {
+                  q: "Is my data safe?",
+                  a: "All CV data is encrypted at rest using AES-256. We never sell your data. You can delete your profile at any time from the account settings page.",
+                },
+                {
+                  q: "Which provinces and cities does EmpowAI cover?",
+                  a: "All 9 provinces — from Gauteng and Western Cape to Limpopo and the Northern Cape. Opportunities and salary projections are localised to your area.",
+                },
+                {
+                  q: "What is an Economic Twin?",
+                  a: "Your Economic Twin is an AI-generated career profile built from your CV. It shows your Empowerment Score, matched job titles, income potential, skill gaps, and personalised recommendations — all in one place.",
+                },
+                {
+                  q: "How long does the CV analysis take?",
+                  a: "Typically under 60 seconds. The AI extracts your skills, scores your employability, identifies gaps, and matches you to live opportunities automatically.",
+                },
+              ].map(({ q, a }) => (
+                <details key={q} className="group rounded-xl border border-border bg-card shadow-sm">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 font-semibold text-primary [&::-webkit-details-marker]:hidden">
+                    {q}
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary transition-transform duration-200 group-open:rotate-45">
+                      <ArrowRight className="h-3.5 w-3.5 rotate-[-45deg] group-open:rotate-0 transition-transform duration-200" />
+                    </span>
+                  </summary>
+                  <div className="border-t border-border px-5 pb-4 pt-3 text-sm text-muted-foreground leading-relaxed">{a}</div>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+
         <section className="relative overflow-hidden border-t border-border bg-primary py-14 text-center text-primary-foreground">
           <div className="ai-mesh absolute inset-0" aria-hidden />
           <div className="container relative">
@@ -453,62 +587,74 @@ export default function LandingPage() {
       </main>
 
       <footer className="border-t border-border bg-background">
-        <div className="container flex flex-col items-center justify-between gap-6 py-7 md:flex-row">
-          <nav className="flex flex-wrap items-center justify-center gap-x-7 gap-y-2 text-sm">
-            {[
-              { label: "Features", href: "#features" },
-              { label: "Ubuntu Stories", href: "#ubuntu-stories" },
-              { label: "Demo", href: "/demo", route: true },
-            ].map((l) =>
-              "route" in l && l.route ? (
-                <Link
-                  key={l.label}
-                  to={l.href}
-                  className="font-semibold text-primary underline-offset-4 hover:text-secondary hover:underline"
-                >
-                  {l.label}
-                </Link>
-              ) : (
-                <a
-                  key={l.label}
-                  href={l.href}
-                  className="font-semibold text-primary underline-offset-4 hover:text-secondary hover:underline"
-                >
-                  {l.label}
-                </a>
-              )
-            )}
-          </nav>
+        <div className="container py-10">
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            {/* Brand */}
+            <div className="lg:col-span-2">
+              <Logo variant="default" size="sm" linkTo="" />
+              <p className="mt-3 max-w-xs text-sm text-muted-foreground leading-relaxed">
+                AI-powered career guidance rooted in Ubuntu values. Free for every young South African — from Limpopo to the Western Cape.
+              </p>
+              <div className="mt-4 flex items-center gap-2">
+                {[
+                  { Icon: Facebook, href: "https://www.facebook.com/profile.php?id=61562941456913", label: "Facebook" },
+                  { Icon: TikTokIcon, href: "https://www.tiktok.com/@empowa.ai", label: "TikTok" },
+                  { Icon: Instagram, href: "https://www.instagram.com/empowa.ai/", label: "Instagram" },
+                  { Icon: Linkedin, href: "https://www.linkedin.com/company/empowaai", label: "LinkedIn" },
+                  { Icon: Mail, href: "mailto:info@empowa-ai.co.za", label: "Email" },
+                ].map(({ Icon, href, label }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    aria-label={label}
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                  </a>
+                ))}
+              </div>
+            </div>
 
-          <div className="flex items-center gap-2">
-            {[Facebook, TikTokIcon, Mail, Instagram, Linkedin].map((Icon, i) => {
-              const socialLinks = [
-                "https://www.facebook.com/profile.php?id=61562941456913",
-                "https://www.tiktok.com/@empowa.ai",
-                "mailto:info@empowa-ai.co.za",
-                "https://www.instagram.com/empowa.ai/",
-                "https://www.linkedin.com/company/empowaai"
-              ];
-              const socialLabels = [
-                "Facebook",
-                "TikTok",
-                "Email",
-                "Instagram",
-                "LinkedIn"
-              ];
-              return (
-                <a
-                  key={i}
-                  href={socialLinks[i]}
-                  aria-label={socialLabels[i]}
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground transition-smooth hover:bg-secondary"
-                >
-                  <Icon className="h-4 w-4" />
-                </a>
-              );
-            })}
+            {/* Product */}
+            <div>
+              <h3 className="text-xs font-bold uppercase tracking-[0.15em] text-muted-foreground mb-3">Product</h3>
+              <ul className="space-y-2 text-sm">
+                {[
+                  { label: "How It Works", href: "#how-it-works" },
+                  { label: "Features", href: "#features" },
+                  { label: "Ubuntu Stories", href: "#ubuntu-stories" },
+                  { label: "Demo", href: "/demo", route: true },
+                  { label: "Pricing", href: "/pricing", route: true },
+                ].map((l) => (
+                  <li key={l.label}>
+                    {"route" in l && l.route ? (
+                      <Link to={l.href} className="text-muted-foreground hover:text-primary transition-colors">{l.label}</Link>
+                    ) : (
+                      <a href={l.href} className="text-muted-foreground hover:text-primary transition-colors">{l.label}</a>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Legal & Contact */}
+            <div>
+              <h3 className="text-xs font-bold uppercase tracking-[0.15em] text-muted-foreground mb-3">Support</h3>
+              <ul className="space-y-2 text-sm">
+                <li><a href="mailto:info@empowa-ai.co.za" className="text-muted-foreground hover:text-primary transition-colors">Contact Us</a></li>
+                <li><a href="mailto:info@empowa-ai.co.za" className="text-muted-foreground hover:text-primary transition-colors">Privacy Policy</a></li>
+                <li><a href="mailto:info@empowa-ai.co.za" className="text-muted-foreground hover:text-primary transition-colors">Terms of Service</a></li>
+                <li>
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-green-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-green-600 dark:text-green-400">
+                    <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                    All systems operational
+                  </span>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
+
         <div className="border-t border-border/60 py-4 text-center text-xs text-muted-foreground">
           © {new Date().getFullYear()} EmpowAI · Amandla e-Ubuntu <span className="emoji">🇿🇦</span> · Built in Mzansi
         </div>
