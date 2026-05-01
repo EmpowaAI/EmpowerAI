@@ -257,15 +257,8 @@ const TwinBuilder = () => {
     setTwinError("");
 
     try {
-      const raw = localStorage.getItem("twinData");
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (applyTwin(parsed)) {
-          setIsLoadingTwin(false);
-          return;
-        }
-      }
-
+      // Always fetch from the API first — localStorage may be stale from a
+      // previous CV upload (e.g. retail twin cached while user re-uploaded SE CV).
       const response = await twinAPI.get();
       const apiTwin = response?.data?.twin ?? null;
 
