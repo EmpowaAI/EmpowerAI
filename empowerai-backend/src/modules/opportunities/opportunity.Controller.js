@@ -202,7 +202,9 @@ exports.getAllOpportunities = async (req, res, next) => {
         // In strict mode, allow lower threshold when only career goals are provided
         userProfile.minMatchScore = hasUserSkills ? 60 : 25;
       } else {
-        userProfile.minMatchScore = hasUserSkills ? 45 : 20;
+        // 25 is the lowest score a single-skill match can produce after the baseline boost,
+        // so this threshold lets any partial match through rather than returning 0.
+        userProfile.minMatchScore = hasUserSkills ? 25 : 15;
       }
       if (careerTerms.length > 0) {
         userProfile.careerGoals = careerTerms;
