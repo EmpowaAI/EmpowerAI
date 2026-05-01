@@ -196,18 +196,21 @@ export default function Opportunities() {
             rawOpportunities = []
           }
 
+          // Fallback: no results from smart matching → retry without skills so the server's
+          // career-goal fallback path triggers (it requires careerGoals && !skills).
+          // Also covers the no-careerGoals case by stripping both to hit the plain query path.
           const shouldFallback =
             rawOpportunities.length === 0 &&
-            careerGoalFilters.length > 0 &&
             !debouncedSearch &&
             category === "all"
 
           if (shouldFallback) {
             const fallbackFilters = { ...filters }
+            delete fallbackFilters.skills
             delete fallbackFilters.careerGoals
             fallbackFilters.sort = 'createdAt'
             response = await opportunitiesAPI.getAll(fallbackFilters)
-            setFallbackNotice("No exact matches for your goals yet. Showing all opportunities instead.")
+            setFallbackNotice("Showing all available opportunities. Upload your CV for personalised matches.")
             rawOpportunities = getResponseOpportunities(response)
             if (!Array.isArray(rawOpportunities)) rawOpportunities = []
           }
