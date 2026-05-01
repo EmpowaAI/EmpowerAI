@@ -4,7 +4,7 @@ const { getMatchedOpportunities, extractUserProfile } = require('./opportunityMa
 const { getCareerTaxonomy } = require('../../services/taxonomyService');
 const cvProfileRepository = require('../cvAnalyser/cvAnalyser.Repository');
 
-let attemptedAutoSeed = false;
+let lastAutoSeedAttemptMs = 0;
 
 exports.getAllOpportunities = async (req, res, next) => {
   try {
@@ -17,8 +17,8 @@ exports.getAllOpportunities = async (req, res, next) => {
 
     // If the DB is empty (or has no active opportunities), opportunistically seed defaults.
     // This makes the Opportunities page usable even when startup tasks didn't run (or the DB was provisioned empty).
-    if (activeCount === 0 && !attemptedAutoSeed) {
-      attemptedAutoSeed = true;
+    if (activeCount === 0 && Date.now() - lastAutoSeedAttemptMs > 30_000) {
+      lastAutoSeedAttemptMs = Date.now();
       try {
         // Reuse the curated defaults from the seed script (without deleting anything).
         // Path is relative to this controller file: src/modules/opportunities -> ../../../scripts
@@ -32,7 +32,14 @@ exports.getAllOpportunities = async (req, res, next) => {
           activeCount = await Opportunity.countDocuments({ isActive: true });
         }
       } catch (seedError) {
-        logger.warn('Auto-seed attempt failed (non-fatal)', { message: seedError?.message });
+        // BulkWriteError (ordered:false) still throws even if some docs inserted —
+        // re-check the count so we don't skip the query when partial inserts succeeded.
+        logger.warn('Auto-seed attempt had errors (non-fatal)', { message: seedError?.message });
+        try {
+          totalCount = await Opportunity.countDocuments({});
+          activeCount = await Opportunity.countDocuments({ isActive: true });
+          if (activeCount > 0) seededDefaults = true;
+        } catch (_) { /* ignore secondary count failure */ }
       }
     }
     
@@ -216,12 +223,12 @@ exports.getAllOpportunities = async (req, res, next) => {
           : 0
       });
 
-      // Fallback: if career goal matching yields zero and no explicit skills/search filters, return unfiltered list
+      // Fallback: if smart matching yields zero, show all active opportunities unless the user
+      // explicitly narrowed by a free-text search or province (those are intentional hard filters).
       if (
         processedOpportunities.length === 0 &&
-        hasCareerFilter &&
-        !skills &&
         !hasSearchQuery &&
+        !province &&
         !strictMatch
       ) {
         processedOpportunities = await Opportunity.find(filter)
