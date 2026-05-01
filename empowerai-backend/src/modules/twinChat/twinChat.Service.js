@@ -120,24 +120,42 @@ async function initialiseChatSession(userId) {
 async function sendMessage(userId, message, history, twinData, isLastPrompt = false) {
   logger.info('[TwinChat] sendMessage', { userId, isLastPrompt });
 
-  // Build full messages array in the shape FastAPI ChatRequest expects
-  const messages = [
-    ...history,
-    { role: 'user', content: message },
-  ];
+  // Build full messages array in the shape FastAPI ChatRequest expects.
+  // The frontend already appends the current user message to history before
+  // calling this function, so we only add `message` here if it differs from
+  // the last history entry (avoids a duplicate when both are the same).
+  const lastHistoryMsg = history[history.length - 1];
+  const alreadyAppended =
+    lastHistoryMsg?.role === 'user' && lastHistoryMsg?.content === message;
+  const messages = alreadyAppended
+    ? history
+    : [...history, { role: 'user', content: message }];
 
   // Map in-memory twin → FastAPI cv_context contract
   const cvContext = _buildCvContext(twinData);
 
-  // Call FastAPI POST /chat/twin via the gate pass
-  const response = await aiServiceClient.post('/chat/twin', {
-    messages,
-    cv_context: cvContext,
-    focus: 'growth',
-  });
-
-  // FastAPI ChatResponse: { reply, options, allowMultiple, isComplete, profile }
-  const fastApiData = response.data;
+  // Call FastAPI POST /chat/twin — degrade gracefully if the AI service is
+  // unavailable so the Node backend never returns a 500 to the browser.
+  let fastApiData = null;
+  try {
+    const response = await aiServiceClient.post('/chat/twin', {
+      messages,
+      cv_context: cvContext,
+      focus: 'growth',
+    });
+    fastApiData = response.data;
+  } catch (aiErr) {
+    logger.warn('[TwinChat] AI service call failed — returning fallback reply', {
+      userId,
+      error: aiErr.message,
+    });
+    fastApiData = {
+      reply: "I'm having a brief connection issue with the AI service. Please try again in a moment.",
+      options: null,
+      isComplete: false,
+      profile: null,
+    };
+  }
 
   // Merge any profile data the AI returned into the in-memory twin
   const updatedTwinData = _mergeFastApiResponse(twinData, fastApiData);
@@ -145,7 +163,11 @@ async function sendMessage(userId, message, history, twinData, isLastPrompt = fa
   let savedTwin = null;
   if (isLastPrompt || fastApiData?.isComplete === true) {
     logger.info('[TwinChat] Persisting twin to DB', { userId });
-    savedTwin = await twinBuilderService.persistTwinFromChat(userId, updatedTwinData);
+    try {
+      savedTwin = await twinBuilderService.persistTwinFromChat(userId, updatedTwinData);
+    } catch (dbErr) {
+      logger.warn('[TwinChat] Failed to persist twin to DB', { userId, error: dbErr.message });
+    }
   }
 
   return {
