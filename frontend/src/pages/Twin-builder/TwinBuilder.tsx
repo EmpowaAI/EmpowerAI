@@ -16,6 +16,9 @@ import {
   Zap,
   ArrowRight,
   AlertCircle,
+  CheckCircle2,
+  Briefcase,
+  Mic,
 } from "lucide-react";
 import { twinAPI, twinAPIReal, cvAPI } from "../../lib/api";
 import { useUser } from "../../contexts/user-context";
@@ -54,13 +57,25 @@ type ChatMessage = {
   role: "assistant" | "user";
   text: string;
   options?: string[];
+  isCompletion?: boolean;
 };
+
+// After this many user turns the chat wraps up automatically.
+// Users can also finish early by selecting the "Finish" quick option.
+const MAX_TURNS = 5;
+
+const FINISH_SIGNAL = "Finish — show me my results →";
 
 const DEFAULT_QUICK_QUESTIONS = [
   "What skills am I missing?",
   "What's my market demand?",
   "Give me career recommendations",
   "What can I monetize?",
+];
+
+const MID_QUICK_QUESTIONS = [
+  "What jobs match my profile?",
+  "How do I increase my salary?",
 ];
 
 // ── Insight card component ──────────────────────────────────────────────
@@ -87,8 +102,6 @@ const InsightCard = ({
 );
 
 // Map the backend's nested twin shape to the flat TwinData interface the UI expects.
-// Backend: identity.industry, economy.employabilityScore, skills.core, intelligence.recommendations, market.jobTitlesMapped
-// Frontend: TwinData.industry, TwinData.empowermentScore, TwinData.skills (string[]), TwinData.recommendations, TwinData.mappedJobs
 function normalizeTwin(raw: any): TwinData | null {
   if (!raw) return null;
   const isNested = (raw.identity || raw.economy) && !Array.isArray(raw.skills);
@@ -131,6 +144,72 @@ function normalizeTwin(raw: any): TwinData | null {
   };
 }
 
+// ── Completion card rendered inline in the chat ─────────────────────────
+
+const CompletionCard = ({
+  score,
+  skills,
+  onOpportunities,
+  onInterview,
+}: {
+  score: number;
+  skills: string[];
+  onOpportunities: () => void;
+  onInterview: () => void;
+}) => (
+  <div className="mt-4 rounded-xl border border-primary/40 bg-primary/5 p-5 space-y-4">
+    <div className="flex items-center gap-2">
+      <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
+      <p className="font-bold text-foreground">Your Economic Twin is ready!</p>
+    </div>
+
+    {score > 0 && (
+      <div>
+        <div className="flex justify-between text-xs mb-1">
+          <span className="text-muted-foreground font-medium">Empowerment Score</span>
+          <span className="font-bold text-primary">{score}%</span>
+        </div>
+        <div className="h-2 overflow-hidden rounded-full bg-muted">
+          <div className="h-full rounded-full bg-primary transition-[width] duration-700" style={{ width: `${score}%` }} />
+        </div>
+      </div>
+    )}
+
+    {skills.length > 0 && (
+      <div className="flex flex-wrap gap-1.5">
+        {skills.slice(0, 5).map((s) => (
+          <span key={s} className="rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
+            {s}
+          </span>
+        ))}
+      </div>
+    )}
+
+    <p className="text-sm text-muted-foreground">
+      Your profile is built. Choose what to do next:
+    </p>
+
+    <div className="grid grid-cols-2 gap-3">
+      <button
+        type="button"
+        onClick={onOpportunities}
+        className="flex flex-col items-center gap-2 rounded-xl border border-primary bg-primary px-4 py-4 text-primary-foreground transition-opacity hover:opacity-90"
+      >
+        <Briefcase className="h-5 w-5" />
+        <span className="text-sm font-bold leading-tight text-center">Browse Opportunities</span>
+      </button>
+      <button
+        type="button"
+        onClick={onInterview}
+        className="flex flex-col items-center gap-2 rounded-xl border border-border bg-card px-4 py-4 text-foreground transition-colors hover:border-primary/40"
+      >
+        <Mic className="h-5 w-5 text-primary" />
+        <span className="text-sm font-bold leading-tight text-center">Practice Interview</span>
+      </button>
+    </div>
+  </div>
+);
+
 // ── Component ──────────────────────────────────────────────────────────
 
 const TwinBuilder = () => {
@@ -142,9 +221,10 @@ const TwinBuilder = () => {
   const [twinData, setTwinData] = useState<TwinData | null>(null);
   const [twinError, setTwinError] = useState("");
   const [chatHistory, setChatHistory] = useState<{ role: string; content: string }[]>([]);
+  const [chatComplete, setChatComplete] = useState(false);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
-  // Keep raw API twin shape so the chat context has all fields (identity, intelligence, etc.)
   const rawTwinRef = useRef<any>(null);
+  const turnCountRef = useRef(0);
 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {
@@ -159,26 +239,24 @@ const TwinBuilder = () => {
     const twin = normalizeTwin(raw);
     if (!twin) return false;
     setTwinData(twin);
-    rawTwinRef.current = raw; // preserve raw shape for chat context
+    rawTwinRef.current = raw;
     const skills = twin.profile?.skills ?? twin.skills ?? [];
     const industry = twin.profile?.industry ?? twin.industry ?? "General";
-    localStorage.setItem("twinData", JSON.stringify(raw)); // persist raw so next load can re-normalize
+    localStorage.setItem("twinData", JSON.stringify(raw));
     setChatMessages([{
       id: 1,
       role: "assistant",
-      text: `Your Economic Twin is loaded. I can see your ${skills.length > 0 ? `${skills.length} core skills` : "profile"}, your industry (${industry}), and your full career profile. Ask me anything — salary benchmarks, skill gaps, market demand, career paths, or what to focus on next.`,
-      options: DEFAULT_QUICK_QUESTIONS,
+      text: `Your Economic Twin is loaded. I can see your ${skills.length > 0 ? `${skills.length} core skills` : "profile"}, your industry (${industry}), and your full career profile.\n\nAsk me anything — salary benchmarks, skill gaps, market demand, career paths, or what to focus on next. When you're ready, select **Finish** to see your matched opportunities.`,
+      options: [...DEFAULT_QUICK_QUESTIONS, FINISH_SIGNAL],
     }]);
     return true;
   };
 
-  // Load twin data from localStorage first, then fallback to API, then auto-build if CV is done
   const loadTwinData = useCallback(async () => {
     setIsLoadingTwin(true);
     setTwinError("");
 
     try {
-      // 1. Try localStorage first (fastest)
       const raw = localStorage.getItem("twinData");
       if (raw) {
         const parsed = JSON.parse(raw);
@@ -188,7 +266,6 @@ const TwinBuilder = () => {
         }
       }
 
-      // 2. Fetch from API
       const response = await twinAPI.get();
       const apiTwin = response?.data?.twin ?? null;
 
@@ -197,7 +274,6 @@ const TwinBuilder = () => {
         return;
       }
 
-      // 3. No twin in DB — if CV analysis was done, try to build one now
       const cvDone = localStorage.getItem("cvCompleted") === "true";
       if (cvDone) {
         setChatMessages([{
@@ -212,7 +288,6 @@ const TwinBuilder = () => {
             localStorage.setItem("twinCompleted", "true");
             return;
           }
-          // Fallback: build response had no twin shape — try a separate GET
           const retryResponse = await twinAPI.get();
           const fetchedTwin = retryResponse?.data?.twin ?? null;
           if (fetchedTwin && applyTwin(fetchedTwin)) {
@@ -222,13 +297,10 @@ const TwinBuilder = () => {
         } catch (buildErr: any) {
           const status = buildErr?.status ?? buildErr?.response?.status;
           if (status === 404) {
-            // CV profile not in DB — try to restore from locally-cached analysis
-            // so users who already analyzed their CV don't need to re-upload.
             const cachedAnalysis = getStoredCvAnalysis<Record<string, unknown>>();
             if (cachedAnalysis) {
               try {
                 await cvAPI.restoreFromCache(cachedAnalysis);
-                // Profile restored — retry the build
                 const retryBuild = await twinAPI.buildFromCv();
                 const restoredTwin = retryBuild?.data?.twin ?? null;
                 if (restoredTwin && applyTwin(restoredTwin)) {
@@ -237,10 +309,9 @@ const TwinBuilder = () => {
                   return;
                 }
               } catch {
-                // Restore or retry failed — fall through to redirect
+                // fall through
               }
             }
-            // No cache or restore failed — clear state and send to cv-analyzer
             localStorage.removeItem("cvCompleted");
             localStorage.removeItem("twinCompleted");
             localStorage.removeItem("twinData");
@@ -250,7 +321,6 @@ const TwinBuilder = () => {
             navigate("/dashboard/cv-analyzer");
             return;
           }
-          // Other errors (422, 500, network) fall through to the error message below
         }
       }
 
@@ -289,21 +359,31 @@ const TwinBuilder = () => {
 
   const sendTwinMessage = async (prompt: string) => {
     const cleanPrompt = prompt.trim();
-    if (!cleanPrompt || isBotTyping) return;
+    if (!cleanPrompt || isBotTyping || chatComplete) return;
 
-    const userMsg: ChatMessage = { id: Date.now(), role: "user", text: cleanPrompt };
+    // Treat the finish signal as a "wrap up" request
+    const isFinishSignal = cleanPrompt === FINISH_SIGNAL;
+
+    turnCountRef.current += 1;
+    const isLast = isFinishSignal || turnCountRef.current >= MAX_TURNS;
+
+    const displayPrompt = isFinishSignal ? "Show me my final results and next steps." : cleanPrompt;
+
+    const userMsg: ChatMessage = { id: Date.now(), role: "user", text: displayPrompt };
     setChatMessages((current) => [...current, userMsg]);
     setIsBotTyping(true);
 
-    const newHistory = [...chatHistory, { role: "user", content: cleanPrompt }];
+    const newHistory = [...chatHistory, { role: "user", content: displayPrompt }];
     setChatHistory(newHistory);
 
     try {
       const response = await twinAPIReal.chatMessage(
-        cleanPrompt,
+        isFinishSignal
+          ? "Please give me a final summary of my profile: my top skills, the best job matches for me, and my top 3 next steps to land a job."
+          : cleanPrompt,
         newHistory,
         rawTwinRef.current ?? twinData ?? {},
-        false
+        isLast
       );
 
       const replyText: string =
@@ -312,21 +392,38 @@ const TwinBuilder = () => {
         response?.data?.message ??
         "I couldn't process your request right now. Please try again.";
 
+      // Pick quick options based on how far through the conversation we are
+      let nextOptions: string[];
+      if (isLast) {
+        nextOptions = [];
+      } else if (turnCountRef.current >= 3) {
+        nextOptions = [...MID_QUICK_QUESTIONS, FINISH_SIGNAL];
+      } else {
+        nextOptions = [...DEFAULT_QUICK_QUESTIONS, FINISH_SIGNAL];
+      }
+
       const assistantMsg: ChatMessage = {
         id: Date.now() + 1,
         role: "assistant",
         text: replyText,
-        options: DEFAULT_QUICK_QUESTIONS,
+        options: nextOptions,
+        isCompletion: isLast,
       };
 
       setChatMessages((current) => [...current, assistantMsg]);
       setChatHistory((h) => [...h, { role: "assistant", content: replyText }]);
+
+      if (isLast) {
+        setChatComplete(true);
+        localStorage.setItem("twinCompleted", "true");
+        updateProgress("twinCompleted", true);
+      }
     } catch {
       const fallbackMsg: ChatMessage = {
         id: Date.now() + 1,
         role: "assistant",
         text: "I had trouble connecting. Please check your internet connection and try again.",
-        options: DEFAULT_QUICK_QUESTIONS,
+        options: isLast ? [] : [...DEFAULT_QUICK_QUESTIONS, FINISH_SIGNAL],
       };
       setChatMessages((current) => [...current, fallbackMsg]);
     } finally {
@@ -363,7 +460,7 @@ const TwinBuilder = () => {
     <main className="bg-background font-sans text-foreground">
       <div className="mx-auto grid max-w-[1070px] border-border bg-background lg:border-x lg:grid-cols-[390px_minmax(0,1fr)]">
 
-        {/* ── Sidebar — shown below chat on mobile, left column on desktop ── */}
+        {/* ── Sidebar ── */}
         <aside className="order-2 overflow-y-auto border-t border-border bg-background px-4 py-4 lg:order-1 lg:h-screen lg:border-r lg:border-t-0">
           {isLoadingTwin ? (
             <div className="flex flex-col items-center justify-center gap-3 py-16">
@@ -428,6 +525,25 @@ const TwinBuilder = () => {
                   </div>
                 )}
               </section>
+
+              {/* Next actions — always visible once twin is loaded */}
+              {twinData && (
+                <section className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-2">
+                  <p className="text-xs font-bold uppercase tracking-wider text-primary">Ready to act?</p>
+                  <Link to="/dashboard/opportunities">
+                    <Button className="w-full mb-2">
+                      <Briefcase className="mr-2 h-4 w-4" />
+                      Browse Opportunities
+                    </Button>
+                  </Link>
+                  <Link to="/dashboard/interview-coach">
+                    <Button variant="outline" className="w-full">
+                      <Mic className="mr-2 h-4 w-4" />
+                      Practice Interview
+                    </Button>
+                  </Link>
+                </section>
+              )}
 
               {/* Core Skills */}
               {skills.length > 0 && (
@@ -499,7 +615,6 @@ const TwinBuilder = () => {
                 </ol>
               </InsightCard>
 
-              {/* CTA */}
               {!progress.cvCompleted && (
                 <section className="rounded-xl border border-primary bg-card p-4">
                   <div className="flex items-center gap-2 mb-3">
@@ -521,7 +636,7 @@ const TwinBuilder = () => {
           )}
         </aside>
 
-        {/* ── Chat Panel — shown first on mobile ── */}
+        {/* ── Chat Panel ── */}
         <section className="order-1 flex flex-col bg-background lg:order-2 lg:h-screen lg:min-h-0">
           <div className="min-h-[50vh] px-4 pb-4 pt-6 sm:px-5 lg:flex-1 lg:min-h-0 lg:overflow-y-auto lg:pb-8 lg:pt-12">
             <div className="space-y-5">
@@ -564,7 +679,18 @@ const TwinBuilder = () => {
                       )}
                     </div>
 
-                    {chat.role === "assistant" && chat.options && chat.options.length > 0 && (
+                    {/* Completion card shown after final assistant message */}
+                    {chat.role === "assistant" && chat.isCompletion && (
+                      <CompletionCard
+                        score={displayScore}
+                        skills={skills}
+                        onOpportunities={() => navigate("/dashboard/opportunities")}
+                        onInterview={() => navigate("/dashboard/interview-coach")}
+                      />
+                    )}
+
+                    {/* Quick-reply buttons (not shown on completion message) */}
+                    {chat.role === "assistant" && !chat.isCompletion && chat.options && chat.options.length > 0 && (
                       <div className="mt-2 flex flex-wrap gap-2">
                         {chat.options.map((option) => (
                           <button
@@ -572,7 +698,11 @@ const TwinBuilder = () => {
                             type="button"
                             disabled={isBotTyping || isLoadingTwin}
                             onClick={() => void sendTwinMessage(option)}
-                            className="rounded-xl bg-secondary/20 px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-secondary/30 disabled:cursor-not-allowed disabled:opacity-60"
+                            className={`rounded-xl px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
+                              option === FINISH_SIGNAL
+                                ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                                : "bg-secondary/20 text-foreground hover:bg-secondary/30"
+                            }`}
                           >
                             {option}
                           </button>
@@ -600,22 +730,39 @@ const TwinBuilder = () => {
             </div>
           </div>
 
-          <form className="sticky bottom-0 border-t border-border bg-background px-4 py-3 sm:px-5" onSubmit={submitMessage}>
-            <div className="flex h-12 items-center gap-2 rounded-[14px] border border-border bg-card px-3 shadow-sm">
-              <Sparkles className="h-4 w-4 shrink-0 text-primary" />
-              <input
-                value={message}
-                onChange={(event) => setMessage(event.target.value)}
-                disabled={isBotTyping || isLoadingTwin}
-                placeholder={isBotTyping ? "Economic Twin is thinking…" : isLoadingTwin ? "Loading your twin…" : "Select an option or type here…"}
-                className="h-full flex-1 bg-transparent text-sm font-semibold text-foreground outline-none placeholder:text-muted-foreground"
-              />
-              <Button type="submit" size="icon" variant="secondary" disabled={isBotTyping || isLoadingTwin || !message.trim()} aria-label="Send message" className="h-8 w-8 rounded-xl">
-                <Send className="h-4 w-4" />
-              </Button>
+          {/* Input area — replaced by CTA panel once chat completes */}
+          {chatComplete ? (
+            <div className="sticky bottom-0 border-t border-border bg-background px-4 py-4 sm:px-5">
+              <p className="text-xs text-center text-muted-foreground font-semibold mb-3">Your twin session is complete. What would you like to do?</p>
+              <div className="grid grid-cols-2 gap-3">
+                <Button onClick={() => navigate("/dashboard/opportunities")} className="w-full">
+                  <Briefcase className="mr-2 h-4 w-4" />
+                  Browse Opportunities
+                </Button>
+                <Button variant="outline" onClick={() => navigate("/dashboard/interview-coach")} className="w-full">
+                  <Mic className="mr-2 h-4 w-4" />
+                  Practice Interview
+                </Button>
+              </div>
             </div>
-            <p className="mt-2 text-center text-[11px] font-semibold text-muted-foreground">Powered by your Economic Twin · SA career intelligence</p>
-          </form>
+          ) : (
+            <form className="sticky bottom-0 border-t border-border bg-background px-4 py-3 sm:px-5" onSubmit={submitMessage}>
+              <div className="flex h-12 items-center gap-2 rounded-[14px] border border-border bg-card px-3 shadow-sm">
+                <Sparkles className="h-4 w-4 shrink-0 text-primary" />
+                <input
+                  value={message}
+                  onChange={(event) => setMessage(event.target.value)}
+                  disabled={isBotTyping || isLoadingTwin}
+                  placeholder={isBotTyping ? "Economic Twin is thinking…" : isLoadingTwin ? "Loading your twin…" : "Select an option or type here…"}
+                  className="h-full flex-1 bg-transparent text-sm font-semibold text-foreground outline-none placeholder:text-muted-foreground"
+                />
+                <Button type="submit" size="icon" variant="secondary" disabled={isBotTyping || isLoadingTwin || !message.trim()} aria-label="Send message" className="h-8 w-8 rounded-xl">
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
+              <p className="mt-2 text-center text-[11px] font-semibold text-muted-foreground">Powered by your Economic Twin · SA career intelligence</p>
+            </form>
+          )}
         </section>
       </div>
     </main>
