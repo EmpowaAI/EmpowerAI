@@ -164,17 +164,9 @@ export default function Opportunities() {
         if (category && category !== "all") {
           filters.type = category
         }
-        const cvSkills = localStorage.getItem('cvSkills')
-        if (cvSkills) {
-          try {
-            const skills = JSON.parse(cvSkills)
-            if (Array.isArray(skills) && skills.length > 0) {
-              filters.skills = skills.slice(0, 5).join(',')
-            }
-          } catch {
-            // ignore
-          }
-        }
+        // Skills are NOT sent in the initial request — the live server's fallback path
+        // requires !skills to fire when career-goal matching returns zero results.
+        // Skills matching is handled server-side via the authenticated user's CV profile.
         if (debouncedSearch) {
           filters.q = debouncedSearch
         }
