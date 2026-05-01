@@ -6,6 +6,26 @@
 
 const { extractSkillsEnhanced } = require('./skillExtractors');
 
+const INDUSTRY_KEYWORDS = {
+  technology: ['developer', 'software', 'engineer', 'python', 'javascript', 'react', 'node', 'java', 'c#', 'typescript', 'frontend', 'backend', 'fullstack', 'devops', 'cloud', 'aws', 'azure', 'docker', 'api', 'html', 'css', 'git'],
+  retail: ['cashier', 'till', 'pos', 'stock', 'inventory', 'merchandising', 'retail', 'spar', 'shoprite', 'checkers', 'woolworths', 'supermarket', 'shelf', 'cash handling'],
+  finance: ['accountant', 'bookkeeper', 'finance', 'audit', 'tax', 'payroll', 'sage', 'pastel', 'quickbooks', 'sap', 'reconciliation', 'creditors', 'debtors'],
+  healthcare: ['nurse', 'doctor', 'clinical', 'patient', 'hospital', 'medical', 'healthcare', 'pharmacy', 'caregiver'],
+  administration: ['administrative', 'admin', 'secretary', 'receptionist', 'office', 'data entry', 'filing', 'scheduling'],
+  sales: ['sales', 'business development', 'account manager', 'lead generation', 'cold calling', 'b2b', 'b2c'],
+};
+
+function detectIndustry(text) {
+  const lower = text.toLowerCase();
+  let best = 'general';
+  let bestScore = 0;
+  for (const [industry, keywords] of Object.entries(INDUSTRY_KEYWORDS)) {
+    const score = keywords.filter(k => lower.includes(k)).length;
+    if (score > bestScore) { bestScore = score; best = industry; }
+  }
+  return best;
+}
+
 const buildFallbackAnalysis = (cvText, jobRequirementsArray) => {
   const text = (cvText || '').toString();
   const extractedSkills = extractSkillsEnhanced(text);
@@ -84,7 +104,7 @@ const buildFallbackAnalysis = (cvText, jobRequirementsArray) => {
     weaknesses,
     recommendations: suggestions,
     missingKeywords: missingSkills,
-    industry: 'general',
+    industry: detectIndustry(text),
     summary:
       extractedSkills.length > 0
         ? `Candidate with ${extractedSkills.length} detected skills.`

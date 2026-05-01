@@ -218,6 +218,7 @@ const TwinBuilder = () => {
   const [message, setMessage] = useState("");
   const [isBotTyping, setIsBotTyping] = useState(false);
   const [isLoadingTwin, setIsLoadingTwin] = useState(true);
+  const [isRebuildingTwin, setIsRebuildingTwin] = useState(false);
   const [twinData, setTwinData] = useState<TwinData | null>(null);
   const [twinError, setTwinError] = useState("");
   const [chatHistory, setChatHistory] = useState<{ role: string; content: string }[]>([]);
@@ -349,6 +350,25 @@ const TwinBuilder = () => {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [chatMessages, isBotTyping]);
+
+  const rebuildTwinFromCv = async () => {
+    setIsRebuildingTwin(true);
+    setTwinError("");
+    try {
+      const buildResp = await twinAPI.buildFromCv();
+      const builtTwin = buildResp?.data?.twin ?? null;
+      if (builtTwin && applyTwin(builtTwin)) {
+        localStorage.setItem("twinCompleted", "true");
+        updateProgress("twinCompleted", true);
+      } else {
+        setTwinError("Rebuild completed but no twin data was returned. Please try again.");
+      }
+    } catch {
+      setTwinError("Could not rebuild twin from CV. Please re-analyze your CV first.");
+    } finally {
+      setIsRebuildingTwin(false);
+    }
+  };
 
   const sendTwinMessage = async (prompt: string) => {
     const cleanPrompt = prompt.trim();
@@ -536,6 +556,23 @@ const TwinBuilder = () => {
                     </Button>
                   </Link>
                 </section>
+              )}
+
+              {/* Rebuild from CV */}
+              {twinData && (
+                <button
+                  type="button"
+                  onClick={() => void rebuildTwinFromCv()}
+                  disabled={isRebuildingTwin}
+                  className="flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary disabled:opacity-50"
+                >
+                  {isRebuildingTwin ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Zap className="h-3.5 w-3.5" />
+                  )}
+                  {isRebuildingTwin ? "Rebuilding twin…" : "Rebuild from latest CV"}
+                </button>
               )}
 
               {/* Core Skills */}
