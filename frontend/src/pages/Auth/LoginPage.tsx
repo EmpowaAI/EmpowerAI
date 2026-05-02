@@ -36,11 +36,15 @@ export default function LoginPage() {
     try {
       const response = await authAPI.login(email, password);
       if (response.status === "success" && response.data?.user) {
+        // Load saved profile image from localStorage
+        const savedProfileImage = localStorage.getItem('profile_image');
+        
         setUser({
           name: response.data.user.name,
           email: response.data.user.email,
           id: response.data.user.id || response.data.user._id,
-          empowermentScore: response.data.user.empowermentScore || 0
+          empowermentScore: response.data.user.empowermentScore || 0,
+          profileImage: savedProfileImage || undefined
         });
         
         toast.success(`Welcome back, ${response.data.user.name}!`);
@@ -55,8 +59,6 @@ export default function LoginPage() {
           if (syncedProgress.empowermentScore) {
             updateProgress('empowermentScore', syncedProgress.empowermentScore);
           }
-
-          // Context progress already updated above, no need for redundant calls here
 
           if (syncedProgress.cvCompleted && syncedProgress.twinCompleted) {
             unlockAllPages(syncedProgress.empowermentScore || 0);
@@ -74,7 +76,7 @@ export default function LoginPage() {
           } else if (!progress.twinCompleted) {
             navigate("/dashboard/twin", { replace: true });
           } else {
-            unlockAllPages(progress.empowermentScore || 0); // Standardize to 0
+            unlockAllPages(progress.empowermentScore || 0);
             navigate("/dashboard", { replace: true });
           }
         }
@@ -143,7 +145,10 @@ export default function LoginPage() {
 
         <div className="w-full max-w-md">
           <div className="rounded-2xl border border-border bg-card p-6 shadow-xl sm:p-7 md:p-9 dark:bg-card">
-            <div className="lg:hidden mb-6 sm:mb-8"><Logo variant="default" size="md" linkTo="/" /></div>
+            <div className="lg:hidden mb-6 sm:mb-8">
+              <Logo variant="default" size="md" linkTo="/" />
+            </div>
+            
             <div className="mb-8">
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-secondary/10 border border-secondary/20 rounded-full mb-4">
                 <Sparkles className="h-3 w-3 text-secondary" />
@@ -273,6 +278,20 @@ export default function LoginPage() {
                 )}
               </button>
             </form>
+
+            {/* ✅ NEW: Create Account Link at the bottom */}
+            <div className="mt-6 text-center pt-6 border-t border-border/50">
+              <p className="text-sm text-muted-foreground">
+                Not registered?{" "}
+                <Link 
+                  to="/signup" 
+                  className="text-primary hover:text-primary/80 font-semibold hover:underline transition-colors inline-flex items-center gap-1"
+                >
+                  Create new account
+                  <Sparkles className="h-3 w-3" />
+                </Link>
+              </p>
+            </div>
           </div>
         </div>
       </div>
