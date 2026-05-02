@@ -18,18 +18,13 @@ export default function Navbar() {
   // Local state for profile image as fallback
   const [localProfileImage, setLocalProfileImage] = useState<string | null>(null);
 
-  // Load from localStorage directly as fallback
+  // Load from localStorage directly as fallback - persists across logouts
   useEffect(() => {
     const savedImage = localStorage.getItem('profile_image');
     if (savedImage) {
       setLocalProfileImage(savedImage);
     }
-  }, []);
-
-  // Debug logs
-  console.log("Navbar - user?.profileImage:", user?.profileImage);
-  console.log("Navbar - localProfileImage:", localProfileImage);
-  console.log("Navbar - full user:", user);
+  }, [user?.profileImage]); // Re-run when user profileImage changes
 
   const getNavItems = () => {
     return [
@@ -150,7 +145,7 @@ export default function Navbar() {
               </Link>
             )}
 
-            {/* Profile Link with Image - FIXED VERSION */}
+            {/* Profile Link with Image - Shows image even after logout */}
             <Link
               to="/profile"
               className="h-9 w-9 rounded-full bg-muted flex items-center justify-center hover:bg-[var(--secondary)]/10 transition-colors border border-border overflow-hidden"

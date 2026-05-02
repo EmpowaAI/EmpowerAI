@@ -133,13 +133,16 @@ export default function ProfilePage() {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteMsg, setDeleteMsg] = useState<ToastMsg>(null);
 
-  // Load saved profile image from localStorage
+  // Load saved profile image from localStorage (persists across logouts)
   useEffect(() => {
     const savedImage = localStorage.getItem('profile_image');
     if (savedImage) {
       setProfileImage(savedImage);
     }
-  }, []);
+    if (user?.profileImage) {
+      setProfileImage(user.profileImage);
+    }
+  }, [user]);
 
   // Load profile from API and user context
   useEffect(() => {
@@ -198,8 +201,43 @@ export default function ProfilePage() {
     if (msg) setTimeout(() => setToast(null), 3000);
   }, []);
 
+  // Compress image function
+  const compressImage = (base64String: string): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.src = base64String;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const maxSize = 200;
+        let width = img.width;
+        let height = img.height;
+        
+        if (width > height) {
+          if (width > maxSize) {
+            height = (height * maxSize) / width;
+            width = maxSize;
+          }
+        } else {
+          if (height > maxSize) {
+            width = (width * maxSize) / height;
+            height = maxSize;
+          }
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        const compressed = canvas.toDataURL('image/jpeg', 0.7);
+        resolve(compressed);
+      };
+      img.onerror = () => resolve(base64String);
+    });
+  };
+
   // ─── Image Upload Handlers ──────────────────────────────────────────
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
     
@@ -216,11 +254,19 @@ export default function ProfilePage() {
     setIsUploading(true);
     
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       const base64String = e.target?.result as string;
-      setProfileImage(base64String);
-      localStorage.setItem('profile_image', base64String);
-      showToast({ type: "success", text: "Profile picture updated!" });
+      const compressedImage = await compressImage(base64String);
+      
+      setProfileImage(compressedImage);
+      localStorage.setItem('profile_image', compressedImage);
+      
+      // Update user context
+      if (updateUser) {
+        updateUser({ profileImage: compressedImage });
+      }
+      
+      showToast({ type: "success", text: "Profile picture updated! It will persist after logout." });
       setIsUploading(false);
     };
     
@@ -242,6 +288,11 @@ export default function ProfilePage() {
   const removeImage = () => {
     setProfileImage("");
     localStorage.removeItem('profile_image');
+    
+    if (updateUser) {
+      updateUser({ profileImage: "" });
+    }
+    
     showToast({ type: "success", text: "Profile picture removed" });
   };
 
@@ -250,25 +301,22 @@ export default function ProfilePage() {
     ? SA_PROVINCES_CITIES[formData.province] || []
     : [];
 
-  // Helper: Check if a string is a date range (not a phone number)
   const isDateRange = (text: string): boolean => {
     if (!text) return false;
     const dateRangePatterns = [
-      /^\d{4}[-–]\d{4}$/,           // 2022-2023 or 2022–2023
-      /^\d{4}\s*[-–]\s*\d{4}$/,     // 2022 - 2023
-      /^\d{2}\/\d{4}$/,              // 02/2024
-      /^\d{4}$/,                     // Just a year
+      /^\d{4}[-–]\d{4}$/,
+      /^\d{4}\s*[-–]\s*\d{4}$/,
+      /^\d{2}\/\d{4}$/,
+      /^\d{4}$/,
       /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{4}$/i,
-      /\([0-9]{4}[-–][0-9]{4}\)/,    // (2022-2023)
-      /[0-9]{4}[-–][0-9]{4}/,        // 2022-2023 without parentheses
+      /\([0-9]{4}[-–][0-9]{4}\)/,
+      /[0-9]{4}[-–][0-9]{4}/,
     ];
     return dateRangePatterns.some(pattern => pattern.test(text.trim()));
   };
 
-  // Helper: Extract valid phone number (not a date range)
   const extractValidPhone = (text: string): string => {
     const phoneMatches = text.match(/(?:\+27|0|27)[0-9\s\-\(\)]{9,15}\b/g) || [];
-    
     for (const match of phoneMatches) {
       const cleaned = match.trim();
       if (isDateRange(cleaned)) continue;
@@ -280,7 +328,6 @@ export default function ProfilePage() {
     return "";
   };
 
-  // ─── AI Fill from CV - NEVER EVER touches name or email ──────────────────────────
   const autoFillFromCV = async () => {
     try {
       const storedCV = localStorage.getItem('comprehensiveCVAnalysis');
@@ -292,10 +339,8 @@ export default function ProfilePage() {
       const cvData = JSON.parse(storedCV);
       const allText = JSON.stringify(cvData);
       
-      // Extract valid phone (filter out date ranges)
       let phone = extractValidPhone(allText);
       
-      // Extract occupation from skills
       const skills = cvData?.sections?.skills || [];
       const techSkills = ["Python", "Java", "JavaScript", "React", "C#", "C++", "TypeScript", "Node.js", "HTML", "CSS", "SQL"];
       const techCount = skills.filter((s: string) => 
@@ -312,7 +357,6 @@ export default function ProfilePage() {
         else occupation = "Software Developer";
       }
       
-      // Extract education
       const educationSection = cvData?.sections?.education || [];
       let education = "";
       if (educationSection.length > 0) {
@@ -325,11 +369,9 @@ export default function ProfilePage() {
         else if (eduText.includes("matric") || eduText.includes("grade 12")) education = "Matric / Grade 12";
       }
       
-      // Extract bio
       let bio = cvData?.sections?.about || "";
       if (bio.length > 300) bio = bio.substring(0, 300) + "...";
       
-      // Extract province and city
       let detectedProvince = "";
       let detectedCity = "";
       const cvText = JSON.stringify(cvData).toLowerCase();
@@ -351,7 +393,6 @@ export default function ProfilePage() {
         }
       }
       
-      // ⚠️ CRITICAL: NEVER include name or email - explicitly EXCLUDE them
       const finalInfo: Partial<UserProfile> = {};
       if (phone && !isDateRange(phone)) finalInfo.phone = phone;
       if (occupation) finalInfo.occupation = occupation;
@@ -360,15 +401,13 @@ export default function ProfilePage() {
       if (detectedProvince) finalInfo.province = detectedProvince;
       if (detectedCity) finalInfo.city = detectedCity;
       
-      // Double-check: explicitly remove name and email if somehow added (paranoia protection)
       delete (finalInfo as any).name;
       delete (finalInfo as any).email;
       
-      // Update ONLY form data (not profile directly)
       setFormData((prev) => ({ ...prev, ...finalInfo }));
       
       const filledCount = Object.keys(finalInfo).length;
-      showToast({ type: "success", text: `✨ Imported ${filledCount} fields from your CV! (Your name and email were NOT changed)` });
+      showToast({ type: "success", text: `✨ Imported ${filledCount} fields from your CV!` });
       
     } catch (error) {
       console.error('Auto-fill failed:', error);
@@ -380,14 +419,11 @@ export default function ProfilePage() {
     setIsSaving(true);
     setToast(null);
     try {
-      // NEVER send email in update payload - email changes go through separate flow
       const { email, createdAt, ...updatePayload } = formData;
       const response = await userService.updateProfile(updatePayload);
       
-      // Update local state
       setProfile(formData);
       
-      // Update user context
       if (updateUser) {
         const updatedUser = { ...user, ...updatePayload };
         updateUser(updatedUser);
@@ -447,10 +483,7 @@ export default function ProfilePage() {
     setEmailSaving(true);
     try {
       await accountService.requestEmailChange({ newEmail: emailForm.newEmail, password: emailForm.password });
-      setEmailMsg({
-        type: "success",
-        text: "Verification link sent to your new email.",
-      });
+      setEmailMsg({ type: "success", text: "Verification link sent to your new email." });
       setEmailForm({ newEmail: "", password: "" });
       setTimeout(() => {
         setShowEmailModal(false);
@@ -468,10 +501,7 @@ export default function ProfilePage() {
     setDeleteLoading(true);
     try {
       await accountService.requestAccountDeletion();
-      setDeleteMsg({
-        type: "success",
-        text: "Confirmation email sent. Check your inbox.",
-      });
+      setDeleteMsg({ type: "success", text: "Confirmation email sent. Check your inbox." });
       setDeleteConfirm("");
       setTimeout(() => {
         setShowDeleteModal(false);
@@ -485,19 +515,11 @@ export default function ProfilePage() {
   };
 
   const initials = profile.name && profile.name !== "Calendar Scheduling"
-    ? profile.name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2)
+    ? profile.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
     : "U";
 
   const memberSince = profile.createdAt && profile.createdAt !== "Invalid Date"
-    ? new Date(profile.createdAt).toLocaleDateString("en-US", {
-        month: "short",
-        year: "numeric",
-      })
+    ? new Date(profile.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })
     : "Jan 2026";
 
   const updateField = (field: keyof UserProfile, value: string) => {
@@ -518,23 +540,16 @@ export default function ProfilePage() {
     );
   }
 
-  // Fix the corrupted name if it got set to "Calendar Scheduling"
   const displayName = profile.name === "Calendar Scheduling" ? (user?.name || "Your Name") : profile.name;
 
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-5xl mx-auto px-4 py-8 sm:py-12 space-y-6">
-        {/* Header */}
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-            My Profile
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Manage your account information
-          </p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">My Profile</h1>
+          <p className="text-muted-foreground mt-1">Manage your account information</p>
         </div>
 
-        {/* Toast */}
         <AnimatePresence>
           <Toast msg={toast} />
         </AnimatePresence>
@@ -545,7 +560,6 @@ export default function ProfilePage() {
             <div className="bg-card border border-border rounded-xl p-6 shadow-sm space-y-6 lg:sticky lg:top-8">
               <div className="text-center">
                 <div className="relative inline-block">
-                  {/* Hidden file input */}
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -554,7 +568,6 @@ export default function ProfilePage() {
                     className="hidden"
                   />
                   
-                  {/* Avatar Display */}
                   {profileImage ? (
                     <img
                       src={profileImage}
@@ -563,25 +576,17 @@ export default function ProfilePage() {
                     />
                   ) : (
                     <div className="h-24 w-24 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center mx-auto shadow-lg">
-                      <span className="text-2xl font-bold text-primary-foreground">
-                        {initials}
-                      </span>
+                      <span className="text-2xl font-bold text-primary-foreground">{initials}</span>
                     </div>
                   )}
                   
-                  {/* Camera Button with onClick */}
                   <button
                     onClick={triggerFileUpload}
                     className="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors"
                   >
-                    {isUploading ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Camera className="h-4 w-4" />
-                    )}
+                    {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
                   </button>
                   
-                  {/* Remove badge */}
                   {profileImage && (
                     <button
                       onClick={removeImage}
@@ -591,39 +596,24 @@ export default function ProfilePage() {
                     </button>
                   )}
                 </div>
-                <h2 className="text-xl font-bold text-foreground mt-4">
-                  {displayName}
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  {profile.email || "your@email.com"}
-                </p>
+                <h2 className="text-xl font-bold text-foreground mt-4">{displayName}</h2>
+                <p className="text-sm text-muted-foreground">{profile.email || "your@email.com"}</p>
               </div>
 
               <div className="space-y-3 pt-4 border-t border-border">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">
-                    Member Since
-                  </span>
-                  <span className="text-sm font-medium text-foreground">
-                    {memberSince}
-                  </span>
+                  <span className="text-sm text-muted-foreground">Member Since</span>
+                  <span className="text-sm font-medium text-foreground">{memberSince}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">
-                    Account Status
-                  </span>
+                  <span className="text-sm text-muted-foreground">Account Status</span>
                   <span className="text-sm font-medium text-green-500 flex items-center gap-1">
-                    <span className="h-2 w-2 rounded-full bg-green-500" />
-                    Active
+                    <span className="h-2 w-2 rounded-full bg-green-500" /> Active
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">
-                    CV Analyzed
-                  </span>
-                  <span className="text-sm font-medium text-foreground">
-                    {hasCVData ? "Yes" : "No"}
-                  </span>
+                  <span className="text-sm text-muted-foreground">CV Analyzed</span>
+                  <span className="text-sm font-medium text-foreground">{hasCVData ? "Yes" : "No"}</span>
                 </div>
               </div>
             </div>
@@ -634,56 +624,22 @@ export default function ProfilePage() {
             {/* Personal Information */}
             <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
               <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-                <h3 className="text-lg font-semibold text-foreground">
-                  Personal Information
-                </h3>
+                <h3 className="text-lg font-semibold text-foreground">Personal Information</h3>
                 <div className="flex items-center gap-2">
                   {hasCVData && !isEditing && (
-                    <button
-                      type="button"
-                      onClick={autoFillFromCV}
-                      className="flex items-center gap-2 px-4 py-2 text-accent hover:bg-accent/10 rounded-lg transition-colors font-medium text-sm"
-                    >
-                      <Sparkles className="h-4 w-4" />
-                      AI Fill from CV
+                    <button onClick={autoFillFromCV} className="flex items-center gap-2 px-4 py-2 text-accent hover:bg-accent/10 rounded-lg transition-colors font-medium text-sm">
+                      <Sparkles className="h-4 w-4" /> AI Fill from CV
                     </button>
                   )}
                   {!isEditing ? (
-                    <button
-                      type="button"
-                      onClick={() => setIsEditing(true)}
-                      className="flex items-center gap-2 px-4 py-2 text-primary hover:bg-primary/10 rounded-lg transition-colors font-medium text-sm"
-                    >
-                      <Edit2 className="h-4 w-4" />
-                      Edit Profile
+                    <button onClick={() => setIsEditing(true)} className="flex items-center gap-2 px-4 py-2 text-primary hover:bg-primary/10 rounded-lg transition-colors font-medium text-sm">
+                      <Edit2 className="h-4 w-4" /> Edit Profile
                     </button>
                   ) : (
                     <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={handleCancel}
-                        disabled={isSaving}
-                        className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors text-sm disabled:opacity-50"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleSave}
-                        disabled={isSaving}
-                        className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm disabled:opacity-50"
-                      >
-                        {isSaving ? (
-                          <>
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            Saving...
-                          </>
-                        ) : (
-                          <>
-                            <Save className="h-4 w-4" />
-                            Save Changes
-                          </>
-                        )}
+                      <button onClick={handleCancel} disabled={isSaving} className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors text-sm">Cancel</button>
+                      <button onClick={handleSave} disabled={isSaving} className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm">
+                        {isSaving ? <><Loader2 className="h-4 w-4 animate-spin" />Saving...</> : <><Save className="h-4 w-4" />Save Changes</>}
                       </button>
                     </div>
                   )}
@@ -691,293 +647,109 @@ export default function ProfilePage() {
               </div>
 
               <div className="space-y-5">
-                {/* Full Name - NEVER auto-filled, user can edit */}
                 <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-sm font-medium text-foreground">
-                    <User className="h-4 w-4 text-muted-foreground" />
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => updateField("name", e.target.value)}
-                    disabled={!isEditing}
-                    className={inputClass(!isEditing)}
-                    placeholder="Enter your full name"
-                  />
-                  {formData.name === "Calendar Scheduling" && (
-                    <p className="text-xs text-destructive flex items-center gap-1 mt-1">
-                      <AlertCircle className="h-3 w-3" />
-                      Your name was incorrectly set. Please correct it above.
-                    </p>
-                  )}
+                  <label className="flex items-center gap-2 text-sm font-medium text-foreground"><User className="h-4 w-4 text-muted-foreground" />Full Name</label>
+                  <input type="text" value={formData.name} onChange={(e) => updateField("name", e.target.value)} disabled={!isEditing} className={inputClass(!isEditing)} placeholder="Enter your full name" />
                 </div>
 
-                {/* Email - NEVER auto-filled, read-only */}
                 <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-sm font-medium text-foreground">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
-                    Email Address
-                  </label>
+                  <label className="flex items-center gap-2 text-sm font-medium text-foreground"><Mail className="h-4 w-4 text-muted-foreground" />Email Address</label>
                   <div className="flex gap-2">
-                    <input
-                      type="email"
-                      value={formData.email}
-                      disabled
-                      className={cn(inputClass(true), "flex-1")}
-                      placeholder="your.email@example.com"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowEmailModal(true)}
-                      className="px-4 py-2 text-sm font-medium text-primary hover:bg-primary/10 border border-primary/30 rounded-lg transition-colors whitespace-nowrap"
-                    >
-                      Change Email
-                    </button>
+                    <input type="email" value={formData.email} disabled className={cn(inputClass(true), "flex-1")} placeholder="your.email@example.com" />
+                    <button onClick={() => setShowEmailModal(true)} className="px-4 py-2 text-sm font-medium text-primary hover:bg-primary/10 border border-primary/30 rounded-lg transition-colors whitespace-nowrap">Change Email</button>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    Email changes require verification via a confirmation link.
-                  </p>
-                </div>
-
-                {/* Phone */}
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-sm font-medium text-foreground">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
-                    Phone Number
-                  </label>
-                  <input
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => updateField("phone", e.target.value)}
-                    disabled={!isEditing}
-                    className={inputClass(!isEditing)}
-                    placeholder="+27 XX XXX XXXX"
-                  />
-                  {formData.phone && isDateRange(formData.phone) && (
-                    <p className="text-xs text-destructive flex items-center gap-1 mt-1">
-                      <AlertCircle className="h-3 w-3" />
-                      This appears to be a date range (like 2022-2023), not a phone number. Please update it.
-                    </p>
-                  )}
-                </div>
-
-                {/* Location */}
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-sm font-medium text-foreground">
-                    <Globe className="h-4 w-4 text-muted-foreground" />
-                    Country
-                  </label>
-                  <input
-                    type="text"
-                    value="South Africa"
-                    disabled
-                    className={inputClass(true)}
-                  />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-sm font-medium text-foreground">
-                    <MapPin className="h-4 w-4 text-muted-foreground" />
-                    Province
-                  </label>
-                  <select
-                    value={formData.province}
-                    onChange={(e) => {
-                      updateField("province", e.target.value);
-                      updateField("city", "");
-                    }}
-                    disabled={!isEditing}
-                    className={inputClass(!isEditing)}
-                  >
+                  <label className="flex items-center gap-2 text-sm font-medium text-foreground"><Phone className="h-4 w-4 text-muted-foreground" />Phone Number</label>
+                  <input type="tel" value={formData.phone} onChange={(e) => updateField("phone", e.target.value)} disabled={!isEditing} className={inputClass(!isEditing)} placeholder="+27 XX XXX XXXX" />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 text-sm font-medium text-foreground"><Globe className="h-4 w-4 text-muted-foreground" />Country</label>
+                  <input type="text" value="South Africa" disabled className={inputClass(true)} />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 text-sm font-medium text-foreground"><MapPin className="h-4 w-4 text-muted-foreground" />Province</label>
+                  <select value={formData.province} onChange={(e) => { updateField("province", e.target.value); updateField("city", ""); }} disabled={!isEditing} className={inputClass(!isEditing)}>
                     <option value="">Select Province</option>
-                    {SA_PROVINCES.map((p) => (
-                      <option key={p} value={p}>
-                        {p}
-                      </option>
-                    ))}
+                    {SA_PROVINCES.map((p) => (<option key={p} value={p}>{p}</option>))}
                   </select>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-sm font-medium text-foreground">
-                    <Building className="h-4 w-4 text-muted-foreground" />
-                    City / Town
-                  </label>
-                  <select
-                    value={formData.city}
-                    onChange={(e) => updateField("city", e.target.value)}
-                    disabled={!isEditing || !formData.province}
-                    className={inputClass(!isEditing || !formData.province)}
-                  >
-                    <option value="">
-                      {formData.province
-                        ? "Select City"
-                        : "Select a province first"}
-                    </option>
-                    {availableCities.map((c) => (
-                      <option key={c} value={c}>
-                        {c}
-                      </option>
-                    ))}
+                  <label className="flex items-center gap-2 text-sm font-medium text-foreground"><Building className="h-4 w-4 text-muted-foreground" />City / Town</label>
+                  <select value={formData.city} onChange={(e) => updateField("city", e.target.value)} disabled={!isEditing || !formData.province} className={inputClass(!isEditing || !formData.province)}>
+                    <option value="">{formData.province ? "Select City" : "Select a province first"}</option>
+                    {availableCities.map((c) => (<option key={c} value={c}>{c}</option>))}
                   </select>
                 </div>
 
-                {/* Occupation */}
                 <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-sm font-medium text-foreground">
-                    <Briefcase className="h-4 w-4 text-muted-foreground" />
-                    Current Occupation
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.occupation}
-                    onChange={(e) => updateField("occupation", e.target.value)}
-                    disabled={!isEditing}
-                    className={inputClass(!isEditing)}
-                    placeholder="Your job title or 'Student' or 'Unemployed'"
-                  />
+                  <label className="flex items-center gap-2 text-sm font-medium text-foreground"><Briefcase className="h-4 w-4 text-muted-foreground" />Current Occupation</label>
+                  <input type="text" value={formData.occupation} onChange={(e) => updateField("occupation", e.target.value)} disabled={!isEditing} className={inputClass(!isEditing)} placeholder="Your job title" />
                 </div>
 
-                {/* Education */}
                 <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-sm font-medium text-foreground">
-                    <GraduationCap className="h-4 w-4 text-muted-foreground" />
-                    Education Level
-                  </label>
-                  <select
-                    value={formData.education}
-                    onChange={(e) => updateField("education", e.target.value)}
-                    disabled={!isEditing}
-                    className={inputClass(!isEditing)}
-                  >
+                  <label className="flex items-center gap-2 text-sm font-medium text-foreground"><GraduationCap className="h-4 w-4 text-muted-foreground" />Education Level</label>
+                  <select value={formData.education} onChange={(e) => updateField("education", e.target.value)} disabled={!isEditing} className={inputClass(!isEditing)}>
                     <option value="">Select Education Level</option>
                     <option value="Matric / Grade 12">Matric / Grade 12</option>
                     <option value="Higher Certificate">Higher Certificate</option>
                     <option value="Diploma">Diploma</option>
                     <option value="Advanced Diploma">Advanced Diploma</option>
-                    <option value="Bachelor's Degree">Bachelor&apos;s Degree</option>
+                    <option value="Bachelor's Degree">Bachelor's Degree</option>
                     <option value="Honours Degree">Honours Degree</option>
-                    <option value="Master's Degree">Master&apos;s Degree</option>
+                    <option value="Master's Degree">Master's Degree</option>
                     <option value="PhD / Doctorate">PhD / Doctorate</option>
-                    <option value="Other">Other</option>
                   </select>
                 </div>
 
-                {/* Bio */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground block">
-                    Bio
-                  </label>
-                  <textarea
-                    value={formData.bio}
-                    onChange={(e) => updateField("bio", e.target.value)}
-                    disabled={!isEditing}
-                    rows={4}
-                    className={cn(inputClass(!isEditing), "resize-none")}
-                    placeholder="Tell us a bit about yourself..."
-                  />
+                  <label className="text-sm font-medium text-foreground block">Bio</label>
+                  <textarea value={formData.bio} onChange={(e) => updateField("bio", e.target.value)} disabled={!isEditing} rows={4} className={cn(inputClass(!isEditing), "resize-none")} placeholder="Tell us a bit about yourself..." />
                 </div>
               </div>
             </div>
 
             {/* Account Security */}
             <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-              <h3 className="text-lg font-semibold text-foreground mb-4">
-                Account Security
-              </h3>
-              <button
-                type="button"
-                onClick={() => setShowPasswordModal(true)}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-muted hover:bg-muted/80 rounded-lg transition-colors"
-              >
-                <Lock className="h-4 w-4" />
-                Change Password
+              <h3 className="text-lg font-semibold text-foreground mb-4">Account Security</h3>
+              <button onClick={() => setShowPasswordModal(true)} className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-muted hover:bg-muted/80 rounded-lg transition-colors">
+                <Lock className="h-4 w-4" /> Change Password
               </button>
             </div>
 
             {/* Danger Zone */}
             <div className="bg-card border border-destructive/30 rounded-xl p-6 shadow-sm">
-              <h3 className="text-lg font-semibold text-destructive mb-2">
-                Danger Zone
-              </h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Once you delete your account, there is no going back. A
-                confirmation email will be sent before deletion.
-              </p>
-              <button
-                type="button"
-                onClick={() => setShowDeleteModal(true)}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-destructive bg-destructive/10 hover:bg-destructive/20 border border-destructive/30 rounded-lg transition-colors"
-              >
-                <Trash2 className="h-4 w-4" />
-                Delete Account
+              <h3 className="text-lg font-semibold text-destructive mb-2">Danger Zone</h3>
+              <p className="text-sm text-muted-foreground mb-4">Once you delete your account, there is no going back.</p>
+              <button onClick={() => setShowDeleteModal(true)} className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-destructive bg-destructive/10 hover:bg-destructive/20 border border-destructive/30 rounded-lg transition-colors">
+                <Trash2 className="h-4 w-4" /> Delete Account
               </button>
             </div>
           </div>
         </div>
 
         {/* Change Password Modal */}
-        <Modal
-          open={showPasswordModal}
-          onClose={() => {
-            setShowPasswordModal(false);
-            setPasswordMsg(null);
-            setPasswordForm({ currentPassword: "", password: "", confirmPassword: "" });
-          }}
-        >
+        <Modal open={showPasswordModal} onClose={() => setShowPasswordModal(false)}>
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-foreground">Change Password</h3>
-            <button onClick={() => setShowPasswordModal(false)}>
-              <X className="h-5 w-5" />
-            </button>
+            <button onClick={() => setShowPasswordModal(false)}><X className="h-5 w-5" /></button>
           </div>
-          <AnimatePresence>
-            <Toast msg={passwordMsg} />
-          </AnimatePresence>
+          <AnimatePresence><Toast msg={passwordMsg} /></AnimatePresence>
           <div className="space-y-4">
             <div className="relative">
-              <input
-                type={showPasswords ? "text" : "password"}
-                value={passwordForm.currentPassword}
-                onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
-                className={inputClass(false)}
-                placeholder="Current Password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPasswords(!showPasswords)}
-                className="absolute right-3 top-3"
-              >
-                {showPasswords ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
+              <input type={showPasswords ? "text" : "password"} value={passwordForm.currentPassword} onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })} className={inputClass(false)} placeholder="Current Password" />
+              <button onClick={() => setShowPasswords(!showPasswords)} className="absolute right-3 top-3">{showPasswords ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button>
             </div>
-            <input
-              type={showPasswords ? "text" : "password"}
-              value={passwordForm.password}
-              onChange={(e) => setPasswordForm({ ...passwordForm, password: e.target.value })}
-              className={inputClass(false)}
-              placeholder="New Password (min 8 chars)"
-            />
-            <input
-              type={showPasswords ? "text" : "password"}
-              value={passwordForm.confirmPassword}
-              onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
-              className={inputClass(false)}
-              placeholder="Confirm New Password"
-            />
+            <input type={showPasswords ? "text" : "password"} value={passwordForm.password} onChange={(e) => setPasswordForm({ ...passwordForm, password: e.target.value })} className={inputClass(false)} placeholder="New Password (min 8 chars)" />
+            <input type={showPasswords ? "text" : "password"} value={passwordForm.confirmPassword} onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })} className={inputClass(false)} placeholder="Confirm New Password" />
           </div>
           <div className="flex gap-3">
-            <button onClick={() => setShowPasswordModal(false)} className="flex-1 px-4 py-2 border rounded-lg">
-              Cancel
-            </button>
-            <button
-              onClick={handleChangePassword}
-              disabled={passwordSaving}
-              className="flex-1 bg-primary text-primary-foreground rounded-lg py-2"
-            >
-              {passwordSaving ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : "Update"}
-            </button>
+            <button onClick={() => setShowPasswordModal(false)} className="flex-1 px-4 py-2 border rounded-lg">Cancel</button>
+            <button onClick={handleChangePassword} disabled={passwordSaving} className="flex-1 bg-primary text-primary-foreground rounded-lg py-2">{passwordSaving ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : "Update"}</button>
           </div>
         </Modal>
 
@@ -985,38 +757,14 @@ export default function ProfilePage() {
         <Modal open={showEmailModal} onClose={() => setShowEmailModal(false)}>
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-foreground">Change Email</h3>
-            <button onClick={() => setShowEmailModal(false)}>
-              <X className="h-5 w-5" />
-            </button>
+            <button onClick={() => setShowEmailModal(false)}><X className="h-5 w-5" /></button>
           </div>
-          <AnimatePresence>
-            <Toast msg={emailMsg} />
-          </AnimatePresence>
-          <input
-            type="email"
-            value={emailForm.newEmail}
-            onChange={(e) => setEmailForm({ ...emailForm, newEmail: e.target.value })}
-            className={inputClass(false)}
-            placeholder="New Email"
-          />
-          <input
-            type="password"
-            value={emailForm.password}
-            onChange={(e) => setEmailForm({ ...emailForm, password: e.target.value })}
-            className={inputClass(false)}
-            placeholder="Current Password"
-          />
+          <AnimatePresence><Toast msg={emailMsg} /></AnimatePresence>
+          <input type="email" value={emailForm.newEmail} onChange={(e) => setEmailForm({ ...emailForm, newEmail: e.target.value })} className={inputClass(false)} placeholder="New Email" />
+          <input type="password" value={emailForm.password} onChange={(e) => setEmailForm({ ...emailForm, password: e.target.value })} className={inputClass(false)} placeholder="Current Password" />
           <div className="flex gap-3">
-            <button onClick={() => setShowEmailModal(false)} className="flex-1 px-4 py-2 border rounded-lg">
-              Cancel
-            </button>
-            <button
-              onClick={handleEmailChange}
-              disabled={emailSaving}
-              className="flex-1 bg-primary text-primary-foreground rounded-lg py-2"
-            >
-              {emailSaving ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : "Send Verification"}
-            </button>
+            <button onClick={() => setShowEmailModal(false)} className="flex-1 px-4 py-2 border rounded-lg">Cancel</button>
+            <button onClick={handleEmailChange} disabled={emailSaving} className="flex-1 bg-primary text-primary-foreground rounded-lg py-2">{emailSaving ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : "Send Verification"}</button>
           </div>
         </Modal>
 
@@ -1024,34 +772,14 @@ export default function ProfilePage() {
         <Modal open={showDeleteModal} onClose={() => setShowDeleteModal(false)} variant="danger">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-destructive">Delete Account</h3>
-            <button onClick={() => setShowDeleteModal(false)}>
-              <X className="h-5 w-5" />
-            </button>
+            <button onClick={() => setShowDeleteModal(false)}><X className="h-5 w-5" /></button>
           </div>
-          <p className="text-sm">
-            Type <strong className="text-destructive">DELETE</strong> to confirm
-          </p>
-          <AnimatePresence>
-            <Toast msg={deleteMsg} />
-          </AnimatePresence>
-          <input
-            type="text"
-            value={deleteConfirm}
-            onChange={(e) => setDeleteConfirm(e.target.value)}
-            className={inputClass(false)}
-            placeholder="DELETE"
-          />
+          <p className="text-sm">Type <strong className="text-destructive">DELETE</strong> to confirm</p>
+          <AnimatePresence><Toast msg={deleteMsg} /></AnimatePresence>
+          <input type="text" value={deleteConfirm} onChange={(e) => setDeleteConfirm(e.target.value)} className={inputClass(false)} placeholder="DELETE" />
           <div className="flex gap-3">
-            <button onClick={() => setShowDeleteModal(false)} className="flex-1 px-4 py-2 border rounded-lg">
-              Cancel
-            </button>
-            <button
-              onClick={handleDeleteAccount}
-              disabled={deleteLoading || deleteConfirm !== "DELETE"}
-              className="flex-1 bg-destructive text-white rounded-lg py-2"
-            >
-              {deleteLoading ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : "Delete"}
-            </button>
+            <button onClick={() => setShowDeleteModal(false)} className="flex-1 px-4 py-2 border rounded-lg">Cancel</button>
+            <button onClick={handleDeleteAccount} disabled={deleteLoading || deleteConfirm !== "DELETE"} className="flex-1 bg-destructive text-white rounded-lg py-2">{deleteLoading ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : "Delete"}</button>
           </div>
         </Modal>
       </div>
