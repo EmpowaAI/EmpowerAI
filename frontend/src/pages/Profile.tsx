@@ -1,17 +1,19 @@
-// frontend/src/pages/Profile.tsx
-import { useState, useEffect } from "react";
+// frontend/src/pages/Profile.tsx - COMPLETE WORKING VERSION WITH DEBUGGING
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   User, Mail, Phone, MapPin, Briefcase, GraduationCap, 
   Save, Loader2, CheckCircle, AlertCircle, Edit2, Camera,
-  Brain, FileText, Award,
+  Brain, FileText, Award, Trash2,
 } from "lucide-react";
 import { useUser } from "../contexts/user-context";
 import { userAPI } from "../lib/api";
 import { cn } from "../lib/utils";
 import { getStoredCvAnalysis } from "../lib/sensitiveStorage";
 import type { CVAnalysisData } from "../types/profile.types";
+
+console.log("🔵 Profile.tsx file loaded");
 
 interface FormData {
   name: string;
@@ -25,15 +27,22 @@ interface FormData {
   experience: string[];
   achievements: string[];
   cvScore?: number;
+  profileImage?: string;
 }
 
 export default function Profile() {
+  console.log("🔵 Profile component rendering");
   const navigate = useNavigate();
   const { user, updateUser } = useUser();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saveMessage, setSaveMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [profileImage, setProfileImage] = useState<string>("");
+  const [isUploading, setIsUploading] = useState(false);
+  
+  // Create a ref for the file input
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [formData, setFormData] = useState<FormData>({
     name: "",
@@ -46,16 +55,110 @@ export default function Profile() {
     skills: [],
     experience: [],
     achievements: [],
+    profileImage: "",
   });
 
-  // Extract data from CV analysis and populate form
+  // Test function to verify clicks work
+  const testClick = () => {
+    console.log("🟢 BUTTON CLICKED! Opening file picker...");
+    if (fileInputRef.current) {
+      console.log("✅ File input ref exists, clicking now");
+      fileInputRef.current.click();
+    } else {
+      console.log("❌ File input ref is null!");
+      alert("Error: File input not found. Please refresh the page.");
+    }
+  };
+
+  // Handle image upload
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log("🟢 FILE INPUT CHANGED EVENT FIRED!", event.target.files);
+    const file = event.target.files?.[0];
+    if (!file) {
+      console.log("No file selected");
+      return;
+    }
+    
+    console.log("📁 File selected:", file.name, file.type, file.size);
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file (JPEG, PNG, GIF, or WebP)');
+      return;
+    }
+    
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image must be less than 5MB');
+      return;
+    }
+    
+    setIsUploading(true);
+    
+    // Read file as base64
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      console.log("✅ File loaded successfully");
+      const base64String = event.target?.result as string;
+      
+      // Update state
+      setProfileImage(base64String);
+      setFormData(prev => ({ ...prev, profileImage: base64String }));
+      
+      // Save to localStorage
+      localStorage.setItem('profile_image', base64String);
+      
+      setSaveMessage({ type: "success", text: "Profile picture updated!" });
+      setTimeout(() => setSaveMessage(null), 3000);
+      setIsUploading(false);
+      console.log("✅ Image saved to localStorage and state");
+    };
+    
+    reader.onerror = (error) => {
+      console.error("❌ File read error:", error);
+      alert('Error reading file. Please try again.');
+      setIsUploading(false);
+    };
+    
+    reader.readAsDataURL(file);
+    
+    // Clear the input so the same file can be uploaded again
+    event.target.value = '';
+  };
+  
+  // Remove profile image
+  const handleRemoveImage = () => {
+    console.log("🟢 Removing profile image");
+    setProfileImage("");
+    setFormData(prev => ({ ...prev, profileImage: "" }));
+    localStorage.removeItem('profile_image');
+    setSaveMessage({ type: "success", text: "Profile picture removed" });
+    setTimeout(() => setSaveMessage(null), 3000);
+  };
+
+  // Load saved profile image from localStorage on mount
+  useEffect(() => {
+    console.log("🟢 useEffect running - loading saved image");
+    const savedImage = localStorage.getItem('profile_image');
+    if (savedImage) {
+      console.log("✅ Found saved image in localStorage");
+      setProfileImage(savedImage);
+      setFormData(prev => ({ ...prev, profileImage: savedImage }));
+    } else {
+      console.log("No saved image found");
+    }
+  }, []);
+
+  // Load profile data
   useEffect(() => {
     const loadProfileData = async () => {
       try {
+        console.log("🟢 Loading profile data");
         setLoading(true);
         
-        // 1. Try to get from user context first
+        // Load from user context
         if (user) {
+          console.log("Loading from user context:", user);
           setFormData(prev => ({
             ...prev,
             name: user.name || "",
@@ -68,7 +171,7 @@ export default function Profile() {
           }));
         }
 
-        // 2. Try to get from API
+        // Try to load from API
         try {
           const response = await userAPI.getProfile();
           if (response.status === 'success' && response.data?.user) {
@@ -82,44 +185,29 @@ export default function Profile() {
               occupation: profileData.occupation || prev.occupation,
               education: profileData.education || prev.education,
               bio: profileData.bio || prev.bio,
+              profileImage: profileData.profileImage || prev.profileImage,
             }));
+            if (profileData.profileImage) {
+              setProfileImage(profileData.profileImage);
+            }
           }
         } catch (error) {
           console.log('Using local profile data');
         }
 
-        // 3. Extract from CV analysis (session storage; avoid long-lived localStorage for PII)
+        // Extract from CV analysis
         const parsedCV = getStoredCvAnalysis<CVAnalysisData>();
         if (parsedCV) {
-          
-          // Extract name from CV
+          console.log("Extracting data from CV");
           const extractedName = extractNameFromCV(parsedCV);
-          
-          // Extract email from CV
           const extractedEmail = extractEmailFromCV(parsedCV);
-          
-          // Extract phone from CV
           const extractedPhone = extractPhoneFromCV(parsedCV);
-          
-          // Extract location from CV
           const extractedLocation = extractLocationFromCV(parsedCV);
-          
-          // Extract occupation from CV
           const extractedOccupation = extractOccupationFromCV(parsedCV);
-          
-          // Extract education
           const extractedEducation = parsedCV.sections?.education?.[0] || "";
-          
-          // Extract bio
           const extractedBio = parsedCV.sections?.about || "";
-          
-          // Get skills
           const extractedSkills = parsedCV.sections?.skills || [];
-          
-          // Get experience
           const extractedExperience = parsedCV.sections?.experience || [];
-          
-          // Get achievements
           const extractedAchievements = parsedCV.sections?.achievements || [];
 
           setFormData(prev => ({
@@ -136,22 +224,7 @@ export default function Profile() {
             achievements: extractedAchievements,
             cvScore: parsedCV.score,
           }));
-
-          // Update user context
-          if (updateUser) {
-            updateUser({
-              ...user,
-              name: extractedName,
-              email: extractedEmail,
-              phone: extractedPhone,
-              location: extractedLocation,
-              occupation: extractedOccupation,
-              education: extractedEducation,
-              bio: extractedBio,
-            });
-          }
         }
-
       } catch (error) {
         console.error('Failed to load profile data:', error);
       } finally {
@@ -160,7 +233,7 @@ export default function Profile() {
     };
 
     loadProfileData();
-  }, [user, updateUser]);
+  }, [user]);
 
   // Handle profile save
   const handleSave = async () => {
@@ -174,10 +247,8 @@ export default function Profile() {
         if (updateUser) {
           updateUser(formData);
         }
-        
         setSaveMessage({ type: "success", text: "Profile updated successfully!" });
         setIsEditing(false);
-        
         setTimeout(() => setSaveMessage(null), 3000);
       } else {
         throw new Error(response.message || 'Failed to update profile');
@@ -259,21 +330,73 @@ export default function Profile() {
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Left Column - Profile Card & CV Stats */}
           <div className="lg:col-span-1 space-y-6">
-            {/* Profile Card */}
+            {/* Profile Card with Image Upload */}
             <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
               <div className="text-center">
-                <div className="relative inline-block">
-                  <div className="h-24 w-24 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center mx-auto shadow-lg">
-                    <span className="text-2xl font-bold text-white">{initials}</span>
-                  </div>
-                  <button className="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-primary text-white flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors">
-                    <Camera className="h-4 w-4" />
-                  </button>
+                {/* Avatar Display */}
+                <div className="relative inline-block mx-auto">
+                  {profileImage ? (
+                    <img
+                      src={profileImage}
+                      alt={formData.name || "Profile"}
+                      className="h-24 w-24 rounded-full object-cover shadow-lg ring-2 ring-primary/20 mx-auto"
+                      onError={(e) => {
+                        console.error('Failed to load image');
+                        e.currentTarget.style.display = 'none';
+                        handleRemoveImage();
+                      }}
+                    />
+                  ) : (
+                    <div className="h-24 w-24 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg mx-auto">
+                      <span className="text-2xl font-bold text-white">{initials}</span>
+                    </div>
+                  )}
                 </div>
+
+                {/* Upload Buttons */}
+                <div className="mt-4 flex justify-center gap-2">
+                  {/* Hidden file input with ref */}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    id="profileImageUpload"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                  
+                  {/* Upload Button - Using ref method */}
+                  <button
+                    onClick={testClick}
+                    disabled={isUploading}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium disabled:opacity-50"
+                    type="button"
+                  >
+                    {isUploading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Camera className="h-4 w-4" />
+                    )}
+                    {profileImage ? 'Change Photo' : 'Upload Photo'}
+                  </button>
+                  
+                  {profileImage && (
+                    <button
+                      onClick={handleRemoveImage}
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-destructive text-white rounded-lg hover:bg-destructive/90 transition-colors text-sm font-medium"
+                      type="button"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Remove
+                    </button>
+                  )}
+                </div>
+
                 <h2 className="text-xl font-bold mt-4">{formData.name || "Your Name"}</h2>
                 <p className="text-sm text-muted-foreground">{formData.email || "email@example.com"}</p>
               </div>
 
+              {/* Profile Stats */}
               <div className="space-y-3 pt-4 border-t border-border mt-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Member Since</span>
@@ -283,22 +406,18 @@ export default function Profile() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Account Status</span>
-                  <span className="text-sm font-medium text-secondary flex items-center gap-1 font-display">
-                    <span className="h-2 w-2 rounded-full bg-secondary animate-pulse font-display"></span>
+                  <span className="text-sm font-medium text-secondary flex items-center gap-1">
+                    <span className="h-2 w-2 rounded-full bg-secondary animate-pulse"></span>
                     Active
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">CV Analyzed</span>
-                  <span className="text-sm font-medium">
-                    {formData.cvScore ? "Yes" : "No"}
-                  </span>
+                  <span className="text-sm font-medium">{formData.cvScore ? "Yes" : "No"}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">CV Score</span>
-                  <span className="text-sm font-medium text-primary">
-                    {formData.cvScore || 0}%
-                  </span>
+                  <span className="text-sm font-medium text-primary">{formData.cvScore || 0}%</span>
                 </div>
               </div>
             </div>
@@ -621,7 +740,6 @@ function extractLocationFromCV(cvData: CVAnalysisData): string {
     }
   }
   
-  // Check experience section for locations
   if (cvData.sections?.experience) {
     for (const exp of cvData.sections.experience) {
       for (const location of locations) {
