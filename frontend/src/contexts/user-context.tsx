@@ -21,7 +21,7 @@ interface User {
   bio?: string
   createdAt?: string
   cvAnalyzed?: boolean
-  profileImage?: string  // ✅ ADDED: Profile image field
+  profileImage?: string
 }
 
 export interface CVData {
@@ -77,7 +77,6 @@ interface UserContextType {
   refreshCVData: () => void
   clearCVData: () => void
   isAuthReady: boolean
-  // New functions for managing re-analysis and twin creation
   reanalyzeCV: () => void
   createNewTwin: () => void
   hasExistingCV: () => boolean
@@ -126,12 +125,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   const [progress, setProgress] = useState(getProgressFromStorage)
   const [isAuthReady, setIsAuthReady] = useState(false)
-
-  // FIX: Track whether we're in the middle of a fresh CV analysis flow.
-  // When true, skip backend sync so it can't overwrite freshly-set local progress.
   const skipNextSync = useRef(false)
 
-  // ✅ NEW: Load profile image from localStorage and sync with user context
+  // Load profile image from localStorage on mount and whenever user changes
   useEffect(() => {
     const savedProfileImage = localStorage.getItem('profile_image')
     if (savedProfileImage && user && !user.profileImage) {
@@ -139,7 +135,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user])
 
-  // Validate token on mount only (not on every user change)
+  // Validate token on mount only
   useEffect(() => {
     const loadUserFromBackend = async () => {
       const token = localStorage.getItem('empowerai-token')
@@ -163,7 +159,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           if (response.ok) {
             const data = await response.json()
             if (data.data?.user) {
-              // ✅ Also check if backend has profile image
               const backendUser = data.data.user
               const savedProfileImage = localStorage.getItem('profile_image')
               setUser({
@@ -173,17 +168,12 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
               console.log('User loaded from backend:', backendUser.email)
             }
           } else if (response.status === 401) {
-            // Only clear session on explicit 401 (invalid/expired token)
             localStorage.removeItem('empowerai-token')
             localStorage.removeItem('user')
             setUser(null)
           }
-          // FIX: Any other status (404, 500, etc.) — do NOT clear the session.
-          // A non-401 failure means the validate endpoint had a problem,
-          // not that the user is unauthenticated.
         } catch (error) {
           console.warn('Failed to validate token:', error)
-          // Network error — do NOT clear session
         }
       }
 
@@ -191,19 +181,14 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     }
 
     loadUserFromBackend()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // FIX: Sync progress from backend when user is set, but:
-  // 1. Skip if skipNextSync is flagged (fresh CV analysis in progress)
-  // 2. Never let backend sync DOWNGRADE local progress (cvCompleted: true → false)
+  // Sync progress from backend
   useEffect(() => {
     if (!user) return
     const token = localStorage.getItem('empowerai-token')
     if (!token) return
 
-    // If we just ran updateProgress (e.g. after CV analysis), skip this sync
-    // to avoid the backend overwriting our fresh local state before the twin exists.
     if (skipNextSync.current) {
       skipNextSync.current = false
       return
@@ -213,36 +198,24 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       try {
         const syncedProgress = await syncProgressFromBackend()
 
-        setProgress(prev => {
-          // FIX: Never downgrade progress that's already true locally.
-          // If local says cvCompleted=true but backend says false (twin not built yet),
-          // keep local value. Backend wins only if it returns true.
-          return {
-            cvCompleted: prev.cvCompleted || syncedProgress.cvCompleted,
-            twinCompleted: prev.twinCompleted || syncedProgress.twinCompleted,
-            empowermentScore: syncedProgress.empowermentScore ?? prev.empowermentScore,
-          }
-        })
+        setProgress(prev => ({
+          cvCompleted: prev.cvCompleted || syncedProgress.cvCompleted,
+          twinCompleted: prev.twinCompleted || syncedProgress.twinCompleted,
+          empowermentScore: syncedProgress.empowermentScore ?? prev.empowermentScore,
+        }))
 
-        if (syncedProgress.cvCompleted) {
-          localStorage.setItem('cvCompleted', 'true')
-        }
-        if (syncedProgress.twinCompleted) {
-          localStorage.setItem('twinCompleted', 'true')
-        }
-        if (syncedProgress.empowermentScore) {
-          localStorage.setItem('empowermentScore', String(syncedProgress.empowermentScore))
-        }
+        if (syncedProgress.cvCompleted) localStorage.setItem('cvCompleted', 'true')
+        if (syncedProgress.twinCompleted) localStorage.setItem('twinCompleted', 'true')
+        if (syncedProgress.empowermentScore) localStorage.setItem('empowermentScore', String(syncedProgress.empowermentScore))
       } catch (error) {
         console.log('Error syncing progress, using localStorage:', error)
-        // On error, keep whatever is already in state — do NOT reset
       }
     }
 
     syncProgress()
   }, [user])
 
-  // Persist user to localStorage (including profileImage)
+  // Persist user to localStorage
   useEffect(() => {
     try {
       if (typeof window !== 'undefined' && window.localStorage) {
@@ -258,11 +231,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   }, [user])
 
   const updateProgress = useCallback((key: keyof typeof progress, value: any) => {
-    // FIX: Flag the next sync to be skipped so the backend doesn't immediately
-    // overwrite the progress we're about to set (e.g. cvCompleted: true right
-    // after analysis, before the twin exists).
     skipNextSync.current = true
-
     setProgress(prev => {
       const newProgress = { ...prev, [key]: value }
       try {
@@ -276,13 +245,11 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     })
   }, [])
 
-  // ✅ UPDATED: updateUser now also syncs profileImage to localStorage
   const updateUser = useCallback((updates: Partial<User>) => {
     if (user) {
       const updatedUser = { ...user, ...updates }
       setUser(updatedUser)
       
-      // If profileImage is being updated, also save to localStorage
       if (updates.profileImage !== undefined) {
         localStorage.setItem('profile_image', updates.profileImage)
       }
@@ -292,7 +259,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const refreshCVData = useCallback(() => {
     const stored = getStoredCvAnalysis<CVData>()
     setCvData(stored)
-  }, []) // No dependencies!
+  }, [])
 
   const clearCVData = () => {
     setCvData(null)
@@ -302,19 +269,15 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   }
 
   const reanalyzeCV = () => {
-    // Clear current CV data but keep progress flags
     clearStoredCvAnalysis()
     clearStoredCvFileName()
     setCvData(null)
-    // User will need to upload a new CV
   }
 
   const createNewTwin = () => {
-    // Clear twin data but keep CV analysis
     localStorage.removeItem('twinData')
     localStorage.removeItem('twinCompleted')
     updateProgress('twinCompleted', false)
-    // User can build a new twin from existing CV data
   }
 
   const hasExistingCV = () => {
@@ -342,7 +305,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('twinCreated')
     localStorage.removeItem('twinFormData')
     localStorage.removeItem('cvSkills')
-    localStorage.removeItem('profile_image') // ✅ Also clear profile image on logout
+    // ✅ IMPORTANT: DO NOT clear profile_image on logout - keeps image between sessions
+    // localStorage.removeItem('profile_image'); // COMMENTED OUT - keeps image
     clearStoredCvAnalysis()
     clearStoredCvFileName()
     localStorage.removeItem('cvFileName')
