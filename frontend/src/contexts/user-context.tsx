@@ -4,7 +4,6 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { syncProgressFromBackend } from '../utils/progressSync'
 import { clearStoredCvAnalysis, clearStoredCvFileName, getStoredCvAnalysis } from '../lib/sensitiveStorage'
 
-
 interface User {
   name: string
   email: string
@@ -22,8 +21,8 @@ interface User {
   bio?: string
   createdAt?: string
   cvAnalyzed?: boolean
+  profileImage?: string  // ✅ ADDED: Profile image field
 }
-
 
 export interface CVData {
   sections: {
@@ -63,7 +62,6 @@ export interface CVData {
   driversLicence?: string
 }
 
-
 interface UserContextType {
   user: User | null
   setUser: (user: User | null) => void
@@ -85,9 +83,7 @@ interface UserContextType {
   hasExistingCV: () => boolean
 }
 
-
 const UserContext = createContext<UserContextType | undefined>(undefined)
-
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
 
@@ -135,6 +131,14 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   // When true, skip backend sync so it can't overwrite freshly-set local progress.
   const skipNextSync = useRef(false)
 
+  // ✅ NEW: Load profile image from localStorage and sync with user context
+  useEffect(() => {
+    const savedProfileImage = localStorage.getItem('profile_image')
+    if (savedProfileImage && user && !user.profileImage) {
+      setUser(prev => prev ? { ...prev, profileImage: savedProfileImage } : prev)
+    }
+  }, [user])
+
   // Validate token on mount only (not on every user change)
   useEffect(() => {
     const loadUserFromBackend = async () => {
@@ -159,8 +163,14 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           if (response.ok) {
             const data = await response.json()
             if (data.data?.user) {
-              setUser(data.data.user)
-              console.log('User loaded from backend:', data.data.user.email)
+              // ✅ Also check if backend has profile image
+              const backendUser = data.data.user
+              const savedProfileImage = localStorage.getItem('profile_image')
+              setUser({
+                ...backendUser,
+                profileImage: backendUser.profileImage || savedProfileImage || undefined
+              })
+              console.log('User loaded from backend:', backendUser.email)
             }
           } else if (response.status === 401) {
             // Only clear session on explicit 401 (invalid/expired token)
@@ -183,7 +193,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     loadUserFromBackend()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
 
   // FIX: Sync progress from backend when user is set, but:
   // 1. Skip if skipNextSync is flagged (fresh CV analysis in progress)
@@ -233,8 +242,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     syncProgress()
   }, [user])
 
-
-  // Persist user to localStorage
+  // Persist user to localStorage (including profileImage)
   useEffect(() => {
     try {
       if (typeof window !== 'undefined' && window.localStorage) {
@@ -248,7 +256,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       console.error('Error saving user to localStorage:', error)
     }
   }, [user])
-
 
   const updateProgress = useCallback((key: keyof typeof progress, value: any) => {
     // FIX: Flag the next sync to be skipped so the backend doesn't immediately
@@ -269,14 +276,18 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     })
   }, [])
 
-
-  const updateUser = (updates: Partial<User>) => {
+  // ✅ UPDATED: updateUser now also syncs profileImage to localStorage
+  const updateUser = useCallback((updates: Partial<User>) => {
     if (user) {
       const updatedUser = { ...user, ...updates }
       setUser(updatedUser)
+      
+      // If profileImage is being updated, also save to localStorage
+      if (updates.profileImage !== undefined) {
+        localStorage.setItem('profile_image', updates.profileImage)
+      }
     }
-  }
-
+  }, [user])
 
   const refreshCVData = useCallback(() => {
     const stored = getStoredCvAnalysis<CVData>()
@@ -331,11 +342,11 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('twinCreated')
     localStorage.removeItem('twinFormData')
     localStorage.removeItem('cvSkills')
+    localStorage.removeItem('profile_image') // ✅ Also clear profile image on logout
     clearStoredCvAnalysis()
     clearStoredCvFileName()
     localStorage.removeItem('cvFileName')
   }
-
 
   return (
     <UserContext.Provider value={{
@@ -357,7 +368,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     </UserContext.Provider>
   )
 }
-
 
 export function useUser() {
   const context = useContext(UserContext)

@@ -1,5 +1,5 @@
 // src/components/Navbar.tsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { 
@@ -13,7 +13,23 @@ import { useUser } from "../../contexts/user-context";
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
-  const { progress } = useUser();
+  const { user, progress } = useUser();
+  
+  // Local state for profile image as fallback
+  const [localProfileImage, setLocalProfileImage] = useState<string | null>(null);
+
+  // Load from localStorage directly as fallback
+  useEffect(() => {
+    const savedImage = localStorage.getItem('profile_image');
+    if (savedImage) {
+      setLocalProfileImage(savedImage);
+    }
+  }, []);
+
+  // Debug logs
+  console.log("Navbar - user?.profileImage:", user?.profileImage);
+  console.log("Navbar - localProfileImage:", localProfileImage);
+  console.log("Navbar - full user:", user);
 
   const getNavItems = () => {
     return [
@@ -55,6 +71,14 @@ export default function Navbar() {
   };
 
   const navItems = getNavItems();
+  
+  // Get the profile image from multiple sources
+  const profileImageSource = user?.profileImage || localProfileImage;
+  
+  // Get initials for fallback
+  const initials = user?.name
+    ? user.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
+    : "U";
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border">
@@ -126,11 +150,26 @@ export default function Navbar() {
               </Link>
             )}
 
+            {/* Profile Link with Image - FIXED VERSION */}
             <Link
               to="/profile"
-              className="h-9 w-9 rounded-full bg-muted flex items-center justify-center hover:bg-[var(--secondary)]/10 transition-colors border border-border"
+              className="h-9 w-9 rounded-full bg-muted flex items-center justify-center hover:bg-[var(--secondary)]/10 transition-colors border border-border overflow-hidden"
             >
-              <User className="h-4 w-4" />
+              {profileImageSource ? (
+                <img 
+                  src={profileImageSource} 
+                  alt="Profile" 
+                  className="h-full w-full object-cover"
+                  onError={(e) => {
+                    console.error("Failed to load profile image");
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              ) : (
+                <span className="text-xs font-bold text-foreground">
+                  {initials}
+                </span>
+              )}
             </Link>
 
             {/* Mobile menu button */}

@@ -128,6 +128,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, progress, logout } = useUser();
   const isSubPage = pathname !== "/dashboard";
+  
+  // Local state for profile image as fallback
+  const [localProfileImage, setLocalProfileImage] = useState<string | null>(null);
+
+  // Load from localStorage directly as fallback
+  useEffect(() => {
+    const savedImage = localStorage.getItem('profile_image');
+    if (savedImage) {
+      setLocalProfileImage(savedImage);
+    }
+  }, []);
 
   // Use the progress directly from context
   const navItems = getFilteredNavItems(progress);
@@ -145,6 +156,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const displayName = user?.name?.split(" ")[0] || "Guest";
   const displayEmail = user?.email || "guest@email.com";
+  
+  // Get profile image from context or localStorage
+  const profileImageSource = user?.profileImage || localProfileImage;
+  
   const initials = user?.name
     ? user.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
     : "GU";
@@ -334,15 +349,23 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               </div>
             </div>
 
-            {/* Mobile User Section */}
+            {/* Mobile User Section - UPDATED with profile image */}
             <div className="p-4 border-t border-border space-y-2">
               <Link
                 to="/dashboard/profile"
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition-colors group"
               >
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-secondary to-primary flex items-center justify-center text-white font-bold flex-shrink-0 shadow-lg ring-2 ring-secondary/20">
-                  {initials}
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-secondary to-primary flex items-center justify-center text-white font-bold flex-shrink-0 shadow-lg ring-2 ring-secondary/20 overflow-hidden">
+                  {profileImageSource ? (
+                    <img 
+                      src={profileImageSource} 
+                      alt="Profile" 
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    initials
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-foreground truncate">
@@ -408,13 +431,21 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </nav>
 
             <div className="flex items-center gap-2">
-              {/* Desktop User Info - Compact */}
+              {/* Desktop User Info - UPDATED with profile image */}
               <Link
                 to="/dashboard/profile"
                 className="hidden lg:flex items-center hover:bg-muted px-2 py-1.5 rounded-lg transition-colors group"
               >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-secondary to-primary flex items-center justify-center text-white text-xs font-bold shadow-lg ring-2 ring-secondary/20">
-                  {initials}
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-secondary to-primary flex items-center justify-center text-white text-xs font-bold shadow-lg ring-2 ring-secondary/20 overflow-hidden">
+                  {profileImageSource ? (
+                    <img 
+                      src={profileImageSource} 
+                      alt="Profile" 
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    initials
+                  )}
                 </div>
               </Link>
 
