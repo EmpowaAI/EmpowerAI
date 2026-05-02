@@ -22,7 +22,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useUser } from "@/contexts/user-context";
 import { authService } from "@/api/Index";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import toast from "react-hot-toast";
 
 const SUPPORT_EMAIL = "support@empowa.org";
@@ -43,6 +43,17 @@ export function ProfileMenu() {
   const [bugOpen, setBugOpen] = useState(false);
   const [bugTitle, setBugTitle] = useState("");
   const [bugDetails, setBugDetails] = useState("");
+  
+  // Local state for profile image fallback
+  const [localProfileImage, setLocalProfileImage] = useState<string | null>(null);
+
+  // Load from localStorage directly as fallback
+  useEffect(() => {
+    const savedImage = localStorage.getItem('profile_image');
+    if (savedImage) {
+      setLocalProfileImage(savedImage);
+    }
+  }, []);
 
   const handleLogout = useCallback(async () => {
     try {
@@ -66,6 +77,9 @@ export function ProfileMenu() {
   }
 
   const initials = initialsOf(user.name);
+  
+  // Get profile image from user context or localStorage
+  const profileImageSource = user?.profileImage || localProfileImage;
 
   const submitBug = (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,17 +108,33 @@ Timestamp: ${new Date().toISOString()}`
           <button
             type="button"
             aria-label="Open profile menu"
-            className="relative inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary font-display text-sm font-bold text-primary-foreground shadow-card-soft transition-smooth hover:scale-105 hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="relative inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary font-display text-sm font-bold text-primary-foreground shadow-card-soft transition-smooth hover:scale-105 hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 overflow-hidden"
           >
-            {initials}
+            {profileImageSource ? (
+              <img 
+                src={profileImageSource} 
+                alt={user.name}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              initials
+            )}
           </button>
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="end" className="w-56">
           <DropdownMenuLabel className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-              {initials}
-            </span>
+            {profileImageSource ? (
+              <img 
+                src={profileImageSource} 
+                alt={user.name}
+                className="flex h-8 w-8 items-center justify-center rounded-full object-cover"
+              />
+            ) : (
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                {initials}
+              </span>
+            )}
             <div className="min-w-0">
               <div className="truncate text-sm font-semibold text-primary">{user.name}</div>
             </div>
