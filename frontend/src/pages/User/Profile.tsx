@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   User, Mail, Phone, MapPin, Briefcase, GraduationCap, Save,
@@ -102,6 +102,11 @@ export default function ProfilePage() {
   const [toast, setToast] = useState<ToastMsg>(null);
   const [hasCVData, setHasCVData] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Profile image states
+  const [profileImage, setProfileImage] = useState<string>("");
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Modals
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -127,6 +132,14 @@ export default function ProfilePage() {
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteMsg, setDeleteMsg] = useState<ToastMsg>(null);
+
+  // Load saved profile image from localStorage
+  useEffect(() => {
+    const savedImage = localStorage.getItem('profile_image');
+    if (savedImage) {
+      setProfileImage(savedImage);
+    }
+  }, []);
 
   // Load profile from API and user context
   useEffect(() => {
@@ -184,6 +197,53 @@ export default function ProfilePage() {
     setToast(msg);
     if (msg) setTimeout(() => setToast(null), 3000);
   }, []);
+
+  // ─── Image Upload Handlers ──────────────────────────────────────────
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    
+    if (!file.type.startsWith('image/')) {
+      showToast({ type: "error", text: "Please select an image file (JPEG, PNG, GIF, or WebP)" });
+      return;
+    }
+    
+    if (file.size > 5 * 1024 * 1024) {
+      showToast({ type: "error", text: "Image must be less than 5MB" });
+      return;
+    }
+    
+    setIsUploading(true);
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const base64String = e.target?.result as string;
+      setProfileImage(base64String);
+      localStorage.setItem('profile_image', base64String);
+      showToast({ type: "success", text: "Profile picture updated!" });
+      setIsUploading(false);
+    };
+    
+    reader.onerror = () => {
+      showToast({ type: "error", text: "Error reading file" });
+      setIsUploading(false);
+    };
+    
+    reader.readAsDataURL(file);
+    event.target.value = '';
+  };
+
+  const triggerFileUpload = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const removeImage = () => {
+    setProfileImage("");
+    localStorage.removeItem('profile_image');
+    showToast({ type: "success", text: "Profile picture removed" });
+  };
 
   // Cities for selected province
   const availableCities = formData.province
@@ -485,14 +545,51 @@ export default function ProfilePage() {
             <div className="bg-card border border-border rounded-xl p-6 shadow-sm space-y-6 lg:sticky lg:top-8">
               <div className="text-center">
                 <div className="relative inline-block">
-                  <div className="h-24 w-24 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center mx-auto shadow-lg">
-                    <span className="text-2xl font-bold text-primary-foreground">
-                      {initials}
-                    </span>
-                  </div>
-                  <button className="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors">
-                    <Camera className="h-4 w-4" />
+                  {/* Hidden file input */}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                  
+                  {/* Avatar Display */}
+                  {profileImage ? (
+                    <img
+                      src={profileImage}
+                      alt="Profile"
+                      className="h-24 w-24 rounded-full object-cover shadow-lg mx-auto ring-2 ring-primary/20"
+                    />
+                  ) : (
+                    <div className="h-24 w-24 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center mx-auto shadow-lg">
+                      <span className="text-2xl font-bold text-primary-foreground">
+                        {initials}
+                      </span>
+                    </div>
+                  )}
+                  
+                  {/* Camera Button with onClick */}
+                  <button
+                    onClick={triggerFileUpload}
+                    className="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors"
+                  >
+                    {isUploading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Camera className="h-4 w-4" />
+                    )}
                   </button>
+                  
+                  {/* Remove badge */}
+                  {profileImage && (
+                    <button
+                      onClick={removeImage}
+                      className="absolute -top-1 -right-1 h-6 w-6 rounded-full bg-destructive text-white flex items-center justify-center shadow-lg hover:bg-destructive/90 transition-colors"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  )}
                 </div>
                 <h2 className="text-xl font-bold text-foreground mt-4">
                   {displayName}
@@ -820,7 +917,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Modals remain the same... */}
+        {/* Change Password Modal */}
         <Modal
           open={showPasswordModal}
           onClose={() => {
@@ -831,66 +928,128 @@ export default function ProfilePage() {
         >
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-foreground">Change Password</h3>
-            <button onClick={() => setShowPasswordModal(false)}><X className="h-5 w-5" /></button>
+            <button onClick={() => setShowPasswordModal(false)}>
+              <X className="h-5 w-5" />
+            </button>
           </div>
-          <AnimatePresence><Toast msg={passwordMsg} /></AnimatePresence>
+          <AnimatePresence>
+            <Toast msg={passwordMsg} />
+          </AnimatePresence>
           <div className="space-y-4">
             <div className="relative">
-              <input type={showPasswords ? "text" : "password"} value={passwordForm.currentPassword}
+              <input
+                type={showPasswords ? "text" : "password"}
+                value={passwordForm.currentPassword}
                 onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
-                className={inputClass(false)} placeholder="Current Password" />
-              <button type="button" onClick={() => setShowPasswords(!showPasswords)} className="absolute right-3 top-3">
+                className={inputClass(false)}
+                placeholder="Current Password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPasswords(!showPasswords)}
+                className="absolute right-3 top-3"
+              >
                 {showPasswords ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
-            <input type={showPasswords ? "text" : "password"} value={passwordForm.password}
+            <input
+              type={showPasswords ? "text" : "password"}
+              value={passwordForm.password}
               onChange={(e) => setPasswordForm({ ...passwordForm, password: e.target.value })}
-              className={inputClass(false)} placeholder="New Password (min 8 chars)" />
-            <input type={showPasswords ? "text" : "password"} value={passwordForm.confirmPassword}
+              className={inputClass(false)}
+              placeholder="New Password (min 8 chars)"
+            />
+            <input
+              type={showPasswords ? "text" : "password"}
+              value={passwordForm.confirmPassword}
               onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
-              className={inputClass(false)} placeholder="Confirm New Password" />
+              className={inputClass(false)}
+              placeholder="Confirm New Password"
+            />
           </div>
           <div className="flex gap-3">
-            <button onClick={() => setShowPasswordModal(false)} className="flex-1">Cancel</button>
-            <button onClick={handleChangePassword} disabled={passwordSaving}
-              className="flex-1 bg-primary text-white rounded-lg py-2">
+            <button onClick={() => setShowPasswordModal(false)} className="flex-1 px-4 py-2 border rounded-lg">
+              Cancel
+            </button>
+            <button
+              onClick={handleChangePassword}
+              disabled={passwordSaving}
+              className="flex-1 bg-primary text-primary-foreground rounded-lg py-2"
+            >
               {passwordSaving ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : "Update"}
             </button>
           </div>
         </Modal>
 
+        {/* Change Email Modal */}
         <Modal open={showEmailModal} onClose={() => setShowEmailModal(false)}>
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-foreground">Change Email</h3>
-            <button onClick={() => setShowEmailModal(false)}><X className="h-5 w-5" /></button>
+            <button onClick={() => setShowEmailModal(false)}>
+              <X className="h-5 w-5" />
+            </button>
           </div>
-          <AnimatePresence><Toast msg={emailMsg} /></AnimatePresence>
-          <input type="email" value={emailForm.newEmail} onChange={(e) => setEmailForm({ ...emailForm, newEmail: e.target.value })}
-            className={inputClass(false)} placeholder="New Email" />
-          <input type="password" value={emailForm.password} onChange={(e) => setEmailForm({ ...emailForm, password: e.target.value })}
-            className={inputClass(false)} placeholder="Current Password" />
+          <AnimatePresence>
+            <Toast msg={emailMsg} />
+          </AnimatePresence>
+          <input
+            type="email"
+            value={emailForm.newEmail}
+            onChange={(e) => setEmailForm({ ...emailForm, newEmail: e.target.value })}
+            className={inputClass(false)}
+            placeholder="New Email"
+          />
+          <input
+            type="password"
+            value={emailForm.password}
+            onChange={(e) => setEmailForm({ ...emailForm, password: e.target.value })}
+            className={inputClass(false)}
+            placeholder="Current Password"
+          />
           <div className="flex gap-3">
-            <button onClick={() => setShowEmailModal(false)} className="flex-1">Cancel</button>
-            <button onClick={handleEmailChange} disabled={emailSaving}
-              className="flex-1 bg-primary text-white rounded-lg py-2">
+            <button onClick={() => setShowEmailModal(false)} className="flex-1 px-4 py-2 border rounded-lg">
+              Cancel
+            </button>
+            <button
+              onClick={handleEmailChange}
+              disabled={emailSaving}
+              className="flex-1 bg-primary text-primary-foreground rounded-lg py-2"
+            >
               {emailSaving ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : "Send Verification"}
             </button>
           </div>
         </Modal>
 
+        {/* Delete Account Modal */}
         <Modal open={showDeleteModal} onClose={() => setShowDeleteModal(false)} variant="danger">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-destructive">Delete Account</h3>
-            <button onClick={() => setShowDeleteModal(false)}><X className="h-5 w-5" /></button>
+            <button onClick={() => setShowDeleteModal(false)}>
+              <X className="h-5 w-5" />
+            </button>
           </div>
-          <p className="text-sm">Type <strong className="text-destructive">DELETE</strong> to confirm</p>
-          <AnimatePresence><Toast msg={deleteMsg} /></AnimatePresence>
-          <input type="text" value={deleteConfirm} onChange={(e) => setDeleteConfirm(e.target.value)}
-            className={inputClass(false)} placeholder="DELETE" />
+          <p className="text-sm">
+            Type <strong className="text-destructive">DELETE</strong> to confirm
+          </p>
+          <AnimatePresence>
+            <Toast msg={deleteMsg} />
+          </AnimatePresence>
+          <input
+            type="text"
+            value={deleteConfirm}
+            onChange={(e) => setDeleteConfirm(e.target.value)}
+            className={inputClass(false)}
+            placeholder="DELETE"
+          />
           <div className="flex gap-3">
-            <button onClick={() => setShowDeleteModal(false)} className="flex-1">Cancel</button>
-            <button onClick={handleDeleteAccount} disabled={deleteLoading || deleteConfirm !== "DELETE"}
-              className="flex-1 bg-destructive text-white rounded-lg py-2">
+            <button onClick={() => setShowDeleteModal(false)} className="flex-1 px-4 py-2 border rounded-lg">
+              Cancel
+            </button>
+            <button
+              onClick={handleDeleteAccount}
+              disabled={deleteLoading || deleteConfirm !== "DELETE"}
+              className="flex-1 bg-destructive text-white rounded-lg py-2"
+            >
               {deleteLoading ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : "Delete"}
             </button>
           </div>
