@@ -1,5 +1,6 @@
+// LandingPage.tsx
 import { Link } from "react-router-dom";
-import { useState } from "react"; // Added import
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import {
@@ -23,8 +24,9 @@ import {
   MapPin,
   Quote,
   TrendingUp,
-  Menu, // Added import
-  X, // Added import
+  Menu,
+  X,
+  Languages,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ProfileMenu } from "@/components/ProfileMenu";
@@ -32,18 +34,67 @@ import { ContactWidget } from "@/components/ContactWidget";
 import siyanda from "../assets/images/siyaimage.png";
 import Logo from "@/components/ui/Logo";
 import TikTokIcon from "@/components/ui/TikTokIcon";
-import { cn } from "@/lib/utils"; // Added import
+import { cn } from "@/lib/utils";
+import { SA_LANGUAGES, translations, type SALanguage } from "@/lib/sa-languages";
 
 const heroBackgroundUrl = encodeURI(`${import.meta.env.BASE_URL}images/Wide blue-orange gra.png`);
 
 export default function LandingPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  
+  // Language rotation state
+  const [currentLanguageIndex, setCurrentLanguageIndex] = useState(0);
+  const [currentLanguage, setCurrentLanguage] = useState<SALanguage>(SA_LANGUAGES[0]);
+  
+  // Get current translations based on active language
+  const currentUbuntuProverb = translations.ubuntuProverb[currentLanguage];
+  const currentMahala = translations.mahala[currentLanguage];
+  const currentUbuntu = translations.ubuntu[currentLanguage];
+  const currentOurTools = translations.ourTools[currentLanguage];
+  const currentThePath = translations.thePath[currentLanguage];
+  const currentLetsBegin = translations.letsBegin[currentLanguage];
+  const currentWatch = translations.watch[currentLanguage];
+  const currentSuccessStories = translations.successStories[currentLanguage];
+  const currentPoweredBy = translations.poweredBy[currentLanguage];
+  
+  // Rotate language every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentLanguageIndex((prevIndex) => {
+        const nextIndex = (prevIndex + 1) % SA_LANGUAGES.length;
+        setCurrentLanguage(SA_LANGUAGES[nextIndex]);
+        return nextIndex;
+      });
+    }, 5000);
+    
+    return () => clearInterval(interval);
+  }, []);
+  
+  // Optional: Add animation class for language changes
+  const [isAnimating, setIsAnimating] = useState(false);
+  
+  useEffect(() => {
+    setIsAnimating(true);
+    const timer = setTimeout(() => setIsAnimating(false), 500);
+    return () => clearTimeout(timer);
+  }, [currentLanguage]);
+
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
       <header className="sticky top-0 z-40 border-b border-border/10 bg-background">
-        {/* State for mobile menu */}
         <div className="container flex h-16 items-center justify-between gap-4">
           <Logo variant="default" size="sm" linkTo="" />
+
+          {/* Language indicator and current phrase */}
+          <div className="hidden md:flex items-center gap-3 px-3 py-1.5 rounded-full bg-primary/5 border border-primary/10">
+            <Languages className="h-3.5 w-3.5 text-secondary" />
+            <span className={cn(
+              "text-xs font-medium transition-all duration-500",
+              isAnimating ? "opacity-0 scale-95" : "opacity-100 scale-100"
+            )}>
+              {currentLanguage}: "{currentUbuntuProverb}"
+            </span>
+          </div>
 
           <nav className="hidden items-center gap-8 md:flex">
             <a href="#how-it-works" className="text-sm font-medium text-foreground hover:text-primary transition-colors">How It Works</a>
@@ -59,7 +110,6 @@ export default function LandingPage() {
               <Link to="/signup">Get Started</Link>
             </Button>
 
-            {/* Hamburger Toggle */}
             <button
               className="md:hidden p-2 text-primary hover:bg-primary/5 rounded-md transition-smooth"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -99,8 +149,7 @@ export default function LandingPage() {
             </div>
           </nav>
         </div>
-
-              </header>
+      </header>
 
       <main>
         <section className="relative overflow-hidden text-white">
@@ -125,29 +174,33 @@ export default function LandingPage() {
             <div className="mx-auto max-w-3xl text-center animate-fade-up">
               <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-xs font-semibold tracking-wide text-white/95 backdrop-blur-md">
                 <Sparkles className="h-3.5 w-3.5 text-secondary" />
-                Amandla e-Ubuntu
+                <span className={cn(
+                  "transition-all duration-500",
+                  isAnimating ? "opacity-0 scale-95" : "opacity-100 scale-100"
+                )}>
+                  {currentPoweredBy}
+                </span>
                 <span className="text-base leading-none emoji">🇿🇦</span>
               </div>
 
               <h1 className="mt-6 font-display text-4xl font-bold leading-[1.05] drop-shadow-sm md:text-6xl lg:text-7xl">
-                Your Future, <span className="text-gradient-ai">Powered by AI</span>
+                Your Future, <span className="text-gradient-ai">Powered by {currentUbuntu}</span>
               </h1>
               <p className="mx-auto mt-5 max-w-xl text-base text-white/90 md:text-lg">
-                Discover career pathways rooted in Ubuntu values. Join thousands of young South Africans building better
-                futures.
+                {currentUbuntuProverb}
               </p>
 
               <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
                 <Button asChild variant="cta" size="xl" className="shimmer w-full sm:w-auto">
                   <Link to="/signup">
-                    Start Your Journey
+                    {currentLetsBegin}
                     <ArrowRight className="ml-1 h-4 w-4" />
                   </Link>
                 </Button>
                 <Button asChild variant="outlineLight" size="xl" className="w-full sm:w-auto">
                   <Link to="/demo">
                     <Play className="mr-1 h-4 w-4" />
-                    Watch Demo
+                    {currentWatch}
                   </Link>
                 </Button>
               </div>
@@ -166,6 +219,17 @@ export default function LandingPage() {
                   All 9 provinces · Mzansi
                 </span>
               </div>
+              
+              {/* Language rotation indicator for mobile */}
+              <div className="mt-6 md:hidden flex items-center justify-center gap-2 text-[10px] text-white/60">
+                <Languages className="h-3 w-3" />
+                <span className={cn(
+                  "transition-all duration-500",
+                  isAnimating ? "opacity-0" : "opacity-100"
+                )}>
+                  {currentLanguage}: "{currentMahala}"
+                </span>
+              </div>
             </div>
           </div>
         </section>
@@ -174,7 +238,7 @@ export default function LandingPage() {
           <div className="container grid grid-cols-1 gap-6 py-7 sm:grid-cols-2 lg:grid-cols-4 stagger-children">
             {[
               { icon: Rocket, title: "AI-powered career", sub: "guidance in 60 seconds" },
-              { icon: HeartHandshake, title: "Rooted in", sub: "Ubuntu values" },
+              { icon: HeartHandshake, title: "Rooted in", sub: `${currentUbuntu} values` },
               { icon: Briefcase, title: "Personalized pathways", sub: "to income growth" },
               { icon: Star, title: "Trusted by 2,000+ youth", sub: "Rated 4.9/5" },
             ].map(({ icon: Icon, title, sub }) => (
@@ -184,7 +248,12 @@ export default function LandingPage() {
                 </span>
                 <div className="text-sm leading-snug">
                   <div className="font-semibold text-primary">{title}</div>
-                  <div className="text-muted-foreground">{sub}</div>
+                  <div className={cn(
+                    "text-muted-foreground transition-all duration-500",
+                    isAnimating ? "opacity-0" : "opacity-100"
+                  )}>
+                    {sub}
+                  </div>
                 </div>
               </div>
             ))}
@@ -194,20 +263,37 @@ export default function LandingPage() {
         <section id="ubuntu-stories" className="bg-muted/50 py-20">
           <div className="container">
             <div className="text-center">
-              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary">Featured Story</span>
+              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary">
+                <span className={cn(
+                  "transition-all duration-500",
+                  isAnimating ? "opacity-0" : "opacity-100"
+                )}>
+                  {currentSuccessStories}
+                </span>
+              </span>
               <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-primary md:text-5xl">
                 Siyanda&apos;s Journey: from R0 to R4,500/month
               </h2>
               <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
-                He didn't get lucky — he explored, compared, and chose. Here's exactly how it went.
+                <span className={cn(
+                  "transition-all duration-500 inline-block",
+                  isAnimating ? "opacity-0" : "opacity-100"
+                )}>
+                  {currentUbuntuProverb.split(' ').slice(0, 3).join(' ')}... — he didn't get lucky.
+                </span>
               </p>
             </div>
 
+            {/* Rest of your existing component remains the same */}
             <div className="mx-auto mt-12 grid max-w-6xl gap-6 lg:grid-cols-2">
+              {/* ... Keep your existing Siyanda card and journey sections exactly as they are ... */}
               <Card className="relative overflow-hidden border-border/70 bg-card p-6 shadow-card-soft md:p-7">
                 <div className="mb-5 inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground">
                   <Zap className="h-3 w-3" />
-                  CV Analyser · Mahala
+                  CV Analyser · <span className={cn(
+                    "transition-all duration-500",
+                    isAnimating ? "opacity-0" : "opacity-100"
+                  )}>{currentMahala}</span>
                 </div>
 
                 <div className="flex items-start gap-4">
@@ -285,7 +371,14 @@ export default function LandingPage() {
 
               <div className="flex flex-col">
                 <Card className="border-border/70 bg-card p-6 shadow-card-soft md:p-7">
-                  <h3 className="font-display text-xl font-bold text-primary">The 5-step journey</h3>
+                  <h3 className="font-display text-xl font-bold text-primary">
+                    <span className={cn(
+                      "transition-all duration-500",
+                      isAnimating ? "opacity-0" : "opacity-100"
+                    )}>
+                      {currentThePath}
+                    </span>
+                  </h3>
                   <ol className="mt-5 space-y-3.5">
                     {[
                       { t: "Uploaded CV", d: "Analyzed in 60 seconds" },
@@ -313,7 +406,10 @@ export default function LandingPage() {
                 <div className="mt-5 rounded-xl border border-border/70 border-l-4 border-l-secondary bg-card p-5 shadow-card-soft">
                   <Quote className="h-5 w-5 text-secondary" />
                   <p className="mt-2 font-display italic text-primary">
-                    &quot;EmpowAI taught me that ubuntu is a business strategy.&quot;
+                    &quot;EmpowAI taught me that <span className={cn(
+                      "transition-all duration-500",
+                      isAnimating ? "opacity-0" : "opacity-100"
+                    )}>{currentUbuntu.toLowerCase()}</span> is a business strategy.&quot;
                   </p>
                   <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                     Siyanda <span className="text-secondary">·</span> Featured story
@@ -328,7 +424,12 @@ export default function LandingPage() {
           <div id="features" className="container scroll-mt-24">
             <div className="text-center">
               <span className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary">
-                Izinsiza Zethu — Our Tools
+                <span className={cn(
+                  "transition-all duration-500",
+                  isAnimating ? "opacity-0" : "opacity-100"
+                )}>
+                  {currentOurTools}
+                </span>
               </span>
               <h2 className="mt-3 font-display text-3xl font-bold text-primary md:text-4xl">How It Works</h2>
               <p className="mx-auto mt-3 max-w-xl text-muted-foreground">Three simple steps to discover your career potential.</p>
@@ -359,7 +460,7 @@ export default function LandingPage() {
             <div className="mt-12 flex justify-center">
               <Button asChild variant="cta" size="xl" className="shimmer">
                 <Link to="/signup">
-                  Start Your Journey
+                  {currentLetsBegin}
                   <ArrowRight className="ml-1 h-4 w-4" />
                 </Link>
               </Button>
@@ -371,7 +472,12 @@ export default function LandingPage() {
           <div className="container">
             <div className="text-center">
               <span className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary">
-                Izindaba Zempumelelo — Ubuntu Stories
+                <span className={cn(
+                  "transition-all duration-500",
+                  isAnimating ? "opacity-0" : "opacity-100"
+                )}>
+                  {currentSuccessStories}
+                </span>
               </span>
               <h2 className="mt-3 font-display text-3xl font-bold text-primary md:text-4xl">Real Success Stories from Mzansi</h2>
               <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
@@ -435,7 +541,14 @@ export default function LandingPage() {
         <section className="relative overflow-hidden border-t border-border bg-primary py-14 text-center text-primary-foreground">
           <div className="ai-mesh absolute inset-0" aria-hidden />
           <div className="container relative">
-            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary">Siyaqala! — Let&apos;s Begin</span>
+            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary">
+              <span className={cn(
+                "transition-all duration-500",
+                isAnimating ? "opacity-0" : "opacity-100"
+              )}>
+                {currentLetsBegin}
+              </span>
+            </span>
             <p className="mt-3 font-display text-2xl italic md:text-3xl">
               Join over <span className="text-gradient-ai font-bold not-italic">2,000+</span> young South Africans building better
               careers with AI. Together, we rise. <span className="emoji">🇿🇦</span>
@@ -443,7 +556,7 @@ export default function LandingPage() {
             <div className="mt-6 flex justify-center">
               <Button asChild variant="cta" size="xl" className="shimmer">
                 <Link to="/signup">
-                  Start Your Journey
+                  {currentLetsBegin}
                   <ArrowRight className="ml-1 h-4 w-4" />
                 </Link>
               </Button>
@@ -510,7 +623,12 @@ export default function LandingPage() {
           </div>
         </div>
         <div className="border-t border-border/60 py-4 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} EmpowAI · Amandla e-Ubuntu <span className="emoji">🇿🇦</span> · Built in Mzansi
+          <span className={cn(
+            "transition-all duration-500",
+            isAnimating ? "opacity-0" : "opacity-100"
+          )}>
+            {currentPoweredBy}
+          </span> · © {new Date().getFullYear()} EmpowAI · Amandla e-Ubuntu <span className="emoji">🇿🇦</span> · Built in Mzansi
         </div>
       </footer>
 
