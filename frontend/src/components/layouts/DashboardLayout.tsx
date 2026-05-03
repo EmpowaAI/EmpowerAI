@@ -420,40 +420,43 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0 h-full">
-          {/* Header */}
-          <header className="sticky top-0 z-30 flex h-16 flex-shrink-0 items-center justify-between border-b border-border/60 bg-background/85 px-4 backdrop-blur-md sm:px-6">
-            <div className="flex items-center gap-2">
+          {/* Header — 3-column grid prevents nav from overlapping logo at any viewport */}
+          <header className="sticky top-0 z-30 grid h-16 flex-shrink-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center border-b border-border/60 bg-background/85 px-4 backdrop-blur-md sm:px-6">
+            {/* Col 1 — Logo + mobile hamburger (fixed left, never shrinks below content) */}
+            <div className="flex min-w-0 items-center gap-2">
               {/* Mobile Menu Button */}
               <button
-                className="lg:hidden p-2 -ml-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+                className="lg:hidden p-2 -ml-2 flex-shrink-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
                 onClick={() => setMobileMenuOpen(true)}
                 aria-label="Open menu"
               >
                 <Menu className="h-5 w-5" />
               </button>
 
-              {/* Logo - Visible on desktop */}
-              <Logo size="md" linkTo="/dashboard" />
-              
-              {/* Back button for subpages */}
+              {/* Logo — fixed min-width so nav can never push into it */}
+              <div className="flex-shrink-0">
+                <Logo size="md" linkTo="/dashboard" />
+              </div>
+
+              {/* Back button — desktop only, sits beside logo */}
               {isSubPage && (
                 <Link
                   to="/dashboard"
-                  className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors px-3 py-2 hover:bg-muted rounded-lg"
+                  className="hidden lg:flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors px-2 py-1.5 hover:bg-muted rounded-lg ml-1"
                 >
-                  <ArrowLeft className="h-4 w-4" />
-                  <span className="hidden sm:inline text-sm font-medium">Back to Dashboard</span>
+                  <ArrowLeft className="h-4 w-4 flex-shrink-0" />
+                  <span className="text-sm font-medium whitespace-nowrap">Back</span>
                 </Link>
               )}
             </div>
 
-            {/* Desktop Navigation - Compact and fits all items */}
-            <nav className="hidden lg:flex items-center">
+            {/* Col 2 — Desktop nav pills, centred in its own column */}
+            <nav className="hidden lg:flex items-center justify-center">
               <div className="flex items-center gap-1 bg-muted/30 p-1 rounded-xl">
                 {navItems.map((item) => (
-                  <NavLink 
-                    key={item.path} 
-                    item={item} 
+                  <NavLink
+                    key={item.path}
+                    item={item}
                     pathname={pathname}
                     prefetchRoute={prefetchRoute}
                   />
@@ -461,7 +464,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               </div>
             </nav>
 
-            <div className="flex items-center gap-2">
+            {/* Col 3 — Right-aligned actions */}
+            <div className="flex items-center justify-end gap-2">
               {/* Desktop User Info - UPDATED with profile image */}
               <Link
                 to="/dashboard/profile"
