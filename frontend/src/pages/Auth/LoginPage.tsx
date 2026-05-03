@@ -4,7 +4,7 @@
 import type React from "react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, Loader2, Sparkles, Mail, Lock } from "lucide-react";
+import { Eye, EyeOff, Loader2, Sparkles, Mail, Lock, Home } from "lucide-react";
 import toast from 'react-hot-toast';
 import { authAPI } from "@/lib/api";
 import { useUser } from "@/contexts/user-context";
@@ -279,7 +279,7 @@ export default function LoginPage() {
               </button>
             </form>
 
-            {/* ✅ NEW: Create Account Link at the bottom */}
+            {/* Create Account Link at the bottom */}
             <div className="mt-6 text-center pt-6 border-t border-border/50">
               <p className="text-sm text-muted-foreground">
                 Not registered?{" "}
@@ -291,6 +291,17 @@ export default function LoginPage() {
                   <Sparkles className="h-3 w-3" />
                 </Link>
               </p>
+            </div>
+
+            {/* Back to Homepage Button */}
+            <div className="mt-4 text-center">
+              <Link 
+                to="/" 
+                className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors group"
+              >
+                <Home className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
+                Back to Homepage
+              </Link>
             </div>
           </div>
         </div>
