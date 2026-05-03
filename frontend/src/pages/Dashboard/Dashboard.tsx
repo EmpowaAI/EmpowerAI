@@ -175,7 +175,7 @@ const Dashboard = () => {
     },
     {
       label: "Live opportunities",
-      value: "7,564",
+      value: "Coming soon",
       note: "South Africa",
     },
   ];
