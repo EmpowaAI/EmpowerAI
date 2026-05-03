@@ -1,4 +1,4 @@
-// LandingPage.tsx - Complete with Authentication-Aware Navbar
+// LandingPage.tsx - Complete with Working Contact Form (mailto)
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { ConsentBanner } from "@/components/ConsentBanner";
@@ -137,15 +137,29 @@ export default function LandingPage() {
     return () => clearTimeout(timer);
   }, [currentLanguage]);
 
+  // Working contact form handler - opens email client
   const handleContactSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setTimeout(() => {
-      toast.success("Message sent! We'll get back to you soon.");
-      setContactForm({ name: "", email: "", subject: "", message: "" });
-      setIsSubmitting(false);
-      setShowContact(false);
-    }, 1000);
+    
+    // Create mailto link with form data
+    const subject = encodeURIComponent(`[EmpowAI Contact] ${contactForm.subject}`);
+    const body = encodeURIComponent(
+      `Name: ${contactForm.name}\n` +
+      `Email: ${contactForm.email}\n\n` +
+      `Message:\n${contactForm.message}\n\n` +
+      `---\n` +
+      `Sent from EmpowAI website contact form\n` +
+      `Date: ${new Date().toLocaleString()}`
+    );
+    
+    // Open default email client
+    window.location.href = `mailto:aiempowa@gmail.com?subject=${subject}&body=${body}`;
+    
+    toast.success("Opening your email client...");
+    setContactForm({ name: "", email: "", subject: "", message: "" });
+    setShowContact(false);
+    setIsSubmitting(false);
   };
 
   // Check if user is logged in
@@ -881,15 +895,62 @@ export default function LandingPage() {
         </div>
       </Modal>
 
-      {/* Contact Us Modal */}
+      {/* Contact Us Modal with Working mailto Handler */}
       <Modal isOpen={showContact} onClose={() => setShowContact(false)} title="Contact Us" icon={MessageSquare}>
         <form onSubmit={handleContactSubmit} className="space-y-4">
-          <div><label className="block text-sm font-medium mb-2">Name *</label><input type="text" required value={contactForm.name} onChange={(e) => setContactForm({...contactForm, name: e.target.value})} className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary" placeholder="Your full name" /></div>
-          <div><label className="block text-sm font-medium mb-2">Email *</label><input type="email" required value={contactForm.email} onChange={(e) => setContactForm({...contactForm, email: e.target.value})} className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary" placeholder="your@email.com" /></div>
-          <div><label className="block text-sm font-medium mb-2">Subject *</label><input type="text" required value={contactForm.subject} onChange={(e) => setContactForm({...contactForm, subject: e.target.value})} className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary" placeholder="What is this regarding?" /></div>
-          <div><label className="block text-sm font-medium mb-2">Message *</label><textarea required rows={4} value={contactForm.message} onChange={(e) => setContactForm({...contactForm, message: e.target.value})} className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary resize-none" placeholder="How can we help you?" /></div>
-          <Button type="submit" variant="cta" className="w-full" disabled={isSubmitting}>{isSubmitting ? "Sending..." : "Send Message"}<Send className="ml-2 h-4 w-4" /></Button>
+          <div>
+            <label className="block text-sm font-medium mb-2">Name *</label>
+            <input 
+              type="text" 
+              required 
+              value={contactForm.name} 
+              onChange={(e) => setContactForm({...contactForm, name: e.target.value})} 
+              className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary" 
+              placeholder="Your full name" 
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">Email *</label>
+            <input 
+              type="email" 
+              required 
+              value={contactForm.email} 
+              onChange={(e) => setContactForm({...contactForm, email: e.target.value})} 
+              className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary" 
+              placeholder="your@email.com" 
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">Subject *</label>
+            <input 
+              type="text" 
+              required 
+              value={contactForm.subject} 
+              onChange={(e) => setContactForm({...contactForm, subject: e.target.value})} 
+              className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary" 
+              placeholder="What is this regarding?" 
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">Message *</label>
+            <textarea 
+              required 
+              rows={4} 
+              value={contactForm.message} 
+              onChange={(e) => setContactForm({...contactForm, message: e.target.value})} 
+              className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary resize-none" 
+              placeholder="How can we help you?" 
+            />
+          </div>
+          <Button type="submit" variant="cta" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? "Opening email..." : "Send Message"}
+            <Send className="ml-2 h-4 w-4" />
+          </Button>
         </form>
+        <div className="mt-4 text-center text-xs text-muted-foreground">
+          <p>This will open your default email client.</p>
+          <p>Alternatively, email us directly at: <strong>aiempowa@gmail.com</strong></p>
+        </div>
       </Modal>
 
       <ContactWidget />
