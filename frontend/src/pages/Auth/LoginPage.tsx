@@ -165,7 +165,7 @@ export default function LoginPage() {
               </div>
               <h2 className="font-display text-3xl sm:text-4xl font-bold text-primary mb-2 tracking-tight">Sign in</h2>
               <p className="text-sm sm:text-base text-muted-foreground">
-                New to EmpowAI?{" "}
+                New to EmpowaAI?{" "}
                 <Link to="/signup" className="text-primary hover:text-primary/80 font-semibold hover:underline transition-colors">
                   Sign up
                 </Link>

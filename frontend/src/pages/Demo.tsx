@@ -19,8 +19,8 @@ export default function Demo() {
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-md">
         <div className="container flex h-16 items-center justify-between gap-4">
           <Link to="/" className="flex items-center gap-2.5">
-            <img src={logoSrc} alt="EmpowAI logo" className="h-9 w-9 object-contain" width={36} height={36} />
-            <span className="font-display text-xl font-bold tracking-tight text-primary">EmpowAI</span>
+            <img src={logoSrc} alt="EmpowaAI logo" className="h-9 w-9 object-contain" width={36} height={36} />
+            <span className="font-display text-xl font-bold tracking-tight text-primary">EmpowaAI</span>
           </Link>
 
           <nav className="hidden items-center gap-8 md:flex">
@@ -92,7 +92,7 @@ export default function Demo() {
               Interactive demo
             </span>
             <h1 className="mt-2 font-display text-2xl font-bold tracking-tight text-primary sm:text-3xl md:text-4xl">
-              Try EmpowAI in 60 seconds
+              Try EmpowaAI in 60 seconds
             </h1>
             <p className="mt-2 max-w-xl text-sm text-muted-foreground sm:text-base">
               CV Analyser is Mahala — always free. See the full 5-path flow, then unlock Premium on the pricing page when
@@ -106,7 +106,7 @@ export default function Demo() {
 
       <footer className="border-t border-border bg-background">
         <div className="container py-6 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} EmpowAI · Amandla e-Ubuntu <span className="emoji">🇿🇦</span>
+          © {new Date().getFullYear()} EmpowaAI · Amandla e-Ubuntu <span className="emoji">🇿🇦</span>
         </div>
       </footer>
 

@@ -64,7 +64,7 @@ Timestamp: ${new Date().toISOString()}`
             Report a bug
           </DialogTitle>
           <DialogDescription>
-            Help us improve EmpowAI. Your message will open in your email app.
+            Help us improve EmpowaAI. Your message will open in your email app.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} className="space-y-4">

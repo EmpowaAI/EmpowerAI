@@ -406,7 +406,7 @@ export default function LandingPage() {
                 <div className="mt-5 rounded-xl border border-border/70 border-l-4 border-l-secondary bg-card p-5 shadow-card-soft">
                   <Quote className="h-5 w-5 text-secondary" />
                   <p className="mt-2 font-display italic text-primary">
-                    &quot;EmpowAI taught me that <span className={cn(
+                    &quot;EmpowaAI taught me that <span className={cn(
                       "transition-all duration-500",
                       isAnimating ? "opacity-0" : "opacity-100"
                     )}>{currentUbuntu.toLowerCase()}</span> is a business strategy.&quot;
@@ -481,7 +481,7 @@ export default function LandingPage() {
               </span>
               <h2 className="mt-3 font-display text-3xl font-bold text-primary md:text-4xl">Real Success Stories from Mzansi</h2>
               <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
-                See how EmpowAI is transforming careers across all 9 provinces.
+                See how EmpowaAI is transforming careers across all 9 provinces.
               </p>
             </div>
 
@@ -491,7 +491,7 @@ export default function LandingPage() {
                   initials: "LM",
                   name: "Lerato Mokoena",
                   loc: "Cape Town, WC",
-                  quote: "From Khayelitsha to a junior dev role. EmpowAI showed me tech skills I didn't know I had. Siyabonga!",
+                  quote: "From Khayelitsha to a junior dev role. EmpowaAI showed me tech skills I didn't know I had. Siyabonga!",
                   earn: "R12,000/mo",
                   path: "Student → Software Developer",
                 },
@@ -628,7 +628,7 @@ export default function LandingPage() {
             isAnimating ? "opacity-0" : "opacity-100"
           )}>
             {currentPoweredBy}
-          </span> · © {new Date().getFullYear()} EmpowAI · Amandla e-Ubuntu <span className="emoji">🇿🇦</span> · Built in Mzansi
+          </span> · © {new Date().getFullYear()} EmpowaAI · Amandla e-Ubuntu <span className="emoji">🇿🇦</span> · Built in Mzansi
         </div>
       </footer>
 

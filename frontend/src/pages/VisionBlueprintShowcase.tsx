@@ -105,7 +105,7 @@ export default function VisionBlueprintShowcase() {
             <AIAvatar size="xl" variant="default" /> {/* Assuming AIAvatar is fine */}
             <div>
               <h1 className="text-4xl font-bold text-foreground mb-4">
-                EmpowerAI Vision Blueprint
+                EmpowaAI Vision Blueprint
               </h1>
               <p className="text-lg text-muted-foreground">
                 AI-First Career Transformation Platform for South African Youth
