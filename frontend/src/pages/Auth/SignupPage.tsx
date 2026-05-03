@@ -1,22 +1,61 @@
-// pages/SignupPage.tsx - POPIA compliant with 3 consent checkboxes
+// pages/SignupPage.tsx - POPIA compliant with popup modals
 import type React from "react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Eye, EyeOff, CheckCircle, Loader2, Sparkles,
-  Shield, Zap, XCircle, Mail, User, Lock,
+  Shield, Zap, XCircle, Mail, User, Lock, X,
 } from "lucide-react";
 import toast from 'react-hot-toast';
 import { authService } from "@/api/Index";
 import Logo from "@/components/ui/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Button } from "@/components/ui/Button";
 import signupBg from "@/assets/images/empowersignin.jpg";
+
+// Modal Component (same as LandingPage)
+function Modal({ isOpen, onClose, title, icon: Icon, children }: { 
+  isOpen: boolean; 
+  onClose: () => void; 
+  title: string; 
+  icon: any;
+  children: React.ReactNode;
+}) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+      <div className="relative max-w-2xl w-full max-h-[85vh] bg-card rounded-2xl shadow-2xl border border-border overflow-hidden animate-scale-in">
+        <div className="sticky top-0 bg-card border-b border-border px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Icon className="h-5 w-5 text-secondary" />
+            <h2 className="text-xl font-display font-bold text-primary">{title}</h2>
+          </div>
+          <button onClick={onClose} className="p-1 rounded-lg hover:bg-muted transition-colors">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="overflow-y-auto p-6 max-h-[calc(85vh-70px)]">
+          {children}
+        </div>
+        <div className="sticky bottom-0 bg-card border-t border-border px-6 py-3 flex justify-end">
+          <Button variant="outline" onClick={onClose} size="sm">Close</Button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function SignupPage() {
   const [showPassword, setShowPassword]       = useState(false);
   const [error, setError]                     = useState("");
   const [isLoading, setIsLoading]             = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState<string | null>(null);
+
+  // Modal states
+  const [showPrivacy, setShowPrivacy] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
+  const [showCookies, setShowCookies] = useState(false);
 
   const [formData, setFormData] = useState({
     name:     "",
@@ -131,7 +170,6 @@ export default function SignupPage() {
   };
 
   // ─── Submit button disabled state ───────────────────────────────────────────
-  // Disabled while loading OR while either required consent is unticked.
   const submitDisabled =
     isLoading ||
     !consents.consentDataProcessing ||
@@ -369,7 +407,7 @@ export default function SignupPage() {
                   <div className="flex gap-2">
                     {[1, 2, 3, 4].map((level) => (
                       <div
-                        key={`password-strength-${level}`}
+                        key={level}
                         className={`h-1.5 flex-1 rounded-full transition-all ${
                           formData.password.length >= level * 2
                             ? level <= 2
@@ -393,16 +431,15 @@ export default function SignupPage() {
               )}
 
               {/* ════════════════════════════════════════════════════════════════
-                  POPIA CONSENT SECTION
-                  Three separate checkboxes — no pre-ticking (POPIA requirement).
-                  Consents 1 & 2 are required; Consent 3 is recommended.
+                  POPIA CONSENT SECTION - With Popup Modal Links
+                  No pre-ticking (POPIA requirement).
               ════════════════════════════════════════════════════════════════ */}
               <div className="space-y-3 pt-2 border-t border-border/30">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                   <Shield className="h-3.5 w-3.5" /> POPIA Consent
                 </p>
 
-                {/* Consent 1 — Required */}
+                {/* Consent 1 — Required - Opens Privacy Policy Modal */}
                 <div className="space-y-1">
                   <label className="flex items-start gap-2.5 cursor-pointer group">
                     <input
@@ -413,9 +450,13 @@ export default function SignupPage() {
                     />
                     <span className="text-sm text-muted-foreground group-hover:text-primary transition-colors">
                       I agree to EmpowaAI processing my personal information in accordance with the{" "}
-                      <Link to="/privacy-policy" className="text-secondary hover:underline" target="_blank" rel="noopener noreferrer">
+                      <button 
+                        type="button"
+                        onClick={() => setShowPrivacy(true)} 
+                        className="text-secondary hover:underline"
+                      >
                         Privacy Policy
-                      </Link>. <span className="text-destructive">*</span>
+                      </button>. <span className="text-destructive">*</span>
                     </span>
                   </label>
                   {consentErrors.consentDataProcessing && (
@@ -425,7 +466,7 @@ export default function SignupPage() {
                   )}
                 </div>
 
-                {/* Consent 2 — Required */}
+                {/* Consent 2 — Required - Opens Terms of Service Modal */}
                 <div className="space-y-1">
                   <label className="flex items-start gap-2.5 cursor-pointer group">
                     <input
@@ -435,8 +476,14 @@ export default function SignupPage() {
                       className="mt-1 rounded border-border/60 text-secondary focus:ring-secondary/30 w-4 h-4 flex-shrink-0 cursor-pointer transition-all bg-background"
                     />
                     <span className="text-sm text-muted-foreground group-hover:text-primary transition-colors">
-                      I consent to my profile being shared with potential employers for job opportunities.{" "}
-                      <span className="text-destructive">*</span>
+                      I consent to my profile being shared with potential employers in accordance with the{" "}
+                      <button 
+                        type="button"
+                        onClick={() => setShowTerms(true)} 
+                        className="text-secondary hover:underline"
+                      >
+                        Terms of Service
+                      </button>. <span className="text-destructive">*</span>
                     </span>
                   </label>
                   {consentErrors.consentProfileSharing && (
@@ -446,17 +493,23 @@ export default function SignupPage() {
                   )}
                 </div>
 
-                {/* Consent 3 — Recommended (optional) */}
+                {/* Consent 3 — Recommended (optional) - Opens Cookies Policy Modal */}
                 <label className="flex items-start gap-2.5 cursor-pointer group">
                   <input
                     type="checkbox"
                     checked={consents.consentAiProcessing}
                     onChange={() => handleConsentChange('consentAiProcessing')}
-                      className="mt-1 rounded border-border/60 text-secondary focus:ring-secondary/30 w-4 h-4 flex-shrink-0 cursor-pointer transition-all bg-background"
+                    className="mt-1 rounded border-border/60 text-secondary focus:ring-secondary/30 w-4 h-4 flex-shrink-0 cursor-pointer transition-all bg-background"
                   />
-                    <span className="text-sm text-muted-foreground group-hover:text-primary transition-colors">
-                    I consent to my data being used for AI-based job matching and recommendations.{" "}
-                    <span className="text-xs text-muted-foreground/70">(Recommended)</span>
+                  <span className="text-sm text-muted-foreground group-hover:text-primary transition-colors">
+                    I consent to my data being used for AI-based job matching and recommendations as described in the{" "}
+                    <button 
+                      type="button"
+                      onClick={() => setShowCookies(true)} 
+                      className="text-secondary hover:underline"
+                    >
+                      Cookies Policy
+                    </button>. <span className="text-xs text-muted-foreground/70">(Recommended)</span>
                   </span>
                 </label>
 
@@ -495,6 +548,49 @@ export default function SignupPage() {
           </div>
         </div>
       </div>
+
+      {/* Policy Modals - Same as LandingPage */}
+      <Modal isOpen={showPrivacy} onClose={() => setShowPrivacy(false)} title="Privacy Policy" icon={Shield}>
+        <div className="prose prose-sm dark:prose-invert max-w-none">
+          <p className="text-muted-foreground mb-4">Last updated: {new Date().toLocaleDateString()}</p>
+          <h3 className="text-primary font-semibold mt-4 mb-2">1. Information We Collect</h3>
+          <p>We collect information you provide directly to us, including your name, email address, phone number, CV/resume data, career preferences, and usage information.</p>
+          <h3 className="text-primary font-semibold mt-4 mb-2">2. How We Use Your Information</h3>
+          <p>We use your information to provide AI-powered career guidance, analyze your CV for opportunities, match you with potential employers, personalize your experience, and improve our services.</p>
+          <h3 className="text-primary font-semibold mt-4 mb-2">3. Data Security</h3>
+          <p>We implement industry-standard security measures including encryption, secure servers, and regular security audits to protect your personal information.</p>
+          <h3 className="text-primary font-semibold mt-4 mb-2">4. Your Rights</h3>
+          <p>You have the right to access, correct, or delete your personal data. Contact us at privacy@empowa-ai.co.za for any privacy concerns.</p>
+        </div>
+      </Modal>
+
+      <Modal isOpen={showTerms} onClose={() => setShowTerms(false)} title="Terms of Service" icon={Shield}>
+        <div className="prose prose-sm dark:prose-invert max-w-none">
+          <p className="text-muted-foreground mb-4">Last updated: {new Date().toLocaleDateString()}</p>
+          <h3 className="text-primary font-semibold mt-4 mb-2">1. Acceptance of Terms</h3>
+          <p>By accessing or using EmpowAI, you agree to be bound by these Terms of Service.</p>
+          <h3 className="text-primary font-semibold mt-4 mb-2">2. User Accounts</h3>
+          <p>You must be at least 18 years old to use this service. You are responsible for maintaining account security and all activities under your account.</p>
+          <h3 className="text-primary font-semibold mt-4 mb-2">3. AI Services</h3>
+          <p>Our AI provides recommendations based on your data. These are suggestions only - final career decisions are yours alone.</p>
+          <h3 className="text-primary font-semibold mt-4 mb-2">4. Prohibited Conduct</h3>
+          <p>You may not misuse our platform, upload malicious content, impersonate others, or violate any applicable laws.</p>
+        </div>
+      </Modal>
+
+      <Modal isOpen={showCookies} onClose={() => setShowCookies(false)} title="Cookies Policy" icon={Shield}>
+        <div className="prose prose-sm dark:prose-invert max-w-none">
+          <p className="text-muted-foreground mb-4">Last updated: {new Date().toLocaleDateString()}</p>
+          <h3 className="text-primary font-semibold mt-4 mb-2">What Are Cookies?</h3>
+          <p>Cookies are small text files stored on your device that help us provide and improve our services.</p>
+          <h3 className="text-primary font-semibold mt-4 mb-2">Types of Cookies We Use</h3>
+          <ul className="list-disc pl-5 space-y-1">
+            <li><strong>Essential Cookies:</strong> Required for platform functionality</li>
+            <li><strong>Preference Cookies:</strong> Remember your settings like language and theme</li>
+            <li><strong>Analytics Cookies:</strong> Help us understand how users interact with our platform</li>
+          </ul>
+        </div>
+      </Modal>
     </div>
   );
 }
