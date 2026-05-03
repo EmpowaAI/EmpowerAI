@@ -400,41 +400,25 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0 h-full">
-          {/* Header — 3-column grid prevents nav from overlapping logo at any viewport */}
-          <header className="sticky top-0 z-30 grid h-16 flex-shrink-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center border-b border-border/60 bg-background/85 px-4 backdrop-blur-md sm:px-6">
-            {/* Col 1 — Logo + back button (mobile & desktop) */}
-            <div className="flex min-w-0 items-center gap-1">
-              {/* Mobile back button on subpages — replaces hamburger as primary left action */}
-              {isSubPage ? (
-                <Link
-                  to="/dashboard"
-                  className="lg:hidden p-2 -ml-2 flex-shrink-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
-                  aria-label="Back to Dashboard"
-                >
-                  <ArrowLeft className="h-5 w-5" />
-                </Link>
-              ) : (
-                <div className="lg:hidden w-9" />
-              )}
-
-              {/* Logo — fixed min-width so nav can never push into it */}
-              <div className="flex-shrink-0">
-                <Logo size="md" linkTo="/dashboard" />
-              </div>
-
-              {/* Back button — desktop only, sits beside logo */}
+          {/* ========== FIXED HEADER - NO OVERLAPPING ON MOBILE ========== */}
+          <header className="sticky top-0 z-30 flex h-16 flex-shrink-0 items-center justify-between border-b border-border/60 bg-background/85 px-4 backdrop-blur-md sm:px-6">
+            
+            {/* Left side - Logo only */}
+            <div className="flex items-center gap-2">
+              <Logo size="md" linkTo="/dashboard" />
+              {/* Back button - desktop only or on subpages for tablet */}
               {isSubPage && (
                 <Link
                   to="/dashboard"
-                  className="hidden lg:flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors px-2 py-1.5 hover:bg-muted rounded-lg ml-1"
+                  className="hidden sm:flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors px-2 py-1.5 hover:bg-muted rounded-lg"
                 >
-                  <ArrowLeft className="h-4 w-4 flex-shrink-0" />
-                  <span className="text-sm font-medium whitespace-nowrap">Back</span>
+                  <ArrowLeft className="h-4 w-4" />
+                  <span className="text-sm font-medium">Back</span>
                 </Link>
               )}
             </div>
 
-            {/* Col 2 — Desktop nav pills, centred in its own column */}
+            {/* Desktop Navigation - Centered (hidden on mobile) */}
             <nav className="hidden lg:flex items-center justify-center">
               <div className="flex items-center gap-1 bg-muted/30 p-1 rounded-xl">
                 {navItems.map((item) => (
@@ -448,23 +432,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               </div>
             </nav>
 
-            {/* Col 3 — Right-aligned actions */}
-            <div className="flex items-center justify-end gap-2">
-              {/* Mobile account sheet trigger (avatar button) */}
-              <button
-                className="lg:hidden flex items-center justify-center p-1 rounded-full hover:ring-2 hover:ring-primary/30 transition-all"
-                onClick={() => setMobileMenuOpen(true)}
-                aria-label="Open account menu"
-              >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-secondary to-primary flex items-center justify-center text-white text-xs font-bold shadow ring-2 ring-secondary/20 overflow-hidden">
-                  {profileImageSource ? (
-                    <img src={profileImageSource} alt="Profile" className="h-full w-full object-cover" />
-                  ) : (
-                    initials
-                  )}
-                </div>
-              </button>
-
+            {/* Right side - Actions */}
+            <div className="flex items-center gap-2">
               {/* Desktop User Info */}
               <Link
                 to="/dashboard/profile"
@@ -482,6 +451,21 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   )}
                 </div>
               </Link>
+
+              {/* Mobile Avatar Button - Opens account sheet (no text, just icon to prevent overlap) */}
+              <button
+                className="lg:hidden flex items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-primary/30"
+                onClick={() => setMobileMenuOpen(true)}
+                aria-label="Open account menu"
+              >
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-secondary to-primary flex items-center justify-center text-white text-xs font-bold shadow ring-2 ring-secondary/20 overflow-hidden">
+                  {profileImageSource ? (
+                    <img src={profileImageSource} alt="Profile" className="h-full w-full object-cover" />
+                  ) : (
+                    initials
+                  )}
+                </div>
+              </button>
 
               {/* Desktop Sign Out */}
               <button
@@ -514,9 +498,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         : "bg-[var(--sa-gold)]"
                     )}
                   />
-                  <span className="truncate">
-                    {queueStatus.enabled ? "Queue" : "Off"}
-                  </span>
+                  <span className="truncate">{queueStatus.enabled ? "Queue" : "Off"}</span>
                 </button>
               )}
               <ThemeToggle />
