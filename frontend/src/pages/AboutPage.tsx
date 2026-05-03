@@ -7,7 +7,7 @@ export default function AboutPage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="text-center mb-8 sm:mb-12">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-3 sm:mb-4">
-            About EmpowerAI
+            About EmpowaAI
           </h1>
           <p className="text-base sm:text-xl text-muted-foreground">
             Empowering South African Youth Through Technology
@@ -20,7 +20,7 @@ export default function AboutPage() {
             <div>
               <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2 sm:mb-3">Our Mission</h2>
               <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                EmpowerAI exists to bridge the gap between South African youth and economic opportunity. We believe every
+                EmpowaAI exists to bridge the gap between South African youth and economic opportunity. We believe every
                 young person deserves a clear path to financial independence, regardless of their background or
                 circumstances. Our platform uses AI to provide personalized career guidance, real opportunities, and
                 practical tools to build their future.

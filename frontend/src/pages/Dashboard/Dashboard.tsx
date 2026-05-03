@@ -84,7 +84,7 @@ const Dashboard = () => {
     {
       icon: FileText,
       title: "Upload CV",
-      text: "Start with your CV so EmpowAI can understand your real skills.",
+      text: "Start with your CV so EmpowaAI can understand your real skills.",
       to: "/dashboard/cv-analyzer",
     },
     {
@@ -219,7 +219,7 @@ const Dashboard = () => {
 
                   <div className="pr-10">
                     <h1 className="font-display text-2xl font-bold text-primary md:text-3xl">
-                      Welcome to EmpowerAI
+                      Welcome to EmpowaAI
                     </h1>
                     <p className="mt-2 text-sm font-semibold text-muted-foreground md:text-base">
                       Three steps to career clarity.

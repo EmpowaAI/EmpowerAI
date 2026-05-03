@@ -82,7 +82,7 @@ export function DemoSection() {
             Live Demo
           </span>
           <h2 className="mt-4 font-display text-3xl font-bold tracking-tight text-primary sm:text-4xl md:text-5xl">
-            See EmpowAI in action
+            See EmpowaAI in action
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground sm:text-base">
             A 60-second taste of what happens after you upload your CV. No sign-up. Mahala.
