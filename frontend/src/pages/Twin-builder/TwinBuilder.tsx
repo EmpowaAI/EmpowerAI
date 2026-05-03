@@ -496,6 +496,19 @@ const TwinBuilder = () => {
             <div className="space-y-3">
               {/* Profile */}
               <section className="rounded-xl border border-border bg-card p-4">
+                {/* Stale-data warning: industry is default AND no skills means twin wasn't built from real CV */}
+                {displayIndustry === "General" && skills.length === 0 && (
+                  <div className="mb-3 flex items-start gap-2 rounded-lg border border-secondary/30 bg-secondary/5 px-3 py-2">
+                    <AlertCircle className="h-4 w-4 text-secondary flex-shrink-0 mt-0.5" />
+                    <p className="text-xs text-muted-foreground">
+                      This twin was built with limited data.{" "}
+                      <Link to="/dashboard/cv-analyzer" className="font-semibold text-secondary hover:underline">
+                        Re-analyse your CV
+                      </Link>{" "}
+                      for accurate results.
+                    </p>
+                  </div>
+                )}
                 <div className="flex items-start gap-3">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                     <UserRound className="h-5 w-5" />

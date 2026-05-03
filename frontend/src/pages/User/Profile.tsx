@@ -587,7 +587,11 @@ export default function ProfilePage() {
     );
   }
 
-  const displayName = profile.name === "Calendar Scheduling" ? (user?.name || "Your Name") : profile.name;
+  const displayName = profile.name && profile.name !== "Calendar Scheduling"
+    ? profile.name
+    : user?.name || "Your Name";
+
+  const isProfileIncomplete = !profile.occupation && !profile.province && !profile.bio;
 
   return (
     <div className="min-h-screen bg-background">
@@ -600,6 +604,33 @@ export default function ProfilePage() {
         <AnimatePresence>
           <Toast msg={toast} />
         </AnimatePresence>
+
+        {/* Incomplete profile nudge — shown until key fields are filled */}
+        {!isLoading && isProfileIncomplete && (
+          <div className="flex items-start gap-3 rounded-xl border border-secondary/30 bg-secondary/5 p-4">
+            <Sparkles className="h-5 w-5 text-secondary flex-shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground">Complete your profile</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Add your occupation, province, and bio so EmpowaAI can give you more personalised guidance.
+                {hasCVData && (
+                  <button
+                    onClick={autoFillFromCV}
+                    className="ml-2 text-secondary font-semibold hover:underline"
+                  >
+                    Auto-fill from CV →
+                  </button>
+                )}
+              </p>
+            </div>
+            <button
+              onClick={() => setIsEditing(true)}
+              className="flex-shrink-0 text-xs font-semibold text-secondary border border-secondary/30 rounded-lg px-3 py-1.5 hover:bg-secondary/10 transition-colors"
+            >
+              Fill in
+            </button>
+          </div>
+        )}
 
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Sidebar Card */}
