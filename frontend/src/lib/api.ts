@@ -1388,7 +1388,7 @@ export const userAPIReal = {
   updateProfile: async (data: any) => {
     try {
       return await request<any>('/user/profile', {
-        method: 'PUT',
+        method: 'PATCH',
         body: JSON.stringify(data),
       });
     } catch (error) {
