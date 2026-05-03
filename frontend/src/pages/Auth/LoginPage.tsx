@@ -3,7 +3,7 @@
  */
 import type React from "react";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Eye, EyeOff, Loader2, Sparkles, Mail, Lock, Home } from "lucide-react";
 import toast from 'react-hot-toast';
 import { authAPI } from "@/lib/api";
@@ -25,6 +25,7 @@ export default function LoginPage() {
   const [passwordFocused, setPasswordFocused] = useState(false);
   
   const navigate = useNavigate();
+  const location = useLocation();
   const { setUser, progress, updateProgress } = useUser();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -49,10 +50,14 @@ export default function LoginPage() {
         
         toast.success(`Welcome back, ${response.data.user.name}!`);
         
+        // Preserve the deep-link destination the user was trying to reach
+        const intendedPath = (location.state as { from?: Location })?.from?.pathname;
+        const from = intendedPath?.startsWith('/dashboard') ? intendedPath : null;
+
         // Sync progress from backend to ensure accurate state
         try {
           const syncedProgress = await syncProgressFromBackend();
-          
+
           // Update progress in context
           updateProgress('cvCompleted', syncedProgress.cvCompleted);
           updateProgress('twinCompleted', syncedProgress.twinCompleted);
@@ -60,7 +65,9 @@ export default function LoginPage() {
             updateProgress('empowermentScore', syncedProgress.empowermentScore);
           }
 
-          if (syncedProgress.cvCompleted && syncedProgress.twinCompleted) {
+          if (from) {
+            navigate(from, { replace: true });
+          } else if (syncedProgress.cvCompleted && syncedProgress.twinCompleted) {
             unlockAllPages(syncedProgress.empowermentScore || 0);
             navigate("/dashboard", { replace: true });
           } else if (syncedProgress.cvCompleted) {
@@ -71,7 +78,9 @@ export default function LoginPage() {
         } catch (error) {
           console.log('Error syncing progress, using local state:', error);
           // Fallback to local progress state
-          if (!progress.cvCompleted) {
+          if (from) {
+            navigate(from, { replace: true });
+          } else if (!progress.cvCompleted) {
             navigate("/dashboard/cv-analyzer", { replace: true });
           } else if (!progress.twinCompleted) {
             navigate("/dashboard/twin", { replace: true });

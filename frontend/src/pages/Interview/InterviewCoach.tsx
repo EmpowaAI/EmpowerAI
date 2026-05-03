@@ -1,5 +1,6 @@
 // frontend/src/pages/Interview/InterviewCoach.tsx
 import { useState, useEffect, useRef } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { motion } from 'framer-motion';
 import {
   Brain, MessageSquare, RefreshCw, Loader2, BarChart3,
@@ -156,11 +157,33 @@ export default function InterviewCoach() {
       setIsStarting(true);
       const cvData = getStoredCvAnalysis<any>() || undefined;
 
+      // Enrich context with Digital Twin profile if available
+      const twinRaw = localStorage.getItem('twinData');
+      let enrichedCvData = cvData;
+      if (twinRaw) {
+        try {
+          const twin = JSON.parse(twinRaw);
+          const twinProfile = twin?.profile ?? twin?.twin?.profile ?? twin;
+          enrichedCvData = {
+            ...(cvData || {}),
+            twinContext: {
+              industry: twinProfile?.industry ?? twin?.industry,
+              level: twinProfile?.level ?? twin?.level,
+              skills: twinProfile?.skills ?? twin?.skills ?? cvData?.sections?.skills,
+              careerPaths: twin?.careerPaths,
+              empowermentScore: twin?.empowermentScore ?? twin?.twin?.empowermentScore,
+            },
+          };
+        } catch {
+          // keep original cvData if twin parse fails
+        }
+      }
+
       const session = await interviewService.startInterview(
         selectedType,
         selectedDifficulty,
         company || undefined,
-        cvData,
+        enrichedCvData,
         jobDescription || undefined
       );
 
@@ -320,7 +343,9 @@ export default function InterviewCoach() {
                   {f.suggestedAnswer && (
                     <div className="bg-primary/5 rounded-xl p-4 border border-primary/20">
                       <h4 className="text-xs font-bold text-primary mb-2 flex items-center gap-2"><Award className="h-4 w-4" /> Model Answer</h4>
-                      <p className="text-xs text-muted-foreground leading-relaxed">{f.suggestedAnswer}</p>
+                      <div className="text-xs text-muted-foreground leading-relaxed prose prose-xs max-w-none dark:prose-invert prose-p:mb-1 prose-p:last:mb-0 prose-ul:my-1 prose-li:my-0">
+                        <ReactMarkdown>{f.suggestedAnswer}</ReactMarkdown>
+                      </div>
                     </div>
                   )}
                 </div>
