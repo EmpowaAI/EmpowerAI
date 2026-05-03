@@ -1038,7 +1038,7 @@ const CVAnalyzer = () => {
 
       <footer className="border-t border-border bg-background">
         <div className="container py-6 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} EmpowAI · Amandla e-Ubuntu 🇿🇦
+          © {new Date().getFullYear()} EmpowaAI · Amandla e-Ubuntu 🇿🇦
         </div>
       </footer>
 
