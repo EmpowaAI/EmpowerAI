@@ -61,7 +61,7 @@ const updateUserRules = [
   body('avatar')
     .optional()
     .trim()
-    .isURL().withMessage('Avatar must be a valid URL'),
+    .isLength({ max: 2_000_000 }).withMessage('Avatar must be a URL or base64 image under 2MB'),
 
   // Block attempts to update email or password through this route
   body('email')
