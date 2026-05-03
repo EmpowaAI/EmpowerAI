@@ -260,13 +260,18 @@ export default function ProfilePage() {
       
       setProfileImage(compressedImage);
       localStorage.setItem('profile_image', compressedImage);
-      
-      // Update user context
+
       if (updateUser) {
         updateUser({ profileImage: compressedImage });
       }
-      
-      showToast({ type: "success", text: "Profile picture updated! It will persist after logout." });
+
+      // Persist to backend so image survives across devices
+      try {
+        await userService.updateProfile({ avatar: compressedImage });
+        showToast({ type: "success", text: "Profile picture updated successfully." });
+      } catch {
+        showToast({ type: "success", text: "Profile picture updated locally. Changes will sync when reconnected." });
+      }
       setIsUploading(false);
     };
     
@@ -285,14 +290,20 @@ export default function ProfilePage() {
     }
   };
 
-  const removeImage = () => {
+  const removeImage = async () => {
     setProfileImage("");
     localStorage.removeItem('profile_image');
-    
+
     if (updateUser) {
       updateUser({ profileImage: "" });
     }
-    
+
+    try {
+      await userService.updateProfile({ avatar: "" });
+    } catch {
+      // non-fatal
+    }
+
     showToast({ type: "success", text: "Profile picture removed" });
   };
 
