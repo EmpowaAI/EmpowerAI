@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react"
+import ReactMarkdown from "react-markdown"
 import { Send, Loader2, MessageCircle, AlertCircle } from "lucide-react"
 import { useUser } from "../../contexts/user-context"
 import { cn } from "../../lib/utils"
@@ -106,7 +107,13 @@ export default function Chat() {
                     : "bg-muted text-foreground rounded-bl-none border border-border"
                 )}
               >
-                <p className="text-sm">{message.content}</p>
+                {message.role === "assistant" ? (
+                  <div className="text-sm prose prose-sm max-w-none dark:prose-invert prose-p:mb-1 prose-p:last:mb-0 prose-ul:my-1 prose-li:my-0">
+                    <ReactMarkdown>{message.content}</ReactMarkdown>
+                  </div>
+                ) : (
+                  <p className="text-sm">{message.content}</p>
+                )}
                 <p className="text-xs opacity-70 mt-1">
                   {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 </p>
