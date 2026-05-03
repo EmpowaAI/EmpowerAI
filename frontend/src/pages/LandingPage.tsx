@@ -813,12 +813,9 @@ export default function LandingPage() {
               <ul className="space-y-3">
                 <li className="flex items-center justify-center sm:justify-start gap-3 text-sm text-muted-foreground">
                   <Mail className="h-4 w-4 text-primary" />
-                  <span>info@empowa-ai.co.za</span>
+                  <span>aiempowa@gmail.com</span>
                 </li>
-                <li className="flex items-center justify-center sm:justify-start gap-3 text-sm text-muted-foreground">
-                  <Phone className="h-4 w-4 text-primary" />
-                  <span>+27 (0) 123 456 789</span>
-                </li>
+                
                 <li className="flex items-center justify-center sm:justify-start gap-3 text-sm text-muted-foreground">
                   <MapPin className="h-4 w-4 text-primary" />
                   <span>South Africa</span>
