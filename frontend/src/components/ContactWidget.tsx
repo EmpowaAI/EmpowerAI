@@ -12,7 +12,7 @@ export function ContactWidget() {
   const mailto = (subject: string) => `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(subject)}`;
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 sm:bottom-6 sm:right-6">
+    <div className="fixed bottom-20 right-4 z-50 sm:bottom-6 sm:right-6">
       {open && (
         <Card className="mb-3 w-[calc(100vw-2rem)] max-w-sm overflow-hidden border-border/70 bg-card p-0 shadow-glow animate-fade-up">
           <div className="flex items-center justify-between gap-2 bg-primary px-4 py-3 text-primary-foreground">
@@ -35,7 +35,7 @@ export function ContactWidget() {
 
           <div className="space-y-2 p-4">
             <a
-              href={mailto("Question about EmpowAI")}
+              href={mailto("Question about EmpowaAI")}
               className="flex items-start gap-3 rounded-xl border border-border/70 bg-background p-3 text-left transition-smooth hover:-translate-y-0.5 hover:border-secondary/60 hover:shadow-card-soft"
             >
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-secondary/10 text-secondary">
@@ -50,7 +50,7 @@ export function ContactWidget() {
             </a>
 
             <a
-              href={mailto("EmpowAI feedback")}
+              href={mailto("EmpowaAI feedback")}
               className="flex items-start gap-3 rounded-xl border border-border/70 bg-background p-3 text-left transition-smooth hover:-translate-y-0.5 hover:border-secondary/60 hover:shadow-card-soft"
             >
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">

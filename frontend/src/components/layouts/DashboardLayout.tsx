@@ -345,43 +345,26 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           aria-hidden={!mobileMenuOpen}
         />
 
-        {/* Mobile Menu */}
+        {/* Mobile Account Sheet — navigation is in the bottom tab bar; this is for account actions only */}
         <div
           className={cn(
-            "fixed inset-y-0 left-0 z-50 w-72 bg-card border-r border-border transform transition-all duration-300 ease-in-out shadow-2xl",
-            mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+            "fixed inset-y-0 right-0 z-50 w-72 bg-card border-l border-border transform transition-all duration-300 ease-in-out shadow-2xl",
+            mobileMenuOpen ? "translate-x-0" : "translate-x-full"
           )}
         >
           <div className="flex flex-col h-full">
-            {/* Mobile Menu Header */}
-            <div className="p-6 flex items-center justify-between border-b border-border">
-              <Logo size="md" linkTo="/dashboard" />
+            <div className="p-5 flex items-center justify-between border-b border-border">
+              <p className="text-sm font-bold text-foreground">Account</p>
               <button
                 className="text-muted-foreground hover:text-foreground p-2 hover:bg-muted rounded-lg transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
+                aria-label="Close menu"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            {/* Mobile Navigation */}
-            <div className="flex-1 overflow-y-auto py-4">
-              <div className="px-3 space-y-1">
-                {navItems.map((item) => (
-                  <NavLink
-                    key={item.path}
-                    item={item}
-                    isMobile
-                    pathname={pathname}
-                    prefetchRoute={prefetchRoute}
-                    onClick={() => setMobileMenuOpen(false)}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Mobile User Section - UPDATED with profile image */}
-            <div className="p-4 border-t border-border space-y-2">
+            <div className="flex-1 p-4 space-y-2">
               <Link
                 to="/dashboard/profile"
                 onClick={() => setMobileMenuOpen(false)}
@@ -389,26 +372,23 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               >
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-secondary to-primary flex items-center justify-center text-white font-bold flex-shrink-0 shadow-lg ring-2 ring-secondary/20 overflow-hidden">
                   {profileImageSource ? (
-                    <img 
-                      src={profileImageSource} 
-                      alt="Profile" 
-                      className="h-full w-full object-cover"
-                    />
+                    <img src={profileImageSource} alt="Profile" className="h-full w-full object-cover" />
                   ) : (
                     initials
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-foreground truncate">
-                    {displayName}
-                  </p>
+                  <p className="text-sm font-bold text-foreground truncate">{displayName}</p>
                   <p className="text-xs text-muted-foreground truncate">{displayEmail}</p>
                 </div>
                 <Settings className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
               </Link>
+            </div>
+
+            <div className="p-4 border-t border-border">
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-destructive hover:bg-destructive/10 transition-all cursor-pointer"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-destructive hover:bg-destructive/10 transition-all"
                 type="button"
               >
                 <LogOut className="w-5 h-5" />
@@ -422,16 +402,20 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="flex-1 flex flex-col min-w-0 h-full">
           {/* Header — 3-column grid prevents nav from overlapping logo at any viewport */}
           <header className="sticky top-0 z-30 grid h-16 flex-shrink-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center border-b border-border/60 bg-background/85 px-4 backdrop-blur-md sm:px-6">
-            {/* Col 1 — Logo + mobile hamburger (fixed left, never shrinks below content) */}
-            <div className="flex min-w-0 items-center gap-2">
-              {/* Mobile Menu Button */}
-              <button
-                className="lg:hidden p-2 -ml-2 flex-shrink-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
-                onClick={() => setMobileMenuOpen(true)}
-                aria-label="Open menu"
-              >
-                <Menu className="h-5 w-5" />
-              </button>
+            {/* Col 1 — Logo + back button (mobile & desktop) */}
+            <div className="flex min-w-0 items-center gap-1">
+              {/* Mobile back button on subpages — replaces hamburger as primary left action */}
+              {isSubPage ? (
+                <Link
+                  to="/dashboard"
+                  className="lg:hidden p-2 -ml-2 flex-shrink-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+                  aria-label="Back to Dashboard"
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                </Link>
+              ) : (
+                <div className="lg:hidden w-9" />
+              )}
 
               {/* Logo — fixed min-width so nav can never push into it */}
               <div className="flex-shrink-0">
@@ -466,7 +450,22 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
             {/* Col 3 — Right-aligned actions */}
             <div className="flex items-center justify-end gap-2">
-              {/* Desktop User Info - UPDATED with profile image */}
+              {/* Mobile account sheet trigger (avatar button) */}
+              <button
+                className="lg:hidden flex items-center justify-center p-1 rounded-full hover:ring-2 hover:ring-primary/30 transition-all"
+                onClick={() => setMobileMenuOpen(true)}
+                aria-label="Open account menu"
+              >
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-secondary to-primary flex items-center justify-center text-white text-xs font-bold shadow ring-2 ring-secondary/20 overflow-hidden">
+                  {profileImageSource ? (
+                    <img src={profileImageSource} alt="Profile" className="h-full w-full object-cover" />
+                  ) : (
+                    initials
+                  )}
+                </div>
+              </button>
+
+              {/* Desktop User Info */}
               <Link
                 to="/dashboard/profile"
                 className="hidden lg:flex items-center hover:bg-muted px-2 py-1.5 rounded-lg transition-colors group"

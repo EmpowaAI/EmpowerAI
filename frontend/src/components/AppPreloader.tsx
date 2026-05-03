@@ -24,7 +24,7 @@ const AppPreloader = () => {
       }`}
       role="status"
       aria-live="polite"
-      aria-label="Loading EmpowAI"
+      aria-label="Loading EmpowaAI"
     >
       <div className="flex flex-col items-center gap-5 animate-scale-in">
         <div className="relative flex h-24 w-24 items-center justify-center">
@@ -33,7 +33,7 @@ const AppPreloader = () => {
 
           <img
             src={logo}
-            alt="EmpowAI logo"
+            alt="EmpowaAI logo"
             className="h-14 w-14 rounded-md object-cover shadow-card-soft"
             width={56}
             height={56}
@@ -43,7 +43,7 @@ const AppPreloader = () => {
 
         <div className="text-center">
           <p className="font-display text-2xl font-semibold text-foreground">
-            EmpowAI
+            EmpowaAI
           </p>
           <p className="mt-1 text-sm font-medium text-muted-foreground">
             Preparing your career intelligence

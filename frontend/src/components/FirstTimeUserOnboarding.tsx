@@ -40,7 +40,7 @@ export default function FirstTimeUserOnboarding() {
     >
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h2 className="text-xl font-bold text-foreground mb-1">Welcome to EmpowerAI! 🚀</h2>
+          <h2 className="text-xl font-bold text-foreground mb-1">Welcome to EmpowaAI! 🚀</h2>
           <p className="text-sm text-muted-foreground">
             Let's get you started. Here's your journey to career empowerment:
           </p>
