@@ -163,7 +163,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
               const savedProfileImage = localStorage.getItem('profile_image')
               setUser({
                 ...backendUser,
-                profileImage: backendUser.profileImage || savedProfileImage || undefined
+                profileImage: backendUser.avatar || backendUser.profileImage || savedProfileImage || undefined
               })
               console.log('User loaded from backend:', backendUser.email)
             }
