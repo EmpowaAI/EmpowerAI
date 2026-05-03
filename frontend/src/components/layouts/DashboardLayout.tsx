@@ -154,6 +154,37 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     };
   }, [mobileMenuOpen]);
 
+  // Per-route page titles + noindex for all dashboard routes
+  useEffect(() => {
+    const titles: Record<string, string> = {
+      "/dashboard": "Dashboard — EmpowaAI",
+      "/dashboard/cv-analyzer": "CV Analyzer — EmpowaAI",
+      "/dashboard/twin": "Digital Twin — EmpowaAI",
+      "/dashboard/twin-builder": "Digital Twin — EmpowaAI",
+      "/dashboard/interview": "Interview Coach — EmpowaAI",
+      "/dashboard/opportunities": "Opportunities — EmpowaAI",
+      "/dashboard/chat": "AI Assistant — EmpowaAI",
+      "/dashboard/mentor": "AI Mentor — EmpowaAI",
+      "/dashboard/simulations": "Simulations — EmpowaAI",
+      "/dashboard/profile": "Profile — EmpowaAI",
+      "/dashboard/settings": "Settings — EmpowaAI",
+    };
+    document.title = titles[pathname] ?? "EmpowaAI";
+
+    let meta = document.querySelector<HTMLMetaElement>('meta[name="robots"]');
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.name = "robots";
+      document.head.appendChild(meta);
+    }
+    meta.content = "noindex, nofollow";
+
+    return () => {
+      document.title = "EmpowaAI";
+      meta?.remove();
+    };
+  }, [pathname]);
+
   const displayName = user?.name?.split(" ")[0] || "Guest";
   const displayEmail = user?.email || "guest@email.com";
   
