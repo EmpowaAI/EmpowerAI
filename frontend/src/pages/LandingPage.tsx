@@ -1,6 +1,7 @@
 // LandingPage.tsx - Complete with Authentication-Aware Navbar
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { ConsentBanner } from "@/components/ConsentBanner";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import {
@@ -895,6 +896,7 @@ export default function LandingPage() {
       </Modal>
 
       <ContactWidget />
+      <ConsentBanner />
     </div>
   );
 }
