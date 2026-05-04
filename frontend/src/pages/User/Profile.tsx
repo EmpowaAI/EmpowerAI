@@ -283,7 +283,7 @@ export default function ProfilePage() {
     reader.readAsDataURL(file);
     event.target.value = '';
   };
-
+/*
   // Compress image function
   const compressImage = (base64String: string): Promise<string> => {
     return new Promise((resolve) => {
@@ -318,7 +318,7 @@ export default function ProfilePage() {
       };
       img.onerror = () => resolve(base64String);
     });
-  };
+  };  */
 
   const triggerFileUpload = () => {
     if (fileInputRef.current) {
