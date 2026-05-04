@@ -283,42 +283,6 @@ export default function ProfilePage() {
     reader.readAsDataURL(file);
     event.target.value = '';
   };
-/*
-  // Compress image function
-  const compressImage = (base64String: string): Promise<string> => {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.src = base64String;
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const maxSize = 200; // 200x200 pixels for profile images
-        let width = img.width;
-        let height = img.height;
-        
-        if (width > height) {
-          if (width > maxSize) {
-            height = (height * maxSize) / width;
-            width = maxSize;
-          }
-        } else {
-          if (height > maxSize) {
-            width = (width * maxSize) / height;
-            height = maxSize;
-          }
-        }
-        
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx?.drawImage(img, 0, 0, width, height);
-        
-        // Compress to JPEG with 0.7 quality
-        const compressed = canvas.toDataURL('image/jpeg', 0.7);
-        resolve(compressed);
-      };
-      img.onerror = () => resolve(base64String);
-    });
-  };  */
 
   const triggerFileUpload = () => {
     if (fileInputRef.current) {
@@ -831,6 +795,7 @@ export default function ProfilePage() {
           </div>
         </Modal>
 
+        {/* Change Email Modal */}
         <Modal open={showEmailModal} onClose={() => setShowEmailModal(false)}>
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-foreground">Change Email</h3>
@@ -845,6 +810,7 @@ export default function ProfilePage() {
           </div>
         </Modal>
 
+        {/* Delete Account Modal */}
         <Modal open={showDeleteModal} onClose={() => setShowDeleteModal(false)} variant="danger">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-destructive">Delete Account</h3>
