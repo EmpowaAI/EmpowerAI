@@ -661,9 +661,9 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Main Form Area */}
+          {/* Main Form Area - Rest remains the same */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Personal Information */}
+            {/* Personal Information - Keep existing form */}
             <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
               <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
                 <h3 className="text-lg font-semibold text-foreground">Personal Information</h3>
