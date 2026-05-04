@@ -1,45 +1,89 @@
 
-
-# Email Service Setup Guide
+# Email Service Setup Guide (Production Version)
 
 ## Overview
 
-The Email Service handles all user email communications in EmpowerAI, including:
+The Email Service is a **centralized communication layer** responsible for handling all outbound email operations in EmpowerAI.
 
-* ✅ **User Verification**: Sends verification emails during registration
-* ✅ **Password Recovery**: Handles forgot password and reset password flows
-* ✅ **Secure SMTP Integration**: Uses Gmail with app passwords
-* ✅ **Reusable Service Functions**: Centralized email sending logic
+It goes beyond basic authentication emails and supports:
 
-This ensures all email-related workflows are consistent and easy to maintain.
+* ✅ **Authentication Emails** (verification, reset, email change, deletion)
+* ✅ **User Lifecycle Emails** (welcome, upgrades)
+* ✅ **Marketplace Emails** (job applications, confirmations)
+* ✅ **System Notifications**
+* ✅ **Feedback & Surveys**
+* ✅ **Support Requests**
+* ✅ **Secure API-based delivery (Brevo)**
+
+All email logic is centralized into a single service for consistency, scalability, and maintainability.
 
 ---
 
 ## Features
 
-* ✅ **Account Verification Emails**: Sends unique token links to verify accounts
-* ✅ **Forgot Password Emails**: Sends password reset links with secure tokens
-* ✅ **Customizable Email Templates**: HTML content with dynamic links
-* ✅ **Environment Configurable**: Uses `.env` for host, port, and credentials
-* ✅ **Non-blocking Service**: Errors in sending emails do not crash the server
+* ✅ **Token-based authentication emails** (secure links)
+* ✅ **Centralized reusable email service**
+* ✅ **HTML + text fallback support**
+* ✅ **Input sanitization (prevents injection)**
+* ✅ **Retry logic for failed email delivery**
+* ✅ **Environment-based configuration**
+* ✅ **Structured logging for debugging**
+* ✅ **Non-blocking architecture (safe failures)**
+
+---
+
+## Email Categories
+
+### 🔐 Authentication
+
+* Email verification
+* Password reset
+* Email change confirmation
+* Account deletion confirmation
+
+### 👤 User Lifecycle
+
+* Welcome emails
+* Subscription upgrades (free → premium)
+
+### 💼 Marketplace
+
+* Job application notifications (to employer)
+* Application confirmation (to applicant)
+
+### 📢 System Notifications
+
+* General system alerts
+* Custom notifications with optional CTA buttons
+
+### 📝 Feedback & Surveys
+
+* User feedback submission
+* Survey responses (structured table format)
+
+### 🆘 Support
+
+* User support requests routed to admin
 
 ---
 
 ## How It Works
 
-### User Registration Flow
+### Email Flow (General)
 
-1. **Register user** → `POST /api/auth/register`
-2. **EmailService** generates a unique verification token and sends email
-3. **User clicks verification link** → `GET /api/account/verify?token=<token>`
-4. **Account is verified** → user can log in
-
-### Forgot Password Flow
-
-1. User requests password reset → `POST /api/account/forgot`
-2. **EmailService** sends reset token link
-3. User submits new password → `POST /api/account/reset`
-4. Password is updated in the database
+```text
+Controller / Service
+        ↓
+EmailService method called
+        ↓
+Content sanitized + wrapped
+        ↓
+Brevo API request sent
+        ↓
+Retry if failed (2 attempts)
+        ↓
+Log result
+```
 
 ---
 
@@ -47,127 +91,245 @@ This ensures all email-related workflows are consistent and easy to maintain.
 
 ### Environment Variables
 
-Add the following to your `.env` file:
-
 ```env
-# Email SMTP configuration
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_USER=your_gmail_address@gmail.com
-EMAIL_PASS=your_gmail_app_password
+# Brevo API Configuration
+BREVO_API_KEY=your_brevo_api_key
 
-# Frontend URL for verification/reset links
+# Sender Info
+EMAIL_FROM=no-reply@yourapp.com
+EMAIL_NAME=EmpowaAI
+
+# Frontend URL (used for token links)
 FRONTEND_URL=https://yourapp.com
+
+# Environment
+NODE_ENV=production
 ```
 
-> ⚠️ Never commit your `.env` with real credentials.
+> ⚠️ Never commit `.env` to version control.
 
 ---
 
-### Gmail Setup Steps
+## Email Provider (Brevo)
 
-1. **Enable 2-Step Verification** on your Gmail account.
-2. Go to **Google Account → Security → App Passwords**.
-3. Create a new app password for **Mail → Other (Custom Name)**.
-4. Copy the 16-character password and use it as `EMAIL_PASS` in `.env`.
-5. Ensure `EMAIL_USER` matches the Gmail account used to generate the app password.
-6. Test sending emails using registration or forgot password flows.
+This service uses Brevo (formerly Sendinblue):
 
----
-
-## Files Added
-
-| File                   | Location                               | Purpose                                                                                                                    |
-| ---------------------- | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `accountController.js` | `src/controllers/accountController.js` | Handles logic for `/verify`, `/forgot`, `/reset` routes. Calls `emailService` functions.                                   |
-| `emailService.js`      | `src/services/emailService.js`         | Centralized email sending functions (`sendVerificationEmail`, `sendPasswordResetEmail`). Uses SMTP with Gmail credentials. |
-| `routes/account.js`    | `src/routes/account.js`                | Defines public routes for email verification and password recovery.                                                        |
-| `.env`                 | Project root                           | Stores email credentials and frontend URL for links.                                                                       |
+* Transactional email API
+* High deliverability
+* Built-in retry resilience
+* No SMTP configuration required
 
 ---
 
-## Usage
+## Core File
 
-### Sending Verification Email
+| File              | Location        | Purpose                                       |
+| ----------------- | --------------- | --------------------------------------------- |
+| `emailService.js` | `src/services/` | Handles all email sending logic and templates |
 
-Triggered automatically on user registration:
+---
+
+## Usage Examples
+
+### 🔐 Send Verification Email
 
 ```javascript
-await emailService.sendVerificationEmail(user.email, token);
-```
-
-Verification link example:
-
-```
-GET https://yourapp.com/api/account/verify?token=<token>
-```
-
-### Sending Password Reset Email
-
-Triggered via forgot password route:
-
-```javascript
-await emailService.sendPasswordResetEmail(user.email, token);
-```
-
-Reset link example:
-
-```
-POST https://yourapp.com/api/account/reset
-Body: { token: "<token>", newPassword: "12345678" }
+await emailService.sendVerification(email, token);
 ```
 
 ---
 
-## Example Email Flow
+### 🔑 Send Password Reset
 
-**Registration / Verification Flow:**
+```javascript
+await emailService.sendReset(email, token);
+```
+
+---
+
+### 🗑️ Send Account Deletion
+
+```javascript
+await emailService.sendAccountDeletion(email, token);
+```
+
+---
+
+### 📧 Send Email Change Confirmation
+
+```javascript
+await emailService.sendEmailChange(email, token);
+```
+
+---
+
+### 👋 Send Welcome Email
+
+```javascript
+await emailService.sendWelcome(email, name);
+```
+
+---
+
+### 💎 Send Upgrade Notification
+
+```javascript
+await emailService.sendUpgrade(email, name, plan);
+```
+
+---
+
+### 💼 Job Application (Employer)
+
+```javascript
+await emailService.sendJobApplication(employerEmail, applicantName, jobTitle);
+```
+
+---
+
+### ✅ Application Confirmation (User)
+
+```javascript
+await emailService.sendApplicationConfirmation(userEmail, jobTitle);
+```
+
+---
+
+### 📢 System Notification
+
+```javascript
+await emailService.sendNotification(email, subject, title, message);
+```
+
+---
+
+### 📝 Feedback Submission
+
+```javascript
+await emailService.sendFeedback(userEmail, name, message);
+```
+
+---
+
+### 📊 Survey Submission
+
+```javascript
+await emailService.sendSurvey(userEmail, name, responses);
+```
+
+---
+
+### 🆘 Support Request
+
+```javascript
+await emailService.sendSupportRequest(userEmail, message);
+```
+
+---
+
+## Example Flows
+
+### 🔐 Registration Flow
 
 ```text
 User registers
      ↓
-EmailService sends verification email with token
+sendVerification()
      ↓
-User clicks verification link
+User clicks link
      ↓
-Account verified → User can login
+Account verified
 ```
 
-**Forgot / Reset Password Flow:**
+---
+
+### 🔑 Password Reset Flow
 
 ```text
-User requests password reset
+User requests reset
      ↓
-EmailService sends reset link
+sendReset()
      ↓
-User submits new password with token
+User submits new password
      ↓
 Password updated
 ```
 
 ---
 
+### 💼 Job Application Flow
+
+```text
+User applies for job
+     ↓
+sendJobApplication() → employer
+sendApplicationConfirmation() → user
+```
+
+---
+
+## Security & Reliability
+
+### 🔒 Security
+
+* All user input is sanitized (prevents HTML/script injection)
+* Tokens must be validated and expired on backend
+* No sensitive data is exposed in emails
+
+### 🔁 Reliability
+
+* Retry mechanism (2 attempts)
+* Logs failures without crashing server
+* Text fallback for email clients
+
+---
+
 ## Monitoring & Debugging
 
-* Check server logs for email sending errors
-* Ensure SMTP credentials are correct in `.env`
-* Test email flows using registration and forgot password endpoints
+* Logs include:
+
+  * timestamp
+  * environment
+  * error messages
+* Check logs for:
+
+  * failed API calls
+  * missing environment variables
 
 ---
 
 ## Notes
 
-* `FRONTEND_URL` must point to your frontend to build verification/reset links correctly.
-* Errors in email sending do not block server startup.
-* Email templates are HTML for better user experience.
+* `FRONTEND_URL` is required for building action links
+* Email failures do not crash the application
+* HTML templates are inline for simplicity (can be externalized later)
 
 ---
 
 ## Future Enhancements
 
-* [ ] Add custom HTML templates per email type
-* [ ] Track email delivery status
-* [ ] Add support for multiple email providers
-* [ ] Integrate with transactional email services (SendGrid, Postmark)
+* [ ] Email queue system (BullMQ + Redis)
+* [ ] Template engine (Handlebars / MJML)
+* [ ] Email analytics (open/click tracking)
+* [ ] Multi-provider fallback (Brevo + SendGrid)
+* [ ] Rate limiting for abuse prevention
+
+---
+
+## 🚀 Final Reality Check
+
+This is no longer:
+
+> “send an email”
+
+This is:
+
+> **a system-level communication service**
+
+You’ve built something that can power:
+
+* SaaS platforms
+* marketplaces
+* real production apps
 
 

@@ -27,8 +27,8 @@ import toast from "react-hot-toast";
 
 const SUPPORT_EMAIL = "support@empowa.org";
 
-const initialsOf = (name: string) =>
-  name
+const initialsOf = (name?: string) =>
+  (name ?? "")
     .trim()
     .split(/\s+/)
     .map((p) => p[0])

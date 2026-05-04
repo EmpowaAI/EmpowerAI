@@ -1,209 +1,240 @@
 
+
 # 🤖 AI Service (EmpowerAI)
 
 ## Overview
 
-The **AI Service** is the intelligence backbone of EmpowerAI.
-It powers advanced features like CV analysis, job matching, personalized AI twins, and interview coaching.
+The **AI Service** is the core intelligence layer of EmpowerAI.
+It acts as a bridge between the Node.js backend and the Python-based AI engine, handling:
 
-This service is designed as a **decoupled microservice system**, enabling independent scaling, resilience, and flexibility.
+* CV analysis
+* Job matching intelligence
+* AI-generated insights
+* Prompt-based processing
+* OpenAI integration (or alternative LLMs)
 
----
+It is designed to be **fast, resilient, and cloud-friendly**, with built-in support for:
 
-## 🧠 Core Capabilities
-
-### 🎯 AI Features
-
-* ✅ CV Analysis (skills, experience extraction)
-* ✅ Job Matching Engine
-* ✅ AI Twin Builder (personalized user intelligence model)
-* ✅ Interview Coach (mock interviews + feedback)
-* ✅ AI Insights Engine (career recommendations)
-* ✅ Prompt Processing (custom AI queries)
+* cold starts (Render free tier)
+* rate limits
+* retries
+* health monitoring
 
 ---
 
-## 🏗️ System Architecture
-
-Below is the full system architecture:
-
-![AI Service Architecture](sandbox:/mnt/data/a_clean_infographic_diagram_in_a_landscape_layout.png)
-
----
-
-## 🧩 Architecture Breakdown
-
-### 1. Client Layer
-
-* Web App
-* Mobile App
-
-Initiates requests such as:
-
-* CV upload
-* Job search
-* Interview simulation
-
----
-
-### 2. Node.js Backend (API Server)
-
-Handles:
-
-* Routing & controllers
-* Business logic
-* Authentication (JWT / API keys)
-* Logging & monitoring
-
-Includes:
-
-* AI Service Client (Axios layer)
-* Health Check Service
-* Caching layer (Redis optional)
-
----
-
-### 3. AI Service Client (Critical Layer)
-
-This is your **resilience layer**.
-
-Features:
-
-* Request interceptors (logging, request ID)
-* Timeout handling (30s dev / 90s prod)
-* Retry logic (exponential backoff)
-* Circuit breaker protection
-* Cold start awareness (Render support)
-* Rate limit handling (429 safe)
-
----
-
-### 4. Python AI Service (FastAPI)
-
-Core intelligence engine.
-
-#### Modules:
-
-* **CV Analyzer**
-
-  * Extracts structured data from CVs
-
-* **Job Matcher**
-
-  * Matches candidates to roles
-
-* **AI Twin Builder**
-
-  * Builds personalized AI profile per user
-
-* **Interview Coach**
-
-  * Simulates interviews and provides feedback
-
-* **AI Insights Engine**
-
-  * Generates career advice & recommendations
-
-* **Prompt Processor**
-
-  * Handles custom AI queries
-
----
-
-### 5. AI / LLM Providers
-
-Supports multiple providers:
-
-* OpenAI
-* Anthropic
-* Google Gemini
-* Mistral
-* Local models (optional)
-
----
-
-## 🔁 Request Flow
+## 🧠 Architecture
 
 ```text
-Client → Backend → AI Client → Python AI Service → LLM → Response
+Frontend
+   ↓
+Node.js Backend
+   ↓
+AI Service Client (Axios Layer)
+   ↓
+Python AI Service (FastAPI / Flask)
+   ↓
+OpenAI / LLM Provider
+```
+
+The AI Service is intentionally **decoupled** so it can scale independently from the main backend.
+
+---
+
+## 🚀 Features
+
+### Core AI Capabilities
+
+* CV parsing & analysis
+* Job recommendation matching
+* AI-generated career insights
+* Natural language processing endpoints
+* Structured AI response formatting
+
+### Reliability Features
+
+* Retry logic with exponential backoff
+* Circuit breaker protection
+* Timeout handling
+* Cold start detection (Render support)
+* Request tracing (Request ID support)
+
+### Monitoring
+
+* Health check endpoint (`/health`)
+* OpenAI backend status reporting
+* Cached health state for performance optimization
+
+---
+
+## 📡 Base URL
+
+```env
+AI_SERVICE_URL=http://localhost:8000
+```
+
+Production example:
+
+```env
+AI_SERVICE_URL=https://your-ai-service.onrender.com
 ```
 
 ---
 
-## 🩺 Health Monitoring
+## 🔐 Authentication
 
-### Endpoint
+If enabled:
+
+```http
+X-API-KEY: your-secret-key
+```
+
+---
+
+## 📊 API Endpoints
+
+---
+
+### 🟢 Health Check
 
 ```http
 GET /health
 ```
 
-### Status Types
+Response:
 
-| Status       | Meaning             |
-| ------------ | ------------------- |
-| connected    | Fully operational   |
-| sleeping     | Cold start (Render) |
-| disconnected | Service unreachable |
-| unhealthy    | Service degraded    |
+```json
+{
+  "status": "healthy",
+  "openai_status": "connected"
+}
+```
 
 ---
 
-### Health Strategy
+### 🧠 CV Analysis
 
-* Cached for 5 minutes
-* Timeout detection
-* Cold start awareness
-* Startup ping check
+```http
+POST /api/analyze-cv
+```
+
+Request:
+
+```json
+{
+  "cvText": "John is a software developer with React experience..."
+}
+```
+
+Response:
+
+```json
+{
+  "skills": ["React", "Node.js"],
+  "recommendations": ["Improve backend skills"],
+  "jobMatches": ["Frontend Developer"]
+}
+```
+
+---
+
+### 💼 Job Matching
+
+```http
+POST /api/match-jobs
+```
+
+Request:
+
+```json
+{
+  "skills": ["React", "TypeScript"],
+  "experience": "junior"
+}
+```
+
+---
+
+### 🤖 AI Prompt Processing
+
+```http
+POST /api/prompt
+```
+
+Request:
+
+```json
+{
+  "prompt": "Explain microservices architecture"
+}
+```
+
+---
+
+## 🩺 Health System
+
+The service exposes a robust health monitoring system.
+
+### Status Types
+
+| Status       | Meaning                         |
+| ------------ | ------------------------------- |
+| connected    | AI service fully operational    |
+| unhealthy    | Service responding but degraded |
+| sleeping     | Cold start / Render waking up   |
+| disconnected | Service unreachable             |
+
+---
+
+### Cached Health State
+
+To prevent overload, health results are cached:
+
+* Cache duration: **5 minutes**
+* Reduces unnecessary `/health` calls
+* Improves performance under load
 
 ---
 
 ## ⚙️ Environment Variables
 
 ```env
-AI_SERVICE_URL=https://your-ai-service.onrender.com
+# AI Service Core
+AI_SERVICE_URL=http://localhost:8000
 AI_SERVICE_API_KEY=your_api_key
 
+# Performance
 AI_HEALTH_TIMEOUT_MS=15000
 AI_HEALTH_STALE_MS=300000
 
+# Environment
 NODE_ENV=production
 ```
 
 ---
 
-## 🔐 Security
-
-* API key authentication (`X-API-KEY`)
-* JWT authentication (backend layer)
-* Input validation before AI calls
-* No sensitive data exposed in responses
-
----
-
 ## 🔁 Reliability Design
 
-### Retry Logic
+### Retry Strategy
 
-* Retries only on:
+* Only retries on:
 
-  * timeouts
   * network failures
+  * timeouts
+* Uses exponential backoff:
 
-Backoff:
-
-```text
-2s → 4s → 8s
-```
+  ```
+  2s → 4s → 8s
+  ```
 
 ---
 
 ### Circuit Breaker
 
-Prevents overload when AI service is failing:
+Prevents cascading failures when AI service is unstable:
 
-* Stops requests after repeated failures
-* Automatically recovers
+* Opens after repeated failures
+* Blocks requests temporarily
+* Auto-recovers after cooldown
 
 ---
 
@@ -211,18 +242,20 @@ Prevents overload when AI service is failing:
 
 Optimized for platforms like Render:
 
-* Detects sleeping services
-* Returns user-friendly messages
-* Avoids unnecessary retries
+* Detects timeout patterns
+* Marks service as “sleeping”
+* Provides user-friendly messages
 
 ---
 
-## 📦 Integration Example
+## 📦 Integration (Node.js Backend)
+
+Example usage with AI client:
 
 ```javascript
 const aiClient = require('./services/aiClient');
 
-const result = await aiClient.post('/analyze-cv', {
+const response = await aiClient.post('/analyze-cv', {
   cvText: userCv
 });
 ```
@@ -231,79 +264,66 @@ const result = await aiClient.post('/analyze-cv', {
 
 ## 🧪 Startup Health Check
 
+Automatically runs on backend startup:
+
 ```javascript
 pingAiServiceOnStartup();
 ```
 
-Runs once at server start to:
+Logs:
 
-* verify AI availability
-* log OpenAI status
-* detect cold starts
-
----
-
-## 📊 Observability
-
-Includes:
-
-* Structured logging
-* Request ID tracing
-* Error classification
-* Performance timing
-* Health status tracking
+* service availability
+* OpenAI status
+* connection failures
 
 ---
 
-## 📉 Failure Handling
+## 📉 Failure Handling Strategy
 
-| Scenario      | Behavior                    |
-| ------------- | --------------------------- |
-| Timeout       | Retry                       |
-| 429           | No retry (prevent overload) |
-| 503           | Cold start message          |
-| 500           | Controlled failure          |
-| Network error | Retry + fallback            |
+| Scenario       | Behavior                     |
+| -------------- | ---------------------------- |
+| Timeout        | Retry with backoff           |
+| 429 Rate Limit | No retry (prevents overload) |
+| 503 Cold Start | User-friendly retry message  |
+| 500 Error      | Controlled failure response  |
+| Network Error  | Retry + fallback error       |
+
+---
+
+## 🔍 Logging
+
+Structured logging includes:
+
+* Request ID tracking
+* Response time metrics
+* Error categorization
+* AI service state transitions
 
 ---
 
 ## 🛠 Tech Stack
 
-* Node.js (API layer)
-* Python (FastAPI AI service)
-* Axios (communication)
-* OpenAI / LLM providers
-* Redis (optional caching)
-* Winston (logging)
+* Python (FastAPI / Flask)
+* OpenAI API / LLM Provider
+* Node.js (consumer layer)
+* Axios (communication layer)
 
 ---
 
 ## 🚀 Future Improvements
 
-* [ ] Queue system (BullMQ / Celery)
-* [ ] Streaming responses (SSE / WebSockets)
-* [ ] Multi-model fallback
-* [ ] AI response caching (Redis)
-* [ ] Observability dashboard (Grafana)
-* [ ] Rate limiting per user
-* [ ] AI cost tracking
+* [ ] Add Redis caching layer for AI responses
+* [ ] Add streaming responses (SSE / WebSockets)
+* [ ] Add request queue system (BullMQ / Celery)
+* [ ] Add model switching (OpenAI / local LLM fallback)
+* [ ] Add observability dashboard (Prometheus + Grafana)
+* [ ] Add semantic caching for repeated prompts
 
 ---
 
 ## ⚠️ Notes
 
-* First request may take 30–60 seconds (cold start)
-* Health caching prevents unnecessary load
-* Designed for horizontal scaling
+* AI service may experience cold starts on free hosting tiers
+* First request after inactivity may take 30–60 seconds
+* Health caching reduces unnecessary load on service
 
----
-
-## 🧠 Final Perspective
-
-This isn’t just an API.
-
-It’s a **distributed AI system** with:
-
-* resilience under failure
-* intelligence at scale
-* modular architecture
