@@ -1,4 +1,4 @@
-// LandingPage.tsx - Complete with Working Contact Form (mailto)
+// LandingPage.tsx - Complete Public Version (No Login Required)
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { ConsentBanner } from "@/components/ConsentBanner";
@@ -33,9 +33,7 @@ import {
   FileText,
   Cookie,
   MessageSquare,
-  Phone,
   Send,
-  UserPlus,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ProfileMenu } from "@/components/ProfileMenu";
@@ -84,7 +82,7 @@ function Modal({ isOpen, onClose, title, icon: Icon, children }: {
 }
 
 export default function LandingPage() {
-  const { user } = useUser(); // Get authentication state
+  const { user } = useUser(); // Get authentication state (but not enforcing login)
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   
   // Modal states
@@ -162,12 +160,12 @@ export default function LandingPage() {
     setIsSubmitting(false);
   };
 
-  // Check if user is logged in
+  // Check if user is logged in (for display purposes only - NOT enforcing)
   const isLoggedIn = !!user;
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
-      {/* ========== AUTHENTICATION-AWARE NAVBAR ========== */}
+      {/* ========== PUBLIC NAVBAR (Always shows Sign In/Get Started) ========== */}
       <header className="sticky top-0 z-50 w-full border-b border-border/10 bg-background/95 backdrop-blur-md">
         <div className="container mx-auto">
           <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -193,7 +191,7 @@ export default function LandingPage() {
               </Link>
             </nav>
 
-            {/* Right Side Actions - Authentication Aware */}
+            {/* Right Side Actions - Always visible for public browsing */}
             <div className="flex items-center gap-3">
               {/* Language Badge - Desktop only */}
               <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/5 border border-primary/10">
@@ -208,27 +206,19 @@ export default function LandingPage() {
               
               <ThemeToggle />
               
-              {/* Authentication-Aware Buttons */}
-              {isLoggedIn ? (
-                // Show Profile Menu for logged-in users
-                <ProfileMenu />
-              ) : (
-                // Show Sign In button for logged-out users
-                <Link 
-                  to="/login" 
-                  className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-semibold text-primary border border-primary/30 rounded-lg hover:bg-primary/10 transition-all"
-                >
-                  <LogIn className="h-4 w-4" />
-                  Sign In
-                </Link>
-              )}
+              {/* Always show Sign In button - Public access */}
+              <Link 
+                to="/login" 
+                className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-semibold text-primary border border-primary/30 rounded-lg hover:bg-primary/10 transition-all"
+              >
+                <LogIn className="h-4 w-4" />
+                Sign In
+              </Link>
               
-              {/* Get Started Button - Only show for logged-out users */}
-              {!isLoggedIn && (
-                <Button asChild variant="cta" size="sm" className="hidden lg:flex shimmer">
-                  <Link to="/signup">Get Started</Link>
-                </Button>
-              )}
+              {/* Always show Get Started button - Public access */}
+              <Button asChild variant="cta" size="sm" className="hidden lg:flex shimmer">
+                <Link to="/signup">Get Started</Link>
+              </Button>
 
               {/* Mobile Menu Button */}
               <button
@@ -278,28 +268,18 @@ export default function LandingPage() {
             </Link>
             
             <div className="border-t border-border my-3 pt-3 space-y-2">
-              {isLoggedIn ? (
-                // Mobile view for logged-in users
-                <div className="flex items-center justify-between py-2">
-                  <span className="text-sm text-muted-foreground">Logged in as</span>
-                  <span className="text-sm font-medium text-primary">{user?.name?.split(' ')[0]}</span>
-                </div>
-              ) : (
-                // Mobile view for logged-out users
-                <>
-                  <Link 
-                    to="/login" 
-                    onClick={() => setIsMenuOpen(false)}
-                    className="flex items-center justify-center gap-2 w-full py-3 px-4 text-base font-medium text-primary border border-primary/30 rounded-lg hover:bg-primary/5 transition-colors"
-                  >
-                    <LogIn className="h-5 w-5" />
-                    Sign In
-                  </Link>
-                  <Button asChild variant="cta" size="lg" className="w-full shimmer" onClick={() => setIsMenuOpen(false)}>
-                    <Link to="/signup">Get Started</Link>
-                  </Button>
-                </>
-              )}
+              {/* Mobile view - Always show Sign In and Get Started */}
+              <Link 
+                to="/login" 
+                onClick={() => setIsMenuOpen(false)}
+                className="flex items-center justify-center gap-2 w-full py-3 px-4 text-base font-medium text-primary border border-primary/30 rounded-lg hover:bg-primary/5 transition-colors"
+              >
+                <LogIn className="h-5 w-5" />
+                Sign In
+              </Link>
+              <Button asChild variant="cta" size="lg" className="w-full shimmer" onClick={() => setIsMenuOpen(false)}>
+                <Link to="/signup">Get Started</Link>
+              </Button>
             </div>
           </nav>
         </div>
@@ -344,14 +324,15 @@ export default function LandingPage() {
               </p>
 
               <div className="mt-6 sm:mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row px-4">
-                {!isLoggedIn && (
-                  <Button asChild variant="cta" size="xl" className="shimmer w-full sm:w-auto text-sm sm:text-base">
-                    <Link to="/signup">
-                      {currentLetsBegin}
-                      <ArrowRight className="ml-1 h-4 w-4" />
-                    </Link>
-                  </Button>
-                )}
+                {/* Always show Get Started button */}
+                <Button asChild variant="cta" size="xl" className="shimmer w-full sm:w-auto text-sm sm:text-base">
+                  <Link to="/signup">
+                    {currentLetsBegin}
+                    <ArrowRight className="ml-1 h-4 w-4" />
+                  </Link>
+                </Button>
+                
+                {/* Always show Demo button */}
                 <Button asChild variant="outlineLight" size="xl" className="w-full sm:w-auto text-sm sm:text-base">
                   <Link to="/demo">
                     <Play className="mr-1 h-4 w-4" />
@@ -360,18 +341,16 @@ export default function LandingPage() {
                 </Button>
               </div>
 
-              {/* Quick login link for returning users on mobile */}
-              {!isLoggedIn && (
-                <div className="mt-4">
-                  <Link 
-                    to="/login" 
-                    className="inline-flex items-center gap-2 text-sm text-white/80 hover:text-white transition-colors"
-                  >
-                    <LogIn className="h-4 w-4" />
-                    Already have an account? Sign In
-                  </Link>
-                </div>
-              )}
+              {/* Quick login link for returning users */}
+              <div className="mt-4">
+                <Link 
+                  to="/login" 
+                  className="inline-flex items-center gap-2 text-sm text-white/80 hover:text-white transition-colors"
+                >
+                  <LogIn className="h-4 w-4" />
+                  Already have an account? Sign In
+                </Link>
+              </div>
 
               <div className="mt-6 sm:mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-[10px] sm:text-xs text-white/80">
                 <span className="inline-flex items-center gap-2">
@@ -455,7 +434,7 @@ export default function LandingPage() {
             </div>
 
             <div className="mx-auto mt-8 sm:mt-12 grid max-w-6xl gap-6 lg:grid-cols-2">
-              {/* Siyanda Card */}
+              {/* Siyanda Card - Same as before */}
               <Card className="relative overflow-hidden border-border/70 bg-card p-4 sm:p-6 md:p-7 shadow-card-soft">
                 <div className="mb-4 sm:mb-5 inline-flex items-center gap-1.5 rounded-full bg-primary px-2 py-1 sm:px-3 text-[10px] sm:text-xs font-bold text-primary-foreground">
                   <Zap className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
@@ -630,15 +609,14 @@ export default function LandingPage() {
               ))}
             </div>
 
+            {/* Always show CTA button */}
             <div className="mt-8 sm:mt-12 flex justify-center px-4">
-              {!isLoggedIn && (
-                <Button asChild variant="cta" size="xl" className="shimmer w-full sm:w-auto">
-                  <Link to="/signup">
-                    {currentLetsBegin}
-                    <ArrowRight className="ml-1 h-4 w-4" />
-                  </Link>
-                </Button>
-              )}
+              <Button asChild variant="cta" size="xl" className="shimmer w-full sm:w-auto">
+                <Link to="/signup">
+                  {currentLetsBegin}
+                  <ArrowRight className="ml-1 h-4 w-4" />
+                </Link>
+              </Button>
             </div>
           </div>
         </section>
@@ -714,37 +692,35 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* CTA Section - Only show for non-logged-in users */}
-        {!isLoggedIn && (
-          <section className="relative overflow-hidden border-t border-border bg-primary py-10 sm:py-14 text-center text-primary-foreground">
-            <div className="ai-mesh absolute inset-0" aria-hidden />
-            <div className="container relative mx-auto px-4 sm:px-6">
-              <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-secondary">
-                <span className={cn(
-                  "transition-all duration-500",
-                  isAnimating ? "opacity-0" : "opacity-100"
-                )}>
-                  {currentLetsBegin}
-                </span>
+        {/* CTA Section - Always visible for public browsing */}
+        <section className="relative overflow-hidden border-t border-border bg-primary py-10 sm:py-14 text-center text-primary-foreground">
+          <div className="ai-mesh absolute inset-0" aria-hidden />
+          <div className="container relative mx-auto px-4 sm:px-6">
+            <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-secondary">
+              <span className={cn(
+                "transition-all duration-500",
+                isAnimating ? "opacity-0" : "opacity-100"
+              )}>
+                {currentLetsBegin}
               </span>
-              <p className="mt-3 font-display text-lg sm:text-2xl md:text-3xl italic px-4">
-                Join over <span className="text-gradient-ai font-bold not-italic">2,000+</span> young South Africans building better
-                careers with AI. Together, we rise. <span className="emoji">🇿🇦</span>
-              </p>
-              <div className="mt-5 sm:mt-6 flex justify-center px-4">
-                <Button asChild variant="cta" size="xl" className="shimmer w-full sm:w-auto">
-                  <Link to="/signup">
-                    {currentLetsBegin}
-                    <ArrowRight className="ml-1 h-4 w-4" />
-                  </Link>
-                </Button>
-              </div>
+            </span>
+            <p className="mt-3 font-display text-lg sm:text-2xl md:text-3xl italic px-4">
+              Join over <span className="text-gradient-ai font-bold not-italic">2,000+</span> young South Africans building better
+              careers with AI. Together, we rise. <span className="emoji">🇿🇦</span>
+            </p>
+            <div className="mt-5 sm:mt-6 flex justify-center px-4">
+              <Button asChild variant="cta" size="xl" className="shimmer w-full sm:w-auto">
+                <Link to="/signup">
+                  {currentLetsBegin}
+                  <ArrowRight className="ml-1 h-4 w-4" />
+                </Link>
+              </Button>
             </div>
-          </section>
-        )}
+          </div>
+        </section>
       </main>
 
-      {/* Footer */}
+      {/* Footer - Same as before */}
       <footer className="border-t border-border bg-background">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
@@ -788,9 +764,6 @@ export default function LandingPage() {
                 <li><a href="#features" className="text-sm text-muted-foreground hover:text-primary transition-colors">Features</a></li>
                 <li><a href="#ubuntu-stories" className="text-sm text-muted-foreground hover:text-primary transition-colors">Stories</a></li>
                 <li><Link to="/demo" className="text-sm text-muted-foreground hover:text-primary transition-colors">Demo</Link></li>
-                {isLoggedIn && (
-                  <li><Link to="/dashboard" className="text-sm text-muted-foreground hover:text-primary transition-colors">Dashboard</Link></li>
-                )}
               </ul>
             </div>
 
@@ -827,7 +800,7 @@ export default function LandingPage() {
               <ul className="space-y-3">
                 <li className="flex items-center justify-center sm:justify-start gap-3 text-sm text-muted-foreground">
                   <Mail className="h-4 w-4 text-primary" />
-                  <span>info@empowa-ai.co.za </span>
+                  <span>info@empowa-ai.co.za</span>
                 </li>
                 
                 <li className="flex items-center justify-center sm:justify-start gap-3 text-sm text-muted-foreground">
@@ -854,7 +827,7 @@ export default function LandingPage() {
         </div>
       </footer>
 
-      {/* Privacy Policy Modal */}
+      {/* Modals - Same as before */}
       <Modal isOpen={showPrivacy} onClose={() => setShowPrivacy(false)} title="Privacy Policy" icon={Shield}>
         <div className="prose prose-sm dark:prose-invert max-w-none">
           <p className="text-muted-foreground mb-4">Last updated: {new Date().toLocaleDateString()}</p>
@@ -869,7 +842,6 @@ export default function LandingPage() {
         </div>
       </Modal>
 
-      {/* Terms of Service Modal */}
       <Modal isOpen={showTerms} onClose={() => setShowTerms(false)} title="Terms of Service" icon={FileText}>
         <div className="prose prose-sm dark:prose-invert max-w-none">
           <p className="text-muted-foreground mb-4">Last updated: {new Date().toLocaleDateString()}</p>
@@ -884,7 +856,6 @@ export default function LandingPage() {
         </div>
       </Modal>
 
-      {/* Cookies Policy Modal */}
       <Modal isOpen={showCookies} onClose={() => setShowCookies(false)} title="Cookies Policy" icon={Cookie}>
         <div className="prose prose-sm dark:prose-invert max-w-none">
           <p className="text-muted-foreground mb-4">Last updated: {new Date().toLocaleDateString()}</p>
@@ -895,7 +866,6 @@ export default function LandingPage() {
         </div>
       </Modal>
 
-      {/* Contact Us Modal with Working mailto Handler */}
       <Modal isOpen={showContact} onClose={() => setShowContact(false)} title="Contact Us" icon={MessageSquare}>
         <form onSubmit={handleContactSubmit} className="space-y-4">
           <div>
@@ -949,7 +919,7 @@ export default function LandingPage() {
         </form>
         <div className="mt-4 text-center text-xs text-muted-foreground">
           <p>This will open your default email client.</p>
-          <p>Alternatively, email us directly at: <strong>info@empowa-ai.co.za </strong></p>
+          <p>Alternatively, email us directly at: <strong>info@empowa-ai.co.za</strong></p>
         </div>
       </Modal>
 
