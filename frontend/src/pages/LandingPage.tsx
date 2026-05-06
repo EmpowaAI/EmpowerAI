@@ -154,7 +154,7 @@ export default function LandingPage() {
     );
     
     // Open default email client
-    window.location.href = `mailto:aiempowa@gmail.com?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:info@empowa-ai.co.za?subject=${subject}&body=${body}`;
     
     toast.success("Opening your email client...");
     setContactForm({ name: "", email: "", subject: "", message: "" });
@@ -827,7 +827,7 @@ export default function LandingPage() {
               <ul className="space-y-3">
                 <li className="flex items-center justify-center sm:justify-start gap-3 text-sm text-muted-foreground">
                   <Mail className="h-4 w-4 text-primary" />
-                  <span>aiempowa@gmail.com</span>
+                  <span>info@empowa-ai.co.za </span>
                 </li>
                 
                 <li className="flex items-center justify-center sm:justify-start gap-3 text-sm text-muted-foreground">
@@ -949,7 +949,7 @@ export default function LandingPage() {
         </form>
         <div className="mt-4 text-center text-xs text-muted-foreground">
           <p>This will open your default email client.</p>
-          <p>Alternatively, email us directly at: <strong>aiempowa@gmail.com</strong></p>
+          <p>Alternatively, email us directly at: <strong>info@empowa-ai.co.za </strong></p>
         </div>
       </Modal>
 
