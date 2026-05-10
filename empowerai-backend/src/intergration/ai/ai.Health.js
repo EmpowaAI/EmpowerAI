@@ -4,6 +4,7 @@ const logger = require('../../utils/logger');
 const AI_HEALTH_TIMEOUT_MS = Number(process.env.AI_HEALTH_TIMEOUT_MS || 15000);
 const AI_HEALTH_STALE_MS = Number(process.env.AI_HEALTH_STALE_MS || 5 * 60 * 1000);
 
+// ================= CACHE =================
 let lastAiHealth = {
   status: 'unknown',
   openaiStatus: 'unknown',
@@ -11,96 +12,114 @@ let lastAiHealth = {
   error: null,
 };
 
-async function checkAiHealth() {
-  const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
+// ================= HEALTH CHECK =================
+async function checkAiHealth(force = false) {
+  const aiServiceUrl = (process.env.AI_SERVICE_URL || 'http://localhost:8000').replace(/\/$/, '');
   const aiServiceApiKey = process.env.AI_SERVICE_API_KEY;
 
   const now = Date.now();
-  const cacheFresh =
-    lastAiHealth.checkedAt && now - lastAiHealth.checkedAt < AI_HEALTH_STALE_MS;
 
-  let aiServiceStatus = 'unknown';
-  let aiServiceError = null;
+  const cacheFresh =
+    lastAiHealth.checkedAt &&
+    now - lastAiHealth.checkedAt < AI_HEALTH_STALE_MS;
+
+  // 👉 Return cached result if still fresh (avoids spam hitting AI service)
+  if (!force && cacheFresh) {
+    return {
+      aiServiceStatus: `${lastAiHealth.status} (cached)`,
+      aiServiceError: lastAiHealth.error,
+    };
+  }
 
   try {
-    const healthResponse = await axios.get(`${aiServiceUrl}/health`, {
+    const res = await axios.get(`${aiServiceUrl}/health`, {
       timeout: AI_HEALTH_TIMEOUT_MS,
-      headers: aiServiceApiKey ? { 'X-API-KEY': aiServiceApiKey } : undefined,
+      headers: aiServiceApiKey ? { 'X-API-KEY': aiServiceApiKey } : {},
     });
 
-    aiServiceStatus =
-      healthResponse.data?.status === 'healthy' ? 'connected' : 'unhealthy';
+    const openaiStatus = res.data?.openai_status || 'unknown';
 
-    if (healthResponse.data) {
-      const openaiStatus = healthResponse.data.openai_status || 'unknown';
-      aiServiceStatus += ` (openai: ${openaiStatus})`;
-      lastAiHealth = {
-        status: aiServiceStatus,
-        openaiStatus,
-        checkedAt: now,
-        error: null,
-      };
-    }
+    const status =
+      res.data?.status === 'healthy'
+        ? 'connected'
+        : 'unhealthy';
+
+    lastAiHealth = {
+      status: `${status} (openai: ${openaiStatus})`,
+      openaiStatus,
+      checkedAt: now,
+      error: null,
+    };
+
+    return {
+      aiServiceStatus: lastAiHealth.status,
+      aiServiceError: null,
+    };
+
   } catch (error) {
     const isTimeout =
-      error.code === 'ECONNABORTED' || error.message?.includes('timeout');
+      error.code === 'ECONNABORTED' ||
+      error.message?.toLowerCase().includes('timeout');
 
-    aiServiceStatus = isTimeout ? 'sleeping' : 'disconnected';
-    aiServiceError = {
+    const status = isTimeout ? 'sleeping' : 'disconnected';
+
+    const errorInfo = {
       code: error.code || 'UNKNOWN',
       message: error.message,
       url: `${aiServiceUrl}/health`,
     };
 
-    if (cacheFresh) {
-      aiServiceStatus = `${lastAiHealth.status} (cached)`;
-    } else {
-      lastAiHealth = {
-        status: aiServiceStatus,
-        openaiStatus: 'unknown',
-        checkedAt: now,
-        error: aiServiceError,
-      };
-    }
-  }
+    lastAiHealth = {
+      status,
+      openaiStatus: 'unknown',
+      checkedAt: now,
+      error: errorInfo,
+    };
 
-  return { aiServiceStatus, aiServiceError };
+    return {
+      aiServiceStatus: status,
+      aiServiceError: errorInfo,
+    };
+  }
 }
 
-/**
- * Non-blocking startup ping — logs result, doesn't throw.
- */
+// ================= STARTUP PING =================
 function pingAiServiceOnStartup() {
-  const aiServiceUrl = process.env.AI_SERVICE_URL;
+  const aiServiceUrl = (process.env.AI_SERVICE_URL || '').replace(/\/$/, '');
   const aiServiceApiKey = process.env.AI_SERVICE_API_KEY;
 
   if (process.env.NODE_ENV !== 'production') return;
 
-  setTimeout(() => {
-    axios
-      .get(`${aiServiceUrl}/health`, {
+  setTimeout(async () => {
+    try {
+      const res = await axios.get(`${aiServiceUrl}/health`, {
         timeout: AI_HEALTH_TIMEOUT_MS,
-        headers: aiServiceApiKey ? { 'X-API-KEY': aiServiceApiKey } : undefined,
-      })
-      .then((response) => {
-        logger.info('AI Service health check passed', {
-          status: response.status,
-          openaiStatus: response.data?.openai_status,
-        });
-      })
-      .catch((error) => {
-        const isTimeout =
-          error.code === 'ECONNABORTED' || error.message?.includes('timeout');
-        logger.warn('AI Service health check failed', {
-          message: error.message,
-          code: error.code,
-          url: `${aiServiceUrl}/health`,
-          note: isTimeout
-            ? 'AI service likely sleeping (Render cold start)'
-            : 'AI service health check failed',
-        });
+        headers: aiServiceApiKey ? { 'X-API-KEY': aiServiceApiKey } : {},
       });
+
+      logger.info('AI Service health check passed', {
+        status: res.status,
+        openaiStatus: res.data?.openai_status,
+      });
+
+    } catch (error) {
+      const isTimeout =
+        error.code === 'ECONNABORTED' ||
+        error.message?.toLowerCase().includes('timeout');
+
+      logger.warn('AI Service health check failed', {
+        message: error.message,
+        code: error.code,
+        url: `${aiServiceUrl}/health`,
+        note: isTimeout
+          ? 'AI service likely cold start (Render sleeping)'
+          : 'AI service unreachable',
+      });
+    }
   }, 2000);
 }
 
-module.exports = { checkAiHealth, pingAiServiceOnStartup };
+module.exports = {
+  checkAiHealth,
+  pingAiServiceOnStartup,
+};
