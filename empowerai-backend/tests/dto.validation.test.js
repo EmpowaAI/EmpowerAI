@@ -21,6 +21,8 @@ describe('DTO validation', () => {
       name: 'Test User',
       email: 'test@example.com',
       password: 'weakpass1',
+      consentDataProcessing: true,
+      consentProfileSharing: true,
     });
     expect(errors.length).toBeGreaterThan(0);
   });
@@ -30,6 +32,8 @@ describe('DTO validation', () => {
       name: 'Test User',
       email: 'test@example.com',
       password: 'StrongPass1!',
+      consentDataProcessing: true,
+      consentProfileSharing: true,
     });
     expect(errors.length).toBe(0);
   });

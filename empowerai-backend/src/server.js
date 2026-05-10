@@ -30,7 +30,12 @@ async function boot() {
   // Connect to MongoDB
   const dbConnected = await connectDatabase();
 
-  await seedAdmins();
+  // Seed admin promotions only when DB is actually connected.
+  if (dbConnected) {
+    await seedAdmins();
+  } else {
+    logger.warn('Skipping admin seeding because database is disconnected');
+  }
   // Run startup tasks (seed, schedulers) — skipped if DB is down
   await runStartupTasks(dbConnected);
 

@@ -1,6 +1,5 @@
 const { body, validationResult } = require('express-validator');
 const logger = require('../../../utils/logger');
-const { removeListener } = require('../../user/user.Model');
 
 const registerRules = [
   body('name')

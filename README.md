@@ -154,14 +154,14 @@ Personalized career guidance anytime:
 |-------|-------------|
 | **Frontend** | React 18, TypeScript, Vite, TailwindCSS, Recharts, Framer Motion, Radix UI |
 | **Backend** | Node.js 18+, Express.js, MongoDB + Mongoose, JWT, Bcrypt, Brevo API |
-| **AI Service** | Python 3.10+, FastAPI, OpenAI GPT-4, Pydantic, Uvicorn |
+| **AI Service** | Python 3.10–3.12, FastAPI, OpenAI GPT-4, Pydantic, Uvicorn |
 | **Infrastructure** | MongoDB Atlas, Vercel, Render, GitHub Actions *(planned)* |
 
 ---
 
 ## 🚀 Quick Start
 
-**Prerequisites:** Node.js 18+, Python 3.10+, MongoDB Atlas account, OpenAI API Key, Brevo API Key
+**Prerequisites:** Node.js 18+, **Python 3.10–3.12** (AI service), MongoDB Atlas account, OpenAI API Key, Brevo API Key
 
 ```bash
 # 1. Clone the repository
@@ -176,6 +176,10 @@ npm run install:all
 # 4. Launch all services
 npm run dev:all
 ```
+
+**Windows note:** If PowerShell blocks `npm` with an “running scripts is disabled” error, use `npm.cmd` (e.g. `npm.cmd run dev:all`).
+
+**AI service note:** The Python AI service requires Python **3.10–3.12**. If you only have Python 3.13+ installed, `pip install` may fail because `pydantic-core` needs native wheels or MSVC build tools.
 
 <details>
 <summary>📋 Environment Variables</summary>

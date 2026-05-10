@@ -49,13 +49,15 @@ export default function ProtectedRoute({ children, requiredStep = 'any' }: Prote
     return null;
   }
 
+  // No session at all → require login
   if (!user && !token) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (!user && token) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
+  // Token exists but user isn't hydrated yet (or backend temporarily unavailable).
+  // Do NOT bounce the user to /login for deep links; allow the app to continue
+  // and let downstream calls handle auth/refresh gracefully.
+  if (!user && token) return <>{children}</>;
 
   // Determine what prerequisite is needed
   let neededStep: 'cv' | 'twin' | null = null;

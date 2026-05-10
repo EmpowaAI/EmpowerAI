@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { MessageCircle, Send, Bot, User, Brain, Lightbulb, Target, TrendingUp, Heart } from 'lucide-react'
 import { cn } from "../../lib/utils"
 
@@ -115,38 +117,35 @@ export default function AIMentor247() {
   }, [messages])
 
   const generateAIResponse = async (userMessage: string): Promise<string> => {
-    // Simulate AI processing
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    
-    const lowerMessage = userMessage.toLowerCase()
-    
-    // Context-aware responses
-    if (lowerMessage.includes("salary") || lowerMessage.includes("negotiate")) {
-      return "For salary negotiation in South Africa, research shows that candidates who negotiate earn 7-13% more on average. Start by researching market rates on Pnet and Careers24. Highlight specific achievements and be prepared to discuss how you'll add value. A good opening is 'Based on my research and the value I bring, I'm targeting a salary in the range of X-Y.'"
+    try {
+      const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      // Mapping internal messages to the API's expected format
+      const apiMessages = messages.map(msg => ({
+        role: msg.type === 'ai' ? 'assistant' : 'user',
+        content: msg.content
+      }));
+
+      const response = await fetch(`${apiBase}/chat/twin`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('empowerai-token')}`
+        },
+        body: JSON.stringify({
+          messages: [...apiMessages, { role: 'user', content: userMessage }],
+          cv_context: JSON.parse(localStorage.getItem('comprehensiveCVAnalysis') || '{}'),
+          focus: 'growth'
+        })
+      });
+
+      if (!response.ok) throw new Error('AI Service unavailable');
+
+      const data = await response.json();
+      return data.reply;
+    } catch (error) {
+      console.error('AI Mentor Error:', error);
+      return "I'm having a bit of trouble connecting to my knowledge base right now. Please try again in a moment, or check your internet connection.";
     }
-    
-    if (lowerMessage.includes("cv") || lowerMessage.includes("resume")) {
-      return "For your CV, focus on quantifiable achievements. Instead of 'Improved performance', say 'Increased user engagement by 35% through UX optimizations'. Include keywords from job descriptions, keep it to 2 pages max, and ensure it's ATS-friendly. Would you like me to review a specific section?"
-    }
-    
-    if (lowerMessage.includes("interview")) {
-      return "Interview success comes from preparation. Research the company, prepare STAR method examples, and have thoughtful questions for them. Practice common questions: 'Tell me about yourself', 'Why this company?', 'Describe a challenge you overcame'. Remember, interviews are two-way conversations - you're evaluating them too!"
-    }
-    
-    if (lowerMessage.includes("job") || lowerMessage.includes("apply")) {
-      return "The SA job market is competitive but opportunities exist. Focus on growing sectors: fintech, e-commerce, renewable energy, and healthtech. Tailor each application, network on LinkedIn, and consider both corporate and startup environments. What specific roles are you targeting?"
-    }
-    
-    if (lowerMessage.includes("discouraged") || lowerMessage.includes("rejected")) {
-      return "I understand how discouraging rejections feel. Remember that even top developers face multiple rejections. Each 'no' is feedback, not failure. Use this time to upskill, refine your approach, and remember that the right opportunity is looking for someone exactly like you. You've got this!"
-    }
-    
-    if (lowerMessage.includes("skills") || lowerMessage.includes("learn")) {
-      return "Based on SA market trends, focus on cloud computing (AWS/Azure), data science, cybersecurity, and AI/ML. Soft skills like communication and problem-solving are equally valuable. Consider certifications from Google, Microsoft, or local bootcamps. What's your current skill set?"
-    }
-    
-    // Default contextual response
-    return `I understand you're asking about ${userMessage}. Let me help you with that. Based on your profile and goals, I suggest focusing on practical steps you can take immediately. Could you provide more details about your specific situation so I can give you more personalized advice?`
   }
 
   const sendMessage = async (content: string) => {
