@@ -11,6 +11,7 @@ from docx import Document
 from models.schemas import CVAnalysisResponse
 from services.cv_analyzer import CVAnalyzer
 from utils.logger import get_logger
+from utils.ai_client import AIClient
 import json
 import traceback
 import uuid
@@ -38,21 +39,49 @@ RETAIL_WEAKNESSES = [
     "No references or character references - retail employers often value references from previous supervisors"
 ]
 
-def is_cv_document(cv_text: str) -> tuple[bool, str]:
+async def _is_cv_document_ai(cv_text: str) -> tuple:
     """
-    Validate if the uploaded document is actually a CV/resume.
+    AI-powered CV validation using Azure OpenAI.
+    Returns (is_cv: bool|None, reason: str) — None means AI unavailable, fall back to keywords.
+    """
+    try:
+        ai_client = AIClient()
+        if not ai_client.enabled:
+            return None, "AI not available"
+
+        excerpt = cv_text[:1500].strip()
+        result = await ai_client.generate_structured_response_async(
+            prompt=f"Document to classify:\n\n{excerpt}",
+            system_prompt=(
+                "You are a strict document classifier. Determine if the provided text is a CV or resume.\n"
+                "A CV/resume contains personal career information: work experience, education, skills, and/or contact details.\n"
+                "Return JSON with exactly two fields: 'is_cv' (boolean) and 'reason' (one short sentence, max 20 words)."
+            ),
+            response_schema={"is_cv": "bool", "reason": "str"},
+            temperature=0.1,
+            max_tokens=80,
+        )
+
+        if result and isinstance(result, dict) and "is_cv" in result:
+            return bool(result["is_cv"]), result.get("reason", "AI classification")
+        return None, "Could not parse AI response"
+    except Exception as e:
+        return None, str(e)
+
+
+def _is_cv_document_keywords(cv_text: str) -> tuple:
+    """
+    Keyword-based CV validation fallback.
     Returns (is_cv, reason) tuple.
     """
     text_lower = cv_text.lower()
-    
-    # CV indicators - strong signals this is a CV
+
     cv_indicators = [
         'curriculum vitae', 'resume', 'cv', 'employment history', 'work experience',
         'education', 'qualifications', 'skills', 'experience', 'career', 'professional',
         'objective', 'summary', 'profile', 'references', 'achievements', 'certifications'
     ]
-    
-    # Non-CV indicators - signals this is NOT a CV
+
     non_cv_indicators = [
         'invoice', 'receipt', 'contract', 'agreement', 'terms and conditions',
         'legal notice', 'court', 'lawsuit', 'medical report', 'prescription',
@@ -60,69 +89,52 @@ def is_cv_document(cv_text: str) -> tuple[bool, str]:
         'bank statement', 'insurance policy', 'warranty', 'manual', 'instructions',
         'recipe', 'menu', 'schedule', 'timetable', 'meeting minutes'
     ]
-    
-    # Count CV indicators
-    cv_score = 0
-    for indicator in cv_indicators:
-        if indicator in text_lower:
-            cv_score += 1
-    
-    # Check for non-CV indicators (immediate rejection)
+
+    cv_score = sum(1 for ind in cv_indicators if ind in text_lower)
+
     for indicator in non_cv_indicators:
         if indicator in text_lower:
-            return False, f"This appears to be a {indicator.split()[0]} document, not a CV/resume."
-    
-    # Check for work-related content
-    work_indicators = [
+            return False, f"This appears to be a {indicator.split()[0]} document, not a CV or resume."
+
+    work_score = sum(text_lower.count(w) for w in [
         'job', 'work', 'employment', 'position', 'role', 'company', 'organization',
         'manager', 'supervisor', 'team', 'project', 'responsibilities', 'duties'
-    ]
-    
-    work_score = 0
-    for indicator in work_indicators:
-        # Count occurrences, not just presence
-        work_score += text_lower.count(indicator)
-    
-    # Check for education content
-    edu_indicators = [
+    ])
+    edu_score = sum(text_lower.count(w) for w in [
         'university', 'college', 'school', 'degree', 'diploma', 'certificate',
         'matric', 'grade 12', 'education', 'studied', 'graduated'
-    ]
-    
-    edu_score = 0
-    for indicator in edu_indicators:
-        edu_score += text_lower.count(indicator)
-    
-    # Check for skills/qualifications
-    skill_indicators = [
+    ])
+    skill_score = sum(text_lower.count(w) for w in [
         'skills', 'abilities', 'competencies', 'qualifications', 'expertise',
         'proficient', 'experienced', 'knowledge', 'training'
-    ]
-    
-    skill_score = 0
-    for indicator in skill_indicators:
-        skill_score += text_lower.count(indicator)
-    
-    # Minimum thresholds (made more lenient)
-    min_cv_indicators = 1
-    min_work_score = 1
-    min_total_score = 2
-    
-    # Validation logic (more lenient)
-    if cv_score < min_cv_indicators:
-        return False, "This document doesn't contain typical CV content like work experience, education, or skills sections."
-    
-    if (work_score + edu_score + skill_score) < min_total_score:
-        return False, "This document doesn't appear to be a CV/resume. It lacks sufficient work, education, or skills content."
-    
-    # Check document structure - CVs typically have multiple sections (made more lenient)
-    lines = cv_text.split('\n')
-    non_empty_lines = [line.strip() for line in lines if line.strip()]
-    
+    ])
+
+    if cv_score < 1:
+        return False, "We couldn't find the usual CV sections — work experience, education, or skills."
+
+    if (work_score + edu_score + skill_score) < 2:
+        return False, "This document doesn't have enough career content to be a CV or resume."
+
+    non_empty_lines = [l.strip() for l in cv_text.split('\n') if l.strip()]
     if len(non_empty_lines) < 5:
-        return False, "This document appears too short to be a complete CV/resume."
-    
+        return False, "This document is too short to be a complete CV. Please upload your full CV."
+
     return True, "Document appears to be a valid CV/resume."
+
+
+async def is_cv_document(cv_text: str) -> tuple:
+    """
+    Validate if the document is a CV/resume.
+    Uses AI classification first; falls back to keyword heuristics if AI is unavailable.
+    Returns (is_cv: bool, reason: str).
+    """
+    ai_result, ai_reason = await _is_cv_document_ai(cv_text)
+    if ai_result is not None:
+        if not ai_result:
+            return False, ai_reason or "This document does not appear to be a CV or resume."
+        return True, "Document confirmed as CV/resume."
+
+    return _is_cv_document_keywords(cv_text)
 
 def is_retail_candidate(cv_text: str, experience: list = None, skills: list = None) -> bool:
     """Check if candidate is in retail based on CV content."""
@@ -324,14 +336,14 @@ async def analyze_cv_file(
         logger.info(f"[{request_id}] Successfully extracted {len(cv_text)} characters")
         
         # Validate that this is actually a CV document
-        is_cv, validation_reason = is_cv_document(cv_text)
+        is_cv, validation_reason = await is_cv_document(cv_text)
         if not is_cv:
             logger.warning(f"[{request_id}] Document validation failed: {validation_reason}")
             raise HTTPException(
                 status_code=400,
                 detail=f"Invalid document format: {validation_reason} Please upload a CV or resume."
             )
-        
+
         logger.info(f"[{request_id}] Document validation passed: {validation_reason}")
         
         job_requirements_list = None

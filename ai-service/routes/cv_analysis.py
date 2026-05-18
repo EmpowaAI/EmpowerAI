@@ -32,7 +32,7 @@ async def analyze_cv(request: CVAnalysisRequest, req: Request):
         logger.info(f"CV analysis started - Text length: {len(request.cvText)} chars")
         
         # Validate that this is actually a CV document
-        is_cv, validation_reason = is_cv_document(request.cvText)
+        is_cv, validation_reason = await is_cv_document(request.cvText)
         if not is_cv:
             logger.warning(f"Document validation failed: {validation_reason}")
             raise HTTPException(

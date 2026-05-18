@@ -278,8 +278,13 @@ async function _handleAnalysisError({ error, userId, cvText, jobRequirementsArra
 
   // 400 from Python means bad input, but file extraction failures (scanned PDFs, etc.)
   // can sometimes be recovered by Node-side text extraction (pdf-parse > PyPDF2).
+  // Exception: "Invalid document format" means the content itself failed CV validation —
+  // no extraction technique will change that, so skip the retry immediately.
   if (status === 400) {
-    if (file) {
+    const detail = error.response?.data?.detail || error.response?.data?.message || '';
+    const isNotCv = detail.toLowerCase().includes('invalid document format');
+
+    if (!isNotCv && file) {
       try {
         const rawText = await extractTextFromUploadedFile(file);
         if (rawText && rawText.trim().length > 50) {

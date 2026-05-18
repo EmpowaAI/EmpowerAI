@@ -34,6 +34,7 @@ import { twinAPI } from "../../lib/api";
 import { useUser } from "../../contexts/user-context";
 
 type Phase = "idle" | "analyzing" | "complete" | "revamping" | "revamped";
+type InputMode = "upload" | "paste";
 type ResultView = "overview" | "match" | "coaching";
 
 type AnalysisIssue = {
@@ -216,13 +217,16 @@ const CVAnalyzer = () => {
   const navigate = useNavigate();
   const { updateProgress, refreshCVData } = useUser();
   const [phase, setPhase] = useState<Phase>("idle");
+  const [inputMode, setInputMode] = useState<InputMode>("upload");
   const [fileName, setFileName] = useState<string | null>(null);
   const [stageIndex, setStageIndex] = useState(0);
   const [stageProgress, setStageProgress] = useState(0); // 0-100 for current stage
   const [revampedCv, setRevampedCv] = useState("");
   const [cvText, setCvText] = useState(SAMPLE_CV);
+  const [pastedCvText, setPastedCvText] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [inputError, setInputError] = useState("");
+  const [notCvError, setNotCvError] = useState<string | null>(null);
   const [aiAnalysis, setAiAnalysis] = useState<CvAnalysis | null>(null);
   const [analysisError, setAnalysisError] = useState("");
   const [resultView, setResultView] = useState<ResultView>("overview");
@@ -346,8 +350,9 @@ const CVAnalyzer = () => {
       const runAiAnalysis = async () => {
       setAnalysisError("");
       try {
-        // Create a File object from the CV text for the existing service
-        const cvFile = new File([cvText], "cv.txt", { type: "text/plain" });
+        // Paste mode already has text — use the text path directly.
+        // File mode wraps the extracted text in a File so the service uses the file endpoint.
+        const cvFile = fileName === "Pasted CV" ? null : new File([cvText], fileName || "cv.txt", { type: "text/plain" });
         const data = await analyzeCV(cvFile, cvText, jobDescription);
          
         if (cancelled) return;
@@ -425,7 +430,17 @@ const CVAnalyzer = () => {
           }
         } catch (error) {
           if (cancelled) return;
-          setAnalysisError("AI analysis could not finish right now, so we are showing the local CV scan.");
+          const msg = (error as Error).message || "";
+          const isNotCv =
+            msg.toLowerCase().includes("invalid document format") ||
+            msg.toLowerCase().includes("not appear to be a cv") ||
+            msg.toLowerCase().includes("not a cv");
+          if (isNotCv) {
+            setNotCvError(msg);
+            reset();
+          } else {
+            setAnalysisError("AI analysis could not finish right now, so we are showing the local CV scan.");
+          }
         }
       };
 
@@ -443,6 +458,7 @@ const CVAnalyzer = () => {
     }
 
     setInputError("");
+    setNotCvError(null);
     setFileName(file.name);
     // Clear stale twin so TwinBuilder fetches fresh data after this new CV analysis.
     localStorage.removeItem("twinData");
@@ -473,6 +489,20 @@ const CVAnalyzer = () => {
     setAnalysisError("");
     setResultView("overview");
   };
+
+  const handlePasteSubmit = useCallback(() => {
+    const text = pastedCvText.trim();
+    if (text.length < 200) {
+      setInputError("Please paste more of your CV — we need at least a few paragraphs to analyse it properly.");
+      return;
+    }
+    setInputError("");
+    setNotCvError(null);
+    setFileName("Pasted CV");
+    localStorage.removeItem("twinData");
+    setCvText(text.slice(0, 20000));
+    setPhase("analyzing");
+  }, [pastedCvText]);
 
   const handleJobDescriptionChange = (value: string) => {
     const parsed = jobDescriptionSchema.safeParse(value);
@@ -561,39 +591,123 @@ const CVAnalyzer = () => {
               ? "See the skills we found, what is limiting you, and which jobs, bursaries, learnerships, ventures, or skill bridges fit next."
               : phase === "analyzing"
               ? "Our AI is mapping your experience to opportunities across South Africa."
-              : "Upload your CV first. The revamp is optional, then your digital twin uses the analysis to map opportunities."}
+              : "Upload or paste your CV below. The revamp is optional — your digital twin uses the analysis to map real opportunities."}
           </p>
 
-          {/* ===== STATE: IDLE — Upload zone ===== */}
+          {/* ===== STATE: IDLE — Upload / Paste zone ===== */}
           {phase === "idle" && (
             <div className="mt-8 w-full max-w-2xl animate-fade-up sm:mt-12">
-              <label
-                htmlFor="cv-file"
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={onDrop}
-                className="group relative flex cursor-pointer flex-col items-center justify-center overflow-hidden rounded-3xl border-2 border-dashed border-border bg-card/50 p-8 text-center transition-all hover:border-secondary hover:bg-card sm:p-16"
-              >
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-secondary/10 text-secondary transition-transform group-hover:scale-110">
-                  <Upload className="h-7 w-7" />
+
+              {/* Not-a-CV friendly error */}
+              {notCvError && (
+                <div className="mb-6 rounded-2xl border border-amber-500/30 bg-amber-500/5 px-5 py-4">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-500" />
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">That doesn't look like a CV</p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        We couldn't find the usual sections — work experience, education, or skills.
+                        Please upload your CV file or paste your CV text in the box below.
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <p className="mt-6 font-display text-xl font-semibold text-foreground">
-                  Drop your CV here
+              )}
+
+              {/* Tab toggle */}
+              <div className="mb-5 grid grid-cols-2 gap-1 rounded-2xl bg-muted/40 p-1">
+                <button
+                  type="button"
+                  onClick={() => { setInputMode("upload"); setInputError(""); }}
+                  className={`flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ${
+                    inputMode === "upload" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Upload className="h-4 w-4" />
+                  Upload file
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setInputMode("paste"); setInputError(""); }}
+                  className={`flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ${
+                    inputMode === "paste" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <FileText className="h-4 w-4" />
+                  Paste text
+                </button>
+              </div>
+
+              {/* Upload mode */}
+              {inputMode === "upload" && (
+                <label
+                  htmlFor="cv-file"
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={onDrop}
+                  className="group relative flex cursor-pointer flex-col items-center justify-center overflow-hidden rounded-3xl border-2 border-dashed border-border bg-card/50 p-8 text-center transition-all hover:border-secondary hover:bg-card sm:p-16"
+                >
+                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-secondary/10 text-secondary transition-transform group-hover:scale-110">
+                    <Upload className="h-7 w-7" />
+                  </div>
+                  <p className="mt-6 font-display text-xl font-semibold text-foreground">
+                    Drop your CV here
+                  </p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    or click to browse · PDF, DOCX, TXT · max 10MB
+                  </p>
+                  <input
+                    ref={inputRef}
+                    id="cv-file"
+                    type="file"
+                    accept=".pdf,.doc,.docx,.txt"
+                    className="sr-only"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) handleFile(f);
+                    }}
+                  />
+                </label>
+              )}
+
+              {/* Paste mode */}
+              {inputMode === "paste" && (
+                <div className="space-y-3">
+                  <textarea
+                    value={pastedCvText}
+                    onChange={(e) => {
+                      setPastedCvText(e.target.value);
+                      if (notCvError) setNotCvError(null);
+                      if (inputError) setInputError("");
+                    }}
+                    placeholder={"Paste your full CV here — include your name, contact details, work experience, education, and skills...\n\nExample:\nJane Doe\njane@email.com · 071 000 0000\n\nWork Experience\nSoftware Developer | Acme Corp | 2021–Present\n- Built and maintained React web applications\n\nEducation\nBSc Computer Science | University of Pretoria | 2021\n\nSkills\nReact, TypeScript, Node.js, SQL"}
+                    rows={14}
+                    maxLength={20000}
+                    className="w-full resize-y rounded-3xl border-2 border-border bg-card/50 p-6 text-sm leading-relaxed text-foreground outline-none transition-all placeholder:text-muted-foreground/60 focus:border-secondary focus:bg-card focus:ring-2 focus:ring-secondary/20"
+                  />
+                  <div className="flex items-center justify-between gap-4">
+                    <p className="text-xs text-muted-foreground">
+                      {pastedCvText.length.toLocaleString()} / 20,000 characters
+                    </p>
+                    <Button
+                      variant="cta"
+                      size="lg"
+                      onClick={handlePasteSubmit}
+                      disabled={pastedCvText.trim().length < 50}
+                      className="shimmer shrink-0"
+                    >
+                      Analyse my CV
+                      <ArrowRight className="ml-1 h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {inputError && (
+                <p className="mt-3 flex items-center gap-2 text-xs font-medium text-destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  {inputError}
                 </p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  or click to browse · max 10MB
-                </p>
-                <input
-                  ref={inputRef}
-                  id="cv-file"
-                  type="file"
-                  accept=".pdf,.doc,.docx,.txt"
-                  className="sr-only"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) handleFile(f);
-                  }}
-                />
-              </label>
+              )}
 
               <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-xs text-muted-foreground sm:gap-6">
                 <span className="inline-flex items-center gap-1.5">
