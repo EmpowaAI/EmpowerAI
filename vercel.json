@@ -1,10 +1,10 @@
 {
-  "framework": "vite",
   "installCommand": "cd frontend && npm install --include=dev",
   "buildCommand": "cd frontend && npm run build",
   "outputDirectory": "frontend/dist",
+  "nodeVersion": "20.x",
   "env": {
-    "VITE_API_URL": "https://empowerai.onrender.com/api"
+    "VITE_API_BASE_URL": "https://empowerai.onrender.com/api"
   },
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
