@@ -109,9 +109,7 @@ export default function Opportunities() {
         setError("")
         
         // Never send careerGoals as a query param — the live server treats it as a hard
-        // MongoDB regex filter (reducing the result pool to only docs mentioning that term)
-        // rather than a scoring hint, which causes 0 results for most users.
-        // Skills matching is handled server-side from the authenticated user's CV profile.
+        // MongoDB regex filter rather than a scoring hint, which can return 0 results.
         const filters: { province?: string; type?: string; skills?: string; q?: string; page?: number; limit?: number; sort?: string; minScore?: number } = {}
         if (category && category !== "all") {
           filters.type = category
@@ -122,6 +120,28 @@ export default function Opportunities() {
         filters.page = page
         filters.limit = 24
         filters.sort = debouncedSearch ? 'relevance' : 'createdAt'
+
+        // Send user skills explicitly so matching works even if server-side CV hydration
+        // hasn't run yet or fails. Read from cvSkills first, fall back to twinData.
+        const resolvedSkills = (() => {
+          try {
+            const stored = localStorage.getItem('cvSkills')
+            if (stored) {
+              const parsed = JSON.parse(stored)
+              if (Array.isArray(parsed) && parsed.length > 0) return parsed as string[]
+            }
+          } catch { /* ignore */ }
+          try {
+            const twin = JSON.parse(localStorage.getItem('twinData') || '{}')
+            const core = twin?.skills?.core ?? twin?.skills
+            if (Array.isArray(core) && core.length > 0) return core as string[]
+          } catch { /* ignore */ }
+          return []
+        })()
+
+        if (resolvedSkills.length > 0) {
+          filters.skills = resolvedSkills.slice(0, 15).join(',')
+        }
 
         setFallbackNotice("")
         let response: any = await opportunitiesAPI.getAll(filters)
@@ -147,7 +167,7 @@ export default function Opportunities() {
             category === "all"
 
           if (shouldFallback) {
-            const fallbackFilters = { ...filters, minScore: 1, sort: 'createdAt' as const }
+            const fallbackFilters = { ...filters, minScore: 20, sort: 'createdAt' as const }
             delete fallbackFilters.skills
             response = await opportunitiesAPI.getAll(fallbackFilters)
             setFallbackNotice("Showing all available opportunities. Upload your CV for personalised matches.")
@@ -215,7 +235,7 @@ export default function Opportunities() {
 
   const calculateMatchScore = (opportunity: any, _user: any): number => {
     // Simple matching algorithm based on skills and province
-    let score = 50 // Base score
+    let score = 0
     
     const cvSkills = localStorage.getItem('cvSkills')
     if (cvSkills && opportunity.skills) {

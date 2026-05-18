@@ -204,7 +204,7 @@ exports.getAllOpportunities = async (req, res, next) => {
       } else {
         // 25 is the lowest score a single-skill match can produce after the baseline boost,
         // so this threshold lets any partial match through rather than returning 0.
-        userProfile.minMatchScore = hasUserSkills ? 25 : 15;
+        userProfile.minMatchScore = hasUserSkills ? 35 : 15;
       }
       if (careerTerms.length > 0) {
         userProfile.careerGoals = careerTerms;
