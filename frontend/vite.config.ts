@@ -23,8 +23,18 @@ export default defineConfig({
       }
     }
   },
+  optimizeDeps: {
+    include: ['react-is'],
+  },
   build: {
     chunkSizeWarningLimit: 1000,
     sourcemap: false,
+    rollupOptions: {
+      onwarn(warning, warn) {
+        // Suppress unresolved-import warnings for known recharts peer deps
+        if (warning.code === 'UNRESOLVED_IMPORT' && warning.source === 'react-is') return;
+        warn(warning);
+      },
+    },
   },
 })
