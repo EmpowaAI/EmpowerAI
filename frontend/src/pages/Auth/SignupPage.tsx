@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import {
   Eye, EyeOff, CheckCircle, Loader2, Sparkles,
   Shield, Zap, XCircle, Mail, User, Lock, X,
-  Facebook, Instagram, Linkedin, MapPin, Cookie, FileText, MessageSquare
+  Facebook, Instagram, Linkedin, MapPin, Cookie, FileText
 } from "lucide-react";
 import toast from 'react-hot-toast';
 import { authService } from "@/api/Index";
