@@ -249,6 +249,63 @@ async function persistTwinFromChat(userId, enrichedTwinData) {
 
 
 // -----------------------------------------------------------------------------
+// CREATE / UPDATE FROM FORM (onboarding manual entry)
+// Called by POST /api/twin when a user submits structured form data.
+// Accepts both flat and nested field shapes so the frontend can send either.
+// -----------------------------------------------------------------------------
+
+async function createOrUpdateFromForm(userId, formData) {
+  const fd = formData || {};
+
+  const payload = {
+    identity: {
+      currentRole:    fd.currentRole    ?? fd.identity?.currentRole    ?? '',
+      targetRole:     fd.targetRole     ?? fd.identity?.targetRole     ?? '',
+      seniorityLevel: fd.seniorityLevel ?? fd.identity?.seniorityLevel ?? 'ENTRY',
+      industry:       fd.industry       ?? fd.identity?.industry       ?? '',
+    },
+    economy: {
+      employabilityScore:   fd.economy?.employabilityScore   ?? fd.employabilityScore   ?? 50,
+      marketValueScore:     fd.economy?.marketValueScore     ?? fd.marketValueScore     ?? 50,
+      demandLevel:          fd.economy?.demandLevel          ?? fd.demandLevel          ?? 'MEDIUM',
+      incomePotentialRange: fd.economy?.incomePotentialRange ?? fd.incomePotentialRange ?? { min: 5000, max: 15000, currency: 'ZAR' },
+    },
+    skills: {
+      core:        fd.skills?.core        ?? fd.coreSkills    ?? [],
+      missing:     fd.skills?.missing     ?? fd.missingSkills ?? [],
+      emerging:    fd.skills?.emerging    ?? [],
+      monetizable: fd.skills?.monetizable ?? [],
+    },
+    intelligence: {
+      strengths:       fd.intelligence?.strengths       ?? fd.strengths       ?? [],
+      weaknesses:      fd.intelligence?.weaknesses      ?? fd.weaknesses      ?? [],
+      opportunities:   fd.intelligence?.opportunities   ?? fd.opportunities   ?? [],
+      threats:         fd.intelligence?.threats         ?? fd.threats         ?? [],
+      recommendations: fd.intelligence?.recommendations ?? fd.recommendations ?? [],
+    },
+    status: 'ACTIVE',
+    lastCalculatedAt: new Date(),
+  };
+
+  const twin = await twinRepository.upsertTwin(userId, payload);
+  return { twin, meta: { source: 'form' } };
+}
+
+
+// -----------------------------------------------------------------------------
+// BUILD FROM CV PROFILE
+// Called by POST /api/twin/build-from-cv after CV analysis completes.
+// Assembles twin data from the user's saved CvProfile and persists it.
+// -----------------------------------------------------------------------------
+
+async function buildFromCvProfile(userId) {
+  const twinData = await buildTwinData(userId);
+  const { _matchedOpportunities, ...twinPayload } = twinData;
+  return twinRepository.upsertTwin(userId, twinPayload);
+}
+
+
+// -----------------------------------------------------------------------------
 // SIMULATION (READ ONLY + AI)
 // -----------------------------------------------------------------------------
 
@@ -323,6 +380,8 @@ async function getTwin(userId) {
 module.exports = {
   buildTwinData,
   persistTwinFromChat,
+  createOrUpdateFromForm,
+  buildFromCvProfile,
   runSimulation,
   getTwin,
 };

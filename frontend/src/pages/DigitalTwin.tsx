@@ -1,20 +1,21 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { 
-  TrendingUp, 
-  Target, 
-  Lightbulb, 
-  ChevronDown, 
+import {
+  TrendingUp,
+  Target,
+  Lightbulb,
+  ChevronDown,
   ChevronUp,
   ArrowRight,
   Briefcase,
   BookOpen,
-  DollarSign
+  DollarSign,
+  Loader2,
 } from "lucide-react";
+import { twinAPI } from "../lib/api";
 
-// Simple Badge component
 const Badge = ({ children, variant = "default" }: { children: React.ReactNode; variant?: "default" | "secondary" | "outline" }) => {
   const baseClasses = "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium";
   const variantClasses = {
@@ -22,7 +23,7 @@ const Badge = ({ children, variant = "default" }: { children: React.ReactNode; v
     secondary: "bg-secondary text-secondary-foreground",
     outline: "border border-input bg-background text-foreground",
   };
-  
+
   return (
     <div className={`${baseClasses} ${variantClasses[variant]}`}>
       {children}
@@ -50,59 +51,131 @@ interface TwinData {
   nextSteps: string[];
 }
 
+const DEMAND_TO_MARKET_VALUE: Record<string, string> = {
+  CRITICAL: "In High Demand",
+  HIGH: "Growing",
+  MEDIUM: "Moderate",
+  LOW: "Early Stage",
+};
+
+const DEMAND_TO_CONFIDENCE: Record<string, string> = {
+  CRITICAL: "High confidence",
+  HIGH: "High confidence",
+  MEDIUM: "Medium confidence",
+  LOW: "Building confidence",
+};
+
+function formatIncomeRange(range: { min?: number; max?: number; currency?: string } | undefined): string {
+  if (!range?.min || !range?.max) return "R5,000 – R15,000 / month";
+  return `R${range.min.toLocaleString("en-ZA")} – R${range.max.toLocaleString("en-ZA")} / month`;
+}
+
+function mapTwinToDisplay(raw: any): TwinData {
+  const identity = raw.identity || {};
+  const economy = raw.economy || {};
+  const skills = raw.skills || {};
+  const intelligence = raw.intelligence || {};
+
+  const score = economy.employabilityScore ?? economy.marketValueScore ?? 50;
+  const demandLevel: string = economy.demandLevel ?? "MEDIUM";
+  const incomePotential = formatIncomeRange(economy.incomePotentialRange);
+
+  const coreSkills: string[] = Array.isArray(skills.core) ? skills.core.slice(0, 8) : [];
+  const missingSkills: string[] = Array.isArray(skills.missing) ? skills.missing.slice(0, 8) : [];
+  const emergingSkills: string[] = Array.isArray(skills.emerging) ? skills.emerging : [];
+  const monetizableSkills: string[] = Array.isArray(skills.monetizable) ? skills.monetizable : [];
+  const recommendations: string[] = Array.isArray(intelligence.recommendations) ? intelligence.recommendations : [];
+
+  const opportunities = [
+    {
+      type: "Jobs",
+      title: identity.targetRole
+        ? `${identity.targetRole} roles matching your profile`
+        : "Entry-level roles matching your current profile",
+      projection: incomePotential,
+      nextStep: recommendations[0] ?? "Improve your CV bullets with outcomes and tools used.",
+    },
+    {
+      type: "Study & Funding",
+      title: "Learnerships, bursaries, and short skills programmes",
+      projection: "Can unlock better income pathways",
+      nextStep: emergingSkills.length > 0
+        ? `Focus on: ${emergingSkills.slice(0, 2).join(", ")}`
+        : "Choose one scarce skill connected to your profile.",
+    },
+    {
+      type: "Side Income",
+      title: "Monetizable skills from your profile",
+      projection: "R2,000 – R10,000 / month early potential",
+      nextStep: monetizableSkills.length > 0
+        ? `Package your ${monetizableSkills[0]} skills into a service offering`
+        : "Package one current skill into a simple offer.",
+    },
+  ];
+
+  const nextSteps = recommendations.length > 0
+    ? recommendations.slice(0, 4)
+    : [
+        "Run your CV through the CV Analyzer.",
+        "Fix your top 3 weak CV bullets.",
+        "Pick one realistic opportunity path.",
+        "Take one action this week.",
+      ];
+
+  const summary =
+    recommendations[0] ??
+    (Array.isArray(intelligence.strengths) ? intelligence.strengths[0] : undefined) ??
+    "Your twin is ready. Explore your opportunities and skills below.";
+
+  return {
+    score,
+    marketValue: DEMAND_TO_MARKET_VALUE[demandLevel] ?? "Growing",
+    incomePotential,
+    strongestPath: identity.targetRole ?? "Entry-level work + skill bridge",
+    confidence: DEMAND_TO_CONFIDENCE[demandLevel] ?? "Medium confidence",
+    summary,
+    coreSkills,
+    skillsNeedingProof: missingSkills,
+    opportunities,
+    nextSteps,
+  };
+}
+
 const DigitalTwin = () => {
   const [selectedPrompt, setSelectedPrompt] = useState("What should I do first?");
   const [openSections, setOpenSections] = useState<SectionKey[]>(["skills", "missing", "next"]);
+  const [twinData, setTwinData] = useState<TwinData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock data - replace with actual API call
-  const twinData: TwinData = {
-    score: 74,
-    marketValue: "Growing",
-    incomePotential: "R8,000 – R18,000 / month",
-    strongestPath: "Entry-level work + skill bridge",
-    confidence: "Medium confidence",
-    summary: "You already have usable skills. Your next move is to show stronger proof through clearer CV bullets, tools used, and small projects.",
-    coreSkills: [
-      "Communication",
-      "Customer support",
-      "Problem solving",
-      "Teamwork",
-      "Basic digital literacy",
-    ],
-    skillsNeedingProof: [
-      "Measurable results",
-      "Tool usage",
-      "Leadership examples",
-      "Project experience",
-      "Income-generating skill",
-    ],
-    opportunities: [
-      {
-        type: "Jobs",
-        title: "Entry-level roles matching your current profile",
-        projection: "R8,000 – R18,000 / month",
-        nextStep: "Improve your CV bullets with outcomes and tools used.",
-      },
-      {
-        type: "Study & Funding",
-        title: "Learnerships, bursaries, and short skills programmes",
-        projection: "Can unlock better R15,000 – R25,000 / month pathways",
-        nextStep: "Choose one scarce skill connected to your profile.",
-      },
-      {
-        type: "Side Income",
-        title: "Small service-based income path",
-        projection: "R2,000 – R10,000 / month early potential",
-        nextStep: "Package one current skill into a simple offer.",
-      },
-    ],
-    nextSteps: [
-      "Run your CV through the CV Analyzer.",
-      "Fix your top 3 weak CV bullets.",
-      "Pick one realistic opportunity path.",
-      "Take one action this week.",
-    ],
-  };
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchTwin() {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await twinAPI.get();
+        if (cancelled) return;
+
+        const raw = response?.data?.twin ?? response?.twin ?? null;
+        if (raw) {
+          setTwinData(mapTwinToDisplay(raw));
+        } else {
+          setTwinData(null);
+        }
+      } catch (err: any) {
+        if (!cancelled) {
+          setError(err?.message ?? "Failed to load your twin.");
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    fetchTwin();
+    return () => { cancelled = true; };
+  }, []);
 
   const toggleSection = (section: SectionKey) => {
     setOpenSections((current) =>
@@ -124,7 +197,6 @@ const DigitalTwin = () => {
         ],
       };
     }
-
     if (selectedPrompt.includes("jobs")) {
       return {
         title: "Jobs that fit your current profile",
@@ -136,7 +208,6 @@ const DigitalTwin = () => {
         ],
       };
     }
-
     if (selectedPrompt.includes("monetize")) {
       return {
         title: "Ways to earn from what you already know",
@@ -148,7 +219,6 @@ const DigitalTwin = () => {
         ],
       };
     }
-
     if (selectedPrompt.includes("income")) {
       return {
         title: "How to increase your income path",
@@ -160,7 +230,6 @@ const DigitalTwin = () => {
         ],
       };
     }
-
     return {
       title: "Your next best move",
       message: "Start by improving the proof in your CV, then compare jobs, learning paths, and side-income options.",
@@ -194,10 +263,65 @@ const DigitalTwin = () => {
     return "text-green-600";
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto" />
+          <p className="text-muted-foreground">Loading your Economic Twin...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Card className="max-w-md w-full mx-4">
+          <CardContent className="p-8 text-center space-y-4">
+            <p className="text-destructive font-medium">Could not load your twin</p>
+            <p className="text-sm text-muted-foreground">{error}</p>
+            <Button onClick={() => window.location.reload()}>Try Again</Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!twinData) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Card className="max-w-lg w-full mx-4">
+          <CardContent className="p-8 text-center space-y-6">
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold text-primary">Your Economic Twin isn't built yet</h2>
+              <p className="text-muted-foreground">
+                Complete your CV analysis first. Your twin is generated automatically from your CV data and updated after each AI coaching session.
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link to="/cv-analyzer">
+                <Button className="w-full sm:w-auto">
+                  Analyse My CV
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+              <Link to="/twin-builder">
+                <Button variant="outline" className="w-full sm:w-auto">
+                  Build via Chat
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
-        {/* Header Section */}
+        {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-primary mb-2">Your Economic Twin</h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
@@ -208,7 +332,7 @@ const DigitalTwin = () => {
 
         {/* Split Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Panel - Economic Twin Summary */}
+          {/* Left Panel */}
           <div className="lg:col-span-1 space-y-6">
             {/* Employability Score */}
             <Card>
@@ -220,13 +344,13 @@ const DigitalTwin = () => {
                   <div className="text-sm text-muted-foreground mb-1">Employability Score</div>
                   <div className="text-sm font-medium">{getScoreLabel(twinData.score)}</div>
                   <div className="w-full bg-muted rounded-full h-2 mt-4">
-  <div 
-    className="bg-primary h-2 rounded-full transition-all duration-300"
-    style={{ width: `${twinData.score}%` }}
-  />
-</div>
+                    <div
+                      className="bg-primary h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${twinData.score}%` }}
+                    />
+                  </div>
                   <p className="text-xs text-muted-foreground mt-2">
-                    You already have usable skills. The next step is adding stronger proof.
+                    {twinData.summary}
                   </p>
                 </div>
               </CardContent>
@@ -243,7 +367,7 @@ const DigitalTwin = () => {
                   {twinData.marketValue}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Your current experience can be shaped into entry-level opportunities.
+                  {twinData.confidence}
                 </p>
               </CardContent>
             </Card>
@@ -272,7 +396,7 @@ const DigitalTwin = () => {
                   <span className="font-medium">Best Current Path</span>
                 </div>
                 <div className="text-lg font-semibold text-purple-600 mb-1">
-                  Work-ready foundation
+                  {twinData.strongestPath}
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Start with roles that match your current evidence, then bridge into higher-value skills.
@@ -281,7 +405,7 @@ const DigitalTwin = () => {
             </Card>
           </div>
 
-          {/* Right Panel - Twin Guidance */}
+          {/* Right Panel */}
           <div className="lg:col-span-2 space-y-6">
             {/* Twin Guidance */}
             <Card>
@@ -295,8 +419,6 @@ const DigitalTwin = () => {
                 <p className="text-muted-foreground mb-4">
                   Choose what you want help with. Your twin will keep it simple and practical.
                 </p>
-
-                {/* Quick Action Buttons */}
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-6">
                   {quickPrompts.map((prompt) => (
                     <Button
@@ -310,8 +432,6 @@ const DigitalTwin = () => {
                     </Button>
                   ))}
                 </div>
-
-                {/* Dynamic Guidance Response */}
                 <div className="bg-muted/50 rounded-lg p-4">
                   <h3 className="font-semibold mb-2">{guidance.title}</h3>
                   <p className="text-sm text-muted-foreground mb-4">{guidance.message}</p>
@@ -329,7 +449,7 @@ const DigitalTwin = () => {
               </CardContent>
             </Card>
 
-            {/* Start Here Section */}
+            {/* Start Here CTA */}
             <Card className="border-primary">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
@@ -394,13 +514,17 @@ const DigitalTwin = () => {
                       <p className="text-sm text-muted-foreground mb-3">
                         These are skills your profile already suggests. The goal is to show stronger proof.
                       </p>
-                      <div className="flex flex-wrap gap-2">
-                        {twinData.coreSkills.map((skill) => (
-                          <Badge key={skill} variant="secondary">
-                            {skill}
-                          </Badge>
-                        ))}
-                      </div>
+                      {twinData.coreSkills.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {twinData.coreSkills.map((skill) => (
+                            <Badge key={skill} variant="secondary">
+                              {skill}
+                            </Badge>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">Complete your CV analysis to see your core skills.</p>
+                      )}
                     </div>
                   )}
                 </CardContent>
@@ -426,13 +550,17 @@ const DigitalTwin = () => {
                       <p className="text-sm text-muted-foreground mb-3">
                         These may become stronger opportunities if you add examples, results, or projects.
                       </p>
-                      <div className="flex flex-wrap gap-2">
-                        {twinData.skillsNeedingProof.map((skill) => (
-                          <Badge key={skill} variant="outline">
-                            {skill}
-                          </Badge>
-                        ))}
-                      </div>
+                      {twinData.skillsNeedingProof.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {twinData.skillsNeedingProof.map((skill) => (
+                            <Badge key={skill} variant="outline">
+                              {skill}
+                            </Badge>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">No skill gaps detected — great profile coverage!</p>
+                      )}
                     </div>
                   )}
                 </CardContent>

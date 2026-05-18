@@ -5,8 +5,8 @@ const router = express.Router();
 
 router.use(protect);
 
-router.get('/', protect,getMyApplications);
-router.get('/stats', protect, getMyApplicationStats);
-router.post('/', protect, createApplication);
+router.get('/', getMyApplications);
+router.get('/stats', getMyApplicationStats);
+router.post('/', createApplication);
 
 module.exports = router;
