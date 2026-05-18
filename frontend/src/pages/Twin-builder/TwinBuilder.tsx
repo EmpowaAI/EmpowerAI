@@ -50,6 +50,7 @@ interface TwinData {
   name?: string;
   industry?: string;
   level?: string;
+  dataSource?: 'ai' | 'chat' | 'fallback' | string;
 }
 
 type ChatMessage = {
@@ -496,8 +497,8 @@ const TwinBuilder = () => {
             <div className="space-y-3">
               {/* Profile */}
               <section className="rounded-xl border border-border bg-card p-4">
-                {/* Stale-data warning: industry is default AND no skills means twin wasn't built from real CV */}
-                {displayIndustry === "General" && skills.length === 0 && (
+                {/* Stale-data warning: few skills OR fallback source means twin wasn't built from real AI analysis */}
+                {(skills.length <= 2 || twinData?.dataSource === 'fallback') && (
                   <div className="mb-3 flex items-start gap-2 rounded-lg border border-secondary/30 bg-secondary/5 px-3 py-2">
                     <AlertCircle className="h-4 w-4 text-secondary flex-shrink-0 mt-0.5" />
                     <p className="text-xs text-muted-foreground">

@@ -315,8 +315,9 @@ async function buildFromCvProfile(userId) {
 
     twinPayload = {
       ...aiTwin,
-      cvProfile: cvProfile._id,
+      cvProfile:         cvProfile._id,
       status:            'ACTIVE',
+      dataSource:        'ai',
       lastCalculatedAt:  new Date(),
     };
 
@@ -334,7 +335,7 @@ async function buildFromCvProfile(userId) {
 
     const twinData = await _assembleTwinData(cvProfile.analysis, userId, cvProfile._id);
     const { _matchedOpportunities, ...fallback } = twinData;
-    twinPayload = fallback;
+    twinPayload = { ...fallback, dataSource: 'fallback' };
   }
 
   return twinRepository.upsertTwin(userId, twinPayload);

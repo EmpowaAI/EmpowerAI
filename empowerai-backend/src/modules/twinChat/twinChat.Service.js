@@ -174,7 +174,10 @@ async function sendMessage(userId, message, history, twinData, isLastPrompt = fa
   if (isLastPrompt || fastApiData?.isComplete === true) {
     logger.info('[TwinChat] Persisting twin to DB', { userId });
     try {
-      savedTwin = await twinBuilderService.persistTwinFromChat(userId, updatedTwinData);
+      savedTwin = await twinBuilderService.persistTwinFromChat(userId, {
+        ...updatedTwinData,
+        dataSource: 'chat',
+      });
     } catch (dbErr) {
       logger.warn('[TwinChat] Failed to persist twin to DB', { userId, error: dbErr.message });
     }
