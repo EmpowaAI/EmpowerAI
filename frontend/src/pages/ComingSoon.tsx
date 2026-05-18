@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import {
-  ArrowRight, Loader2, Sparkles, Cpu, Zap, MapPin,
+  ArrowRight, Loader2, Sparkles, Zap, MapPin,
   CheckCircle2, Facebook, Instagram, Linkedin, Mail,
-  Clock, Bell, Shield,
+  Clock, Bell,
 } from "lucide-react";
 import Logo from "@/components/ui/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -11,28 +11,6 @@ import { API_BASE_URL } from "../lib/apiBase";
 
 const heroBackgroundUrl = encodeURI(`${import.meta.env.BASE_URL}images/Wide blue-orange gra.png`);
 
-const WHAT_TO_EXPECT = [
-  {
-    icon: Cpu,
-    title: "AI-powered CV Analysis",
-    desc: "Get real, personalised feedback on your CV in under 60 seconds.",
-  },
-  {
-    icon: Zap,
-    title: "Digital Career Twin",
-    desc: "Your skills mapped to income potential, demand level, and growth paths.",
-  },
-  {
-    icon: MapPin,
-    title: "Matched Opportunities",
-    desc: "Jobs, learnerships, bursaries and funding across all 9 provinces.",
-  },
-  {
-    icon: Shield,
-    title: "Interview Coaching",
-    desc: "AI-driven practice built around your actual experience and goals.",
-  },
-];
 
 export default function ComingSoon() {
   const [email, setEmail] = useState("");
@@ -192,39 +170,6 @@ export default function ComingSoon() {
             <span className="inline-flex items-center gap-1.5">
               <MapPin className="h-3.5 w-3.5 text-secondary" /> All 9 provinces · Mzansi
             </span>
-          </div>
-        </div>
-      </section>
-
-      {/* ── What's coming section ─────────────────────────────────────────────── */}
-      <section className="bg-background py-16 sm:py-20 px-4">
-        <div className="container mx-auto max-w-5xl">
-          <div className="text-center mb-12 space-y-2">
-            <p className="text-xs font-bold uppercase tracking-widest text-secondary">What we're building</p>
-            <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-foreground">
-              Everything you need to launch your career
-            </h2>
-            <p className="text-muted-foreground text-sm sm:text-base max-w-xl mx-auto">
-              EmpowaAI is not just another job board. It's a complete AI career intelligence
-              platform designed from the ground up for South African realities.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {WHAT_TO_EXPECT.map(({ icon: Icon, title, desc }) => (
-              <div
-                key={title}
-                className="flex gap-4 p-6 rounded-2xl border border-border bg-card hover:border-primary/30 transition-colors"
-              >
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <Icon className="h-5 w-5" />
-                </span>
-                <div>
-                  <h3 className="font-semibold text-foreground">{title}</h3>
-                  <p className="mt-1 text-sm text-muted-foreground leading-relaxed">{desc}</p>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </section>
