@@ -64,7 +64,7 @@ async def generate_twin(request: CreateTwinRequest, req: Request):
             raise HTTPException(400, "Must provide cv_analysis or manual_data")
         
         # Generate base twin
-        twin_data = twin_generator.generate_twin_with_ai(user_dict)
+        twin_data = await twin_generator.generate_twin_with_ai(user_dict)
         
         # TODO: Save to MongoDB with user_id linking (implement in next step)
         # twin_doc = EconomicTwin(

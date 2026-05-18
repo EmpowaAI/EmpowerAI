@@ -170,10 +170,9 @@ async def debug_connection():
     }
 
 # Import all routes - FIXED: Removed duplicate chat import
-from routes import digital_twin, simulation, cv_analysis, cv_analysis_file, cv_revamp, interview, chat, twin
+from routes import simulation, cv_analysis, cv_analysis_file, cv_revamp, interview, chat, twin
 
 # Include all routers with proper prefixes
-app.include_router(digital_twin.router, prefix="/api")
 app.include_router(simulation.router, prefix="/api")
 app.include_router(cv_analysis.router, prefix="/api/cv")
 app.include_router(cv_analysis_file.router, prefix="/api/cv")

@@ -112,7 +112,7 @@ def is_cv_document(cv_text: str) -> tuple[bool, str]:
     if cv_score < min_cv_indicators:
         return False, "This document doesn't contain typical CV content like work experience, education, or skills sections."
     
-    if min_total_score < min_total_score:
+    if (work_score + edu_score + skill_score) < min_total_score:
         return False, "This document doesn't appear to be a CV/resume. It lacks sufficient work, education, or skills content."
     
     # Check document structure - CVs typically have multiple sections (made more lenient)
