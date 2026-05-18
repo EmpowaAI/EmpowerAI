@@ -295,12 +295,48 @@ async function createOrUpdateFromForm(userId, formData) {
 // -----------------------------------------------------------------------------
 // BUILD FROM CV PROFILE
 // Called by POST /api/twin/build-from-cv after CV analysis completes.
-// Assembles twin data from the user's saved CvProfile and persists it.
+// Calls the Python AI service for AI-enriched twin data; falls back to
+// the rule-based Node assembly if the AI service is unavailable.
 // -----------------------------------------------------------------------------
 
 async function buildFromCvProfile(userId) {
-  const twinData = await buildTwinData(userId);
-  const { _matchedOpportunities, ...twinPayload } = twinData;
+  const cvProfile = await cvRepository.findByUserId(userId);
+  if (!cvProfile) throw new NotFoundError('CV profile not found.');
+
+  let twinPayload;
+
+  try {
+    const aiTwin = await aiServiceClient.post('/twin/generate', {
+      user_id: String(userId),
+      cv_analysis: cvProfile.analysis,
+    });
+
+    if (!aiTwin || typeof aiTwin !== 'object') throw new Error('Empty response from AI service');
+
+    twinPayload = {
+      ...aiTwin,
+      cvProfile: cvProfile._id,
+      status:            'ACTIVE',
+      lastCalculatedAt:  new Date(),
+    };
+
+    logger.info('[TwinService] AI twin built from CV profile', {
+      userId,
+      industry:          twinPayload.identity?.industry,
+      employability:     twinPayload.economy?.employabilityScore,
+      coreSkillCount:    twinPayload.skills?.core?.length ?? 0,
+    });
+  } catch (aiErr) {
+    logger.warn('[TwinService] AI service unavailable, using rule-based fallback', {
+      userId,
+      error: aiErr.message,
+    });
+
+    const twinData = await _assembleTwinData(cvProfile.analysis, userId, cvProfile._id);
+    const { _matchedOpportunities, ...fallback } = twinData;
+    twinPayload = fallback;
+  }
+
   return twinRepository.upsertTwin(userId, twinPayload);
 }
 

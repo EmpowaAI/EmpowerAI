@@ -1,6 +1,7 @@
 'use strict';
 
 const twinBuilderService = require('../twinBuilder/twinBuilder.Service');
+const twinRepository     = require('../twinBuilder/twinBuilder.Repository');
 const aiServiceClient    = require('../../intergration/ai/ai.ServiceClient');
 const logger             = require('../../utils/logger');
 
@@ -105,12 +106,21 @@ function _mapCareerStageToSeniority(careerStage = '') {
 async function initialiseChatSession(userId) {
   logger.info('[TwinChat] Initialising chat session', { userId });
 
-  const twinData = await twinBuilderService.buildTwinData(userId);
+  // Prefer the persisted (AI-enriched) twin from MongoDB so the chat always
+  // starts with the richest available data. Only rebuild rule-based if no
+  // saved twin exists yet.
+  let twinData = await twinRepository.findByUserId(userId);
+
+  if (!twinData) {
+    logger.info('[TwinChat] No persisted twin found — building from CV profile', { userId });
+    twinData = await twinBuilderService.buildTwinData(userId);
+  }
 
   logger.info('[TwinChat] Session ready', {
     userId,
     employabilityScore:   twinData.economy?.employabilityScore,
-    matchedOpportunities: twinData._matchedOpportunities?.length,
+    industry:             twinData.identity?.industry,
+    coreSkillCount:       twinData.skills?.core?.length ?? 0,
   });
 
   return { twinData };
