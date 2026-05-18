@@ -1,6 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
 import { MessageCircle, Send, Bot, User, Brain, Lightbulb, Target, TrendingUp, Heart } from 'lucide-react'
 import { cn } from "../../lib/utils"
 
@@ -261,7 +259,6 @@ export default function AIMentor247() {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto space-y-4 mb-4">
         {messages.map((message) => {
-          const Icon = message.type === 'ai' ? Bot : User
           const CategoryIcon = getCategoryIcon(message.category)
           
           return (
