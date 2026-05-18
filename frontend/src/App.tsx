@@ -10,6 +10,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { Toaster } from 'react-hot-toast';
 
 const LandingPage = lazy(() => import('./pages/LandingPage'));
+const ComingSoon = lazy(() => import('./pages/ComingSoon'));
 const Demo = lazy(() => import('./pages/Demo'));
 const Pricing = lazy(() => import('./pages/Pricing'));
 const LoginPage = lazy(() => import('./pages/Auth/LoginPage'));
@@ -33,6 +34,8 @@ const InterviewCoach = lazy(() => import('./pages/Interview/InterviewCoach'));
 const Applications = lazy(() => import('./pages/Oportunities/Applications'));
 const Chat = lazy(() => import('./pages/AI/Chat'));
 const AdminPanel = lazy(() => import('./pages/AdminPanel'));
+
+const COMING_SOON = import.meta.env.VITE_COMING_SOON === 'true';
 
 function App() {
   return (
@@ -58,14 +61,14 @@ function App() {
             <RouteTransition>
               <Routes>
               {/* Public routes */}
-              <Route path="/" element={<LandingPage />} />
+              <Route path="/" element={COMING_SOON ? <ComingSoon /> : <LandingPage />} />
               <Route path="/demo" element={<Demo />} />
               <Route path="/cv-analyzer" element={<CVAnalyzer />} />
               <Route path="/digital-twin" element={<DigitalTwin />} />
               <Route path="/twin-preview" element={<TwinBuilder />} />
               {/* <Route path="/pricing" element={<Pricing />} /> */}
               <Route path="/login" element={<LoginPage />} />
-              <Route path="/signup" element={<SignupPage />} />
+              <Route path="/signup" element={COMING_SOON ? <Navigate to="/" replace /> : <SignupPage />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/verify" element={<EmailVerified />} />
