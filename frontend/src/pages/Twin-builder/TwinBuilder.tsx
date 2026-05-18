@@ -102,6 +102,14 @@ const InsightCard = ({
   </article>
 );
 
+// Treat JS "undefined"/"null" strings and empty strings as missing.
+function safeStr(val: unknown, fallback = ""): string {
+  if (val == null) return fallback;
+  const s = String(val).trim();
+  if (!s || s.toLowerCase() === "undefined" || s.toLowerCase() === "null" || s.toLowerCase() === "n/a") return fallback;
+  return s;
+}
+
 // Map the backend's nested twin shape to the flat TwinData interface the UI expects.
 function normalizeTwin(raw: any): TwinData | null {
   if (!raw) return null;
@@ -113,18 +121,21 @@ function normalizeTwin(raw: any): TwinData | null {
     ? `R${(raw.economy.incomePotentialRange.min ?? 0).toLocaleString()} – R${(raw.economy.incomePotentialRange.max ?? 0).toLocaleString()}/month`
     : undefined;
   const coreSkills: string[] = Array.isArray(raw.skills?.core) ? raw.skills.core : [];
-  const industry: string = raw.identity?.industry || "General";
+  const industry: string = safeStr(raw.identity?.industry, "General");
   const demandRaw: string = raw.economy?.demandLevel ?? "";
   const marketDemand = demandRaw
     ? demandRaw.charAt(0) + demandRaw.slice(1).toLowerCase()
     : employabilityScore > 70 ? "High" : employabilityScore > 40 ? "Medium" : "Developing";
 
+  const currentRole = safeStr(raw.identity?.currentRole);
+  const targetRole = safeStr(raw.identity?.targetRole);
+
   return {
     profile: {
-      name: raw.identity?.currentRole || "Economic Twin Profile",
-      path: raw.identity?.targetRole || "Career profile",
+      name: currentRole || "Economic Twin Profile",
+      path: targetRole || "Career profile",
       industry,
-      level: raw.identity?.seniorityLevel || "",
+      level: safeStr(raw.identity?.seniorityLevel),
       value: incomeRange || "—",
       skills: coreSkills,
       empowermentScore: employabilityScore,
@@ -139,9 +150,9 @@ function normalizeTwin(raw: any): TwinData | null {
       : [],
     empowermentScore: employabilityScore,
     economy: { employabilityScore, incomeRange },
-    name: raw.identity?.currentRole,
+    name: currentRole || undefined,
     industry,
-    level: raw.identity?.seniorityLevel,
+    level: safeStr(raw.identity?.seniorityLevel) || undefined,
   };
 }
 
@@ -452,11 +463,11 @@ const TwinBuilder = () => {
     setMessage("");
   };
 
-  // Derived display values
+  // Derived display values — safeStr guards against stored "undefined"/"null" strings
   const profile = twinData?.profile;
-  const displayName = profile?.name ?? twinData?.name ?? "Economic Twin Profile";
-  const displayPath = profile?.path ?? (twinData?.careerPaths?.[0]?.title ?? "Career profile");
-  const displayIndustry = profile?.industry ?? twinData?.industry ?? "General";
+  const displayName = safeStr(profile?.name ?? twinData?.name, "Economic Twin Profile");
+  const displayPath = safeStr(profile?.path ?? twinData?.careerPaths?.[0]?.title, "Career profile");
+  const displayIndustry = safeStr(profile?.industry ?? twinData?.industry, "General");
   const displayValue = profile?.value ?? twinData?.economy?.incomeRange ?? "—";
   const displayScore = profile?.empowermentScore ?? twinData?.empowermentScore ?? twinData?.economy?.employabilityScore ?? 0;
   const displayMarket = profile?.marketDemand ?? (displayScore > 70 ? "High" : displayScore > 40 ? "Medium" : "Developing");

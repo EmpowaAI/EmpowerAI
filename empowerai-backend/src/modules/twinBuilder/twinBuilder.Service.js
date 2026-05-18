@@ -177,13 +177,18 @@ async function _assembleTwinData(analysis, userId, cvProfileId) {
   const marketValueScore =
     Math.min(100, employabilityScore + matchedOpportunities.length * 3);
 
-  const currentRole =
-    analysis.experience?.length
-      ? String(analysis.experience[0]).split(' - ')[0].trim()
-      : '';
+  // Guard against JS coercing actual `undefined` values to the string "undefined"
+  const _safeStr = (val) => {
+    if (val == null) return '';
+    const s = String(val).trim();
+    return (s === 'undefined' || s === 'null' || s === 'N/A') ? '' : s;
+  };
 
-  const targetRole =
-    matchedOpportunities[0]?.title || currentRole;
+  const currentRole = _safeStr(
+    analysis.experience?.length ? analysis.experience[0]?.split?.(' - ')?.[0] : null
+  );
+
+  const targetRole = _safeStr(matchedOpportunities[0]?.title) || currentRole;
 
   return {
     cvProfile: cvProfileId,
