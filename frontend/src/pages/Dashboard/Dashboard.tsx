@@ -15,61 +15,59 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { ContactWidget } from "@/components/ContactWidget";
 import { getStoredCvAnalysis } from "../../lib/sensitiveStorage";
+import { opportunitiesAPI } from "../../lib/api";
+import { useUser } from "../../contexts/user-context";
 
 const Dashboard = () => {
+  const { progress, cvData } = useUser();
+
+  const cvCompleted = progress.cvCompleted;
+  const twinCompleted = progress.twinCompleted;
+  const empowermentScore = progress.empowermentScore ?? 0;
+
   const [showWelcomeGuide, setShowWelcomeGuide] = useState(true);
-  const [cvCompleted, setCvCompleted] = useState(false);
-  const [twinCompleted, setTwinCompleted] = useState(false);
   const [cvScore, setCvScore] = useState(0);
-  const [empowermentScore, setEmpowermentScore] = useState(0);
   const [topSkills, setTopSkills] = useState<string[]>([]);
+  const [liveCount, setLiveCount] = useState<number | null>(null);
 
+  // CV score + top skills — derive from stored analysis or cvData from context
   useEffect(() => {
-    const sync = () => {
+    let score = Number(localStorage.getItem("cvScore")) || 0;
+    if (!score) score = Number(getStoredCvAnalysis<any>()?.score) || 0;
+    if (!score && cvData?.score) score = cvData.score;
+    setCvScore(score);
+
+    const fromStorage = (() => {
       try {
-        const cvDone = localStorage.getItem("cvCompleted") === "true";
-        const twinDone = !!localStorage.getItem("twinData");
-        setCvCompleted(cvDone);
-        setTwinCompleted(twinDone);
-
-        // CV score
-        let score = Number(localStorage.getItem("cvScore")) || 0;
-        if (!score) score = Number(getStoredCvAnalysis<any>()?.score) || 0;
-        setCvScore(score);
-
-        // Skills
-        const skillsRaw = (() => {
-          try { return JSON.parse(localStorage.getItem("cvSkills") || "[]"); } catch { return []; }
-        })();
-        setTopSkills(Array.isArray(skillsRaw) ? skillsRaw.slice(0, 5) : []);
-
-        // Twin score
-        const twinRaw = localStorage.getItem("twinData");
-        if (twinRaw) {
-          const parsed = JSON.parse(twinRaw);
-          setEmpowermentScore(
-            parsed.economy?.employabilityScore ||
-            parsed.empowermentScore ||
-            parsed.profile?.empowermentScore ||
-            0
-          );
-        } else {
-          setEmpowermentScore(0);
-        }
+        const raw = JSON.parse(localStorage.getItem("cvSkills") || "[]");
+        return Array.isArray(raw) ? raw : [];
       } catch {
-        // ignore
+        return [];
       }
-    };
+    })();
+    const skills = fromStorage.length > 0
+      ? fromStorage.slice(0, 5)
+      : (cvData?.sections?.skills ?? []).slice(0, 5);
+    setTopSkills(skills);
+  }, [cvData]);
 
-    sync();
-    window.addEventListener("storage", sync);
-    window.addEventListener("cvCompleted", sync);
-    window.addEventListener("twinCompleted", sync);
-    return () => {
-      window.removeEventListener("storage", sync);
-      window.removeEventListener("cvCompleted", sync);
-      window.removeEventListener("twinCompleted", sync);
-    };
+  // Live opportunity count — single lightweight backend call
+  useEffect(() => {
+    let cancelled = false;
+    opportunitiesAPI.getAll({ limit: 1, page: 1 })
+      .then((res: any) => {
+        if (cancelled) return;
+        const meta = res?.meta ?? res?.data?.meta;
+        const count =
+          typeof meta?.totalInDatabase === "number" && meta.totalInDatabase > 0
+            ? meta.totalInDatabase
+            : typeof meta?.totalFiltered === "number" && meta.totalFiltered > 0
+            ? meta.totalFiltered
+            : null;
+        if (count !== null) setLiveCount(count);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
   }, []);
 
   // Hide welcome guide once CV is done
@@ -79,6 +77,34 @@ const Dashboard = () => {
 
   const completedCount = [cvCompleted, twinCompleted, false, false].filter(Boolean).length;
   const progressPct = Math.round((completedCount / 4) * 100);
+
+  // Both scores present → average; only one → use that one; neither → 0
+  const readinessScore =
+    cvScore > 0 && empowermentScore > 0
+      ? Math.round((cvScore + empowermentScore) / 2)
+      : cvScore > 0
+      ? cvScore
+      : empowermentScore > 0
+      ? empowermentScore
+      : 0;
+
+  const quietStats = [
+    {
+      label: "CV strength",
+      value: cvScore > 0 ? `${cvScore}%` : "—",
+      note: cvScore > 0 ? "Based on your last upload" : "Analyse your CV first",
+    },
+    {
+      label: "Readiness",
+      value: readinessScore > 0 ? `${readinessScore}%` : "—",
+      note: readinessScore > 0 ? "Career readiness score" : "Build your twin next",
+    },
+    {
+      label: "Live opportunities",
+      value: liveCount !== null ? liveCount.toLocaleString() : "—",
+      note: liveCount !== null ? "Active in South Africa" : "Loading…",
+    },
+  ];
 
   const onboardingSteps = [
     {
@@ -156,31 +182,6 @@ const Dashboard = () => {
     },
   ];
 
-  // Derived stats
-  const readinessScore =
-    cvScore > 0 || empowermentScore > 0
-      ? Math.round((cvScore + empowermentScore) / 2)
-      : 0;
-
-  const quietStats = [
-    {
-      label: "CV strength",
-      value: cvScore > 0 ? `${cvScore}%` : "—",
-      note: cvScore > 0 ? "Based on your last upload" : "Analyse your CV first",
-    },
-    {
-      label: "Readiness",
-      value: readinessScore > 0 ? `${readinessScore}%` : "—",
-      note: readinessScore > 0 ? "Career readiness score" : "Build your twin next",
-    },
-    {
-      label: "Live opportunities",
-      value: "Coming soon",
-      note: "South Africa",
-    },
-  ];
-
-  // Recommended next action
   const nextActionTitle = !cvCompleted
     ? "Analyse your CV"
     : !twinCompleted
@@ -408,6 +409,12 @@ const Dashboard = () => {
                       </p>
                     )}
                   </div>
+                  {empowermentScore > 0 && (
+                    <div>
+                      <p className="font-semibold text-foreground">Empowerment score</p>
+                      <p className="mt-1 text-2xl font-bold text-primary">{empowermentScore}%</p>
+                    </div>
+                  )}
                 </div>
               </Card>
 
