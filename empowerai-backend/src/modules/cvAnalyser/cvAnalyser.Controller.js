@@ -1,10 +1,8 @@
-
-
 const cvService = require('./cvAnalyser.Service');
 const { AppError, BadRequestError, ServiceUnavailableError } = require('../../utils/errors');
+const { buildCVDocx } = require('../../intergration/docxBuilder/cvDoxcBuilder');
 
-// ─── Restore from cached analysis ─────────────────────────────────────────────
-
+// ── Restore from cached analysis ──────────────────────────────────────────────
 exports.restoreFromCachedAnalysis = async (req, res, next) => {
   try {
     const { analysis } = req.body;
@@ -15,32 +13,32 @@ exports.restoreFromCachedAnalysis = async (req, res, next) => {
       userId: req.user.id,
       cachedAnalysis: analysis,
     });
-    return res.status(200).json({
-      status: 'success',
-      data: { profileId: profile._id },
-    });
+    return res.status(200).json({ status: 'success', data: { profileId: profile._id } });
   } catch (error) {
     next(error);
   }
 };
 
-// ─── analyzeCV (text-based) ────────────────────────────────────────────────────
-
+// ── Analyse from text ─────────────────────────────────────────────────────────
 exports.analyzeCV = async (req, res, next) => {
   try {
-    const { cvText, jobRequirements } = req.body;
+    const { cvText, targetRole, industry, jobDescription } = req.body;
 
     if (!cvText) {
-      return res.status(400).json({ status: 'error', message: 'CV text is required' });
+      return res.status(400).json({ status: 'error', message: 'cvText is required' });
+    }
+    if (!targetRole || !industry) {
+      return res.status(400).json({ status: 'error', message: 'targetRole and industry are required' });
     }
 
-    const jobRequirementsArray = _parseJobRequirements(jobRequirements);
-
-    const { analysis, profileId, isFallback, fallbackMessage, meta } =
+    const { analysis, profileId, isFallback, fallbackMessage, isSubscribed, remaining } =
       await cvService.analyzeFromText({
-        userId: req.user.id,
+        userId:          req.user.id,
         cvText,
-        jobRequirementsArray,
+        targetRole,
+        industry,
+        jobDescription:  req.body.jobDescription || null,
+        subscription:    req.subscription || null,
       });
 
     return res.status(200).json({
@@ -48,31 +46,39 @@ exports.analyzeCV = async (req, res, next) => {
       data: {
         analysis,
         profileId,
+        isSubscribed,
+        ...(remaining !== null ? { analysisRemaining: remaining } : {}),
         ...(isFallback ? { fallback: true, message: fallbackMessage } : {}),
-        ...(meta ? { meta } : {}),
       },
     });
   } catch (error) {
+    if (error.limitReached) {
+      return res.status(403).json({ status: 'error', message: error.message, limitReached: true });
+    }
     _forwardError(error, next);
   }
 };
 
-// ─── analyzeCVFile (file upload) ───────────────────────────────────────────────
-
+// ── Analyse from file ─────────────────────────────────────────────────────────
 exports.analyzeCVFile = async (req, res, next) => {
   try {
     if (!req.file) {
       return res.status(400).json({ status: 'error', message: 'CV file is required' });
     }
 
-    const { jobRequirements } = req.body;
-    const jobRequirementsArray = _parseJobRequirements(jobRequirements);
+    const { targetRole, industry, jobDescription } = req.body;
+    if (!targetRole || !industry) {
+      return res.status(400).json({ status: 'error', message: 'targetRole and industry are required' });
+    }
 
-    const { analysis, profileId, isFallback, fallbackMessage, meta } =
+    const { analysis, profileId, isFallback, fallbackMessage, isSubscribed, remaining } =
       await cvService.analyzeFromFile({
-        userId: req.user.id,
-        file: req.file,
-        jobRequirementsArray,
+        userId:       req.user.id,
+        file:         req.file,
+        targetRole,
+        industry,
+        jobDescription: jobDescription || null,
+        subscription:   req.subscription || null,
       });
 
     return res.status(200).json({
@@ -80,60 +86,98 @@ exports.analyzeCVFile = async (req, res, next) => {
       data: {
         analysis,
         profileId,
+        isSubscribed,
+        ...(remaining !== null ? { analysisRemaining: remaining } : {}),
         ...(isFallback ? { fallback: true, message: fallbackMessage } : {}),
-        ...(meta ? { meta } : {}),
       },
     });
   } catch (error) {
+    if (error.limitReached) {
+      return res.status(403).json({ status: 'error', message: error.message, limitReached: true });
+    }
     _forwardError(error, next);
   }
 };
 
-// ─── revampCV ──────────────────────────────────────────────────────────────────
-
+// ── Revamp CV (subscription only) ────────────────────────────────────────────
 exports.revampCV = async (req, res, next) => {
   try {
-    const { cvData } = req.body || {};
-
-    if (!cvData || typeof cvData !== 'object') {
-      return res.status(400).json({ status: 'error', message: 'cvData is required' });
-    }
-
-    const { revamp, meta } = await cvService.revampCv({ cvData });
+    const { revamp, profileId } = await cvService.revampCv({
+      userId:       req.user.id,
+      subscription: req.subscription || null,
+    });
 
     return res.status(200).json({
       status: 'success',
-      data: { revamp, ...(meta ? { meta } : {}) },
+      data: { revamp, profileId },
     });
   } catch (error) {
+    if (error.requiresSubscription) {
+      return res.status(403).json({
+        status: 'error',
+        message: error.message,
+        requiresSubscription: true,
+      });
+    }
     _forwardError(error, next);
   }
 };
 
-// ─── Stored CV profile (read/delete) ───────────────────────────────────────────
+// ── Download revamped CV as DOCX (subscription only) ─────────────────────────
+exports.downloadRevampedCV = async (req, res, next) => {
+  try {
+    const { format = 'docx' } = req.query;
 
-const toBool = (value, defaultValue = false) => {
-  if (value === undefined || value === null) return defaultValue;
-  const normalized = String(value).trim().toLowerCase();
-  if (['1', 'true', 'yes', 'y', 'on'].includes(normalized)) return true;
-  if (['0', 'false', 'no', 'n', 'off'].includes(normalized)) return false;
-  return defaultValue;
+    const { revampedCv, plainTextCv } = await cvService.getRevampForDownload({
+      userId:       req.user.id,
+      subscription: req.subscription || null,
+    });
+
+    // Plain text download
+    if (format === 'txt') {
+      const filename = `revamped-cv-${req.user.id}.txt`;
+      res.setHeader('Content-Type', 'text/plain');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      return res.send(plainTextCv || '');
+    }
+
+    // DOCX download (default)
+    const docxBuffer = await buildCVDocx(revampedCv);
+    const filename = `revamped-cv-${req.user.id}.docx`;
+
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    );
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Length', docxBuffer.length);
+
+    return res.send(docxBuffer);
+  } catch (error) {
+    if (error.requiresSubscription) {
+      return res.status(403).json({
+        status: 'error',
+        message: error.message,
+        requiresSubscription: true,
+      });
+    }
+    _forwardError(error, next);
+  }
 };
 
+// ── Get CV profile ────────────────────────────────────────────────────────────
 exports.getCvProfile = async (req, res, next) => {
   try {
-    const includeRawTextRequested = req.query?.includeRawText === '1' || req.query?.includeRawText === 'true';
-    const allowRawTextExport = toBool(process.env.CV_ALLOW_RAW_TEXT_EXPORT, false);
+    const includeRawText = req.query?.includeRawText === '1';
+    const allowRawExport = process.env.CV_ALLOW_RAW_TEXT_EXPORT === 'true';
 
-    const profile = await cvService.getCvProfile(req.user.id);
+    const profile = await cvService.getCvProfile(req.user.id, req.subscription || null);
     if (!profile) {
       return res.status(200).json({ status: 'success', data: { profile: null } });
     }
 
     const safeProfile = { ...profile };
-    if (!(includeRawTextRequested && allowRawTextExport)) {
-      delete safeProfile.rawText;
-    }
+    if (!(includeRawText && allowRawExport)) delete safeProfile.rawText;
 
     return res.status(200).json({ status: 'success', data: { profile: safeProfile } });
   } catch (error) {
@@ -141,6 +185,7 @@ exports.getCvProfile = async (req, res, next) => {
   }
 };
 
+// ── Delete CV profile ─────────────────────────────────────────────────────────
 exports.deleteCvProfile = async (req, res, next) => {
   try {
     await cvService.deleteCvProfile(req.user.id);
@@ -150,29 +195,18 @@ exports.deleteCvProfile = async (req, res, next) => {
   }
 };
 
-// ─── Private helpers ───────────────────────────────────────────────────────────
-
-function _parseJobRequirements(jobRequirements) {
-  if (!jobRequirements) return null;
-  if (typeof jobRequirements === 'string') {
-    return jobRequirements.split(/[,\n]/).map((s) => s.trim()).filter(Boolean);
-  }
-  if (Array.isArray(jobRequirements)) return jobRequirements;
-  return null;
-}
-
+// ── Error forwarding ──────────────────────────────────────────────────────────
 function _forwardError(error, next) {
   const status = error.response?.status;
   const message =
-    error.response?.data?.message ||
     error.response?.data?.detail ||
+    error.response?.data?.message ||
     error.message ||
     'An unexpected error occurred';
 
   if (error instanceof BadRequestError || status === 400) {
     return next(new BadRequestError(message));
   }
-
   if (
     error.isRateLimit ||
     status === 429 ||
@@ -180,14 +214,13 @@ function _forwardError(error, next) {
   ) {
     const retryAfter = error.retryAfter || 60;
     return next(
-      Object.assign(new AppError(`AI service is rate limited. Please try again in ${retryAfter} seconds.`, 429), {
-        retryAfter,
-      })
+      Object.assign(
+        new AppError(`AI service is rate limited. Please try again in ${retryAfter} seconds.`, 429),
+        { retryAfter }
+      )
     );
   }
-
   if (
-    status === 401 ||
     status === 503 ||
     status >= 500 ||
     error.code === 'ECONNREFUSED' ||
@@ -195,8 +228,7 @@ function _forwardError(error, next) {
     error.code === 'ENOTFOUND' ||
     error.code === 'ETIMEDOUT'
   ) {
-    return next(new ServiceUnavailableError('AI service is temporarily unavailable. Please try again later.'));
+    return next(new ServiceUnavailableError('AI service is temporarily unavailable.'));
   }
-
   next(error);
 }

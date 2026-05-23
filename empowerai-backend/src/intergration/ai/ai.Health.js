@@ -15,7 +15,7 @@ let lastAiHealth = {
 // ================= HEALTH CHECK =================
 async function checkAiHealth(force = false) {
   const aiServiceUrl = (process.env.AI_SERVICE_URL || 'http://localhost:8000').replace(/\/$/, '');
-  const aiServiceApiKey = process.env.AI_SERVICE_API_KEY;
+  const aiServiceToken = process.env.AI_SERVICE_TOKEN;
 
   const now = Date.now();
 
@@ -23,7 +23,7 @@ async function checkAiHealth(force = false) {
     lastAiHealth.checkedAt &&
     now - lastAiHealth.checkedAt < AI_HEALTH_STALE_MS;
 
-  // 👉 Return cached result if still fresh (avoids spam hitting AI service)
+  // Return cached result if still fresh (avoids hammering AI service)
   if (!force && cacheFresh) {
     return {
       aiServiceStatus: `${lastAiHealth.status} (cached)`,
@@ -34,15 +34,11 @@ async function checkAiHealth(force = false) {
   try {
     const res = await axios.get(`${aiServiceUrl}/health`, {
       timeout: AI_HEALTH_TIMEOUT_MS,
-      headers: aiServiceApiKey ? { 'X-API-KEY': aiServiceApiKey } : {},
+      headers: aiServiceToken ? { 'X-Service-Token': aiServiceToken } : {},
     });
 
     const openaiStatus = res.data?.openai_status || 'unknown';
-
-    const status =
-      res.data?.status === 'healthy'
-        ? 'connected'
-        : 'unhealthy';
+    const status = res.data?.status === 'healthy' ? 'connected' : 'unhealthy';
 
     lastAiHealth = {
       status: `${status} (openai: ${openaiStatus})`,
@@ -86,7 +82,7 @@ async function checkAiHealth(force = false) {
 // ================= STARTUP PING =================
 function pingAiServiceOnStartup() {
   const aiServiceUrl = (process.env.AI_SERVICE_URL || '').replace(/\/$/, '');
-  const aiServiceApiKey = process.env.AI_SERVICE_API_KEY;
+  const aiServiceToken = process.env.AI_SERVICE_TOKEN;
 
   if (process.env.NODE_ENV !== 'production') return;
 
@@ -94,7 +90,7 @@ function pingAiServiceOnStartup() {
     try {
       const res = await axios.get(`${aiServiceUrl}/health`, {
         timeout: AI_HEALTH_TIMEOUT_MS,
-        headers: aiServiceApiKey ? { 'X-API-KEY': aiServiceApiKey } : {},
+        headers: aiServiceToken ? { 'X-Service-Token': aiServiceToken } : {},
       });
 
       logger.info('AI Service health check passed', {
@@ -119,7 +115,4 @@ function pingAiServiceOnStartup() {
   }, 2000);
 }
 
-module.exports = {
-  checkAiHealth,
-  pingAiServiceOnStartup,
-};
+module.exports = { checkAiHealth, pingAiServiceOnStartup };
