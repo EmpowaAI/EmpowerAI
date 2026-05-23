@@ -1,4 +1,0 @@
-"""
-EmpowerAI AI Service Package
-"""
-
