@@ -87,9 +87,9 @@ class CVAnalyzerService:
                 status_code=400,
             )
 
-        if len(cv_text) > 15000:
+        if len(cv_text) > 30000:
             raise AIServiceError(
-                "CV text exceeds the 15,000 character limit.",
+                "CV text exceeds the 30,000 character limit.",
                 status_code=400,
             )
 

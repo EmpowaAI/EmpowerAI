@@ -6,7 +6,7 @@ const { extractTextFromUploadedFile } = require('../../utils/cvParser.util');
 const AiUsageLog = require('../usage/usage.model');
 const { getPlanById } = require('../../config/plans.config');
 
-const FREE_ANALYSIS_LIMIT = 3;
+const FREE_ANALYSIS_LIMIT = 300;
 
 // Subscription-gated fields — stripped from response for non-subscribers
 const GATED_FIELDS = [

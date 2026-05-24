@@ -1,7 +1,7 @@
 const { post, postForm, FormData } = require('../../intergration/ai/ai.ServiceClient');
 
 async function analyseCVText({ cv_text, target_role, industry, job_description }) {
-  return post('/cv/analyze/text', { cv_text, target_role, industry, job_description });
+  return post('api/cv/text', { cv_text, target_role, industry, job_description });
 }
 
 async function analyseCVFile({ fileBuffer, filename, mimetype, target_role, industry, job_description }) {
@@ -11,11 +11,11 @@ async function analyseCVFile({ fileBuffer, filename, mimetype, target_role, indu
   form.append('industry', industry);
   if (job_description) form.append('job_description', job_description);
 
-  return postForm('/cv/analyze/upload', form);
+  return postForm('api/cv/upload', form);
 }
 
 async function revampCV({ cv_text, analysis, target_role, industry }) {
-  return post('/cv/revamp/', { cv_text, analysis, target_role, industry });
+  return post('api/cv/revamp/', { cv_text, analysis, target_role, industry });
 }
 
 module.exports = { analyseCVText, analyseCVFile, revampCV };
