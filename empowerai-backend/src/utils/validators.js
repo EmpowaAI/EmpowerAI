@@ -55,10 +55,21 @@ const simulationSchema = z.object({
  * CV analysis validation schema
  */
 const cvAnalysisSchema = z.object({
-  cvText: z.string().min(10, 'CV text must be at least 10 characters').max(50000, 'CV text is too long'),
+  cvText: z.string().min(10, 'CV text must be at least 10 characters').max(50000, 'CV text is too long').optional(),
+  cv_text: z.string().min(10, 'CV text must be at least 10 characters').max(50000, 'CV text is too long').optional(),
+  targetRole: z.string().min(1, 'Target role is required').optional(),
+  target_role: z.string().min(1, 'Target role is required').optional(),
+  industry: z.string().min(1, 'Industry is required'),
+  jobDescription: z.string().max(5000).optional(),
+  job_description: z.string().max(5000).optional(),
   jobRequirements: z.union([z.string().max(5000), z.array(z.string())]).optional(),
-});
-
+}).refine(
+  (data) => data.cvText || data.cv_text,
+  { message: 'cvText or cv_text is required', path: ['cvText'] }
+).refine(
+  (data) => data.targetRole || data.target_role,
+  { message: 'targetRole or target_role is required', path: ['targetRole'] }
+);
 
 /**
  * CV revamp validation schema

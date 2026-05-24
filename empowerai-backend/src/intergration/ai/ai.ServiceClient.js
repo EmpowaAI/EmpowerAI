@@ -123,16 +123,19 @@ client.interceptors.response.use(
   }
 );
 
-// ================= FORM UPLOAD HELPER =================
-// Used by services that need to send files (multipart/form-data)
-// Axios needs the FormData headers merged in for file uploads to work correctly
+// ================= HELPERS =================
+
+// JSON POST — used by cvService and all future AI service files
+async function post(endpoint, body) {
+  return client.post(endpoint, body);
+}
+
+// Multipart form POST — used for file uploads
 async function postForm(endpoint, form) {
   return client.post(endpoint, form, {
-    headers: {
-      ...form.getHeaders(),
-    },
+    headers: { ...form.getHeaders() },
   });
 }
 
 // ================= EXPORT =================
-module.exports = { client, postForm, FormData };
+module.exports = { client, post, postForm, FormData };
