@@ -102,9 +102,17 @@ exports.analyzeCVFile = async (req, res, next) => {
 // ── Revamp CV (subscription only) ────────────────────────────────────────────
 exports.revampCV = async (req, res, next) => {
   try {
+    const cv_text    = req.body.cv_text || req.body.cvText || null;
+    const analysis   = req.body.analysis || null;
+    const target_role = req.body.target_role || req.body.targetRole || null;
+    const industry   = req.body.industry || null;
+
     const { revamp, profileId } = await cvService.revampCv({
-      userId:       req.user.id,
-      subscription: req.subscription || null,
+      userId: req.user.id,
+      cv_text,
+      analysis,
+      target_role,
+      industry,
     });
 
     return res.status(200).json({
@@ -112,13 +120,6 @@ exports.revampCV = async (req, res, next) => {
       data: { revamp, profileId },
     });
   } catch (error) {
-    if (error.requiresSubscription) {
-      return res.status(403).json({
-        status: 'error',
-        message: error.message,
-        requiresSubscription: true,
-      });
-    }
     _forwardError(error, next);
   }
 };

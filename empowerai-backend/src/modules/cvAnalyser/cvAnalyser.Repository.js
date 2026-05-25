@@ -189,18 +189,26 @@ async function saveRevamp({ userId, revampData }) {
     { user: userId },
     {
       $set: {
-        'revamp.revampedAt':    new Date(),
-        'revamp.plainTextCv':   revampData?.plain_text_cv
-                                  ? encryptField(revampData.plain_text_cv)
-                                  : null,
+        'revamp.revampedAt': new Date(),
+        'revamp.plainTextCv': revampData?.plain_text_cv
+          ? encryptField(revampData.plain_text_cv)
+          : null,
         'revamp.revampSummary': revampData?.revamp_summary
-                                  ? encryptField(revampData.revamp_summary)
-                                  : null,
-        'revamp.revampedCv':    encryptJson(r),
+          ? encryptField(revampData.revamp_summary)
+          : null,
+        'revamp.revampedCv': encryptJson(r),
       },
     },
-    { new: true }
+    {
+      new: true,
+      upsert: true,              // 🔥 CRITICAL FIX
+      setDefaultsOnInsert: true
+    }
   );
+
+  if (!profile) {
+    throw new Error('Failed to save revamp: profile not found or created');
+  }
 
   return _withDecryptedAnalysis(profile);
 }
