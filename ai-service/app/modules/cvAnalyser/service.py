@@ -22,6 +22,10 @@ class CVAnalyzerService:
         job_description = payload.get("job_description")
         location = (payload.get("location") or "").strip()
 
+        # Truncate instead of rejecting — keeps the most important content
+        if len(cv_text) > 15000:
+            cv_text = cv_text[:15000]
+
         self._validate(cv_text, target_role, industry)
 
         logger.info(
@@ -83,15 +87,9 @@ class CVAnalyzerService:
 
         if len(cv_text) < 50:
             raise AIServiceError(
-                "CV text is too short. Please provide the full CV content.",
-                status_code=400,
-            )
-
-        if len(cv_text) > 30000:
-            raise AIServiceError(
-                "CV text exceeds the 30,000 character limit.",
-                status_code=400,
-            )
+            "CV text is too short. Please provide the full CV content.",
+            status_code=400,
+        )
 
         if not target_role:
             raise AIServiceError("target_role is required.", status_code=400)

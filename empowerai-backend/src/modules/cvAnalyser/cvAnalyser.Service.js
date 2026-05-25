@@ -3,23 +3,12 @@ const logger = require('../../utils/logger');
 const { analyseCVText, analyseCVFile, revampCV } = require('./cvAnalyser.AiService');
 const { buildFallbackAnalysis } = require('../../utils/cvFallback.util');
 const { extractTextFromUploadedFile } = require('../../utils/cvParser.util');
-const AiUsageLog = require('../usage/usage.model');
-const { getPlanById } = require('../../config/plans.config');
 
-const FREE_ANALYSIS_LIMIT = 300;
+const MAX_CV_CHARS = 15000;
 
-// Subscription-gated fields — stripped from response for non-subscribers
-const GATED_FIELDS = [
-  'salaryPrediction',
-  'careerRoadmap',
-  'provinceEarnings',
-  'marketBenchmarking',
-  'careerSimulation',
-  'interviewQuestions',
-  'linkedinSummary',
-  'coverLetter',
-  'careerRecommendations',
-];
+function cleanCvText(text) {
+  return (text || '').replace(/\s+/g, ' ').trim().slice(0, MAX_CV_CHARS);
+}
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -35,72 +24,8 @@ const callWithRateLimitRetry = async (fn) => {
   }
 };
 
-// ── AI usage audit ────────────────────────────────────────────────────────────
-async function _logAiUsage({ userId, feature, latencyMs, isError, errorMessage }) {
-  try {
-    await AiUsageLog.create({
-      userId,
-      feature,
-      latencyMs,
-      isError: !!isError,
-      errorMessage: errorMessage || null,
-      modelUsed: process.env.AI_MODEL || null,
-    });
-  } catch (err) {
-    logger.warn('[CvService] Failed to write AI usage log', { userId, err: err.message });
-  }
-}
-
-// ── Subscription helpers ──────────────────────────────────────────────────────
-
-/**
- * Checks if user has an active paid/trial subscription.
- * Expects req.subscription to be set by auth middleware.
- */
-function _isSubscribed(subscription) {
-  if (!subscription) return false;
-  return subscription.isActive === true;
-}
-
-/**
- * Strips gated fields from analysis for non-subscribed users.
- */
-function _applySubscriptionGate(analysis, isSubscribed) {
-  if (!analysis || isSubscribed) return analysis;
-  const gated = { ...analysis };
-  GATED_FIELDS.forEach((field) => {
-    gated[field] = undefined;
-  });
-  return gated;
-}
-
-// ── Analysis limit check (free users: max 3) ──────────────────────────────────
-async function checkAnalysisLimit(userId, subscription) {
-  if (_isSubscribed(subscription)) return { allowed: true };
-
-  const count = await cvProfileRepository.getAnalysisCount(userId);
-  if (count >= FREE_ANALYSIS_LIMIT) {
-    return {
-      allowed: false,
-      message: `Free users can analyse their CV up to ${FREE_ANALYSIS_LIMIT} times. Subscribe to unlock unlimited analysis.`,
-      count,
-      limit: FREE_ANALYSIS_LIMIT,
-    };
-  }
-
-  return { allowed: true, count, remaining: FREE_ANALYSIS_LIMIT - count };
-}
-
 // ── Persistence ───────────────────────────────────────────────────────────────
-async function _saveAnalysisResult({
-  userId,
-  file,
-  rawText,
-  analysis,
-  targetRole,
-  industry,
-  isFallback = false,
-}) {
+async function _saveAnalysisResult({ userId, file, rawText, analysis, targetRole, industry, isFallback = false }) {
   try {
     const profile = await cvProfileRepository.saveOrUpdate({
       userId,
@@ -124,112 +49,64 @@ async function _saveAnalysisResult({
 
     return profile;
   } catch (error) {
-    logger.error('[CvService] Failed to save CvProfile', {
-      userId,
-      error: error.message,
-    });
+    logger.error('[CvService] Failed to save CvProfile', { userId, error: error.message });
     throw error;
   }
 }
 
 // ── Analyse from text ─────────────────────────────────────────────────────────
-async function analyzeFromText({ userId, cvText, targetRole, industry, jobDescription, subscription }) {
-  const limitCheck = await checkAnalysisLimit(userId, subscription);
-  if (!limitCheck.allowed) {
-    const err = new Error(limitCheck.message);
-    err.statusCode = 403;
-    err.limitReached = true;
-    throw err;
-  }
-
+async function analyzeFromText({ userId, cvText, targetRole, industry, jobDescription }) {
   const start = Date.now();
+
   try {
     logger.info('[CvService] CV text analysis start', { userId, targetRole, industry });
 
-    const aiResult = await callWithRateLimitRetry(() =>
-      analyseCVText({ cv_text: cvText, target_role: targetRole, industry, job_description: jobDescription })
-    );
+    const safeText = cleanCvText(cvText);
 
-    await _logAiUsage({
-      userId,
-      feature: 'cv_analysis',
-      latencyMs: Date.now() - start,
-      isError: false,
-    });
+    const aiResult = await callWithRateLimitRetry(() =>
+      analyseCVText({ cv_text: safeText, target_role: targetRole, industry, job_description: jobDescription })
+    );
 
     const savedProfile = await _saveAnalysisResult({
       userId,
       file: null,
-      rawText: cvText,
+      rawText: safeText,
       analysis: aiResult.analysis,
       targetRole,
       industry,
       isFallback: false,
     });
 
-    const gatedAnalysis = _applySubscriptionGate(
-      savedProfile.analysis,
-      _isSubscribed(subscription)
-    );
+    logger.info('[CvService] CV text analysis complete', { userId, duration: Date.now() - start });
 
     return {
-      analysis: gatedAnalysis,
+      analysis:  savedProfile.analysis,
       profileId: savedProfile._id,
       isFallback: false,
-      isSubscribed: _isSubscribed(subscription),
-      remaining: limitCheck.remaining ?? null,
     };
   } catch (error) {
-    if (error.limitReached) throw error;
-
-    await _logAiUsage({
-      userId,
-      feature: 'cv_analysis',
-      latencyMs: Date.now() - start,
-      isError: true,
-      errorMessage: error.message,
-    });
-
-    return _handleAnalysisError({ error, userId, cvText, targetRole, industry, file: null, subscription });
+    logger.error('[CvService] CV text analysis failed', { userId, error: error.message });
+    return _handleAnalysisError({ error, userId, cvText, targetRole, industry, file: null });
   }
 }
 
 // ── Analyse from file ─────────────────────────────────────────────────────────
-async function analyzeFromFile({ userId, file, targetRole, industry, jobDescription, subscription }) {
-  const limitCheck = await checkAnalysisLimit(userId, subscription);
-  if (!limitCheck.allowed) {
-    const err = new Error(limitCheck.message);
-    err.statusCode = 403;
-    err.limitReached = true;
-    throw err;
-  }
-
+async function analyzeFromFile({ userId, file, targetRole, industry, jobDescription }) {
   const start = Date.now();
+
   try {
-    logger.info('[CvService] CV file analysis start', {
-      userId,
-      filename: file.originalname,
-      targetRole,
-      industry,
-    });
+    logger.info('[CvService] CV file analysis start', { userId, filename: file.originalname, targetRole, industry });
 
     const aiResult = await callWithRateLimitRetry(() =>
       analyseCVFile({
-        fileBuffer: file.buffer,
-        filename:   file.originalname,
-        mimetype:   file.mimetype,
-        target_role: targetRole,
+        fileBuffer:      file.buffer,
+        filename:        file.originalname,
+        mimetype:        file.mimetype,
+        target_role:     targetRole,
         industry,
         job_description: jobDescription,
       })
     );
-
-    await _logAiUsage({
-      userId,
-      feature: 'cv_analysis',
-      latencyMs: Date.now() - start,
-      isError: false,
-    });
 
     const savedProfile = await _saveAnalysisResult({
       userId,
@@ -241,106 +118,73 @@ async function analyzeFromFile({ userId, file, targetRole, industry, jobDescript
       isFallback: false,
     });
 
-    const gatedAnalysis = _applySubscriptionGate(
-      savedProfile.analysis,
-      _isSubscribed(subscription)
-    );
+    logger.info('[CvService] CV file analysis complete', { userId, duration: Date.now() - start });
 
     return {
-      analysis: gatedAnalysis,
+      analysis:  savedProfile.analysis,
       profileId: savedProfile._id,
       isFallback: false,
-      isSubscribed: _isSubscribed(subscription),
-      remaining: limitCheck.remaining ?? null,
     };
   } catch (error) {
-    if (error.limitReached) throw error;
-
-    await _logAiUsage({
-      userId,
-      feature: 'cv_analysis',
-      latencyMs: Date.now() - start,
-      isError: true,
-      errorMessage: error.message,
-    });
-
-    return _handleAnalysisError({ error, userId, cvText: null, targetRole, industry, file, subscription });
+    logger.error('[CvService] CV file analysis failed', { userId, error: error.message });
+    return _handleAnalysisError({ error, userId, cvText: null, targetRole, industry, file });
   }
 }
 
-// ── Revamp CV (subscription only) ────────────────────────────────────────────
-async function revampCv({ userId, subscription }) {
-  if (!_isSubscribed(subscription)) {
-    const err = new Error('CV Revamp is available for subscribed users only. Please upgrade your plan.');
-    err.statusCode = 403;
-    err.requiresSubscription = true;
-    throw err;
+// ── Revamp CV ─────────────────────────────────────────────────────────────────
+async function revampCv({ userId, cv_text, analysis, target_role, industry }) {
+  let cvText     = cv_text;
+  let cvAnalysis = analysis;
+  let role       = target_role;
+  let ind        = industry;
+
+  // Fall back to stored profile if payload not provided
+  if (!cvText || !cvAnalysis) {
+    const profile = await cvProfileRepository.findByUserId(userId);
+    if (!profile || !profile.isComplete) {
+      const err = new Error('Please analyse your CV first before requesting a revamp.');
+      err.statusCode = 400;
+      throw err;
+    }
+    cvText     = cvText     || profile.rawText || '';
+    cvAnalysis = cvAnalysis || profile.analysis;
+    role       = role       || profile.analysis?.targetRole || '';
+    ind        = ind        || profile.analysis?.industry   || '';
   }
 
-  // Load the stored profile to get cv_text and analysis
-  const profile = await cvProfileRepository.findByUserId(userId);
-  if (!profile || !profile.isComplete) {
-    const err = new Error('Please analyse your CV first before requesting a revamp.');
+  if (!cvText) {
+    const err = new Error('cv_text is required. Please paste your CV text or analyse via text input first.');
     err.statusCode = 400;
     throw err;
   }
 
   const start = Date.now();
+
   try {
-    logger.info('[CvService] CV revamp start', { userId });
+    logger.info('[CvService] CV revamp start', { userId, role, ind });
 
     const aiResult = await callWithRateLimitRetry(() =>
-      revampCV({
-        cv_text:     profile.rawText || '',
-        analysis:    profile.analysis,
-        target_role: profile.analysis?.targetRole || '',
-        industry:    profile.analysis?.industry   || '',
-      })
+      revampCV({ cv_text: cvText, analysis: cvAnalysis, target_role: role, industry: ind })
     );
 
-    await _logAiUsage({
-      userId,
-      feature: 'cv_analysis', // reuse existing enum — extend if needed
-      latencyMs: Date.now() - start,
-      isError: false,
-    });
-
-    const savedProfile = await cvProfileRepository.saveRevamp({
+    const saved = await cvProfileRepository.saveRevamp({
       userId,
       revampData: aiResult.revamp,
     });
 
-    logger.info('[CvService] CV revamp saved', { userId, profileId: savedProfile._id });
+    logger.info('[CvService] CV revamp saved', { userId, profileId: saved._id, duration: Date.now() - start });
 
-    return {
-      revamp: savedProfile.revamp,
-      profileId: savedProfile._id,
-    };
+    return { revamp: saved.revamp, profileId: saved._id };
   } catch (error) {
-    if (error.statusCode) throw error;
-
-    await _logAiUsage({
-      userId,
-      feature: 'cv_analysis',
-      latencyMs: Date.now() - start,
-      isError: true,
-      errorMessage: error.message,
-    });
-
+    logger.error('[CvService] CV revamp failed', { userId, error: error.message, duration: Date.now() - start });
     throw error;
   }
 }
 
-// ── Download revamped CV (subscription only) ──────────────────────────────────
-async function getRevampForDownload({ userId, subscription }) {
-  if (!_isSubscribed(subscription)) {
-    const err = new Error('CV download is available for subscribed users only. Please upgrade your plan.');
-    err.statusCode = 403;
-    err.requiresSubscription = true;
-    throw err;
-  }
-
+// ── Download revamped CV ──────────────────────────────────────────────────────
+async function getRevampForDownload({ userId }) {
   const profile = await cvProfileRepository.findByUserId(userId);
+
   if (!profile?.revamp?.revampedCv) {
     const err = new Error('No revamped CV found. Please revamp your CV first.');
     err.statusCode = 404;
@@ -369,28 +213,13 @@ async function restoreFromCachedAnalysis({ userId, cachedAnalysis }) {
     isFallback: false,
   });
 
-  logger.info('[CvService] CvProfile restored from cache', {
-    userId,
-    profileId: profile._id,
-  });
-
+  logger.info('[CvService] CvProfile restored from cache', { userId, profileId: profile._id });
   return profile;
 }
 
 // ── Profile queries ───────────────────────────────────────────────────────────
-async function getCvProfile(userId, subscription) {
-  const profile = await cvProfileRepository.findByUserId(userId);
-  if (!profile) return null;
-
-  // Gate subscription fields on read too
-  if (profile.analysis) {
-    profile.analysis = _applySubscriptionGate(
-      profile.analysis,
-      _isSubscribed(subscription)
-    );
-  }
-
-  return profile;
+async function getCvProfile(userId) {
+  return cvProfileRepository.findByUserId(userId);
 }
 
 async function hasCompleteProfile(userId) {
@@ -402,21 +231,16 @@ async function deleteCvProfile(userId) {
 }
 
 // ── Error handler ─────────────────────────────────────────────────────────────
-async function _handleAnalysisError({ error, userId, cvText, targetRole, industry, file, subscription }) {
+async function _handleAnalysisError({ error, userId, cvText, targetRole, industry, file }) {
   const status = error.response?.status;
-
-  const isRateLimit =
-    error.isRateLimit ||
-    status === 429 ||
-    (error.message || '').toLowerCase().includes('rate limit');
 
   const isServiceDown =
     status === 503 ||
-    status >= 500 ||
+    status >= 500  ||
     error.code === 'ECONNREFUSED' ||
     error.code === 'ECONNABORTED' ||
-    error.code === 'ENOTFOUND' ||
-    error.code === 'ETIMEDOUT' ||
+    error.code === 'ENOTFOUND'    ||
+    error.code === 'ETIMEDOUT'    ||
     !error.response;
 
   // 400 — bad input; try Node-side extraction if file provided
@@ -429,19 +253,16 @@ async function _handleAnalysisError({ error, userId, cvText, targetRole, industr
         const rawText = await extractTextFromUploadedFile(file);
         if (rawText && rawText.trim().length > 50) {
           logger.info('[CvService] Retrying with Node-side text extraction', { userId });
-          return await analyzeFromText({ userId, cvText: rawText, targetRole, industry, subscription });
+          return await analyzeFromText({ userId, cvText: rawText, targetRole, industry });
         }
       } catch (fallbackError) {
-        logger.warn('[CvService] Node-side extraction fallback failed', {
-          userId,
-          error: fallbackError.message,
-        });
+        logger.warn('[CvService] Node-side extraction fallback failed', { userId, error: fallbackError.message });
       }
     }
     throw error;
   }
 
-  if (isRateLimit || isServiceDown) {
+  if (isServiceDown) {
     let rawText = cvText || '';
     if (!rawText && file) {
       try { rawText = await extractTextFromUploadedFile(file); } catch (_) {}
@@ -449,31 +270,21 @@ async function _handleAnalysisError({ error, userId, cvText, targetRole, industr
 
     const analysis = buildFallbackAnalysis(rawText, []);
     const savedProfile = await _saveAnalysisResult({
-      userId,
-      file: file ?? null,
-      rawText,
-      analysis,
-      targetRole,
-      industry,
-      isFallback: true,
+      userId, file: file ?? null, rawText, analysis, targetRole, industry, isFallback: true,
     });
 
-    const fallbackMessage = isRateLimit
-      ? 'AI service is rate limited. Showing basic CV insights.'
-      : 'AI service is temporarily unavailable. Showing basic CV insights.';
-
     return {
-      analysis: analysis,
-      profileId: savedProfile?._id ?? null,
-      isFallback: true,
-      fallbackMessage,
-      isSubscribed: _isSubscribed(subscription),
+      analysis:       savedProfile.analysis,
+      profileId:      savedProfile._id,
+      isFallback:     true,
+      fallbackMessage: 'AI service is temporarily unavailable. Showing basic CV insights.',
     };
   }
 
   throw error;
 }
 
+// ── Exports ───────────────────────────────────────────────────────────────────
 module.exports = {
   analyzeFromText,
   analyzeFromFile,
@@ -483,5 +294,4 @@ module.exports = {
   getCvProfile,
   hasCompleteProfile,
   deleteCvProfile,
-  checkAnalysisLimit,
 };
