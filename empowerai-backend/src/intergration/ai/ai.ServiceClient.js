@@ -125,14 +125,9 @@ client.interceptors.response.use(
 
 // ================= HELPERS =================
 
-// JSON POST — used by all AI service files
 async function post(endpoint, body) {
   return client.post(endpoint, body);
 }
-
-// Multipart form POST — used for file uploads
-// transformRequest prevents axios from JSON-serializing FormData
-// which strips the multipart boundary and sends binary instead
 async function postForm(endpoint, form) {
   const formHeaders = form.getHeaders();
   return client.post(endpoint, form, {

@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { X, Sparkles, Wand2, Brain, ArrowRight, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { cn } from '../lib/utils';
+import { cn } from '../../../lib/utils';
 
 interface PostCVAnalysisModalProps {
   isOpen: boolean;

@@ -1,4 +1,5 @@
 ﻿﻿// frontend/src/App.tsx
+
 import { lazy, Suspense, useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { UserProvider, useUser } from './contexts/user-context';
@@ -9,33 +10,53 @@ import AppPreloader from './components/AppPreloader';
 import ErrorBoundary from './components/ErrorBoundary';
 import { Toaster } from 'react-hot-toast';
 
-const LandingPage = lazy(() => import('./pages/LandingPage'));
-const ComingSoon = lazy(() => import('./pages/ComingSoon'));
-const Demo = lazy(() => import('./pages/Demo'));
-const Pricing = lazy(() => import('./pages/Pricing'));
-const LoginPage = lazy(() => import('./pages/Auth/LoginPage'));
+// ── Page imports ───────────────────────────────────────────────────────────
+const LandingPage    = lazy(() => import('./pages/LandingPage'));
+const ComingSoon     = lazy(() => import('./pages/ComingSoon'));
+const Demo           = lazy(() => import('./pages/Demo'));
+const Pricing        = lazy(() => import('./pages/Pricing'));
+const LoginPage      = lazy(() => import('./pages/Auth/LoginPage'));
 const ForgotPassword = lazy(() => import('./pages/Auth/ForgotPassword'));
-const ResetPassword = lazy(() => import('./pages/Auth/ResetPassword'));
-const EmailVerified = lazy(() => import('./pages/Auth/EmailVerified'));
+const ResetPassword  = lazy(() => import('./pages/Auth/ResetPassword'));
+const EmailVerified  = lazy(() => import('./pages/Auth/EmailVerified'));
+const Profile        = lazy(() => import('./pages/User/Profile'));
+const ConfirmEmail   = lazy(() => import('./pages/User/ConfirmEmail'));
+const ConfirmDelete  = lazy(() => import('./pages/User/ConfirmDelete'));
 
-const Profile = lazy(() => import('./pages/User/Profile'));
-const ConfirmEmail = lazy(() => import('./pages/User/ConfirmEmail'));
-const ConfirmDelete = lazy(() => import('./pages/User/ConfirmDelete'));
-
+// ── Layout & dashboard ─────────────────────────────────────────────────────
 const DashboardLayout = lazy(() => import('./components/layouts/DashboardLayout'));
-const Dashboard = lazy(() => import('./pages/Dashboard/Dashboard'));
-const TwinBuilder = lazy(() => import('./pages/Twin-builder/TwinBuilder'));
-const DigitalTwin = lazy(() => import('./pages/DigitalTwin'));
-const Simulations = lazy(() => import('./pages/Simulation/Simulations'));
-const Opportunities = lazy(() => import('./pages/Oportunities/Opportunities'));
-const CVAnalyzer = lazy(() => import('./pages/CV-analysis/CVAnalyzer'));
-const InterviewCoach = lazy(() => import('./pages/Interview/InterviewCoach'));
-const Applications = lazy(() => import('./pages/Oportunities/Applications'));
-const Chat = lazy(() => import('./pages/AI/Chat'));
-const AdminPanel = lazy(() => import('./pages/AdminPanel'));
+const Dashboard       = lazy(() => import('./pages/Dashboard/Dashboard'));
+const TwinBuilder     = lazy(() => import('./pages/Twin-builder/TwinBuilder'));
+const DigitalTwin     = lazy(() => import('./pages/DigitalTwin'));
+const Simulations     = lazy(() => import('./pages/Simulation/Simulations'));
+const Opportunities   = lazy(() => import('./pages/Oportunities/Opportunities'));
+const InterviewCoach  = lazy(() => import('./pages/Interview/InterviewCoach'));
+const Applications    = lazy(() => import('./pages/Oportunities/Applications'));
+const Chat            = lazy(() => import('./pages/AI/Chat'));
+const AdminPanel      = lazy(() => import('./pages/AdminPanel'));
+
+// ── CV Analyzer: NEW module replaces old page ──────────────────────────────
+// Old: lazy(() => import('./pages/CV-analysis/CVAnalyzer'))
+const CVAnalyzer = lazy(() => import('./modules/cvAnalyser'));
 
 const COMING_SOON = import.meta.env.VITE_COMING_SOON === 'true';
 
+// ── Suspense fallback ──────────────────────────────────────────────────────
+function PageLoader() {
+  return (
+    <div className="min-h-screen relative flex items-center justify-center overflow-hidden bg-gradient-to-br from-emerald-50 via-white to-sky-50">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-200/40 blur-3xl" />
+        <div className="absolute left-1/2 top-1/2 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-sky-200/30 blur-3xl animate-pulse" />
+      </div>
+      <div className="relative">
+        <NeuralLoading size="lg" text="Loading your workspace..." />
+      </div>
+    </div>
+  );
+}
+
+// ── App ────────────────────────────────────────────────────────────────────
 function App() {
   return (
     <ThemeProvider>
@@ -43,131 +64,11 @@ function App() {
         <AppPreloader />
         <PreloadRoutes />
         <Toaster position="top-right" />
-        <Suspense
-          fallback={
-            <div className="min-h-screen relative flex items-center justify-center overflow-hidden bg-gradient-to-br from-emerald-50 via-white to-sky-50">
-              <div className="pointer-events-none absolute inset-0">
-                <div className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-200/40 blur-3xl" />
-                <div className="absolute left-1/2 top-1/2 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-sky-200/30 blur-3xl animate-pulse" />
-              </div>
-              <div className="relative">
-                <NeuralLoading size="lg" text="Loading your workspace..." />
-              </div>
-            </div>
-          }
-        >
+        <Suspense fallback={<PageLoader />}>
           <ErrorBoundary>
             <RouteTransition>
-              <Routes>
-              {/* Public routes */}
-              <Route path="/" element={COMING_SOON ? <ComingSoon /> : <LandingPage />} />
-              <Route path="/demo" element={<Demo />} />
-              <Route path="/cv-analyzer" element={<CVAnalyzer />} />
-              <Route path="/digital-twin" element={<DigitalTwin />} />
-              <Route path="/twin-preview" element={<TwinBuilder />} />
-              {/* <Route path="/pricing" element={<Pricing />} /> */}
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/signup" element={<Navigate to="/" replace />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/verify" element={<EmailVerified />} />
-              <Route path="/confirm-email" element={<ConfirmEmail />} />
-              <Route path="/confirm-delete" element={<ConfirmDelete />} />
-
-              {/* Protected dashboard routes */}
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <DashboardLayout />
-                  </ProtectedRoute>
-                }
-              >
-                <Route index element={<Dashboard />} />
-                <Route path="profile" element={<Profile />} />
-                
-                {/* Step 1: CV Analyzer - Always accessible */}
-                <Route path="cv-analyzer" element={<CVAnalyzer />} />
-                
-                {/* Step 2: Digital Twin - Requires CV completed */}
-                <Route 
-                  path="twin" 
-                  element={
-                    <ProtectedRoute requiredStep="cv">
-                      <TwinBuilder />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="twin-builder" 
-                  element={
-                    <ProtectedRoute requiredStep="cv">
-                      <TwinBuilder />
-                    </ProtectedRoute>
-                  } 
-                />
-                
-                {/* Step 3: Interview Coach - Requires Twin completed */}
-                <Route 
-                  path="interview-coach" 
-                  element={
-                    <ProtectedRoute requiredStep="twin">
-                      <InterviewCoach />
-                    </ProtectedRoute>
-                  } 
-                />
-                
-                {/* Step 4: Opportunities - Requires Twin completed */}
-                <Route 
-                  path="opportunities" 
-                  element={
-                    <ProtectedRoute requiredStep="twin">
-                      <Opportunities />
-                    </ProtectedRoute>
-                  } 
-                />
-                
-                {/* Additional features - All require Twin completed */}
-                <Route 
-                  path="simulations" 
-                  element={
-                    <ProtectedRoute requiredStep="twin">
-                      <Simulations />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="applications" 
-                  element={
-                    <ProtectedRoute requiredStep="twin">
-                      <Applications />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="chat" 
-                  element={
-                    <ProtectedRoute requiredStep="twin">
-                      <Chat />
-                    </ProtectedRoute>
-                  } 
-                />
-                
-                {/* Admin route - Special handling */}
-                <Route
-                  path="admin"
-                  element={
-                    import.meta.env.VITE_ENABLE_ADMIN === 'true'
-                      ? <AdminPanel />
-                      : <Navigate to="/dashboard" replace />
-                  }
-                />
-              </Route>
-
-              {/* Fallback route */}
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </RouteTransition>
+              <AppRoutes />
+            </RouteTransition>
           </ErrorBoundary>
         </Suspense>
       </UserProvider>
@@ -175,9 +76,75 @@ function App() {
   );
 }
 
+// ── Routes (extracted so App stays clean) ─────────────────────────────────
+function AppRoutes() {
+  return (
+    <Routes>
+      {/* Public */}
+      <Route path="/" element={COMING_SOON ? <ComingSoon /> : <LandingPage />} />
+      <Route path="/demo" element={<Demo />} />
+      <Route path="/cv-analyzer" element={<CVAnalyzer />} />
+      <Route path="/digital-twin" element={<DigitalTwin />} />
+      <Route path="/twin-preview" element={<TwinBuilder />} />
+      {/* <Route path="/pricing" element={<Pricing />} /> */}
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/signup" element={<Navigate to="/" replace />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/verify" element={<EmailVerified />} />
+      <Route path="/confirm-email" element={<ConfirmEmail />} />
+      <Route path="/confirm-delete" element={<ConfirmDelete />} />
+
+      {/* Protected dashboard */}
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Dashboard />} />
+        <Route path="profile" element={<Profile />} />
+
+        {/* Step 1: CV Analyzer — always accessible */}
+        <Route path="cv-analyzer" element={<CVAnalyzer />} />
+
+        {/* Step 2: Digital Twin — requires CV */}
+        <Route path="twin" element={<ProtectedRoute requiredStep="cv"><TwinBuilder /></ProtectedRoute>} />
+        <Route path="twin-builder" element={<ProtectedRoute requiredStep="cv"><TwinBuilder /></ProtectedRoute>} />
+
+        {/* Step 3: Interview Coach — requires Twin */}
+        <Route path="interview-coach" element={<ProtectedRoute requiredStep="twin"><InterviewCoach /></ProtectedRoute>} />
+
+        {/* Step 4: Opportunities — requires Twin */}
+        <Route path="opportunities" element={<ProtectedRoute requiredStep="twin"><Opportunities /></ProtectedRoute>} />
+
+        {/* Additional features — require Twin */}
+        <Route path="simulations" element={<ProtectedRoute requiredStep="twin"><Simulations /></ProtectedRoute>} />
+        <Route path="applications" element={<ProtectedRoute requiredStep="twin"><Applications /></ProtectedRoute>} />
+        <Route path="chat" element={<ProtectedRoute requiredStep="twin"><Chat /></ProtectedRoute>} />
+
+        {/* Admin */}
+        <Route
+          path="admin"
+          element={
+            import.meta.env.VITE_ENABLE_ADMIN === 'true'
+              ? <AdminPanel />
+              : <Navigate to="/dashboard" replace />
+          }
+        />
+      </Route>
+
+      {/* Fallback */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}
+
+// ── Route transition wrapper ───────────────────────────────────────────────
 function RouteTransition({ children }: { children: React.ReactNode }) {
   const location = useLocation();
-
   return (
     <div className="route-transition" key={location.pathname}>
       {children}
@@ -185,78 +152,66 @@ function RouteTransition({ children }: { children: React.ReactNode }) {
   );
 }
 
+// ── Idle preloader ─────────────────────────────────────────────────────────
 function PreloadRoutes() {
   const { user, progress } = useUser();
   const location = useLocation();
 
+  // Persist last route for preload hints
   useEffect(() => {
     try {
-      if (typeof window !== 'undefined' && window.sessionStorage) {
-        sessionStorage.setItem('empowerai:lastRoute', location.pathname);
-      }
-    } catch {
-      // Ignore storage failures
-    }
+      sessionStorage.setItem('empowerai:lastRoute', location.pathname);
+    } catch { /* ignore */ }
   }, [location.pathname]);
 
   useEffect(() => {
     if (!user) return;
 
-    const connection = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string; downlink?: number } }).connection;
-    const saveData = connection?.saveData === true;
-    const effectiveType = connection?.effectiveType;
-    const slowConnection = effectiveType === '2g' || effectiveType === 'slow-2g';
-    const downlink = connection?.downlink;
-    const slowDownlink = typeof downlink === 'number' && downlink < 1.5;
-    const deviceMemory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
-    const lowMemory = typeof deviceMemory === 'number' && deviceMemory <= 2;
+    const connection = (navigator as Navigator & {
+      connection?: { saveData?: boolean; effectiveType?: string; downlink?: number };
+    }).connection;
+
+    const saveData       = connection?.saveData === true;
+    const slowConnection = connection?.effectiveType === '2g' || connection?.effectiveType === 'slow-2g';
+    const slowDownlink   = typeof connection?.downlink === 'number' && connection.downlink < 1.5;
+    const lowMemory      = typeof (navigator as Navigator & { deviceMemory?: number }).deviceMemory === 'number'
+                           && (navigator as Navigator & { deviceMemory?: number }).deviceMemory! <= 2;
 
     if (saveData || slowConnection || slowDownlink || lowMemory) return;
 
-    const requestIdle = (window as unknown as { requestIdleCallback?: (cb: () => void) => number }).requestIdleCallback;
-    const cancelIdle = (window as unknown as { cancelIdleCallback?: (id: number) => void }).cancelIdleCallback;
+    const requestIdle = (window as Window & { requestIdleCallback?: (cb: () => void) => number }).requestIdleCallback;
+    const cancelIdle  = (window as Window & { cancelIdleCallback?: (id: number) => void }).cancelIdleCallback;
 
     const getLastRoute = () => {
-      try {
-        if (typeof window !== 'undefined' && window.sessionStorage) {
-          return sessionStorage.getItem('empowerai:lastRoute') || '';
-        }
-      } catch {
-        return '';
-      }
-      return '';
+      try { return sessionStorage.getItem('empowerai:lastRoute') || ''; } catch { return ''; }
     };
 
     const preload = () => {
-      const lastRoute = getLastRoute();
+      const last = getLastRoute();
       const loaders: Array<() => Promise<unknown>> = [];
 
-      const byLastRoute = () => {
-        if (lastRoute.includes('/dashboard/cv-analyzer')) return () => import('./pages/CV-analysis/CVAnalyzer');
-        if (lastRoute.includes('/dashboard/twin')) return () => import('./pages/Twin-builder/TwinBuilder');
-        if (lastRoute.includes('/dashboard/simulations')) return () => import('./pages/Simulation/Simulations');
-        if (lastRoute.includes('/dashboard/opportunities')) return () => import('./pages/Oportunities/Opportunities');
-        if (lastRoute.includes('/dashboard/interview-coach')) return () => import('./pages/Interview/InterviewCoach');
-        if (lastRoute.includes('/dashboard/applications')) return () => import('./pages/Oportunities/Applications');
-        if (lastRoute.includes('/dashboard/chat')) return () => import('./pages/AI/Chat');
-        if (lastRoute.includes('/dashboard/profile')) return () => import('./pages/User/Profile');
-        return null;
+      // ── Preload by last visited route ──────────────────────────────────
+      const routeMap: Record<string, () => Promise<unknown>> = {
+        '/dashboard/cv-analyzer':    () => import('./modules/cvAnalyser'), // ← updated
+        '/dashboard/twin':           () => import('./pages/Twin-builder/TwinBuilder'),
+        '/dashboard/simulations':    () => import('./pages/Simulation/Simulations'),
+        '/dashboard/opportunities':  () => import('./pages/Oportunities/Opportunities'),
+        '/dashboard/interview-coach':() => import('./pages/Interview/InterviewCoach'),
+        '/dashboard/applications':   () => import('./pages/Oportunities/Applications'),
+        '/dashboard/chat':           () => import('./pages/AI/Chat'),
+        '/dashboard/profile':        () => import('./pages/User/Profile'),
       };
 
-      const lastRouteLoader = byLastRoute();
-      if (lastRouteLoader) loaders.push(lastRouteLoader);
+      const lastLoader = Object.entries(routeMap).find(([path]) => last.includes(path))?.[1];
+      if (lastLoader) loaders.push(lastLoader);
 
+      // Always preload layout + dashboard
       loaders.push(() => import('./components/layouts/DashboardLayout'));
       loaders.push(() => import('./pages/Dashboard/Dashboard'));
 
-      // Progressive preloading based on user progress
-      if (!progress.cvCompleted) {
-        loaders.push(() => import('./pages/CV-analysis/CVAnalyzer'));
-      }
-
-      if (!progress.twinCompleted) {
-        loaders.push(() => import('./pages/Twin-builder/TwinBuilder'));
-      }
+      // Progressive by user progress
+      if (!progress.cvCompleted) loaders.push(() => import('./modules/cvAnalyser')); // ← updated
+      if (!progress.twinCompleted) loaders.push(() => import('./pages/Twin-builder/TwinBuilder'));
 
       if (progress.cvCompleted && progress.twinCompleted) {
         loaders.push(() => import('./pages/Oportunities/Opportunities'));
@@ -267,10 +222,7 @@ function PreloadRoutes() {
       }
 
       loaders.push(() => import('./pages/User/Profile'));
-
-      for (const load of loaders) {
-        void load();
-      }
+      loaders.forEach((load) => void load());
     };
 
     if (requestIdle) {
@@ -278,8 +230,8 @@ function PreloadRoutes() {
       return () => cancelIdle?.(id);
     }
 
-    const timeoutId = window.setTimeout(preload, 1500);
-    return () => window.clearTimeout(timeoutId);
+    const t = window.setTimeout(preload, 1500);
+    return () => window.clearTimeout(t);
   }, [user, progress.cvCompleted, progress.twinCompleted]);
 
   return null;
