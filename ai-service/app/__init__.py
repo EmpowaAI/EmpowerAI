@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
@@ -7,6 +7,11 @@ import uuid
 
 from app.utils.logger import get_logger
 from app.config.config import settings
+
+# Shared-secret check applied to every CV endpoint below.
+# Without this check, anyone can call the public Render URL and consume
+# the upstream API quota. Defined in `app/middleware/auth.py`.
+from app.middleware.auth import verify_service_token
 
 logger = get_logger()
 
@@ -74,15 +79,25 @@ def create_app() -> FastAPI:
         router as cv_revamp_router,
     )
 
+    # `dependencies=[Depends(verify_service_token)]` runs the token check
+    # before every route in the router. Each route under `/api/cv/...`
+    # and `/api/cv/revamp/...` then needs a valid `X-Service-Token`
+    # header. If the header is missing or wrong, the request returns
+    # 401, the model is not called, and no upstream API quota is used.
+    #
+    # A router mounted without this `dependencies=` value would be
+    # publicly callable.
     app.include_router(
         cv_analyzer_router,
         prefix="/api/cv",
         tags=["CV Analyzer"],
+        dependencies=[Depends(verify_service_token)],
     )
     app.include_router(
         cv_revamp_router,
         prefix="/api/cv/revamp",
         tags=["CV Revamp"],
+        dependencies=[Depends(verify_service_token)],
     )
 
     logger.info("App initialized successfully")
