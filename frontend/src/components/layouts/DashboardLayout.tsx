@@ -334,6 +334,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <>
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(var(--primary)/0.08),transparent_60%)] pointer-events-none z-0" />
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_bottom_left,hsl(var(--accent)/0.05),transparent_60%)] pointer-events-none z-0" />
       <div className="min-h-[100dvh] bg-background flex overflow-hidden">
         {/* Mobile Menu Overlay */}
         <div

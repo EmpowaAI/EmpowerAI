@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import {
   Bot,
   BriefcaseBusiness,
@@ -13,6 +14,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import GlassCard from "@/components/shared/GlassCard";
 import { ContactWidget } from "@/components/ContactWidget";
 import { getStoredCvAnalysis } from "../../lib/sensitiveStorage";
 import { opportunitiesAPI } from "../../lib/api";
@@ -199,8 +201,22 @@ const Dashboard = () => {
     : "/dashboard/opportunities";
   const nextActionCta = !cvCompleted ? "Analyse CV" : !twinCompleted ? "Build Twin" : "Find Opportunities";
 
+  const containerVariants = {
+    hidden: {},
+    show: { transition: { staggerChildren: 0.08 } },
+  };
+  const itemVariants = {
+    hidden: { opacity: 0, y: 16 },
+    show:   { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.4, 0, 0.2, 1] } },
+  };
+
   return (
-    <div className="min-h-screen bg-background font-sans text-foreground">
+    <motion.div
+      className="min-h-screen bg-background font-sans text-foreground"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
+    >
       <main className="bg-gradient-to-b from-muted/35 via-background to-background">
         <section className="container py-8 md:py-10">
           <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[1.45fr_0.85fr]">
@@ -277,17 +293,24 @@ const Dashboard = () => {
               </Card>
 
               {/* Stats */}
-              <div className="grid gap-4 md:grid-cols-3">
+              <motion.div
+                className="grid gap-4 md:grid-cols-3"
+                variants={containerVariants}
+                initial="hidden"
+                animate="show"
+              >
                 {quietStats.map((stat) => (
-                  <Card key={stat.label} className="border-border/70 p-5 shadow-sm">
-                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                      {stat.label}
-                    </p>
-                    <p className="mt-4 font-display text-4xl font-bold text-primary">{stat.value}</p>
-                    <p className="mt-1 text-sm text-muted-foreground">{stat.note}</p>
-                  </Card>
+                  <motion.div key={stat.label} variants={itemVariants}>
+                    <GlassCard className="p-5 hover:shadow-elevated transition-shadow duration-300" animate={false}>
+                      <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                        {stat.label}
+                      </p>
+                      <p className="mt-4 font-display text-4xl font-bold text-primary">{stat.value}</p>
+                      <p className="mt-1 text-sm text-muted-foreground">{stat.note}</p>
+                    </GlassCard>
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
 
               {/* Journey */}
               <Card className="border-border/70 p-5 shadow-sm md:p-6">
@@ -461,7 +484,7 @@ const Dashboard = () => {
       </main>
 
       <ContactWidget />
-    </div>
+    </motion.div>
   );
 };
 

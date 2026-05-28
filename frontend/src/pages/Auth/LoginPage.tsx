@@ -3,6 +3,7 @@
  */
 import type React from "react";
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { 
   Eye, EyeOff, Loader2, Sparkles, Mail, Lock, Home, 
@@ -191,7 +192,12 @@ export default function LoginPage() {
           </div>
 
           <div className="w-full max-w-md">
-            <div className="rounded-2xl border border-border bg-card p-6 shadow-xl sm:p-7 md:p-9 dark:bg-card">
+            <motion.div
+              className="rounded-2xl border border-border bg-card p-6 shadow-xl sm:p-7 md:p-9 dark:bg-card"
+              initial={{ opacity: 0, scale: 0.97 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+            >
               <div className="lg:hidden mb-6 sm:mb-8">
                 <Logo variant="default" size="md" linkTo="/" />
               </div>
@@ -238,9 +244,9 @@ export default function LoginPage() {
                     autoComplete="email"
                     inputMode="email"
                     spellCheck={false}
-                    className={`min-h-[52px] w-full rounded-xl border py-3.5 pl-12 pr-4 text-base text-foreground transition-all ${
+                    className={`min-h-[52px] w-full rounded-xl border py-3.5 pl-12 pr-4 text-base text-foreground transition-all duration-200 ${
                       emailFocused
-                        ? "border-secondary/50 bg-background ring-2 ring-secondary/10"
+                        ? "border-secondary/50 bg-background ring-2 ring-secondary/10 shadow-[0_0_0_3px_hsl(var(--primary)/0.15)]"
                         : "border-border/60 bg-background"
                     }`}
                     required
@@ -266,9 +272,9 @@ export default function LoginPage() {
                     onFocus={() => setPasswordFocused(true)}
                     onBlur={() => setPasswordFocused(false)}
                     autoComplete="current-password"
-                    className={`min-h-[52px] w-full rounded-xl border py-3.5 pl-12 pr-12 text-base text-foreground transition-all ${
+                    className={`min-h-[52px] w-full rounded-xl border py-3.5 pl-12 pr-12 text-base text-foreground transition-all duration-200 ${
                       passwordFocused
-                        ? "border-secondary/50 bg-background ring-2 ring-secondary/10"
+                        ? "border-secondary/50 bg-background ring-2 ring-secondary/10 shadow-[0_0_0_3px_hsl(var(--primary)/0.15)]"
                         : "border-border/60 bg-background"
                     }`}
                     required
@@ -341,7 +347,7 @@ export default function LoginPage() {
                   Back to Homepage
                 </Link>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
 
