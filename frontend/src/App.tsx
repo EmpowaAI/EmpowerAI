@@ -1,4 +1,4 @@
-﻿﻿// frontend/src/App.tsx
+﻿// frontend/src/App.tsx
 import { lazy, Suspense, useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { UserProvider, useUser } from './contexts/user-context';
@@ -65,7 +65,7 @@ function App() {
               <Route path="/cv-analyzer" element={<CVAnalyzer />} />
               <Route path="/digital-twin" element={<DigitalTwin />} />
               <Route path="/twin-preview" element={<TwinBuilder />} />
-              {/* <Route path="/pricing" element={<Pricing />} /> */}
+              <Route path="/pricing" element={<Pricing />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<Navigate to="/" replace />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />

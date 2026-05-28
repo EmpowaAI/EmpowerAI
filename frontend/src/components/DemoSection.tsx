@@ -19,6 +19,7 @@ import {
   X,
 } from "lucide-react";
 import { useReveal } from "@/hooks/use-reveal";
+import { PremiumGate } from "@/components/PremiumGate";
 
 type Step = 0 | 1 | 2 | 3;
 
@@ -339,22 +340,10 @@ export function DemoSection() {
                     Restart
                   </Button>
                   <div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:items-end">
-                    <Button
-                      variant="cta"
-                      size="lg"
-                      disabled={chosen === null}
-                      onClick={() => setStep(3)}
-                      className="shimmer w-full sm:w-auto"
-                    >
-                      {chosen === null ? "Pick a path to continue" : "Lock it in"}
-                      <ArrowRight className="ml-1 h-4 w-4" />
-                    </Button>
-                    <Link
-                      to="/pricing"
-                      className="text-center text-[11px] text-muted-foreground underline-offset-4 hover:text-secondary hover:underline sm:text-right"
-                    >
-                      Full matching is R50/mo — CV Analyser stays Mahala
-                    </Link>
+                    <PremiumGate inline feature="Career path matching" />
+                    <span className="text-center text-[11px] text-muted-foreground sm:text-right">
+                      Locking in your path is a Premium feature — try the demo, then upgrade
+                    </span>
                   </div>
                 </div>
               </div>
@@ -399,7 +388,7 @@ export function DemoSection() {
                       Run again
                     </Button>
                     <Button variant="cta" size="lg" className="shimmer w-full sm:w-auto" asChild>
-                      <Link to="/signup">
+                      <Link to="/login">
                         Start my real journey
                         <ArrowRight className="ml-1 h-4 w-4" />
                       </Link>

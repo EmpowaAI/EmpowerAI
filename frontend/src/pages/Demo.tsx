@@ -112,7 +112,7 @@ export default function Demo() {
                 </Link>
               </Button>
               <Button asChild variant="cta" size="xl" className="w-full rounded-2xl shimmer" onClick={() => setIsMenuOpen(false)}>
-                <Link to="/signup">Get Started</Link>
+                <Link to="/login">Get Started</Link>
               </Button>
             </div>
           </nav>

@@ -30,7 +30,7 @@ export function UpgradeModal({ open, onOpenChange, feature }: Props) {
   const handleContinue = () => {
     onOpenChange(false);
     toast.success("Create an account to unlock Premium when billing goes live.");
-    navigate("/signup");
+    navigate("/login");
   };
 
   return (
