@@ -561,12 +561,41 @@ const CVAnalyzer = () => {
           <div className="absolute bottom-0 right-0 h-96 w-96 rounded-full bg-secondary/10 blur-3xl" />
         </div>
 
-        <section className="container flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center px-4 py-10 sm:py-16 lg:py-20">
-          {/* Eyebrow */}
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-muted/40 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-            <Sparkles className="h-3 w-3 text-secondary" />
-            Step 1 · CV skills and opportunity analysis
-          </span>
+        <section className={`container flex flex-col items-center px-4 py-10 sm:py-14 ${
+          phase === "complete" || phase === "revamping" || phase === "revamped"
+            ? "min-h-[calc(100vh-4rem)]"
+            : "min-h-[calc(100vh-4rem)] justify-center"
+        }`}>
+          {/* Journey stepper */}
+          <div className="flex flex-wrap items-center justify-center gap-1 sm:gap-1.5">
+            {([
+              { label: "Upload CV",  done: phase !== "idle",                                         active: phase === "idle" },
+              { label: "Analysing",  done: ["complete","revamping","revamped"].includes(phase),       active: phase === "analyzing" },
+              { label: "Results",    done: phase === "revamping" || phase === "revamped",             active: phase === "complete" },
+              { label: "ATS Ready",  done: phase === "revamped",                                     active: phase === "revamping" },
+            ] as { label: string; done: boolean; active: boolean }[]).map((step, i, arr) => (
+              <div key={step.label} className="flex items-center gap-1 sm:gap-1.5">
+                <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold transition-all ${
+                  step.active
+                    ? "bg-secondary/20 text-secondary border border-secondary/30"
+                    : step.done
+                    ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
+                    : "bg-muted/40 text-muted-foreground border border-border/60"
+                }`}>
+                  {step.done
+                    ? <CheckCircle2 className="h-3 w-3" />
+                    : step.active
+                    ? <Sparkles className="h-3 w-3" />
+                    : <span className="h-2.5 w-2.5 rounded-full border border-current opacity-40 inline-block" />
+                  }
+                  {step.label}
+                </span>
+                {i < arr.length - 1 && (
+                  <div className={`h-px w-4 sm:w-5 ${step.done ? "bg-emerald-500/50" : "bg-border/60"}`} />
+                )}
+              </div>
+            ))}
+          </div>
 
           <h1 className="mt-5 max-w-4xl text-center font-display text-3xl font-bold tracking-tight text-primary sm:text-5xl md:text-6xl">
             {phase === "revamped" ? (
@@ -873,219 +902,250 @@ const CVAnalyzer = () => {
             </div>
           )}
 
-          {/* ===== STATE: COMPLETE ===== */}
+          {/* ===== STATE: COMPLETE / REVAMPING / REVAMPED ===== */}
           {(phase === "complete" || phase === "revamping" || phase === "revamped") && (
-            <div className="mt-8 w-full max-w-6xl animate-fade-up text-center sm:mt-12">
+            <div className="mt-6 w-full max-w-6xl animate-fade-up sm:mt-10">
+
+              {/* Restored-session banner */}
               {isRestoredRef.current && phase === "complete" && (
-                <div className="mx-auto mb-6 flex max-w-3xl items-center justify-between gap-4 rounded-2xl border border-secondary/30 bg-secondary/5 px-5 py-3 text-left">
+                <div className="mb-5 flex items-center justify-between gap-4 rounded-2xl border border-secondary/30 bg-secondary/5 px-5 py-3 text-left">
                   <p className="text-sm text-muted-foreground">
                     <span className="font-semibold text-foreground">Showing your previous CV analysis.</span> Upload a new CV to re-analyse.
                   </p>
-                  <button
-                    onClick={reset}
-                    className="shrink-0 rounded-xl border border-border px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted transition-colors"
-                  >
+                  <button onClick={reset} className="shrink-0 rounded-xl border border-border px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted transition-colors">
                     Upload new CV
                   </button>
                 </div>
               )}
-              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-secondary/10 text-secondary">
-                {phase === "revamping" ? (
-                  <Wand2 className="h-9 w-9 animate-pulse" />
-                ) : phase === "revamped" ? (
-                  <ShieldCheck className="h-9 w-9" />
-                ) : (
-                  <CheckCircle2 className="h-9 w-9" />
-                )}
-              </div>
+
+              {/* ── Complete: two-column sidebar layout ── */}
               {phase === "complete" && (
-                <>
-                  <div className="mx-auto mt-8 grid max-w-3xl gap-3 rounded-3xl border border-border bg-card p-4 text-left shadow-sm sm:grid-cols-[auto_1fr] sm:p-6">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-secondary/10 text-secondary">
-                      <Gauge className="h-8 w-8" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-muted-foreground">Your readiness score</p>
-                      <p className="mt-1 font-display text-4xl font-bold text-primary">{analysis.score}<span className="text-xl text-muted-foreground">/100</span></p>
+                <div className="grid gap-6 lg:grid-cols-[280px_1fr] items-start">
+
+                  {/* LEFT — sticky sidebar: score + breakdown + actions */}
+                  <aside className="lg:sticky lg:top-6 space-y-4 text-left">
+
+                    {/* Score card */}
+                    <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary/10 text-secondary">
+                          <Gauge className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-semibold text-muted-foreground">Readiness score</p>
+                          <p className="font-display text-3xl font-bold text-primary leading-none mt-0.5">
+                            {analysis.score}<span className="text-base text-muted-foreground font-normal">/100</span>
+                          </p>
+                        </div>
+                      </div>
                       <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted">
                         <div className="h-full rounded-full bg-secondary transition-[width] duration-700" style={{ width: `${analysis.score}%` }} />
                       </div>
-                      <p className="mt-3 text-sm text-muted-foreground">
-                        Next best step: {analysis.score < 75 ? "revamp your CV before applications, then build your opportunity twin." : "build your opportunity twin and explore matched pathways."}
+                      <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
+                        {analysis.score < 75
+                          ? "Revamp your CV before applications, then build your twin."
+                          : "Build your twin and explore matched pathways."}
                       </p>
                     </div>
-                  </div>
 
-                  {/* ── Quick-action bar — visible immediately after score ── */}
-                  <div className="mx-auto mt-5 flex max-w-3xl w-full flex-col items-stretch gap-2 sm:flex-row sm:items-center">
-                    <Button variant="cta" size="lg" onClick={buildRevampedCv} className="shimmer flex-1">
-                      Revamp ATS CV
-                      <Wand2 className="ml-1 h-4 w-4" />
-                    </Button>
-                    <Button variant="outline" size="lg" onClick={() => navigate("/dashboard/twin")} className="flex-1">
-                      Build digital twin
-                      <ArrowRight className="ml-1 h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="lg" onClick={reset} className="flex-1">
-                      Analyse another CV
-                    </Button>
-                  </div>
-
-                  <div className="mx-auto mt-5 grid max-w-3xl gap-2 rounded-2xl bg-muted/40 p-1 sm:grid-cols-3">
-                    {([
-                      ["overview", "Overview"],
-                      ["match", "Target match"],
-                      ["coaching", "CV fixes"],
-                    ] as const).map(([id, label]) => (
-                      <button
-                        key={id}
-                        type="button"
-                        onClick={() => setResultView(id)}
-                        className={`rounded-xl px-4 py-2 text-sm font-semibold transition-colors ${resultView === id ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
-                      >
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-
-                  {resultView === "match" && <div className="mt-8 rounded-3xl border border-border bg-card p-4 text-left shadow-sm sm:p-6">
-                    <div className="flex items-center gap-2">
-                      <Briefcase className="h-5 w-5 text-secondary" />
-                      <h2 className="font-display text-2xl font-semibold text-foreground">Target job match</h2>
+                    {/* Score breakdown */}
+                    <div className="rounded-2xl border border-border bg-card p-4 shadow-sm space-y-3">
+                      <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Breakdown</p>
+                      {analysis.breakdown.map((item) => (
+                        <div key={item.label}>
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="font-semibold text-foreground">{item.label}</span>
+                            <span className="tabular-nums text-secondary font-semibold">{item.score}</span>
+                          </div>
+                          <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-muted">
+                            <div className="h-full rounded-full bg-secondary" style={{ width: `${item.score}%` }} />
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                    <textarea
-                      value={jobDescription}
-                      onChange={(event) => handleJobDescriptionChange(event.target.value)}
-                      className="mt-4 min-h-36 w-full resize-y rounded-2xl border border-input bg-background p-4 text-sm leading-relaxed text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-secondary focus:ring-2 focus:ring-secondary/20"
-                      placeholder="Paste the job description here to compare ATS keywords and missing terms..."
-                      maxLength={6000}
-                    />
-                    {inputError && (
-                      <p className="mt-2 flex items-center gap-2 text-xs font-medium text-destructive">
-                        <AlertTriangle className="h-4 w-4" />
-                        {inputError}
+
+                    {/* Action buttons */}
+                    <div className="space-y-2">
+                      <Button variant="cta" size="lg" onClick={buildRevampedCv} className="shimmer w-full">
+                        Revamp ATS CV
+                        <Wand2 className="ml-1 h-4 w-4" />
+                      </Button>
+                      <Button variant="outline" size="lg" onClick={() => navigate("/dashboard/twin")} className="w-full">
+                        Build digital twin
+                        <ArrowRight className="ml-1 h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="lg" onClick={reset} className="w-full">
+                        Analyse another CV
+                      </Button>
+                    </div>
+                  </aside>
+
+                  {/* RIGHT — tabs + scrollable content */}
+                  <div className="min-w-0 space-y-5 text-left">
+
+                    {/* Sticky tab bar */}
+                    <div className="sticky top-2 z-10 rounded-2xl bg-muted/40 p-1 backdrop-blur-md grid sm:grid-cols-3 gap-1">
+                      {([
+                        ["overview", "Overview"],
+                        ["match",    "Target match"],
+                        ["coaching", "CV fixes"],
+                      ] as const).map(([id, label]) => (
+                        <button
+                          key={id}
+                          type="button"
+                          onClick={() => setResultView(id)}
+                          className={`rounded-xl px-4 py-2 text-sm font-semibold transition-colors ${resultView === id ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Tab: Target match */}
+                    {resultView === "match" && (
+                      <div className="rounded-3xl border border-border bg-card p-4 shadow-sm sm:p-6">
+                        <div className="flex items-center gap-2">
+                          <Briefcase className="h-5 w-5 text-secondary" />
+                          <h2 className="font-display text-2xl font-semibold text-foreground">Target job match</h2>
+                        </div>
+                        <textarea
+                          value={jobDescription}
+                          onChange={(event) => handleJobDescriptionChange(event.target.value)}
+                          className="mt-4 min-h-36 w-full resize-y rounded-2xl border border-input bg-background p-4 text-sm leading-relaxed text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-secondary focus:ring-2 focus:ring-secondary/20"
+                          placeholder="Paste the job description here to compare ATS keywords and missing terms..."
+                          maxLength={6000}
+                        />
+                        {inputError && (
+                          <p className="mt-2 flex items-center gap-2 text-xs font-medium text-destructive">
+                            <AlertTriangle className="h-4 w-4" />{inputError}
+                          </p>
+                        )}
+                        <div className="mt-4 grid gap-3 lg:grid-cols-2">
+                          <div className="rounded-2xl bg-muted/40 p-4">
+                            <p className="flex items-center gap-2 text-sm font-semibold text-foreground"><Search className="h-4 w-4 text-secondary" />Matched terms</p>
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              {(analysis.matchedKeywords.length ? analysis.matchedKeywords : ["Paste a job description"]).map((term) => (
+                                <span key={term} className="rounded-full bg-secondary/10 px-3 py-1 text-xs font-semibold text-secondary">{term}</span>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="rounded-2xl bg-muted/40 p-4">
+                            <p className="flex items-center gap-2 text-sm font-semibold text-foreground"><Target className="h-4 w-4 text-secondary" />Missing terms</p>
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              {(analysis.missingKeywords.length ? analysis.missingKeywords : ["No major gaps found"]).map((term) => (
+                                <span key={term} className="rounded-full border border-border bg-background px-3 py-1 text-xs font-semibold text-muted-foreground">{term}</span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {analysisError && (
+                      <p className="rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+                        {analysisError}
                       </p>
                     )}
-                    <div className="mt-4 grid gap-3 lg:grid-cols-2">
-                      <div className="rounded-2xl bg-muted/40 p-4">
-                        <p className="flex items-center gap-2 text-sm font-semibold text-foreground"><Search className="h-4 w-4 text-secondary" />Matched terms</p>
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          {(analysis.matchedKeywords.length ? analysis.matchedKeywords : ["Paste a job description"]).map((term) => (
-                            <span key={term} className="rounded-full bg-secondary/10 px-3 py-1 text-xs font-semibold text-secondary">{term}</span>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="rounded-2xl bg-muted/40 p-4">
-                        <p className="flex items-center gap-2 text-sm font-semibold text-foreground"><Target className="h-4 w-4 text-secondary" />Missing terms</p>
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          {(analysis.missingKeywords.length ? analysis.missingKeywords : ["No major gaps found"]).map((term) => (
-                            <span key={term} className="rounded-full border border-border bg-background px-3 py-1 text-xs font-semibold text-muted-foreground">{term}</span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>}
 
-                  {analysisError && (
-                    <p className="mt-3 rounded-2xl border border-border bg-muted/40 px-4 py-3 text-left text-sm text-muted-foreground">
-                      {analysisError}
-                    </p>
-                  )}
-
-                  {resultView === "overview" && <div className="mt-5 grid gap-5 text-left lg:grid-cols-[1fr_1fr]">
-                    <div className="rounded-3xl border border-border bg-card p-4 shadow-sm sm:p-6">
-                      <div className="flex items-center gap-2">
-                        <ListChecks className="h-5 w-5 text-secondary" />
-                        <h2 className="font-display text-2xl font-semibold text-foreground">Where to improve</h2>
-                      </div>
-                      <div className="mt-5 space-y-4">
-                        {analysis.breakdown.map((item) => (
-                          <div key={item.label}>
-                            <div className="flex items-center justify-between text-sm">
-                              <span className="font-semibold text-foreground">{item.label}</span>
-                              <span className="font-semibold tabular-nums text-secondary">{item.score}/100</span>
-                            </div>
-                            <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
-                              <div className="h-full rounded-full bg-secondary" style={{ width: `${item.score}%` }} />
-                            </div>
-                            <p className="mt-1 text-xs text-muted-foreground">{item.note}</p>
+                    {/* Tab: Overview */}
+                    {resultView === "overview" && (
+                      <>
+                        <div className="rounded-3xl border border-border bg-card p-4 shadow-sm sm:p-6">
+                          <div className="flex items-center gap-2">
+                            <ListChecks className="h-5 w-5 text-secondary" />
+                            <h2 className="font-display text-2xl font-semibold text-foreground">Where to improve</h2>
                           </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>}
-
-                  {resultView === "overview" && <div className="mt-5 grid gap-4 text-left md:grid-cols-3">
-                    {IMPROVEMENT_AREAS.map((item) => (
-                      <div key={item.title} className="rounded-3xl border border-border bg-card p-4 shadow-sm sm:p-5">
-                        <span className="inline-flex rounded-full bg-secondary/10 px-3 py-1 text-xs font-semibold text-secondary">{item.priority}</span>
-                        <h3 className="mt-4 font-display text-lg font-semibold text-foreground">{item.title}</h3>
-                        <p className="mt-2 text-sm text-muted-foreground">{item.detail}</p>
-                      </div>
-                    ))}
-                  </div>}
-
-                  {resultView === "overview" && (analysis.opportunityMatches?.length || 0) > 0 && (
-                    <div className="mt-5 rounded-3xl border border-border bg-card p-4 text-left shadow-sm sm:p-6">
-                      <h2 className="font-display text-2xl font-semibold text-foreground">Opportunity pathways from your skills</h2>
-                      <p className="mt-2 text-sm text-muted-foreground">
-                        This is not only job matching — it includes income routes, learning routes, and venture options.
-                      </p>
-                      <div className="mt-4 grid gap-3 md:grid-cols-2">
-                        {analysis.opportunityMatches?.map((item) => (
-                          <div key={`${item.type}-${item.title}`} className="rounded-2xl bg-muted/40 p-4">
-                            <span className="rounded-full bg-secondary/10 px-3 py-1 text-xs font-semibold text-secondary">{item.type}</span>
-                            <h3 className="mt-3 font-display text-lg font-semibold text-foreground">{item.title}</h3>
-                            <p className="mt-1 text-sm font-semibold text-primary">{item.projection}</p>
-                            <p className="mt-2 text-sm text-muted-foreground">Next: {item.nextStep}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {resultView === "coaching" && <div className="mt-5 rounded-3xl border border-border bg-card p-4 text-left shadow-sm sm:p-6">
-                    <div className="flex items-center gap-2">
-                      <AlertTriangle className="h-5 w-5 text-secondary" />
-                      <h2 className="font-display text-2xl font-semibold text-foreground">Inline CV coaching</h2>
-                    </div>
-                    <div className="mt-4 max-h-[28rem] space-y-3 overflow-auto rounded-2xl bg-muted/30 p-2 sm:p-3">
-                      {previewLines.map((line, index) => {
-                        const issues = issueByLine.get(index) || [];
-                        return (
-                          <div key={`${line}-${index}`} className={`rounded-2xl border p-3 ${issues.length ? "border-secondary/40 bg-secondary/10" : "border-border bg-background"}`}>
-                            <p className="whitespace-pre-wrap text-sm text-foreground">{line}</p>
-                            {issues.map((issue) => (
-                              <div key={`${issue.title}-${issue.suggestion}`} className="mt-2 rounded-xl bg-background/80 p-3 text-xs">
-                                <p className="font-semibold text-secondary">{issue.title}</p>
-                                <p className="mt-1 text-muted-foreground">Fix it: {issue.suggestion}</p>
+                          <div className="mt-5 space-y-4">
+                            {analysis.breakdown.map((item) => (
+                              <div key={item.label}>
+                                <div className="flex items-center justify-between text-sm">
+                                  <span className="font-semibold text-foreground">{item.label}</span>
+                                  <span className="font-semibold tabular-nums text-secondary">{item.score}/100</span>
+                                </div>
+                                <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
+                                  <div className="h-full rounded-full bg-secondary" style={{ width: `${item.score}%` }} />
+                                </div>
+                                <p className="mt-1 text-xs text-muted-foreground">{item.note}</p>
                               </div>
                             ))}
                           </div>
-                        );
-                      })}
-                      {analysis.issues.filter((issue) => issue.type === "missing-section").map((issue) => (
-                        <div key={issue.title} className="rounded-2xl border border-secondary/40 bg-secondary/10 p-3">
-                          <p className="text-sm font-semibold text-secondary">{issue.title}</p>
-                          <p className="mt-1 text-xs text-muted-foreground">Fix it: {issue.suggestion}</p>
                         </div>
-                      ))}
-                    </div>
-                  </div>}
 
-                  <div className="mt-5 rounded-3xl border border-border bg-card p-4 text-left shadow-sm sm:p-6">
-                    <h2 className="font-display text-2xl font-semibold text-foreground">Optional revamp before your twin</h2>
-                    <p className="mt-2 text-sm text-muted-foreground">Best flow: analyse the CV, optionally fix the CV for applications, then build the digital twin for broader career and income navigation.</p>
-                    <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                      {ATS_IMPROVEMENTS.map((item) => (
-                        <div key={item} className="flex items-start gap-2 rounded-2xl bg-muted/40 px-4 py-3 text-sm">
-                          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-secondary" />
-                          <span className="text-muted-foreground">{item}</span>
+                        <div className="grid gap-4 md:grid-cols-3">
+                          {IMPROVEMENT_AREAS.map((item) => (
+                            <div key={item.title} className="rounded-3xl border border-border bg-card p-4 shadow-sm sm:p-5">
+                              <span className="inline-flex rounded-full bg-secondary/10 px-3 py-1 text-xs font-semibold text-secondary">{item.priority}</span>
+                              <h3 className="mt-4 font-display text-lg font-semibold text-foreground">{item.title}</h3>
+                              <p className="mt-2 text-sm text-muted-foreground">{item.detail}</p>
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
+
+                        {(analysis.opportunityMatches?.length || 0) > 0 && (
+                          <div className="rounded-3xl border border-border bg-card p-4 shadow-sm sm:p-6">
+                            <h2 className="font-display text-2xl font-semibold text-foreground">Opportunity pathways from your skills</h2>
+                            <p className="mt-2 text-sm text-muted-foreground">Not only job matching — includes income routes, learning routes, and venture options.</p>
+                            <div className="mt-4 grid gap-3 md:grid-cols-2">
+                              {analysis.opportunityMatches?.map((item) => (
+                                <div key={`${item.type}-${item.title}`} className="rounded-2xl bg-muted/40 p-4">
+                                  <span className="rounded-full bg-secondary/10 px-3 py-1 text-xs font-semibold text-secondary">{item.type}</span>
+                                  <h3 className="mt-3 font-display text-lg font-semibold text-foreground">{item.title}</h3>
+                                  <p className="mt-1 text-sm font-semibold text-primary">{item.projection}</p>
+                                  <p className="mt-2 text-sm text-muted-foreground">Next: {item.nextStep}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="rounded-3xl border border-border bg-card p-4 shadow-sm sm:p-6">
+                          <h2 className="font-display text-2xl font-semibold text-foreground">Optional revamp before your twin</h2>
+                          <p className="mt-2 text-sm text-muted-foreground">Best flow: analyse → optionally revamp for applications → build digital twin for career navigation.</p>
+                          <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                            {ATS_IMPROVEMENTS.map((item) => (
+                              <div key={item} className="flex items-start gap-2 rounded-2xl bg-muted/40 px-4 py-3 text-sm">
+                                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-secondary" />
+                                <span className="text-muted-foreground">{item}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    {/* Tab: CV fixes */}
+                    {resultView === "coaching" && (
+                      <div className="rounded-3xl border border-border bg-card p-4 shadow-sm sm:p-6">
+                        <div className="flex items-center gap-2">
+                          <AlertTriangle className="h-5 w-5 text-secondary" />
+                          <h2 className="font-display text-2xl font-semibold text-foreground">Inline CV coaching</h2>
+                        </div>
+                        <div className="mt-4 max-h-[28rem] space-y-3 overflow-auto rounded-2xl bg-muted/30 p-2 sm:p-3">
+                          {previewLines.map((line, index) => {
+                            const issues = issueByLine.get(index) || [];
+                            return (
+                              <div key={`${line}-${index}`} className={`rounded-2xl border p-3 ${issues.length ? "border-secondary/40 bg-secondary/10" : "border-border bg-background"}`}>
+                                <p className="whitespace-pre-wrap text-sm text-foreground">{line}</p>
+                                {issues.map((issue) => (
+                                  <div key={`${issue.title}-${issue.suggestion}`} className="mt-2 rounded-xl bg-background/80 p-3 text-xs">
+                                    <p className="font-semibold text-secondary">{issue.title}</p>
+                                    <p className="mt-1 text-muted-foreground">Fix it: {issue.suggestion}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            );
+                          })}
+                          {analysis.issues.filter((issue) => issue.type === "missing-section").map((issue) => (
+                            <div key={issue.title} className="rounded-2xl border border-secondary/40 bg-secondary/10 p-3">
+                              <p className="text-sm font-semibold text-secondary">{issue.title}</p>
+                              <p className="mt-1 text-xs text-muted-foreground">Fix it: {issue.suggestion}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </>
+                </div>
               )}
               {phase === "revamping" && (
                 <div className="mx-auto mt-8 max-w-2xl rounded-3xl border border-border bg-card p-4 text-left shadow-sm sm:p-6">
@@ -1137,29 +1197,26 @@ const CVAnalyzer = () => {
                   </div>
                 </div>
               )}
-              <div className="mt-8 flex w-full flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
-                {phase === "complete" && (
-                  <Button variant="cta" size="lg" onClick={buildRevampedCv} className="shimmer">
-                    Revamp ATS CV
-                    <Wand2 className="ml-1 h-4 w-4" />
+              {/* Actions for revamping / revamped phases */}
+              {(phase === "revamping" || phase === "revamped") && (
+                <div className="mt-8 flex w-full flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
+                  {phase === "revamped" && (
+                    <Button variant="cta" size="lg" onClick={exportRevampedCv} className="shimmer">
+                      Download CV
+                      <Download className="ml-1 h-4 w-4" />
+                    </Button>
+                  )}
+                  {phase === "revamped" && (
+                    <Button variant="outline" size="lg" onClick={() => navigate("/dashboard/twin")}>
+                      Build digital twin
+                      <ArrowRight className="ml-1 h-4 w-4" />
+                    </Button>
+                  )}
+                  <Button variant="ghost" size="lg" onClick={reset}>
+                    Analyse another CV
                   </Button>
-                )}
-                {phase === "revamped" && (
-                  <Button variant="cta" size="lg" onClick={exportRevampedCv} className="shimmer">
-                    Download CV
-                    <Download className="ml-1 h-4 w-4" />
-                  </Button>
-                )}
-                {phase !== "revamping" && (
-                  <Button variant="outline" size="lg" onClick={() => navigate("/dashboard/twin")}>
-                    Build digital twin
-                    <ArrowRight className="ml-1 h-4 w-4" />
-                  </Button>
-                )}
-                <Button variant="ghost" size="lg" onClick={reset}>
-                  Analyse another CV
-                </Button>
-              </div>
+                </div>
+              )}
             </div>
           )}
         </section>
