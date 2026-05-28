@@ -1,17 +1,14 @@
-
 const cvProfileRepository = require('./cvAnalyser.Repository');
 const logger = require('../../utils/logger');
-const aiServiceClient = require('../../intergration/ai/ai.ServiceClient');
-const { runAiTask } = require('../../intergration/queues/aiQueue');
+const { analyseCVText, analyseCVFile, revampCV } = require('./cvAnalyser.AiService');
 const { buildFallbackAnalysis } = require('../../utils/cvFallback.util');
 const { extractTextFromUploadedFile } = require('../../utils/cvParser.util');
-const FormData = require('form-data');
-const axios = require('axios');
 
-const REQUEST_TIMEOUT = 30000;
-const FILE_TIMEOUT = 60000;
+const MAX_CV_CHARS = 15000;
 
-// ─── Internal helpers ──────────────────────────────────────────────────────────
+function cleanCvText(text) {
+  return (text || '').replace(/\s+/g, ' ').trim().slice(0, MAX_CV_CHARS);
+}
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -27,221 +24,200 @@ const callWithRateLimitRetry = async (fn) => {
   }
 };
 
-// ─── Persistence ───────────────────────────────────────────────────────────────
-
-/**
- * Save or update a CvProfile after a successful AI analysis.
- */
-async function saveAnalysisResult({ userId, file, rawText, analysis, isFallback = false }) {
+// ── Persistence ───────────────────────────────────────────────────────────────
+async function _saveAnalysisResult({ userId, file, rawText, analysis, targetRole, industry, isFallback = false }) {
   try {
     const profile = await cvProfileRepository.saveOrUpdate({
       userId,
-      filename: file?.originalname ?? null,
-      mimetype: file?.mimetype ?? null,
-      fileSize: file?.size ?? null,
+      filename:  file?.originalname ?? null,
+      mimetype:  file?.mimetype     ?? null,
+      fileSize:  file?.size         ?? null,
       rawText,
       analysis,
+      targetRole,
+      industry,
       isFallback,
     });
 
     logger.info('[CvService] CvProfile saved', {
       userId,
-      profileId: profile._id,
-      score: profile.analysis?.score,
+      profileId:  profile._id,
+      atsScore:   profile.analysis?.atsScore,
       isFallback,
       isComplete: profile.isComplete,
     });
 
-    
-    return profile; 
+    return profile;
   } catch (error) {
-    logger.error('[CvService] Failed to save CvProfile', {
-      userId,
-      error: error.message,
-      stack: error.stack,
-    });
+    logger.error('[CvService] Failed to save CvProfile', { userId, error: error.message });
     throw error;
   }
 }
-  
 
-// ─── Text-based CV analysis ────────────────────────────────────────────────────
+// ── Analyse from text ─────────────────────────────────────────────────────────
+async function analyzeFromText({ userId, cvText, targetRole, industry, jobDescription }) {
+  const start = Date.now();
 
-/**
- * Analyse a CV submitted as plain text.
- * Returns { analysis, profileId, isFallback, fallbackMessage?, meta? }
- */
-async function analyzeFromText({ userId, cvText, jobRequirementsArray }) {
   try {
-    const queuedResult = await runAiTask(
-      'cv:analyze',
-      { cvText, jobRequirements: jobRequirementsArray },
-      async ({ cvText: taskCvText, jobRequirements: taskRequirements }) => {
-        const response = await callWithRateLimitRetry(() =>
-          aiServiceClient.post('/cv/analyze', { cvText: taskCvText, jobRequirements: taskRequirements })
-        );
-        return response.data;
-      },
-      { timeout: REQUEST_TIMEOUT, includeJobId: true }
+    logger.info('[CvService] CV text analysis start', { userId, targetRole, industry });
+
+    const safeText = cleanCvText(cvText);
+
+    const aiResult = await callWithRateLimitRetry(() =>
+      analyseCVText({ cv_text: safeText, target_role: targetRole, industry, job_description: jobDescription })
     );
 
-    const analysis = queuedResult.result || queuedResult;
-    const meta = queuedResult.result
-      ? { jobId: queuedResult.jobId, queued: queuedResult.queued }
-      : undefined;
-
-    const savedProfile = await saveAnalysisResult({
+    const savedProfile = await _saveAnalysisResult({
       userId,
       file: null,
-      rawText: cvText,
-      analysis,
+      rawText: safeText,
+      analysis: aiResult.analysis,
+      targetRole,
+      industry,
       isFallback: false,
     });
 
-    return { analysis, profileId: savedProfile?._id ?? null, isFallback: false, meta };
+    logger.info('[CvService] CV text analysis complete', { userId, duration: Date.now() - start });
+
+    return {
+      analysis:  savedProfile.analysis,
+      profileId: savedProfile._id,
+      isFallback: false,
+    };
   } catch (error) {
-    return _handleAnalysisError({ error, userId, cvText, jobRequirementsArray, file: null });
+    logger.error('[CvService] CV text analysis failed', { userId, error: error.message });
+    return _handleAnalysisError({ error, userId, cvText, targetRole, industry, file: null });
   }
 }
 
-async function analyzeFromFile({ userId, file, jobRequirementsArray }) {
-  const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
-  const aiServiceApiKey = process.env.AI_SERVICE_API_KEY;
+// ── Analyse from file ─────────────────────────────────────────────────────────
+async function analyzeFromFile({ userId, file, targetRole, industry, jobDescription }) {
+  const start = Date.now();
 
   try {
-    const queuedResult = await runAiTask(
-      'cv:analyze-file',
-      {
-        fileBuffer: file.buffer.toString('base64'),
-        filename: file.originalname,
-        mimetype: file.mimetype,
-        jobRequirements: jobRequirementsArray || [],
-      },
-      async (payload) => {
-        const payloadForm = new FormData();
-        payloadForm.append('cvFile', Buffer.from(payload.fileBuffer, 'base64'), {
-          filename: payload.filename,
-          contentType: payload.mimetype,
-        });
-        if (payload.jobRequirements && payload.jobRequirements.length > 0) {
-          payloadForm.append('jobRequirements', JSON.stringify(payload.jobRequirements));
-        }
-        return callWithRateLimitRetry(() =>
-          axios.post(`${aiServiceUrl}/api/cv/analyze-file`, payloadForm, {
-            headers: {
-              ...payloadForm.getHeaders(),
-              ...(aiServiceApiKey ? { 'X-API-KEY': aiServiceApiKey } : {}),
-            },
-            timeout: FILE_TIMEOUT,
-            maxContentLength: 10 * 1024 * 1024,
-            maxBodyLength: 10 * 1024 * 1024,
-          })
-        ).then((response) => response.data);
-      },
-      { timeout: FILE_TIMEOUT, includeJobId: true }
+    logger.info('[CvService] CV file analysis start', { userId, filename: file.originalname, targetRole, industry });
+
+    const aiResult = await callWithRateLimitRetry(() =>
+      analyseCVFile({
+        fileBuffer:      file.buffer,
+        filename:        file.originalname,
+        mimetype:        file.mimetype,
+        target_role:     targetRole,
+        industry,
+        job_description: jobDescription,
+      })
     );
 
-    const analysis = queuedResult.result || queuedResult;
-    const meta = queuedResult.result
-      ? { jobId: queuedResult.jobId, queued: queuedResult.queued }
-      : undefined;
-
-    const savedProfile = await saveAnalysisResult({
+    const savedProfile = await _saveAnalysisResult({
       userId,
       file,
       rawText: '',
-      analysis,
+      analysis: aiResult.analysis,
+      targetRole,
+      industry,
       isFallback: false,
     });
 
-    return { analysis, profileId: savedProfile?._id ?? null, isFallback: false, meta };
+    logger.info('[CvService] CV file analysis complete', { userId, duration: Date.now() - start });
+
+    return {
+      analysis:  savedProfile.analysis,
+      profileId: savedProfile._id,
+      isFallback: false,
+    };
   } catch (error) {
-    return _handleAnalysisError({ error, userId, cvText: null, jobRequirementsArray, file });
+    logger.error('[CvService] CV file analysis failed', { userId, error: error.message });
+    return _handleAnalysisError({ error, userId, cvText: null, targetRole, industry, file });
   }
 }
 
-// ─── CV revamp ─────────────────────────────────────────────────────────────────
+// ── Revamp CV ─────────────────────────────────────────────────────────────────
+async function revampCv({ userId, cv_text, analysis, target_role, industry }) {
+  let cvText     = cv_text;
+  let cvAnalysis = analysis;
+  let role       = target_role;
+  let ind        = industry;
 
-/**
- * Request a CV revamp from the AI service.
- * Returns { revamp, meta? }
- * Throws on failure — controller passes to next(error).
- */
-async function revampCv({ cvData }) {
-  const queuedResult = await runAiTask(
-    'cv:revamp',
-    { cvData },
-    async ({ cvData: taskCvData }) => {
-      const response = await callWithRateLimitRetry(() =>
-        aiServiceClient.post('/cv/revamp', { cvData: taskCvData })
-      );
-      return response.data;
-    },
-    { timeout: FILE_TIMEOUT, includeJobId: true }
-  );
+  // Fall back to stored profile if payload not provided
+  if (!cvText || !cvAnalysis) {
+    const profile = await cvProfileRepository.findByUserId(userId);
+    if (!profile || !profile.isComplete) {
+      const err = new Error('Please analyse your CV first before requesting a revamp.');
+      err.statusCode = 400;
+      throw err;
+    }
+    cvText     = cvText     || profile.rawText || '';
+    cvAnalysis = cvAnalysis || profile.analysis;
+    role       = role       || profile.analysis?.targetRole || '';
+    ind        = ind        || profile.analysis?.industry   || '';
+  }
 
-  const revamp = queuedResult.result || queuedResult;
-  const meta = queuedResult.result
-    ? { jobId: queuedResult.jobId, queued: queuedResult.queued }
-    : undefined;
+  if (!cvText) {
+    const err = new Error('cv_text is required. Please paste your CV text or analyse via text input first.');
+    err.statusCode = 400;
+    throw err;
+  }
 
-  return { revamp, meta };
+  const start = Date.now();
+
+  try {
+    logger.info('[CvService] CV revamp start', { userId, role, ind });
+
+    const aiResult = await callWithRateLimitRetry(() =>
+      revampCV({ cv_text: cvText, analysis: cvAnalysis, target_role: role, industry: ind })
+    );
+
+    const saved = await cvProfileRepository.saveRevamp({
+      userId,
+      revampData: aiResult.revamp,
+    });
+
+    logger.info('[CvService] CV revamp saved', { userId, profileId: saved._id, duration: Date.now() - start });
+
+    return { revamp: saved.revamp, profileId: saved._id };
+  } catch (error) {
+    logger.error('[CvService] CV revamp failed', { userId, error: error.message, duration: Date.now() - start });
+    throw error;
+  }
 }
 
-// ─── Restore from cached frontend analysis ────────────────────────────────────
+// ── Download revamped CV ──────────────────────────────────────────────────────
+async function getRevampForDownload({ userId }) {
+  const profile = await cvProfileRepository.findByUserId(userId);
 
-/**
- * Upserts a CvProfile from a cached frontend TransformedCVAnalysis object.
- * Used when the user already analyzed their CV but the profile was never
- * persisted (e.g. old runValidators bug) — avoids forcing a re-upload.
- */
-async function restoreFromCachedAnalysis({ userId, cachedAnalysis }) {
-  // Map frontend TransformedCVAnalysis → backend CVAnalysisResponse shape
-  const analysis = {
-    score:           cachedAnalysis.score          ?? 0,
-    readinessLevel:  cachedAnalysis.readinessLevel ?? 'JUNIOR',
-    industry:        cachedAnalysis.industry       ?? 'general',
-    about:           cachedAnalysis.sections?.about ?? cachedAnalysis.summary ?? '',
-    extractedSkills: cachedAnalysis.sections?.skills        ?? [],
-    missingSkills:   cachedAnalysis.missingSkills            ?? [],
-    marketKeywords:  cachedAnalysis.missingKeywords          ?? [],
-    strengths:       cachedAnalysis.strengths                ?? [],
-    weaknesses:      cachedAnalysis.weaknesses               ?? [],
-    suggestions:     cachedAnalysis.recommendations          ?? [],
-    recommendations: cachedAnalysis.recommendations          ?? [],
-    missingKeywords: cachedAnalysis.missingKeywords          ?? [],
-    achievements:    cachedAnalysis.sections?.achievements   ?? [],
-    education:       cachedAnalysis.sections?.education      ?? [],
-    experience:      cachedAnalysis.sections?.experience     ?? [],
-    links: {
-      linkedin:       cachedAnalysis.linkCheck?.linkedin       ?? false,
-      github:         cachedAnalysis.linkCheck?.github         ?? false,
-      portfolio:      cachedAnalysis.linkCheck?.portfolio      ?? false,
-      driversLicence: cachedAnalysis.linkCheck?.driversLicence ?? false,
-    },
+  if (!profile?.revamp?.revampedCv) {
+    const err = new Error('No revamped CV found. Please revamp your CV first.');
+    err.statusCode = 404;
+    throw err;
+  }
+
+  return {
+    revampedCv:    profile.revamp.revampedCv,
+    plainTextCv:   profile.revamp.plainTextCv,
+    revampSummary: profile.revamp.revampSummary,
+    revampedAt:    profile.revamp.revampedAt,
   };
+}
 
+// ── Restore from cached analysis ──────────────────────────────────────────────
+async function restoreFromCachedAnalysis({ userId, cachedAnalysis }) {
   const profile = await cvProfileRepository.saveOrUpdate({
     userId,
     filename:   null,
     mimetype:   null,
     fileSize:   null,
     rawText:    '',
-    analysis,
+    analysis:   cachedAnalysis,
+    targetRole: cachedAnalysis.targetRole || '',
+    industry:   cachedAnalysis.industry   || 'general',
     isFallback: false,
   });
 
-  logger.info('[CvService] CvProfile restored from cached analysis', {
-    userId,
-    profileId: profile._id,
-    score: profile.analysis?.score,
-  });
-
+  logger.info('[CvService] CvProfile restored from cache', { userId, profileId: profile._id });
   return profile;
 }
 
-// ─── Profile queries ───────────────────────────────────────────────────────────
-
+// ── Profile queries ───────────────────────────────────────────────────────────
 async function getCvProfile(userId) {
   return cvProfileRepository.findByUserId(userId);
 }
@@ -254,32 +230,20 @@ async function deleteCvProfile(userId) {
   return cvProfileRepository.deleteByUserId(userId);
 }
 
-// ─── Private: unified error → fallback handler ─────────────────────────────────
-
-async function _handleAnalysisError({ error, userId, cvText, jobRequirementsArray, file }) {
-  const errorMessage = error.message || '';
+// ── Error handler ─────────────────────────────────────────────────────────────
+async function _handleAnalysisError({ error, userId, cvText, targetRole, industry, file }) {
   const status = error.response?.status;
-  const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
-
-  const isRateLimit =
-    error.isRateLimit ||
-    status === 429 ||
-    errorMessage.toLowerCase().includes('rate limit');
 
   const isServiceDown =
-    status === 401 ||
     status === 503 ||
-    status >= 500 ||
+    status >= 500  ||
     error.code === 'ECONNREFUSED' ||
     error.code === 'ECONNABORTED' ||
-    error.code === 'ENOTFOUND' ||
-    error.code === 'ETIMEDOUT' ||
+    error.code === 'ENOTFOUND'    ||
+    error.code === 'ETIMEDOUT'    ||
     !error.response;
 
-  // 400 from Python means bad input, but file extraction failures (scanned PDFs, etc.)
-  // can sometimes be recovered by Node-side text extraction (pdf-parse > PyPDF2).
-  // Exception: "Invalid document format" means the content itself failed CV validation —
-  // no extraction technique will change that, so skip the retry immediately.
+  // 400 — bad input; try Node-side extraction if file provided
   if (status === 400) {
     const detail = error.response?.data?.detail || error.response?.data?.message || '';
     const isNotCv = detail.toLowerCase().includes('invalid document format');
@@ -288,86 +252,44 @@ async function _handleAnalysisError({ error, userId, cvText, jobRequirementsArra
       try {
         const rawText = await extractTextFromUploadedFile(file);
         if (rawText && rawText.trim().length > 50) {
-          logger.info('[CvService] Python file extraction returned 400; retrying with Node-side text extraction', {
-            userId,
-            filename: file.originalname,
-            extractedLength: rawText.length,
-          });
-          return await analyzeFromText({ userId, cvText: rawText, jobRequirementsArray });
+          logger.info('[CvService] Retrying with Node-side text extraction', { userId });
+          return await analyzeFromText({ userId, cvText: rawText, targetRole, industry });
         }
       } catch (fallbackError) {
-        logger.warn('[CvService] Node-side text extraction fallback failed', {
-          userId,
-          error: fallbackError.message,
-        });
+        logger.warn('[CvService] Node-side extraction fallback failed', { userId, error: fallbackError.message });
       }
     }
     throw error;
   }
 
-  if (isRateLimit || isServiceDown) {
-    const retryAfter = error.retryAfter || error.response?.data?.retryAfter || 60;
-
+  if (isServiceDown) {
     let rawText = cvText || '';
     if (!rawText && file) {
-      try {
-        rawText = await extractTextFromUploadedFile(file);
-      } catch (_) {}
+      try { rawText = await extractTextFromUploadedFile(file); } catch (_) {}
     }
 
-    const analysis = buildFallbackAnalysis(rawText, jobRequirementsArray);
-
-    const savedProfile = await saveAnalysisResult({
-      userId,
-      file: file ?? null,
-      rawText,
-      analysis,
-      isFallback: true,
+    const analysis = buildFallbackAnalysis(rawText, []);
+    const savedProfile = await _saveAnalysisResult({
+      userId, file: file ?? null, rawText, analysis, targetRole, industry, isFallback: true,
     });
 
-    const fallbackMessage = isRateLimit
-      ? `AI service is rate limited. Showing basic CV insights while you wait ${retryAfter} seconds.`
-      : _buildNetworkMessage(error, aiServiceUrl);
-
     return {
-      analysis,
-      profileId: savedProfile?._id ?? null,
-      isFallback: true,
-      fallbackMessage,
+      analysis:       savedProfile.analysis,
+      profileId:      savedProfile._id,
+      isFallback:     true,
+      fallbackMessage: 'AI service is temporarily unavailable. Showing basic CV insights.',
     };
   }
 
-  // Unknown error — rethrow
   throw error;
 }
 
-function _buildNetworkMessage(error, aiServiceUrl) {
-  const code = error.code || 'UNKNOWN';
-  const isRender =
-    (process.env.AI_SERVICE_URL || '').includes('render.com') ||
-    (process.env.AI_SERVICE_URL || '').includes('onrender.com');
-
-  switch (code) {
-    case 'ECONNREFUSED':
-      return `Cannot connect to AI service at ${aiServiceUrl}. The service may be down or not accepting connections.`;
-    case 'ECONNABORTED':
-      return isRender || error.isRenderColdStart
-        ? 'AI service is waking up (Render free tier cold start). Please wait 30-60 seconds and try again.'
-        : `AI service request timed out. The service may be slow or unresponsive.`;
-    case 'ENOTFOUND':
-      return `Cannot resolve AI service hostname. Please check that AI_SERVICE_URL (${aiServiceUrl}) is correct.`;
-    case 'ETIMEDOUT':
-      return `AI service connection timed out. Please check if the service is running at ${aiServiceUrl}.`;
-    default:
-      return `AI service is unavailable. Showing basic CV insights.`;
-  }
-}
-
+// ── Exports ───────────────────────────────────────────────────────────────────
 module.exports = {
-  saveAnalysisResult,
   analyzeFromText,
   analyzeFromFile,
   revampCv,
+  getRevampForDownload,
   restoreFromCachedAnalysis,
   getCvProfile,
   hasCompleteProfile,
