@@ -916,6 +916,21 @@ const CVAnalyzer = () => {
                     </div>
                   </div>
 
+                  {/* ── Quick-action bar — visible immediately after score ── */}
+                  <div className="mx-auto mt-5 flex max-w-3xl w-full flex-col items-stretch gap-2 sm:flex-row sm:items-center">
+                    <Button variant="cta" size="lg" onClick={buildRevampedCv} className="shimmer flex-1">
+                      Revamp ATS CV
+                      <Wand2 className="ml-1 h-4 w-4" />
+                    </Button>
+                    <Button variant="outline" size="lg" onClick={() => navigate("/dashboard/twin")} className="flex-1">
+                      Build digital twin
+                      <ArrowRight className="ml-1 h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="lg" onClick={reset} className="flex-1">
+                      Analyse another CV
+                    </Button>
+                  </div>
+
                   <div className="mx-auto mt-5 grid max-w-3xl gap-2 rounded-2xl bg-muted/40 p-1 sm:grid-cols-3">
                     {([
                       ["overview", "Overview"],
