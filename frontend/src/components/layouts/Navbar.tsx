@@ -76,8 +76,13 @@ export default function Navbar() {
     : "U";
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border">
-      <div className="container mx-auto px-4">
+    <motion.nav
+      initial={{ opacity: 0, y: -8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="fixed top-0 left-0 right-0 z-50 backdrop-blur-lg bg-background/80 border-b border-border/50 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-primary/30 after:to-transparent"
+    >
+      <div className="container relative mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Logo size="md" linkTo="/dashboard" />
@@ -109,21 +114,16 @@ export default function Navbar() {
                   className={cn(
                     "relative px-4 py-2 rounded-xl text-sm font-medium transition-all",
                     "hover:text-[var(--secondary)] group",
-                    isActive ? "text-[var(--secondary)]" : "text-muted-foreground"
+                    isActive
+                      ? "text-[var(--secondary)] after:absolute after:bottom-0 after:left-4 after:right-4 after:h-0.5 after:bg-accent after:rounded-full"
+                      : "text-muted-foreground"
                   )}
                   title={item.tooltip}
                 >
-                  <span className="flex items-center gap-2">
+                  <span className="relative z-10 flex items-center gap-2">
                     <Icon className="h-4 w-4" />
                     {item.label}
                   </span>
-                  {isActive && (
-                    <motion.div
-                      layoutId="navbar-active"
-                      className="absolute inset-0 bg-[var(--secondary)]/10 rounded-xl border border-[var(--secondary)]/20"
-                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                    />
-                  )}
                 </Link>
               );
             })}
@@ -210,9 +210,9 @@ export default function Navbar() {
                     to={item.path}
                     onClick={() => setIsOpen(false)}
                     className={cn(
-                      "flex items-center gap-3 px-4 py-3 rounded-xl transition-all",
+                      "relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all",
                       isActive
-                        ? "bg-[var(--secondary)]/10 text-[var(--secondary)] border border-[var(--secondary)]/20"
+                        ? "bg-[var(--secondary)]/10 text-[var(--secondary)] border border-[var(--secondary)]/20 after:absolute after:bottom-1 after:left-4 after:right-4 after:h-0.5 after:bg-accent after:rounded-full"
                         : "text-foreground hover:bg-muted"
                     )}
                   >
@@ -225,6 +225,6 @@ export default function Navbar() {
           </motion.div>
         )}
       </div>
-    </nav>
+    </motion.nav>
   );
 }

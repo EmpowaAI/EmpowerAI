@@ -4,6 +4,7 @@
 import type React from "react";
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
 import { 
   Eye, EyeOff, Loader2, Sparkles, Mail, Lock, Home, 
   Facebook, Instagram, Linkedin, MapPin, Shield, FileText, Cookie, X 
@@ -15,6 +16,7 @@ import { syncProgressFromBackend, unlockAllPages } from "@/utils/progressSync";
 import Logo from "@/components/ui/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/Button";
+import GlassCard from "@/components/shared/GlassCard";
 import { ContactWidget } from "@/components/ContactWidget";
 import TikTokIcon from "@/components/ui/TikTokIcon";
 import loginBg from "@/assets/images/empowerlogin.png";
@@ -191,7 +193,12 @@ export default function LoginPage() {
           </div>
 
           <div className="w-full max-w-md">
-            <div className="rounded-2xl border border-border bg-card p-6 shadow-xl sm:p-7 md:p-9 dark:bg-card">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.97 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4 }}
+            >
+            <GlassCard className="auth-card-surface border-border/60 p-6 shadow-xl sm:p-7 md:p-9">
               <div className="lg:hidden mb-6 sm:mb-8">
                 <Logo variant="default" size="md" linkTo="/" />
               </div>
@@ -238,7 +245,7 @@ export default function LoginPage() {
                     autoComplete="email"
                     inputMode="email"
                     spellCheck={false}
-                    className={`min-h-[52px] w-full rounded-xl border py-3.5 pl-12 pr-4 text-base text-foreground transition-all ${
+                    className={`min-h-[52px] w-full rounded-xl border py-3.5 pl-12 pr-4 text-base text-foreground transition-all duration-200 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.15)] ${
                       emailFocused
                         ? "border-secondary/50 bg-background ring-2 ring-secondary/10"
                         : "border-border/60 bg-background"
@@ -266,7 +273,7 @@ export default function LoginPage() {
                     onFocus={() => setPasswordFocused(true)}
                     onBlur={() => setPasswordFocused(false)}
                     autoComplete="current-password"
-                    className={`min-h-[52px] w-full rounded-xl border py-3.5 pl-12 pr-12 text-base text-foreground transition-all ${
+                    className={`min-h-[52px] w-full rounded-xl border py-3.5 pl-12 pr-12 text-base text-foreground transition-all duration-200 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.15)] ${
                       passwordFocused
                         ? "border-secondary/50 bg-background ring-2 ring-secondary/10"
                         : "border-border/60 bg-background"
@@ -304,10 +311,11 @@ export default function LoginPage() {
                   </div>
                 )}
 
-                <button
+                <Button
                   type="submit"
                   disabled={isLoading}
-                  className="shimmer w-full py-4 bg-cta-gradient text-white rounded-xl font-bold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-cta hover:shadow-glow hover:-translate-y-0.5 active:translate-y-0 min-h-[56px] text-base group"
+                  className="shimmer w-full rounded-xl py-4 font-bold min-h-[56px] h-auto text-base group"
+                  size="lg"
                 >
                   {isLoading ? (
                     <>
@@ -320,7 +328,7 @@ export default function LoginPage() {
                       <Sparkles className="h-5 w-5 group-hover:rotate-12 transition-transform" />
                     </>
                   )}
-                </button>
+                </Button>
               </form>
 
               {/* Create Account Link at the bottom */}
@@ -341,7 +349,8 @@ export default function LoginPage() {
                   Back to Homepage
                 </Link>
               </div>
-            </div>
+            </GlassCard>
+            </motion.div>
           </div>
         </div>
 

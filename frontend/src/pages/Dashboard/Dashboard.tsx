@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import {
   Bot,
   BriefcaseBusiness,
@@ -12,7 +13,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
+import GlassCard from "@/components/shared/GlassCard";
 import { ContactWidget } from "@/components/ContactWidget";
 import { getStoredCvAnalysis } from "../../lib/sensitiveStorage";
 import { opportunitiesAPI } from "../../lib/api";
@@ -199,15 +200,37 @@ const Dashboard = () => {
     : "/dashboard/opportunities";
   const nextActionCta = !cvCompleted ? "Analyse CV" : !twinCompleted ? "Build Twin" : "Find Opportunities";
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.08 },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 16 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.35, ease: [0.4, 0, 0.2, 1] as const },
+    },
+  };
+
   return (
-    <div className="min-h-screen bg-background font-sans text-foreground">
+    <motion.div
+      className="min-h-screen bg-background font-sans text-foreground"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
+    >
       <main className="bg-gradient-to-b from-muted/35 via-background to-background">
         <section className="container py-8 md:py-10">
           <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[1.45fr_0.85fr]">
             <div className="space-y-6">
               {/* Welcome Guide — hidden once CV is done */}
               {showWelcomeGuide && !cvCompleted && (
-                <Card className="relative overflow-hidden border-primary/20 bg-card p-6 shadow-card-soft md:p-8">
+                <GlassCard className="relative overflow-hidden border-primary/20 shadow-card-soft md:p-8">
                   <Button
                     variant="ghost"
                     size="icon"
@@ -246,11 +269,11 @@ const Dashboard = () => {
                       </Link>
                     ))}
                   </div>
-                </Card>
+                </GlassCard>
               )}
 
               {/* Recommended Next Step */}
-              <Card className="border-secondary/25 bg-secondary/5 p-5 shadow-sm md:p-6">
+              <GlassCard className="border-secondary/25 bg-secondary/5 p-5 shadow-sm md:p-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-start gap-4">
                     <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-secondary/15 text-secondary">
@@ -274,23 +297,33 @@ const Dashboard = () => {
                     <Link to={nextActionTo}>{nextActionCta}</Link>
                   </Button>
                 </div>
-              </Card>
+              </GlassCard>
 
               {/* Stats */}
-              <div className="grid gap-4 md:grid-cols-3">
+              <motion.div
+                className="grid gap-4 md:grid-cols-3"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+              >
                 {quietStats.map((stat) => (
-                  <Card key={stat.label} className="border-border/70 p-5 shadow-sm">
-                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                      {stat.label}
-                    </p>
-                    <p className="mt-4 font-display text-4xl font-bold text-primary">{stat.value}</p>
-                    <p className="mt-1 text-sm text-muted-foreground">{stat.note}</p>
-                  </Card>
+                  <motion.div key={stat.label} variants={itemVariants}>
+                    <GlassCard
+                      animate={false}
+                      className="border-border/70 p-5 shadow-sm hover:shadow-elevated transition-shadow duration-300"
+                    >
+                      <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                        {stat.label}
+                      </p>
+                      <p className="mt-4 font-display text-4xl font-bold text-primary">{stat.value}</p>
+                      <p className="mt-1 text-sm text-muted-foreground">{stat.note}</p>
+                    </GlassCard>
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
 
               {/* Journey */}
-              <Card className="border-border/70 p-5 shadow-sm md:p-6">
+              <GlassCard className="border-border/70 p-5 shadow-sm md:p-6">
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <h2 className="font-display text-2xl font-bold text-primary">Your AI Journey</h2>
@@ -352,13 +385,13 @@ const Dashboard = () => {
                     )
                   )}
                 </div>
-              </Card>
+              </GlassCard>
             </div>
 
             {/* Sidebar */}
             <aside className="space-y-5 lg:sticky lg:top-24 lg:self-start">
               {/* Profile Snapshot */}
-              <Card className="border-border/70 p-5 shadow-sm">
+              <GlassCard className="border-border/70 p-5 shadow-sm">
                 <div className="flex items-center gap-3">
                   <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
                     <Compass className="h-5 w-5" />
@@ -416,14 +449,14 @@ const Dashboard = () => {
                     </div>
                   )}
                 </div>
-              </Card>
+              </GlassCard>
 
               {/* Primary Actions */}
               <div className="space-y-3">
                 {primaryActions.map(({ icon: Icon, title, text, cta, to }) => (
-                  <Card
+                  <GlassCard
                     key={title}
-                    className="border-border/70 p-5 shadow-sm transition-colors hover:border-primary/30"
+                    className="border-border/70 p-5 shadow-sm transition-colors hover:border-primary/30 hover:shadow-elevated transition-shadow duration-300"
                   >
                     <div className="flex gap-4">
                       <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -437,12 +470,12 @@ const Dashboard = () => {
                         </Button>
                       </div>
                     </div>
-                  </Card>
+                  </GlassCard>
                 ))}
               </div>
 
               {/* Footer Card */}
-              <Card className="border-primary/20 bg-primary/5 p-5 shadow-sm">
+              <GlassCard className="border-primary/20 bg-primary/5 p-5 shadow-sm">
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-secondary" />
                   <div>
@@ -454,14 +487,14 @@ const Dashboard = () => {
                     </p>
                   </div>
                 </div>
-              </Card>
+              </GlassCard>
             </aside>
           </div>
         </section>
       </main>
 
       <ContactWidget />
-    </div>
+    </motion.div>
   );
 };
 
