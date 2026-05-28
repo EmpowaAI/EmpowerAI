@@ -382,17 +382,22 @@ const CVAnalyzer = () => {
          setAiAnalysis(transformedAnalysis);
 
          try {
-           // Only mark CV as completed when the profile was actually saved server-side.
-           // profileId is null when the backend failed to persist the analysis.
+           // Always unlock the twin once a CV has been analysed — regardless of
+           // whether the backend persisted a profileId.  The local score is valid.
+           const score = data.score || transformedAnalysis.score || 0;
+           if (score > 0) {
+             localStorage.setItem('cvCompleted', 'true');
+             localStorage.setItem('cvScore', String(score));
+             updateProgress('cvCompleted', true);
+             window.dispatchEvent(new Event('cvCompleted'));
+           }
+
+           // Store full AI data only when the backend actually saved the profile.
            const profileSaved = !!data.profileId;
            if (profileSaved) {
-             localStorage.setItem('cvCompleted', 'true');
-             localStorage.setItem('cvScore', String(data.score || 0));
-             updateProgress('cvCompleted', true);
              setStoredCvAnalysis(data);
              setStoredCvFileName(fileName || 'cv.txt');
              refreshCVData();
-             window.dispatchEvent(new Event('cvCompleted'));
 
              const skills = data.sections?.skills || [];
              if (Array.isArray(skills) && skills.length > 0) {
@@ -438,6 +443,14 @@ const CVAnalyzer = () => {
             reset();
           } else {
             setAnalysisError("AI analysis could not finish right now, so we are showing the local CV scan.");
+            // Local analysis succeeded — unlock the twin so the user isn't blocked.
+            const localScore = localAnalysis.score || 0;
+            if (localScore > 0) {
+              localStorage.setItem('cvCompleted', 'true');
+              localStorage.setItem('cvScore', String(localScore));
+              updateProgress('cvCompleted', true);
+              window.dispatchEvent(new Event('cvCompleted'));
+            }
           }
         }
       };
