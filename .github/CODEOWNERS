@@ -1,0 +1,4 @@
+# All files require review from a human team member.
+# This prevents automated bots (v0, Cursor agents, etc.) from
+# merging PRs into main without explicit human approval.
+* @NickiMash17 @khulisojohn
