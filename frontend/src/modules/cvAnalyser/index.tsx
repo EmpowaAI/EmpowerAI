@@ -1,4 +1,3 @@
-
 import { AnimatePresence, motion } from 'framer-motion';
 import { Brain, RotateCcw } from 'lucide-react';
 
@@ -25,7 +24,6 @@ export default function CVAnalyzerPage() {
     submitRevamp,
     dismissError,
     dismissPostModal,
-    //goToRevamp,
     reset,
   } = useCVAnalyzer();
 
@@ -50,9 +48,10 @@ export default function CVAnalyzerPage() {
   const uploadReady =
     inputMode === 'file' ? !!file : cvText.trim().length >= 50;
 
-  // ── Render ─────────────────────────────────────────────────────────────
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+
       {/* Page header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -83,7 +82,7 @@ export default function CVAnalyzerPage() {
         {error && (
           <CVUploadError
             error={error}
-            onRetry={step !== 'scanning' ? submitAnalysis : undefined}
+            onRetry={submitAnalysis}
             onDismiss={dismissError}
             isRateLimited={isRateLimited}
             retryAfter={retryAfter}
@@ -91,8 +90,9 @@ export default function CVAnalyzerPage() {
         )}
       </AnimatePresence>
 
-      {/* ── Step: idle / form ─────────────────────────────────────────────── */}
       <AnimatePresence mode="wait">
+
+        {/* ── Step: idle / form ──────────────────────────────────────────────── */}
         {(step === 'idle' || step === 'form') && (
           <motion.div
             key="upload"
@@ -117,7 +117,7 @@ export default function CVAnalyzerPage() {
                   values={formValues}
                   inputMode={inputMode}
                   isReady={uploadReady}
-                  isScanning={step === 'scanning'}
+                  isScanning={false}
                   onChange={setFormValues}
                   onSubmit={submitAnalysis}
                 />
@@ -126,7 +126,7 @@ export default function CVAnalyzerPage() {
           </motion.div>
         )}
 
-        {/* ── Step: scanning ─────────────────────────────────────────────── */}
+        {/* ── Step: scanning ─────────────────────────────────────────────────── */}
         {step === 'scanning' && (
           <motion.div
             key="scanning"
@@ -136,12 +136,12 @@ export default function CVAnalyzerPage() {
           >
             <CVScanAnimation
               isActive
-              onComplete={() => {/* hook drives state, animation is cosmetic */}}
+              onComplete={() => { /* hook drives state, animation is cosmetic */ }}
             />
           </motion.div>
         )}
 
-        {/* ── Step: result ───────────────────────────────────────────────── */}
+        {/* ── Step: result ───────────────────────────────────────────────────── */}
         {step === 'result' && analysis && (
           <motion.div
             key="result"
@@ -168,7 +168,7 @@ export default function CVAnalyzerPage() {
           </motion.div>
         )}
 
-        {/* ── Step: revamping ────────────────────────────────────────────── */}
+        {/* ── Step: revamping ────────────────────────────────────────────────── */}
         {step === 'revamping' && (
           <motion.div
             key="revamping"
@@ -176,7 +176,6 @@ export default function CVAnalyzerPage() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
           >
-            {/* Reuse scan animation for revamp loading — same UX pattern */}
             <CVScanAnimation
               isActive
               onComplete={() => {}}
@@ -187,7 +186,7 @@ export default function CVAnalyzerPage() {
           </motion.div>
         )}
 
-        {/* ── Step: revamped ─────────────────────────────────────────────── */}
+        {/* ── Step: revamped ─────────────────────────────────────────────────── */}
         {step === 'revamped' && revampedCV && (
           <motion.div
             key="revamped"
@@ -198,6 +197,7 @@ export default function CVAnalyzerPage() {
             <RevampedCVDisplay cvData={revampedCV} />
           </motion.div>
         )}
+
       </AnimatePresence>
 
       {/* Post-analysis modal */}
@@ -219,6 +219,7 @@ export default function CVAnalyzerPage() {
           onRevampClick={submitRevamp}
         />
       )}
+
     </div>
   );
 }

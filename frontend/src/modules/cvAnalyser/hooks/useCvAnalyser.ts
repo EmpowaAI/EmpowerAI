@@ -1,6 +1,5 @@
-
-import { useCallback, useReducer } from 'react';
-import { analyzeCVFile, analyzeCVText, revampCV } from '../api';
+import { useCallback, useReducer, useEffect } from 'react';
+import { analyzeCVFile, analyzeCVText, revampCV, getCVProfile } from '../api';
 import type {
   CVAnalysis,
   CVAnalyzerState,
@@ -10,7 +9,7 @@ import type {
   RevampedCV,
 } from '../types';
 
-// ── Actions ────────────────────────────────────────────────────────────────
+// ── Actions ───────────────────────────────────────────────────────────────────
 type Action =
   | { type: 'SET_INPUT_MODE'; payload: CVInputMode }
   | { type: 'SET_FILE'; payload: File | null }
@@ -25,9 +24,12 @@ type Action =
   | { type: 'DISMISS_ERROR' }
   | { type: 'SHOW_POST_MODAL'; payload: boolean }
   | { type: 'RESET' }
-  | { type: 'GO_TO_STEP'; payload: CVAnalyzerStep };
+  | { type: 'GO_TO_STEP'; payload: CVAnalyzerStep }
+  | { type: 'PROFILE_LOADING' }
+  | { type: 'PROFILE_LOADED'; payload: { analysis: CVAnalysis; profileId: string } }
+  | { type: 'PROFILE_EMPTY' };
 
-// ── Initial state ──────────────────────────────────────────────────────────
+// ── Initial state ─────────────────────────────────────────────────────────────
 const initialState: CVAnalyzerState = {
   step: 'idle',
   inputMode: 'file',
@@ -46,7 +48,7 @@ const initialState: CVAnalyzerState = {
   showPostModal: false,
 };
 
-// ── Reducer ────────────────────────────────────────────────────────────────
+// ── Reducer ───────────────────────────────────────────────────────────────────
 function reducer(state: CVAnalyzerState, action: Action): CVAnalyzerState {
   switch (action.type) {
     case 'SET_INPUT_MODE':
@@ -64,6 +66,21 @@ function reducer(state: CVAnalyzerState, action: Action): CVAnalyzerState {
 
     case 'SET_FORM_VALUES':
       return { ...state, formValues: { ...state.formValues, ...action.payload } };
+
+    case 'PROFILE_LOADING':
+      return { ...state, step: 'scanning' };
+
+    case 'PROFILE_LOADED':
+      return {
+        ...state,
+        step: 'result',
+        analysis: action.payload.analysis,
+        profileId: action.payload.profileId,
+        showPostModal: false, // don't show modal for cached profile
+      };
+
+    case 'PROFILE_EMPTY':
+      return { ...state, step: 'idle' };
 
     case 'START_SCAN':
       return { ...state, step: 'scanning', error: null, isRateLimited: false };
@@ -115,11 +132,54 @@ function reducer(state: CVAnalyzerState, action: Action): CVAnalyzerState {
   }
 }
 
-// ── Hook ───────────────────────────────────────────────────────────────────
+// ── Hook ──────────────────────────────────────────────────────────────────────
 export function useCVAnalyzer() {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  // ── Submit analysis ──────────────────────────────────────────────────────
+  // ── Check for existing profile on mount ─────────────────────────────────────
+  useEffect(() => {
+  let cancelled = false;
+
+  async function loadExistingProfile() {
+    const token = localStorage.getItem('empowerai-token');
+    console.log('Token exists:', !!token);
+
+    try {
+      const { profile } = await getCVProfile();
+      console.log('Profile result:', profile);
+
+      if (cancelled) return;
+
+      const p = profile as any;
+
+      if (p && p.isComplete && p.analysis) {
+        dispatch({
+          type: 'SET_FORM_VALUES',
+          payload: {
+            targetRole: p.analysis.targetRole || '',
+            industry:   p.analysis.industry   || '',
+            jobDescription: '',
+          },
+        });
+        dispatch({
+          type: 'PROFILE_LOADED',
+          payload: { analysis: p.analysis, profileId: p._id },
+        });
+      } else {
+        dispatch({ type: 'PROFILE_EMPTY' });
+      }
+    } catch (err) {
+      console.log('Profile fetch error:', err);
+      if (!cancelled) dispatch({ type: 'PROFILE_EMPTY' });
+    }
+  }
+
+  loadExistingProfile();
+
+  return () => { cancelled = true; };
+}, []);
+
+  // ── Submit analysis ──────────────────────────────────────────────────────────
   const submitAnalysis = useCallback(async () => {
     const { inputMode, file, cvText, formValues } = state;
     const { targetRole, industry, jobDescription } = formValues;
@@ -139,11 +199,11 @@ export function useCVAnalyzer() {
       dispatch({
         type: 'SCAN_SUCCESS',
         payload: {
-          analysis: response.analysis,
-          profileId: response.profileId,
-          isSubscribed: response.isSubscribed ?? false,
+          analysis:          response.analysis,
+          profileId:         response.profileId,
+          isSubscribed:      response.isSubscribed ?? false,
           analysisRemaining: response.analysisRemaining ?? null,
-          isFallback: response.fallback ?? false,
+          isFallback:        response.fallback ?? false,
         },
       });
     } catch (err: unknown) {
@@ -156,15 +216,15 @@ export function useCVAnalyzer() {
       dispatch({
         type: 'SCAN_ERROR',
         payload: {
-          message: error.message || 'Analysis failed. Please try again.',
+          message:     error.message || 'Analysis failed. Please try again.',
           isRateLimit: error.isRateLimit ?? false,
-          retryAfter: error.retryAfter,
+          retryAfter:  error.retryAfter,
         },
       });
     }
   }, [state]);
 
-  // ── Submit revamp ────────────────────────────────────────────────────────
+  // ── Submit revamp ────────────────────────────────────────────────────────────
   const submitRevamp = useCallback(async () => {
     const { analysis, formValues, cvText } = state;
     if (!analysis) return;
@@ -192,26 +252,15 @@ export function useCVAnalyzer() {
     }
   }, [state]);
 
-  // ── Helpers ──────────────────────────────────────────────────────────────
-  const setInputMode = (mode: CVInputMode) =>
-    dispatch({ type: 'SET_INPUT_MODE', payload: mode });
-
-  const setFile = (file: File | null) =>
-    dispatch({ type: 'SET_FILE', payload: file });
-
-  const setCVText = (text: string) =>
-    dispatch({ type: 'SET_CV_TEXT', payload: text });
-
-  const setFormValues = (values: Partial<AnalyzeFormValues>) =>
-    dispatch({ type: 'SET_FORM_VALUES', payload: values });
-
-  const dismissError = () => dispatch({ type: 'DISMISS_ERROR' });
-
+  // ── Helpers ──────────────────────────────────────────────────────────────────
+  const setInputMode   = (mode: CVInputMode) => dispatch({ type: 'SET_INPUT_MODE', payload: mode });
+  const setFile        = (file: File | null) => dispatch({ type: 'SET_FILE', payload: file });
+  const setCVText      = (text: string)       => dispatch({ type: 'SET_CV_TEXT', payload: text });
+  const setFormValues  = (values: Partial<AnalyzeFormValues>) => dispatch({ type: 'SET_FORM_VALUES', payload: values });
+  const dismissError   = ()  => dispatch({ type: 'DISMISS_ERROR' });
   const dismissPostModal = () => dispatch({ type: 'SHOW_POST_MODAL', payload: false });
-
-  const goToRevamp = () => dispatch({ type: 'GO_TO_STEP', payload: 'result' });
-
-  const reset = () => dispatch({ type: 'RESET' });
+  const goToRevamp     = ()  => dispatch({ type: 'GO_TO_STEP', payload: 'result' });
+  const reset          = ()  => dispatch({ type: 'RESET' });
 
   return {
     state,

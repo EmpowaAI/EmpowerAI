@@ -84,8 +84,8 @@ export async function getCVProfile(): Promise<{ profile: unknown | null }> {
     headers: authHeaders(),
   });
 
-  const json = await handleResponse<{ data: { profile: unknown | null } }>(res);
-  return { profile: json.data.profile };
+  const json = await handleResponse<{ profile: unknown | null }>(res);
+  return { profile: json.profile ?? null };
 }
 
 // ── Delete CV profile ──────────────────────────────────────────────────────
