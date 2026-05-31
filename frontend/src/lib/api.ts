@@ -1146,7 +1146,7 @@ export const interviewAPIReal = {
 
   getResults: async (sessionId: string) => {
     try {
-      return await request<any>(`/interview/${sessionId}/results`);
+      return await request<any>(`/interview/${sessionId}`);
     } catch (error) {
       console.error('Failed to get interview results:', error);
       throw error;
@@ -1226,36 +1226,31 @@ export const applicationsAPIReal = {
 };
 
 export const adminAPIReal = {
-  getStats: async (adminKey: string) => {
-    const response = await adminRequest<any>('/admin/stats', adminKey);
-    return response;
+  // Admin routes use standard JWT bearer auth (protect + restrictTo('admin'))
+  getStats: async (_adminKey: string) => {
+    return await request<any>('/admin/dashboard');
   },
-  getQueueHealth: async (adminKey: string) => {
-    const response = await adminRequest<any>('/queue/health', adminKey);
-    return response;
+  getQueueHealth: async (_adminKey: string) => {
+    return await request<any>('/health/queue');
   },
-  getCareerTaxonomy: async (adminKey: string) => {
-    const response = await adminRequest<any>('/admin/career-taxonomy', adminKey);
-    return response;
+  getCareerTaxonomy: async (_adminKey: string) => {
+    return await request<any>('/admin/taxonomy');
   },
-  updateCareerTaxonomy: async (adminKey: string, taxonomy: any) => {
-    const response = await adminRequest<any>('/admin/career-taxonomy', adminKey, {
+  updateCareerTaxonomy: async (_adminKey: string, taxonomy: any) => {
+    return await request<any>('/admin/taxonomy', {
       method: 'PUT',
       body: JSON.stringify({ taxonomy }),
     });
-    return response;
   },
-  refreshOpportunities: async (adminKey: string, options: { backfill?: boolean; fetch?: boolean; async?: boolean }) => {
+  refreshOpportunities: async (_adminKey: string, options: { backfill?: boolean; fetch?: boolean; async?: boolean }) => {
     const query = options.async ? '?async=true' : '';
-    const body = JSON.stringify({
-      backfill: options.backfill !== false,
-      fetch: options.fetch !== false,
-    });
-    const response = await adminRequest<any>(`/admin/refresh-opportunities${query}`, adminKey, {
+    return await request<any>(`/admin/opportunities/refresh${query}`, {
       method: 'POST',
-      body,
+      body: JSON.stringify({
+        backfill: options.backfill !== false,
+        fetch: options.fetch !== false,
+      }),
     });
-    return response;
   },
 };
 
@@ -1305,6 +1300,8 @@ export const statsAPIReal = {
   },
 };
 
+// NOTE: /api/progress router not yet implemented in backend (Khuliso's backlog).
+// These calls fail silently so the UI is not blocked while the backend is being built.
 export const progressAPIReal = {
   saveTwinCompletion: async (twinId: string) => {
     try {
@@ -1312,18 +1309,16 @@ export const progressAPIReal = {
         method: 'POST',
         body: JSON.stringify({ twinId }),
       });
-    } catch (error) {
-      console.error('Failed to save twin completion:', error);
-      throw error;
+    } catch {
+      return { status: 'pending', message: 'Progress endpoint not yet available' };
     }
   },
 
   getProgress: async () => {
     try {
       return await request<any>('/progress/my-progress');
-    } catch (error) {
-      console.error('Failed to get progress:', error);
-      throw error;
+    } catch {
+      return { status: 'pending', data: null };
     }
   },
 
@@ -1333,38 +1328,22 @@ export const progressAPIReal = {
         method: 'POST',
         body: JSON.stringify({ module, completed, score }),
       });
-    } catch (error) {
-      console.error('Failed to update progress:', error);
-      throw error;
+    } catch {
+      return { status: 'pending', message: 'Progress endpoint not yet available' };
     }
   },
 };
 
 export const chatAPIReal = {
-  sendMessage: async (message: string) => {
+  sendMessage: async (message: string, history: { role: string; content: string }[] = []) => {
     try {
-      const response = await fetch(`${API_BASE}/chat`, {
+      const twinContext = (() => {
+        try { return JSON.parse(localStorage.getItem('twinData') || 'null'); } catch { return null; }
+      })();
+      const data = await request<any>('/twin/chat/message', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify({ 
-          message
-        }),
+        body: JSON.stringify({ message, history, twinContext }),
       });
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          removeToken();
-          window.location.href = '/login';
-        }
-        const error = await response.json().catch(() => ({ message: 'Request failed' }));
-        throw new Error(error.message || `HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-
       return {
         reply: data.data?.reply || data.reply || 'I received your message but got an empty response.',
       };
@@ -1400,7 +1379,7 @@ export const userAPIReal = {
   changePassword: async (currentPassword: string, newPassword: string) => {
     try {
       return await request<any>('/user/change-password', {
-        method: 'POST',
+        method: 'PATCH',
         body: JSON.stringify({ currentPassword, newPassword }),
       });
     } catch (error) {
@@ -1408,57 +1387,6 @@ export const userAPIReal = {
       throw error;
     }
   },
-};
-
-const adminRequest = async <T>(endpoint: string, adminKey: string, options: RequestInit = {}): Promise<T> => {
-  const headers = new Headers(options.headers);
-  headers.set('Content-Type', 'application/json');
-  if (adminKey) headers.set('x-admin-key', adminKey);
-
-  const timeout = 60000;
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-  try {
-    const response = await fetch(`${API_BASE}${endpoint}`, {
-      ...options,
-      headers,
-      signal: controller.signal,
-    });
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({
-        message: `Request failed with status ${response.status}`,
-        status: response.status,
-      }));
-      const errorMessage = error.message || error.data?.message || error.detail || `HTTP error! status: ${response.status}`;
-      const apiError = new Error(errorMessage);
-      (apiError as any).status = error.status || error.statusCode || response.status;
-      (apiError as any).response = {
-        ...error,
-        status: response.status,
-        statusCode: error.statusCode || response.status,
-        data: {
-          ...error,
-          message: errorMessage,
-          code: error.code || error.error,
-        },
-      };
-      throw apiError;
-    }
-
-    const data = await response.json();
-    clearTimeout(timeoutId);
-    return data;
-  } catch (error: any) {
-    clearTimeout(timeoutId);
-    if (error.name === 'AbortError' || error.message?.includes('timeout') || error.message?.includes('aborted')) {
-      const timeoutError = new Error('Request timed out. Please check your connection and try again.');
-      (timeoutError as any).isTimeout = true;
-      throw timeoutError;
-    }
-    throw error;
-  }
 };
 
 // ============================================
