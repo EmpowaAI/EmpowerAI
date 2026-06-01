@@ -1,5 +1,7 @@
 import { useCallback, useReducer, useEffect } from 'react';
+
 import { analyzeCVFile, analyzeCVText, revampCV, getCVProfile } from '../api';
+
 import type {
   CVAnalysis,
   CVAnalyzerState,
@@ -16,7 +18,19 @@ type Action =
   | { type: 'SET_CV_TEXT'; payload: string }
   | { type: 'SET_FORM_VALUES'; payload: Partial<AnalyzeFormValues> }
   | { type: 'START_SCAN' }
-  | { type: 'SCAN_SUCCESS'; payload: { analysis: CVAnalysis; profileId: string; isSubscribed: boolean; analysisRemaining: number | null; isFallback: boolean } }
+  | {
+      type: 'SCAN_SUCCESS';
+      payload: {
+        analysis: CVAnalysis;
+        profileId: string;
+        isSubscribed: boolean;
+        analysisRemaining: number | null;
+        isFallback: boolean;
+        // cvText is persisted here so POST /cv/revamp always has it,
+        // regardless of whether the user uploaded a file or pasted text.
+        cvText: string;
+      };
+    }
   | { type: 'SCAN_ERROR'; payload: { message: string; isRateLimit: boolean; retryAfter?: number } }
   | { type: 'START_REVAMP' }
   | { type: 'REVAMP_SUCCESS'; payload: RevampedCV }
@@ -71,12 +85,15 @@ function reducer(state: CVAnalyzerState, action: Action): CVAnalyzerState {
       return { ...state, step: 'scanning' };
 
     case 'PROFILE_LOADED':
+      // cvText is NOT restored here because the cached profile response
+      // does not include the original CV text. The user must re-analyse
+      // to use the revamp feature on a cached profile.
       return {
         ...state,
         step: 'result',
         analysis: action.payload.analysis,
         profileId: action.payload.profileId,
-        showPostModal: false, // don't show modal for cached profile
+        showPostModal: false,
       };
 
     case 'PROFILE_EMPTY':
@@ -94,6 +111,8 @@ function reducer(state: CVAnalyzerState, action: Action): CVAnalyzerState {
         isSubscribed: action.payload.isSubscribed,
         analysisRemaining: action.payload.analysisRemaining,
         isFallback: action.payload.isFallback,
+        // KEY FIX: persist cvText so submitRevamp can send it to POST /cv/revamp.
+        cvText: action.payload.cvText,
         showPostModal: true,
       };
 
@@ -136,50 +155,50 @@ function reducer(state: CVAnalyzerState, action: Action): CVAnalyzerState {
 export function useCVAnalyzer() {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  // ── Check for existing profile on mount ─────────────────────────────────────
+  // ── Check for existing profile on mount ────────────────────────────────────
   useEffect(() => {
-  let cancelled = false;
+    let cancelled = false;
 
-  async function loadExistingProfile() {
-    const token = localStorage.getItem('empowerai-token');
-    console.log('Token exists:', !!token);
+    async function loadExistingProfile() {
+      const token = localStorage.getItem('empowerai-token');
+      console.log('Token exists:', !!token);
 
-    try {
-      const { profile } = await getCVProfile();
-      console.log('Profile result:', profile);
+      try {
+        const { profile } = await getCVProfile();
+        console.log('Profile result:', profile);
 
-      if (cancelled) return;
+        if (cancelled) return;
 
-      const p = profile as any;
+        const p = profile as any;
 
-      if (p && p.isComplete && p.analysis) {
-        dispatch({
-          type: 'SET_FORM_VALUES',
-          payload: {
-            targetRole: p.analysis.targetRole || '',
-            industry:   p.analysis.industry   || '',
-            jobDescription: '',
-          },
-        });
-        dispatch({
-          type: 'PROFILE_LOADED',
-          payload: { analysis: p.analysis, profileId: p._id },
-        });
-      } else {
-        dispatch({ type: 'PROFILE_EMPTY' });
+        if (p && p.isComplete && p.analysis) {
+          dispatch({
+            type: 'SET_FORM_VALUES',
+            payload: {
+              targetRole: p.analysis.targetRole || '',
+              industry: p.analysis.industry || '',
+              jobDescription: '',
+            },
+          });
+          dispatch({
+            type: 'PROFILE_LOADED',
+            payload: { analysis: p.analysis, profileId: p._id },
+          });
+        } else {
+          dispatch({ type: 'PROFILE_EMPTY' });
+        }
+      } catch (err) {
+        console.log('Profile fetch error:', err);
+        if (!cancelled) dispatch({ type: 'PROFILE_EMPTY' });
       }
-    } catch (err) {
-      console.log('Profile fetch error:', err);
-      if (!cancelled) dispatch({ type: 'PROFILE_EMPTY' });
     }
-  }
 
-  loadExistingProfile();
+    loadExistingProfile();
 
-  return () => { cancelled = true; };
-}, []);
+    return () => { cancelled = true; };
+  }, []);
 
-  // ── Submit analysis ──────────────────────────────────────────────────────────
+  // ── Submit analysis ────────────────────────────────────────────────────────
   const submitAnalysis = useCallback(async () => {
     const { inputMode, file, cvText, formValues } = state;
     const { targetRole, industry, jobDescription } = formValues;
@@ -196,14 +215,21 @@ export function useCVAnalyzer() {
           ? await analyzeCVFile(file!, targetRole, industry, jobDescription)
           : await analyzeCVText(cvText, targetRole, industry, jobDescription);
 
+      // Determine the resolved cvText to persist in state:
+      //   1. Use cvText returned by the backend (file upload path — backend extracts text).
+      //   2. Fall back to the pasted text the user typed (text input path).
+      //   3. Last resort: empty string (revamp will be blocked by backend validation).
+      const resolvedCvText = response.cvText ?? cvText ?? '';
+
       dispatch({
         type: 'SCAN_SUCCESS',
         payload: {
-          analysis:          response.analysis,
-          profileId:         response.profileId,
-          isSubscribed:      response.isSubscribed ?? false,
+          analysis: response.analysis,
+          profileId: response.profileId,
+          isSubscribed: response.isSubscribed ?? false,
           analysisRemaining: response.analysisRemaining ?? null,
-          isFallback:        response.fallback ?? false,
+          isFallback: response.fallback ?? false,
+          cvText: resolvedCvText,
         },
       });
     } catch (err: unknown) {
@@ -216,18 +242,28 @@ export function useCVAnalyzer() {
       dispatch({
         type: 'SCAN_ERROR',
         payload: {
-          message:     error.message || 'Analysis failed. Please try again.',
+          message: error.message || 'Analysis failed. Please try again.',
           isRateLimit: error.isRateLimit ?? false,
-          retryAfter:  error.retryAfter,
+          retryAfter: error.retryAfter,
         },
       });
     }
   }, [state]);
 
-  // ── Submit revamp ────────────────────────────────────────────────────────────
+  // ── Submit revamp ──────────────────────────────────────────────────────────
   const submitRevamp = useCallback(async () => {
     const { analysis, formValues, cvText } = state;
     if (!analysis) return;
+
+    // Guard: cvText must be non-empty. This can only happen if the user
+    // loaded a cached profile (no fresh analysis in this session).
+    if (!cvText.trim()) {
+      dispatch({
+        type: 'REVAMP_ERROR',
+        payload: 'Please re-analyse your CV before revamping. Your CV text is not available from the cached profile.',
+      });
+      return;
+    }
 
     dispatch({ type: 'START_REVAMP' });
 
@@ -236,7 +272,7 @@ export function useCVAnalyzer() {
         cvText,
         analysis,
         formValues.targetRole,
-        formValues.industry
+        formValues.industry,
       );
 
       const revampedCv = response.revamp?.revampedCv;
@@ -252,15 +288,16 @@ export function useCVAnalyzer() {
     }
   }, [state]);
 
-  // ── Helpers ──────────────────────────────────────────────────────────────────
-  const setInputMode   = (mode: CVInputMode) => dispatch({ type: 'SET_INPUT_MODE', payload: mode });
-  const setFile        = (file: File | null) => dispatch({ type: 'SET_FILE', payload: file });
-  const setCVText      = (text: string)       => dispatch({ type: 'SET_CV_TEXT', payload: text });
-  const setFormValues  = (values: Partial<AnalyzeFormValues>) => dispatch({ type: 'SET_FORM_VALUES', payload: values });
-  const dismissError   = ()  => dispatch({ type: 'DISMISS_ERROR' });
+  // ── Helpers ────────────────────────────────────────────────────────────────
+  const setInputMode = (mode: CVInputMode) => dispatch({ type: 'SET_INPUT_MODE', payload: mode });
+  const setFile = (file: File | null) => dispatch({ type: 'SET_FILE', payload: file });
+  const setCVText = (text: string) => dispatch({ type: 'SET_CV_TEXT', payload: text });
+  const setFormValues = (values: Partial<AnalyzeFormValues>) =>
+    dispatch({ type: 'SET_FORM_VALUES', payload: values });
+  const dismissError = () => dispatch({ type: 'DISMISS_ERROR' });
   const dismissPostModal = () => dispatch({ type: 'SHOW_POST_MODAL', payload: false });
-  const goToRevamp     = ()  => dispatch({ type: 'GO_TO_STEP', payload: 'result' });
-  const reset          = ()  => dispatch({ type: 'RESET' });
+  const goToRevamp = () => dispatch({ type: 'GO_TO_STEP', payload: 'result' });
+  const reset = () => dispatch({ type: 'RESET' });
 
   return {
     state,

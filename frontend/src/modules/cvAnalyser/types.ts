@@ -1,8 +1,8 @@
 
-// ── Upload modes ──────────────────────────────────────────────────────────
+// ── Upload modes ──────────────────────────────────────────────────────────────
 export type CVInputMode = 'file' | 'text';
 
-// ── Readiness levels returned by the backend ──────────────────────────────
+// ── Readiness levels returned by the backend ──────────────────────────────────
 export type ReadinessLevel =
   | 'EXCEPTIONAL'
   | 'HIGH POTENTIAL'
@@ -10,7 +10,7 @@ export type ReadinessLevel =
   | 'DEVELOPING'
   | 'NEEDS WORK';
 
-// ── Score breakdown (mirrors analysis.scoreBreakdown in the Node response) ─
+// ── Score breakdown (mirrors analysis.scoreBreakdown in the Node response) ────
 export interface ScoreBreakdown {
   formatting: number;
   contentQuality: number;
@@ -19,7 +19,7 @@ export interface ScoreBreakdown {
   grammar: number;
 }
 
-// ── Candidate info ─────────────────────────────────────────────────────────
+// ── Candidate info ────────────────────────────────────────────────────────────
 export interface CandidateLinks {
   linkedin: string | null;
   github: string | null;
@@ -35,20 +35,20 @@ export interface CandidateInfo {
   links: CandidateLinks;
 }
 
-// ── Missing keywords shape ─────────────────────────────────────────────────
+// ── Missing keywords shape ────────────────────────────────────────────────────
 export interface MissingKeywords {
   critical: string[];
   recommended: string[];
   industry_specific: string[];
 }
 
-// ── Recruiter feedback ─────────────────────────────────────────────────────
+// ── Recruiter feedback ────────────────────────────────────────────────────────
 export interface RecruiterFeedback {
   overall_verdict: string;
   [key: string]: unknown;
 }
 
-// ── Full analysis object (decrypted by Node before sending to frontend) ────
+// ── Full analysis object (decrypted by Node before sending to frontend) ───────
 export interface CVAnalysis {
   targetRole: string;
   industry: string;
@@ -106,7 +106,7 @@ export interface CVAnalysis {
   careerRecommendations: unknown | null;
 }
 
-// ── Analyze endpoint responses ─────────────────────────────────────────────
+// ── Analyze endpoint responses ────────────────────────────────────────────────
 export interface AnalyzeResponse {
   analysis: CVAnalysis;
   profileId: string;
@@ -114,9 +114,12 @@ export interface AnalyzeResponse {
   analysisRemaining?: number;
   fallback?: boolean;
   message?: string;
+  // The backend returns the extracted CV text so the frontend can persist it
+  // for use in subsequent calls (e.g. POST /cv/revamp).
+  cvText?: string;
 }
 
-// ── Revamped CV shape (returned inside revamp.revampedCv from Node) ────────
+// ── Revamped CV shape (returned inside revamp.revampedCv from Node) ───────────
 export interface RevampedCV {
   name: string;
   contactInfo: string;
@@ -145,7 +148,7 @@ export interface RevampedCV {
   formattedText?: string;
 }
 
-// ── Revamp endpoint response ───────────────────────────────────────────────
+// ── Revamp endpoint response ──────────────────────────────────────────────────
 export interface RevampResponse {
   revamp: {
     revampedAt: string | null;
@@ -156,14 +159,14 @@ export interface RevampResponse {
   profileId: string;
 }
 
-// ── Analyze form inputs ────────────────────────────────────────────────────
+// ── Analyze form inputs ───────────────────────────────────────────────────────
 export interface AnalyzeFormValues {
   targetRole: string;
   industry: string;
   jobDescription?: string;
 }
 
-// ── Hook state ────────────────────────────────────────────────────────────
+// ── Hook state ────────────────────────────────────────────────────────────────
 export type CVAnalyzerStep =
   | 'idle'
   | 'form'
