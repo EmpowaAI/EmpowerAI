@@ -12,13 +12,6 @@ const {
   WidthType,
 } = require('docx');
 
-/**
- * Builds a professional DOCX buffer from the revamped CV object
- * returned by the AI service (revamp.revamped_cv).
- *
- * @param {object} revampedCv
- * @returns {Promise<Buffer>}
- */
 async function buildCVDocx(revampedCv) {
   const {
     name,

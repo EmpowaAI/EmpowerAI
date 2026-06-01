@@ -1,4 +1,4 @@
-import { AlertTriangle, Zap, Lightbulb, RefreshCw } from 'lucide-react';
+import {  Zap, Lightbulb, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface CVUploadErrorProps {
@@ -100,7 +100,7 @@ export default function CVUploadError({
   isRateLimited = false,
   retryAfter,
 }: CVUploadErrorProps) {
-  const { category, title, advice, icon } = categorizeError(error);
+  const { title, advice, icon } = categorizeError(error);
 
   return (
     <motion.div

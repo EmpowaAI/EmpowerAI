@@ -5,7 +5,7 @@ import {
   Award, Code, Globe, User, FileText
 } from "lucide-react";
 import jsPDF from "jspdf";
-import type { RevampedCV } from "../services/aiService";
+import type { RevampedCV } from "../../../services/aiService";
 
 interface RevampedCVDisplayProps {
   cvData: RevampedCV;
