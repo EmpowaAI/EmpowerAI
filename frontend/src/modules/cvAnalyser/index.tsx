@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { Brain, RotateCcw } from 'lucide-react';
+import { Brain, RotateCcw, Sparkles } from 'lucide-react';
 
 import { useCVAnalyzer } from './hooks/useCvAnalyser';
 import CVUploadZone from './componets/CVUploadZone';
@@ -50,23 +50,35 @@ export default function CVAnalyzerPage() {
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6">
 
-      {/* Page header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-            <Brain className="h-5 w-5 text-primary" />
-          </div>
+      {/* ── Gradient Hero Header ── */}
+      <div className="relative overflow-hidden rounded-2xl text-white" style={{ background: 'var(--gradient-hero)' }}>
+        <div className="pointer-events-none absolute inset-0 ai-mesh opacity-15" aria-hidden />
+        <div className="pointer-events-none absolute inset-0 ai-grid opacity-10" aria-hidden />
+        <div className="pointer-events-none absolute inset-0 ubuntu-pattern opacity-20" aria-hidden />
+        <div className="relative z-10 p-6 md:p-8 flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-xl font-display font-bold text-foreground">CV Analyser</h1>
-            <p className="text-xs text-muted-foreground">
-              AI-powered analysis · ATS scoring · Career insights
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold text-white/90 backdrop-blur-sm mb-3">
+              <Sparkles className="h-3 w-3 text-secondary" />
+              AI-Powered Analysis
+            </div>
+            <h1 className="font-display text-2xl md:text-3xl lg:text-4xl font-bold leading-tight">
+              CV <span className="text-gradient-ai">Analyser</span>
+            </h1>
+            <p className="mt-2 text-white/70 text-sm md:text-base max-w-md">
+              ATS scoring · Career insights · Instant improvement tips
             </p>
           </div>
+          <div className="flex-shrink-0 flex items-center justify-center h-14 w-14 rounded-2xl bg-white/15 backdrop-blur-sm border border-white/20">
+            <Brain className="h-7 w-7 text-white" />
+          </div>
         </div>
+      </div>
 
-        {(step === 'result' || step === 'revamped' || step === 'revamping') && (
+      {/* Start Over button — shown after analysis */}
+      {(step === 'result' || step === 'revamped' || step === 'revamping') && (
+        <div className="flex justify-end">
           <button
             onClick={reset}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors border border-border"
@@ -74,8 +86,8 @@ export default function CVAnalyzerPage() {
             <RotateCcw className="h-3.5 w-3.5" />
             Start Over
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Error banner */}
       <AnimatePresence>

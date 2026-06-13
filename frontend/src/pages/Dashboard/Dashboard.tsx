@@ -13,6 +13,7 @@ import {
   ArrowRight,
   Sparkles,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { ContactWidget } from "@/components/ContactWidget";
@@ -243,244 +244,242 @@ const Dashboard = () => {
           </div>
 
           <div className="grid gap-6 lg:grid-cols-[1.45fr_0.85fr]">
-            <div className="space-y-6">
-              {/* Welcome Guide — hidden once CV is done */}
+            <div className="space-y-5">
+
+              {/* ── Welcome Guide ── gradient card, only before CV upload ── */}
               {showWelcomeGuide && !cvCompleted && (
-                <Card className="relative overflow-hidden border-primary/20 bg-card p-6 shadow-card-soft md:p-8">
+                <div className="relative overflow-hidden rounded-2xl text-white" style={{ background: 'var(--gradient-hero)' }}>
+                  <div className="pointer-events-none absolute inset-0 ai-mesh opacity-10" aria-hidden />
+                  <div className="pointer-events-none absolute inset-0 ubuntu-pattern opacity-20" aria-hidden />
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="absolute right-4 top-4 text-muted-foreground hover:text-foreground hover:bg-muted"
+                    className="absolute right-4 top-4 z-10 text-white/60 hover:text-white hover:bg-white/15"
                     aria-label="Close welcome guide"
                     onClick={() => setShowWelcomeGuide(false)}
                   >
                     <X className="h-5 w-5" />
                   </Button>
-
-                  <div className="pr-10">
-                    <h1 className="font-display text-2xl font-bold text-primary md:text-3xl">
-                      Welcome to EmpowaAI
+                  <div className="relative z-10 p-6 md:p-8">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold text-white/90 backdrop-blur-sm mb-4">
+                      <Sparkles className="h-3 w-3 text-secondary" />
+                      Getting started
+                    </div>
+                    <h1 className="font-display text-2xl font-bold text-white md:text-3xl">
+                      Welcome to <span className="text-gradient-ai">EmpowaAI</span>
                     </h1>
-                    <p className="mt-2 text-sm font-semibold text-muted-foreground md:text-base">
-                      Three steps to career clarity.
-                    </p>
+                    <p className="mt-1 text-sm text-white/70 md:text-base">Three steps to career clarity.</p>
+                    <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                      {onboardingSteps.map(({ icon: Icon, title, text, to }, i) => (
+                        <Link
+                          key={title}
+                          to={to}
+                          className="group rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm p-4 hover:bg-white/20 transition-all"
+                        >
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/15 text-white flex-shrink-0">
+                              <Icon className="h-4 w-4" />
+                            </span>
+                            <span className="text-[10px] font-bold text-white/50 uppercase tracking-wider">Step {i + 1}</span>
+                          </div>
+                          <p className="font-display text-sm font-bold text-white group-hover:text-secondary mb-1">{title}</p>
+                          <p className="text-xs leading-5 text-white/65">{text}</p>
+                        </Link>
+                      ))}
+                    </div>
                   </div>
-
-                  <div className="mt-6 grid gap-4 sm:grid-cols-3">
-                    {onboardingSteps.map(({ icon: Icon, title, text, to }) => (
-                      <Link
-                        key={title}
-                        to={to}
-                        className="group rounded-xl border border-border/70 bg-card p-4 shadow-sm transition-all hover:border-primary/30 hover:shadow-md"
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                            <Icon className="h-5 w-5" />
-                          </span>
-                          <h3 className="font-display text-base font-bold text-primary group-hover:text-secondary">
-                            {title}
-                          </h3>
-                        </div>
-                        <p className="mt-2 text-xs leading-5 text-muted-foreground">{text}</p>
-                      </Link>
-                    ))}
-                  </div>
-                </Card>
+                </div>
               )}
 
-              {/* Recommended Next Step */}
-              <Card className="border-secondary/25 bg-secondary/5 p-5 shadow-sm md:p-6">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              {/* ── Recommended Next Step ── orange-accented card ── */}
+              <div className="relative overflow-hidden rounded-2xl border border-secondary/25 bg-gradient-to-r from-secondary/8 to-transparent p-5 md:p-6 shadow-sm">
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-secondary rounded-l-2xl" />
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pl-2">
                   <div className="flex items-start gap-4">
-                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-secondary/15 text-secondary">
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-secondary text-white shadow-md">
                       <Target className="h-6 w-6" />
                     </span>
                     <div>
-                      <p className="text-xs font-bold uppercase tracking-wider text-secondary">
+                      <p className="text-xs font-bold uppercase tracking-widest text-secondary mb-1">
                         Recommended next step
                       </p>
-                      <h2 className="mt-1 font-display text-2xl font-bold text-primary">
+                      <h2 className="font-display text-xl font-bold text-foreground">
                         {nextActionTitle}
                       </h2>
-                      <p className="mt-1 text-sm text-muted-foreground">{nextActionDesc}</p>
+                      <p className="mt-1 text-sm text-muted-foreground leading-relaxed">{nextActionDesc}</p>
                     </div>
                   </div>
-                  <Button
-                    asChild
-                    variant="outline"
-                    className="shrink-0 border-secondary/40 text-secondary hover:bg-secondary/10"
-                  >
+                  <Button asChild variant="cta" size="sm" className="shrink-0 shimmer">
                     <Link to={nextActionTo}>{nextActionCta}</Link>
                   </Button>
                 </div>
-              </Card>
+              </div>
 
-              {/* Journey */}
-              <Card className="border-border/70 p-5 shadow-sm md:p-6">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <h2 className="font-display text-2xl font-bold text-primary">Your AI Journey</h2>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Simple, calm, and one action at a time.
-                    </p>
-                  </div>
-                  <span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground whitespace-nowrap">
-                    {progressPct}% complete
-                  </span>
-                </div>
-
-                {/* Progress bar */}
-                <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-muted">
-                  <div
-                    className="h-full rounded-full bg-secondary transition-[width] duration-700"
-                    style={{ width: `${progressPct}%` }}
-                  />
-                </div>
-
-                <div className="mt-5 space-y-3">
-                  {journeySteps.map((step, index) =>
-                    step.done ? (
-                      <div
-                        key={step.title}
-                        className="flex items-center justify-between gap-4 rounded-xl border border-border/50 bg-muted/20 p-4 opacity-70"
-                      >
-                        <span className="flex items-center gap-3">
-                          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15">
-                            <CheckCircle2 className="h-4 w-4 text-primary" />
-                          </span>
-                          <span className="font-semibold text-muted-foreground line-through">
-                            {step.title}
-                          </span>
-                        </span>
-                        <span className="text-right text-xs font-semibold text-secondary">{step.status}</span>
+              {/* ── Journey ── premium step indicators ── */}
+              <div className="relative overflow-hidden rounded-2xl border border-border/60 bg-card p-5 shadow-sm md:p-6">
+                <div className="absolute top-0 right-0 w-28 h-28 bg-gradient-to-bl from-primary/5 to-transparent rounded-bl-full pointer-events-none" />
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between gap-4 mb-4">
+                    <div>
+                      <h2 className="font-display text-xl font-bold text-foreground">Your AI Journey</h2>
+                      <p className="text-xs text-muted-foreground mt-0.5">One step at a time.</p>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <div className="h-1.5 w-20 overflow-hidden rounded-full bg-muted">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-primary to-secondary transition-[width] duration-700"
+                          style={{ width: `${progressPct}%` }}
+                        />
                       </div>
-                    ) : (
-                      <Link
-                        key={step.title}
-                        to={step.to}
-                        className={`flex items-center justify-between gap-4 rounded-xl border p-4 transition-colors ${
-                          step.active
-                            ? "border-secondary/35 bg-secondary/5 hover:bg-secondary/10"
-                            : "border-border/70 bg-background hover:border-primary/30"
-                        }`}
-                      >
-                        <span className="flex items-center gap-3">
-                          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
-                            {String(index + 1).padStart(2, "0")}
+                      <span className="text-xs font-bold text-secondary">{progressPct}%</span>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    {journeySteps.map((step, index) =>
+                      step.done ? (
+                        <div
+                          key={step.title}
+                          className="flex items-center justify-between gap-4 rounded-xl bg-muted/40 p-3.5 opacity-60"
+                        >
+                          <span className="flex items-center gap-3">
+                            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/20 flex-shrink-0">
+                              <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+                            </span>
+                            <span className="text-sm font-medium text-muted-foreground line-through">{step.title}</span>
                           </span>
-                          <span className="font-semibold text-foreground">{step.title}</span>
-                        </span>
-                        <span className="flex items-center gap-1 text-right text-xs font-semibold text-muted-foreground">
-                          {step.status}
-                          {step.active && <ArrowRight className="h-3 w-3 text-secondary" />}
-                        </span>
-                      </Link>
-                    )
-                  )}
+                          <span className="text-xs font-bold text-secondary flex-shrink-0">{step.status}</span>
+                        </div>
+                      ) : (
+                        <Link
+                          key={step.title}
+                          to={step.to}
+                          className={cn(
+                            "flex items-center justify-between gap-4 rounded-xl border p-3.5 transition-all group",
+                            step.active
+                              ? "border-secondary/40 bg-gradient-to-r from-secondary/8 to-transparent hover:from-secondary/15 shadow-sm"
+                              : "border-border/60 bg-background hover:border-primary/25 hover:bg-muted/30"
+                          )}
+                        >
+                          <span className="flex items-center gap-3">
+                            <span className={cn(
+                              "flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold flex-shrink-0 transition-colors",
+                              step.active ? "bg-secondary text-white shadow-sm" : "bg-muted text-muted-foreground"
+                            )}>
+                              {String(index + 1).padStart(2, "0")}
+                            </span>
+                            <span className={cn("text-sm font-semibold", step.active ? "text-foreground" : "text-muted-foreground")}>
+                              {step.title}
+                            </span>
+                          </span>
+                          <span className="flex items-center gap-1 text-xs font-semibold text-muted-foreground flex-shrink-0">
+                            {step.status}
+                            {step.active && <ArrowRight className="h-3 w-3 text-secondary group-hover:translate-x-0.5 transition-transform" />}
+                          </span>
+                        </Link>
+                      )
+                    )}
+                  </div>
                 </div>
-              </Card>
+              </div>
             </div>
 
-            {/* Sidebar */}
-            <aside className="space-y-5 lg:sticky lg:top-24 lg:self-start">
-              {/* Profile Snapshot */}
-              <Card className="border-border/70 p-5 shadow-sm">
-                <div className="flex items-center gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                    <Compass className="h-5 w-5" />
-                  </span>
-                  <div>
-                    <h2 className="font-display text-xl font-bold text-primary">Profile snapshot</h2>
-                    <p className="text-xs text-muted-foreground">South Africa · Professional growth</p>
+            {/* ── Sidebar ── */}
+            <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
+
+              {/* Profile Snapshot — gradient header */}
+              <div className="rounded-2xl overflow-hidden border border-border/60 shadow-sm">
+                <div className="relative p-4 text-white" style={{ background: 'var(--gradient-hero)' }}>
+                  <div className="pointer-events-none absolute inset-0 ubuntu-pattern opacity-20" aria-hidden />
+                  <div className="relative z-10 flex items-center gap-3">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 text-white flex-shrink-0">
+                      <Compass className="h-5 w-5" />
+                    </span>
+                    <div>
+                      <h2 className="font-display text-base font-bold text-white">Profile snapshot</h2>
+                      <p className="text-xs text-white/70">South Africa · Professional growth</p>
+                    </div>
                   </div>
                 </div>
-                <div className="mt-5 space-y-4 text-sm">
+                <div className="bg-card p-4 space-y-3 text-sm">
                   <div>
-                    <p className="font-semibold text-foreground">Top skills</p>
+                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Top skills</p>
                     {topSkills.length > 0 ? (
-                      <div className="mt-1.5 flex flex-wrap gap-1.5">
+                      <div className="flex flex-wrap gap-1.5">
                         {topSkills.map((s) => (
-                          <span
-                            key={s}
-                            className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary"
-                          >
+                          <span key={s} className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
                             {s}
                           </span>
                         ))}
                       </div>
                     ) : (
-                      <p className="text-muted-foreground mt-1">
-                        <Link to="/dashboard/cv-analyzer" className="text-secondary hover:underline underline-offset-2">
+                      <p className="text-muted-foreground text-xs">
+                        <Link to="/dashboard/cv-analyzer" className="text-secondary hover:underline underline-offset-2 font-semibold">
                           Analyse CV
-                        </Link>{" "}
-                        to detect skills
+                        </Link>{" "}to detect skills
                       </p>
                     )}
                   </div>
-                  <div>
-                    <p className="font-semibold text-foreground">Twin status</p>
+                  <div className="border-t border-border/50 pt-3">
+                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5">Twin status</p>
                     {twinCompleted ? (
-                      <p className="mt-1 text-secondary font-semibold text-xs">
-                        Active · view in{" "}
-                        <Link to="/dashboard/twin" className="hover:underline underline-offset-2">
-                          Digital Twin
-                        </Link>
+                      <p className="text-secondary font-semibold text-xs">
+                        Active ·{" "}
+                        <Link to="/dashboard/twin" className="hover:underline underline-offset-2">view Digital Twin</Link>
                       </p>
                     ) : (
-                      <p className="text-muted-foreground mt-1">
-                        <Link to="/dashboard/twin" className="text-secondary hover:underline underline-offset-2">
-                          Build twin
-                        </Link>{" "}
-                        after CV analysis
+                      <p className="text-muted-foreground text-xs">
+                        <Link to="/dashboard/twin" className="text-secondary hover:underline underline-offset-2 font-semibold">Build twin</Link>{" "}after CV analysis
                       </p>
                     )}
                   </div>
                   {empowermentScore > 0 && (
-                    <div>
-                      <p className="font-semibold text-foreground">Empowerment score</p>
-                      <p className="mt-1 text-2xl font-bold text-primary">{empowermentScore}%</p>
+                    <div className="border-t border-border/50 pt-3">
+                      <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">Empowerment score</p>
+                      <p className="text-2xl font-bold text-primary">{empowermentScore}%</p>
                     </div>
                   )}
                 </div>
-              </Card>
+              </div>
 
-              {/* Primary Actions */}
-              <div className="space-y-3">
+              {/* Primary Actions — full-card links with gradient icon */}
+              <div className="space-y-2">
                 {primaryActions.map(({ icon: Icon, title, text, cta, to }) => (
-                  <Card
+                  <Link
                     key={title}
-                    className="border-border/70 p-5 shadow-sm transition-colors hover:border-primary/30"
+                    to={to}
+                    className="flex gap-3 p-4 rounded-2xl border border-border/60 bg-card hover:border-secondary/30 hover:shadow-md transition-all group"
                   >
-                    <div className="flex gap-4">
-                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                        <Icon className="h-5 w-5" />
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/15 to-secondary/10 text-primary group-hover:from-secondary/20 group-hover:to-secondary/5 transition-all">
+                      <Icon className="h-4.5 w-4.5 group-hover:text-secondary transition-colors" />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-display text-sm font-bold text-foreground group-hover:text-primary transition-colors">{title}</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground leading-4">{text}</p>
+                      <span className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-secondary">
+                        {cta} <ArrowRight className="h-3 w-3" />
                       </span>
-                      <div className="min-w-0 flex-1">
-                        <h3 className="font-display text-lg font-bold text-primary">{title}</h3>
-                        <p className="mt-1 text-sm leading-5 text-muted-foreground">{text}</p>
-                        <Button asChild variant="link" className="mt-2 h-auto p-0 text-secondary">
-                          <Link to={to}>{cta}</Link>
-                        </Button>
-                      </div>
                     </div>
-                  </Card>
+                  </Link>
                 ))}
               </div>
 
-              {/* Footer Card */}
-              <Card className="border-primary/20 bg-primary/5 p-5 shadow-sm">
-                <div className="flex items-start gap-3">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-secondary" />
-                  <div>
-                    <p className="font-semibold text-primary">AI Twin ready when you are</p>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {twinCompleted
-                        ? "Your twin is live and scanning for opportunities."
-                        : "We keep the dashboard quiet until your CV gives us better evidence."}
-                    </p>
+              {/* Footer — gradient left-border */}
+              <div className="relative overflow-hidden rounded-2xl border border-primary/15">
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-secondary rounded-l-2xl" />
+                <div className="p-4 pl-5 bg-gradient-to-r from-primary/5 to-transparent">
+                  <div className="flex items-start gap-3">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-secondary" />
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">AI Twin ready when you are</p>
+                      <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                        {twinCompleted
+                          ? "Your twin is live and scanning for opportunities."
+                          : "We keep the dashboard quiet until your CV gives us better evidence."}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </Card>
+              </div>
             </aside>
           </div>
         </section>
