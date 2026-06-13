@@ -112,91 +112,6 @@ const handleProgrammingError = (err, req, res) => {
   return sendError(res, error, 500);
 };
 
-/**
- * Handle MongoDB duplicate key errors
- */
-const handleMongoDuplicateKeyError = (err, req, res) => {
-  const correlationId = req.id || req.correlationId;
-  const field = Object.keys(err.keyValue || {})[0];
-  const message = `${field} already exists`;
-
-  // Special handling for twin duplicate errors - return success instead of error
-  if (req.originalUrl?.includes('/twin') && field === 'userId') {
-    logger.info('Twin duplicate detected in error handler, fetching existing twin', {
-      correlationId,
-      userId: err.keyValue?.userId,
-      url: req.originalUrl
-    });
-    
-    // Try to fetch and return existing twin
-    const EconomicTwin = require('../models/EconomicTwin');
-    const userId = err.keyValue?.userId || req.user?.id;
-    
-    if (userId) {
-      EconomicTwin.findOne({ userId })
-        .then(existingTwin => {
-          if (existingTwin) {
-            const { sendSuccess } = require('../utils/response');
-            return sendSuccess(res, {
-              twin: existingTwin,
-              message: 'Twin already exists'
-            });
-          } else {
-            // Twin exists but can't fetch it - return success anyway
-            const { sendSuccess } = require('../utils/response');
-            return sendSuccess(res, {
-              twin: null,
-              message: 'Twin already exists for this user',
-              code: 'DUPLICATE_TWIN'
-            });
-          }
-        })
-        .catch(lookupError => {
-          logger.error('Error fetching existing twin in error handler', {
-            correlationId,
-            error: lookupError.message
-          });
-          // Return success anyway to prevent page locking
-          const { sendSuccess } = require('../utils/response');
-          return sendSuccess(res, {
-            twin: null,
-            message: 'Twin already exists for this user',
-            code: 'DUPLICATE_TWIN'
-          });
-        });
-      return; // Don't continue with error handling
-    }
-  }
-
-  logger.logError(err, correlationId, {
-    method: req.method,
-    url: req.originalUrl,
-    duplicateField: field,
-  });
-
-  const { ConflictError } = require('../utils/errors');
-  return sendError(res, new ConflictError(message), 409);
-};
-
-/**
- * Handle MongoDB validation errors
- */
-const handleMongoValidationError = (err, req, res) => {
-  const correlationId = req.id || req.correlationId;
-  const errors = Object.values(err.errors || {}).map((e) => ({
-    field: e.path,
-    message: e.message,
-  }));
-
-  logger.logError(err, correlationId, {
-    method: req.method,
-    url: req.originalUrl,
-    validationErrors: errors,
-  });
-
-  const { ValidationError } = require('../utils/errors');
-  return sendError(res, new ValidationError('Validation failed', errors), 422);
-};
 
 /**
  * Handle JWT errors
@@ -256,16 +171,6 @@ module.exports = (err, req, res, next) => {
   // Handle operational errors (AppError instances)
   if (err.isOperational) {
     return handleOperationalError(err, req, res);
-  }
-
-  // Handle MongoDB duplicate key error
-  if (err.name === 'MongoServerError' && err.code === 11000) {
-    return handleMongoDuplicateKeyError(err, req, res);
-  }
-
-  // Handle MongoDB validation error
-  if (err.name === 'ValidationError') {
-    return handleMongoValidationError(err, req, res);
   }
 
   // Handle JWT errors

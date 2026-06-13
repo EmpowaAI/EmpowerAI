@@ -1,33 +1,41 @@
-
-
-const Subscription = require('../modules/subscription/subscription.model');
-const Usage = require('../modules/usage/usage.model');
-const { getLimit, PLAN_LIMITS } = require('../config/features.config');
+const supabase = require('../db/supabase');
+const { getLimit } = require('../config/features.config');
 const { SUBSCRIPTION_STATUS } = require('../config/plans.config');
+const { getCurrentPeriodStart, increment } = require('../modules/usage/usage.service');
 
-// ─── HELPER ───────────────────────────────────────────────────────────────────
-
-const getCurrentPeriodStart = () => {
-  const now = new Date();
-  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
-};
+function fromRow(row) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    userId: row.user_id,
+    planId: row.plan_id,
+    billingCycle: row.billing_cycle,
+    status: row.status,
+    trialStartedAt: row.trial_started_at,
+    trialEndsAt: row.trial_ends_at,
+    currentPeriodStart: row.current_period_start,
+    currentPeriodEnd: row.current_period_end,
+    cancelAtPeriodEnd: row.cancel_at_period_end,
+    paystackCustomerCode: row.paystack_customer_code,
+    paystackSubscriptionCode: row.paystack_subscription_code,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
 
 // ─── MIDDLEWARE 1: requireActiveSubscription ──────────────────────────────────
 
 const requireActiveSubscription = async (req, res, next) => {
   try {
-    const userId = req.user?._id;
+    const userId = req.user?.id;
     if (!userId) {
-      return res.status(401).json({
-        success: false,
-        code: 'UNAUTHENTICATED',
-        message: 'Authentication required.',
-      });
+      return res.status(401).json({ success: false, code: 'UNAUTHENTICATED', message: 'Authentication required.' });
     }
 
-    const subscription = await Subscription.findOne({ userId });
+    const { data: row } = await supabase
+      .from('subscriptions').select('*').eq('user_id', userId).maybeSingle();
 
-    if (!subscription) {
+    if (!row) {
       return res.status(403).json({
         success: false,
         code: 'NO_SUBSCRIPTION',
@@ -36,14 +44,15 @@ const requireActiveSubscription = async (req, res, next) => {
       });
     }
 
+    const subscription = fromRow(row);
     const activeStatuses = [SUBSCRIPTION_STATUS.ACTIVE, SUBSCRIPTION_STATUS.TRIAL];
+
     if (!activeStatuses.includes(subscription.status)) {
       const messages = {
-        [SUBSCRIPTION_STATUS.EXPIRED]: 'Your trial has expired. Please subscribe to continue.',
+        [SUBSCRIPTION_STATUS.EXPIRED]:   'Your trial has expired. Please subscribe to continue.',
         [SUBSCRIPTION_STATUS.CANCELLED]: 'Your subscription has been cancelled.',
-        [SUBSCRIPTION_STATUS.PAST_DUE]: 'Your last payment failed. Please update your payment method.',
+        [SUBSCRIPTION_STATUS.PAST_DUE]:  'Your last payment failed. Please update your payment method.',
       };
-
       return res.status(403).json({
         success: false,
         code: 'SUBSCRIPTION_INACTIVE',
@@ -66,23 +75,25 @@ const requireActiveSubscription = async (req, res, next) => {
 const checkUsageLimit = (product) => async (req, res, next) => {
   try {
     const { planId } = req.subscription;
-    const userId = req.user._id;
+    const userId = req.user.id;
     const periodStart = getCurrentPeriodStart();
     const limit = getLimit(planId, product);
 
-    // Unlimited
     if (limit === -1) {
-      await Usage.increment(userId, product, periodStart);
+      await increment(userId, product, periodStart);
       req.usage = { product, limit: 'unlimited', count: 'unlimited' };
       return next();
     }
 
-    const currentCount = await Usage.getCount(userId, product, periodStart);
+    const { data: usageRow } = await supabase
+      .from('usages').select('count')
+      .eq('user_id', userId).eq('product', product)
+      .eq('period_start', periodStart.toISOString()).maybeSingle();
+    const currentCount = usageRow?.count ?? 0;
 
     if (currentCount >= limit) {
       const planRank = ['starter', 'professional', 'enterprise'];
       const nextPlanId = planRank[planRank.indexOf(planId) + 1];
-
       return res.status(403).json({
         success: false,
         code: 'USAGE_LIMIT_REACHED',
@@ -96,7 +107,7 @@ const checkUsageLimit = (product) => async (req, res, next) => {
       });
     }
 
-    const newCount = await Usage.increment(userId, product, periodStart);
+    const newCount = await increment(userId, product, periodStart);
     req.usage = { product, limit, count: newCount, remaining: limit - newCount };
     next();
   } catch (err) {
@@ -105,12 +116,7 @@ const checkUsageLimit = (product) => async (req, res, next) => {
   }
 };
 
-// ─── HELPERS ─────────────────────────────────────────────────────────────────
-
-const _formatProduct = (product) =>
-  product.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-
-const _capitalize = (str) =>
-  str.charAt(0).toUpperCase() + str.slice(1);
+const _formatProduct = (product) => product.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+const _capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
 module.exports = { requireActiveSubscription, checkUsageLimit, getCurrentPeriodStart };

@@ -11,7 +11,7 @@ module.exports = (req, res, next) => {
 
   if (req.user.role !== 'admin') {
     logger.warn('Admin access denied', {
-      userId: req.user._id,
+      userId: req.user.id,
       email: req.user.email,
     });
     return res.status(403).json({

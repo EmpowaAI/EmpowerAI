@@ -1,53 +1,34 @@
-const jwt = require('jsonwebtoken');
-const User = require('../modules/user/user.Model');
-const mongoose = require('mongoose');
+const supabase = require('../db/supabase');
 const logger = require('../utils/logger');
 
-// ─── protect (your existing logic, unchanged) ────────────────────────────────
 const protect = async (req, res, next) => {
   try {
-    if (!process.env.JWT_SECRET) {
-      logger.error('Auth: JWT_SECRET not configured');
-      return res.status(500).json({ status: 'error', message: 'Server configuration error' });
-    }
-
-    logger.debug('Auth: checking authorization header', {
-      hasAuthHeader: !!req.headers.authorization,
-    });
-
-    let token;
-    if (req.headers.authorization?.startsWith('Bearer')) {
-      token = req.headers.authorization.split(' ')[1];
-    }
-
-    if (!token) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader?.startsWith('Bearer ')) {
       logger.warn('Auth: no token provided');
       return res.status(401).json({ status: 'error', message: 'Please log in to access this resource' });
     }
 
-    let decoded;
-    try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET);
-    } catch (jwtError) {
-      if (jwtError.name === 'TokenExpiredError') {
-        return res.status(401).json({ status: 'error', message: 'Your session has expired. Please log in again.' });
-      }
-      if (jwtError.name === 'JsonWebTokenError') {
-        return res.status(401).json({ status: 'error', message: 'Invalid token. Please log in again.' });
-      }
-      throw jwtError;
+    const token = authHeader.split(' ')[1];
+
+    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !authUser) {
+      logger.warn('Auth: invalid or expired token');
+      return res.status(401).json({ status: 'error', message: 'Your session has expired. Please log in again.' });
     }
 
-    if (mongoose.connection.readyState !== 1) {
-      return res.status(503).json({ status: 'error', message: 'Database is not connected. Please try again in a moment.' });
-    }
+    const { data: profile, error: profileError } = await supabase
+      .from('users')
+      .select('id, name, email, role, province, skills, avatar')
+      .eq('id', authUser.id)
+      .single();
 
-    const currentUser = await User.findById(decoded.id);
-    if (!currentUser) {
+    if (profileError || !profile) {
+      logger.warn('Auth: user profile not found', { userId: authUser.id });
       return res.status(401).json({ status: 'error', message: 'User no longer exists' });
     }
 
-    req.user = currentUser;
+    req.user = profile;
     next();
   } catch (error) {
     logger.error('Auth middleware error', { message: error.message });
@@ -55,7 +36,6 @@ const protect = async (req, res, next) => {
   }
 };
 
-// ─── restrictTo: must come after protect in the chain ────────────────────────
 const restrictTo = (...roles) => {
   return (req, res, next) => {
     if (!req.user) {
@@ -64,7 +44,7 @@ const restrictTo = (...roles) => {
 
     if (!roles.includes(req.user.role)) {
       logger.warn('Auth: insufficient role', {
-        userId: req.user._id,
+        userId: req.user.id,
         userRole: req.user.role,
         requiredRoles: roles,
       });
