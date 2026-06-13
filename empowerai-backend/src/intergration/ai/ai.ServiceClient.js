@@ -4,7 +4,7 @@ const { v4: uuid } = require('uuid');
 
 // ================= CONFIG =================
 const AI_SERVICE_URL = (process.env.AI_SERVICE_URL || 'http://localhost:8000').replace(/\/$/, '');
-const AI_SERVICE_TOKEN = process.env.AI_SERVICE_TOKEN;
+const AI_SERVICE_TOKEN = process.env.AI_SERVICE_API_KEY || process.env.AI_SERVICE_TOKEN;
 
 const REQUEST_TIMEOUT = process.env.NODE_ENV === 'production' ? 90000 : 30000;
 const MAX_RETRIES = 3;
@@ -107,7 +107,7 @@ client.interceptors.response.use(
         message: data?.detail || data?.error || error.message,
       });
 
-      if (status === 401) throw new Error('AI service authentication failed. Check AI_SERVICE_TOKEN.');
+      if (status === 401) throw new Error('AI service authentication failed. Check AI_SERVICE_API_KEY.');
       if (status === 429) { const e = new Error('AI service rate limited. Try again later.'); e.isRateLimit = true; throw e; }
       if (status === 503) throw new Error('AI service unavailable (possibly cold start)');
       if (status === 400) throw new Error(data?.detail || data?.error || 'Invalid request to AI service');
