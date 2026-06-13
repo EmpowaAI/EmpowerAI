@@ -47,6 +47,7 @@
     "rss-parser": "^3.13.0",
     "uuid": "^14.0.0",
     "winston": "^3.19.0",
+    "ws": "^8.18.0",
     "zod": "^4.2.1"
   },
   "devDependencies": {
