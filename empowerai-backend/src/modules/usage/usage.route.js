@@ -8,7 +8,7 @@ const { UsageService } = require('../usage/usage.service');
 
 router.get('/', requireActiveSubscription, async (req, res) => {
   try {
-    const summary = await UsageService.getSummary(req.user._id, req.subscription.planId);
+    const summary = await UsageService.getSummary(req.user.id, req.subscription.planId);
     res.json({ success: true, data: summary });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -26,7 +26,7 @@ router.get('/:product', requireActiveSubscription, async (req, res) => {
   }
 
   try {
-    const usage = await UsageService.getProductUsage(req.user._id, req.subscription.planId, product);
+    const usage = await UsageService.getProductUsage(req.user.id, req.subscription.planId, product);
     res.json({ success: true, data: usage });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });

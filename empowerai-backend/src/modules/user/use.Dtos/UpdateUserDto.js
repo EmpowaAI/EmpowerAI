@@ -65,10 +65,10 @@ const updateUserRules = [
 
   // Block attempts to update email or password through this route
   body('email')
-    .not().exists().withMessage('Email cannot be updated here. Use /api/account/change-email instead.'),
+    .not().exists().withMessage('Email cannot be updated here.'),
 
   body('password')
-    .not().exists().withMessage('Password cannot be updated here. Use /api/account/change-password instead.'),
+    .not().exists().withMessage('Password cannot be updated here. Use Supabase Auth directly.'),
 ];
 
 // ─────────────────────────────────────────────

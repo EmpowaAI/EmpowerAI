@@ -1,10 +1,5 @@
-const CvProfile = require('./cvAnalyser.Model');
-const {
-  encryptAnalysis,
-  decryptAnalysis,
-  encryptField,
-  decryptField,
-} = require('../../utils/encryption.util');
+const supabase = require('../../db/supabase');
+const { encryptField, decryptField } = require('../../utils/encryption.util');
 
 const toBool = (value, defaultValue = false) => {
   if (value === undefined || value === null) return defaultValue;
@@ -129,113 +124,115 @@ function mapAnalysisToSchema(aiAnalysis, targetRole, industry, isFallback) {
   };
 }
 
+// ── Row mapper ────────────────────────────────────────────────────────────────
+function fromRow(row) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    _id: row.id,
+    userId: row.user_id,
+    filename: row.filename,
+    mimetype: row.mimetype,
+    fileSize: row.file_size,
+    rawText: row.raw_text || '',
+    analysis: row.analysis || {},
+    revamp: row.revamp || {},
+    isComplete: row.is_complete,
+    isFallback: row.is_fallback,
+    analyzedAt: row.analyzed_at,
+    analysisCount: row.analysis_count,
+    lastAnalyzedAt: row.last_analyzed_at,
+    expiresAt: row.expires_at,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
 // ── Save or update ────────────────────────────────────────────────────────────
-async function saveOrUpdate({
-  userId,
-  filename,
-  mimetype,
-  fileSize,
-  rawText,
-  analysis,      // raw AI output
-  targetRole,
-  industry,
-  isFallback = false,
-}) {
+async function saveOrUpdate({ userId, filename, mimetype, fileSize, rawText, analysis, targetRole, industry, isFallback = false }) {
   const isComplete = !isFallback && !!(analysis?.overall_score?.total || analysis?.score);
 
-  const ttlDays = process.env.CV_PROFILE_TTL_DAYS
-    ? toPositiveInt(process.env.CV_PROFILE_TTL_DAYS)
-    : null;
-  const expiresAt = ttlDays
-    ? new Date(Date.now() + ttlDays * 24 * 60 * 60 * 1000)
-    : null;
+  const ttlDays = process.env.CV_PROFILE_TTL_DAYS ? toPositiveInt(process.env.CV_PROFILE_TTL_DAYS) : null;
+  const expiresAt = ttlDays ? new Date(Date.now() + ttlDays * 24 * 60 * 60 * 1000) : null;
 
   const storeRawText = toBool(process.env.CV_STORE_RAW_TEXT, false);
-  const rawTextToStore = storeRawText
-    ? encryptField((rawText || '').slice(0, 10000))
-    : '';
+  const rawTextToStore = storeRawText ? encryptField((rawText || '').slice(0, 10000)) : '';
 
   const mappedAnalysis = mapAnalysisToSchema(analysis, targetRole, industry, isFallback);
 
-  const profile = await CvProfile.findOneAndUpdate(
-    { user: userId },
-    {
-      $set: {
-        user: userId,
-        filename,
-        mimetype,
-        fileSize,
-        rawText: rawTextToStore,
-        analysis: mappedAnalysis,
-        isComplete,
-        isFallback: !!isFallback,
-        analyzedAt: new Date(),
-        lastAnalyzedAt: new Date(),
-        expiresAt,
-      },
-      $inc: { analysisCount: 1 },
-    },
-    { new: true, upsert: true, setDefaultsOnInsert: true }
-  );
+  const { data: existing } = await supabase
+    .from('cv_profiles').select('analysis_count').eq('user_id', userId).maybeSingle();
+  const newCount = (existing?.analysis_count ?? 0) + 1;
 
-  return _withDecryptedAnalysis(profile);
+  const now = new Date().toISOString();
+  const { data: row, error } = await supabase
+    .from('cv_profiles')
+    .upsert({
+      user_id: userId,
+      filename,
+      mimetype,
+      file_size: fileSize,
+      raw_text: rawTextToStore,
+      analysis: mappedAnalysis,
+      is_complete: isComplete,
+      is_fallback: !!isFallback,
+      analyzed_at: now,
+      last_analyzed_at: now,
+      expires_at: expiresAt?.toISOString() ?? null,
+      analysis_count: newCount,
+    }, { onConflict: 'user_id' })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return _withDecryptedAnalysis(fromRow(row));
 }
 
 // ── Save revamp ───────────────────────────────────────────────────────────────
 async function saveRevamp({ userId, revampData }) {
   const r = revampData?.revamped_cv || revampData || {};
 
-  const profile = await CvProfile.findOneAndUpdate(
-    { user: userId },
-    {
-      $set: {
-        'revamp.revampedAt': new Date(),
-        'revamp.plainTextCv': revampData?.plain_text_cv
-          ? encryptField(revampData.plain_text_cv)
-          : null,
-        'revamp.revampSummary': revampData?.revamp_summary
-          ? encryptField(revampData.revamp_summary)
-          : null,
-        'revamp.revampedCv': encryptJson(r),
-      },
-    },
-    {
-      new: true,
-      upsert: true,              // 🔥 CRITICAL FIX
-      setDefaultsOnInsert: true
-    }
-  );
+  const revampRow = {
+    revampedAt: new Date().toISOString(),
+    plainTextCv: revampData?.plain_text_cv ? encryptField(revampData.plain_text_cv) : null,
+    revampSummary: revampData?.revamp_summary ? encryptField(revampData.revamp_summary) : null,
+    revampedCv: encryptJson(r),
+  };
 
-  if (!profile) {
-    throw new Error('Failed to save revamp: profile not found or created');
-  }
+  const { data: row, error } = await supabase
+    .from('cv_profiles')
+    .upsert({ user_id: userId, revamp: revampRow }, { onConflict: 'user_id' })
+    .select()
+    .single();
 
-  return _withDecryptedAnalysis(profile);
+  if (error) throw error;
+  if (!row) throw new Error('Failed to save revamp: profile not found or created');
+  return _withDecryptedAnalysis(fromRow(row));
 }
 
 // ── Queries ───────────────────────────────────────────────────────────────────
 async function findByUserId(userId) {
-  const profile = await CvProfile.findOne({ user: userId }).lean();
-  if (!profile) return null;
-  return _withDecryptedAnalysis(profile);
+  const { data, error } = await supabase
+    .from('cv_profiles').select('*').eq('user_id', userId).maybeSingle();
+  if (error) throw error;
+  return _withDecryptedAnalysis(fromRow(data));
 }
 
 async function getAnalysisCount(userId) {
-  const profile = await CvProfile.findOne({ user: userId })
-    .select('analysisCount')
-    .lean();
-  return profile?.analysisCount ?? 0;
+  const { data } = await supabase
+    .from('cv_profiles').select('analysis_count').eq('user_id', userId).maybeSingle();
+  return data?.analysis_count ?? 0;
 }
 
 async function hasCompleteProfile(userId) {
-  const profile = await CvProfile.findOne({ user: userId, isComplete: true })
-    .select('_id')
-    .lean();
-  return !!profile;
+  const { count } = await supabase
+    .from('cv_profiles').select('id', { count: 'exact', head: true })
+    .eq('user_id', userId).eq('is_complete', true);
+  return (count ?? 0) > 0;
 }
 
 async function deleteByUserId(userId) {
-  return CvProfile.deleteOne({ user: userId });
+  return supabase.from('cv_profiles').delete().eq('user_id', userId);
 }
 
 // ── Decrypt on read ───────────────────────────────────────────────────────────

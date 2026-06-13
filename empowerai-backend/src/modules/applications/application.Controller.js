@@ -1,82 +1,60 @@
-const Application = require('./application.Model');
-const Opportunity = require('../opportunities/Opportunity.Model');
+const supabase = require('../../db/supabase');
 const logger = require('../../utils/logger');
 
 exports.createApplication = async (req, res, next) => {
   try {
     const { opportunityId } = req.body;
     if (!opportunityId) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'opportunityId is required'
-      });
+      return res.status(400).json({ status: 'error', message: 'opportunityId is required' });
     }
 
-    const opportunity = await Opportunity.findById(opportunityId).lean();
-    if (!opportunity) {
-      return res.status(404).json({
-        status: 'error',
-        message: 'Opportunity not found'
-      });
+    const { data: opp, error: oppError } = await supabase
+      .from('opportunities').select('source, application_url').eq('id', opportunityId).single();
+    if (oppError || !opp) {
+      return res.status(404).json({ status: 'error', message: 'Opportunity not found' });
     }
 
-    const existing = await Application.findOne({ userId: req.user.id, opportunityId });
-    if (existing) {
-      return res.status(200).json({
-        status: 'success',
-        data: {
-          application: existing,
-          created: false
-        }
-      });
-    }
+    const { data: application, error } = await supabase
+      .from('applications')
+      .insert({
+        user_id: req.user.id,
+        opportunity_id: opportunityId,
+        source: opp.source || 'manual',
+        application_url: opp.application_url || '',
+      })
+      .select()
+      .single();
 
-    const application = await Application.create({
-      userId: req.user.id,
-      opportunityId,
-      source: opportunity.source || 'manual',
-      applicationUrl: opportunity.applicationUrl || ''
-    });
-
-    logger.info('Application tracked', {
-      correlationId: req.correlationId,
-      userId: req.user.id,
-      opportunityId
-    });
-
-    return res.status(201).json({
-      status: 'success',
-      data: {
-        application,
-        created: true
+    if (error) {
+      // PostgreSQL unique violation — already tracked
+      if (error.code === '23505') {
+        return res.status(200).json({ status: 'success', data: { created: false } });
       }
-    });
-  } catch (error) {
-    if (error.code === 11000) {
-      return res.status(200).json({
-        status: 'success',
-        data: {
-          created: false
-        }
-      });
+      throw error;
     }
+
+    logger.info('Application tracked', { correlationId: req.correlationId, userId: req.user.id, opportunityId });
+
+    return res.status(201).json({ status: 'success', data: { application, created: true } });
+  } catch (error) {
     next(error);
   }
 };
 
 exports.getMyApplications = async (req, res, next) => {
   try {
-    const applications = await Application.find({ userId: req.user.id })
-      .sort({ createdAt: -1 })
-      .populate('opportunityId')
-      .lean();
+    const { data: applications, error } = await supabase
+      .from('applications')
+      .select('*, opportunity:opportunities(*)')
+      .eq('user_id', req.user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
 
     res.status(200).json({
       status: 'success',
-      results: applications.length,
-      data: {
-        applications
-      }
+      results: (applications || []).length,
+      data: { applications: applications || [] },
     });
   } catch (error) {
     next(error);
@@ -85,13 +63,14 @@ exports.getMyApplications = async (req, res, next) => {
 
 exports.getMyApplicationStats = async (req, res, next) => {
   try {
-    const total = await Application.countDocuments({ userId: req.user.id });
-    res.status(200).json({
-      status: 'success',
-      data: {
-        total
-      }
-    });
+    const { count, error } = await supabase
+      .from('applications')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', req.user.id);
+
+    if (error) throw error;
+
+    res.status(200).json({ status: 'success', data: { total: count || 0 } });
   } catch (error) {
     next(error);
   }

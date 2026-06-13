@@ -1,11 +1,10 @@
 const adminRepository = require('./admin.Repository');
+const supabase = require('../../db/supabase');
 const logger = require('../../utils/logger');
 const { extractSkillsEnhanced } = require('../../utils/skillExtractors');
 const { fetchAndSaveJobs } = require('../../services/jobAPIService');
 const { fetchAllFeeds } = require('../../services/rssFeedService');
 const { getCareerTaxonomy, setCareerTaxonomy } = require('../../services/taxonomyService');
-const Opportunity = require('../opportunities/Opportunity.Model');
-const RefreshRun = require('../../models/RefreshRun');
 
 // ─── USER MANAGEMENT ─────────────────────────────────────────────────────────
 
@@ -235,35 +234,37 @@ async function performRefresh({ runBackfill, runFetch, triggeredBy }) {
 
   try {
     if (runBackfill) {
-      const cursor = Opportunity.find({ isActive: true }).cursor();
-      const bulkOps = [];
+      let from = 0;
+      const batchSize = 200;
+      let hasMore = true;
 
-      for await (const opp of cursor) {
-        backfill.processed += 1;
-        const baseText = `${opp.title || ''} ${opp.company || ''} ${opp.description || ''}`;
-        const extracted = extractSkillsEnhanced(baseText);
-        if (extracted.length === 0) continue;
+      while (hasMore) {
+        const { data: batch } = await supabase
+          .from('opportunities')
+          .select('id, title, company, description, skills')
+          .eq('is_active', true)
+          .range(from, from + batchSize - 1);
 
-        const existing = Array.isArray(opp.skills) ? opp.skills : [];
-        const merged = Array.from(new Set([...existing, ...extracted])).slice(0, 12);
+        if (!batch || batch.length === 0) { hasMore = false; break; }
 
-        if (
-          merged.length !== existing.length ||
-          merged.some((skill, idx) => skill !== existing[idx])
-        ) {
-          bulkOps.push({
-            updateOne: { filter: { _id: opp._id }, update: { $set: { skills: merged } } },
-          });
-          backfill.updated += 1;
+        for (const opp of batch) {
+          backfill.processed += 1;
+          const baseText = `${opp.title || ''} ${opp.company || ''} ${opp.description || ''}`;
+          const extracted = extractSkillsEnhanced(baseText);
+          if (extracted.length === 0) continue;
+
+          const existing = Array.isArray(opp.skills) ? opp.skills : [];
+          const merged = Array.from(new Set([...existing, ...extracted])).slice(0, 12);
+
+          if (merged.length !== existing.length || merged.some((s, i) => s !== existing[i])) {
+            await supabase.from('opportunities').update({ skills: merged }).eq('id', opp.id);
+            backfill.updated += 1;
+          }
         }
 
-        if (bulkOps.length >= 500) {
-          await Opportunity.bulkWrite(bulkOps);
-          bulkOps.length = 0;
-        }
+        from += batchSize;
+        if (batch.length < batchSize) hasMore = false;
       }
-
-      if (bulkOps.length > 0) await Opportunity.bulkWrite(bulkOps);
     }
 
     if (runFetch) {
@@ -275,24 +276,11 @@ async function performRefresh({ runBackfill, runFetch, triggeredBy }) {
       }
     }
 
-    const finishedAt = new Date();
-    const durationMs = finishedAt.getTime() - startedAt.getTime();
-
-    const record = await RefreshRun.create({
-      startedAt, finishedAt, durationMs, triggeredBy,
-      backfill, fetch, status: 'success',
-    });
-
+    const durationMs = new Date().getTime() - startedAt.getTime();
     logger.info('Admin: Refresh completed', { triggeredBy, durationMs, backfill, fetch });
-    return { message: 'Refresh completed', backfill, fetch, refreshId: record._id };
+    return { message: 'Refresh completed', backfill, fetch };
   } catch (error) {
-    const finishedAt = new Date();
-    await RefreshRun.create({
-      startedAt, finishedAt,
-      durationMs: finishedAt.getTime() - startedAt.getTime(),
-      triggeredBy, status: 'error', error: error.message,
-    }).catch((e) => logger.error('Admin: Failed to record refresh error', e));
-
+    logger.error('Admin: Refresh failed', { triggeredBy, error: error.message });
     throw error;
   }
 }

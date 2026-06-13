@@ -1,30 +1,19 @@
-const User = require('./user.Model');
+const UserRepository = require('./User.Repository');
 const { toGetUserDTO } = require('./use.Dtos/GetUserDto');
 const { toUpdateUserDTO } = require('./use.Dtos/UpdateUserDto');
 const { NotFoundError } = require('../../utils/errors');
 
-class UserService {
-
-  async getUserProfile(userId) {
-    const user = await User.findById(userId);
-    if (!user) throw new NotFoundError('User not found');
-
-    return toGetUserDTO(user);
-  }
-
-  async updateUser(userId, rawData) {
-    const dto = toUpdateUserDTO(rawData);
-
-    const updated = await User.findByIdAndUpdate(
-      userId,
-      { $set: dto },
-      { new: true, runValidators: true }
-    );
-
-    if (!updated) throw new NotFoundError('User not found');
-
-    return toGetUserDTO(updated);
-  }
+async function getUserProfile(userId) {
+  const user = await UserRepository.findById(userId);
+  if (!user) throw new NotFoundError('User not found');
+  return toGetUserDTO(user);
 }
 
-module.exports = new UserService();
+async function updateUser(userId, rawData) {
+  const fields = toUpdateUserDTO(rawData);
+  const updated = await UserRepository.updateUser(userId, fields);
+  if (!updated) throw new NotFoundError('User not found');
+  return toGetUserDTO(updated);
+}
+
+module.exports = { getUserProfile, updateUser };

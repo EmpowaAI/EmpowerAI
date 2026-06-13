@@ -14,11 +14,11 @@ const express = require('express');
 const router = express.Router();
 const { body, param, query, validationResult } = require('express-validator');
 const { PLANS, BILLING_CYCLES } = require('../../config/plans.config');
+const { protect, restrictTo } = require('../../middleware/auth');
+const UserRepository = require('../user/User.Repository');
 
 const validPlanIds = Object.keys(PLANS).map((k) => k.toLowerCase());
 const validCycles = Object.values(BILLING_CYCLES);
-
-// ─── VALIDATION ───────────────────────────────────────────────────────────────
 
 const validate = (req, res, next) => {
   const errors = validationResult(req);
@@ -28,19 +28,8 @@ const validate = (req, res, next) => {
   next();
 };
 
-// ─── AUTH MIDDLEWARE ──────────────────────────────────────────────────────────
-// Replace with your actual auth middleware from your existing auth module
-
-const requireAuth = (req, res, next) => {
-  // Your existing auth middleware sets req.user — plug it in here
-  // e.g. require('../../middleware/auth')(req, res, next)
-  next();
-};
-
-const requireSuperAdmin = (req, res, next) => {
-  // e.g. if (req.user.role !== 'super_admin') return res.status(403).json(...)
-  next();
-};
+const requireAuth = protect;
+const requireSuperAdmin = restrictTo('admin');
 
 // ─── ROUTES ───────────────────────────────────────────────────────────────────
 
@@ -136,7 +125,7 @@ router.post(
     try {
       const { userId, planId, billingCycle } = req.body;
 
-      const user = await req.db.users.findById(userId);
+      const user = await UserRepository.findById(userId);
       if (!user) {
         return res.status(404).json({ success: false, message: 'User not found.' });
       }

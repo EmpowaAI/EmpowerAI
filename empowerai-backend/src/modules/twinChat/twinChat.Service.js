@@ -106,7 +106,7 @@ function _mapCareerStageToSeniority(careerStage = '') {
 async function initialiseChatSession(userId) {
   logger.info('[TwinChat] Initialising chat session', { userId });
 
-  // Prefer the persisted (AI-enriched) twin from MongoDB so the chat always
+  // Prefer the persisted (AI-enriched) twin from Supabase so the chat always
   // starts with the richest available data. Only rebuild rule-based if no
   // saved twin exists yet.
   let twinData = await twinRepository.findByUserId(userId);

@@ -1,7 +1,7 @@
 'use strict';
 
 const express = require('express');
-const Waitlist = require('./Waitlist.Model');
+const supabase = require('../../db/supabase');
 const logger = require('../../utils/logger');
 
 const router = express.Router();
@@ -13,17 +13,17 @@ router.post('/', async (req, res, next) => {
       return res.status(400).json({ status: 'error', message: 'Valid email required.' });
     }
 
-    try {
-      await Waitlist.create({ email });
-      logger.info('[Waitlist] New signup', { email });
-    } catch (err) {
-      if (err.code === 11000) {
-        // Already on waitlist — treat as success so we don't leak existence
+    const { error } = await supabase.from('waitlist').insert({ email });
+
+    if (error) {
+      // PostgreSQL unique violation — already on waitlist
+      if (error.code === '23505') {
         return res.status(200).json({ status: 'success', message: 'You are on the waitlist.' });
       }
-      throw err;
+      throw error;
     }
 
+    logger.info('[Waitlist] New signup', { email });
     return res.status(201).json({ status: 'success', message: 'Added to waitlist.' });
   } catch (err) {
     next(err);

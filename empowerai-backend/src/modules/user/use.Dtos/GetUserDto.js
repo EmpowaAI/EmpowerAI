@@ -11,21 +11,21 @@
 // DTO builder — maps a User document to a safe response shape
 // ─────────────────────────────────────────────
 const toGetUserDTO = (user) => ({
-  id:        user._id,
+  id:        user.id,
   name:      user.name,
   email:     user.email,
-  age:       user.age       ?? null,
-  province:  user.province  ?? null,
-  phone:     user.phone     ?? null,
-  education: user.education ?? null,
-  about: user.about ?? null,
-  summary: user.summary ?? null,
-  skills:    user.skills    ?? [],
-  interests: user.interests ?? [],
-  avatar:    user.avatar    ?? null,
-  isVerified: user.isVerified,
-  createdAt: user.createdAt,
-  updatedAt: user.updatedAt,
+  age:       user.age        ?? null,
+  province:  user.province   ?? null,
+  phone:     user.phone      ?? null,
+  education: user.education  ?? null,
+  about:     user.about      ?? null,
+  summary:   user.summary    ?? null,
+  skills:    user.skills     ?? [],
+  interests: user.interests  ?? [],
+  avatar:    user.avatar     ?? null,
+  role:      user.role,
+  createdAt: user.created_at,
+  updatedAt: user.updated_at,
 });
 
 module.exports = { toGetUserDTO };

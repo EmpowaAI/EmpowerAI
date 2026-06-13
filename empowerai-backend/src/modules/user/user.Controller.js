@@ -53,23 +53,3 @@ exports.updateUser = async (req, res, next) => {
   }
 };
 
-// ─────────────────────────────────────────────
-// Change password
-// @route  PATCH /api/user/change-password
-// @access Private
-// ─────────────────────────────────────────────
-exports.changePassword = async (req, res, next) => {
-  const correlationId = req.correlationId;
-  try {
-    await userService.changePassword(req.user.id, req.body, correlationId);
-
-    logger.info('Password changed successfully', { correlationId, userId: req.user.id });
-
-    return sendSuccess(res, {
-      message: 'Password changed successfully.',
-    });
-  } catch (error) {
-    logger.error('Failed to change password', { correlationId, error: error.message });
-    next(error);
-  }
-};

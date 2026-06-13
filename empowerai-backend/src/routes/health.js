@@ -1,5 +1,5 @@
 const express = require('express');
-const mongoose = require('mongoose');
+const supabase = require('../db/supabase');
 const { checkAiHealth } = require('../intergration/ai/ai.Health');
 const { getAiQueueHealth, getAiJobStatus } = require('../intergration/queues/aiQueue');
 
@@ -14,7 +14,12 @@ router.get('/', async (req, res) => {
     logger.error('CRITICAL: AI_SERVICE_URL environment variable is missing in production!');
   }
 
-  const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+  let dbStatus = 'connected';
+  try {
+    const { error } = await supabase.from('users').select('id', { count: 'exact', head: true });
+    if (error) dbStatus = 'disconnected';
+  } catch { dbStatus = 'disconnected'; }
+
   const memoryUsage = process.memoryUsage();
   const { aiServiceStatus, aiServiceError } = await checkAiHealth();
 
@@ -48,7 +53,11 @@ router.get('/live', (req, res) => {
 
 // Readiness probe — is the server ready to serve traffic?
 router.get('/ready', async (req, res) => {
-  const dbReady = mongoose.connection.readyState === 1;
+  let dbReady = true;
+  try {
+    const { error } = await supabase.from('users').select('id', { count: 'exact', head: true });
+    if (error) dbReady = false;
+  } catch { dbReady = false; }
 
   let schedulers = null;
   try {

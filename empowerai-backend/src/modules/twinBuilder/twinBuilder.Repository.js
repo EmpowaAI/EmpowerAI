@@ -1,6 +1,5 @@
-const EconomicTwin = require('./twinBuilder.Model');
-const {encryptField, decryptField,} = require('../../utils/encryption.util');
-
+const supabase = require('../../db/supabase');
+const { encryptField, decryptField } = require('../../utils/encryption.util');
 
 function _encryptTwinData(data) {
   const encrypted = { ...data };
@@ -8,7 +7,6 @@ function _encryptTwinData(data) {
   if (data.identity !== undefined) {
     encrypted.identity = {
       ...data.identity,
-
       currentRole: encryptField(data.identity.currentRole),
       targetRole:  encryptField(data.identity.targetRole),
     };
@@ -43,18 +41,41 @@ function _encryptTwinData(data) {
   }
 
   if (data.analysisLatest !== undefined) {
-    encrypted['analysis.latest'] = encryptField(data.analysisLatest);
-    delete encrypted.analysisLatest; 
+    encrypted.analysis = { ...(encrypted.analysis || {}), latest: encryptField(data.analysisLatest) };
+    delete encrypted.analysisLatest;
   }
 
   return encrypted;
 }
 
+function fromRow(row) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    _id: row.id,
+    user: row.user_id,
+    userId: row.user_id,
+    cvProfile: row.cv_profile_id,
+    analysis: row.analysis || { latest: '' },
+    identity: row.identity || {},
+    economy: row.economy || {},
+    skills: row.skills || {},
+    market: row.market || {},
+    intelligence: row.intelligence || {},
+    chatHistory: row.chat_history || [],
+    simulationHistory: row.simulation_history || [],
+    evolution: row.evolution || {},
+    status: row.status,
+    lastCalculatedAt: row.last_calculated_at,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
 
 function _decryptTwin(twin) {
   if (!twin) return null;
 
-  const plain = typeof twin.toObject === 'function' ? twin.toObject() : { ...twin };
+  const plain = { ...twin };
 
   if (plain.identity) {
     plain.identity = {
@@ -92,12 +113,8 @@ function _decryptTwin(twin) {
     };
   }
 
-
   if (plain.analysis?.latest && typeof plain.analysis.latest === 'string') {
-    plain.analysis = {
-      ...plain.analysis,
-      latest: decryptField(plain.analysis.latest),
-    };
+    plain.analysis = { ...plain.analysis, latest: decryptField(plain.analysis.latest) };
   }
 
   if (Array.isArray(plain.chatHistory)) {
@@ -118,55 +135,52 @@ function _decryptTwin(twin) {
   return plain;
 }
 
+// ─── Build Supabase row object from encrypted data ─────────────────────────
+function _toRow(encryptedData) {
+  const row = {};
+  if (encryptedData.analysis     !== undefined) row.analysis      = encryptedData.analysis;
+  if (encryptedData.identity     !== undefined) row.identity      = encryptedData.identity;
+  if (encryptedData.economy      !== undefined) row.economy       = encryptedData.economy;
+  if (encryptedData.skills       !== undefined) row.skills        = encryptedData.skills;
+  if (encryptedData.market       !== undefined) row.market        = encryptedData.market;
+  if (encryptedData.intelligence !== undefined) row.intelligence  = encryptedData.intelligence;
+  if (encryptedData.status       !== undefined) row.status        = encryptedData.status;
+  if (encryptedData.evolution    !== undefined) row.evolution     = encryptedData.evolution;
+  if (encryptedData.lastCalculatedAt !== undefined) row.last_calculated_at = encryptedData.lastCalculatedAt;
+  if (encryptedData.cvProfile    !== undefined) row.cv_profile_id = encryptedData.cvProfile;
+  if (encryptedData.cvProfileId  !== undefined) row.cv_profile_id = encryptedData.cvProfileId;
+  return row;
+}
+
 const findByUserId = async (userId) => {
-  const twin = await EconomicTwin.findOne({ user: userId }).populate('cvProfile');
-  return _decryptTwin(twin);
+  const { data, error } = await supabase
+    .from('economic_twins').select('*').eq('user_id', userId).maybeSingle();
+  if (error) throw error;
+  return _decryptTwin(fromRow(data));
 };
 
 const upsertTwin = async (userId, data) => {
   const encryptedData = _encryptTwinData(data);
-
-  const twin = await EconomicTwin.findOneAndUpdate(
-    { user: userId },
-    {
-      $set: {
-        ...encryptedData,
-        user: userId,
-        updatedAt: new Date(),
-      },
-    },
-    {
-      new: true,
-      upsert: true,
-      setDefaultsOnInsert: true,
-    }
-  );
-
-  return _decryptTwin(twin);
+  const { data: row, error } = await supabase
+    .from('economic_twins')
+    .upsert({ user_id: userId, ..._toRow(encryptedData) }, { onConflict: 'user_id' })
+    .select()
+    .single();
+  if (error) throw error;
+  return _decryptTwin(fromRow(row));
 };
 
-
 const appendChatMessage = async (userId, message) => {
-  const encryptedMessage = {
-    ...message,
-    content: encryptField(message.content),
-  };
+  const encryptedMessage = { ...message, content: encryptField(message.content) };
 
-  const twin = await EconomicTwin.findOneAndUpdate(
-    { user: userId },
-    {
-      $push: {
-        chatHistory: {
-          $each: [encryptedMessage],
-          $slice: -100, 
-        },
-      },
-      $set: { updatedAt: new Date() },
-    },
-    { new: true }
-  );
+  const { data: current } = await supabase
+    .from('economic_twins').select('chat_history').eq('user_id', userId).single();
+  const history = [...(current?.chat_history || []), encryptedMessage].slice(-100);
 
-  return _decryptTwin(twin);
+  const { data: twin, error } = await supabase
+    .from('economic_twins').update({ chat_history: history }).eq('user_id', userId).select().single();
+  if (error) throw error;
+  return _decryptTwin(fromRow(twin));
 };
 
 const appendSimulation = async (userId, simulationEntry) => {
@@ -176,62 +190,32 @@ const appendSimulation = async (userId, simulationEntry) => {
     output: encryptField(simulationEntry.output),
   };
 
-  const twin = await EconomicTwin.findOneAndUpdate(
-    { user: userId },
-    {
-      $push: {
-        simulationHistory: {
-          $each: [encryptedEntry],
-          $slice: -20,
-        },
-      },
-      $set: { updatedAt: new Date() },
-    },
-    { new: true }
-  );
+  const { data: current } = await supabase
+    .from('economic_twins').select('simulation_history').eq('user_id', userId).single();
+  const history = [...(current?.simulation_history || []), encryptedEntry].slice(-20);
 
-  return _decryptTwin(twin);
+  const { data: twin, error } = await supabase
+    .from('economic_twins').update({ simulation_history: history }).eq('user_id', userId).select().single();
+  if (error) throw error;
+  return _decryptTwin(fromRow(twin));
 };
 
-
 const updateFields = async (userId, fields) => {
-  const allowedFields = [
-    'analysis',
-    'identity',
-    'economy',
-    'skills',
-    'market',
-    'intelligence',
-    'status',
-    'evolution',
-    'lastCalculatedAt',
-  ];
-
+  const allowedFields = ['analysis', 'identity', 'economy', 'skills', 'market', 'intelligence', 'status', 'evolution', 'lastCalculatedAt'];
   const safeUpdate = {};
   for (const key of allowedFields) {
-    if (fields[key] !== undefined) {
-      safeUpdate[key] = fields[key];
-    }
+    if (fields[key] !== undefined) safeUpdate[key] = fields[key];
   }
-
   const encryptedUpdate = _encryptTwinData(safeUpdate);
 
-  const twin = await EconomicTwin.findOneAndUpdate(
-    { user: userId },
-    {
-      $set: {
-        ...encryptedUpdate,
-        updatedAt: new Date(),
-      },
-    },
-    { new: true, runValidators: true }
-  );
-
-  return _decryptTwin(twin);
+  const { data: twin, error } = await supabase
+    .from('economic_twins').update(_toRow(encryptedUpdate)).eq('user_id', userId).select().single();
+  if (error) throw error;
+  return _decryptTwin(fromRow(twin));
 };
 
 const deleteByUserId = async (userId) => {
-  return EconomicTwin.findOneAndDelete({ user: userId });
+  return supabase.from('economic_twins').delete().eq('user_id', userId);
 };
 
 module.exports = {

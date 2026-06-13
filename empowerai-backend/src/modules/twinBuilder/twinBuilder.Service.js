@@ -2,7 +2,7 @@
 
 const cvRepository = require('../cvAnalyser/cvAnalyser.Repository');
 const twinRepository = require('./twinBuilder.Repository');
-const Opportunity = require('../opportunities/Opportunity.Model');
+const supabase = require('../../db/supabase');
 const logger = require('../../utils/logger');
 const aiServiceClient = require('../../intergration/ai/ai.ServiceClient');
 const { NotFoundError } = require('../../utils/errors');
@@ -17,7 +17,13 @@ async function matchOpportunities(analysis) {
   const userIndustry = (analysis.industry || '').toLowerCase();
   const userLevel = (analysis.readinessLevel || '').toLowerCase();
 
-  const opportunities = await Opportunity.find({ isActive: true }).lean();
+  const { data: rows } = await supabase.from('opportunities').select('*').eq('is_active', true);
+  const opportunities = (rows || []).map(row => ({
+    ...row,
+    salaryRange: row.salary_range,
+    applicationUrl: row.application_url,
+    isActive: row.is_active,
+  }));
 
   const scored = opportunities.map((opp) => {
     const oppSkills = (opp.skills || []).map(s => s.toLowerCase());

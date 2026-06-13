@@ -1,239 +1,170 @@
-const mongoose = require('mongoose');
-const User = require('../user/user.Model');
-const Opportunity = require('../opportunities/Opportunity.Model');
-const RefreshRun = require('../../models/RefreshRun');
-const CareerAnalytics = require('../../models/CareerAnalytics');
-const AuditLog = require('../../models/auditLog');
-const AiUsageLog = require('../../models/aiUsageLog');
+const supabase = require('../../db/supabase');
 
 // ─── USER QUERIES ────────────────────────────────────────────────────────────
 
-exports.findAllUsers = async ({ page, limit, search, role, isActive }) => {
-  const skip = (page - 1) * limit;
+exports.findAllUsers = async ({ page, limit, search, role }) => {
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
 
-  const filter = {};
-  if (role) filter.role = role;
-  if (typeof isActive === 'boolean') filter.isActive = isActive;
-  if (search) {
-    filter.$or = [
-      { name: { $regex: search, $options: 'i' } },
-      { email: { $regex: search, $options: 'i' } },
-    ];
-  }
+  let q = supabase.from('users').select('id, name, email, role, province, skills, avatar, created_at, updated_at', { count: 'exact' });
+  if (role) q = q.eq('role', role);
+  if (search) q = q.or(`name.ilike.%${search}%,email.ilike.%${search}%`);
 
-  const [users, total] = await Promise.all([
-    User.find(filter)
-      .select('-password -refreshToken')
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .lean(),
-    User.countDocuments(filter),
-  ]);
-
-  return { users, total };
+  const { data, count } = await q.order('created_at', { ascending: false }).range(from, to);
+  return { users: data || [], total: count || 0 };
 };
 
-exports.findUserById = async (id) =>
-  User.findById(id).select('-password -refreshToken').lean();
+exports.findUserById = async (id) => {
+  const { data } = await supabase
+    .from('users').select('id, name, email, role, province, skills, avatar, created_at, updated_at')
+    .eq('id', id).single();
+  return data;
+};
 
-exports.updateUser = async (id, updates) =>
-  User.findByIdAndUpdate(id, { $set: updates }, { new: true, runValidators: true })
-    .select('-password -refreshToken')
-    .lean();
+exports.updateUser = async (id, updates) => {
+  const allowed = ['name', 'email', 'role', 'province', 'skills', 'avatar', 'about', 'summary'];
+  const safe = Object.fromEntries(Object.entries(updates).filter(([k]) => allowed.includes(k)));
+  const { data } = await supabase
+    .from('users').update(safe).eq('id', id)
+    .select('id, name, email, role, province, skills, avatar, created_at, updated_at').single();
+  return data;
+};
 
-exports.deleteUser = async (id) => User.findByIdAndDelete(id).lean();
+exports.deleteUser = async (id) => {
+  const { data: user } = await supabase
+    .from('users').select('id, name, email').eq('id', id).single();
+  if (!user) return null;
+  await supabase.auth.admin.deleteUser(id);
+  return user;
+};
 
-exports.toggleUserStatus = async (id, isActive) =>
-  User.findByIdAndUpdate(id, { $set: { isActive } }, { new: true })
-    .select('-password -refreshToken')
-    .lean();
+exports.toggleUserStatus = async (id, isActive) => {
+  // Supabase Auth manages active state via banned_until or user management
+  // For now, update a flagged_for_deletion field as a proxy for deactivation
+  const { data } = await supabase
+    .from('users').update({ flagged_for_deletion: !isActive }).eq('id', id)
+    .select('id, name, email, role, flagged_for_deletion').single();
+  return data;
+};
 
 exports.getUserGrowthStats = async () => {
-  return User.aggregate([
-    {
-      $group: {
-        _id: {
-          year: { $year: '$createdAt' },
-          month: { $month: '$createdAt' },
-        },
-        count: { $sum: 1 },
-      },
-    },
-    { $sort: { '_id.year': 1, '_id.month': 1 } },
-    { $limit: 12 },
-  ]);
+  const { data } = await supabase
+    .from('users').select('created_at').order('created_at', { ascending: true });
+  if (!data) return [];
+  // Group by year-month in JS
+  const grouped = {};
+  for (const { created_at } of data) {
+    const d = new Date(created_at);
+    const key = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+    grouped[key] = (grouped[key] || 0) + 1;
+  }
+  return Object.entries(grouped).slice(-12).map(([key, count]) => {
+    const [year, month] = key.split('-');
+    return { _id: { year: +year, month: +month }, count };
+  });
 };
 
-exports.getUserRoleBreakdown = async () =>
-  User.aggregate([
-    { $group: { _id: '$role', count: { $sum: 1 } } },
-  ]);
+exports.getUserRoleBreakdown = async () => {
+  const { data } = await supabase.from('users').select('role');
+  if (!data) return [];
+  const grouped = {};
+  for (const { role } of data) grouped[role] = (grouped[role] || 0) + 1;
+  return Object.entries(grouped).map(([role, count]) => ({ _id: role, count }));
+};
 
 // ─── OPPORTUNITY QUERIES ─────────────────────────────────────────────────────
 
 exports.findAllOpportunities = async ({ page, limit, search, type, isActive }) => {
-  const skip = (page - 1) * limit;
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
 
-  const filter = {};
-  if (type) filter.type = type;
-  if (typeof isActive === 'boolean') filter.isActive = isActive;
-  if (search) {
-    filter.$or = [
-      { title: { $regex: search, $options: 'i' } },
-      { company: { $regex: search, $options: 'i' } },
-    ];
-  }
+  let q = supabase.from('opportunities').select('*', { count: 'exact' });
+  if (type) q = q.eq('type', type);
+  if (typeof isActive === 'boolean') q = q.eq('is_active', isActive);
+  if (search) q = q.or(`title.ilike.%${search}%,company.ilike.%${search}%`);
 
-  const [opportunities, total] = await Promise.all([
-    Opportunity.find(filter)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .lean(),
-    Opportunity.countDocuments(filter),
-  ]);
-
-  return { opportunities, total };
+  const { data, count } = await q.order('created_at', { ascending: false }).range(from, to);
+  return { opportunities: data || [], total: count || 0 };
 };
 
-exports.findOpportunityById = async (id) =>
-  Opportunity.findById(id).lean();
+exports.findOpportunityById = async (id) => {
+  const { data } = await supabase.from('opportunities').select('*').eq('id', id).single();
+  return data;
+};
 
-exports.updateOpportunity = async (id, updates) =>
-  Opportunity.findByIdAndUpdate(id, { $set: updates }, { new: true, runValidators: true }).lean();
+exports.updateOpportunity = async (id, updates) => {
+  const allowed = ['title', 'type', 'company', 'location', 'province', 'description', 'requirements', 'skills', 'salary_range', 'deadline', 'application_url', 'is_active'];
+  const safe = Object.fromEntries(Object.entries(updates).filter(([k]) => allowed.includes(k)));
+  const { data } = await supabase.from('opportunities').update(safe).eq('id', id).select().single();
+  return data;
+};
 
-exports.deleteOpportunity = async (id) => Opportunity.findByIdAndDelete(id).lean();
+exports.deleteOpportunity = async (id) => {
+  await supabase.from('opportunities').delete().eq('id', id);
+};
 
-exports.getOpportunityTypeBreakdown = async () =>
-  Opportunity.aggregate([
-    { $group: { _id: '$type', count: { $sum: 1 }, active: { $sum: { $cond: ['$isActive', 1, 0] } } } },
-  ]);
+exports.getOpportunityTypeBreakdown = async () => {
+  const { data } = await supabase.from('opportunities').select('type, is_active');
+  if (!data) return [];
+  const grouped = {};
+  for (const { type, is_active } of data) {
+    if (!grouped[type]) grouped[type] = { _id: type, count: 0, active: 0 };
+    grouped[type].count += 1;
+    if (is_active) grouped[type].active += 1;
+  }
+  return Object.values(grouped);
+};
 
 // ─── AI USAGE QUERIES ────────────────────────────────────────────────────────
+// Derived from the usages table (product-level counts per user per month)
 
-exports.findAiUsageLogs = async ({ page, limit, userId, feature, startDate, endDate }) => {
-  const skip = (page - 1) * limit;
-
-  const filter = {};
-  if (userId) filter.userId = new mongoose.Types.ObjectId(userId);
-  if (feature) filter.feature = feature;
-  if (startDate || endDate) {
-    filter.createdAt = {};
-    if (startDate) filter.createdAt.$gte = new Date(startDate);
-    if (endDate) filter.createdAt.$lte = new Date(endDate);
-  }
-
-  const [logs, total] = await Promise.all([
-    AiUsageLog.find(filter)
-      .populate('userId', 'name email')
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .lean(),
-    AiUsageLog.countDocuments(filter),
-  ]);
-
-  return { logs, total };
+exports.findAiUsageLogs = async ({ page, limit }) => {
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+  const { data, count } = await supabase
+    .from('usages').select('*, user:users(name, email)', { count: 'exact' })
+    .order('last_used_at', { ascending: false }).range(from, to);
+  return { logs: data || [], total: count || 0 };
 };
 
 exports.getAiUsageSummary = async () => {
-  const [byFeature, byDay, topUsers] = await Promise.all([
-    AiUsageLog.aggregate([
-      {
-        $group: {
-          _id: '$feature',
-          totalCalls: { $sum: 1 },
-          totalTokens: { $sum: '$tokensUsed' },
-          avgLatencyMs: { $avg: '$latencyMs' },
-          errors: { $sum: { $cond: ['$isError', 1, 0] } },
-        },
-      },
-      { $sort: { totalCalls: -1 } },
-    ]),
-    AiUsageLog.aggregate([
-      {
-        $group: {
-          _id: {
-            year: { $year: '$createdAt' },
-            month: { $month: '$createdAt' },
-            day: { $dayOfMonth: '$createdAt' },
-          },
-          calls: { $sum: 1 },
-          tokens: { $sum: '$tokensUsed' },
-        },
-      },
-      { $sort: { '_id.year': -1, '_id.month': -1, '_id.day': -1 } },
-      { $limit: 30 },
-    ]),
-    AiUsageLog.aggregate([
-      { $group: { _id: '$userId', totalCalls: { $sum: 1 }, totalTokens: { $sum: '$tokensUsed' } } },
-      { $sort: { totalCalls: -1 } },
-      { $limit: 10 },
-      { $lookup: { from: 'users', localField: '_id', foreignField: '_id', as: 'user' } },
-      { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
-      { $project: { totalCalls: 1, totalTokens: 1, 'user.name': 1, 'user.email': 1 } },
-    ]),
-  ]);
+  const { data } = await supabase.from('usages').select('product, count, user_id, last_used_at');
+  if (!data) return { byFeature: [], byDay: [], topUsers: [] };
 
-  return { byFeature, byDay, topUsers };
-};
-
-// ─── AUDIT LOG QUERIES ───────────────────────────────────────────────────────
-
-exports.findAuditLogs = async ({ page, limit, actorId, action, targetModel, startDate, endDate }) => {
-  const skip = (page - 1) * limit;
-
-  const filter = {};
-  if (actorId) filter.actorId = new mongoose.Types.ObjectId(actorId);
-  if (action) filter.action = action;
-  if (targetModel) filter.targetModel = targetModel;
-  if (startDate || endDate) {
-    filter.createdAt = {};
-    if (startDate) filter.createdAt.$gte = new Date(startDate);
-    if (endDate) filter.createdAt.$lte = new Date(endDate);
+  const byFeature = {};
+  for (const { product, count } of data) {
+    if (!byFeature[product]) byFeature[product] = { _id: product, totalCalls: 0 };
+    byFeature[product].totalCalls += count;
   }
 
-  const [logs, total] = await Promise.all([
-    AuditLog.find(filter)
-      .populate('actorId', 'name email role')
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .lean(),
-    AuditLog.countDocuments(filter),
-  ]);
-
-  return { logs, total };
+  return { byFeature: Object.values(byFeature), byDay: [], topUsers: [] };
 };
 
-exports.createAuditLog = async (entry) => AuditLog.create(entry);
+// Audit logs not yet implemented in Supabase schema
+exports.findAuditLogs = async () => ({ logs: [], total: 0 });
+exports.createAuditLog = async () => null;
 
 // ─── DASHBOARD AGGREGATE ─────────────────────────────────────────────────────
 
 exports.getDashboardCounts = async () => {
   const [
-    totalUsers,
-    activeUsers,
-    totalOpportunities,
-    activeOpportunities,
-    totalAiCalls,
-    recentRefreshRun,
+    { count: totalUsers },
+    { count: totalOpportunities },
+    { count: activeOpportunities },
+    { count: totalAiCalls },
   ] = await Promise.all([
-    User.countDocuments(),
-    User.countDocuments({ isActive: true }),
-    Opportunity.countDocuments(),
-    Opportunity.countDocuments({ isActive: true }),
-    AiUsageLog.countDocuments(),
-    RefreshRun.findOne().sort({ startedAt: -1 }).lean(),
+    supabase.from('users').select('id', { count: 'exact', head: true }),
+    supabase.from('opportunities').select('id', { count: 'exact', head: true }),
+    supabase.from('opportunities').select('id', { count: 'exact', head: true }).eq('is_active', true),
+    supabase.from('usages').select('id', { count: 'exact', head: true }),
   ]);
 
   return {
-    totalUsers,
-    activeUsers,
-    totalOpportunities,
-    activeOpportunities,
-    totalAiCalls,
-    recentRefreshRun,
+    totalUsers: totalUsers || 0,
+    activeUsers: totalUsers || 0,
+    totalOpportunities: totalOpportunities || 0,
+    activeOpportunities: activeOpportunities || 0,
+    totalAiCalls: totalAiCalls || 0,
+    recentRefreshRun: null,
   };
 };
