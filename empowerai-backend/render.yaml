@@ -13,7 +13,7 @@ services:
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
         sync: false
-      - key: ENCRYPTION_KEY
+      - key: DATA_ENCRYPTION_KEY
         sync: false
       - key: AI_SERVICE_URL
         sync: false
