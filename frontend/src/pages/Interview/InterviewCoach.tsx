@@ -11,7 +11,6 @@ import { cn } from '../../lib/utils';
 import { interviewService } from '../../services/interviewService';
 import { TipsPanel } from '../../components/interview/TipsPanel';
 import GlassCard from '../../components/shared/GlassCard';
-import PageHeader from '../../components/shared/PageHeader';
 import { Button } from '../../components/ui/Button';
 import { useToast } from '../../components/Toast';
 import { getStoredCvAnalysis } from '../../lib/sensitiveStorage';
@@ -367,14 +366,24 @@ export default function InterviewCoach() {
   if (!sessionStarted) {
     return (
       <div className="max-w-2xl mx-auto space-y-6">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
-          <PageHeader
-            icon={Brain}
-            eyebrow="AI-Powered Practice"
-            title="Interview Coach"
-            subtitle="Practise with AI-powered interview questions tailored for SA professionals."
-            align="center"
-          />
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+          <div className="relative overflow-hidden rounded-2xl text-white" style={{ background: 'var(--gradient-hero)' }}>
+            <div className="pointer-events-none absolute inset-0 ai-mesh opacity-15" aria-hidden />
+            <div className="pointer-events-none absolute inset-0 ai-grid opacity-10" aria-hidden />
+            <div className="pointer-events-none absolute inset-0 ubuntu-pattern opacity-20" aria-hidden />
+            <div className="relative z-10 p-6 md:p-8 text-center">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold text-white/90 backdrop-blur-sm mb-3">
+                <Sparkles className="h-3 w-3 text-secondary" />
+                AI-Powered Practice
+              </div>
+              <h1 className="font-display text-2xl md:text-3xl lg:text-4xl font-bold leading-tight">
+                Interview <span className="text-gradient-ai">Coach</span>
+              </h1>
+              <p className="mt-2 text-white/75 text-sm md:text-base max-w-sm mx-auto">
+                Practise with AI-powered questions tailored for SA professionals.
+              </p>
+            </div>
+          </div>
         </motion.div>
 
         <GlassCard>

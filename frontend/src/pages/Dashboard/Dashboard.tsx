@@ -11,11 +11,10 @@ import {
   Target,
   X,
   ArrowRight,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import GlassCard from "@/components/shared/GlassCard";
-import PageHeader from "@/components/shared/PageHeader";
 import { ContactWidget } from "@/components/ContactWidget";
 import { getStoredCvAnalysis } from "../../lib/sensitiveStorage";
 import { opportunitiesAPI } from "../../lib/api";
@@ -207,33 +206,43 @@ const Dashboard = () => {
     : "/dashboard/opportunities";
   const nextActionCta = !cvCompleted ? "Analyse CV" : !twinCompleted ? "Build Twin" : "Find Opportunities";
 
-  const containerVariants = {
-    hidden: {},
-    show: { transition: { staggerChildren: 0.08 } },
-  };
-  const itemVariants = {
-    hidden: { opacity: 0, y: 16 },
-    show:   { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.4, 0, 0.2, 1] } },
-  };
-
   return (
     <motion.div
-      className="min-h-screen bg-background font-sans text-foreground"
+      className="font-sans text-foreground"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
     >
-      <main className="bg-gradient-to-b from-muted/35 via-background to-background">
-        <section className="container py-8 md:py-10">
-          <div className="mx-auto max-w-6xl">
-            <PageHeader
-              eyebrow={firstName ? `${greeting}, ${firstName}` : greeting}
-              title="Your Career Hub"
-              subtitle="Track your progress, build your profile, and take the next step."
-              className="mb-8"
-            />
+      <main>
+        <section>
+          {/* ── Gradient Hero Banner ── */}
+          <div className="relative overflow-hidden rounded-2xl mb-8 text-white" style={{ background: 'var(--gradient-hero)' }}>
+            <div className="pointer-events-none absolute inset-0 ai-mesh opacity-15" aria-hidden />
+            <div className="pointer-events-none absolute inset-0 ai-grid opacity-10" aria-hidden />
+            <div className="pointer-events-none absolute inset-0 ubuntu-pattern opacity-25" aria-hidden />
+            <div className="relative z-10 p-6 md:p-8 lg:p-10">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold text-white/90 backdrop-blur-sm mb-3">
+                <Sparkles className="h-3 w-3 text-secondary" />
+                {firstName ? `${greeting}, ${firstName}` : greeting}
+              </div>
+              <h1 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
+                Your <span className="text-gradient-ai">Career Hub</span>
+              </h1>
+              <p className="mt-2 text-white/75 max-w-md text-sm md:text-base">
+                Track your progress, build your profile, and take the next step toward your future.
+              </p>
+              <div className="mt-6 grid grid-cols-3 gap-3 max-w-lg">
+                {quietStats.map((stat) => (
+                  <div key={stat.label} className="rounded-xl bg-white/10 backdrop-blur-sm border border-white/15 p-3 md:p-4">
+                    <p className="font-display text-2xl md:text-3xl font-bold text-white leading-none">{stat.value}</p>
+                    <p className="text-xs text-white/65 mt-1 leading-tight">{stat.label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-          <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[1.45fr_0.85fr]">
+
+          <div className="grid gap-6 lg:grid-cols-[1.45fr_0.85fr]">
             <div className="space-y-6">
               {/* Welcome Guide — hidden once CV is done */}
               {showWelcomeGuide && !cvCompleted && (
@@ -305,26 +314,6 @@ const Dashboard = () => {
                   </Button>
                 </div>
               </Card>
-
-              {/* Stats */}
-              <motion.div
-                className="grid gap-4 md:grid-cols-3"
-                variants={containerVariants}
-                initial="hidden"
-                animate="show"
-              >
-                {quietStats.map((stat) => (
-                  <motion.div key={stat.label} variants={itemVariants}>
-                    <GlassCard className="p-5 hover:shadow-elevated transition-shadow duration-300" animate={false}>
-                      <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                        {stat.label}
-                      </p>
-                      <p className="mt-4 font-display text-4xl font-bold text-primary">{stat.value}</p>
-                      <p className="mt-1 text-sm text-muted-foreground">{stat.note}</p>
-                    </GlassCard>
-                  </motion.div>
-                ))}
-              </motion.div>
 
               {/* Journey */}
               <Card className="border-border/70 p-5 shadow-sm md:p-6">

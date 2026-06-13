@@ -6,7 +6,6 @@ import { cn } from "../../lib/utils"
 import { opportunitiesAPI, applicationsAPI } from "../../lib/api"
 import { useUser } from "../../contexts/user-context"
 import LoadingState from "../../components/shared/LoadingState"
-import PageHeader from "../../components/shared/PageHeader"
 import EmptyState from "../../components/EmptyState"
 import ErrorAlert from "../../components/shared/ErrorAlert"
 import LoadingButton from "../../components/LoadingButton"
@@ -319,14 +318,37 @@ export default function Opportunities() {
     setPage(1)
   }
 
+  const OpportunitiesHero = () => (
+    <div className="relative overflow-hidden rounded-2xl text-white" style={{ background: 'var(--gradient-hero)' }}>
+      <div className="pointer-events-none absolute inset-0 ai-mesh opacity-15" aria-hidden />
+      <div className="pointer-events-none absolute inset-0 ai-grid opacity-10" aria-hidden />
+      <div className="pointer-events-none absolute inset-0 ubuntu-pattern opacity-20" aria-hidden />
+      <div className="relative z-10 p-6 md:p-8">
+        <div className="flex flex-wrap items-center gap-2 mb-3">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold text-white/90 backdrop-blur-sm">
+            <MapPin className="h-3 w-3 text-secondary" />
+            South Africa
+          </div>
+          {totalFiltered !== null && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-3 py-1 text-xs font-bold text-white shadow">
+              {totalFiltered.toLocaleString()} live
+            </span>
+          )}
+        </div>
+        <h1 className="font-display text-2xl md:text-3xl lg:text-4xl font-bold leading-tight">
+          Career <span className="text-gradient-ai">Opportunities</span>
+        </h1>
+        <p className="mt-2 text-white/75 text-sm md:text-base max-w-md">
+          Real jobs, learnerships, internships, and bursaries — updated daily.
+        </p>
+      </div>
+    </div>
+  )
+
   if (loading) {
     return (
       <div className="space-y-6">
-        <PageHeader
-          eyebrow="South Africa"
-          title="Career Opportunities"
-          subtitle="Real jobs, learnerships, internships, and bursaries across South Africa."
-        />
+        <OpportunitiesHero />
         <LoadingState message="Loading opportunities..." />
       </div>
     )
@@ -335,13 +357,9 @@ export default function Opportunities() {
   return (
     <div className="space-y-5 sm:space-y-5 md:space-y-6 -mx-3 sm:-mx-4 md:mx-0">
       {/* Header */}
-      <PageHeader
-        eyebrow="South Africa"
-        title="Career Opportunities"
-        subtitle="Real jobs, learnerships, internships, and bursaries. Updated daily with transparent matching."
-        badge={totalFiltered !== null ? `${totalFiltered.toLocaleString()} live` : undefined}
-        className="px-3 sm:px-4 md:px-0"
-      />
+      <div className="px-3 sm:px-4 md:px-0">
+        <OpportunitiesHero />
+      </div>
 
       {/* Profile match context */}
       {user ? (

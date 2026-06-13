@@ -90,14 +90,16 @@ const NavLink = ({ item, isMobile = false, onClick, pathname, prefetchRoute }: {
 
   const baseClasses = cn(
     "flex items-center transition-all",
-    isMobile 
-      ? "gap-3 px-4 py-3 rounded-xl text-base w-full text-foreground" 
+    isMobile
+      ? "gap-3 px-4 py-3 rounded-xl text-base w-full text-foreground"
       : "gap-1.5 px-3 py-2 rounded-lg text-sm font-medium",
     isActive && !isDisabled
-      ? "bg-secondary/10 text-secondary" + (isMobile ? " border border-secondary/20" : "")
+      ? isMobile
+        ? "bg-secondary/10 text-secondary border border-secondary/20"
+        : "bg-gradient-to-r from-secondary/20 to-primary/10 text-secondary border border-secondary/25 shadow-sm"
       : "",
-    isDisabled 
-      ? "opacity-50 cursor-not-allowed text-muted-foreground" 
+    isDisabled
+      ? "opacity-50 cursor-not-allowed text-muted-foreground"
       : "hover:bg-muted hover:text-foreground cursor-pointer"
   );
 
@@ -402,8 +404,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0 h-full">
+          {/* Premium orange accent bar at the top */}
+          <div className="h-0.5 flex-shrink-0 bg-gradient-to-r from-primary/70 via-secondary to-primary/70" />
           {/* ========== FIXED HEADER - NO OVERLAPPING ON MOBILE ========== */}
-          <header className="sticky top-0 z-30 flex h-16 flex-shrink-0 items-center justify-between border-b border-border/60 bg-background/85 px-4 backdrop-blur-md sm:px-6">
+          <header className="sticky top-0 z-30 flex h-16 flex-shrink-0 items-center justify-between border-b border-border/50 bg-background/95 px-4 backdrop-blur-xl sm:px-6 shadow-[0_1px_16px_-4px_hsl(218_64%_28%/0.10)]">
             
             {/* Left side - Logo only */}
             <div className="flex items-center gap-2">
@@ -508,7 +512,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </header>
 
           {/* Page Content */}
-          <main className="flex-1 overflow-y-auto bg-gradient-to-b from-background to-muted/30">
+          <main className="flex-1 overflow-y-auto" style={{ background: 'linear-gradient(160deg, hsl(var(--background)) 0%, hsl(var(--muted)/0.5) 50%, hsl(var(--background)) 100%)' }}>
             <div className="p-4 sm:p-6 md:p-8 lg:p-10 pb-24 lg:pb-10 max-w-6xl mx-auto w-full">
               {children || <Outlet />}
             </div>
