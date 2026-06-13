@@ -109,11 +109,12 @@ export default function CVAnalysisForm({
         onClick={onSubmit}
         disabled={!canSubmit}
         className={cn(
-          'w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all',
+          'relative w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-bold text-sm transition-all overflow-hidden',
           canSubmit
-            ? 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-md hover:shadow-lg'
+            ? 'text-white shadow-lg hover:shadow-xl hover:scale-[1.01] shimmer'
             : 'bg-muted text-muted-foreground cursor-not-allowed'
         )}
+        style={canSubmit ? { background: 'var(--gradient-hero)' } : undefined}
       >
         {isScanning ? (
           <>

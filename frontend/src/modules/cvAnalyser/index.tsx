@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { Brain, RotateCcw, Sparkles } from 'lucide-react';
+import { cn } from '../../lib/utils';
 
 import { useCVAnalyzer } from './hooks/useCvAnalyser';
 import CVUploadZone from './componets/CVUploadZone';
@@ -44,9 +45,8 @@ export default function CVAnalyzerPage() {
     showPostModal,
   } = state;
 
-  // Determine readiness of the upload step
-  const uploadReady =
-    inputMode === 'file' ? !!file : cvText.trim().length >= 50;
+  // Ready when either input has content
+  const uploadReady = !!file || cvText.trim().length >= 50;
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
@@ -111,7 +111,7 @@ export default function CVAnalyzerPage() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -12 }}
-            className="rounded-2xl border border-border bg-card p-6 space-y-6"
+            className="rounded-2xl border border-border bg-card p-6 md:p-8 space-y-6"
           >
             <CVUploadZone
               inputMode={inputMode}
@@ -122,19 +122,20 @@ export default function CVAnalyzerPage() {
               onTextChange={setCVText}
             />
 
-            {/* Analysis form only shows when there's content to submit */}
-            {(uploadReady || step === 'form') && (
-              <div className="border-t border-border pt-5">
-                <CVAnalysisForm
-                  values={formValues}
-                  inputMode={inputMode}
-                  isReady={uploadReady}
-                  isScanning={false}
-                  onChange={setFormValues}
-                  onSubmit={submitAnalysis}
-                />
-              </div>
-            )}
+            {/* Analysis details — always show so user can fill while uploading */}
+            <div className={cn(
+              "border-t border-border pt-6 transition-opacity duration-300",
+              uploadReady ? "opacity-100" : "opacity-50 pointer-events-none"
+            )}>
+              <CVAnalysisForm
+                values={formValues}
+                inputMode={inputMode}
+                isReady={uploadReady}
+                isScanning={false}
+                onChange={setFormValues}
+                onSubmit={submitAnalysis}
+              />
+            </div>
           </motion.div>
         )}
 
