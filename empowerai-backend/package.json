@@ -17,14 +17,15 @@
     "youth-empowerment",
     "api",
     "express",
-    "mongodb"
+    "supabase",
+    "south-africa"
   ],
   "author": "Team Nicolette",
   "license": "MIT",
   "type": "commonjs",
   "dependencies": {
+    "@supabase/supabase-js": "^2.107.0",
     "axios": "^1.7.9",
-    "bcryptjs": "^3.0.3",
     "bullmq": "^5.20.3",
     "cloudinary": "^2.8.0",
     "compression": "^1.8.1",
@@ -37,10 +38,7 @@
     "form-data": "^4.0.5",
     "helmet": "^8.1.0",
     "ioredis": "^5.4.1",
-    "jsonwebtoken": "^9.0.2",
     "mammoth": "^1.9.0",
-    "mongodb": "^7.0.0",
-    "mongoose": "^9.0.0",
     "multer": "^2.0.2",
     "node-cron": "^4.2.1",
     "node-fetch": "^2.7.0",

@@ -2,25 +2,56 @@ services:
   - type: web
     name: empowerai-backend
     env: node
-    buildCommand: npm install
+    buildCommand: npm install --legacy-peer-deps
     startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 10000
-      - key: MONGODB_URI
+      - key: SUPABASE_URL
         sync: false
-      - key: JWT_SECRET
+      - key: SUPABASE_SERVICE_ROLE_KEY
         sync: false
-      - key: JWT_EXPIRES_IN
-        value: 90d
+      - key: ENCRYPTION_KEY
+        sync: false
       - key: AI_SERVICE_URL
+        sync: false
+      - key: AI_SERVICE_API_KEY
         sync: false
       - key: FRONTEND_URL
         value: https://empower-ai-gamma.vercel.app
+      - key: BREVO_API_KEY
+        sync: false
+      - key: PAYSTACK_SECRET_KEY
+        sync: false
+      - key: PAYSTACK_PUBLIC_KEY
+        sync: false
+      - key: PAYSTACK_CALLBACK_URL
+        sync: false
+      - key: PAYSTACK_WEBHOOK_SECRET
+        sync: false
+      - key: PAYSTACK_PLAN_STARTER_MONTHLY
+        sync: false
+      - key: PAYSTACK_PLAN_STARTER_ANNUAL
+        sync: false
+      - key: PAYSTACK_PLAN_PROFESSIONAL_MONTHLY
+        sync: false
+      - key: PAYSTACK_PLAN_PROFESSIONAL_ANNUAL
+        sync: false
+      - key: PAYSTACK_PLAN_ENTERPRISE_MONTHLY
+        sync: false
+      - key: PAYSTACK_PLAN_ENTERPRISE_ANNUAL
+        sync: false
       - key: ADZUNA_APP_ID
         sync: false
       - key: ADZUNA_APP_KEY
         sync: false
-
+      - key: ENABLE_JOB_API_SCHEDULER
+        value: "false"
+      - key: ENABLE_API_RATE_LIMITER
+        value: "true"
+      - key: ENABLE_AUTH_RATE_LIMITER
+        value: "true"
+      - key: ENABLE_AI_RATE_LIMITER
+        value: "true"

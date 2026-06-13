@@ -4,18 +4,14 @@ const app = require('./app');
 const logger = require('./utils/logger');
 const { connectDatabase } = require('./infrastructures/database');
 const { pingAiServiceOnStartup } = require('./intergration/ai/ai.Health');
-const { runStartupTasks } = require('./config/seed');
 const { registerProcessHandlers } = require('./utils/shutdown');
 const { initAiQueue } = require('./intergration/queues/aiQueue');
-const seedAdmins = require('./utils/seedAdmin');
 
 const PORT = process.env.PORT || 5000;
 
 async function boot() {
-  // Initialize background queue (no-op unless enabled via env)
   initAiQueue();
 
-  // Log AI service config so it's visible on every cold start
   const aiServiceUrl =
     process.env.AI_SERVICE_URL ||
     (process.env.NODE_ENV === 'production' ? 'MISSING_URL' : 'http://localhost:8000');
@@ -27,19 +23,8 @@ async function boot() {
     healthCheckEndpoint: `${aiServiceUrl}/health`,
   });
 
-  // Connect to MongoDB
   const dbConnected = await connectDatabase();
 
-  // Seed admin promotions only when DB is actually connected.
-  if (dbConnected) {
-    await seedAdmins();
-  } else {
-    logger.warn('Skipping admin seeding because database is disconnected');
-  }
-  // Run startup tasks (seed, schedulers) — skipped if DB is down
-  await runStartupTasks(dbConnected);
-
-  // Start HTTP server
   const serverInstance = app.listen(PORT, () => {
     logger.info('Server started successfully', {
       port: PORT,
@@ -50,10 +35,7 @@ async function boot() {
     });
   });
 
-  // Register shutdown + uncaught error handlers
   registerProcessHandlers(serverInstance);
-
-  // Non-blocking AI service ping (production only)
   pingAiServiceOnStartup();
 }
 

@@ -9,12 +9,10 @@ const helmetOptions = require('./infrastructures/helmet');
 const { apiLimiter, authLimiter, aiServiceLimiter, isEnabled } = require('./middleware/rateLimiter');
 
 // ─── Payment & Subscription Services ─────────────────────────────────────────
-const { connect: connectMongo } = require('./models/db');
 const SubscriptionService = require('./modules/subscription/subscription.service');
 const PaystackService = require('./modules/subscriptionPlan/paystack.service');
-const db = require('./models/db');
 
-const subscriptionService = new SubscriptionService(db);
+const subscriptionService = new SubscriptionService();
 const paystackService = new PaystackService(subscriptionService);
 
 const app = express();
@@ -40,7 +38,6 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use((req, _res, next) => {
   req.subscriptionService = subscriptionService;
   req.paystackService = paystackService;
-  req.db = db;
   next();
 });
 
@@ -72,10 +69,12 @@ app.use(require('./middleware/requestLogger'));
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
 
+// Auth & account
+app.use('/api/auth',          require('./modules/auth/auth.Route'));
+app.use('/api/account',       require('./modules/account/account.Route'));
+
 // Existing routes
 app.use('/api/health',        require('./routes/health'));
-app.use('/api/auth',          require('./modules/authentication/auth.Route'));
-app.use('/api/account',       require('./modules/userAccount/account.Route'));
 app.use('/api/twin',          require('./modules/twinBuilder/twinBuilder.Route'));
 app.use('/api/opportunities', require('./modules/opportunities/opportunities.Route'));
 app.use('/api/cv',            require('./modules/cvAnalyser/cvAnalyser.Route'));
@@ -101,8 +100,6 @@ app.get('/', (req, res) => {
     version: process.env.APP_VERSION || '1.0.0',
     endpoints: {
       health:        '/api/health',
-      auth:          '/api/auth',
-      account:       '/api/account',
       user:          '/api/user',
       applications:  '/api/applications',
       twin:          '/api/twin',
@@ -129,21 +126,5 @@ app.use((req, res, next) => {
 // ─── Global Error Handler ─────────────────────────────────────────────────────
 app.use(require('./middleware/errorHandler'));
 
-// ─── Startup (only when run directly) ────────────────────────────────────────
-if (require.main === module) {
-  const PORT = process.env.PORT || 3001;
-
-  connectMongo()
-    .then(() => {
-      app.listen(PORT, () => {
-        console.log(`EmpowerAI running on port ${PORT}`);
-        console.log(`Paystack mode: ${process.env.PAYSTACK_SECRET_KEY?.startsWith('sk_live') ? 'LIVE' : 'TEST'}`);
-      });
-    })
-    .catch((err) => {
-      console.error('Failed to connect to MongoDB:', err.message);
-      process.exit(1);
-    });
-}
 
 module.exports = app;

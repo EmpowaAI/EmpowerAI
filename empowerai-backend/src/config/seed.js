@@ -2,8 +2,9 @@ const logger = require('../utils/logger');
 
 async function seedOpportunitiesIfEmpty() {
   try {
-    const Opportunity = require('../modules/opportunities/Opportunity.Model');
-    const opportunityCount = await Opportunity.countDocuments({ isActive: true });
+    const supabase = require('../db/supabase');
+    const { count: opportunityCount } = await supabase
+      .from('opportunities').select('id', { count: 'exact', head: true }).eq('is_active', true);
 
     if (opportunityCount === 0) {
       logger.info('No opportunities found in database, auto-seeding...');
