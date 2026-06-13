@@ -13,17 +13,17 @@ export default function NeuralLoading({ size = 'md', className, text }: NeuralLo
     lg: 'h-8 w-8'
   }
   
-  const dots = Array.from({ length: 5 }, (_, i) => i)
-  
+  const dotColors = ['bg-primary', 'bg-secondary', 'bg-primary', 'bg-secondary', 'bg-primary']
+
   return (
     <div className={cn("flex items-center gap-2", className)}>
-      {/* Neural synapse animation */}
       <div className="flex gap-1">
-        {dots.map((index) => (
+        {dotColors.map((color, index) => (
           <div
             key={index}
             className={cn(
-              "rounded-full bg-primary animate-pulse",
+              "rounded-full animate-pulse",
+              color,
               sizeClasses[size]
             )}
             style={{

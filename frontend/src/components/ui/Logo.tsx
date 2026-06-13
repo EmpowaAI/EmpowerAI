@@ -44,13 +44,11 @@ export default function Logo({
         }}
       />
       <span
-        className={`font-bold tracking-tight ${textClasses[size]} ${
-          variant === "light" 
-            ? "text-primary-foreground panel-copy-shadow" 
-            : "text-foreground"
+        className={`font-display font-bold tracking-tight ${textClasses[size]} ${
+          variant === "light" ? "panel-copy-shadow" : ""
         }`}
       >
-        EmpowaAI
+        <span className={variant === "light" ? "text-primary-foreground" : "text-foreground"}>Empowa</span><span className="text-secondary">AI</span>
       </span>
     </div>
   );

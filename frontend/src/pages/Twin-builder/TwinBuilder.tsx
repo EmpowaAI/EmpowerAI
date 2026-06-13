@@ -169,55 +169,60 @@ const CompletionCard = ({
   onOpportunities: () => void;
   onInterview: () => void;
 }) => (
-  <div className="mt-4 rounded-xl border border-primary/40 bg-primary/5 p-5 space-y-4">
-    <div className="flex items-center gap-2">
-      <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
-      <p className="font-bold text-foreground">Your Economic Twin is ready!</p>
+  <div className="mt-4 rounded-xl border border-border overflow-hidden">
+    {/* Gradient header */}
+    <div className="relative overflow-hidden px-4 py-4 text-white" style={{ background: 'var(--gradient-hero)' }}>
+      <div className="pointer-events-none absolute inset-0 ubuntu-pattern opacity-20" aria-hidden />
+      <div className="relative z-10 flex items-center gap-2">
+        <CheckCircle2 className="h-5 w-5 shrink-0" />
+        <p className="font-display font-bold text-sm">Your Economic Twin is ready!</p>
+      </div>
     </div>
 
-    {score > 0 && (
-      <div>
-        <div className="flex justify-between text-xs mb-1">
-          <span className="text-muted-foreground font-medium">Empowerment Score</span>
-          <span className="font-bold text-primary">{score}%</span>
+    <div className="bg-card p-4 space-y-4">
+      {score > 0 && (
+        <div>
+          <div className="flex justify-between text-xs mb-1.5">
+            <span className="text-muted-foreground font-medium">Empowerment Score</span>
+            <span className="font-bold text-primary">{score}%</span>
+          </div>
+          <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+            <div className="h-full rounded-full transition-[width] duration-700" style={{ width: `${score}%`, background: 'var(--gradient-hero)' }} />
+          </div>
         </div>
-        <div className="h-2 overflow-hidden rounded-full bg-muted">
-          <div className="h-full rounded-full bg-primary transition-[width] duration-700" style={{ width: `${score}%` }} />
+      )}
+
+      {skills.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {skills.slice(0, 5).map((s) => (
+            <span key={s} className="rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
+              {s}
+            </span>
+          ))}
         </div>
+      )}
+
+      <p className="text-xs text-muted-foreground">Your profile is built. Choose what to do next:</p>
+
+      <div className="grid grid-cols-2 gap-3">
+        <button
+          type="button"
+          onClick={onOpportunities}
+          className="shimmer flex flex-col items-center gap-2 rounded-xl px-4 py-4 text-white transition-all hover:-translate-y-0.5"
+          style={{ background: 'var(--gradient-hero)' }}
+        >
+          <Briefcase className="h-5 w-5" />
+          <span className="text-sm font-bold leading-tight text-center">Browse Opportunities</span>
+        </button>
+        <button
+          type="button"
+          onClick={onInterview}
+          className="flex flex-col items-center gap-2 rounded-xl border border-border bg-card px-4 py-4 text-foreground transition-colors hover:border-primary/40 hover:bg-muted/30"
+        >
+          <Mic className="h-5 w-5 text-secondary" />
+          <span className="text-sm font-bold leading-tight text-center">Practice Interview</span>
+        </button>
       </div>
-    )}
-
-    {skills.length > 0 && (
-      <div className="flex flex-wrap gap-1.5">
-        {skills.slice(0, 5).map((s) => (
-          <span key={s} className="rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
-            {s}
-          </span>
-        ))}
-      </div>
-    )}
-
-    <p className="text-sm text-muted-foreground">
-      Your profile is built. Choose what to do next:
-    </p>
-
-    <div className="grid grid-cols-2 gap-3">
-      <button
-        type="button"
-        onClick={onOpportunities}
-        className="flex flex-col items-center gap-2 rounded-xl border border-primary bg-primary px-4 py-4 text-primary-foreground transition-opacity hover:opacity-90"
-      >
-        <Briefcase className="h-5 w-5" />
-        <span className="text-sm font-bold leading-tight text-center">Browse Opportunities</span>
-      </button>
-      <button
-        type="button"
-        onClick={onInterview}
-        className="flex flex-col items-center gap-2 rounded-xl border border-border bg-card px-4 py-4 text-foreground transition-colors hover:border-primary/40"
-      >
-        <Mic className="h-5 w-5 text-primary" />
-        <span className="text-sm font-bold leading-tight text-center">Practice Interview</span>
-      </button>
     </div>
   </div>
 );
@@ -566,20 +571,25 @@ const TwinBuilder = () => {
 
               {/* Next actions — always visible once twin is loaded */}
               {twinData && (
-                <section className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-2">
-                  <p className="text-xs font-bold uppercase tracking-wider text-primary">Ready to act?</p>
-                  <Link to="/dashboard/opportunities">
-                    <Button className="w-full mb-2">
-                      <Briefcase className="mr-2 h-4 w-4" />
-                      Browse Opportunities
-                    </Button>
-                  </Link>
-                  <Link to="/dashboard/interview-coach">
-                    <Button variant="outline" className="w-full">
-                      <Mic className="mr-2 h-4 w-4" />
-                      Practice Interview
-                    </Button>
-                  </Link>
+                <section className="rounded-xl border border-border overflow-hidden">
+                  <div className="relative overflow-hidden px-3 py-2.5 text-white" style={{ background: 'var(--gradient-hero)' }}>
+                    <div className="pointer-events-none absolute inset-0 ubuntu-pattern opacity-15" aria-hidden />
+                    <p className="relative z-10 text-xs font-bold uppercase tracking-wider">Ready to act?</p>
+                  </div>
+                  <div className="bg-card p-3 space-y-2">
+                    <Link to="/dashboard/opportunities">
+                      <Button className="w-full mb-1 shimmer" style={{ background: 'var(--gradient-hero)', color: 'white', border: 'none' }}>
+                        <Briefcase className="mr-2 h-4 w-4" />
+                        Browse Opportunities
+                      </Button>
+                    </Link>
+                    <Link to="/dashboard/interview-coach">
+                      <Button variant="outline" className="w-full">
+                        <Mic className="mr-2 h-4 w-4" />
+                        Practice Interview
+                      </Button>
+                    </Link>
+                  </div>
                 </section>
               )}
 
@@ -775,7 +785,7 @@ const TwinBuilder = () => {
                   </div>
                   <div className="flex items-center gap-2 rounded-[14px] border border-border bg-card px-5 py-4 shadow-sm" aria-live="polite" aria-label="Economic Twin is typing">
                     <span className="h-2 w-2 animate-bounce rounded-full bg-primary" />
-                    <span className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:120ms]" />
+                    <span className="h-2 w-2 animate-bounce rounded-full bg-secondary [animation-delay:120ms]" />
                     <span className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:240ms]" />
                     <span className="ml-2 text-sm font-medium text-muted-foreground">Thinking…</span>
                   </div>
@@ -788,12 +798,16 @@ const TwinBuilder = () => {
           {/* Input area — replaced by CTA panel once chat completes */}
           {chatComplete ? (
             <div className="sticky bottom-0 border-t border-border bg-background px-4 py-4 sm:px-5">
-              <p className="text-xs text-center text-muted-foreground font-semibold mb-3">Your twin session is complete. What would you like to do?</p>
+              <p className="text-xs text-center text-muted-foreground font-semibold mb-3">Session complete — what would you like to do next?</p>
               <div className="grid grid-cols-2 gap-3">
-                <Button onClick={() => navigate("/dashboard/opportunities")} className="w-full">
-                  <Briefcase className="mr-2 h-4 w-4" />
+                <button
+                  onClick={() => navigate("/dashboard/opportunities")}
+                  className="shimmer flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold text-white"
+                  style={{ background: 'var(--gradient-hero)' }}
+                >
+                  <Briefcase className="h-4 w-4" />
                   Browse Opportunities
-                </Button>
+                </button>
                 <Button variant="outline" onClick={() => navigate("/dashboard/interview-coach")} className="w-full">
                   <Mic className="mr-2 h-4 w-4" />
                   Practice Interview

@@ -1,139 +1,226 @@
+
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Brain, FileText } from "lucide-react";
+import {
+  Brain, CheckCircle, Loader2,
+  FileText, Eye, Shield, Briefcase, Target, Sparkles,
+} from "lucide-react";
+import { cn } from "../../../lib/utils";
 
 interface CVScanAnimationProps {
   isActive: boolean;
   onComplete?: () => void;
 }
 
-const scanSteps = [
-  { text: "Parsing experience...", status: "OK" },
-  { text: "Cross-referencing skills with job market...", status: "OK" },
-  { text: "Identifying weak keyword density...", status: "WARN" },
-  { text: "Evaluating action verb usage...", status: "OK" },
-  { text: "Checking profile link presence...", status: "PARTIAL" },
-  { text: "Generating strength report...", status: "OK" },
+const SCAN_STEPS = [
+  { Icon: FileText,  label: "Parsing document structure",      phase: "Reading"    },
+  { Icon: Eye,       label: "Extracting skills & experience",   phase: "Extracting" },
+  { Icon: Shield,    label: "ATS compatibility check",          phase: "ATS"        },
+  { Icon: Briefcase, label: "Matching job market keywords",     phase: "Matching"   },
+  { Icon: Target,    label: "Analysing keyword density",        phase: "Keywords"   },
+  { Icon: Sparkles,  label: "Generating your full report",      phase: "Finalising" },
 ];
+
+const R = 50, SW = 10, SZ = 128, CX = SZ / 2;
+const CIRC = 2 * Math.PI * R;
 
 export default function CVScanAnimation({ isActive, onComplete }: CVScanAnimationProps) {
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [currentStep, setCurrentStep] = useState(-1);
-  const [scanLinePos, setScanLinePos] = useState(0);
 
   useEffect(() => {
     if (!isActive) return;
     setCompletedSteps([]);
     setCurrentStep(0);
     let step = 0;
-    const interval = setInterval(() => {
-      setCompletedSteps((prev) => [...prev, step]);
+    const id = setInterval(() => {
+      setCompletedSteps((p) => [...p, step]);
       step++;
-      if (step >= scanSteps.length) {
-        clearInterval(interval);
-        setTimeout(() => onComplete?.(), 800);
+      if (step >= SCAN_STEPS.length) {
+        clearInterval(id);
+        setTimeout(() => onComplete?.(), 600);
       } else {
         setCurrentStep(step);
       }
     }, 1100);
-    return () => clearInterval(interval);
+    return () => clearInterval(id);
   }, [isActive, onComplete]);
-
-  useEffect(() => {
-    if (!isActive) return;
-    const interval = setInterval(() => {
-      setScanLinePos((p) => (p >= 100 ? 0 : p + 2));
-    }, 40);
-    return () => clearInterval(interval);
-  }, [isActive]);
 
   if (!isActive) return null;
 
+  const pct = Math.round((completedSteps.length / SCAN_STEPS.length) * 100);
+  const done = completedSteps.length === SCAN_STEPS.length;
+  const dashFill = (pct / 100) * CIRC;
+
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      className="glass-panel-strong p-8 relative overflow-hidden"
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -12 }}
+      className="rounded-2xl border border-border overflow-hidden"
     >
-      <div className="absolute inset-0 grid-bg opacity-10" />
-      <div className="relative flex flex-col lg:flex-row gap-8 items-start">
-        <div className="relative flex-shrink-0 mx-auto lg:mx-0">
-          <div className="relative w-48 h-64 rounded-xl border border-border/50 bg-muted/20 overflow-hidden">
-            <div className="p-4 space-y-2">
-              {Array.from({ length: 12 }).map((_, i) => (
-                <div key={i} className="h-2 rounded-full bg-border/40" style={{ width: `${60 + Math.random() * 35}%` }} />
-              ))}
-            </div>
+      {/* ── Gradient header ─────────────────────────────────────────────── */}
+      <div className="relative overflow-hidden px-6 py-5 text-white" style={{ background: 'var(--gradient-hero)' }}>
+        <div className="pointer-events-none absolute inset-0 ai-grid opacity-10" aria-hidden />
+        <div className="pointer-events-none absolute inset-0 ubuntu-pattern opacity-15" aria-hidden />
+        <div className="relative z-10 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
             <motion.div
-              className="absolute left-0 right-0 h-1"
-              style={{
-                top: `${scanLinePos}%`,
-                background: "linear-gradient(90deg, transparent, hsl(var(--neon-cyan) / 0.8), transparent)",
-                boxShadow: "0 0 20px 4px hsl(var(--neon-cyan) / 0.3)",
-              }}
-            />
-            {[0, 1, 2, 3, 4].map((i) => (
-              <motion.div
-                key={i}
-                className="absolute h-1 w-1 rounded-full bg-primary"
-                animate={{
-                  x: [Math.random() * 180, Math.random() * 180],
-                  y: [Math.random() * 240, Math.random() * 240],
-                  opacity: [0, 1, 0],
-                  scale: [0, 1.5, 0],
-                }}
-                transition={{ duration: 2 + Math.random(), repeat: Infinity, delay: i * 0.4 }}
-              />
-            ))}
-            <div className="absolute inset-0 border-2 border-primary/20 rounded-xl" />
+              animate={{ scale: [1, 1.08, 1] }}
+              transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+              className="h-10 w-10 rounded-xl bg-white/15 border border-white/25 flex items-center justify-center flex-shrink-0"
+            >
+              <Brain className="h-5 w-5" />
+            </motion.div>
+            <div>
+              <p className="font-display font-bold text-sm leading-tight">
+                {done ? "Analysis Complete!" : "Analysing Your CV"}
+              </p>
+              <p className="text-white/65 text-xs mt-0.5">
+                {done
+                  ? "Preparing your results…"
+                  : `Step ${Math.min(currentStep + 1, SCAN_STEPS.length)} of ${SCAN_STEPS.length}`}
+              </p>
+            </div>
           </div>
-          <motion.div
-            animate={{ y: [0, -5, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="absolute -top-4 -right-4 h-10 w-10 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center neon-glow-cyan"
-          >
-            <Brain className="h-5 w-5 text-primary" />
-          </motion.div>
+          <div className="text-right">
+            <motion.p
+              key={pct}
+              initial={{ scale: 0.85, opacity: 0.5 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="font-display font-bold text-2xl"
+            >
+              {pct}%
+            </motion.p>
+            <p className="text-white/55 text-[11px]">complete</p>
+          </div>
         </div>
+      </div>
 
-        <div className="flex-1 w-full">
-          <div className="flex items-center gap-2 mb-4">
-            <FileText className="h-4 w-4 text-primary" />
-            <span className="text-xs font-mono text-primary uppercase tracking-widest">AI Analysis Terminal</span>
+      {/* ── Body ────────────────────────────────────────────────────────── */}
+      <div className="bg-card p-6 space-y-5">
+        <div className="flex gap-6 items-start">
+
+          {/* Circular ring */}
+          <div className="flex-shrink-0 relative" style={{ width: SZ, height: SZ }}>
+            <svg
+              width={SZ} height={SZ}
+              className="absolute top-0 left-0 -rotate-90"
+              style={{ transformOrigin: 'center' }}
+              aria-hidden
+            >
+              <defs>
+                <linearGradient id="cvScanGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="hsl(218 64% 28%)" />
+                  <stop offset="100%" stopColor="hsl(22 95% 55%)" />
+                </linearGradient>
+              </defs>
+              <circle cx={CX} cy={CX} r={R} strokeWidth={SW} fill="none" className="stroke-muted" />
+              <motion.circle
+                cx={CX} cy={CX} r={R} strokeWidth={SW} fill="none"
+                strokeLinecap="round"
+                stroke="url(#cvScanGrad)"
+                strokeDasharray={CIRC}
+                initial={{ strokeDashoffset: CIRC }}
+                animate={{ strokeDashoffset: CIRC - dashFill }}
+                transition={{ duration: 0.7, ease: "easeOut" }}
+              />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <motion.span
+                key={pct}
+                initial={{ scale: 0.85 }}
+                animate={{ scale: 1 }}
+                className="font-display font-bold text-2xl text-foreground"
+              >
+                {pct}%
+              </motion.span>
+              <span className="text-[10px] text-muted-foreground font-medium mt-0.5">done</span>
+            </div>
           </div>
-          <div className="space-y-2 font-mono text-sm">
-            {scanSteps.map((step, i) => {
-              const isCompleted = completedSteps.includes(i);
-              const isCurrent = currentStep === i && !isCompleted;
+
+          {/* Step list */}
+          <div className="flex-1 space-y-2.5 pt-1 min-w-0">
+            {SCAN_STEPS.map(({ Icon, label, phase }, i) => {
+              const stepDone   = completedSteps.includes(i);
+              const stepActive = currentStep === i && !stepDone;
               return (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={isCompleted || isCurrent ? { opacity: 1, x: 0 } : { opacity: 0.2 }}
+                  initial={{ opacity: 0, x: 8 }}
+                  animate={{ opacity: stepDone || stepActive ? 1 : 0.28, x: 0 }}
+                  transition={{ duration: 0.25, delay: i * 0.04 }}
                   className="flex items-center gap-3"
                 >
-                  {isCompleted ? (
-                    <span className={
-                      step.status === "OK" ? "text-neon-green" :
-                      step.status === "WARN" ? "text-neon-orange" : "text-secondary"
-                    }>[{step.status}]</span>
-                  ) : isCurrent ? (
-                    <motion.span
-                      animate={{ opacity: [1, 0.3, 1] }}
-                      transition={{ duration: 0.8, repeat: Infinity }}
-                      className="text-primary"
-                    >[...]</motion.span>
-                  ) : (
-                    <span className="text-muted-foreground/30">[---]</span>
+                  {/* Status indicator */}
+                  <div className={cn(
+                    "h-6 w-6 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300",
+                    stepDone
+                      ? "bg-gradient-to-br from-primary to-secondary"
+                      : stepActive
+                      ? "border-2 border-secondary bg-secondary/10"
+                      : "border border-border bg-muted/50"
+                  )}>
+                    {stepDone ? (
+                      <CheckCircle className="h-3.5 w-3.5 text-white" />
+                    ) : stepActive ? (
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      >
+                        <Loader2 className="h-3.5 w-3.5 text-secondary" />
+                      </motion.div>
+                    ) : (
+                      <Icon className="h-3 w-3 text-muted-foreground/30" />
+                    )}
+                  </div>
+
+                  <p className={cn(
+                    "flex-1 text-xs transition-colors truncate",
+                    stepDone   ? "text-foreground font-medium" :
+                    stepActive ? "text-secondary font-semibold" :
+                                 "text-muted-foreground/40"
+                  )}>
+                    {label}
+                  </p>
+
+                  {stepDone && (
+                    <span className="text-[10px] font-bold text-green-600 dark:text-green-400 bg-green-500/10 px-1.5 py-0.5 rounded-full flex-shrink-0">
+                      ✓
+                    </span>
                   )}
-                  <span className={
-                    isCompleted ? "text-muted-foreground" :
-                    isCurrent ? "text-foreground" : "text-muted-foreground/30"
-                  }>{step.text}</span>
+                  {stepActive && (
+                    <motion.span
+                      animate={{ opacity: [1, 0.4, 1] }}
+                      transition={{ duration: 0.85, repeat: Infinity }}
+                      className="text-[10px] font-bold text-secondary bg-secondary/10 px-1.5 py-0.5 rounded-full flex-shrink-0"
+                    >
+                      {phase}
+                    </motion.span>
+                  )}
                 </motion.div>
               );
             })}
+          </div>
+        </div>
+
+        {/* Bottom progress bar */}
+        <div className="space-y-1.5">
+          <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+            <motion.div
+              className="h-full rounded-full"
+              style={{ background: 'var(--gradient-hero)' }}
+              animate={{ width: `${pct}%` }}
+              transition={{ duration: 0.7, ease: "easeOut" }}
+            />
+          </div>
+          <div className="flex justify-between text-[10px] text-muted-foreground">
+            <span>
+              {done
+                ? "All checks complete — preparing results"
+                : `${completedSteps.length} of ${SCAN_STEPS.length} checks complete`}
+            </span>
+            <span className="font-semibold">{pct}%</span>
           </div>
         </div>
       </div>

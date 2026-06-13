@@ -6,6 +6,7 @@ import { UserProvider, useUser } from './contexts/user-context';
 import { ThemeProvider } from './lib/theme';
 import ProtectedRoute from './routes/ProtectedRoute';
 import NeuralLoading from './components/ui/NeuralLoading';
+import Logo from './components/ui/Logo';
 import AppPreloader from './components/AppPreloader';
 import ErrorBoundary from './components/ErrorBoundary';
 import { Toaster } from 'react-hot-toast';
@@ -45,12 +46,13 @@ const COMING_SOON = import.meta.env.VITE_COMING_SOON === 'true';
 // ── Suspense fallback ──────────────────────────────────────────────────────
 function PageLoader() {
   return (
-    <div className="min-h-screen relative flex items-center justify-center overflow-hidden bg-gradient-to-br from-emerald-50 via-white to-sky-50">
+    <div className="min-h-screen relative flex items-center justify-center overflow-hidden bg-background">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-200/40 blur-3xl" />
-        <div className="absolute left-1/2 top-1/2 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-sky-200/30 blur-3xl animate-pulse" />
+        <div className="absolute top-0 right-0 h-3/4 w-3/4 -translate-y-1/4 translate-x-1/4 rounded-full bg-primary/5 blur-3xl" />
+        <div className="absolute bottom-0 left-0 h-3/4 w-3/4 translate-y-1/4 -translate-x-1/4 rounded-full bg-secondary/5 blur-3xl animate-pulse" />
       </div>
-      <div className="relative">
+      <div className="relative flex flex-col items-center gap-8">
+        <Logo size="lg" />
         <NeuralLoading size="lg" text="Loading your workspace..." />
       </div>
     </div>
