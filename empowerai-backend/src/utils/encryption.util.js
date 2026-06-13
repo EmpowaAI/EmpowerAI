@@ -13,16 +13,22 @@ const PROFILE_ARRAY_FIELDS  = ['skills', 'interests'];
 // ── Key management ───────────────────────────────────────────────────────────
 
 let _cachedKey = null;
+let _warnedMissingKey = false;
 
 function _getKey() {
   if (_cachedKey) return _cachedKey;
 
   const hex = process.env.DATA_ENCRYPTION_KEY;
   if (!hex || hex.length !== 64) {
-    throw new Error(
-      '[Encryption] DATA_ENCRYPTION_KEY must be a 64-character hex string (32 bytes). ' +
-      'Generate one with: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"'
-    );
+    if (!_warnedMissingKey) {
+      _warnedMissingKey = true;
+      // eslint-disable-next-line no-console
+      console.warn(
+        '[Encryption] DATA_ENCRYPTION_KEY is not set or invalid — storing data unencrypted. ' +
+        'Set a 64-char hex key in production: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"'
+      );
+    }
+    return null; // caller handles graceful degradation
   }
 
   _cachedKey = Buffer.from(hex, 'hex');
@@ -34,12 +40,18 @@ function _getKey() {
 /**
  * Encrypts any serialisable value (string, number, array, object).
  * Returns a colon-delimited string: "<iv>:<authTag>:<ciphertext>"
+ * Returns the value as-is (string passthrough) when no key is configured.
  * Returns the original value unchanged if null / undefined.
  */
 function encryptField(value) {
   if (value === null || value === undefined) return value;
 
-  const key       = _getKey();
+  const key = _getKey();
+  if (!key) {
+    // No key configured — store as-is (plaintext fallback)
+    return typeof value === 'string' ? value : JSON.stringify(value);
+  }
+
   const iv        = crypto.randomBytes(IV_LENGTH);
   const cipher    = crypto.createCipheriv(ALGORITHM, key, iv, { authTagLength: TAG_LENGTH });
   const plaintext = JSON.stringify(value);
@@ -61,10 +73,12 @@ function decryptField(encrypted) {
   if (!encrypted || typeof encrypted !== 'string') return encrypted;
 
   const parts = encrypted.split(':');
-  if (parts.length !== 3) return encrypted; // plaintext passthrough (pre-migration data)
+  if (parts.length !== 3) return encrypted; // plaintext passthrough (pre-migration data or no-key mode)
+
+  const key = _getKey();
+  if (!key) return encrypted; // key not configured — return as stored
 
   try {
-    const key     = _getKey();
     const [ivHex, authTagHex, ciphertext] = parts;
 
     const iv      = Buffer.from(ivHex, 'hex');
