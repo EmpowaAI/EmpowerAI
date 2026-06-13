@@ -15,6 +15,7 @@ const LandingPage    = lazy(() => import('./pages/LandingPage'));
 const ComingSoon     = lazy(() => import('./pages/ComingSoon'));
 const Demo           = lazy(() => import('./pages/Demo'));
 const Pricing        = lazy(() => import('./pages/Pricing'));
+const SignupPage     = lazy(() => import('./pages/Auth/SignupPage'));
 const LoginPage      = lazy(() => import('./pages/Auth/LoginPage'));
 const ForgotPassword = lazy(() => import('./pages/Auth/ForgotPassword'));
 const ResetPassword  = lazy(() => import('./pages/Auth/ResetPassword'));
@@ -88,7 +89,7 @@ function AppRoutes() {
       <Route path="/twin-preview" element={<TwinBuilder />} />
       {/* <Route path="/pricing" element={<Pricing />} /> */}
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/signup" element={<Navigate to="/" replace />} />
+      <Route path="/signup" element={<SignupPage />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/verify" element={<EmailVerified />} />
