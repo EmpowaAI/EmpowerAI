@@ -186,7 +186,7 @@ function encryptProfile(data) {
 
 /**
  * Decrypts PII profile fields on a User document returned from the DB.
- * Accepts a Mongoose document or a plain object.
+ * Accepts a plain object or any object with a toObject() method.
  * Restores age back to a Number after decryption.
  */
 function decryptProfile(user) {

@@ -10,7 +10,7 @@
  */
 
 const axios = require('axios');
-const Opportunity = require('../modules/opportunities/Opportunity.Model');
+const supabase = require('../db/supabase');
 const logger = require('../utils/logger');
 
 let schedulerInterval = null;
@@ -154,19 +154,29 @@ async function saveOpportunities(jobs, source) {
 
   for (const job of jobs) {
     try {
-      // Check for duplicates
-      const existing = await Opportunity.findOne({
-        externalId: job.externalId,
-        source: source
-      });
+      const { data: existing } = await supabase.from('opportunities').select('id')
+        .eq('external_id', job.externalId).eq('source', source).maybeSingle();
 
       if (!existing) {
-        await Opportunity.create({
-          ...job,
+        const { error } = await supabase.from('opportunities').insert({
+          title: job.title,
+          type: job.type,
+          company: job.company,
+          location: job.location,
+          province: job.province,
+          description: job.description,
+          requirements: job.requirements,
+          skills: job.skills,
+          salary_range: job.salaryRange ?? null,
+          deadline: job.deadline instanceof Date ? job.deadline.toISOString() : job.deadline,
+          application_url: job.applicationUrl,
+          is_active: true,
           source: source,
-          isActive: true
+          external_id: job.externalId ?? null,
         });
-        added++;
+        if (error && error.code !== '23505') logger.warn(`Error saving opportunity: ${error.message}`);
+        else if (!error) added++;
+        else skipped++;
       } else {
         skipped++;
       }

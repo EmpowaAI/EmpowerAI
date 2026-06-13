@@ -1,23 +1,16 @@
-const CareerTaxonomyConfig = require('../models/CareerTaxonomyConfig');
 const defaultTaxonomy = require('../config/careerTaxonomy');
 
+// In-memory override — survives for the process lifetime; resets on deploy.
+// Admin can update via PUT /api/admin/taxonomy but changes are not persisted.
+let _override = null;
+
 async function getCareerTaxonomy() {
-  try {
-    const doc = await CareerTaxonomyConfig.findOne({ key: 'careerTaxonomy' }).lean();
-    if (doc && doc.data) return doc.data;
-  } catch (error) {
-    // Fall back to default if DB unavailable
-  }
-  return defaultTaxonomy;
+  return _override || defaultTaxonomy;
 }
 
 async function setCareerTaxonomy(data) {
-  const updated = await CareerTaxonomyConfig.findOneAndUpdate(
-    { key: 'careerTaxonomy' },
-    { data },
-    { upsert: true, new: true }
-  );
-  return updated?.data || data;
+  _override = data;
+  return data;
 }
 
 module.exports = {

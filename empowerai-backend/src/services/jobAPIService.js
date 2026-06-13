@@ -6,9 +6,28 @@
  */
 
 const axios = require('axios');
-const Opportunity = require('../modules/opportunities/Opportunity.Model');
+const supabase = require('../db/supabase');
 const logger = require('../utils/logger');
 const { extractSkillsEnhanced } = require('../utils/skillExtractors');
+
+function toRow(job) {
+  return {
+    title: job.title,
+    type: job.type,
+    company: job.company,
+    location: job.location,
+    province: job.province,
+    description: job.description,
+    requirements: job.requirements,
+    skills: job.skills,
+    salary_range: job.salaryRange ?? null,
+    deadline: job.deadline instanceof Date ? job.deadline.toISOString() : job.deadline,
+    application_url: job.applicationUrl,
+    is_active: job.isActive ?? true,
+    source: job.source,
+    external_id: job.externalId ?? null,
+  };
+}
 
 // API Configuration
 const ADZUNA_APP_ID = process.env.ADZUNA_APP_ID;
@@ -183,34 +202,36 @@ async function fetchAllJobAPIs() {
 async function saveJobsToDatabase(jobs) {
   let newCount = 0;
   let skippedCount = 0;
-  
+
   for (const job of jobs) {
     try {
-      // Principal Engineer Note: Check externalId first as it's the most reliable unique identifier
-      const existing = await Opportunity.findOne({
-        $or: [
-          { externalId: job.externalId, source: job.source },
-          { applicationUrl: job.applicationUrl }
-        ]
-      }, { _id: 1 }).lean(); // Only fetch _id for speed
-      
-      if (existing) {
-        skippedCount++;
-        continue;
+      let existing = null;
+      if (job.externalId) {
+        const { data } = await supabase.from('opportunities').select('id')
+          .eq('external_id', job.externalId).eq('source', job.source).maybeSingle();
+        existing = data;
       }
-      
-      await Opportunity.create(job);
-      newCount++;
-    } catch (error) {
-      if (error.code === 11000) {
-        skippedCount++;
+      if (!existing && job.applicationUrl) {
+        const { data } = await supabase.from('opportunities').select('id')
+          .eq('application_url', job.applicationUrl).maybeSingle();
+        existing = data;
+      }
+
+      if (existing) { skippedCount++; continue; }
+
+      const { error } = await supabase.from('opportunities').insert(toRow(job));
+      if (error) {
+        if (error.code === '23505') { skippedCount++; }
+        else { logger.error(`Error saving job "${job.title}":`, error.message); skippedCount++; }
       } else {
-        logger.error(`Error saving job "${job.title}":`, error.message);
-        skippedCount++;
+        newCount++;
       }
+    } catch (error) {
+      logger.error(`Error saving job "${job.title}":`, error.message);
+      skippedCount++;
     }
   }
-  
+
   return { new: newCount, skipped: skippedCount };
 }
 

@@ -1,4 +1,3 @@
-const mongoose = require('mongoose');
 const logger = require('./logger');
 
 function createShutdownHandler(serverInstance) {
@@ -15,9 +14,6 @@ function createShutdownHandler(serverInstance) {
         await new Promise((resolve) => serverInstance.close(resolve));
         logger.info('HTTP server closed');
       }
-
-      await mongoose.connection.close(false);
-      logger.info('MongoDB connection closed');
 
       logger.info('Shutdown complete');
       process.exit(0);

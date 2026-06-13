@@ -6,9 +6,28 @@
  */
 
 const Parser = require('rss-parser');
-const Opportunity = require('../modules/opportunities/Opportunity.Model');
+const supabase = require('../db/supabase');
 const logger = require('../utils/logger');
 const { extractSkillsEnhanced } = require('../utils/skillExtractors');
+
+function toRow(opp) {
+  return {
+    title: opp.title,
+    type: opp.type,
+    company: opp.company,
+    location: opp.location,
+    province: opp.province,
+    description: opp.description,
+    requirements: opp.requirements,
+    skills: opp.skills,
+    salary_range: opp.salaryRange ?? null,
+    deadline: opp.deadline instanceof Date ? opp.deadline.toISOString() : opp.deadline,
+    application_url: opp.applicationUrl,
+    is_active: opp.isActive ?? true,
+    source: opp.source,
+    external_id: opp.externalId ?? null,
+  };
+}
 
 const parser = new Parser({
   timeout: 30000, // increased timeout for slow feeds
@@ -113,20 +132,18 @@ async function fetchAllFeeds() {
           }
 
           // Save new opportunity
-          try {
-            const saved = await Opportunity.create(opportunity);
-            newCount++;
-            logger.debug(`Saved new opportunity: ${saved.title} from ${source.name}`);
-          } catch (saveError) {
-            // Handle duplicate key errors or validation errors
-            if (saveError.code === 11000) {
-              // Duplicate key error (if we have unique indexes)
+          const { error: saveError } = await supabase.from('opportunities').insert(toRow(opportunity));
+          if (saveError) {
+            if (saveError.code === '23505') {
               skippedCount++;
               logger.debug(`Duplicate opportunity skipped: ${opportunity.title}`);
             } else {
               logger.error(`Error saving opportunity: ${saveError.message}`);
               skippedCount++;
             }
+          } else {
+            newCount++;
+            logger.debug(`Saved new opportunity: ${opportunity.title} from ${source.name}`);
           }
 
         } catch (itemError) {
@@ -159,9 +176,11 @@ async function fetchAllFeeds() {
 async function purgeOldOpportunities(daysOld = 30) {
   const cutoffDate = new Date(Date.now() - daysOld * 24 * 60 * 60 * 1000);
   try {
-    const results = await Opportunity.deleteMany({ createdAt: { $lt: cutoffDate } });
-    logger.info(`Purged old opportunities older than ${daysOld} days: ${results.deletedCount} removed.`);
-    return results.deletedCount;
+    const { count, error } = await supabase.from('opportunities')
+      .delete({ count: 'exact' }).lt('created_at', cutoffDate.toISOString());
+    if (error) throw error;
+    logger.info(`Purged old opportunities older than ${daysOld} days: ${count ?? 0} removed.`);
+    return count ?? 0;
   } catch (error) {
     logger.error('Error purging old opportunities:', error.message);
     throw error;
@@ -172,23 +191,16 @@ async function purgeOldOpportunities(daysOld = 30) {
  * Find existing opportunity by title, company, and link
  */
 async function findExistingOpportunity(opportunity) {
-  // Try multiple strategies for deduplication
-  const escapedTitle = opportunity.title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const queries = [
-    { applicationUrl: opportunity.applicationUrl },
-    { 
-      title: { $regex: `^${escapedTitle}$`, $options: 'i' },
-      company: opportunity.company
-    }
-  ];
-
-  for (const query of queries) {
-    const existing = await Opportunity.findOne(query);
-    if (existing) {
-      return existing;
-    }
+  if (opportunity.applicationUrl) {
+    const { data } = await supabase.from('opportunities').select('id')
+      .eq('application_url', opportunity.applicationUrl).maybeSingle();
+    if (data) return data;
   }
-
+  if (opportunity.title && opportunity.company) {
+    const { data } = await supabase.from('opportunities').select('id')
+      .ilike('title', opportunity.title).ilike('company', opportunity.company).maybeSingle();
+    if (data) return data;
+  }
   return null;
 }
 
