@@ -36,8 +36,6 @@ export default function CVAnalyzerPage() {
     formValues,
     analysis,
     isFallback,
-    isSubscribed,
-    analysisRemaining,
     revampedCV,
     error,
     isRateLimited,
@@ -166,15 +164,12 @@ export default function CVAnalyzerPage() {
             <CVAnalysisResult
               analysis={analysis}
               isFallback={isFallback}
-              analysisRemaining={analysisRemaining}
-              isSubscribed={isSubscribed}
               onRevampClick={submitRevamp}
               onReanalyze={reset}
             />
 
             {/* Revamp section below results */}
             <CVRevampSection
-              isSubscribed={isSubscribed}
               isRevamping={false}
               onRevamp={submitRevamp}
             />

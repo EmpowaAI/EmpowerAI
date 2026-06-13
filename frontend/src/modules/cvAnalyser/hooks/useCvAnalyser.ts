@@ -23,11 +23,8 @@ type Action =
       payload: {
         analysis: CVAnalysis;
         profileId: string;
-        isSubscribed: boolean;
         analysisRemaining: number | null;
         isFallback: boolean;
-        // cvText is persisted here so POST /cv/revamp always has it,
-        // regardless of whether the user uploaded a file or pasted text.
         cvText: string;
       };
     }
@@ -52,7 +49,6 @@ const initialState: CVAnalyzerState = {
   formValues: { targetRole: '', industry: '', jobDescription: '' },
   analysis: null,
   profileId: null,
-  isSubscribed: false,
   analysisRemaining: null,
   isFallback: false,
   revampedCV: null,
@@ -108,7 +104,6 @@ function reducer(state: CVAnalyzerState, action: Action): CVAnalyzerState {
         step: 'result',
         analysis: action.payload.analysis,
         profileId: action.payload.profileId,
-        isSubscribed: action.payload.isSubscribed,
         analysisRemaining: action.payload.analysisRemaining,
         isFallback: action.payload.isFallback,
         // KEY FIX: persist cvText so submitRevamp can send it to POST /cv/revamp.
@@ -226,7 +221,6 @@ export function useCVAnalyzer() {
         payload: {
           analysis: response.analysis,
           profileId: response.profileId,
-          isSubscribed: response.isSubscribed ?? false,
           analysisRemaining: response.analysisRemaining ?? null,
           isFallback: response.fallback ?? false,
           cvText: resolvedCvText,

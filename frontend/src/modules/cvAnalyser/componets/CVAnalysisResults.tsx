@@ -1,7 +1,7 @@
 
 import { motion } from 'framer-motion';
 import {
-  AlertTriangle, Info, RefreshCw,
+  AlertTriangle, RefreshCw,
   TrendingUp, Shield, Target, Brain,
   User, Briefcase, BookOpen, Star, Zap, Sparkles,
 } from 'lucide-react';
@@ -11,10 +11,8 @@ import type { CVAnalysis } from '../types';
 interface CVAnalysisResultProps {
   analysis: CVAnalysis;
   isFallback: boolean;
-  analysisRemaining: number | null;
   onRevampClick: () => void;
   onReanalyze: () => void;
-  isSubscribed: boolean;
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -165,10 +163,8 @@ function Section({
 export default function CVAnalysisResult({
   analysis,
   isFallback,
-  analysisRemaining,
   onRevampClick,
   onReanalyze,
-  isSubscribed,
 }: CVAnalysisResultProps) {
   const readiness = getReadinessLabel(analysis.overallScore);
   const allRecommendations = [
@@ -188,12 +184,6 @@ export default function CVAnalysisResult({
         <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-700 dark:text-amber-400">
           <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" />
           <p>AI service temporarily unavailable. Showing basic CV insights based on text analysis.</p>
-        </div>
-      )}
-      {!isSubscribed && analysisRemaining !== null && (
-        <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/5 border border-primary/15 text-xs text-primary/80">
-          <Info className="h-4 w-4 flex-shrink-0" />
-          <p>You have <strong>{analysisRemaining}</strong> free analysis{analysisRemaining !== 1 ? 'es' : ''} remaining.</p>
         </div>
       )}
 

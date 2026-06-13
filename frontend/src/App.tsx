@@ -15,7 +15,6 @@ import { Toaster } from 'react-hot-toast';
 const LandingPage    = lazy(() => import('./pages/LandingPage'));
 const ComingSoon     = lazy(() => import('./pages/ComingSoon'));
 const Demo           = lazy(() => import('./pages/Demo'));
-const Pricing        = lazy(() => import('./pages/Pricing'));
 const SignupPage     = lazy(() => import('./pages/Auth/SignupPage'));
 const LoginPage      = lazy(() => import('./pages/Auth/LoginPage'));
 const ForgotPassword = lazy(() => import('./pages/Auth/ForgotPassword'));
@@ -89,7 +88,6 @@ function AppRoutes() {
       <Route path="/cv-analyzer" element={<CVAnalyzer />} />
       <Route path="/digital-twin" element={<DigitalTwin />} />
       <Route path="/twin-preview" element={<TwinBuilder />} />
-      {/* <Route path="/pricing" element={<Pricing />} /> */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />

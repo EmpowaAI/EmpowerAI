@@ -110,7 +110,6 @@ export interface CVAnalysis {
 export interface AnalyzeResponse {
   analysis: CVAnalysis;
   profileId: string;
-  isSubscribed: boolean;
   analysisRemaining?: number;
   fallback?: boolean;
   message?: string;
@@ -183,7 +182,6 @@ export interface CVAnalyzerState {
   formValues: AnalyzeFormValues;
   analysis: CVAnalysis | null;
   profileId: string | null;
-  isSubscribed: boolean;
   analysisRemaining: number | null;
   isFallback: boolean;
   revampedCV: RevampedCV | null;

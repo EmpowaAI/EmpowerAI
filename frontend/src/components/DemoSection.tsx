@@ -349,12 +349,6 @@ export function DemoSection() {
                       {chosen === null ? "Pick a path to continue" : "Lock it in"}
                       <ArrowRight className="ml-1 h-4 w-4" />
                     </Button>
-                    <Link
-                      to="/pricing"
-                      className="text-center text-[11px] text-muted-foreground underline-offset-4 hover:text-secondary hover:underline sm:text-right"
-                    >
-                      Full matching is R50/mo — CV Analyser stays Mahala
-                    </Link>
                   </div>
                 </div>
               </div>

@@ -1,17 +1,15 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ArrowRight, Brain, Sparkles, Zap, Users } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ProfileMenu } from "@/components/ProfileMenu";
 import { ContactWidget } from "@/components/ContactWidget";
 import DemoSection from "@/components/DemoSection";
-import { Menu, X, Mail, MapPin, Facebook, Instagram, Linkedin, Shield, FileText, Cookie, MessageSquare } from "lucide-react";
+import { Menu, X, Mail, MapPin, Facebook, Instagram, Linkedin, Shield, FileText, Cookie } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Logo from "@/components/ui/Logo";
 import TikTokIcon from "@/components/ui/TikTokIcon";
-
-const logoSrc = `${import.meta.env.BASE_URL}images/empowa_icon.png`;
 
 // Modal Component for legal pages
 function Modal({ isOpen, onClose, title, icon: Icon, children }: { 
@@ -58,17 +56,14 @@ export default function Demo() {
     <div className="min-h-screen bg-background font-sans text-foreground">
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-md">
         <div className="container flex h-16 items-center justify-between gap-4">
-          <Link to="/" className="flex items-center gap-2.5">
-            <img src={logoSrc} alt="EmpowaAI logo" className="h-9 w-9 object-contain" width={36} height={36} />
-            <span className="font-display text-xl font-bold tracking-tight text-primary">EmpowaAI</span>
-          </Link>
+          <Logo variant="default" size="md" linkTo="/" />
 
           <nav className="hidden items-center gap-8 md:flex">
             <Link to="/" className="text-sm font-medium text-muted-foreground hover:text-primary">
               Home
             </Link>
-            <Link to="/pricing" className="text-sm font-medium text-muted-foreground hover:text-primary">
-              Pricing
+            <Link to="/signup" className="text-sm font-medium text-muted-foreground hover:text-primary">
+              Sign Up
             </Link>
           </nav>
 
@@ -101,8 +96,8 @@ export default function Demo() {
             <Link to="/" onClick={() => setIsMenuOpen(false)} className="text-3xl font-display font-bold text-primary hover:text-secondary transition-colors">
               Home
             </Link>
-            <Link to="/pricing" onClick={() => setIsMenuOpen(false)} className="text-3xl font-display font-bold text-primary hover:text-secondary transition-colors">
-              Pricing
+            <Link to="/signup" onClick={() => setIsMenuOpen(false)} className="text-3xl font-display font-bold text-primary hover:text-secondary transition-colors">
+              Sign Up
             </Link>
             <div className="flex flex-col w-full gap-4 pt-8 border-t border-border/40">
               <Button asChild variant="outline" size="xl" className="w-full rounded-2xl" onClick={() => setIsMenuOpen(false)}>
@@ -120,24 +115,81 @@ export default function Demo() {
       </header>
 
       <main>
-        <section className="border-b border-border/60 bg-muted/40 py-8 sm:py-10">
-          <div className="container">
-            <Link
-              to="/"
-              className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground transition-smooth hover:text-secondary sm:hidden"
-            >
-              <ArrowLeft className="h-3 w-3" /> Back
-            </Link>
-            <span className="mt-2 inline-block text-[11px] font-semibold uppercase tracking-[0.18em] text-secondary sm:mt-0">
-              Interactive demo
-            </span>
-            <h1 className="mt-2 font-display text-2xl font-bold tracking-tight text-primary sm:text-3xl md:text-4xl">
-              Try EmpowaAI in 60 seconds
-            </h1>
-            <p className="mt-2 max-w-xl text-sm text-muted-foreground sm:text-base">
-              CV Analyser is Mahala — always free. See the full 5-path flow, then unlock Premium on the pricing page when
-              you&apos;re ready.
-            </p>
+        {/* ── Hero ─────────────────────────────────────────────────────── */}
+        <section className="relative overflow-hidden border-b border-border/60">
+          <div
+            className="relative px-4 py-12 sm:py-16 text-white"
+            style={{ background: 'var(--gradient-hero)' }}
+          >
+            {/* Background textures */}
+            <div className="pointer-events-none absolute inset-0 ai-mesh opacity-10" aria-hidden />
+            <div className="pointer-events-none absolute inset-0 ubuntu-pattern opacity-15" aria-hidden />
+
+            <div className="container relative z-10">
+              {/* Back link (mobile) */}
+              <Link
+                to="/"
+                className="mb-5 inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.18em] text-white/60 hover:text-white/90 transition-colors sm:hidden"
+              >
+                <ArrowLeft className="h-3 w-3" /> Back
+              </Link>
+
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-8">
+                <div className="max-w-xl">
+                  <div className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white/90 mb-4">
+                    <Sparkles className="h-3 w-3" />
+                    Interactive Demo
+                  </div>
+                  <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl leading-tight">
+                    Try EmpowaAI<br className="hidden sm:block" /> in 60 seconds
+                  </h1>
+                  <p className="mt-3 text-white/70 text-sm sm:text-base max-w-md leading-relaxed">
+                    CV Analyser · AI revamp · Digital Twin — all free. See the full flow, then sign up to unlock your real career journey.
+                  </p>
+
+                  {/* Feature pills */}
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    {[
+                      { Icon: Brain,    label: 'AI CV Analysis'   },
+                      { Icon: Zap,      label: 'Instant Revamp'   },
+                      { Icon: Users,    label: 'Digital Twin'      },
+                    ].map(({ Icon, label }) => (
+                      <span key={label} className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/15 px-3 py-1 text-xs font-semibold text-white/85">
+                        <Icon className="h-3 w-3" />
+                        {label}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* CTAs */}
+                  <div className="mt-6 flex flex-wrap gap-3">
+                    <Button asChild size="lg" className="bg-white text-primary font-bold hover:bg-white/90 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all">
+                      <Link to="/signup">
+                        Get Started Free
+                        <ArrowRight className="ml-1 h-4 w-4" />
+                      </Link>
+                    </Button>
+                    <Button asChild variant="ghost" size="lg" className="border border-white/25 text-white hover:bg-white/10">
+                      <Link to="/login">Sign In</Link>
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Stats */}
+                <div className="grid grid-cols-3 gap-3 md:grid-cols-1 md:gap-4 md:text-right shrink-0">
+                  {[
+                    { value: '60s',   label: 'to first result'     },
+                    { value: '100%',  label: 'free, no card needed' },
+                    { value: '5',     label: 'career paths mapped'  },
+                  ].map(({ value, label }) => (
+                    <div key={label} className="rounded-xl bg-white/10 border border-white/15 px-4 py-3 text-center md:text-right">
+                      <p className="font-display font-bold text-xl sm:text-2xl">{value}</p>
+                      <p className="text-white/60 text-xs mt-0.5 leading-tight">{label}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -185,8 +237,8 @@ export default function Demo() {
               <h4 className="font-display font-semibold text-primary mb-4">Quick Links</h4>
               <ul className="space-y-2">
                 <li><Link to="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">Home</Link></li>
-                <li><Link to="/pricing" className="text-sm text-muted-foreground hover:text-primary transition-colors">Pricing</Link></li>
                 <li><Link to="/demo" className="text-sm text-muted-foreground hover:text-primary transition-colors">Demo</Link></li>
+                <li><Link to="/signup" className="text-sm text-muted-foreground hover:text-primary transition-colors">Sign Up</Link></li>
               </ul>
             </div>
 
