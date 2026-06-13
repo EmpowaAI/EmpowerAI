@@ -15,13 +15,19 @@ import {
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import GlassCard from "@/components/shared/GlassCard";
+import PageHeader from "@/components/shared/PageHeader";
 import { ContactWidget } from "@/components/ContactWidget";
 import { getStoredCvAnalysis } from "../../lib/sensitiveStorage";
 import { opportunitiesAPI } from "../../lib/api";
 import { useUser } from "../../contexts/user-context";
 
 const Dashboard = () => {
-  const { progress, cvData } = useUser();
+  const { user, progress, cvData } = useUser();
+
+  const hour = new Date().getHours();
+  const greeting =
+    hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  const firstName = user?.name?.split(" ")[0] || "";
 
   const cvCompleted = progress.cvCompleted;
   const twinCompleted = progress.twinCompleted;
@@ -219,6 +225,14 @@ const Dashboard = () => {
     >
       <main className="bg-gradient-to-b from-muted/35 via-background to-background">
         <section className="container py-8 md:py-10">
+          <div className="mx-auto max-w-6xl">
+            <PageHeader
+              eyebrow={firstName ? `${greeting}, ${firstName}` : greeting}
+              title="Your Career Hub"
+              subtitle="Track your progress, build your profile, and take the next step."
+              className="mb-8"
+            />
+          </div>
           <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[1.45fr_0.85fr]">
             <div className="space-y-6">
               {/* Welcome Guide — hidden once CV is done */}

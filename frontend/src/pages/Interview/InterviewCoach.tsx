@@ -11,6 +11,8 @@ import { cn } from '../../lib/utils';
 import { interviewService } from '../../services/interviewService';
 import { TipsPanel } from '../../components/interview/TipsPanel';
 import GlassCard from '../../components/shared/GlassCard';
+import PageHeader from '../../components/shared/PageHeader';
+import { Button } from '../../components/ui/Button';
 import { useToast } from '../../components/Toast';
 import { getStoredCvAnalysis } from '../../lib/sensitiveStorage';
 
@@ -279,19 +281,23 @@ export default function InterviewCoach() {
     const passed = averageScore >= 70;
     return (
       <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
-            <button onClick={() => setShowResults(false)} className="text-muted-foreground hover:text-foreground text-sm mb-2 flex items-center gap-1 transition-colors">
+            <button
+              onClick={() => setShowResults(false)}
+              className="mb-3 flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
               ← Back to Questions
             </button>
-            <h1 className="text-2xl md:text-3xl font-display font-bold flex items-center gap-3">
-              <BarChart3 className="h-7 w-7 text-secondary shrink-0" />
-              <span className="text-primary">Interview Summary</span>
-            </h1>
+            <PageHeader
+              icon={BarChart3}
+              eyebrow="Session complete"
+              title="Interview Summary"
+            />
           </div>
-          <button onClick={reset} className="px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-all flex items-center gap-2 shadow-lg text-sm">
-            <RefreshCw className="h-4 w-4" /> Start New
-          </button>
+          <Button onClick={reset} variant="outline" size="sm" className="shrink-0 border-secondary/30 text-secondary hover:bg-secondary/10">
+            <RefreshCw className="h-4 w-4 mr-1.5" /> Start New
+          </Button>
         </div>
 
         {/* Global Score */}
@@ -361,12 +367,14 @@ export default function InterviewCoach() {
   if (!sessionStarted) {
     return (
       <div className="max-w-2xl mx-auto space-y-6">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-6">
-          <h1 className="text-2xl md:text-3xl font-display font-bold mb-2 flex items-center justify-center gap-3">
-            <Brain className="h-7 w-7 text-secondary shrink-0" />
-            <span className="text-primary">AI Interview Coach</span>
-          </h1>
-          <p className="text-muted-foreground text-sm">Practise with AI-powered interview questions tailored for SA professionals</p>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+          <PageHeader
+            icon={Brain}
+            eyebrow="AI-Powered Practice"
+            title="Interview Coach"
+            subtitle="Practise with AI-powered interview questions tailored for SA professionals."
+            align="center"
+          />
         </motion.div>
 
         <GlassCard>
@@ -427,11 +435,18 @@ export default function InterviewCoach() {
                 className="w-full px-4 py-3 rounded-xl border-2 border-border focus:border-secondary focus:outline-none bg-muted/30 font-medium text-foreground resize-none text-sm transition-colors" />
             </div>
 
-            <button onClick={() => handleStart(0)} disabled={isStarting}
-              className="w-full bg-secondary text-secondary-foreground py-4 rounded-2xl font-bold text-base hover:opacity-90 transition-all flex items-center justify-center gap-3 shadow-glow disabled:opacity-70">
-              {isStarting ? <Loader2 className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}
-              {isStarting ? 'Preparing AI...' : 'Start Simulation'}
-            </button>
+            <Button
+              onClick={() => handleStart(0)}
+              disabled={isStarting}
+              variant="cta"
+              size="lg"
+              className="w-full"
+            >
+              {isStarting
+                ? <><Loader2 className="h-5 w-5 animate-spin mr-2" />Preparing AI...</>
+                : <><Sparkles className="h-5 w-5 mr-2" />Start Simulation</>
+              }
+            </Button>
           </div>
         </GlassCard>
 
@@ -446,10 +461,12 @@ export default function InterviewCoach() {
       <ToastComponent />
       {/* Header */}
       <div className="flex justify-between items-center mb-6 gap-4">
-        <h1 className="text-lg md:text-xl font-display font-bold flex items-center gap-2">
-          <Brain className="h-5 w-5 text-secondary shrink-0" />
-          <span className="text-foreground">AI Interview Coach</span>
-        </h1>
+        <div className="flex items-center gap-2">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-secondary/10 text-secondary">
+            <Brain className="h-5 w-5" />
+          </span>
+          <h1 className="font-display text-lg font-bold text-primary md:text-xl">AI Interview Coach</h1>
+        </div>
         <div className="flex items-center gap-2">
           <button onClick={() => setAudioEnabled(!audioEnabled)}
             className="p-2 rounded-lg bg-muted text-muted-foreground hover:bg-muted/80 transition-colors">
@@ -534,10 +551,18 @@ export default function InterviewCoach() {
                   </span>
                 </div>
 
-                <button onClick={handleSubmit} disabled={isSubmitting || !userInput.trim() || userInput.trim().length < 20}
-                  className="w-full bg-secondary text-secondary-foreground py-4 rounded-2xl font-bold text-base hover:opacity-90 transition-all shadow-glow flex items-center justify-center gap-2 disabled:opacity-50">
-                  {isSubmitting ? <><Loader2 className="h-5 w-5 animate-spin" /> Analysing...</> : <><Send className="h-5 w-5" /> Submit &amp; Continue</>}
-                </button>
+                <Button
+                  onClick={handleSubmit}
+                  disabled={isSubmitting || !userInput.trim() || userInput.trim().length < 20}
+                  variant="cta"
+                  size="lg"
+                  className="w-full"
+                >
+                  {isSubmitting
+                    ? <><Loader2 className="h-5 w-5 animate-spin mr-2" />Analysing...</>
+                    : <><Send className="h-5 w-5 mr-2" />Submit &amp; Continue</>
+                  }
+                </Button>
               </div>
             </GlassCard>
           )}

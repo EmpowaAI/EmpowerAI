@@ -559,10 +559,7 @@ const CVAnalyzer = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background font-sans text-foreground">
-      
-      
-      <main className="relative overflow-hidden">
+    <div className="relative overflow-hidden">
         {/* Ambient background orbs */}
         <div
           aria-hidden
@@ -1210,15 +1207,7 @@ const CVAnalyzer = () => {
             </div>
           )}
         </section>
-      </main>
-
-      <footer className="border-t border-border bg-background">
-        <div className="container py-6 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} EmpowaAI · Amandla e-Ubuntu 🇿🇦
-        </div>
-      </footer>
-
-          </div>
+    </div>
   );
 };
 

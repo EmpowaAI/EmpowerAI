@@ -6,6 +6,7 @@ import { cn } from "../../lib/utils"
 import { opportunitiesAPI, applicationsAPI } from "../../lib/api"
 import { useUser } from "../../contexts/user-context"
 import LoadingState from "../../components/shared/LoadingState"
+import PageHeader from "../../components/shared/PageHeader"
 import EmptyState from "../../components/EmptyState"
 import ErrorAlert from "../../components/shared/ErrorAlert"
 import LoadingButton from "../../components/LoadingButton"
@@ -321,10 +322,11 @@ export default function Opportunities() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Career Opportunities</h1>
-          <p className="text-muted-foreground">Real jobs, learnerships, internships, and bursaries across South Africa</p>
-        </div>
+        <PageHeader
+          eyebrow="South Africa"
+          title="Career Opportunities"
+          subtitle="Real jobs, learnerships, internships, and bursaries across South Africa."
+        />
         <LoadingState message="Loading opportunities..." />
       </div>
     )
@@ -333,13 +335,13 @@ export default function Opportunities() {
   return (
     <div className="space-y-5 sm:space-y-5 md:space-y-6 -mx-3 sm:-mx-4 md:mx-0">
       {/* Header */}
-      <div className="text-center sm:text-left px-3 sm:px-4 md:px-0">
-        <h1 className="text-2xl sm:text-2xl md:text-3xl font-bold text-foreground">Career Opportunities</h1>
-        <p className="text-sm sm:text-base text-muted-foreground mt-2 sm:mt-2">
-          Real jobs, learnerships, internships, and bursaries across South Africa.
-          <span className="ml-2 text-xs text-muted-foreground">Updated daily - Transparent matching</span>
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="South Africa"
+        title="Career Opportunities"
+        subtitle="Real jobs, learnerships, internships, and bursaries. Updated daily with transparent matching."
+        badge={totalFiltered !== null ? `${totalFiltered.toLocaleString()} live` : undefined}
+        className="px-3 sm:px-4 md:px-0"
+      />
 
       {/* Profile match context */}
       {user ? (
@@ -370,7 +372,7 @@ export default function Opportunities() {
             </Link>
             <Link
               to="/dashboard/twin"
-              className="inline-flex items-center justify-center px-4 py-2 text-xs sm:text-sm rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors"
+              className="inline-flex items-center justify-center px-4 py-2 text-xs sm:text-sm rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/90 transition-colors font-semibold"
             >
               Update Twin
             </Link>
@@ -409,8 +411,8 @@ export default function Opportunities() {
             className={cn(
               "flex items-center gap-2 sm:gap-2 px-4 sm:px-4 py-2.5 sm:py-2.5 text-sm sm:text-sm rounded-lg transition-colors min-h-[44px] sm:min-h-[40px] touch-manipulation",
               category === cat.id
-                ? "bg-primary text-white"
-                : "bg-card border border-border text-muted-foreground hover:text-foreground",
+                ? "bg-secondary text-secondary-foreground border border-secondary/30 shadow-sm"
+                : "bg-card border border-border text-muted-foreground hover:text-foreground hover:border-secondary/30",
             )}
           >
             <cat.icon className="h-4 w-4 sm:h-4 sm:w-4 flex-shrink-0" />
@@ -533,7 +535,7 @@ export default function Opportunities() {
                 isLoading={applyingId === opp.id}
                 loadingText="Opening..."
                 icon={<ExternalLink className="h-3 w-3 sm:h-4 sm:w-4" />}
-                className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors w-full sm:w-auto"
+                className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/90 transition-colors w-full sm:w-auto font-semibold"
               >
                 Apply Now
               </LoadingButton>

@@ -93,8 +93,8 @@ const NavLink = ({ item, isMobile = false, onClick, pathname, prefetchRoute }: {
     isMobile 
       ? "gap-3 px-4 py-3 rounded-xl text-base w-full text-foreground" 
       : "gap-1.5 px-3 py-2 rounded-lg text-sm font-medium",
-    isActive && !isDisabled 
-      ? "bg-primary/10 text-primary" + (isMobile ? " border border-primary/20" : "")
+    isActive && !isDisabled
+      ? "bg-secondary/10 text-secondary" + (isMobile ? " border border-secondary/20" : "")
       : "",
     isDisabled 
       ? "opacity-50 cursor-not-allowed text-muted-foreground" 
@@ -541,11 +541,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     className={cn(
                       "flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-all relative",
                       isActive
-                        ? "text-primary bg-primary/10"
+                        ? "text-secondary bg-secondary/10"
                         : "text-foreground hover:text-foreground hover:bg-muted"
                     )}
                   >
-                    <item.icon className={cn("h-5 w-5 mb-1", isActive && "text-primary")} />
+                    <item.icon className={cn("h-5 w-5 mb-1", isActive && "text-secondary")} />
                     <span className="text-[10px] font-medium">{item.label.split(" ")[0]}</span>
                     {item.highlight && !isActive && (
                       <span className="absolute top-1 right-3 w-1.5 h-1.5 rounded-full bg-[var(--sa-gold)] animate-pulse" />
