@@ -32,6 +32,7 @@ type Action =
   | { type: 'START_REVAMP' }
   | { type: 'REVAMP_SUCCESS'; payload: RevampedCV }
   | { type: 'REVAMP_ERROR'; payload: string }
+  | { type: 'REVAMP_NEEDS_REUPLOAD' }
   | { type: 'DISMISS_ERROR' }
   | { type: 'SHOW_POST_MODAL'; payload: boolean }
   | { type: 'RESET' }
@@ -56,6 +57,7 @@ const initialState: CVAnalyzerState = {
   isRateLimited: false,
   retryAfter: undefined,
   showPostModal: false,
+  revampPending: false,
 };
 
 // ── Reducer ───────────────────────────────────────────────────────────────────
@@ -127,7 +129,10 @@ function reducer(state: CVAnalyzerState, action: Action): CVAnalyzerState {
       return { ...state, step: 'revamped', revampedCV: action.payload };
 
     case 'REVAMP_ERROR':
-      return { ...state, step: 'result', error: action.payload };
+      return { ...state, step: 'result', error: action.payload, revampPending: false };
+
+    case 'REVAMP_NEEDS_REUPLOAD':
+      return { ...initialState, revampPending: true };
 
     case 'DISMISS_ERROR':
       return { ...state, error: null, isRateLimited: false, retryAfter: undefined };
@@ -262,13 +267,11 @@ export function useCVAnalyzer() {
     const { analysis, formValues, cvText } = state;
     if (!analysis) return;
 
-    // Guard: cvText must be non-empty. This can only happen if the user
-    // loaded a cached profile (no fresh analysis in this session).
+    // Guard: cvText must be non-empty. Cached profiles don't include the raw
+    // CV text. Reset to the upload form so the user can re-analyse, then
+    // auto-start the revamp once fresh text is available.
     if (!cvText.trim()) {
-      dispatch({
-        type: 'REVAMP_ERROR',
-        payload: 'Please re-analyse your CV before revamping. Your CV text is not available from the cached profile.',
-      });
+      dispatch({ type: 'REVAMP_NEEDS_REUPLOAD' });
       return;
     }
 
@@ -294,6 +297,15 @@ export function useCVAnalyzer() {
       });
     }
   }, [state]);
+
+  // ── Auto-revamp after re-analysis (when user clicked Revamp on a cached profile) ──
+  useEffect(() => {
+    if (state.step === 'result' && state.revampPending && state.cvText.trim()) {
+      submitRevamp();
+    }
+  // submitRevamp is intentionally omitted — we only want this to fire on step/cvText transitions
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.step, state.revampPending, state.cvText]);
 
   // ── Helpers ────────────────────────────────────────────────────────────────
   const setInputMode = (mode: CVInputMode) => dispatch({ type: 'SET_INPUT_MODE', payload: mode });

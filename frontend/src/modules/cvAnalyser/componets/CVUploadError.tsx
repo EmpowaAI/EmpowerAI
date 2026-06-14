@@ -42,7 +42,7 @@ function categorizeError(error: string): {
     };
   }
 
-  if (lowerError.includes('file') || lowerError.includes('format') || lowerError.includes('pdf') || lowerError.includes('docx')) {
+  if (/\bfile\b/.test(lowerError) || lowerError.includes('format') || lowerError.includes('pdf') || lowerError.includes('docx')) {
     return {
       category: 'file',
       title: 'File Format Error',

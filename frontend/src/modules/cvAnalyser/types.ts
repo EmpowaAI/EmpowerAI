@@ -189,4 +189,5 @@ export interface CVAnalyzerState {
   isRateLimited: boolean;
   retryAfter: number | undefined;
   showPostModal: boolean;
+  revampPending: boolean;
 }

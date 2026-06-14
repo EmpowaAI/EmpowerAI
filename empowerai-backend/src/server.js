@@ -3,6 +3,7 @@ require('dotenv').config();
 const app = require('./app');
 const logger = require('./utils/logger');
 const { connectDatabase } = require('./infrastructures/database');
+const { runStartupTasks } = require('./config/seed');
 const { pingAiServiceOnStartup } = require('./intergration/ai/ai.Health');
 const { registerProcessHandlers } = require('./utils/shutdown');
 const { initAiQueue } = require('./intergration/queues/aiQueue');
@@ -24,6 +25,7 @@ async function boot() {
   });
 
   const dbConnected = await connectDatabase();
+  await runStartupTasks(dbConnected);
 
   const serverInstance = app.listen(PORT, () => {
     logger.info('Server started successfully', {
