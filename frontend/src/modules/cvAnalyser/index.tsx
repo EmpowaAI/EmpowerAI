@@ -166,12 +166,15 @@ export default function CVAnalyzerPage() {
               isFallback={isFallback}
               onRevampClick={submitRevamp}
               onReanalyze={reset}
+              canRevamp={cvText.trim().length > 0}
             />
 
             {/* Revamp section below results */}
             <CVRevampSection
               isRevamping={false}
               onRevamp={submitRevamp}
+              canRevamp={cvText.trim().length > 0}
+              onReanalyze={reset}
             />
           </motion.div>
         )}

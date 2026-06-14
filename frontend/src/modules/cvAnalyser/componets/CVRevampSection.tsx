@@ -1,15 +1,19 @@
 
 import { motion } from 'framer-motion';
-import { Wand2, Sparkles, ArrowRight, Loader2, CheckCircle } from 'lucide-react';
+import { Wand2, Sparkles, ArrowRight, Loader2, CheckCircle, RefreshCw } from 'lucide-react';
 
 interface CVRevampSectionProps {
   isRevamping: boolean;
   onRevamp: () => void;
+  canRevamp?: boolean;
+  onReanalyze?: () => void;
 }
 
 export default function CVRevampSection({
   isRevamping,
   onRevamp,
+  canRevamp = true,
+  onReanalyze,
 }: CVRevampSectionProps) {
   return (
     <motion.div
@@ -43,33 +47,50 @@ export default function CVRevampSection({
 
       {/* CTA */}
       <div className="bg-card px-6 py-5 flex flex-col sm:flex-row items-center gap-4">
-        <div className="flex flex-wrap gap-x-6 gap-y-1.5 text-xs text-muted-foreground flex-1">
-          {['ATS-optimised structure', 'Stronger action verbs', 'Download as PDF or DOCX'].map((point) => (
-            <span key={point} className="flex items-center gap-1.5">
-              <CheckCircle className="h-3 w-3 text-secondary flex-shrink-0" />
-              {point}
-            </span>
-          ))}
-        </div>
-        <button
-          onClick={onRevamp}
-          disabled={isRevamping}
-          className="shimmer flex-shrink-0 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
-          style={{ background: 'var(--gradient-hero)' }}
-        >
-          {isRevamping ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Rewriting…
-            </>
-          ) : (
-            <>
-              <Wand2 className="h-4 w-4" />
-              Revamp My CV
-              <ArrowRight className="h-4 w-4" />
-            </>
-          )}
-        </button>
+        {canRevamp ? (
+          <>
+            <div className="flex flex-wrap gap-x-6 gap-y-1.5 text-xs text-muted-foreground flex-1">
+              {['ATS-optimised structure', 'Stronger action verbs', 'Download as PDF or DOCX'].map((point) => (
+                <span key={point} className="flex items-center gap-1.5">
+                  <CheckCircle className="h-3 w-3 text-secondary flex-shrink-0" />
+                  {point}
+                </span>
+              ))}
+            </div>
+            <button
+              onClick={onRevamp}
+              disabled={isRevamping}
+              className="shimmer flex-shrink-0 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+              style={{ background: 'var(--gradient-hero)' }}
+            >
+              {isRevamping ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Rewriting…
+                </>
+              ) : (
+                <>
+                  <Wand2 className="h-4 w-4" />
+                  Revamp My CV
+                  <ArrowRight className="h-4 w-4" />
+                </>
+              )}
+            </button>
+          </>
+        ) : (
+          <div className="flex flex-col sm:flex-row items-center gap-4 w-full">
+            <p className="text-sm text-muted-foreground flex-1">
+              Re-analyse your CV to unlock the revamp feature — your previous results are still shown above.
+            </p>
+            <button
+              onClick={onReanalyze}
+              className="flex-shrink-0 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm border border-border hover:bg-muted/50 transition-colors"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Re-analyse CV
+            </button>
+          </div>
+        )}
       </div>
     </motion.div>
   );

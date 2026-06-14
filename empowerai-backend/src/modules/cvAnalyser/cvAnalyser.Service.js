@@ -3,6 +3,7 @@ const logger = require('../../utils/logger');
 const { analyseCVText, analyseCVFile, revampCV } = require('./cvAnalyser.AiService');
 const { buildFallbackAnalysis } = require('../../utils/cvFallback.util');
 const { extractTextFromUploadedFile } = require('../../utils/cvParser.util');
+const { BadRequestError } = require('../../utils/errors');
 
 const MAX_CV_CHARS = 15000;
 
@@ -146,9 +147,7 @@ async function revampCv({ userId, cv_text, analysis, target_role, industry }) {
   if (!cvText || !cvAnalysis) {
     const profile = await cvProfileRepository.findByUserId(userId);
     if (!profile || !profile.isComplete) {
-      const err = new Error('Please analyse your CV first before requesting a revamp.');
-      err.statusCode = 400;
-      throw err;
+      throw new BadRequestError('Please analyse your CV first before requesting a revamp.');
     }
     cvText     = cvText     || profile.rawText || '';
     cvAnalysis = cvAnalysis || profile.analysis;
@@ -157,9 +156,7 @@ async function revampCv({ userId, cv_text, analysis, target_role, industry }) {
   }
 
   if (!cvText) {
-    const err = new Error('cv_text is required. Please paste your CV text or analyse via text input first.');
-    err.statusCode = 400;
-    throw err;
+    throw new BadRequestError('Your CV text is not available. Please re-analyse your CV to use the revamp feature.');
   }
 
   const start = Date.now();

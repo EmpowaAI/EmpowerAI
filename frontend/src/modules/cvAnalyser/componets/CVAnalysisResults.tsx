@@ -13,6 +13,7 @@ interface CVAnalysisResultProps {
   isFallback: boolean;
   onRevampClick: () => void;
   onReanalyze: () => void;
+  canRevamp?: boolean;
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -165,6 +166,7 @@ export default function CVAnalysisResult({
   isFallback,
   onRevampClick,
   onReanalyze,
+  canRevamp = true,
 }: CVAnalysisResultProps) {
   const readiness = getReadinessLabel(analysis.overallScore);
   const allRecommendations = [
@@ -263,13 +265,22 @@ export default function CVAnalysisResult({
         {/* Action buttons */}
         <div className="bg-card px-6 py-4 flex flex-wrap gap-3">
           <button
-            onClick={onRevampClick}
+            onClick={canRevamp ? onRevampClick : onReanalyze}
             className="flex-1 sm:flex-none shimmer flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all"
             style={{ background: 'var(--gradient-hero)' }}
           >
-            <Zap className="h-4 w-4" />
-            Revamp My CV
-            <Sparkles className="h-4 w-4" />
+            {canRevamp ? (
+              <>
+                <Zap className="h-4 w-4" />
+                Revamp My CV
+                <Sparkles className="h-4 w-4" />
+              </>
+            ) : (
+              <>
+                <RefreshCw className="h-4 w-4" />
+                Re-analyse to Revamp
+              </>
+            )}
           </button>
           <button
             onClick={onReanalyze}
