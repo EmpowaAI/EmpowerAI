@@ -233,5 +233,9 @@ function _forwardError(error, next) {
   ) {
     return next(new ServiceUnavailableError('AI service is temporarily unavailable.'));
   }
+  // Supabase / database errors have a code string (e.g. "PGRST116") and no .response
+  if (error.code && !error.response && error.details !== undefined) {
+    return next(new ServiceUnavailableError('A database error occurred. Please try again.'));
+  }
   next(error);
 }

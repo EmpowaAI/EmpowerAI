@@ -273,17 +273,24 @@ async function _handleAnalysisError({ error, userId, cvText, targetRole, industr
     }
 
     const analysis = buildFallbackAnalysis(rawText, []);
-    const savedProfile = await _saveAnalysisResult({
-      userId, file: file ?? null, rawText, analysis, targetRole, industry, isFallback: true,
-    });
-
-    return {
-      analysis:       savedProfile.analysis,
-      profileId:      savedProfile._id,
-      isFallback:     true,
-      cvText:         rawText,
-      fallbackMessage: 'AI service is temporarily unavailable. Showing basic CV insights.',
-    };
+    try {
+      const savedProfile = await _saveAnalysisResult({
+        userId, file: file ?? null, rawText, analysis, targetRole, industry, isFallback: true,
+      });
+      return {
+        analysis:        savedProfile.analysis,
+        profileId:       savedProfile._id,
+        isFallback:      true,
+        cvText:          rawText,
+        fallbackMessage: 'AI service is temporarily unavailable. Showing basic CV insights.',
+      };
+    } catch (saveErr) {
+      logger.error('[CvService] Fallback save failed', { userId, error: saveErr.message });
+      const err = new Error('Analysis failed. Please try again later.');
+      err.statusCode = 503;
+      err.isOperational = true;
+      throw err;
+    }
   }
 
   throw error;

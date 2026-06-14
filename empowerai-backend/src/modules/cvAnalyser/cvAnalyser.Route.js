@@ -17,6 +17,7 @@ const { protect, restrictTo } = require('../../middleware/auth');
 //const { attachSubscription } = require('../../middleware/subscription.middleware');
 const validateRequest = require('../../middleware/validate');
 const { cvAnalysisSchema } = require('../../utils/validators');
+const { BadRequestError } = require('../../utils/errors');
 
 const router = express.Router();
 
@@ -46,7 +47,13 @@ const upload = multer({
 // ── CV Analysis ───────────────────────────────────────────────────────────────
 
 router.post('/analyze', validateRequest(cvAnalysisSchema), analyzeCV);
-router.post('/analyze-file', upload.single('cvFile'), analyzeCVFile);
+router.post('/analyze-file', (req, res, next) => {
+  upload.single('cvFile')(req, res, (err) => {
+    if (!err) return next();
+    if (err.code === 'LIMIT_FILE_SIZE') return next(new BadRequestError('File is too large. Maximum size is 5MB.'));
+    return next(new BadRequestError(err.message || 'File upload failed. Please try again.'));
+  });
+}, analyzeCVFile);
 router.post('/restore-from-cache', restoreFromCachedAnalysis);
 
 // ── CV Revamp (subscription only) ─────────────────────────────────────────────
