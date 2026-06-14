@@ -41,7 +41,6 @@ export default function CVAnalyzerPage() {
     isRateLimited,
     retryAfter,
     showPostModal,
-    revampPending,
   } = state;
 
   // Ready when either input has content
@@ -85,19 +84,6 @@ export default function CVAnalyzerPage() {
             <RotateCcw className="h-3.5 w-3.5" />
             Start Over
           </button>
-        </div>
-      )}
-
-      {/* Revamp re-upload banner — shown when user clicked Revamp on a cached profile */}
-      {revampPending && (step === 'idle' || step === 'form') && (
-        <div className="rounded-xl border border-secondary/40 bg-secondary/5 px-4 py-3 text-sm flex items-start gap-3">
-          <span className="text-lg">✨</span>
-          <div>
-            <p className="font-semibold text-foreground">Upload your CV to revamp it</p>
-            <p className="text-muted-foreground text-xs mt-0.5">
-              Your previous score is saved. Re-upload or paste your CV below — the revamp will start automatically once analysis is complete.
-            </p>
-          </div>
         </div>
       )}
 
