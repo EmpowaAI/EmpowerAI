@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import {
   Brain, MessageSquare, RefreshCw, Loader2, BarChart3,
   Clock, Sparkles, Zap, Volume2, Send, Trophy, ChevronRight,
-  Award, AlertCircle, CheckCircle, VolumeX, Mic, FileText
+  Award, AlertCircle, CheckCircle, VolumeX, Mic, MicOff, FileText
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { interviewService } from '../../services/interviewService';
@@ -14,6 +14,8 @@ import GlassCard from '../../components/shared/GlassCard';
 import { Button } from '../../components/ui/Button';
 import { useToast } from '../../components/Toast';
 import { getStoredCvAnalysis } from '../../lib/sensitiveStorage';
+import VoiceVisualizer from '../../components/ui/VoiceVisualizer';
+import { useAudioLevel } from '../../hooks/useAudioLevel';
 
 type InterviewType = 'tech' | 'behavioral' | 'non-tech';
 type Difficulty = 'easy' | 'medium' | 'hard';
@@ -82,6 +84,7 @@ export default function InterviewCoach() {
   const [recognitionSupported, setRecognitionSupported] = useState(true);
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const processedIndexRef = useRef<number>(-1);
+  const { volume: micVolume } = useAudioLevel(isListening);
 
   const currentQuestion = questions[currentIndex];
   const totalQuestions = questions.length;
@@ -477,10 +480,6 @@ export default function InterviewCoach() {
           <h1 className="font-display text-lg font-bold text-primary md:text-xl">AI Interview Coach</h1>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => setAudioEnabled(!audioEnabled)}
-            className="p-2 rounded-lg bg-muted text-muted-foreground hover:bg-muted/80 transition-colors">
-            {audioEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
-          </button>
           {feedbacks.size > 0 && (
             <button onClick={() => setShowResults(true)}
               className="bg-secondary text-secondary-foreground px-4 py-2 rounded-xl font-bold text-sm transition-all flex items-center gap-2 shadow-glow hover:opacity-90">
@@ -532,32 +531,82 @@ export default function InterviewCoach() {
               </div>
 
               <div className="space-y-4">
-                <div className="relative">
-                  <textarea
-                    value={userInput}
-                    onChange={(e) => setUserInput(e.target.value)}
-                    placeholder="Type your response here... (Use STAR method for best results)"
-                    className="w-full bg-muted/30 border-2 border-border rounded-2xl p-4 md:p-5 h-32 md:h-40 focus:outline-none focus:border-secondary transition-all text-foreground font-medium resize-none text-sm"
-                  />
-                  {isListening && interimTranscript && (
-                    <div className="absolute top-4 md:top-5 left-4 md:left-5 right-16 pointer-events-none">
-                      <span className="text-sm font-medium text-transparent select-none">{userInput}</span>
-                      <span className="text-sm font-medium text-secondary/60 ml-1 italic">{interimTranscript}</span>
+                {/* Voice recording panel */}
+                {recognitionSupported && (
+                  <div className={cn(
+                    "rounded-2xl border-2 transition-all overflow-hidden",
+                    isListening ? 'border-destructive/40 bg-destructive/5' : 'border-border bg-muted/20'
+                  )}>
+                    <div className="flex items-center gap-3 px-4 py-3">
+                      <button
+                        type="button"
+                        onClick={toggleListening}
+                        className={cn(
+                          "flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-all",
+                          isListening
+                            ? 'bg-destructive text-white shadow-lg shadow-destructive/30'
+                            : 'bg-secondary/10 text-secondary hover:bg-secondary/20'
+                        )}
+                        aria-label={isListening ? 'Stop recording' : 'Start recording'}
+                      >
+                        {isListening
+                          ? <MicOff className="h-4 w-4" />
+                          : <Mic className="h-4 w-4" />
+                        }
+                      </button>
+
+                      <div className="flex-1 min-w-0">
+                        {isListening ? (
+                          <VoiceVisualizer volume={micVolume} isActive={isListening} className="h-9" />
+                        ) : (
+                          <p className="text-xs font-medium text-muted-foreground">
+                            Tap to speak your answer
+                          </p>
+                        )}
+                      </div>
+
+                      <span className={cn(
+                        "shrink-0 text-xs font-bold px-2 py-1 rounded-full",
+                        isListening ? 'bg-destructive/10 text-destructive' : 'bg-muted text-muted-foreground'
+                      )}>
+                        {isListening ? 'REC' : 'OFF'}
+                      </span>
                     </div>
-                  )}
-                  {recognitionSupported && (
-                    <button type="button" onClick={toggleListening}
-                      className={cn("absolute bottom-4 right-4 p-3 rounded-full transition-all",
-                        isListening ? 'bg-destructive text-destructive-foreground animate-pulse' : 'bg-muted text-muted-foreground hover:bg-muted/80')}>
-                      {isListening ? <Volume2 className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
-                    </button>
-                  )}
-                </div>
+
+                    {/* Live interim transcript preview */}
+                    {isListening && interimTranscript && (
+                      <div className="border-t border-destructive/20 px-4 py-2">
+                        <p className="text-xs text-secondary italic leading-relaxed">{interimTranscript}…</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Text area for typed / transcribed answer */}
+                <textarea
+                  value={userInput}
+                  onChange={(e) => setUserInput(e.target.value)}
+                  placeholder={recognitionSupported
+                    ? 'Your spoken words appear here. You can also type or edit your response.'
+                    : 'Type your response here... (Use STAR method for best results)'}
+                  className="w-full bg-muted/30 border-2 border-border rounded-2xl p-4 md:p-5 h-28 md:h-32 focus:outline-none focus:border-secondary transition-all text-foreground font-medium resize-none text-sm"
+                />
 
                 <div className="flex justify-between items-center">
                   <span className={cn("text-xs font-medium", wordCount < 30 ? 'text-secondary' : 'text-success')}>
                     {wordCount} words{wordCount < 30 && ' (aim for 50+)'}
                   </span>
+                  {audioEnabled ? (
+                    <button onClick={() => { window.speechSynthesis?.cancel(); setAudioEnabled(false); }}
+                      className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
+                      <Volume2 className="h-3 w-3" /> TTS on
+                    </button>
+                  ) : (
+                    <button onClick={() => setAudioEnabled(true)}
+                      className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
+                      <VolumeX className="h-3 w-3" /> TTS off
+                    </button>
+                  )}
                 </div>
 
                 <Button

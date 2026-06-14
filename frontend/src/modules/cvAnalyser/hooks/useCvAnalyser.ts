@@ -179,6 +179,12 @@ export function useCVAnalyzer() {
             type: 'PROFILE_LOADED',
             payload: { analysis: p.analysis, profileId: p._id },
           });
+          // Persist skills so Opportunities page can personalise results without a fresh analysis
+          const loadedSkills = p.analysis?.extractedSkills;
+          if (Array.isArray(loadedSkills) && loadedSkills.length > 0) {
+            try { localStorage.setItem('cvSkills', JSON.stringify(loadedSkills)); } catch {}
+          }
+          try { localStorage.setItem('cvCompleted', 'true'); } catch {}
         } else {
           dispatch({ type: 'PROFILE_EMPTY' });
         }
@@ -226,6 +232,13 @@ export function useCVAnalyzer() {
           cvText: resolvedCvText,
         },
       });
+
+      // Persist skills to localStorage so Opportunities page can personalise results immediately
+      const extractedSkills = response.analysis?.extractedSkills;
+      if (Array.isArray(extractedSkills) && extractedSkills.length > 0) {
+        try { localStorage.setItem('cvSkills', JSON.stringify(extractedSkills)); } catch {}
+      }
+      try { localStorage.setItem('cvCompleted', 'true'); } catch {}
     } catch (err: unknown) {
       const error = err as Error & {
         isRateLimit?: boolean;
