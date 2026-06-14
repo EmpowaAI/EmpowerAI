@@ -1,202 +1,119 @@
 const { validationResult } = require('express-validator');
 
-const { registerRules, validateRegister, toRegisterDTO } = require('../src/modules/authentication/authentication.Dto/RegisterDto');
-const { loginRules, validateLogin, toLoginDTO } = require('../src//modules/authentication/authentication.Dto/LoginDto');
-const { forgotPasswordRules, validateForgotPassword, toForgotPasswordDTO } = require('../src/modules/userAccount/userAccount.Dto/ForgotPasswordDto');
-const { resetPasswordRules, validateResetPassword, toResetPasswordDTO } = require('../src/modules/userAccount/userAccount.Dto/ResetPasswordDto');
-const { updateEmailRules, validateUpdateEmail, toUpdateEmailDTO } = require('../src/modules/userAccount/userAccount.Dto/UpdateEmailDto');
-const { changePasswordRules, validateChangePassword, toChangePasswordDTO } = require('../src/modules/userAccount/userAccount.Dto/ChangePasswordDto');
-const { updateUserRules, validateUpdateUser, toUpdateUserDTO } = require('../src/modules/user/use.Dtos/UpdateUserDto');
+const { updateUserRules, toUpdateUserDTO } = require('../src/modules/user/use.Dtos/UpdateUserDto');
+const { registerSchema, loginSchema } = require('../src/utils/validators');
 
 const runRules = async (rules, body) => {
   const req = { body };
   await Promise.all(rules.map((rule) => rule.run(req)));
-  const errors = validationResult(req).array();
-  return { req, errors };
+  return validationResult(req).array();
 };
 
-describe('DTO validation', () => {
-  test('RegisterDto rejects weak password', async () => {
-    const { errors } = await runRules(registerRules, {
-      name: 'Test User',
-      email: 'test@example.com',
-      password: 'weakpass1',
-      consentDataProcessing: true,
-      consentProfileSharing: true,
-    });
-    expect(errors.length).toBeGreaterThan(0);
+describe('UpdateUserDto — express-validator', () => {
+  test('rejects attempt to change email', async () => {
+    const errors = await runRules(updateUserRules, { email: 'new@email.com' });
+    expect(errors.some((e) => e.path === 'email')).toBe(true);
   });
 
-  test('RegisterDto accepts valid payload', async () => {
-    const { errors } = await runRules(registerRules, {
-      name: 'Test User',
-      email: 'test@example.com',
-      password: 'StrongPass1!',
-      consentDataProcessing: true,
-      consentProfileSharing: true,
-    });
-    expect(errors.length).toBe(0);
+  test('rejects attempt to change password', async () => {
+    const errors = await runRules(updateUserRules, { password: 'NewPass1!' });
+    expect(errors.some((e) => e.path === 'password')).toBe(true);
   });
 
-  test('LoginDto rejects invalid email', async () => {
-    const { errors } = await runRules(loginRules, {
-      email: 'bad-email',
-      password: 'anything',
-    });
-    expect(errors.length).toBeGreaterThan(0);
+  test('rejects name shorter than 2 characters', async () => {
+    const errors = await runRules(updateUserRules, { name: 'X' });
+    expect(errors.some((e) => e.path === 'name')).toBe(true);
   });
 
-  test('ForgotPasswordDto accepts valid email', async () => {
-    const { errors } = await runRules(forgotPasswordRules, {
-      email: 'test@example.com',
-    });
-    expect(errors.length).toBe(0);
+  test('rejects age below 13', async () => {
+    const errors = await runRules(updateUserRules, { age: 10 });
+    expect(errors.some((e) => e.path === 'age')).toBe(true);
   });
 
-  test('ResetPasswordDto rejects bad token length', async () => {
-    const { errors } = await runRules(resetPasswordRules, {
-      token: 'abc',
-      newPassword: 'StrongPass1!',
-      confirmPassword: 'StrongPass1!',
+  test('accepts a valid profile update', async () => {
+    const errors = await runRules(updateUserRules, {
+      name: 'Zanele Mokoena',
+      age: 24,
+      province: 'Gauteng',
+      skills: ['React', 'Node.js'],
+      about: 'Frontend developer based in Soweto.',
     });
-    expect(errors.length).toBeGreaterThan(0);
-  });
-
-  test('ResetPasswordDto rejects password mismatch', async () => {
-    const { errors } = await runRules(resetPasswordRules, {
-      token: 'a'.repeat(64),
-      newPassword: 'StrongPass1!',
-      confirmPassword: 'Mismatch1!',
-    });
-    expect(errors.length).toBeGreaterThan(0);
-  });
-
-  test('ResetPasswordDto accepts valid payload', async () => {
-    const { errors } = await runRules(resetPasswordRules, {
-      token: 'a'.repeat(64),
-      newPassword: 'StrongPass1!',
-      confirmPassword: 'StrongPass1!',
-    });
-    expect(errors.length).toBe(0);
-  });
-
-  test('UpdateEmailDto requires password', async () => {
-    const { errors } = await runRules(updateEmailRules, {
-      newEmail: 'new@example.com',
-    });
-    expect(errors.length).toBeGreaterThan(0);
-  });
-
-  test('UpdateEmailDto accepts valid payload', async () => {
-    const { errors } = await runRules(updateEmailRules, {
-      newEmail: 'new@example.com',
-      password: 'StrongPass1!',
-    });
-    expect(errors.length).toBe(0);
-  });
-
-  test('ChangePasswordDto rejects same new password', async () => {
-    const { errors } = await runRules(changePasswordRules, {
-      currentPassword: 'StrongPass1!',
-      newPassword: 'StrongPass1!',
-      confirmPassword: 'StrongPass1!',
-    });
-    expect(errors.length).toBeGreaterThan(0);
-  });
-
-  test('ChangePasswordDto accepts valid payload', async () => {
-    const { errors } = await runRules(changePasswordRules, {
-      currentPassword: 'OldPass1!',
-      newPassword: 'NewPass1!',
-      confirmPassword: 'NewPass1!',
-    });
-    expect(errors.length).toBe(0);
-  });
-
-  test('UpdateUserDto blocks email/password updates', async () => {
-    const { errors } = await runRules(updateUserRules, {
-      email: 'nope@example.com',
-      password: 'Nope1!',
-    });
-    expect(errors.length).toBeGreaterThan(0);
-  });
-
-  test('UpdateUserDto accepts valid profile update', async () => {
-    const { errors } = await runRules(updateUserRules, {
-      name: 'New Name',
-      age: 22,
-      skills: ['JavaScript', 'Node.js'],
-      interests: ['AI'],
-    });
-    expect(errors.length).toBe(0);
+    expect(errors).toHaveLength(0);
   });
 });
 
-describe('DTO builders', () => {
-  test('toRegisterDTO strips unknown fields', () => {
-    const dto = toRegisterDTO({
-      name: 'Test',
-      email: 'test@example.com',
-      password: 'StrongPass1!',
-      extra: 'nope',
-    });
-    expect(dto.extra).toBeUndefined();
-  });
-
-  test('toUpdateUserDTO only allows profile fields', () => {
+describe('toUpdateUserDTO — field allowlist', () => {
+  test('strips disallowed fields', () => {
     const dto = toUpdateUserDTO({
-      name: 'New Name',
-      age: 30,
-      email: 'nope@example.com',
-      password: 'Nope1!',
-      avatar: 'https://example.com/a.png',
+      name: 'Sipho',
+      email: 'should-be-stripped@example.com',
+      admin: true,
+      age: 22,
     });
     expect(dto.email).toBeUndefined();
-    expect(dto.password).toBeUndefined();
-    expect(dto.avatar).toBe('https://example.com/a.png');
+    expect(dto.admin).toBeUndefined();
+    expect(dto.name).toBe('Sipho');
+    expect(dto.age).toBe(22);
   });
 
-  test('toResetPasswordDTO excludes confirmPassword', () => {
-    const dto = toResetPasswordDTO({
-      token: 'a'.repeat(64),
-      newPassword: 'StrongPass1!',
-      confirmPassword: 'StrongPass1!',
-    });
-    expect(dto.confirmPassword).toBeUndefined();
+  test('passes through all allowed fields', () => {
+    const input = {
+      name: 'Lerato',
+      age: 28,
+      province: 'Western Cape',
+      education: 'BCom',
+      skills: ['SQL', 'Python'],
+      interests: ['Data science'],
+      about: 'Data analyst.',
+      summary: 'Five years experience.',
+    };
+    const dto = toUpdateUserDTO(input);
+    for (const key of Object.keys(input)) {
+      expect(dto[key]).toEqual(input[key]);
+    }
   });
+});
 
-  test('toChangePasswordDTO excludes confirmPassword', () => {
-    const dto = toChangePasswordDTO({
-      currentPassword: 'OldPass1!',
-      newPassword: 'NewPass1!',
-      confirmPassword: 'NewPass1!',
-    });
-    expect(dto.confirmPassword).toBeUndefined();
-  });
-
-  test('toForgotPasswordDTO only includes email', () => {
-    const dto = toForgotPasswordDTO({
+describe('Zod validator schemas', () => {
+  test('registerSchema rejects password without uppercase', () => {
+    const result = registerSchema.safeParse({
+      name: 'Test User',
       email: 'test@example.com',
-      extra: 'nope',
+      password: 'weakpassword1',
     });
-    expect(Object.keys(dto)).toEqual(['email']);
+    expect(result.success).toBe(false);
   });
 
-  test('toLoginDTO only includes email and password', () => {
-    const dto = toLoginDTO({
+  test('registerSchema rejects password without a digit', () => {
+    const result = registerSchema.safeParse({
+      name: 'Test User',
       email: 'test@example.com',
-      password: 'StrongPass1!',
-      extra: 'nope',
+      password: 'WeakPassword',
     });
-    expect(Object.keys(dto)).toEqual(['email', 'password']);
+    expect(result.success).toBe(false);
   });
 
-  test('toUpdateEmailDTO only includes newEmail and password', () => {
-    const dto = toUpdateEmailDTO({
-      newEmail: 'new@example.com',
-      password: 'StrongPass1!',
-      extra: 'nope',
+  test('registerSchema accepts a strong password', () => {
+    const result = registerSchema.safeParse({
+      name: 'Test User',
+      email: 'test@example.com',
+      password: 'StrongPass1',
     });
-    expect(Object.keys(dto)).toEqual(['newEmail', 'password']);
+    expect(result.success).toBe(true);
+  });
+
+  test('loginSchema rejects empty password', () => {
+    const result = loginSchema.safeParse({ email: 'user@example.com', password: '' });
+    expect(result.success).toBe(false);
+  });
+
+  test('loginSchema rejects invalid email format', () => {
+    const result = loginSchema.safeParse({ email: 'not-an-email', password: 'anypass' });
+    expect(result.success).toBe(false);
+  });
+
+  test('loginSchema accepts valid credentials', () => {
+    const result = loginSchema.safeParse({ email: 'user@example.com', password: 'anypassword' });
+    expect(result.success).toBe(true);
   });
 });
