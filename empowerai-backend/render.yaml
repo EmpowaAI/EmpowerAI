@@ -49,6 +49,8 @@ services:
         sync: false
       - key: ADZUNA_APP_KEY
         sync: false
+      - key: REGISTRATION_ENABLED
+        value: "false"
       - key: ENABLE_JOB_API_SCHEDULER
         value: "false"
       - key: ENABLE_API_RATE_LIMITER

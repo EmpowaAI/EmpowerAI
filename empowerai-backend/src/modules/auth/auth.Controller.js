@@ -3,6 +3,14 @@ const logger = require('../../utils/logger');
 
 exports.register = async (req, res, next) => {
   try {
+    // Registration can be disabled via REGISTRATION_ENABLED=false
+    if (process.env.REGISTRATION_ENABLED === 'false') {
+      return res.status(503).json({
+        status: 'error',
+        message: 'New registrations are temporarily closed. Please check back soon.',
+      });
+    }
+
     const { name, email, password, age, province, education, skills, interests } = req.body;
 
     if (!name || !email || !password) {
