@@ -352,7 +352,7 @@ export default function CVAnalysisResult({
               {analysis.candidateInfo.location  && <p><span className="font-semibold text-foreground">Location</span> · {analysis.candidateInfo.location}</p>}
               <div className="flex gap-2 flex-wrap pt-1">
                 {(['linkedin', 'github', 'portfolio'] as const).map((key) => {
-                  const present = analysis.candidateInfo.links[key];
+                  const present = analysis.candidateInfo.links?.[key];
                   return (
                     <span
                       key={key}
