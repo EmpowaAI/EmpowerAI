@@ -31,7 +31,7 @@ exports.analyzeCV = async (req, res, next) => {
       return res.status(400).json({ status: 'error', message: 'targetRole and industry are required' });
     }
 
-    const { analysis, profileId, isFallback, fallbackMessage, isSubscribed, remaining } =
+    const { analysis, profileId, isFallback, fallbackMessage, isSubscribed, remaining, cvText: resolvedCvText } =
       await cvService.analyzeFromText({
         userId:          req.user.id,
         cvText,
@@ -47,6 +47,7 @@ exports.analyzeCV = async (req, res, next) => {
         analysis,
         profileId,
         isSubscribed,
+        cvText: resolvedCvText || '',
         ...(remaining !== null ? { analysisRemaining: remaining } : {}),
         ...(isFallback ? { fallback: true, message: fallbackMessage } : {}),
       },
@@ -71,7 +72,7 @@ exports.analyzeCVFile = async (req, res, next) => {
       return res.status(400).json({ status: 'error', message: 'targetRole and industry are required' });
     }
 
-    const { analysis, profileId, isFallback, fallbackMessage, isSubscribed, remaining } =
+    const { analysis, profileId, isFallback, fallbackMessage, isSubscribed, remaining, cvText } =
       await cvService.analyzeFromFile({
         userId:       req.user.id,
         file:         req.file,
@@ -87,6 +88,7 @@ exports.analyzeCVFile = async (req, res, next) => {
         analysis,
         profileId,
         isSubscribed,
+        cvText: cvText || '',
         ...(remaining !== null ? { analysisRemaining: remaining } : {}),
         ...(isFallback ? { fallback: true, message: fallbackMessage } : {}),
       },

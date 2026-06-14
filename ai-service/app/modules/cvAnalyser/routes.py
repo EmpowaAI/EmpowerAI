@@ -48,6 +48,7 @@ async def analyze_upload(
         }
 
         result = cv_analyzer_service.analyze(payload)
+        result["cv_text"] = cv_text[:15000]
         return result
 
     except Exception as e:

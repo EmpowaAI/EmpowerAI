@@ -83,6 +83,7 @@ async function analyzeFromText({ userId, cvText, targetRole, industry, jobDescri
       analysis:  savedProfile.analysis,
       profileId: savedProfile._id,
       isFallback: false,
+      cvText:    safeText,
     };
   } catch (error) {
     logger.error('[CvService] CV text analysis failed', { userId, error: error.message });
@@ -108,10 +109,12 @@ async function analyzeFromFile({ userId, file, targetRole, industry, jobDescript
       })
     );
 
+    const extractedText = aiResult.cv_text || '';
+
     const savedProfile = await _saveAnalysisResult({
       userId,
       file,
-      rawText: '',
+      rawText: extractedText,
       analysis: aiResult.analysis,
       targetRole,
       industry,
@@ -124,6 +127,7 @@ async function analyzeFromFile({ userId, file, targetRole, industry, jobDescript
       analysis:  savedProfile.analysis,
       profileId: savedProfile._id,
       isFallback: false,
+      cvText:    extractedText,
     };
   } catch (error) {
     logger.error('[CvService] CV file analysis failed', { userId, error: error.message });
@@ -277,6 +281,7 @@ async function _handleAnalysisError({ error, userId, cvText, targetRole, industr
       analysis:       savedProfile.analysis,
       profileId:      savedProfile._id,
       isFallback:     true,
+      cvText:         rawText,
       fallbackMessage: 'AI service is temporarily unavailable. Showing basic CV insights.',
     };
   }
