@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "react-router-dom";
 import { Sparkles, TrendingUp, AlertTriangle, Plus, ArrowRight, Code, TestTube, Shield, Briefcase, Award } from "lucide-react";
 import { cn } from "../lib/utils";
 
@@ -288,16 +289,26 @@ export default function SkillGapAnalysis({ cvData, cvText = "" }: SkillGapAnalys
                         </div>
                       )}
 
-                      <a
-                        href={insight.actionLink || "#"}
-                        target={insight.actionLink ? "_blank" : undefined}
-                        rel={insight.actionLink ? "noopener noreferrer" : undefined}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors"
-                        onClick={(e) => !insight.actionLink && e.preventDefault()}
-                      >
-                        <Plus className="h-3 w-3" /> 
-                        {insight.actionLabel}
-                      </a>
+                      {insight.actionLink?.startsWith('/') ? (
+                        <Link
+                          to={insight.actionLink}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors"
+                        >
+                          <Plus className="h-3 w-3" />
+                          {insight.actionLabel}
+                        </Link>
+                      ) : (
+                        <a
+                          href={insight.actionLink || "#"}
+                          target={insight.actionLink ? "_blank" : undefined}
+                          rel={insight.actionLink ? "noopener noreferrer" : undefined}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors"
+                          onClick={(e) => !insight.actionLink && e.preventDefault()}
+                        >
+                          <Plus className="h-3 w-3" />
+                          {insight.actionLabel}
+                        </a>
+                      )}
                     </div>
                   </div>
                 </motion.div>
