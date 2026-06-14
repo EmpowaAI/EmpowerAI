@@ -9,7 +9,7 @@ interface CVUploadErrorProps {
   retryAfter?: number;
 }
 
-type ErrorCategory = 'file' | 'network' | 'processing' | 'rate-limit' | 'other';
+type ErrorCategory = 'file' | 'network' | 'processing' | 'rate-limit' | 'auth' | 'other';
 
 /**
  * Categorizes error messages and provides actionable advice
@@ -21,6 +21,26 @@ function categorizeError(error: string): {
   icon: string;
 } {
   const lowerError = error.toLowerCase();
+
+  if (
+    lowerError.includes('log in') ||
+    lowerError.includes('login') ||
+    lowerError.includes('session') ||
+    lowerError.includes('unauthorized') ||
+    lowerError.includes('authentication failed') ||
+    lowerError.includes('not authenticated')
+  ) {
+    return {
+      category: 'auth',
+      title: 'Session Expired',
+      advice: [
+        'Your session has expired or you are not logged in',
+        'Click "Log in again" below to continue',
+        'You will need to re-upload your CV after logging in',
+      ],
+      icon: '🔐',
+    };
+  }
 
   if (lowerError.includes('file') || lowerError.includes('format') || lowerError.includes('pdf') || lowerError.includes('docx')) {
     return {
@@ -100,7 +120,7 @@ export default function CVUploadError({
   isRateLimited = false,
   retryAfter,
 }: CVUploadErrorProps) {
-  const { title, advice, icon } = categorizeError(error);
+  const { title, advice, icon, category } = categorizeError(error);
 
   return (
     <motion.div
@@ -161,15 +181,24 @@ export default function CVUploadError({
 
         {/* Action buttons */}
         <div className="flex items-center gap-2 flex-wrap">
-          {onRetry && (
-            <button
-              onClick={onRetry}
-              disabled={isRateLimited}
-              className="flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium text-sm hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          {category === 'auth' ? (
+            <a
+              href="/login"
+              className="flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium text-sm hover:bg-primary/90 transition-colors"
             >
-              <RefreshCw className="h-4 w-4" />
-              Try Again
-            </button>
+              Log in again
+            </a>
+          ) : (
+            onRetry && (
+              <button
+                onClick={onRetry}
+                disabled={isRateLimited}
+                className="flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium text-sm hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <RefreshCw className="h-4 w-4" />
+                Try Again
+              </button>
+            )
           )}
           <button
             onClick={onDismiss}

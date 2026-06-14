@@ -10,6 +10,7 @@ const getToken = (): string | null => localStorage.getItem('empowerai-token');
 const setToken = (token: string): void => localStorage.setItem('empowerai-token', token);
 const removeToken = (): void => {
   localStorage.removeItem('empowerai-token');
+  localStorage.removeItem('empowerai-refresh-token');
   // Also clear other user-specific data from local storage on logout
   localStorage.removeItem('enrichedProfile');
   localStorage.removeItem('cvAnalysisData');
@@ -19,6 +20,30 @@ const removeToken = (): void => {
   localStorage.removeItem('cvCompleted');
   localStorage.removeItem('twinCompleted');
   localStorage.removeItem('empowermentScore');
+};
+
+const refreshAccessToken = async (): Promise<boolean> => {
+  const refreshToken = localStorage.getItem('empowerai-refresh-token');
+  if (!refreshToken) return false;
+  try {
+    const response = await fetch(`${API_BASE}/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken }),
+    });
+    if (!response.ok) return false;
+    const data = await response.json();
+    if (data?.data?.token) {
+      setToken(data.data.token);
+      if (data.data?.refreshToken) {
+        localStorage.setItem('empowerai-refresh-token', data.data.refreshToken);
+      }
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
 };
 
 const getStoredCvScore = (): number => {
@@ -34,107 +59,112 @@ const getStoredCvScore = (): number => {
 };
 
 const request = async <T>(endpoint: string, options: RequestInit = {}): Promise<T> => {
-  const token = getToken();
-  const headers = new Headers(options.headers);
-  headers.set('Content-Type', 'application/json');
-
-  if (token) headers.set('Authorization', `Bearer ${token}`);
-
   // Determine timeout based on endpoint type
-  let timeout = 45000; // default 45 seconds for standard CRUD
+  let timeout = 45000;
   if (typeof endpoint === 'string') {
-    if (endpoint.includes('/auth/')) {
-      timeout = 20000; // auth: 20 seconds (fail fast)
-    } else if (endpoint.includes('/twin/')) {
-      timeout = 150000; // AI tasks: 2.5 minutes (allow for cold starts + deep analysis)
-    }
+    if (endpoint.includes('/auth/')) timeout = 20000;
+    else if (endpoint.includes('/twin/')) timeout = 150000;
   }
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => {
-    console.warn(`API request to ${endpoint} timed out after ${timeout}ms`);
-    controller.abort();
-  }, timeout);
+  const _do = async (isRetry: boolean): Promise<T> => {
+    const token = getToken();
+    const headers = new Headers(options.headers);
+    headers.set('Content-Type', 'application/json');
+    if (token) headers.set('Authorization', `Bearer ${token}`);
 
-  try {
-    const response = await fetch(`${API_BASE}${endpoint}`, {
-      ...options,
-      headers,
-      signal: controller.signal,
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      console.warn(`API request to ${endpoint} timed out after ${timeout}ms`);
+      controller.abort();
+    }, timeout);
 
-    clearTimeout(timeoutId);
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({
-        message: `HTTP error! status: ${response.status}`,
-        status: response.status,
-      }));
-
-      // Robustly extract error message from FastAPI/OpenAI response formats
-      let errorMessage = error.detail || (error.data && (error.data.message || error.data.detail)) || error.message;
-      
-      // Handle FastAPI validation error arrays
-      if (Array.isArray(errorMessage)) {
-        errorMessage = errorMessage.map((e: any) => e.msg || JSON.stringify(e)).join(', ');
-      }
-
-      if (!errorMessage || (typeof errorMessage === 'string' && errorMessage.includes('status'))) {
-        errorMessage = `Request failed with status ${response.status}`;
-      }
-
-      const apiError = new Error(errorMessage);
-      (apiError as any).status = error.status || error.statusCode || response.status;
-      (apiError as any).response = {
-        ...error,
-        status: response.status,
-        statusCode: error.statusCode || response.status,
-        data: {
-          ...error,
-          message: errorMessage,
-          code: error.code || error.error,
-        },
-      };
-      if (response.status === 429) {
-        (apiError as any).isRateLimit = true;
-        (apiError as any).retryAfter = error.retryAfter || 60;
-      }
-      if (response.status === 401) {
-        removeToken();
-        // Avoid redirect loops if already on login
-        if (!window.location.pathname.includes('/login')) {
-          window.location.href = '/login';
-        }
-      }
-      throw apiError;
-    }
-
-    const data = await response.json();
     try {
-      const jobId = data?.data?.meta?.jobId;
-      if (jobId) {
-        localStorage.setItem('empowerai:last-ai-job-id', String(jobId));
-        localStorage.setItem('empowerai:last-ai-job-at', new Date().toISOString());
+      const response = await fetch(`${API_BASE}${endpoint}`, {
+        ...options,
+        headers,
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({
+          message: `HTTP error! status: ${response.status}`,
+          status: response.status,
+        }));
+
+        // Robustly extract error message from FastAPI/OpenAI response formats
+        let errorMessage = error.detail || (error.data && (error.data.message || error.data.detail)) || error.message;
+
+        // Handle FastAPI validation error arrays
+        if (Array.isArray(errorMessage)) {
+          errorMessage = errorMessage.map((e: any) => e.msg || JSON.stringify(e)).join(', ');
+        }
+
+        if (!errorMessage || (typeof errorMessage === 'string' && errorMessage.includes('status'))) {
+          errorMessage = `Request failed with status ${response.status}`;
+        }
+
+        const apiError = new Error(errorMessage);
+        (apiError as any).status = error.status || error.statusCode || response.status;
+        (apiError as any).response = {
+          ...error,
+          status: response.status,
+          statusCode: error.statusCode || response.status,
+          data: {
+            ...error,
+            message: errorMessage,
+            code: error.code || error.error,
+          },
+        };
+        if (response.status === 429) {
+          (apiError as any).isRateLimit = true;
+          (apiError as any).retryAfter = error.retryAfter || 60;
+        }
+        if (response.status === 401) {
+          // On first 401, attempt a silent token refresh and retry once
+          if (!isRetry) {
+            const refreshed = await refreshAccessToken();
+            if (refreshed) return _do(true);
+          }
+          // Refresh failed or already retried — clear session and redirect
+          removeToken();
+          if (!window.location.pathname.includes('/login')) {
+            window.location.href = '/login';
+          }
+        }
+        throw apiError;
       }
-    } catch {
-      // Ignore localStorage failures
-    }
-    return data;
-  } catch (error: any) {
-    clearTimeout(timeoutId);
 
-    // Handle abort errors (timeout or manual cancellation)
-    if (error.name === 'AbortError' || error.message?.includes('aborted')) {
-      const abortError = new Error(
-        `Request to ${endpoint} was aborted. The operation took longer than ${timeout}ms or was cancelled.`
-      );
-      (abortError as any).isTimeout = true;
-      throw abortError;
-    }
+      const data = await response.json();
+      try {
+        const jobId = data?.data?.meta?.jobId;
+        if (jobId) {
+          localStorage.setItem('empowerai:last-ai-job-id', String(jobId));
+          localStorage.setItem('empowerai:last-ai-job-at', new Date().toISOString());
+        }
+      } catch {
+        // Ignore localStorage failures
+      }
+      return data;
+    } catch (error: any) {
+      clearTimeout(timeoutId);
 
-    console.error('API Request Error:', error);
-    throw error;
-  }
+      // Handle abort errors (timeout or manual cancellation)
+      if (error.name === 'AbortError' || error.message?.includes('aborted')) {
+        const abortError = new Error(
+          `Request to ${endpoint} was aborted. The operation took longer than ${timeout}ms or was cancelled.`
+        );
+        (abortError as any).isTimeout = true;
+        throw abortError;
+      }
+
+      console.error('API Request Error:', error);
+      throw error;
+    }
+  };
+
+  return _do(false);
 };
 
 // ============================================
@@ -889,6 +919,11 @@ export const authAPIReal = {
       setToken(response.data.token);
     } else if (response.token) {
       setToken(response.token);
+    }
+    if (response.data?.refreshToken) {
+      localStorage.setItem('empowerai-refresh-token', response.data.refreshToken);
+    } else if (response.refreshToken) {
+      localStorage.setItem('empowerai-refresh-token', response.refreshToken);
     }
     return response;
   },

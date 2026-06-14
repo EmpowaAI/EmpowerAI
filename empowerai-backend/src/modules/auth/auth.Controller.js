@@ -95,6 +95,7 @@ exports.login = async (req, res, next) => {
       status: 'success',
       data: {
         token: data.session.access_token,
+        refreshToken: data.session.refresh_token,
         user: profile || {
           id: data.user.id,
           email: data.user.email,
@@ -142,6 +143,34 @@ exports.validate = async (req, res, next) => {
     });
   } catch (error) {
     logger.error('Validate controller error', { message: error.message });
+    next(error);
+  }
+};
+
+exports.refresh = async (req, res, next) => {
+  try {
+    const { refreshToken } = req.body;
+    if (!refreshToken) {
+      return res.status(400).json({ status: 'error', message: 'Refresh token is required.' });
+    }
+
+    const { data, error } = await supabase.auth.refreshSession({ refresh_token: refreshToken });
+    if (error || !data.session) {
+      logger.warn('Token refresh failed', { message: error?.message });
+      return res.status(401).json({ status: 'error', message: 'Session expired. Please log in again.' });
+    }
+
+    logger.info('Token refreshed', { userId: data.user?.id });
+
+    res.json({
+      status: 'success',
+      data: {
+        token: data.session.access_token,
+        refreshToken: data.session.refresh_token,
+      },
+    });
+  } catch (error) {
+    logger.error('Refresh controller error', { message: error.message });
     next(error);
   }
 };
