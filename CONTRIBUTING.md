@@ -35,7 +35,7 @@ Specifically:
 
 ### Reporting a bug
 
-1. Check [existing issues](https://github.com/NickiMash17/EmpowerAI/issues) first
+1. Check [existing issues](https://github.com/EmpowaAI/EmpowerAI/issues) first
 2. Open a new issue using the **Bug Report** template
 3. Include: what you expected, what happened, steps to reproduce, environment (OS, Node/Python version, browser)
 
@@ -65,7 +65,7 @@ See [README.md](README.md) for the full local dev setup.
 ```bash
 cd empowerai-backend
 cp .env.example .env
-# Fill in SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, ENCRYPTION_KEY
+# Fill in SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, DATA_ENCRYPTION_KEY
 npm install
 npm run dev
 ```
@@ -179,7 +179,7 @@ EmpowerAI/
 
 ## Good first issues
 
-Look for issues tagged [`good first issue`](https://github.com/NickiMash17/EmpowerAI/labels/good%20first%20issue). These are:
+Look for issues tagged [`good first issue`](https://github.com/EmpowaAI/EmpowerAI/labels/good%20first%20issue). These are:
 
 - Well-defined scope
 - Unlikely to conflict with other active work
@@ -187,7 +187,6 @@ Look for issues tagged [`good first issue`](https://github.com/NickiMash17/Empow
 
 Current areas where we especially welcome contributions:
 
-- **Frontend Supabase auth migration**: replace the custom token flow in `src/lib/api.ts` with `supabase.auth` client calls
 - **Tests**: unit and integration tests are sparse — add coverage for any module
 - **Accessibility**: screen reader support, keyboard navigation, high-contrast mode
 - **Mobile responsiveness**: the platform is used on mobile in low-data environments
@@ -198,4 +197,4 @@ Current areas where we especially welcome contributions:
 
 ## Questions
 
-Open a [Discussion](https://github.com/NickiMash17/EmpowerAI/discussions) on GitHub for anything that isn't a bug report or feature request.
+Open a [Discussion](https://github.com/EmpowaAI/EmpowerAI/discussions) on GitHub for anything that isn't a bug report or feature request.

@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EmpowerAI — Open Source Readiness Report</title>
+<style>
+  :root {
+    --ground: #F2F5F9;
+    --surface: #FFFFFF;
+    --text: #18202E;
+    --text-muted: #5A6478;
+    --accent: #1A7A3D;
+    --accent-light: #E8F5EE;
+    --accent-2: #C8842A;
+    --accent-2-light: #FDF4E7;
+    --border: #DDE3EC;
+    --score-font: Georgia, "Palatino Linotype", "Book Antiqua", Palatino, serif;
+    --body-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { background: var(--ground); color: var(--text); font-family: var(--body-font); font-size: 16px; line-height: 1.6; }
+
+  body { max-width: 860px; margin: 0 auto; padding: 48px 32px 80px; }
+
+  .doc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: 28px;
+    border-bottom: 2px solid var(--text);
+    margin-bottom: 0;
+  }
+  .doc-header .brand { font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text); }
+  .doc-header .brand span { color: var(--accent); }
+  .doc-header .meta { font-size: 12px; color: var(--text-muted); text-align: right; line-height: 1.8; }
+
+  .hero { padding: 40px 0 20px; position: relative; }
+  .hero-score {
+    font-family: var(--score-font);
+    font-size: clamp(120px, 22vw, 200px);
+    font-weight: 700;
+    line-height: 0.88;
+    color: var(--text);
+    letter-spacing: -0.03em;
+    display: block;
+  }
+  .hero-score .denom {
+    font-size: 0.38em;
+    font-weight: 400;
+    color: var(--accent);
+    vertical-align: super;
+    letter-spacing: 0;
+  }
+  .hero-label {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .hero-label::before {
+    content: "";
+    display: inline-block;
+    width: 32px;
+    height: 2px;
+    background: var(--accent);
+  }
+  .hero-tagline {
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--text-muted);
+    margin-top: 8px;
+    max-width: 540px;
+    line-height: 1.5;
+  }
+  .hero-tagline strong { color: var(--text); font-weight: 600; }
+
+  .section {
+    background: var(--surface);
+    border-radius: 6px;
+    padding: 36px 40px;
+    margin-top: 20px;
+    border: 1px solid var(--border);
+  }
+  .section-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  .section-title {
+    font-family: var(--score-font);
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 16px;
+    line-height: 1.25;
+  }
+  .section p { color: var(--text-muted); font-size: 15px; line-height: 1.7; }
+  .section p + p { margin-top: 12px; }
+  .section p strong { color: var(--text); font-weight: 600; }
+
+  .journey {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+    margin-top: 28px;
+    position: relative;
+  }
+  .journey::before {
+    content: "";
+    position: absolute;
+    top: 28px;
+    left: 10%;
+    right: 10%;
+    height: 2px;
+    background: linear-gradient(to right, #DDE3EC, var(--accent), var(--accent));
+    z-index: 0;
+  }
+  .milestone { position: relative; z-index: 1; padding: 0 12px; text-align: center; }
+  .milestone-dot {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 14px;
+    font-family: var(--score-font);
+    font-size: 20px;
+    font-weight: 700;
+  }
+  .milestone-dot.past { background: var(--ground); border: 2px solid var(--border); color: var(--text-muted); }
+  .milestone-dot.current { background: var(--accent); color: #fff; border: 2px solid var(--accent); }
+  .milestone-date { font-size: 11px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
+  .milestone-desc { font-size: 13px; color: var(--text); line-height: 1.5; }
+
+  .completed-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 24px;
+  }
+  .completed-item {
+    background: var(--ground);
+    border-radius: 5px;
+    padding: 16px 18px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .completed-icon {
+    width: 22px;
+    height: 22px;
+    background: var(--accent);
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+  }
+  .completed-icon svg { width: 12px; height: 12px; }
+  .completed-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+  .completed-body { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+  .next-items { margin-top: 20px; display: flex; flex-direction: column; gap: 16px; }
+  .next-item { display: flex; gap: 20px; align-items: flex-start; }
+  .next-num {
+    font-family: var(--score-font);
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--border);
+    line-height: 1;
+    flex-shrink: 0;
+    width: 36px;
+  }
+  .next-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+  .next-body { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.04em;
+  }
+  .badge-green { background: var(--accent-light); color: var(--accent); }
+  .badge-amber { background: var(--accent-2-light); color: var(--accent-2); }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-top: 24px;
+  }
+  .stat-cell { background: var(--ground); padding: 20px 18px; text-align: center; }
+  .stat-value {
+    font-family: var(--score-font);
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .stat-value.green { color: var(--accent); }
+  .stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; }
+
+  .doc-footer {
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .doc-footer .prepared strong { display: block; font-size: 13px; color: var(--text); font-weight: 600; }
+
+  @media print {
+    body { padding: 32px; max-width: 100%; }
+    .section { break-inside: avoid; }
+    .hero-score { font-size: 140px; }
+    .journey::before { display: none; }
+  }
+
+  @media (max-width: 600px) {
+    body { padding: 24px 20px 60px; }
+    .completed-grid { grid-template-columns: 1fr; }
+    .journey { grid-template-columns: 1fr; gap: 24px; }
+    .journey::before { display: none; }
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .doc-footer { flex-direction: column; gap: 16px; }
+    .hero-score { font-size: 100px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+
+<header class="doc-header">
+  <div class="brand">Empow<span>AI</span> &#8212; Open Source Report</div>
+  <div class="meta">
+    Prepared for: Lindy<br>
+    Prepared by: Nicolette Mashaba<br>
+    June 2026
+  </div>
+</header>
+
+<section class="hero">
+  <span class="hero-score">100<span class="denom">/100</span></span>
+  <div class="hero-label">Open Source Readiness Score</div>
+  <p class="hero-tagline">EmpowerAI meets <strong>every standard</strong> the global developer community uses to evaluate whether a project is ready to be built and contributed to by people outside the team.</p>
+</section>
+
+<section class="section">
+  <div class="section-eyebrow">In plain language</div>
+  <h2 class="section-title">What does 100/100 actually mean?</h2>
+  <p>Think of open source readiness the same way you&#8217;d think about a property inspection before listing a house. A score of 100/100 means every room is in order: the legal paperwork is signed, the structure is sound, the instructions for visitors are clear, and there&#8217;s a welcome mat at the door.</p>
+  <p>For EmpowerAI, this means: <strong>any skilled developer in the world can find the project, understand how to contribute, and trust that their contribution will be properly reviewed</strong> before it becomes part of the product. Nothing is hidden, nothing is missing. The project is professionally presented.</p>
+  <p>This is the standard that projects like VS Code, React, and Django hold themselves to. We now hold ourselves to the same standard.</p>
+</section>
+
+<section class="section">
+  <div class="section-eyebrow">The journey</div>
+  <h2 class="section-title">From 71 to 100 in two sessions</h2>
+  <div class="journey">
+    <div class="milestone">
+      <div class="milestone-dot past">71</div>
+      <div class="milestone-date">Early 2026</div>
+      <div class="milestone-desc">Code existed and worked. No contribution guide, no security policy, no formal release &#8212; not ready for outside contributors.</div>
+    </div>
+    <div class="milestone">
+      <div class="milestone-dot past">97</div>
+      <div class="milestone-date">April 2026</div>
+      <div class="milestone-desc">Security policy, contribution guide, and code of conduct added. Automated tests introduced. Three points short.</div>
+    </div>
+    <div class="milestone">
+      <div class="milestone-dot current">100</div>
+      <div class="milestone-date">June 2026</div>
+      <div class="milestone-desc">First official release published, contributor labels live, code reviewer updated, test suite expanded to 59 tests.</div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-eyebrow">Completed this sprint</div>
+  <h2 class="section-title">Eight things we put in place</h2>
+  <div class="completed-grid">
+    <div class="completed-item">
+      <div class="completed-icon">
+        <svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 6.5L5 9.5L10 3" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      </div>
+      <div>
+        <div class="completed-title">v1.0.0 Release published</div>
+        <div class="completed-body">The first official version is live on GitHub. Anyone referencing EmpowerAI now has a stable version number they can cite and build on.</div>
+      </div>
+    </div>
+    <div class="completed-item">
+      <div class="completed-icon">
+        <svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 6.5L5 9.5L10 3" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      </div>
+      <div>
+        <div class="completed-title">Good First Issue labels</div>
+        <div class="completed-body">Specific issues on the tracker have been marked so that newcomers to open source can find genuinely approachable tasks to work on.</div>
+      </div>
+    </div>
+    <div class="completed-item">
+      <div class="completed-icon">
+        <svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 6.5L5 9.5L10 3" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      </div>
+      <div>
+        <div class="completed-title">Code reviewer updated</div>
+        <div class="completed-body">The CODEOWNERS file now reflects the current team. Every proposed change to the codebase requires Nicolette&#8217;s explicit approval before it is accepted.</div>
+      </div>
+    </div>
+    <div class="completed-item">
+      <div class="completed-icon">
+        <svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 6.5L5 9.5L10 3" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      </div>
+      <div>
+        <div class="completed-title">59 automated tests</div>
+        <div class="completed-body">Tests now verify that security, encryption, and core error handling behave correctly &#8212; and flag any regression immediately.</div>
+      </div>
+    </div>
+    <div class="completed-item">
+      <div class="completed-icon">
+        <svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 6.5L5 9.5L10 3" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      </div>
+      <div>
+        <div class="completed-title">Security policy (SECURITY.md)</div>
+        <div class="completed-body">Tells security researchers exactly how to report vulnerabilities privately, so issues are disclosed responsibly &#8212; not posted publicly.</div>
+      </div>
+    </div>
+    <div class="completed-item">
+      <div class="completed-icon">
+        <svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 6.5L5 9.5L10 3" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      </div>
+      <div>
+        <div class="completed-title">MIT Licence</div>
+        <div class="completed-body">The legal framework is in place. The MIT licence is the most permissive and widely trusted in open source &#8212; it allows others to use and build on EmpowerAI freely.</div>
+      </div>
+    </div>
+    <div class="completed-item">
+      <div class="completed-icon">
+        <svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 6.5L5 9.5L10 3" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      </div>
+      <div>
+        <div class="completed-title">Contribution guide (CONTRIBUTING.md)</div>
+        <div class="completed-body">Step-by-step instructions for any developer who wants to contribute &#8212; from forking the repo to submitting a pull request.</div>
+      </div>
+    </div>
+    <div class="completed-item">
+      <div class="completed-icon">
+        <svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 6.5L5 9.5L10 3" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      </div>
+      <div>
+        <div class="completed-title">Code of Conduct</div>
+        <div class="completed-body">Sets the community standards. Every serious open source project has one &#8212; it tells contributors what behaviour is expected and how violations are handled.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-eyebrow">By the numbers</div>
+  <h2 class="section-title">Where the project stands today</h2>
+  <div class="stats-row">
+    <div class="stat-cell">
+      <span class="stat-value green">100</span>
+      <div class="stat-label">OSS Score /100</div>
+    </div>
+    <div class="stat-cell">
+      <span class="stat-value">59</span>
+      <div class="stat-label">Automated tests</div>
+    </div>
+    <div class="stat-cell">
+      <span class="stat-value">v1.0.0</span>
+      <div class="stat-label">Published release</div>
+    </div>
+    <div class="stat-cell">
+      <span class="stat-value green">3</span>
+      <div class="stat-label">Issues for newcomers</div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-eyebrow">What comes next</div>
+  <h2 class="section-title">The project is now discoverable worldwide</h2>
+  <div class="next-items">
+    <div class="next-item">
+      <div class="next-num">1</div>
+      <div>
+        <div class="next-title">GitHub surfaces EmpowerAI to first-time contributors</div>
+        <div class="next-body">GitHub runs a global discovery feed for developers looking for their first open source contribution. Issues tagged &#8220;good first issue&#8221; appear in this feed. EmpowerAI is now on that map &#8212; developers browsing for South African projects, career-tech projects, or AI projects can find and contribute to it without any outreach from us.</div>
+      </div>
+    </div>
+    <div class="next-item">
+      <div class="next-num">2</div>
+      <div>
+        <div class="next-title">v1.0.0 can be cited, shared, and built on</div>
+        <div class="next-body">Journalists, researchers, and other developers can now reference EmpowerAI at a specific, stable version. The release page on GitHub shows the full change history and makes the project look like a professional, shipped product &#8212; because it is.</div>
+      </div>
+    </div>
+    <div class="next-item">
+      <div class="next-num">3</div>
+      <div>
+        <div class="next-title">Security researchers can report responsibly</div>
+        <div class="next-body">The security policy means any developer who discovers a vulnerability now has a clear, private channel to report it directly to the team. This is how large companies like Google and Microsoft handle this &#8212; and EmpowerAI now does too.</div>
+      </div>
+    </div>
+    <div class="next-item">
+      <div class="next-num">4</div>
+      <div>
+        <div class="next-title">20 new issues filed for next development sprint</div>
+        <div class="next-body">A full codebase audit was completed this session. 20 new issues are logged on GitHub covering security hardening, bug fixes, and feature enhancements &#8212; giving contributors a well-organised backlog to work from.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="doc-footer">
+  <div class="prepared">
+    <strong>Nicolette Mashaba</strong>
+    EmpowerAI &#8212; Lead Engineer
+  </div>
+  <div style="text-align:right;">
+    <span class="badge badge-green">&#10003; Score: 100/100</span>&nbsp;
+    <span class="badge badge-amber">v1.0.0 Released</span>
+    <div style="margin-top:8px;">Prepared June 2026 &middot; Built in Mzansi &#x1F1FF;&#x1F1E6;</div>
+  </div>
+</footer>
+
+</body>
+</html>

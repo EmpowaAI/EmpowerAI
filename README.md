@@ -4,11 +4,11 @@
 
 **AI-powered career platform for South African youth**
 
-[![Status](https://img.shields.io/badge/status-in%20development-orange?style=flat-square)](https://github.com/NickiMash17/EmpowerAI)
+[![Status](https://img.shields.io/badge/status-in%20development-orange?style=flat-square)](https://github.com/EmpowaAI/EmpowerAI)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
 [![Stack](https://img.shields.io/badge/stack-React%20%7C%20Node.js%20%7C%20Python%20%7C%20Supabase-blueviolet?style=flat-square)]()
 
-[Report Bug](https://github.com/NickiMash17/EmpowerAI/issues) · [Request Feature](https://github.com/NickiMash17/EmpowerAI/issues) · [Security](SECURITY.md)
+[Report Bug](https://github.com/EmpowaAI/EmpowerAI/issues) · [Request Feature](https://github.com/EmpowaAI/EmpowerAI/issues) · [Security](SECURITY.md)
 
 </div>
 
@@ -57,7 +57,7 @@ EmpowerAI/
 ### 1. Clone and set up the database
 
 ```bash
-git clone https://github.com/NickiMash17/EmpowerAI.git
+git clone https://github.com/EmpowaAI/EmpowerAI.git
 cd EmpowerAI
 ```
 
@@ -136,7 +136,7 @@ App starts at `http://localhost:5173`.
 |---|---|---|
 | `SUPABASE_URL` | Yes | Supabase project URL |
 | `SUPABASE_SERVICE_ROLE_KEY` | Yes | Service-role key — **never expose client-side** |
-| `ENCRYPTION_KEY` | Yes | 64-char hex for AES-256-GCM encryption of PII |
+| `DATA_ENCRYPTION_KEY` | Yes | 64-char hex for AES-256-GCM encryption of PII |
 | `AI_SERVICE_URL` | Yes | FastAPI service URL |
 | `FRONTEND_URL` | Yes | Frontend URL (used in email auth redirects) |
 | `BREVO_API_KEY` | Email | Transactional email delivery |
