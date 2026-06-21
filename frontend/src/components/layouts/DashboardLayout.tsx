@@ -4,7 +4,9 @@ import { Link, useLocation, Outlet, useNavigate } from "react-router-dom";
 import {
   Menu, X, LogOut, ArrowLeft, Settings, Home,
   Brain, FileText, MessageSquare, Briefcase, Lock,
+  Mail, MapPin, Facebook, Instagram, Linkedin,
 } from "lucide-react";
+import TikTokIcon from "../ui/TikTokIcon";
 import { cn } from "../../lib/utils";
 import ThemeToggle from "../ui/ThemeToggle";
 import Logo from "../../components/ui/Logo";
@@ -516,6 +518,50 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="p-4 sm:p-6 md:p-8 lg:p-10 pb-24 lg:pb-10 max-w-6xl mx-auto w-full">
               {children || <Outlet />}
             </div>
+
+            {/* Dashboard Footer */}
+            <footer className="border-t border-border/50 bg-background/60 backdrop-blur-sm pb-20 lg:pb-0">
+              <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                  {/* Copyright */}
+                  <p className="text-xs text-muted-foreground text-center sm:text-left">
+                    © {new Date().getFullYear()} EmpowAI · Amandla e-Ubuntu 🇿🇦 · Built in Mzansi
+                  </p>
+
+                  {/* Social icons */}
+                  <div className="flex items-center gap-3">
+                    {[
+                      { href: "https://www.facebook.com/profile.php?id=61562941456913", icon: Facebook, label: "Facebook" },
+                      { href: "https://www.tiktok.com/@empowa.ai", icon: TikTokIcon, label: "TikTok" },
+                      { href: "mailto:info@empowa-ai.co.za", icon: Mail, label: "Email" },
+                      { href: "https://www.instagram.com/empowa.ai/", icon: Instagram, label: "Instagram" },
+                      { href: "https://www.linkedin.com/company/empowaai", icon: Linkedin, label: "LinkedIn" },
+                    ].map(({ href, icon: Icon, label }) => (
+                      <a
+                        key={label}
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={label}
+                        className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-secondary hover:text-white transition-colors"
+                      >
+                        <Icon className="h-3.5 w-3.5" />
+                      </a>
+                    ))}
+                  </div>
+
+                  {/* Links */}
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <a href="/" className="hover:text-primary transition-colors">Home</a>
+                    <span className="text-border">·</span>
+                    <a href="mailto:info@empowa-ai.co.za" className="flex items-center gap-1 hover:text-primary transition-colors">
+                      <MapPin className="h-3 w-3" />
+                      South Africa
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </footer>
           </main>
 
           {/* Mobile Bottom Navigation */}
