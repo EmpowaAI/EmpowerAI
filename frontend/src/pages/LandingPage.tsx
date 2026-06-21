@@ -420,7 +420,7 @@ export default function LandingPage() {
                 </span>
               </span>
               <h2 className="mt-3 font-display text-2xl sm:text-3xl md:text-5xl font-bold tracking-tight text-primary px-2">
-                A story we're here to write: from R0 to R4,500/month
+                What EmpowaAI does: from R0 to R4,500/month
               </h2>
               <p className="mx-auto mt-3 sm:mt-4 max-w-xl text-sm sm:text-base text-muted-foreground px-4">
                 <span className={cn(
@@ -444,13 +444,13 @@ export default function LandingPage() {
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-                  <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-ai-gradient flex items-center justify-center ring-2 ring-secondary/30 flex-shrink-0">
+                  <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-xl bg-ai-gradient flex items-center justify-center ring-2 ring-secondary/30 flex-shrink-0">
                     <Sparkles className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-display text-base sm:text-lg font-bold text-primary">Your name here · SA Graduate</h3>
+                    <h3 className="font-display text-base sm:text-lg font-bold text-primary">Analysis complete</h3>
                     <p className="flex items-center gap-1 text-[11px] sm:text-xs text-muted-foreground">
-                      <MapPin className="h-2.5 w-2.5 sm:h-3 sm:w-3" /> Anywhere in South Africa
+                      <MapPin className="h-2.5 w-2.5 sm:h-3 sm:w-3" /> SA Graduate · Projected outcome
                     </p>
                   </div>
                   <div className="text-left sm:text-right mt-2 sm:mt-0">
@@ -549,13 +549,13 @@ export default function LandingPage() {
                 <div className="mt-4 sm:mt-5 rounded-xl border border-border/70 border-l-4 border-l-secondary bg-card p-4 sm:p-5 shadow-card-soft">
                   <Quote className="h-4 w-4 sm:h-5 sm:w-5 text-secondary" />
                   <p className="mt-2 font-display italic text-primary text-sm sm:text-base">
-                    &quot;EmpowAI taught me that <span className={cn(
+                    &quot;<span className={cn(
                       "transition-all duration-500",
                       isAnimating ? "opacity-0" : "opacity-100"
-                    )}>{currentUbuntu.toLowerCase()}</span> is a business strategy.&quot;
+                    )}>{currentUbuntu}</span> — this is what we're building for.&quot;
                   </p>
                   <p className="mt-2 sm:mt-3 text-[9px] sm:text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                    Siyanda <span className="text-secondary">·</span> Featured story
+                    EmpowaAI <span className="text-secondary">·</span> Projected outcome · SA Graduate
                   </p>
                 </div>
               </div>
