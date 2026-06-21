@@ -172,13 +172,10 @@ export default function SignupPage() {
   const submitDisabled = isLoading || !consents.consentDataProcessing || !consents.consentProfileSharing;
 
   const leftPanel = (
-    <div className="relative hidden flex-1 flex-col justify-between overflow-hidden p-12 lg:flex">
-      <img
-        src={signupBg}
-        alt="EmpowaAI"
-        loading="eager"
-        className="absolute inset-0 h-full w-full scale-105 object-cover object-center crisp-image"
-      />
+    <div
+      className="relative hidden min-h-screen flex-1 flex-col justify-between overflow-hidden p-12 lg:flex"
+      style={{ backgroundImage: `url(${signupBg})`, backgroundSize: 'cover', backgroundPosition: 'center top' }}
+    >
       <div className="absolute inset-0 panel-image-overlay" />
       <div className="absolute inset-0 panel-image-accent opacity-70" />
 

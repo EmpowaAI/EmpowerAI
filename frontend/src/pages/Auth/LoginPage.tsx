@@ -147,13 +147,10 @@ export default function LoginPage() {
   };
 
   const leftPanel = (
-    <div className="relative hidden flex-1 flex-col justify-between overflow-hidden p-12 lg:flex">
-      <img
-        src={loginBg}
-        alt="EmpowaAI"
-        loading="eager"
-        className="absolute inset-0 h-full w-full scale-110 object-cover object-top crisp-image"
-      />
+    <div
+      className="relative hidden min-h-screen flex-1 flex-col justify-between overflow-hidden p-12 lg:flex"
+      style={{ backgroundImage: `url(${loginBg})`, backgroundSize: 'cover', backgroundPosition: 'center top' }}
+    >
       <div className="absolute inset-0 panel-image-overlay" />
       <div className="absolute inset-0 panel-image-accent opacity-70" />
 
