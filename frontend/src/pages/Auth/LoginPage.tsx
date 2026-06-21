@@ -152,7 +152,7 @@ export default function LoginPage() {
         src={loginBg}
         alt="EmpowaAI"
         loading="eager"
-        className="absolute inset-0 h-full w-full scale-105 object-cover object-center crisp-image"
+        className="absolute inset-0 h-full w-full scale-110 object-cover object-top crisp-image"
       />
       <div className="absolute inset-0 panel-image-overlay" />
       <div className="absolute inset-0 panel-image-accent opacity-70" />

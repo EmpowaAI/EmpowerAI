@@ -418,19 +418,19 @@
   .panel-image-overlay {
     /* Overlay keeps text readable while letting the image show through */
     background: linear-gradient(
-      135deg,
-      rgba(0, 0, 0, 0.50) 0%,
-      rgba(0, 0, 0, 0.28) 48%,
-      rgba(0, 0, 0, 0.46) 100%
+      180deg,
+      rgba(0, 0, 0, 0.45) 0%,
+      rgba(0, 0, 0, 0.10) 45%,
+      rgba(0, 0, 0, 0.40) 100%
     );
   }
 
   .panel-image-accent {
     background: linear-gradient(
       135deg,
-      hsl(var(--primary) / 0.22) 0%,
-      transparent 42%,
-      hsl(var(--accent) / 0.16) 100%
+      hsl(var(--primary) / 0.10) 0%,
+      transparent 50%,
+      hsl(var(--accent) / 0.08) 100%
     );
   }
 
