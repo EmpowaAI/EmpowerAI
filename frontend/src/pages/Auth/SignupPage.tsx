@@ -182,15 +182,20 @@ export default function SignupPage() {
       <div className="absolute inset-0 panel-image-overlay" />
       <div className="absolute inset-0 panel-image-accent opacity-70" />
 
-      <div className="relative z-10 max-w-lg space-y-6 animate-slide-up">
+      {/* Logo — top left, over the sky */}
+      <div className="relative z-10 animate-slide-up">
         <Logo variant="light" size="lg" linkTo="/" />
+      </div>
+
+      {/* Text content — bottom, over the city */}
+      <div className="relative z-10 max-w-lg space-y-5 animate-slide-up">
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-secondary">
           Create your account
         </p>
         <h1 className="font-display text-4xl font-bold leading-tight text-white drop-shadow-md">
           Start your journey to economic empowerment.
         </h1>
-        <ul className="space-y-4">
+        <ul className="space-y-3">
           {[
             { text: "Build your Digital Economic Twin",    icon: Sparkles },
             { text: "Visualize your earning potential",    icon: Zap },
@@ -209,11 +214,10 @@ export default function SignupPage() {
             </li>
           ))}
         </ul>
+        <p className="text-xs font-medium uppercase tracking-widest text-white/50" style={{ animationDelay: "0.6s" }}>
+          Youth Economic Digital Twin Platform
+        </p>
       </div>
-
-      <p className="relative z-10 max-w-sm text-xs font-medium uppercase tracking-widest text-white/60 animate-slide-up" style={{ animationDelay: "0.6s" }}>
-        Youth Economic Digital Twin Platform
-      </p>
     </div>
   );
 
