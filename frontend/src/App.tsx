@@ -84,6 +84,7 @@ function AppRoutes() {
     <Routes>
       {/* Public */}
       <Route path="/" element={COMING_SOON ? <ComingSoon /> : <LandingPage />} />
+      <Route path="/preview" element={<LandingPage />} />
       <Route path="/demo" element={<Demo />} />
       <Route path="/cv-analyzer" element={<CVAnalyzer />} />
       <Route path="/digital-twin" element={<DigitalTwin />} />
