@@ -330,7 +330,7 @@ async function getMatchedOpportunities(opportunities, userProfile) {
   });
 
   // Filter out very low matches
-  const minScore = userProfile.minMatchScore || 45;
+  const minScore = userProfile.minMatchScore ?? 45;
   const filtered = scoredOpportunities.filter(opp => opp.matchScore >= minScore);
 
   // Sort by match score descending
