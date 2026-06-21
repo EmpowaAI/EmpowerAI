@@ -38,7 +38,6 @@ import {
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ProfileMenu } from "@/components/ProfileMenu";
 import { ContactWidget } from "@/components/ContactWidget";
-import siyanda from "../assets/images/siyaimage.png";
 import Logo from "@/components/ui/Logo";
 import TikTokIcon from "@/components/ui/TikTokIcon";
 import { cn } from "@/lib/utils";
@@ -421,20 +420,20 @@ export default function LandingPage() {
                 </span>
               </span>
               <h2 className="mt-3 font-display text-2xl sm:text-3xl md:text-5xl font-bold tracking-tight text-primary px-2">
-                Siyanda&apos;s Journey: from R0 to R4,500/month
+                A story we're here to write: from R0 to R4,500/month
               </h2>
               <p className="mx-auto mt-3 sm:mt-4 max-w-xl text-sm sm:text-base text-muted-foreground px-4">
                 <span className={cn(
                   "transition-all duration-500 inline-block",
                   isAnimating ? "opacity-0" : "opacity-100"
                 )}>
-                  {currentUbuntuProverb.split(' ').slice(0, 3).join(' ')}... — he didn't get lucky.
+                  {currentUbuntuProverb.split(' ').slice(0, 3).join(' ')}... — this is what's possible.
                 </span>
               </p>
             </div>
 
             <div className="mx-auto mt-8 sm:mt-12 grid max-w-6xl gap-6 lg:grid-cols-2">
-              {/* Siyanda Card - Same as before */}
+              {/* Aspirational outcome card */}
               <Card className="relative overflow-hidden border-border/70 bg-card p-4 sm:p-6 md:p-7 shadow-card-soft">
                 <div className="mb-4 sm:mb-5 inline-flex items-center gap-1.5 rounded-full bg-primary px-2 py-1 sm:px-3 text-[10px] sm:text-xs font-bold text-primary-foreground">
                   <Zap className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
@@ -445,18 +444,13 @@ export default function LandingPage() {
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-                  <img
-                    src={siyanda}
-                    alt="Portrait of Siyanda Nkosi"
-                    width={56}
-                    height={56}
-                    loading="lazy"
-                    className="h-14 w-14 sm:h-16 sm:w-16 rounded-full object-cover ring-2 ring-secondary/30"
-                  />
+                  <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-ai-gradient flex items-center justify-center ring-2 ring-secondary/30 flex-shrink-0">
+                    <Sparkles className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
+                  </div>
                   <div className="flex-1">
-                    <h3 className="font-display text-base sm:text-lg font-bold text-primary">Siyanda Nkosi, 22</h3>
+                    <h3 className="font-display text-base sm:text-lg font-bold text-primary">Your name here · SA Graduate</h3>
                     <p className="flex items-center gap-1 text-[11px] sm:text-xs text-muted-foreground">
-                      <MapPin className="h-2.5 w-2.5 sm:h-3 sm:w-3" /> Boksburg, Gauteng
+                      <MapPin className="h-2.5 w-2.5 sm:h-3 sm:w-3" /> Anywhere in South Africa
                     </p>
                   </div>
                   <div className="text-left sm:text-right mt-2 sm:mt-0">

@@ -416,12 +416,12 @@
   }
 
   .panel-image-overlay {
-    /* Always-dark overlay so left-panel copy stays readable in light + dark themes */
+    /* Overlay keeps text readable while letting the image show through */
     background: linear-gradient(
       135deg,
-      rgba(0, 0, 0, 0.78) 0%,
-      rgba(0, 0, 0, 0.56) 48%,
-      rgba(0, 0, 0, 0.74) 100%
+      rgba(0, 0, 0, 0.50) 0%,
+      rgba(0, 0, 0, 0.28) 48%,
+      rgba(0, 0, 0, 0.46) 100%
     );
   }
 
