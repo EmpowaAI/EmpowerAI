@@ -1,6 +1,6 @@
 // LandingPage.tsx - Complete Public Version (No Login Required)
 import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ConsentBanner } from "@/components/ConsentBanner";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -100,6 +100,7 @@ export default function LandingPage() {
   
   // Language rotation state
   const [currentLanguage, setCurrentLanguage] = useState<SALanguage>(SA_LANGUAGES[0]);
+  const languageIndexRef = useRef(0);
   
   // Get current translations
   const currentUbuntuProverb = translations.ubuntuProverb[currentLanguage];
@@ -115,11 +116,8 @@ export default function LandingPage() {
   // Rotate language every 5 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentLanguageIndex((prevIndex) => {
-        const nextIndex = (prevIndex + 1) % SA_LANGUAGES.length;
-        setCurrentLanguage(SA_LANGUAGES[nextIndex]);
-        return nextIndex;
-      });
+      languageIndexRef.current = (languageIndexRef.current + 1) % SA_LANGUAGES.length;
+      setCurrentLanguage(SA_LANGUAGES[languageIndexRef.current]);
     }, 5000);
     return () => clearInterval(interval);
   }, []);
