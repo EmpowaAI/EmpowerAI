@@ -18,7 +18,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/Button";
 import { ContactWidget } from "@/components/ContactWidget";
 import TikTokIcon from "@/components/ui/TikTokIcon";
-import loginBg from "@/assets/images/empowerlogin.png";
+import loginBg from "@/assets/images/login-bg.png";
 
 // Modal Component
 function Modal({ isOpen, onClose, title, icon: Icon, children }: { 
