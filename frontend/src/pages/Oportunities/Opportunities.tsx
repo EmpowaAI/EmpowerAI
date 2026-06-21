@@ -167,7 +167,7 @@ export default function Opportunities() {
             category === "all"
 
           if (shouldFallback) {
-            const fallbackFilters = { ...filters, minScore: 20, sort: 'createdAt' as const }
+            const fallbackFilters = { ...filters, minScore: 0, sort: 'createdAt' as const }
             delete fallbackFilters.skills
             response = await opportunitiesAPI.getAll(fallbackFilters)
             setFallbackNotice("Showing all available opportunities. Upload your CV for personalised matches.")
