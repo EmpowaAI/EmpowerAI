@@ -36,7 +36,6 @@ import {
   Send,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { ProfileMenu } from "@/components/ProfileMenu";
 import { ContactWidget } from "@/components/ContactWidget";
 import Logo from "@/components/ui/Logo";
 import TikTokIcon from "@/components/ui/TikTokIcon";
@@ -100,7 +99,6 @@ export default function LandingPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Language rotation state
-  const [currentLanguageIndex, setCurrentLanguageIndex] = useState(0);
   const [currentLanguage, setCurrentLanguage] = useState<SALanguage>(SA_LANGUAGES[0]);
   
   // Get current translations
@@ -159,8 +157,6 @@ export default function LandingPage() {
     setIsSubmitting(false);
   };
 
-  // Check if user is logged in (for display purposes only - NOT enforcing)
-  const isLoggedIn = !!user;
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
@@ -351,7 +347,7 @@ export default function LandingPage() {
                 </Link>
               </div>
 
-              <div className="mt-6 sm:mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-[10px] sm:text-xs text-white/80">
+              <div className="mt-6 sm:mt-10 flex flex-wrap items-center justify-center gap-x-3 sm:gap-x-6 gap-y-2 sm:gap-y-3 text-[10px] sm:text-xs text-white/80">
                 <span className="inline-flex items-center gap-2">
                   <Cpu className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-secondary" />
                   Neural matching engine
@@ -698,7 +694,7 @@ export default function LandingPage() {
                 {currentLetsBegin}
               </span>
             </span>
-            <p className="mt-3 font-display text-lg sm:text-2xl md:text-3xl italic px-4">
+            <p className="mt-3 font-display text-base sm:text-xl md:text-2xl lg:text-3xl italic px-4">
               Join over <span className="text-gradient-ai font-bold not-italic">2,000+</span> young South Africans building better
               careers with AI. Together, we rise. <span className="emoji">🇿🇦</span>
             </p>

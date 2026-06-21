@@ -226,7 +226,7 @@ const Dashboard = () => {
                 <Sparkles className="h-3 w-3 text-secondary" />
                 {firstName ? `${greeting}, ${firstName}` : greeting}
               </div>
-              <h1 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
+              <h1 className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
                 Your <span className="text-gradient-ai">Career Hub</span>
               </h1>
               <p className="mt-2 text-white/75 max-w-md text-sm md:text-base">
