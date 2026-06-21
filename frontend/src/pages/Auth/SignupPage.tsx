@@ -14,7 +14,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/Button";
 import { ContactWidget } from "@/components/ContactWidget";
 import TikTokIcon from "@/components/ui/TikTokIcon";
-import signupBg from "@/assets/images/empowersignin.jpg";
+import signupBg from "@/assets/images/signup-bg.png";
 
 // Modal Component (same as LandingPage)
 function Modal({ isOpen, onClose, title, icon: Icon, children }: { 
