@@ -10,7 +10,7 @@ import {
   Facebook, Instagram, Linkedin, MapPin, Shield, FileText, Cookie, X 
 } from "lucide-react";
 import toast from 'react-hot-toast';
-import { authAPI } from "@/lib/api";
+import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/contexts/user-context";
 import { syncProgressFromBackend, unlockAllPages } from "@/utils/progressSync";
 import Logo from "@/components/ui/Logo";
@@ -58,7 +58,6 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [warmupHint, setWarmupHint] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [emailFocused, setEmailFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
@@ -75,63 +74,70 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setWarmupHint("");
     setIsLoading(true);
 
     try {
-      const response = await authAPI.login(email, password);
-      if (response.status === "success" && response.data?.user) {
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
+      if (authError) throw new Error(authError.message);
+
+      // Store access token immediately so API calls in this handler work
+      localStorage.setItem('empowerai-token', authData.session.access_token);
+
+      // Fetch full profile from backend (Supabase user only has email/id)
+      const { API_BASE_URL: apiBase } = await import('@/lib/apiBase');
+      const validateRes = await fetch(`${apiBase}/auth/validate`, {
+        headers: { 'Authorization': `Bearer ${authData.session.access_token}` }
+      });
+      if (!validateRes.ok) throw new Error('Failed to load your profile. Please try again.');
+      const validateData = await validateRes.json();
+      const backendUser = validateData.data?.user;
+
+      if (backendUser) {
         const savedProfileImage = localStorage.getItem('profile_image');
-        
         setUser({
-          name: response.data.user.name,
-          email: response.data.user.email,
-          id: response.data.user.id || response.data.user._id,
-          empowermentScore: response.data.user.empowermentScore || 0,
-          profileImage: savedProfileImage || undefined
+          name: backendUser.name,
+          email: backendUser.email,
+          id: backendUser.id,
+          empowermentScore: backendUser.empowermentScore || 0,
+          profileImage: backendUser.avatar || backendUser.profileImage || savedProfileImage || undefined
         });
-        
-        toast.success(`Welcome back, ${response.data.user.name}!`);
-        
-        const intendedPath = (location.state as { from?: Location })?.from?.pathname;
-        const from = intendedPath?.startsWith('/dashboard') ? intendedPath : null;
+        toast.success(`Welcome back, ${backendUser.name}!`);
+      }
 
-        try {
-          const syncedProgress = await syncProgressFromBackend();
-          updateProgress('cvCompleted', syncedProgress.cvCompleted);
-          updateProgress('twinCompleted', syncedProgress.twinCompleted);
-          if (syncedProgress.empowermentScore) {
-            updateProgress('empowermentScore', syncedProgress.empowermentScore);
-          }
+      const intendedPath = (location.state as { from?: Location })?.from?.pathname;
+      const from = intendedPath?.startsWith('/dashboard') ? intendedPath : null;
 
-          if (from) {
-            navigate(from, { replace: true });
-          } else if (syncedProgress.cvCompleted && syncedProgress.twinCompleted) {
-            unlockAllPages(syncedProgress.empowermentScore || 0);
-            navigate("/dashboard", { replace: true });
-          } else if (syncedProgress.cvCompleted) {
-            navigate("/dashboard/twin", { replace: true });
-          } else {
-            navigate("/dashboard/cv-analyzer", { replace: true });
-          }
-        } catch (error) {
-          console.log('Error syncing progress, using local state:', error);
-          if (from) {
-            navigate(from, { replace: true });
-          } else if (!progress.cvCompleted) {
-            navigate("/dashboard/cv-analyzer", { replace: true });
-          } else if (!progress.twinCompleted) {
-            navigate("/dashboard/twin", { replace: true });
-          } else {
-            unlockAllPages(progress.empowermentScore || 0);
-            navigate("/dashboard", { replace: true });
-          }
+      try {
+        const syncedProgress = await syncProgressFromBackend();
+        updateProgress('cvCompleted', syncedProgress.cvCompleted);
+        updateProgress('twinCompleted', syncedProgress.twinCompleted);
+        if (syncedProgress.empowermentScore) {
+          updateProgress('empowermentScore', syncedProgress.empowermentScore);
+        }
+
+        if (from) {
+          navigate(from, { replace: true });
+        } else if (syncedProgress.cvCompleted && syncedProgress.twinCompleted) {
+          unlockAllPages(syncedProgress.empowermentScore || 0);
+          navigate("/dashboard", { replace: true });
+        } else if (syncedProgress.cvCompleted) {
+          navigate("/dashboard/twin", { replace: true });
+        } else {
+          navigate("/dashboard/cv-analyzer", { replace: true });
+        }
+      } catch {
+        if (from) {
+          navigate(from, { replace: true });
+        } else if (!progress.cvCompleted) {
+          navigate("/dashboard/cv-analyzer", { replace: true });
+        } else if (!progress.twinCompleted) {
+          navigate("/dashboard/twin", { replace: true });
+        } else {
+          unlockAllPages(progress.empowermentScore || 0);
+          navigate("/dashboard", { replace: true });
         }
       }
     } catch (err: any) {
-      if (err?.isTimeout) {
-        setWarmupHint("The server may be waking up. Please wait a few seconds and try again.");
-      }
       const errorMessage = err.message || "Login failed. Please check your credentials.";
       setError(errorMessage);
       toast.error(errorMessage);
@@ -217,11 +223,6 @@ export default function LoginPage() {
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-5">
-                {warmupHint && (
-                  <div className="p-4 bg-secondary/10 border border-secondary/30 rounded-xl text-xs font-medium text-secondary animate-fade-up">
-                    {warmupHint}
-                  </div>
-                )}
                 
                 {/* Email Input */}
                 <div className="relative group">

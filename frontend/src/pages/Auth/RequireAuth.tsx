@@ -1,31 +1,12 @@
-import React, { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
+import React from "react"
+import { Navigate } from "react-router-dom"
 import { Loader2 } from "lucide-react"
+import { useUser } from "@/contexts/user-context"
 
 export default function RequireAuth({ children }: { children: React.ReactNode }) {
-  const [isChecking, setIsChecking] = useState(true)
-  const [hasToken, setHasToken] = useState(false)
-  const navigate = useNavigate()
+  const { isAuthReady, user } = useUser()
 
-  useEffect(() => {
-    // Check if user has a valid token
-    const token = localStorage.getItem('empowerai-token')
-    
-    if (!token) {
-      console.error('🔐 NO TOKEN - Redirecting to login...')
-      navigate('/login', { 
-        replace: true,
-        state: { message: 'Please log in to access this page' }
-      })
-      return
-    }
-
-    console.log('🔐 Token found! User is authenticated ✅')
-    setHasToken(true)
-    setIsChecking(false)
-  }, [navigate])
-
-  if (isChecking) {
+  if (!isAuthReady) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
@@ -36,8 +17,8 @@ export default function RequireAuth({ children }: { children: React.ReactNode })
     )
   }
 
-  if (!hasToken) {
-    return null
+  if (!user) {
+    return <Navigate to="/login" replace state={{ message: 'Please log in to access this page' }} />
   }
 
   return <>{children}</>

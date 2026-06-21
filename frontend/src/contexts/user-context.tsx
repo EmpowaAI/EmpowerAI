@@ -1,6 +1,7 @@
 // frontend/src/lib/user-context.tsx
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
+import { supabase } from '../integrations/supabase/client'
 import { syncProgressFromBackend } from '../utils/progressSync'
 import { clearStoredCvAnalysis, clearStoredCvFileName, getStoredCvAnalysis } from '../lib/sensitiveStorage'
 
@@ -135,52 +136,54 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user])
 
-  // Validate token on mount only
+  // Reactive auth state via Supabase session
   useEffect(() => {
-    const loadUserFromBackend = async () => {
-      const token = localStorage.getItem('empowerai-token')
-      const shouldValidate =
-        !!token &&
-        (!user ||
-          String(user.id || '').startsWith('demo-') ||
-          user.email === 'demo@example.com' ||
-          user.name?.toLowerCase().includes('demo'))
-
-      if (shouldValidate) {
-        try {
-          const { API_BASE_URL: apiBase } = await import('../lib/apiBase')
-          const response = await fetch(`${apiBase}/auth/validate`, {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }
-          })
-
-          if (response.ok) {
-            const data = await response.json()
-            if (data.data?.user) {
-              const backendUser = data.data.user
-              const savedProfileImage = localStorage.getItem('profile_image')
-              setUser({
-                ...backendUser,
-                profileImage: backendUser.avatar || backendUser.profileImage || savedProfileImage || undefined
-              })
-              console.log('User loaded from backend:', backendUser.email)
-            }
-          } else if (response.status === 401) {
-            localStorage.removeItem('empowerai-token')
-            localStorage.removeItem('user')
-            setUser(null)
-          }
-        } catch (error) {
-          console.warn('Failed to validate token:', error)
-        }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session) {
+        // Keep legacy key in sync so existing API calls stay authenticated
+        localStorage.setItem('empowerai-token', session.access_token)
       }
 
-      setIsAuthReady(true)
-    }
+      if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
+        if (session) {
+          try {
+            const { API_BASE_URL: apiBase } = await import('../lib/apiBase')
+            const response = await fetch(`${apiBase}/auth/validate`, {
+              headers: { 'Authorization': `Bearer ${session.access_token}` }
+            })
+            if (response.ok) {
+              const data = await response.json()
+              if (data.data?.user) {
+                const backendUser = data.data.user
+                const savedProfileImage = localStorage.getItem('profile_image')
+                setUser({
+                  ...backendUser,
+                  profileImage: backendUser.avatar || backendUser.profileImage || savedProfileImage || undefined
+                })
+              }
+            } else if (response.status === 401) {
+              localStorage.removeItem('empowerai-token')
+              setUser(null)
+            }
+          } catch (error) {
+            console.warn('Failed to hydrate user profile:', error)
+          }
+        } else {
+          // INITIAL_SESSION with no active session — user is logged out
+          setUser(null)
+        }
+        setIsAuthReady(true)
+      } else if (event === 'TOKEN_REFRESHED') {
+        // Token already updated in localStorage above — no re-validation needed
+      } else if (event === 'SIGNED_OUT') {
+        localStorage.removeItem('empowerai-token')
+        localStorage.removeItem('empowerai-refresh-token')
+        setUser(null)
+        setIsAuthReady(true)
+      }
+    })
 
-    loadUserFromBackend()
+    return () => subscription.unsubscribe()
   }, [])
 
   // Sync progress from backend
@@ -289,6 +292,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   }
 
   const logout = () => {
+    // End Supabase session; onAuthStateChange SIGNED_OUT handler will clear empowerai-token
+    supabase.auth.signOut()
     setUser(null)
     setCvData(null)
     setProgress({
@@ -301,12 +306,12 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('twinCompleted')
     localStorage.removeItem('empowermentScore')
     localStorage.removeItem('empowerai-token')
+    localStorage.removeItem('empowerai-refresh-token')
     localStorage.removeItem('twinData')
     localStorage.removeItem('twinCreated')
     localStorage.removeItem('twinFormData')
     localStorage.removeItem('cvSkills')
-    // ✅ IMPORTANT: DO NOT clear profile_image on logout - keeps image between sessions
-    // localStorage.removeItem('profile_image'); // COMMENTED OUT - keeps image
+    // DO NOT clear profile_image on logout - keeps image between sessions
     clearStoredCvAnalysis()
     clearStoredCvFileName()
     localStorage.removeItem('cvFileName')

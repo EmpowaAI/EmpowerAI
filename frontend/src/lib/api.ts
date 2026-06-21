@@ -1,6 +1,7 @@
 // frontend/src/lib/api.ts
 import { API_BASE_URL as API_BASE } from './apiBase';
 import { clearStoredCvAnalysis, getStoredCvAnalysis } from './sensitiveStorage';
+import { supabase } from '../integrations/supabase/client';
 
 // Demo mode is opt-in via env var; real APIs are used by default.
 const USE_DEMO_MODE = import.meta.env.VITE_USE_DEMO_MODE === 'true';
@@ -23,24 +24,11 @@ const removeToken = (): void => {
 };
 
 const refreshAccessToken = async (): Promise<boolean> => {
-  const refreshToken = localStorage.getItem('empowerai-refresh-token');
-  if (!refreshToken) return false;
   try {
-    const response = await fetch(`${API_BASE}/auth/refresh`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken }),
-    });
-    if (!response.ok) return false;
-    const data = await response.json();
-    if (data?.data?.token) {
-      setToken(data.data.token);
-      if (data.data?.refreshToken) {
-        localStorage.setItem('empowerai-refresh-token', data.data.refreshToken);
-      }
-      return true;
-    }
-    return false;
+    const { data, error } = await supabase.auth.refreshSession();
+    if (error || !data.session) return false;
+    setToken(data.session.access_token);
+    return true;
   } catch {
     return false;
   }
