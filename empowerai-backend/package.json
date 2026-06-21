@@ -27,7 +27,7 @@
     "@supabase/supabase-js": "^2.107.0",
     "axios": "^1.7.9",
     "bullmq": "^5.20.3",
-    "cloudinary": "^2.8.0",
+    "cloudinary": "^2.10.0",
     "compression": "^1.8.1",
     "cors": "^2.8.5",
     "docx": "^9.6.1",
