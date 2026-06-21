@@ -13,6 +13,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Issue templates (bug report, feature request) and PR template
 - Code of Conduct
 - `ai-service/.env.example`
+- `empowerai-backend/schema.sql` — full Supabase schema with tables, indexes, RLS policies, and `increment_usage` RPC function
+- `CONTRIBUTORS.md` — contributor credits and acknowledgements
+- `.github/dependabot.yml` — automated weekly dependency updates for npm (frontend + backend), pip (AI service), and GitHub Actions
+
+### Removed
+- `frontend/src-v2/` dead code directory (App.tsx, components, hooks, pages — unused branch never promoted to main)
 
 ---
 

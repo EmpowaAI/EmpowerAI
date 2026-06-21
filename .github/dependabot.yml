@@ -1,0 +1,49 @@
+version: 2
+updates:
+  # Frontend — React / Vite / TypeScript
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    groups:
+      react-ecosystem:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react*"
+      vite-tooling:
+        patterns:
+          - "vite"
+          - "@vitejs/*"
+          - "typescript"
+      radix-ui:
+        patterns:
+          - "@radix-ui/*"
+
+  # Backend — Node.js / Express
+  - package-ecosystem: "npm"
+    directory: "/empowerai-backend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    groups:
+      supabase:
+        patterns:
+          - "@supabase/*"
+
+  # AI service — Python / FastAPI
+  - package-ecosystem: "pip"
+    directory: "/ai-service"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
