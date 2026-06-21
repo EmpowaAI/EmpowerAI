@@ -183,17 +183,20 @@ export default function ComingSoon() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-secondary" />
                 </span>
-                Early access — join the waitlist
+                In development · Launching soon
               </span>
             </div>
 
             {/* Headline — Plus Jakarta Sans via font-display */}
-            <div className="cs-2 space-y-3">
+            <div className="cs-2 space-y-4">
               <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-[4.5rem] font-extrabold leading-[1.04] tracking-tight drop-shadow-sm">
                 The career coach
                 <br />
                 <span className="text-gradient-ai">South Africa deserves.</span>
               </h1>
+              <p className="text-sm sm:text-base font-medium text-white/60 tracking-wide">
+                We're still building — sign up to be the first to know when we open.
+              </p>
             </div>
 
             {/* Subtext */}
@@ -229,7 +232,7 @@ export default function ComingSoon() {
                   >
                     {status === "loading"
                       ? <Loader2 className="h-4 w-4 animate-spin" />
-                      : <><span>Get early access</span> <ArrowRight className="h-4 w-4" /></>
+                      : <><span>Notify me at launch</span> <ArrowRight className="h-4 w-4" /></>
                     }
                   </button>
                 </form>
