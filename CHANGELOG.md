@@ -16,6 +16,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `empowerai-backend/schema.sql` — full Supabase schema with tables, indexes, RLS policies, and `increment_usage` RPC function
 - `CONTRIBUTORS.md` — contributor credits and acknowledgements
 - `.github/dependabot.yml` — automated weekly dependency updates for npm (frontend + backend), pip (AI service), and GitHub Actions
+- `.github/workflows/ci.yml` — gitleaks secret-scan job runs on every push and PR, blocking merges that contain real credentials
+- `.gitleaks.toml` — allowlists `.env.example` and doc files so placeholder values don't trigger false positives
+- `SECURITY.md` — new "Credential protection for contributors" section: rules, rotate-if-exposed steps, adding-new-env-var guide
+
+### Fixed
+- `ai-service/.gitignore` — was nearly empty; now covers venv, pycache, .env variants, pytest/coverage artefacts
 
 ### Removed
 - `frontend/src-v2/` dead code directory (App.tsx, components, hooks, pages — unused branch never promoted to main)

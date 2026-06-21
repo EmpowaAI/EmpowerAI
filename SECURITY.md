@@ -88,11 +88,40 @@ Encryption uses a per-field IV (12 bytes) and auth tag (16 bytes). The key is a 
 
 ---
 
+## Credential protection for contributors
+
+**Every push and pull request is scanned for secrets** using [gitleaks](https://github.com/gitleaks/gitleaks) in the CI pipeline. Any commit containing a real credential will be blocked from merging.
+
+### Rules
+
+| Rule | Detail |
+|---|---|
+| Never commit `.env` files | Only `.env.example` with placeholder values belongs in git |
+| Never hardcode keys in source | Not in config files, not in comments, not in test fixtures |
+| `SUPABASE_SERVICE_ROLE_KEY` is backend-only | It bypasses RLS — never expose it in the frontend or logs |
+| `DATA_ENCRYPTION_KEY` is backend-only | Expiring or losing this key means encrypted PII is unrecoverable |
+| `VITE_AZURE_OPENAI_KEY` must stay commented out | Any `VITE_` variable is bundled into the browser JS and visible to all users |
+| Rotate immediately if exposed | If you accidentally commit a secret, rotate it before the PR is merged — gitleaks records it in git history even if the commit is amended |
+
+### Adding a new environment variable
+
+1. Add it to the correct `.env.example` with a **placeholder value** and an inline comment explaining what it is and where to find it
+2. If the variable is sensitive, add it to the `Stored secrets` table in this file
+3. If it belongs in Render, add it to the Render env var list; if it belongs in Vercel, ensure it is **not** prefixed with `VITE_`
+
+### If you accidentally commit a secret
+
+1. **Rotate the credential immediately** — do not just delete the file; git history preserves the value
+2. Open a private security report to [nicolette.mashaba@marisapeer.com](mailto:nicolette.mashaba@marisapeer.com) so we can verify no unauthorised access occurred
+3. We will force-push to remove the secret from history after rotation
+
+---
+
 ## Security checklist for contributors
 
 Before submitting a PR, verify:
 
-- [ ] No secrets or credentials in source code
+- [ ] No secrets or credentials in source code or test fixtures
 - [ ] No `console.log(password)` or similar logging of sensitive values
 - [ ] User input is validated with Zod schemas before processing
 - [ ] New Supabase queries use parameterised values (Supabase JS does this by default — do not use `.rpc()` with string concatenation)
@@ -106,7 +135,7 @@ Before submitting a PR, verify:
 
 ## Dependency security
 
-We use `npm audit` to monitor backend dependencies. Run `npm audit` before submitting PRs that add or update packages. Critical and high-severity vulnerabilities must be resolved before merge.
+Dependabot raises weekly PRs for outdated dependencies. Run `npm audit` before submitting PRs that add or update packages. Critical and high-severity vulnerabilities must be resolved before merge.
 
 ---
 
