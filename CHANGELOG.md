@@ -19,6 +19,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `.github/workflows/ci.yml` — gitleaks secret-scan job runs on every push and PR, blocking merges that contain real credentials
 - `.gitleaks.toml` — allowlists `.env.example` and doc files so placeholder values don't trigger false positives
 - `SECURITY.md` — new "Credential protection for contributors" section: rules, rotate-if-exposed steps, adding-new-env-var guide
+- `docker-compose.yml` — single-command local dev (`docker compose up --build`) for all three services; Redis available via `--profile redis`
+- `Dockerfile` for backend, AI service, and frontend — hot reload in all three via source volume mounts
+- `.dockerignore` files for all three services
 
 ### Fixed
 - `ai-service/.gitignore` — was nearly empty; now covers venv, pycache, .env variants, pytest/coverage artefacts

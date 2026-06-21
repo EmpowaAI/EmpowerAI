@@ -64,32 +64,59 @@ cd EmpowerAI
 Open your Supabase project → SQL Editor and run `empowerai-backend/schema.sql`.  
 Note your **Project URL** and **service role key** from Settings → API.
 
-### 2. Backend
+### 2. Option A — Docker (recommended)
+
+The fastest way to run all three services together:
+
+```bash
+# Copy and fill in all three env files (Supabase keys, AI provider key, encryption key)
+cp empowerai-backend/.env.example empowerai-backend/.env
+cp ai-service/.env.example ai-service/.env
+cp frontend/.env.example frontend/.env.local
+
+# Start everything
+docker compose up --build
+```
+
+| Service | URL |
+|---|---|
+| Frontend | http://localhost:5173 |
+| Backend API | http://localhost:5000/api |
+| AI Service | http://localhost:8000 |
+
+To also start Redis (needed for the BullMQ async queue):
+```bash
+docker compose --profile redis up --build
+```
+
+### Option B — Manual setup
+
+#### Backend
 
 ```bash
 cd empowerai-backend
 cp .env.example .env
-# Edit .env: set SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, ENCRYPTION_KEY
+# Edit .env: set SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, DATA_ENCRYPTION_KEY
 npm install
 npm run dev
 ```
 
-Generate `ENCRYPTION_KEY`:
+Generate `DATA_ENCRYPTION_KEY`:
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
-### 3. AI Service
+#### AI Service
 
 ```bash
 cd ai-service
-python -m venv venv && source venv/Scripts/activate
+python -m venv venv && source venv/Scripts/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env  # set your AI provider key
-uvicorn app.main:app --reload --port 8000
+cp .env.example .env  # set AZURE_OPENAI_API_KEY and AZURE_OPENAI_ENDPOINT
+uvicorn main:app --reload --port 8000
 ```
 
-### 4. Frontend
+#### Frontend
 
 ```bash
 cd frontend

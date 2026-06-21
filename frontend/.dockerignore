@@ -1,0 +1,9 @@
+node_modules
+.env.local
+.env.*.local
+*.log
+dist
+dist-ssr
+build
+coverage
+.nyc_output
