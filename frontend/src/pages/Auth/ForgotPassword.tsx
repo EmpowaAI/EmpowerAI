@@ -33,8 +33,7 @@ export default function ForgotPassword() {
     }
 
 return (
-    <div className="ai-mesh ai-spotlight grain min-h-screen bg-background text-foreground flex flex-col sm:flex-row animate-fade-in relative overflow-hidden">
-      <div className="ai-grid absolute inset-0 opacity-40 pointer-events-none" />
+    <div className="flex min-h-screen flex-col animate-fade-in bg-gradient-to-br from-primary/10 via-background to-secondary/10 text-foreground sm:flex-row dark:from-background dark:via-background dark:to-muted/60">
 
       {/* Left Panel */}
       <div
@@ -83,7 +82,7 @@ return (
         </div>
 
         <div className="w-full max-w-md animate-scale-in" style={{ animationDelay: '0.15s' }}>
-          <div className="card-glow bg-card/40 backdrop-blur-xl border border-border/50 p-6 sm:p-7 md:p-9 rounded-2xl shadow-card-soft">
+          <div className="card-glow bg-card backdrop-blur-xl border border-border/50 p-6 sm:p-7 md:p-9 rounded-2xl shadow-card-soft">
             <div className="lg:hidden mb-6 sm:mb-8">
               <Logo variant="default" size="md" linkTo="/" />
             </div>
