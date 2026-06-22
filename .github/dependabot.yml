@@ -6,21 +6,11 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 3
     groups:
-      react-ecosystem:
+      all-frontend:
         patterns:
-          - "react"
-          - "react-dom"
-          - "@types/react*"
-      vite-tooling:
-        patterns:
-          - "vite"
-          - "@vitejs/*"
-          - "typescript"
-      radix-ui:
-        patterns:
-          - "@radix-ui/*"
+          - "*"
 
   # Backend — Node.js / Express
   - package-ecosystem: "npm"
@@ -28,11 +18,11 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 3
     groups:
-      supabase:
+      all-backend:
         patterns:
-          - "@supabase/*"
+          - "*"
 
   # AI service — Python / FastAPI
   - package-ecosystem: "pip"
@@ -40,10 +30,18 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 3
+    groups:
+      all-ai-service:
+        patterns:
+          - "*"
 
   # GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "monthly"
+    groups:
+      all-actions:
+        patterns:
+          - "*"
