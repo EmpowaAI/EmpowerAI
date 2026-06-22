@@ -156,7 +156,7 @@ export default function LoginPage() {
 
       <div className="relative z-10 max-w-lg space-y-6 animate-slide-up">
         <Logo variant="light" size="lg" linkTo="/" />
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/70">
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-secondary">
           Welcome back
         </p>
         <h1 className="font-display text-4xl font-bold leading-tight text-white drop-shadow-md">

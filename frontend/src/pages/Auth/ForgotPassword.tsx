@@ -4,9 +4,9 @@ import type React from "react"
 import { useState } from "react"
 import { Link } from "react-router-dom"
 import { Loader2, Mail, CheckCircle, Lock, Shield, Sparkles, ArrowLeft } from "lucide-react"
-import { accountService } from "@/api/Index"
+import { supabase } from "@/integrations/supabase/client"
 import Logo from "@/components/ui/Logo"
-import background from "@/assets/images/empowerlogin.png"
+import loginBg from "@/assets/images/login-bg.png"
 import { ThemeToggle } from "@/components/ThemeToggle"
 
 export default function ForgotPassword() {
@@ -14,35 +14,40 @@ export default function ForgotPassword() {
     const [error, setError] = useState("")
     const [isLoading, setIsLoading] = useState(false)
     const [isSuccess, setIsSuccess] = useState(false)
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setError("")
         setIsLoading(true)
-            try {
-            // forgotPassword returns { message } — no status field, if it doesn't throw it succeeded
-                await accountService.forgotPassword({ email })
-                setIsSuccess(true)
-            } catch (err: any) {
-                setError(err.message || "Something went wrong")
-            } finally {
-                setIsLoading(false)
-            }
+        try {
+            const { error: sbError } = await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: `${window.location.origin}/reset-password`,
+            })
+            if (sbError) throw new Error(sbError.message)
+            setIsSuccess(true)
+        } catch (err: any) {
+            setError(err.message || "Something went wrong")
+        } finally {
+            setIsLoading(false)
         }
+    }
 
 return (
     <div className="ai-mesh ai-spotlight grain min-h-screen bg-background text-foreground flex flex-col sm:flex-row animate-fade-in relative overflow-hidden">
       <div className="ai-grid absolute inset-0 opacity-40 pointer-events-none" />
-      
+
       {/* Left Panel */}
-      <div className="hidden lg:flex flex-1 relative p-12 flex-col justify-between overflow-hidden">
-        <img src={background} alt="Background" className="absolute inset-0 h-full w-full object-cover scale-105" />
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/40 to-background/90" />
-        <div className="ai-grid absolute inset-0 opacity-30" />
-        
+      <div
+        className="hidden min-h-screen flex-1 flex-col justify-between overflow-hidden p-12 lg:flex"
+        style={{ backgroundImage: `url(${loginBg})`, backgroundSize: 'cover', backgroundPosition: 'center 30%' }}
+      >
+        <div className="absolute inset-0 panel-image-overlay" />
+        <div className="absolute inset-0 panel-image-accent opacity-70" />
+
         <div className="relative z-10 animate-slide-up">
           <Logo variant="light" size="md" linkTo="/" />
         </div>
-        
+
         <div className="relative z-10 space-y-6 animate-slide-up max-w-lg" style={{ animationDelay: '0.1s' }}>
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-secondary">
             Account Recovery
@@ -76,7 +81,7 @@ return (
         <div className="absolute top-4 right-4 z-20">
           <ThemeToggle />
         </div>
-        
+
         <div className="w-full max-w-md animate-scale-in" style={{ animationDelay: '0.15s' }}>
           <div className="card-glow bg-card/40 backdrop-blur-xl border border-border/50 p-6 sm:p-7 md:p-9 rounded-2xl shadow-card-soft">
             <div className="lg:hidden mb-6 sm:mb-8">
@@ -95,11 +100,8 @@ return (
                   We sent a password reset link to <strong className="text-foreground">{email}</strong>
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Didn't receive the email? Check your spam folder.
+                  Didn't receive the email? Check your spam folder or wait a minute and try again.
                 </p>
-                <Link to="/reset-password" title="Code entry" className="shimmer inline-block w-full text-center px-4 py-3 bg-cta-gradient text-white rounded-xl font-bold shadow-cta hover:shadow-glow transition-all">
-                  Enter reset code
-                </Link>
                 <div className="pt-1">
                   <Link to="/login" className="text-sm text-primary hover:text-primary/80 font-medium hover:underline transition-colors flex items-center justify-center gap-1">
                     <ArrowLeft className="h-4 w-4" /> Back to Login
