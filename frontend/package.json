@@ -28,8 +28,8 @@
     "mammoth": "^1.12.0",
     "microsoft-cognitiveservices-speech-sdk": "^1.13.1",
     "pdfjs-dist": "^5.7.284",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
     "react-hot-toast": "^2.6.0",
     "react-markdown": "^10.1.0",
     "react-router-dom": "^6.8.0",
@@ -41,8 +41,8 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@types/react": "^18.3.28",
-    "@types/react-dom": "^18.3.7",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.20",
     "baseline-browser-mapping": "^2.9.19",
