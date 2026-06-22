@@ -186,7 +186,7 @@ export default function SignupPage() {
 
       {/* Text content — bottom, over the city */}
       <div className="relative z-10 max-w-lg space-y-5 animate-slide-up">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white drop-shadow-md">
+        <p className="text-2xl font-semibold uppercase tracking-[0.24em] text-white drop-shadow-md">
           Create your account
         </p>
         <h1 className="font-display text-4xl font-bold leading-tight text-white drop-shadow-md">
