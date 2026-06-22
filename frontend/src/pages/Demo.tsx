@@ -211,7 +211,7 @@ export default function Demo() {
                   const socialLinks = [
                     "https://www.facebook.com/profile.php?id=61562941456913",
                     "https://www.tiktok.com/@empowa.ai",
-                    "mailto:info@empowa-ai.co.za",
+                    "mailto:info@empowa.org",
                     "https://www.instagram.com/empowa.ai/",
                     "https://www.linkedin.com/company/empowaai"
                   ];
@@ -270,7 +270,7 @@ export default function Demo() {
               <ul className="space-y-3">
                 <li className="flex items-center justify-center sm:justify-start gap-3 text-sm text-muted-foreground">
                   <Mail className="h-4 w-4 text-primary" />
-                  <span>info@empowa-ai.co.za</span>
+                  <span>info@empowa.org</span>
                 </li>
                 
                 <li className="flex items-center justify-center sm:justify-start gap-3 text-sm text-muted-foreground">

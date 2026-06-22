@@ -319,10 +319,10 @@ export default function ComingSoon() {
               Have questions before we launch? Reach out — we'd love to hear from you.
             </p>
 
-            <a href="mailto:info@empowa-ai.co.za"
+            <a href="mailto:info@empowa.org"
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-border text-sm font-medium text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors">
               <Mail className="h-4 w-4" />
-              info@empowa-ai.co.za
+              info@empowa.org
             </a>
 
             <div className="flex items-center gap-5">

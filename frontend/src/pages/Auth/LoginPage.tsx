@@ -156,7 +156,7 @@ export default function LoginPage() {
 
       <div className="relative z-10 max-w-lg space-y-6 animate-slide-up">
         <Logo variant="light" size="lg" linkTo="/" />
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-secondary">
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/70">
           Welcome back
         </p>
         <h1 className="font-display text-4xl font-bold leading-tight text-white drop-shadow-md">
@@ -408,17 +408,17 @@ export default function LoginPage() {
                   const socialLinks = [
                     "https://www.facebook.com/profile.php?id=61562941456913",
                     "https://www.tiktok.com/@empowa.ai",
-                    "mailto:info@empowa-ai.co.za",
+                    "mailto:info@empowa.org",
                     "https://www.instagram.com/empowa.ai/",
                     "https://www.linkedin.com/company/empowaai"
                   ];
                   const socialLabels = ["Facebook", "TikTok", "Email", "Instagram", "LinkedIn"];
+                  const isEmail = socialLinks[i].startsWith('mailto:');
                   return (
                     <a
                       key={i}
                       href={socialLinks[i]}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      {...(!isEmail && { target: "_blank", rel: "noopener noreferrer" })}
                       aria-label={socialLabels[i]}
                       className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-primary/10 text-primary transition-smooth hover:bg-secondary hover:text-white"
                     >
@@ -466,7 +466,7 @@ export default function LoginPage() {
               <ul className="space-y-3">
                 <li className="flex items-center justify-center sm:justify-start gap-3 text-sm text-muted-foreground">
                   <Mail className="h-4 w-4 text-primary" />
-                  <span>info@empowa-ai.co.za</span>
+                  <span>info@empowa.org</span>
                 </li>
                 <li className="flex items-center justify-center sm:justify-start gap-3 text-sm text-muted-foreground">
                   <MapPin className="h-4 w-4 text-primary" />

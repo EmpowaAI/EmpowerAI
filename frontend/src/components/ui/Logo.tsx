@@ -38,8 +38,7 @@ export default function Logo({
         src={`${import.meta.env.BASE_URL}images/empowa_icon.png`}
         alt="EmpowaAI"
         className={`${sizeClasses[size]} crisp-image shrink-0 object-contain`}
-        style={{ 
-          imageRendering: "crisp-edges",
+        style={{
           objectFit: size === "full" ? "cover" : "contain"
         }}
       />

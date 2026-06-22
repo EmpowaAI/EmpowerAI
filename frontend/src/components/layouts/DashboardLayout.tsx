@@ -533,15 +533,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     {[
                       { href: "https://www.facebook.com/profile.php?id=61562941456913", icon: Facebook, label: "Facebook" },
                       { href: "https://www.tiktok.com/@empowa.ai", icon: TikTokIcon, label: "TikTok" },
-                      { href: "mailto:info@empowa-ai.co.za", icon: Mail, label: "Email" },
+                      { href: "mailto:info@empowa.org", icon: Mail, label: "Email" },
                       { href: "https://www.instagram.com/empowa.ai/", icon: Instagram, label: "Instagram" },
                       { href: "https://www.linkedin.com/company/empowaai", icon: Linkedin, label: "LinkedIn" },
                     ].map(({ href, icon: Icon, label }) => (
                       <a
                         key={label}
                         href={href}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        {...(!href.startsWith('mailto:') && { target: "_blank", rel: "noopener noreferrer" })}
                         aria-label={label}
                         className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-secondary hover:text-white transition-colors"
                       >
@@ -554,7 +553,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   <div className="flex items-center gap-4 text-xs text-muted-foreground">
                     <a href="/" className="hover:text-primary transition-colors">Home</a>
                     <span className="text-border">·</span>
-                    <a href="mailto:info@empowa-ai.co.za" className="flex items-center gap-1 hover:text-primary transition-colors">
+                    <a href="mailto:info@empowa.org" className="flex items-center gap-1 hover:text-primary transition-colors">
                       <MapPin className="h-3 w-3" />
                       South Africa
                     </a>
