@@ -49,7 +49,7 @@ return (
         </div>
 
         <div className="relative z-10 space-y-6 animate-slide-up max-w-lg" style={{ animationDelay: '0.1s' }}>
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-secondary">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white drop-shadow-md">
             Account Recovery
           </p>
           <h1 className="font-display text-4xl font-bold text-white mb-6 drop-shadow-md">

@@ -70,7 +70,7 @@ return (
             <Logo variant="light" size="md" linkTo="/" />
         </div>
         <div className="relative z-10 space-y-6 animate-slide-up" style={{ animationDelay: '0.1s' }}>
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-secondary">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white drop-shadow-md">
               Set new password
             </p>
             <h1 className="font-display text-4xl font-bold text-white mb-6 drop-shadow-md">
