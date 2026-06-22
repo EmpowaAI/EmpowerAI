@@ -61,7 +61,7 @@ return (
 
     {/* Left Panel */}
     <div
-        className="hidden min-h-screen flex-1 flex-col justify-between overflow-hidden p-12 lg:flex"
+        className="relative hidden min-h-screen flex-1 flex-col justify-between overflow-hidden p-12 lg:flex"
         style={{ backgroundImage: `url(${loginBg})`, backgroundSize: 'cover', backgroundPosition: 'center 30%' }}
     >
         <div className="absolute inset-0 panel-image-overlay" />
