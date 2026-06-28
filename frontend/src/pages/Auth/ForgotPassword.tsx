@@ -127,7 +127,7 @@ return (
                 <form onSubmit={handleSubmit} className="space-y-5">
                   <div className="relative group">
                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors z-10" />
-                    <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full pl-12 pr-4 py-3.5 border rounded-xl bg-background/50 border-border/60 focus:border-secondary/50 focus:ring-2 focus:ring-secondary/10 transition-all text-foreground" placeholder="Email address" required disabled={isLoading}/>
+                    <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full pl-12 pr-4 py-3.5 border rounded-xl bg-background/50 border-border/60 focus:border-secondary/50 focus:ring-2 focus:ring-secondary/10 transition-all text-foreground placeholder:text-muted-foreground" placeholder="Email address" required disabled={isLoading}/>
                   </div>
                   <button type="submit" disabled={isLoading} className="shimmer w-full py-4 bg-cta-gradient text-white rounded-xl font-bold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-cta hover:shadow-glow">
                     {isLoading ? (

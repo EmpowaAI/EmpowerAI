@@ -242,7 +242,7 @@ export default function LoginPage() {
                     autoComplete="email"
                     inputMode="email"
                     spellCheck={false}
-                    className={`min-h-[52px] w-full rounded-xl border py-3.5 pl-12 pr-4 text-base text-foreground transition-all duration-200 ${
+                    className={`min-h-[52px] w-full rounded-xl border py-3.5 pl-12 pr-4 text-base text-foreground placeholder:text-muted-foreground transition-all duration-200 ${
                       emailFocused
                         ? "border-secondary/50 bg-background ring-2 ring-secondary/10 shadow-[0_0_0_3px_hsl(var(--primary)/0.15)]"
                         : "border-border/60 bg-background"
@@ -270,7 +270,7 @@ export default function LoginPage() {
                     onFocus={() => setPasswordFocused(true)}
                     onBlur={() => setPasswordFocused(false)}
                     autoComplete="current-password"
-                    className={`min-h-[52px] w-full rounded-xl border py-3.5 pl-12 pr-12 text-base text-foreground transition-all duration-200 ${
+                    className={`min-h-[52px] w-full rounded-xl border py-3.5 pl-12 pr-12 text-base text-foreground placeholder:text-muted-foreground transition-all duration-200 ${
                       passwordFocused
                         ? "border-secondary/50 bg-background ring-2 ring-secondary/10 shadow-[0_0_0_3px_hsl(var(--primary)/0.15)]"
                         : "border-border/60 bg-background"

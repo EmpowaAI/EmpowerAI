@@ -874,7 +874,7 @@ export default function LandingPage() {
               required 
               value={contactForm.email} 
               onChange={(e) => setContactForm({...contactForm, email: e.target.value})} 
-              className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary" 
+              className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary placeholder:text-muted-foreground"
               placeholder="your@email.com" 
             />
           </div>
