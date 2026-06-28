@@ -223,7 +223,7 @@ export default function ComingSoon() {
                     placeholder="your@email.com"
                     autoComplete="email"
                     required
-                    className="flex-1 px-4 py-3.5 rounded-xl border border-white/22 bg-white/9 text-white placeholder:text-white/40 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-secondary/70 focus:border-transparent text-sm transition-all duration-200"
+                    className="flex-1 px-4 py-3.5 rounded-xl border border-white/30 bg-white/15 text-white placeholder:text-white/70 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-secondary/70 focus:border-transparent text-sm transition-all duration-200"
                   />
                   <button
                     type="submit"
