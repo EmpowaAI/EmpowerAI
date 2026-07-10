@@ -152,7 +152,7 @@ export default function Navbar() {
 
             {/* Profile Link with Image - Shows image even after logout */}
             <Link
-              to="/profile"
+              to="/dashboard/profile"
               className="h-9 w-9 rounded-full bg-muted flex items-center justify-center hover:bg-[var(--secondary)]/10 transition-colors border border-border overflow-hidden"
             >
               {profileImageSource ? (

@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import {
   Download, Edit3, Save, Briefcase, GraduationCap,
-  Award, Code, Globe, User, FileText
+  Award, Code, Globe, User, FileText, Copy, Check
 } from "lucide-react";
 import jsPDF from "jspdf";
 import type { RevampedCV } from "../../../services/aiService";
@@ -114,6 +114,7 @@ export default function RevampedCVDisplay({ cvData }: RevampedCVDisplayProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedData, setEditedData] = useState<RevampedCV>(cvData);
   const [customFileName, setCustomFileName] = useState("ATS-Optimized-CV");
+  const [copied, setCopied] = useState(false);
   const cvRef = useRef<HTMLDivElement>(null);
 
   const updateField = useCallback((path: string, value: string) => {
@@ -338,18 +339,9 @@ export default function RevampedCVDisplay({ cvData }: RevampedCVDisplayProps) {
     doc.save(`${customFileName}.pdf`);
   };
 
-  const downloadTXT = () => {
+  const buildPlainText = (): string => {
     if (data.formattedText && data.formattedText.trim().length > 100) {
-      const blob = new Blob([data.formattedText], { type: "text/plain;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${customFileName}.txt`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-      return;
+      return data.formattedText;
     }
 
     let text = `${data.name}\n`;
@@ -413,13 +405,30 @@ export default function RevampedCVDisplay({ cvData }: RevampedCVDisplayProps) {
       }
     }
 
-    const blob = new Blob([text], { type: "text/plain" });
+    return text;
+  };
+
+  const downloadTXT = () => {
+    const blob = new Blob([buildPlainText()], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
     a.download = `${customFileName}.txt`;
+    document.body.appendChild(a);
     a.click();
+    a.remove();
     URL.revokeObjectURL(url);
+  };
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(buildPlainText());
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard API unavailable (e.g. insecure context) — fall back to TXT download
+      downloadTXT();
+    }
   };
 
   const EditableText = ({ value, path, as: Tag = "span", className = "" }: {
@@ -575,6 +584,12 @@ export default function RevampedCVDisplay({ cvData }: RevampedCVDisplayProps) {
             className="px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 bg-secondary text-secondary-foreground border border-border hover:bg-muted transition-all"
           >
             <FileText className="h-3 w-3" /> TXT
+          </button>
+          <button
+            onClick={copyToClipboard}
+            className="px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 bg-secondary text-secondary-foreground border border-border hover:bg-muted transition-all"
+          >
+            {copied ? <><Check className="h-3 w-3 text-success" /> Copied</> : <><Copy className="h-3 w-3" /> Copy</>}
           </button>
         </div>
       </div>

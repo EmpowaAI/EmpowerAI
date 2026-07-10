@@ -87,12 +87,12 @@ export default function CVAnalyzerPage() {
         </div>
       )}
 
-      {/* Error banner */}
+      {/* Error banner — step 'result' means the revamp failed, so retry the revamp */}
       <AnimatePresence>
         {error && (
           <CVUploadError
             error={error}
-            onRetry={submitAnalysis}
+            onRetry={step === 'result' ? submitRevamp : submitAnalysis}
             onDismiss={dismissError}
             isRateLimited={isRateLimited}
             retryAfter={retryAfter}

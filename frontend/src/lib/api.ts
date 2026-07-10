@@ -21,6 +21,13 @@ const removeToken = (): void => {
   localStorage.removeItem('cvCompleted');
   localStorage.removeItem('twinCompleted');
   localStorage.removeItem('empowermentScore');
+  localStorage.removeItem('cvScore');
+  localStorage.removeItem('cvSkills');
+  localStorage.removeItem('user');
+  localStorage.removeItem('profile_image');
+  localStorage.removeItem('lastInterviewScore');
+  localStorage.removeItem('empowerai:last-ai-job-id');
+  localStorage.removeItem('empowerai:last-ai-job-at');
 };
 
 const refreshAccessToken = async (): Promise<boolean> => {
@@ -653,7 +660,7 @@ export const applicationsAPIDemo = {
   getStats: async () => {
     console.log('📊 Demo: Getting application stats');
     await new Promise(resolve => setTimeout(resolve, 400));
-    
+
     return {
       status: 'success',
       data: {
@@ -664,7 +671,23 @@ export const applicationsAPIDemo = {
         success: 0
       }
     };
-  }
+  },
+
+  getSaved: async () => {
+    const ids: string[] = JSON.parse(localStorage.getItem('demo-saved-opps') || '[]');
+    return { status: 'success', data: { savedIds: ids, saved: [] } };
+  },
+  save: async (opportunityId: string) => {
+    const ids: string[] = JSON.parse(localStorage.getItem('demo-saved-opps') || '[]');
+    if (!ids.includes(opportunityId)) ids.push(opportunityId);
+    localStorage.setItem('demo-saved-opps', JSON.stringify(ids));
+    return { status: 'success', data: { saved: true, opportunityId } };
+  },
+  unsave: async (opportunityId: string) => {
+    const ids: string[] = JSON.parse(localStorage.getItem('demo-saved-opps') || '[]');
+    localStorage.setItem('demo-saved-opps', JSON.stringify(ids.filter(id => id !== opportunityId)));
+    return { status: 'success', data: { saved: false, opportunityId } };
+  },
 };
 
 // Demo Admin API
@@ -1246,6 +1269,35 @@ export const applicationsAPIReal = {
       throw error;
     }
   },
+  getSaved: async () => {
+    try {
+      return await request<any>('/applications/saved');
+    } catch (error) {
+      console.error('Failed to get saved opportunities:', error);
+      throw error;
+    }
+  },
+  save: async (opportunityId: string) => {
+    try {
+      return await request<any>('/applications/saved', {
+        method: 'POST',
+        body: JSON.stringify({ opportunityId }),
+      });
+    } catch (error) {
+      console.error('Failed to save opportunity:', error);
+      throw error;
+    }
+  },
+  unsave: async (opportunityId: string) => {
+    try {
+      return await request<any>(`/applications/saved/${opportunityId}`, {
+        method: 'DELETE',
+      });
+    } catch (error) {
+      console.error('Failed to unsave opportunity:', error);
+      throw error;
+    }
+  },
 };
 
 export const adminAPIReal = {
@@ -1377,6 +1429,17 @@ export const chatAPIReal = {
   },
 };
 
+export const leaderboardAPIReal = {
+  get: async (period: 'weekly' | 'monthly' | 'all-time' = 'all-time', limit = 50) => {
+    try {
+      return await request<any>(`/leaderboard?period=${period}&limit=${limit}`);
+    } catch (error) {
+      console.error('Failed to get leaderboard:', error);
+      throw error;
+    }
+  },
+};
+
 export const userAPIReal = {
   getProfile: async () => {
     try {
@@ -1428,5 +1491,6 @@ export const statsAPI = USE_DEMO_MODE ? statsAPIDemo : statsAPIReal;
 export const progressAPI = USE_DEMO_MODE ? progressAPIDemo : progressAPIReal;
 export const chatAPI = USE_DEMO_MODE ? chatAPIDemo : chatAPIReal;
 export const userAPI = USE_DEMO_MODE ? userAPIDemo : userAPIReal;
+export const leaderboardAPI = leaderboardAPIReal;
 
 export { getToken, setToken, removeToken, calculateEmpowermentScoreLocal as calculateEmpowermentScore };

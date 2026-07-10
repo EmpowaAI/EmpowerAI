@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { Search, MapPin, Clock, Briefcase, GraduationCap, Building, Heart, Filter, ExternalLink, Loader2 } from "lucide-react"
-import { Link, useLocation } from "react-router-dom"
+import { Link, useLocation, useSearchParams } from "react-router-dom"
 import toast from 'react-hot-toast'
 import { cn } from "../../lib/utils"
 import { opportunitiesAPI, applicationsAPI } from "../../lib/api"
@@ -29,15 +29,16 @@ interface Opportunity {
 
 export default function Opportunities() {
   const location = useLocation()
-  const [search, setSearch] = useState("")
-  const [debouncedSearch, setDebouncedSearch] = useState("")
-  const [category, setCategory] = useState("all")
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [search, setSearch] = useState(() => searchParams.get('q') || "")
+  const [debouncedSearch, setDebouncedSearch] = useState(() => searchParams.get('q') || "")
+  const [category, setCategory] = useState(() => searchParams.get('category') || "all")
   const [saved, setSaved] = useState<string[]>([])
   const [opportunities, setOpportunities] = useState<Opportunity[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [applyingId, setApplyingId] = useState<string | null>(null)
-  const [page, setPage] = useState(1)
+  const [page, setPage] = useState(() => Math.max(parseInt(searchParams.get('page') || '1', 10) || 1, 1))
   const [totalPages, setTotalPages] = useState(1)
   const [hasMore, setHasMore] = useState(false)
   const [totalFiltered, setTotalFiltered] = useState<number | null>(null)
@@ -51,9 +52,25 @@ export default function Opportunities() {
     return () => clearTimeout(timeout)
   }, [search])
 
+  // Load persisted bookmarks once on mount
+  useEffect(() => {
+    applicationsAPI.getSaved()
+      .then((res) => setSaved(res.data?.savedIds || []))
+      .catch(() => { /* bookmarks are non-blocking — keep empty on failure */ })
+  }, [])
+
   useEffect(() => {
     setPage(1)
   }, [debouncedSearch, category])
+
+  // Keep filters and page in the URL so back/forward and refresh work
+  useEffect(() => {
+    const params = new URLSearchParams()
+    if (debouncedSearch) params.set('q', debouncedSearch)
+    if (category !== 'all') params.set('category', category)
+    if (page > 1) params.set('page', String(page))
+    setSearchParams(params, { replace: true })
+  }, [debouncedSearch, category, page, setSearchParams])
 
   useEffect(() => {
     const fetchSelectedByHash = async () => {
@@ -262,8 +279,20 @@ export default function Opportunities() {
     ? [selectedOpportunity, ...filteredOpportunities.filter(o => o.id !== selectedOpportunity.id)]
     : filteredOpportunities
 
-  const toggleSave = (id: string) => {
-    setSaved((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]))
+  const toggleSave = async (id: string) => {
+    const wasSaved = saved.includes(id)
+    // Optimistic update; revert if the API call fails
+    setSaved((prev) => (wasSaved ? prev.filter((i) => i !== id) : [...prev, id]))
+    try {
+      if (wasSaved) {
+        await applicationsAPI.unsave(id)
+      } else {
+        await applicationsAPI.save(id)
+      }
+    } catch {
+      setSaved((prev) => (wasSaved ? [...prev, id] : prev.filter((i) => i !== id)))
+      toast.error(wasSaved ? 'Could not remove bookmark. Please try again.' : 'Could not save bookmark. Please try again.')
+    }
   }
 
   const handleApply = async (opportunity: Opportunity) => {

@@ -6,14 +6,18 @@ import { CheckCircle, Loader2, XCircle } from "lucide-react"
 import { accountService } from "@/api/Index"
 import Logo from "@/components/ui/Logo"
 
+const VERIFY_TIMEOUT_MS = 20000
+
 export default function EmailVerified() {
     const [searchParams] = useSearchParams()
     const navigate = useNavigate()
     const [isLoading, setIsLoading] = useState(true)
     const [isSuccess, setIsSuccess] = useState(false)
     const [error, setError] = useState("")
+    const [attempt, setAttempt] = useState(0)
 
     useEffect(() => {
+        let cancelled = false
         const verifyEmail = async () => {
         const token = searchParams.get('token')
         if (!token) {
@@ -21,19 +25,30 @@ export default function EmailVerified() {
             setIsLoading(false)
             return
         }
+        setIsLoading(true)
+        setError("")
         try {
-            // accountService.verifyEmail returns { message, user } — no status field
-            await accountService.verifyEmail(token)
+            // Race the API call against a hard timeout so the spinner can
+            // never run forever on a hung request.
+            await Promise.race([
+                accountService.verifyEmail(token),
+                new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('Verification is taking too long. Please try again.')), VERIFY_TIMEOUT_MS)
+                ),
+            ])
+            if (cancelled) return
             setIsSuccess(true)
             setTimeout(() => navigate('/login'), 3000)
         } catch (err: any) {
+            if (cancelled) return
             setError(err.message || "Verification failed")
         } finally {
-            setIsLoading(false)
+            if (!cancelled) setIsLoading(false)
         }
     }
         verifyEmail()
-    }, [searchParams, navigate])
+        return () => { cancelled = true }
+    }, [searchParams, navigate, attempt])
 
 return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/10 dark:from-background dark:via-background dark:to-muted/60 flex items-center justify-center p-4 animate-fade-in">
@@ -97,8 +112,14 @@ return (
                 <p className="text-sm text-muted-foreground">
                     The verification link may be invalid or expired.
                 </p>
+                <button
+                    onClick={() => setAttempt(n => n + 1)}
+                    className="w-full px-4 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-semibold"
+                >
+                    Try again
+                </button>
                 <div className="flex flex-col sm:flex-row gap-3">
-                    <Link to="/signup" className="flex-1 text-center px-4 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-semibold">
+                    <Link to="/signup" className="flex-1 text-center px-4 py-3 bg-muted text-foreground rounded-lg hover:bg-muted/80 transition-colors font-semibold">
                         Sign up again
                     </Link>
                     <Link to="/login" className="flex-1 text-center px-4 py-3 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/90 transition-colors font-semibold">

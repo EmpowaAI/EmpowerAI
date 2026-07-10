@@ -1,7 +1,8 @@
-import { useState } from 'react'
-import { Trophy, Flame, Star, Zap, Target, Award, Medal, Crown, Gem, TrendingUp, Calendar, Users, MessageCircle } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Trophy, Flame, Star, Zap, Target, Award, Medal, Crown, Gem, TrendingUp, Calendar, Users, MessageCircle, Loader2 } from 'lucide-react'
 import { cn } from "../../lib/utils"
 import { useUser } from "../../contexts/user-context"
+import { leaderboardAPI } from "../../lib/api"
 
 // Import Neural Fusion components
 import NeuralCard from "../../components/ui/NeuralCard"
@@ -31,12 +32,13 @@ interface Level {
 
 interface LeaderboardEntry {
   rank: number
+  userId: string
   name: string
-  xp: number
+  score: number
   level: number
-  streak: number
-  province: string
-  avatar: string
+  activityCount: number
+  province: string | null
+  avatar: string | null
 }
 
 interface GamificationState {
@@ -115,16 +117,9 @@ const achievements: Achievement[] = [
   }
 ]
 
-const mockLeaderboard: LeaderboardEntry[] = [
-  { rank: 1, name: "Sarah Chen", xp: 5234, level: 5, streak: 45, province: "Western Cape", avatar: "👩‍💻" },
-  { rank: 2, name: "Thabo Mokoena", xp: 4892, level: 5, streak: 32, province: "Gauteng", avatar: "👨‍💼" },
-  { rank: 3, name: "Priya Naidoo", xp: 4156, level: 4, streak: 28, province: "KwaZulu-Natal", avatar: "👩‍🔬" },
-  { rank: 4, name: "John Smith", xp: 3821, level: 4, streak: 21, province: "Western Cape", avatar: "👨‍🎓" },
-  { rank: 5, name: "Zanele Khumalo", xp: 3567, level: 4, streak: 19, province: "Gauteng", avatar: "👩‍🏫" },
-  { rank: 6, name: "You", xp: 1250, level: 3, streak: 7, province: "Gauteng", avatar: "🎯" },
-  { rank: 7, name: "Michael Brown", xp: 1198, level: 3, streak: 15, province: "Western Cape", avatar: "👨‍💻" },
-  { rank: 8, name: "Aisha Patel", xp: 1087, level: 3, streak: 12, province: "KwaZulu-Natal", avatar: "👩‍💼" }
-]
+function avatarFallback(name: string): string {
+  return (name || '?').trim().charAt(0).toUpperCase() || '?'
+}
 
 export default function GamificationSystem() {
   const { user } = useUser()
@@ -141,6 +136,31 @@ export default function GamificationSystem() {
   
   const [activeTab, setActiveTab] = useState<'overview' | 'achievements' | 'leaderboard'>('overview')
   const [leaderboardView, setLeaderboardView] = useState<'weekly' | 'monthly' | 'all-time'>('weekly')
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
+  const [myRank, setMyRank] = useState<LeaderboardEntry | null>(null)
+  const [leaderboardLoading, setLeaderboardLoading] = useState(false)
+  const [leaderboardError, setLeaderboardError] = useState('')
+  const [leaderboardRefresh, setLeaderboardRefresh] = useState(0)
+
+  useEffect(() => {
+    let cancelled = false
+    setLeaderboardLoading(true)
+    setLeaderboardError('')
+    leaderboardAPI.get(leaderboardView)
+      .then((res) => {
+        if (cancelled) return
+        setLeaderboard(res.data?.entries || [])
+        setMyRank(res.data?.currentUser || null)
+      })
+      .catch((err) => {
+        if (cancelled) return
+        setLeaderboardError(err.message || 'Failed to load the leaderboard.')
+      })
+      .finally(() => {
+        if (!cancelled) setLeaderboardLoading(false)
+      })
+    return () => { cancelled = true }
+  }, [leaderboardView, leaderboardRefresh])
 
   const currentLevel = levels.find(l => l.level === state.level) || levels[0]
   const nextLevel = levels.find(l => l.level === state.level + 1)
@@ -191,20 +211,7 @@ export default function GamificationSystem() {
     }
   }
 
-  const getLeaderboardData = () => {
-    switch (leaderboardView) {
-      case 'weekly':
-        return mockLeaderboard.map((entry, i) => ({ ...entry, weeklyRank: i + 1 }))
-      case 'monthly':
-        return mockLeaderboard.map((entry, i) => ({ ...entry, monthlyRank: i + 1 }))
-      case 'all-time':
-        return mockLeaderboard
-      default:
-        return mockLeaderboard
-    }
-  }
-
-  const yourRank = getLeaderboardData().find(entry => entry.name === "You")
+  const yourRank = myRank
 
   return (
     <div className="space-y-6">
@@ -278,8 +285,8 @@ export default function GamificationSystem() {
           <p className="text-sm text-muted-foreground">Achievements</p>
         </NeuralCard>
         <NeuralCard className="text-center">
-          <div className="text-3xl font-bold text-secondary">#{yourRank?.rank || 6}</div>
-          <p className="text-sm text-muted-foreground">Weekly Rank</p>
+          <div className="text-3xl font-bold text-secondary">{yourRank ? `#${yourRank.rank}` : '—'}</div>
+          <p className="text-sm text-muted-foreground">Leaderboard Rank</p>
         </NeuralCard>
       </div>
 
@@ -419,14 +426,32 @@ export default function GamificationSystem() {
 
           {/* Leaderboard */}
           <NeuralCard>
+            {leaderboardLoading ? (
+              <div className="flex items-center justify-center gap-2 py-12 text-muted-foreground">
+                <Loader2 className="h-5 w-5 animate-spin" />
+                <span>Loading leaderboard…</span>
+              </div>
+            ) : leaderboardError ? (
+              <div className="py-12 text-center space-y-3">
+                <p className="text-muted-foreground">{leaderboardError}</p>
+                <HolographicButton onClick={() => setLeaderboardRefresh(n => n + 1)} variant="secondary">
+                  Try again
+                </HolographicButton>
+              </div>
+            ) : leaderboard.length === 0 ? (
+              <div className="py-12 text-center text-muted-foreground">
+                <p>No one is on the {leaderboardView.replace('-', ' ')} leaderboard yet.</p>
+                <p className="text-sm mt-1">Analyse your CV or build your twin to claim the first spot.</p>
+              </div>
+            ) : (
             <div className="space-y-3">
-              {getLeaderboardData().map((entry) => {
-                const isYou = entry.name === "You"
+              {leaderboard.map((entry) => {
+                const isYou = entry.userId === user?.id
                 const entryLevel = levels.find(l => l.level === entry.level)
                 const LevelIcon = entryLevel?.icon || Medal
-                
+
                 return (
-                  <div key={entry.rank} className={cn(
+                  <div key={entry.userId} className={cn(
                     "flex items-center gap-4 p-4 rounded-lg transition-all",
                     isYou ? "bg-primary/10 border border-primary/30" : "bg-muted/50"
                   )}>
@@ -441,11 +466,15 @@ export default function GamificationSystem() {
                         <Trophy className="h-4 w-4 text-yellow-400 mx-auto" />
                       )}
                     </div>
-                    
-                    <div className="w-12 h-12 bg-background rounded-full flex items-center justify-center text-2xl border-2 border-border">
-                      {entry.avatar}
+
+                    <div className="w-12 h-12 bg-background rounded-full flex items-center justify-center text-lg font-bold border-2 border-border overflow-hidden">
+                      {entry.avatar ? (
+                        <img src={entry.avatar} alt={entry.name} className="w-full h-full object-cover" />
+                      ) : (
+                        avatarFallback(entry.name)
+                      )}
                     </div>
-                    
+
                     <div className="flex-1">
                       <p className={cn(
                         "font-semibold text-foreground",
@@ -458,22 +487,23 @@ export default function GamificationSystem() {
                           <LevelIcon className={cn("h-3 w-3", entryLevel?.color)} />
                           {entryLevel?.name}
                         </span>
-                        <span>{entry.province}</span>
+                        {entry.province && <span>{entry.province}</span>}
                         <span className="flex items-center gap-1">
                           <Flame className="h-3 w-3 text-orange-400" />
-                          {entry.streak} days
+                          {entry.activityCount} actions
                         </span>
                       </div>
                     </div>
-                    
+
                     <div className="text-right">
-                      <p className="text-xl font-bold text-primary">{entry.xp.toLocaleString()}</p>
-                      <p className="text-xs text-muted-foreground">XP</p>
+                      <p className="text-xl font-bold text-primary">{entry.score}</p>
+                      <p className="text-xs text-muted-foreground">Score</p>
                     </div>
                   </div>
                 )
               })}
             </div>
+            )}
           </NeuralCard>
         </div>
       )}

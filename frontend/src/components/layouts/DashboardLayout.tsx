@@ -267,7 +267,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         void import("../../pages/Twin-builder/TwinBuilder");
         return;
       case "/dashboard/cv-analyzer":
-        void import("../../pages/CV-analysis/CVAnalyzer");
+        void import("../../modules/cvAnalyser");
         return;
       case "/dashboard/interview-coach":
         void import("../../pages/Interview/InterviewCoach");
