@@ -58,8 +58,15 @@ const wrap = (content) => `
 // ================= CORE SEND =================
 const send = async (to, subject, html, text = '', replyTo = null) => {
   if (!BREVO_API_KEY || !EMAIL_FROM || !FRONTEND_URL) {
-    log('warn', 'Missing env vars – email NOT sent');
-    return;
+    const missing = [
+      !BREVO_API_KEY && 'BREVO_API_KEY',
+      !EMAIL_FROM && 'EMAIL_FROM',
+      !FRONTEND_URL && 'FRONTEND_URL',
+    ].filter(Boolean).join(', ');
+    log('error', `Email not sent — missing env vars: ${missing}`);
+    throw new Error(
+      `Email service is not configured (missing: ${missing}). Set these environment variables to enable outgoing email.`
+    );
   }
 
   const payload = {

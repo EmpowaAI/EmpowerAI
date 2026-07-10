@@ -4,6 +4,7 @@
  */
 
 const { validate } = require('../utils/validators');
+const logger = require('../utils/logger');
 
 /**
  * Create validation middleware for a specific schema
@@ -35,13 +36,12 @@ const { validate } = require('../utils/validators');
 
       next();
     } catch (error) {
-      console.log('❌ VALIDATION FAILED');
-      console.log('SOURCE:', source);
-      console.log('INPUT:', data); // now safe
-
-      if (error.errors) {
-        console.log('DETAILS:', error.errors);
-      }
+      // Log field names only — request bodies can contain passwords/CV text
+      logger.warn('Request validation failed', {
+        source,
+        fields: data && typeof data === 'object' ? Object.keys(data) : [],
+        issues: error.errors?.map((e) => ({ path: e.path?.join('.'), message: e.message })),
+      });
 
       next(error);
     }

@@ -44,6 +44,10 @@ app.use((req, _res, next) => {
 // ─── Rate Limiting ────────────────────────────────────────────────────────────
 if (isEnabled(process.env.ENABLE_AUTH_RATE_LIMITER, true)) {
   app.use('/api/auth', authLimiter);
+  // Password recovery endpoints get the same strict limiter — they can be
+  // abused for email enumeration and mail-quota exhaustion.
+  app.use('/api/account/forgot-password', authLimiter);
+  app.use('/api/account/reset-password', authLimiter);
 }
 
 if (isEnabled(process.env.ENABLE_AI_RATE_LIMITER, true)) {
@@ -62,6 +66,7 @@ if (isEnabled(process.env.ENABLE_API_RATE_LIMITER, true)) {
   app.use('/api/plans', apiLimiter);
   app.use('/api/subscriptions', apiLimiter);
   app.use('/api/usage', apiLimiter);
+  app.use('/api/leaderboard', apiLimiter);
 }
 
 // ─── Request Logging ──────────────────────────────────────────────────────────
@@ -85,6 +90,7 @@ app.use('/api/user',          require('./modules/user/user.Route'));
 app.use('/api/applications',  require('./modules/applications/applications.Route'));
 app.use('/api/contact',       require('./modules/contact/contact.Route'));
 app.use('/api/waitlist',      require('./modules/waitlist/waitlist.Router'));
+app.use('/api/leaderboard',   require('./modules/leaderboard/leaderboard.Route'));
 
 // Subscription & billing routes
 app.use('/api/plans',         require('./modules/subscriptionPlan/plans.route'));

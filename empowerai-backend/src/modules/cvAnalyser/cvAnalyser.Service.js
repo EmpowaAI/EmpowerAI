@@ -4,11 +4,13 @@ const { analyseCVText, analyseCVFile, revampCV } = require('./cvAnalyser.AiServi
 const { buildFallbackAnalysis } = require('../../utils/cvFallback.util');
 const { extractTextFromUploadedFile } = require('../../utils/cvParser.util');
 const { BadRequestError } = require('../../utils/errors');
+const { sanitizeForPrompt } = require('../../utils/promptSanitizer');
 
 const MAX_CV_CHARS = 15000;
 
 function cleanCvText(text) {
-  return (text || '').replace(/\s+/g, ' ').trim().slice(0, MAX_CV_CHARS);
+  const collapsed = (text || '').replace(/\s+/g, ' ');
+  return sanitizeForPrompt(collapsed, MAX_CV_CHARS);
 }
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));

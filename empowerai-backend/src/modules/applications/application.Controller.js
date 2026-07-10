@@ -75,3 +75,72 @@ exports.getMyApplicationStats = async (req, res, next) => {
     next(error);
   }
 };
+
+// ─── SAVED OPPORTUNITIES (BOOKMARKS) ─────────────────────────────────────────
+
+exports.saveOpportunity = async (req, res, next) => {
+  try {
+    const { opportunityId } = req.body;
+    if (!opportunityId) {
+      return res.status(400).json({ status: 'error', message: 'opportunityId is required' });
+    }
+
+    const { error } = await supabase
+      .from('saved_opportunities')
+      .insert({ user_id: req.user.id, opportunity_id: opportunityId });
+
+    if (error) {
+      // 23505 unique violation — already saved, treat as success (idempotent)
+      // 23503 FK violation — opportunity doesn't exist
+      if (error.code === '23503') {
+        return res.status(404).json({ status: 'error', message: 'Opportunity not found' });
+      }
+      if (error.code !== '23505') throw error;
+    }
+
+    return res.status(200).json({ status: 'success', data: { saved: true, opportunityId } });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.unsaveOpportunity = async (req, res, next) => {
+  try {
+    const { opportunityId } = req.params;
+
+    const { error } = await supabase
+      .from('saved_opportunities')
+      .delete()
+      .eq('user_id', req.user.id)
+      .eq('opportunity_id', opportunityId);
+
+    if (error) throw error;
+
+    return res.status(200).json({ status: 'success', data: { saved: false, opportunityId } });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getSavedOpportunities = async (req, res, next) => {
+  try {
+    const { data: saved, error } = await supabase
+      .from('saved_opportunities')
+      .select('opportunity_id, created_at, opportunity:opportunities(*)')
+      .eq('user_id', req.user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    res.status(200).json({
+      status: 'success',
+      results: (saved || []).length,
+      data: {
+        savedIds: (saved || []).map((s) => s.opportunity_id),
+        saved: saved || [],
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};

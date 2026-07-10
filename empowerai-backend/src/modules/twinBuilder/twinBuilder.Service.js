@@ -387,15 +387,16 @@ Return JSON:
   let parsed;
 
   try {
+    // aiServiceClient's interceptor already unwraps the HTTP body
     const response = await aiServiceClient.post('/simulate', {
       prompt,
       temperature: 0.3,
     });
 
     const raw =
-      response.data?.content ||
-      response.data?.reply ||
-      JSON.stringify(response.data);
+      response?.content ||
+      response?.reply ||
+      JSON.stringify(response);
 
     parsed = JSON.parse(raw.replace(/```json|```/g, '').trim());
   } catch (err) {

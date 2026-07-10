@@ -38,7 +38,7 @@ exports.getUserById = async (req, res, next) => {
 
 exports.updateUser = async (req, res, next) => {
   try {
-    const user = await adminService.updateUser(req.params.id, req.body, req.user._id);
+    const user = await adminService.updateUser(req.params.id, req.body, req.user.id);
     sendSuccess(res, { user });
   } catch (error) {
     logger.error('Admin: updateUser failed', { userId: req.params.id, error });
@@ -52,7 +52,7 @@ exports.toggleUserStatus = async (req, res, next) => {
     if (typeof isActive !== 'boolean') {
       return sendError(res, 'isActive must be a boolean', 400);
     }
-    const user = await adminService.toggleUserStatus(req.params.id, isActive, req.user._id);
+    const user = await adminService.toggleUserStatus(req.params.id, isActive, req.user.id);
     sendSuccess(res, { user });
   } catch (error) {
     logger.error('Admin: toggleUserStatus failed', { userId: req.params.id, error });
@@ -62,10 +62,10 @@ exports.toggleUserStatus = async (req, res, next) => {
 
 exports.deleteUser = async (req, res, next) => {
   try {
-    if (req.params.id === req.user._id.toString()) {
+    if (req.params.id === req.user.id) {
       return sendError(res, 'You cannot delete your own account', 400);
     }
-    const result = await adminService.deleteUser(req.params.id, req.user._id);
+    const result = await adminService.deleteUser(req.params.id, req.user.id);
     sendSuccess(res, result);
   } catch (error) {
     logger.error('Admin: deleteUser failed', { userId: req.params.id, error });
@@ -107,7 +107,7 @@ exports.getOpportunityById = async (req, res, next) => {
 
 exports.updateOpportunity = async (req, res, next) => {
   try {
-    const opportunity = await adminService.updateOpportunity(req.params.id, req.body, req.user._id);
+    const opportunity = await adminService.updateOpportunity(req.params.id, req.body, req.user.id);
     sendSuccess(res, { opportunity });
   } catch (error) {
     logger.error('Admin: updateOpportunity failed', { id: req.params.id, error });
@@ -117,7 +117,7 @@ exports.updateOpportunity = async (req, res, next) => {
 
 exports.deleteOpportunity = async (req, res, next) => {
   try {
-    const result = await adminService.deleteOpportunity(req.params.id, req.user._id);
+    const result = await adminService.deleteOpportunity(req.params.id, req.user.id);
     sendSuccess(res, result);
   } catch (error) {
     logger.error('Admin: deleteOpportunity failed', { id: req.params.id, error });
@@ -185,7 +185,7 @@ exports.getCareerTaxonomy = async (req, res, next) => {
 
 exports.updateCareerTaxonomy = async (req, res, next) => {
   try {
-    const saved = await adminService.updateCareerTaxonomy(req.body?.taxonomy, req.user._id);
+    const saved = await adminService.updateCareerTaxonomy(req.body?.taxonomy, req.user.id);
     sendSuccess(res, { taxonomy: saved });
   } catch (error) {
     logger.error('Admin: updateCareerTaxonomy failed', { error });

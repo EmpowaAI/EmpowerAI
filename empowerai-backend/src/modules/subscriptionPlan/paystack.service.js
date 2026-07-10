@@ -14,7 +14,7 @@ class PaystackService {
     const plan = getPlanById(planId);
     const planCode = getPaystackPlanCode(planId, billingCycle);
     const amount = billingCycle === BILLING_CYCLES.ANNUAL ? plan.priceAnnual : plan.priceMonthly;
-    const reference = `EMPOWERAI-${user._id}-${uuidv4()}`;
+    const reference = `EMPOWERAI-${user.id}-${uuidv4()}`;
 
     const payload = {
       email: user.email,
@@ -24,7 +24,7 @@ class PaystackService {
       plan: planCode,                 // attaches recurring billing
       callback_url: PAYSTACK_CONFIG.callbackUrl,
       metadata: {
-        userId: user._id.toString(),  // ✅ was schoolId
+        userId: user.id,
         planId: plan.id,
         billingCycle,
         userName: user.name,
@@ -80,7 +80,7 @@ class PaystackService {
         return this._handleSubscriptionDisabled(data);
 
       default:
-        console.log(`[Paystack Webhook] Unhandled event: ${eventType}`);
+        // Unhandled event types are expected — log via caller
         return { event: 'unhandled', eventType };
     }
   }

@@ -144,27 +144,25 @@ async function sendMessage(userId, message, history, twinData, isLastPrompt = fa
   // Map in-memory twin → FastAPI cv_context contract
   const cvContext = _buildCvContext(twinData);
 
-  // Call FastAPI POST /chat/twin — degrade gracefully if the AI service is
-  // unavailable so the Node backend never returns a 500 to the browser.
+  // Call FastAPI POST /chat/twin. The axios interceptor already unwraps
+  // the HTTP body, so the response IS the payload.
   let fastApiData = null;
   try {
-    const response = await aiServiceClient.post('/chat/twin', {
+    fastApiData = await aiServiceClient.post('/chat/twin', {
       messages,
       cv_context: cvContext,
       focus: 'growth',
     });
-    fastApiData = response.data;
   } catch (aiErr) {
-    logger.warn('[TwinChat] AI service call failed — returning fallback reply', {
+    logger.error('[TwinChat] AI service call failed', {
       userId,
       error: aiErr.message,
     });
-    fastApiData = {
-      reply: "I'm having a brief connection issue with the AI service. Please try again in a moment.",
-      options: null,
-      isComplete: false,
-      profile: null,
-    };
+    const err = new Error(
+      'Your twin is temporarily unavailable. Please try again in a minute.'
+    );
+    err.statusCode = 503;
+    throw err;
   }
 
   // Merge any profile data the AI returned into the in-memory twin
