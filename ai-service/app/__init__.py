@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from datetime import datetime
@@ -7,8 +8,13 @@ import uuid
 
 from app.utils.logger import get_logger
 from app.config.config import settings
+from app.core.exceptions import AIServiceError
+from app.middleware.auth import is_authorized
 
 logger = get_logger()
+
+# Paths that must stay reachable without a service token
+PUBLIC_PATHS = {"/", "/health", "/docs", "/redoc", "/openapi.json"}
 
 
 def create_app() -> FastAPI:
@@ -49,6 +55,35 @@ def create_app() -> FastAPI:
 
     app.add_middleware(CorrelationIDMiddleware)
 
+    # ── Service Token Auth ──────────────────────────────
+    # Every business endpoint requires X-Service-Token. Only health
+    # checks and API docs are public. Applies to current AND future
+    # routers automatically.
+    class ServiceAuthMiddleware(BaseHTTPMiddleware):
+
+        async def dispatch(self, request: Request, call_next):
+            path = request.url.path.rstrip("/") or "/"
+
+            if request.method == "OPTIONS" or path in PUBLIC_PATHS:
+                return await call_next(request)
+
+            if not is_authorized(request.headers.get("X-Service-Token")):
+                logger.warning(f"AUTH_REJECTED | path={path}")
+                return JSONResponse(
+                    status_code=401,
+                    content={"detail": "Unauthorized"},
+                )
+
+            return await call_next(request)
+
+    app.add_middleware(ServiceAuthMiddleware)
+
+    # ── Domain Error Handler ────────────────────────────
+    @app.exception_handler(AIServiceError)
+    async def ai_service_error_handler(request: Request, exc: AIServiceError):
+        logger.error(f"AI_SERVICE_ERROR | path={request.url.path} | {exc.message}")
+        return JSONResponse(status_code=exc.status_code, content=exc.to_dict())
+
     # ── Health Routes ───────────────────────────────────
     @app.get("/")
     async def root():
@@ -74,6 +109,22 @@ def create_app() -> FastAPI:
         router as cv_revamp_router,
     )
 
+    from app.modules.interview.routes import (
+        router as interview_router,
+    )
+
+    from app.modules.twinChat.routes import (
+        router as twin_chat_router,
+    )
+
+    from app.modules.twinBuilder.routes import (
+        router as twin_builder_router,
+    )
+
+    from app.modules.twinBuilder.simulate_routes import (
+        router as simulate_router,
+    )
+
     app.include_router(
         cv_analyzer_router,
         prefix="/api/cv",
@@ -83,6 +134,25 @@ def create_app() -> FastAPI:
         cv_revamp_router,
         prefix="/api/cv/revamp",
         tags=["CV Revamp"],
+    )
+    app.include_router(
+        interview_router,
+        prefix="/interview",
+        tags=["Interview Coach"],
+    )
+    app.include_router(
+        twin_chat_router,
+        prefix="/chat",
+        tags=["Twin Chat"],
+    )
+    app.include_router(
+        twin_builder_router,
+        prefix="/twin",
+        tags=["Twin Builder"],
+    )
+    app.include_router(
+        simulate_router,
+        tags=["Twin Builder"],
     )
 
     logger.info("App initialized successfully")
