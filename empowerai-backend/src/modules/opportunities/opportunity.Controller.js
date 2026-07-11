@@ -151,6 +151,29 @@ exports.getAllOpportunities = async (req, res, next) => {
 
     if (matchingActive) {
       const poolLimit = Math.min(Math.max(limitNum * 5, 100), 500);
+
+      // Curate the pool to the user's actual career on first page: the
+      // scheduled pool is generic entry-level jobs, so a specialised profile
+      // (e.g. "AI Engineer") has nothing relevant to match. Fetch live from
+      // Adzuna for the user's career terms / search, persist, then query — so
+      // results reflect their profile/CV. Non-fatal and page-1 only to bound
+      // latency and API usage.
+      if (pageNum === 1 && req.user && (careerTerms.length > 0 || hasSearchQuery)) {
+        try {
+          const { fetchAdzunaByTerms, upsertOpportunities } = require('../../services/jobAPIService');
+          const fetchTerms = hasSearchQuery
+            ? [q.trim(), ...careerTerms.slice(0, 1)]
+            : careerTerms.slice(0, 2);
+          const fresh = await fetchAdzunaByTerms(fetchTerms, province || null);
+          if (fresh.length > 0) {
+            await upsertOpportunities(fresh, 'adzuna');
+            logger.info('Curated opportunities fetched live', { terms: fetchTerms, fetched: fresh.length });
+          }
+        } catch (e) {
+          logger.warn('Live curated fetch failed (non-fatal)', { message: e?.message });
+        }
+      }
+
       const { data: poolRows } = await buildQuery({ province, type, q })
         .order(sortCol, { ascending: sortAsc })
         .limit(poolLimit);

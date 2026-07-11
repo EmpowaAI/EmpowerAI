@@ -78,6 +78,82 @@ async function fetchAdzunaJobs() {
 }
 
 /**
+ * Fetch Adzuna jobs for specific career terms (curated to a user's profile).
+ * Used on-demand when a user browses opportunities so results reflect their
+ * actual career/CV rather than the generic scheduled pool.
+ */
+async function fetchAdzunaByTerms(terms, location = null, perTerm = 25) {
+  if (!ADZUNA_APP_ID || !ADZUNA_APP_KEY) return [];
+
+  const unique = [...new Set(
+    (Array.isArray(terms) ? terms : [terms])
+      .map(t => String(t || '').trim())
+      .filter(t => t.length >= 2)
+  )].slice(0, 3); // cap API calls per request
+
+  if (unique.length === 0) return [];
+
+  const results = [];
+  for (const term of unique) {
+    try {
+      const params = {
+        app_id: ADZUNA_APP_ID,
+        app_key: ADZUNA_APP_KEY,
+        results_per_page: perTerm,
+        what: term,
+      };
+      if (location) params.where = location;
+
+      const response = await axios.get(`${ADZUNA_BASE_URL}/za/search/1`, { params, timeout: 10000 });
+      if (response.data?.results) results.push(...response.data.results);
+    } catch (error) {
+      logger.warn(`Adzuna term fetch failed for "${term}": ${error.message}`);
+    }
+  }
+
+  return results.map(transformAdzunaJob);
+}
+
+/**
+ * Bulk-upsert transformed opportunities, deduped on (external_id, source).
+ * Returns the number of rows written.
+ */
+async function upsertOpportunities(jobs, source = 'adzuna') {
+  if (!Array.isArray(jobs) || jobs.length === 0) return { count: 0 };
+
+  const rows = jobs
+    .filter(j => j.externalId)
+    .map(j => ({
+      title: j.title,
+      type: j.type,
+      company: j.company,
+      location: j.location,
+      province: j.province,
+      description: j.description,
+      requirements: j.requirements,
+      skills: j.skills,
+      salary_range: j.salaryRange ?? null,
+      deadline: j.deadline instanceof Date ? j.deadline.toISOString() : j.deadline,
+      application_url: j.applicationUrl,
+      is_active: true,
+      source,
+      external_id: j.externalId,
+    }));
+
+  if (rows.length === 0) return { count: 0 };
+
+  const { error } = await supabase
+    .from('opportunities')
+    .upsert(rows, { onConflict: 'external_id,source', ignoreDuplicates: true });
+
+  if (error) {
+    logger.warn(`upsertOpportunities failed: ${error.message}`);
+    return { count: 0 };
+  }
+  return { count: rows.length };
+}
+
+/**
  * Transform Adzuna job to Opportunity format
  */
 function transformAdzunaJob(job) {
@@ -324,5 +400,7 @@ function cleanDescription(description) {
 module.exports = {
   fetchAndSaveJobs,
   fetchAdzunaJobs,
-  fetchIndeedJobs
+  fetchIndeedJobs,
+  fetchAdzunaByTerms,
+  upsertOpportunities
 };
