@@ -235,7 +235,7 @@ export default function RevampedCVDisplay({ cvData }: RevampedCVDisplayProps) {
         doc.setFontSize(9);
         doc.text(exp.dates || "", pageWidth - margin, y, { align: "right" });
         y += LINE_HEIGHT;
-        for (const bullet of exp.bullets) {
+        for (const bullet of (exp.bullets || [])) {
           checkPageBreak(LINE_HEIGHT);
           doc.setFont("helvetica", "normal");
           doc.setFontSize(9);
@@ -264,7 +264,7 @@ export default function RevampedCVDisplay({ cvData }: RevampedCVDisplayProps) {
           doc.text(`Technologies: ${proj.technologies}`, margin, y);
           y += LINE_HEIGHT;
         }
-        for (const bullet of proj.bullets) {
+        for (const bullet of (proj.bullets || [])) {
           checkPageBreak(LINE_HEIGHT);
           doc.setFont("helvetica", "normal");
           doc.setFontSize(9);
@@ -366,7 +366,7 @@ export default function RevampedCVDisplay({ cvData }: RevampedCVDisplayProps) {
       text += `PROFESSIONAL EXPERIENCE\n${"-".repeat(40)}\n`;
       for (const exp of data.experience) {
         text += `\n${exp.title} | ${exp.company}\n${exp.dates || ""}\n`;
-        for (const b of exp.bullets) text += `• ${b}\n`;
+        for (const b of (exp.bullets || [])) text += `• ${b}\n`;
       }
       text += "\n";
     }
@@ -375,7 +375,7 @@ export default function RevampedCVDisplay({ cvData }: RevampedCVDisplayProps) {
       text += `PROJECTS\n${"-".repeat(40)}\n`;
       for (const p of data.projects) {
         text += `\n${p.name}\nTechnologies: ${p.technologies || "N/A"}\n`;
-        for (const b of p.bullets) text += `• ${b}\n`;
+        for (const b of (p.bullets || [])) text += `• ${b}\n`;
       }
       text += "\n";
     }
@@ -674,7 +674,7 @@ export default function RevampedCVDisplay({ cvData }: RevampedCVDisplayProps) {
                       <EditableText value={exp.dates || ""} path={`experience.${expIndex}.dates`} className="text-xs text-muted-foreground italic" />
                     </div>
                     <ul className="space-y-1 ml-1">
-                      {exp.bullets.map((bullet: string, bulletIndex: number) => (
+                      {(exp.bullets || []).map((bullet: string, bulletIndex: number) => (
                         <li key={bulletIndex} className="flex items-start gap-2 text-sm text-muted-foreground">
                           <span className="mt-1.5 h-1 w-1 rounded-full bg-muted-foreground/40 flex-shrink-0" />
                           <EditableText value={bullet} path={`experience.${expIndex}.bullets.${bulletIndex}`} />
@@ -700,7 +700,7 @@ export default function RevampedCVDisplay({ cvData }: RevampedCVDisplayProps) {
                       </p>
                     )}
                     <ul className="space-y-1 mt-1 ml-1">
-                      {proj.bullets.map((bullet: string, bulletIndex: number) => (
+                      {(proj.bullets || []).map((bullet: string, bulletIndex: number) => (
                         <li key={bulletIndex} className="flex items-start gap-2 text-sm text-muted-foreground">
                           <span className="mt-1.5 h-1 w-1 rounded-full bg-muted-foreground/40 flex-shrink-0" />
                           <EditableText value={bullet} path={`projects.${projIndex}.bullets.${bulletIndex}`} />
