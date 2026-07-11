@@ -177,7 +177,9 @@ class InterviewService {
         );
       }
 
-      return await apiResponse.json();
+      const jsonResponse = await apiResponse.json();
+      // Backend wraps feedback as { status, data: { feedback: {...} } }
+      return jsonResponse.data?.feedback || jsonResponse.feedback || jsonResponse;
     } catch (error) {
       console.error('Error submitting answer:', error);
       if (error instanceof Error) throw error;

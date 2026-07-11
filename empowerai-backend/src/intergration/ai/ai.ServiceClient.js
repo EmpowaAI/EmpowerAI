@@ -125,8 +125,8 @@ client.interceptors.response.use(
 
 // ================= HELPERS =================
 
-async function post(endpoint, body) {
-  return client.post(endpoint, body);
+async function post(endpoint, body, config = {}) {
+  return client.post(endpoint, body, config);
 }
 async function postForm(endpoint, form) {
   const formHeaders = form.getHeaders();

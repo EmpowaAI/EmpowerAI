@@ -2,14 +2,29 @@ services:
   - type: web
     name: empowerai-ai-service
     env: python
+    rootDir: ai-service
     buildCommand: pip install -r requirements.txt
-    startCommand: python -m uvicorn main:app --host 0.0.0.0 --port ${PORT:-10000}
-    healthCheckPath: /api/health
+    # 2 workers so a blocking 30s AI call in one worker doesn't stall health
+    # checks / other requests. Handlers are sync `def` (threadpool) too.
+    startCommand: python -m uvicorn main:app --host 0.0.0.0 --port ${PORT:-10000} --workers 2
+    healthCheckPath: /health
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.9
       - key: PORT
         value: 10000
-      - key: OPENAI_API_KEY
+      # All required — the app fails to boot if any are missing.
+      # AZURE_OPENAI_MODEL must point at a deployment that supports the
+      # completion token limits used (gpt-4o 2024-08-06+ for 8k+ output).
+      - key: AZURE_OPENAI_API_KEY
         sync: false
-
+      - key: AZURE_OPENAI_ENDPOINT
+        sync: false
+      - key: AZURE_OPENAI_MODEL
+        sync: false
+      # Service-to-service auth. SERVICE_SECRET (or AI_SERVICE_API_KEY) must
+      # match the backend's AI_SERVICE_API_KEY value.
+      - key: SERVICE_SECRET
+        sync: false
+      - key: AI_SERVICE_API_KEY
+        sync: false

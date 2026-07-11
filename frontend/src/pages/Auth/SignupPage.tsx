@@ -159,7 +159,7 @@ export default function SignupPage() {
         ...consents,
       });
       setRegisteredEmail(formData.email);
-      toast.success(`Account created! Check your inbox, ${response.user?.name ?? formData.name}.`);
+      toast.success(`Account created! You can now sign in, ${response.data?.user?.name ?? formData.name}.`);
     } catch (err: any) {
       const errorMessage = err.message || "Registration failed. Please try again.";
       setError(errorMessage);
@@ -231,22 +231,20 @@ export default function SignupPage() {
               <div className="lg:hidden mb-6 sm:mb-8"><Logo variant="default" size="md" linkTo="/" /></div>
               <div className="flex flex-col items-center text-center space-y-6">
                 <div className="h-20 w-20 rounded-full bg-ai-gradient flex items-center justify-center animate-glow-pulse shadow-glow">
-                  <Mail className="h-10 w-10 text-white" />
+                  <CheckCircle className="h-10 w-10 text-white" />
                 </div>
                 <div className="space-y-2 animate-fade-up" style={{ animationDelay: "0.1s" }}>
-                  <h2 className="font-display text-3xl sm:text-4xl font-bold text-primary tracking-tight">Check your email</h2>
-                  <p className="text-muted-foreground text-sm sm:text-base">We sent a verification link to</p>
+                  <h2 className="font-display text-3xl sm:text-4xl font-bold text-primary tracking-tight">You're all set</h2>
+                  <p className="text-muted-foreground text-sm sm:text-base">Your account was created for</p>
                   <p className="font-semibold text-foreground text-sm sm:text-base break-all">{registeredEmail}</p>
                 </div>
                 <div className="w-full p-4 bg-primary/5 border border-primary/20 rounded-xl text-sm text-muted-foreground text-left space-y-2 animate-slide-up" style={{ animationDelay: "0.2s" }}>
-                  <p className="flex items-start gap-2"><CheckCircle className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" /><span>Open the email and click the verification link.</span></p>
-                  <p className="flex items-start gap-2"><CheckCircle className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" /><span>The link will expire after 24 hours.</span></p>
-                  <p className="flex items-start gap-2"><CheckCircle className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" /><span>Check your spam folder if you don&apos;t see it.</span></p>
+                  <p className="flex items-start gap-2"><CheckCircle className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" /><span>Sign in with the email and password you just chose.</span></p>
+                  <p className="flex items-start gap-2"><CheckCircle className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" /><span>Start by analysing your CV to build your Digital Twin.</span></p>
                 </div>
-                <p className="text-sm text-muted-foreground animate-slide-up" style={{ animationDelay: "0.3s" }}>
-                  Already verified?{" "}
-                  <Link to="/login" className="text-primary hover:text-primary/80 font-semibold hover:underline transition-colors">Sign in</Link>
-                </p>
+                <Link to="/login" className="w-full text-center px-4 py-3 bg-cta-gradient text-white rounded-xl font-bold shadow-cta hover:shadow-glow transition-all animate-slide-up" style={{ animationDelay: "0.3s" }}>
+                  Continue to Sign in
+                </Link>
               </div>
             </div>
           </div>

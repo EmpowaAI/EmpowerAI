@@ -17,11 +17,16 @@ exports.register = async (req, res, next) => {
       return res.status(400).json({ status: 'error', message: 'Name, email, and password are required' });
     }
 
-    // Create the auth user — sends verification email automatically
+    // Create the auth user. We auto-confirm the email here because the
+    // admin.createUser API does NOT send a verification email — leaving it
+    // unconfirmed while the Supabase project enforces email confirmation
+    // would lock every new user out of login. Auto-confirming guarantees
+    // sign-in works. (To add real verification later, switch to
+    // admin.generateLink({type:'signup'}) and send the link via Brevo.)
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email,
       password,
-      email_confirm: false,
+      email_confirm: true,
       user_metadata: { name },
     });
 
@@ -57,7 +62,7 @@ exports.register = async (req, res, next) => {
 
     res.status(201).json({
       status: 'success',
-      message: 'Registration successful. Please check your email to verify your account.',
+      message: 'Registration successful. You can now log in.',
       data: {
         user: { id: authData.user.id, name, email },
       },

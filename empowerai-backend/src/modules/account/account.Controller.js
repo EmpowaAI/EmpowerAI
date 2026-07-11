@@ -12,7 +12,7 @@ exports.forgotPassword = async (req, res, next) => {
 
     // Always responds with the same message to prevent email enumeration
     await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.FRONTEND_URL}/auth/reset-password`,
+      redirectTo: `${process.env.FRONTEND_URL}/reset-password`,
     });
 
     res.json({ status: 'success', message: 'If that email exists, a reset link has been sent.' });
@@ -104,7 +104,7 @@ exports.requestAccountDeletion = async (req, res, next) => {
 
     // Send confirmation email via Supabase Auth magic link
     await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.FRONTEND_URL}/auth/confirm-delete`,
+      redirectTo: `${process.env.FRONTEND_URL}/confirm-delete`,
     }).catch(() => {
       // Non-fatal: user can still confirm deletion via admin
     });

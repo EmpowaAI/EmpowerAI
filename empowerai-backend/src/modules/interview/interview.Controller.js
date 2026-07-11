@@ -74,10 +74,12 @@ exports.startInterview = async (req, res, next) => {
           jobDescription: jobDescription || null,
         },
         async (taskPayload) => {
-          // aiServiceClient's interceptor already unwraps the HTTP body
-          return aiServiceClient.post('/interview/start', taskPayload, { timeout: 30000 });
+          // aiServiceClient's interceptor already unwraps the HTTP body.
+          // 60s covers a cold AI-service start (~30-60s on Render free tier)
+          // plus the 30s Azure completion.
+          return aiServiceClient.post('/interview/start', taskPayload, { timeout: 60000 });
         },
-        { timeout: 30000, includeJobId: true }
+        { timeout: 60000, includeJobId: true }
       );
       aiSession = (queuedResult && queuedResult.result) ? queuedResult.result : (queuedResult || null);
       meta = (queuedResult && queuedResult.jobId) ? { jobId: queuedResult.jobId, queued: !!queuedResult.queued } : null;
@@ -177,9 +179,9 @@ exports.submitAnswer = async (req, res, next) => {
         },
         async (taskPayload) => {
           // aiServiceClient's interceptor already unwraps the HTTP body
-          return aiServiceClient.post('/interview/answer', taskPayload, { timeout: 30000 });
+          return aiServiceClient.post('/interview/answer', taskPayload, { timeout: 60000 });
         },
-        { timeout: 30000, includeJobId: true }
+        { timeout: 60000, includeJobId: true }
       );
       feedbackData = (queuedResult && queuedResult.result) ? queuedResult.result : (queuedResult || null);
       meta = (queuedResult && queuedResult.jobId) ? { jobId: queuedResult.jobId, queued: !!queuedResult.queued } : null;

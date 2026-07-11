@@ -970,8 +970,10 @@ export const accountAPIReal = {
   requestAccountDeletion: async () => {
     return await request<any>('/account/delete-request', { method: 'POST' });
   },
-  confirmAccountDeletion: async (token: string) => {
-    const response = await request<any>(`/account/confirm-delete?token=${encodeURIComponent(token)}`);
+  confirmAccountDeletion: async (_token?: string) => {
+    // Backend deletes the currently-authenticated user (from the bearer token
+    // established by the recovery link), so this is an authenticated POST.
+    const response = await request<any>('/account/confirm-delete', { method: 'POST' });
     removeToken();
     return response;
   },

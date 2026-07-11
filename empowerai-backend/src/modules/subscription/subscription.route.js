@@ -31,6 +31,19 @@ const validate = (req, res, next) => {
 const requireAuth = protect;
 const requireSuperAdmin = restrictTo('admin');
 
+// Prevent IDOR: the target userId (param or body) must be the caller's own
+// id, unless the caller is an admin. Without this, any logged-in user could
+// read another user's billing data or cancel their subscription.
+const requireSelfOrAdmin = (req, res, next) => {
+  const targetUserId = req.params.userId || req.body.userId;
+  if (req.user?.role === 'admin') return next();
+  if (targetUserId && targetUserId === req.user?.id) return next();
+  return res.status(403).json({
+    success: false,
+    message: 'You can only manage your own subscription.',
+  });
+};
+
 // ─── ROUTES ───────────────────────────────────────────────────────────────────
 
 /**
@@ -41,6 +54,7 @@ const requireSuperAdmin = restrictTo('admin');
 router.post(
   '/trial',
   requireAuth,
+  requireSelfOrAdmin,
   [
     body('userId').notEmpty().withMessage('userId is required'),
     body('planId')
@@ -67,6 +81,7 @@ router.post(
 router.get(
   '/user/:userId',
   requireAuth,
+  requireSelfOrAdmin,
   [param('userId').notEmpty()],
   validate,
   async (req, res) => {
@@ -115,6 +130,7 @@ router.get(
 router.post(
   '/checkout',
   requireAuth,
+  requireSelfOrAdmin,
   [
     body('userId').notEmpty().withMessage('userId is required'),
     body('planId').isIn(validPlanIds).withMessage(`planId must be one of: ${validPlanIds.join(', ')}`),
@@ -153,6 +169,7 @@ router.post(
 router.patch(
   '/:userId/plan',
   requireAuth,
+  requireSelfOrAdmin,
   [
     param('userId').notEmpty(),
     body('planId').isIn(validPlanIds).withMessage(`planId must be one of: ${validPlanIds.join(', ')}`),
@@ -178,6 +195,7 @@ router.patch(
 router.post(
   '/:userId/cancel',
   requireAuth,
+  requireSelfOrAdmin,
   [
     param('userId').notEmpty(),
     body('reason').optional().isString().isLength({ max: 500 }),
@@ -202,6 +220,7 @@ router.post(
 router.post(
   '/:userId/reactivate',
   requireAuth,
+  requireSelfOrAdmin,
   [param('userId').notEmpty()],
   validate,
   async (req, res) => {

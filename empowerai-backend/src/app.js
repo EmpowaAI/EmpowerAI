@@ -67,6 +67,9 @@ if (isEnabled(process.env.ENABLE_API_RATE_LIMITER, true)) {
   app.use('/api/subscriptions', apiLimiter);
   app.use('/api/usage', apiLimiter);
   app.use('/api/leaderboard', apiLimiter);
+  // Public endpoints that send mail / write rows — protect from spam
+  app.use('/api/contact', apiLimiter);
+  app.use('/api/waitlist', apiLimiter);
 }
 
 // ─── Request Logging ──────────────────────────────────────────────────────────
