@@ -4,17 +4,21 @@
 
 **AI-powered career platform for South African youth**
 
-[![Status](https://img.shields.io/badge/status-in%20development-orange?style=flat-square)](https://github.com/EmpowaAI/EmpowerAI)
+[![Status](https://img.shields.io/badge/status-public%20beta-brightgreen?style=flat-square)](https://github.com/EmpowaAI/EmpowerAI)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
 [![Stack](https://img.shields.io/badge/stack-React%20%7C%20Node.js%20%7C%20Python%20%7C%20Supabase-blueviolet?style=flat-square)]()
 
-[Report Bug](https://github.com/EmpowaAI/EmpowerAI/issues) · [Request Feature](https://github.com/EmpowaAI/EmpowerAI/issues) · [Security](SECURITY.md)
+[Report Bug](https://github.com/EmpowaAI/EmpowerAI/issues) · [Request Feature](https://github.com/EmpowaAI/EmpowerAI/issues) · [Security](SECURITY.md) · [Beta Testers](BETA_TESTERS.md)
 
 </div>
 
 ---
 
 EmpowerAI uses a Digital Economic Twin, CV analysis, interview coaching, and real-time opportunity matching to help young South Africans find work and build careers — in their own languages, from wherever they are.
+
+> **🧪 Public Beta:** EmpowaAI is in open beta. If you're testing, please read the
+> **[Beta Tester Guide](BETA_TESTERS.md)** — it explains what to expect (e.g. sign-up
+> has no email-verification step during beta) and how to report issues.
 
 ## Features
 
