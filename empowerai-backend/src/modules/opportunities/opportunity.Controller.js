@@ -2,6 +2,7 @@ const supabase = require('../../db/supabase');
 const logger = require('../../utils/logger');
 const { getMatchedOpportunities, extractUserProfile } = require('./opportunityMatchingService');
 const { getCareerTaxonomy } = require('../../services/taxonomyService');
+const cvRepository = require('../cvAnalyser/cvAnalyser.Repository');
 
 // Normalize a Supabase row to the shape the frontend expects (camelCase)
 function fromRow(row) {
@@ -92,9 +93,11 @@ exports.getAllOpportunities = async (req, res, next) => {
 
     if (req.user && (!Array.isArray(userProfile.skills) || userProfile.skills.length === 0)) {
       try {
-        const { data: cvRow } = await supabase
-          .from('cv_profiles').select('analysis').eq('user_id', req.user.id).single();
-        const cvSkills = cvRow?.analysis?.extractedSkills;
+        // Go through the repository so analysis.extractedSkills is decrypted.
+        // A raw select returns it as an encrypted string, so the old
+        // Array.isArray check silently never matched.
+        const cvProfile = await cvRepository.findByUserId(req.user.id);
+        const cvSkills = cvProfile?.analysis?.extractedSkills;
         if (Array.isArray(cvSkills) && cvSkills.length > 0) userProfile.skills = cvSkills;
       } catch (e) {
         logger.warn('Failed to hydrate skills from CV profile (non-fatal)', { message: e?.message });

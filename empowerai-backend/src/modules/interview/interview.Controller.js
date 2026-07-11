@@ -102,11 +102,20 @@ exports.startInterview = async (req, res, next) => {
       });
     }
 
+    // Clamp difficulty to the DB CHECK set — the AI-echoed value is not
+    // covered by the request validator and a stray value (e.g.
+    // 'intermediate') would violate the interview_sessions constraint.
+    const ALLOWED_DIFFICULTY = ['easy', 'medium', 'hard'];
+    const candidateDifficulty = aiSession.difficulty || difficulty || 'medium';
+    const safeDifficulty = ALLOWED_DIFFICULTY.includes(candidateDifficulty)
+      ? candidateDifficulty
+      : 'medium';
+
     // Persist so the session survives restarts and can be resumed
     const row = await interviewRepository.create({
       userId: req.user.id,
       type,
-      difficulty: aiSession.difficulty || difficulty || 'medium',
+      difficulty: safeDifficulty,
       company: company || null,
       questions: aiSession.questions,
       cvData: cvData || null,
