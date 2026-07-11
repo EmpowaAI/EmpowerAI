@@ -33,7 +33,8 @@ class AIClient:
     def ping(self, timeout: float = 6.0) -> bool:
         """Cheap liveness probe for Azure OpenAI: a 1-token completion that
         validates key + endpoint + deployment without real cost. Never
-        raises — returns False on any failure."""
+        raises — returns False on any failure, and logs why so Azure
+        misconfiguration is diagnosable from the service logs."""
         try:
             self.client.chat.completions.create(
                 model=self.model,
@@ -42,7 +43,14 @@ class AIClient:
                 timeout=timeout,
             )
             return True
-        except Exception:
+        except Exception as e:
+            # Surface the reason: 401=bad key, 404=deployment/endpoint wrong,
+            # DeploymentNotFound=AZURE_OPENAI_MODEL is not the deployment name.
+            from app.utils.logger import logger
+            logger.error(
+                f"AZURE_PING_FAILED | model={self.model} | "
+                f"endpoint={settings.AZURE_OPENAI_ENDPOINT} | {type(e).__name__}: {str(e)[:300]}"
+            )
             return False
 
     def chat(
