@@ -97,7 +97,7 @@ Please include as much as you can:
 
 Open bugs at **https://github.com/EmpowaAI/EmpowerAI/issues**.
 For **security issues**, do **not** open a public issue — email
-`nicolette.mashaba@marisapeer.com` (see [SECURITY.md](SECURITY.md)).
+`nene171408@gmail.com` (see [SECURITY.md](SECURITY.md)).
 
 ---
 
@@ -106,6 +106,24 @@ For **security issues**, do **not** open a public issue — email
 Not everything has to be a bug. We'd love to hear about features you'd like,
 things that feel confusing, better workflows, UI improvements, and ideas that
 would genuinely help job seekers.
+
+---
+
+## 🤝 Powered by Our Partners
+
+EmpowerAI uses intelligent automations powered by our partner, Lindy, to help
+deliver parts of the platform experience. As you use the platform, you may
+interact with workflows or processes that are powered by Lindy behind the scenes.
+
+If you notice anything unusual with automated interactions or workflows, please
+include that in your feedback as well.
+
+---
+
+## 📬 Need Help?
+
+Questions, stuck somewhere, or just want to reach us? Email
+**nene171408@gmail.com** and we'll get back to you.
 
 ---
 
