@@ -15,7 +15,7 @@ let lastAiHealth = {
 // ================= HEALTH CHECK =================
 async function checkAiHealth(force = false) {
   const aiServiceUrl = (process.env.AI_SERVICE_URL || 'http://localhost:8000').replace(/\/$/, '');
-  const aiServiceToken = process.env.AI_SERVICE_TOKEN;
+  const aiServiceToken = process.env.AI_SERVICE_API_KEY || process.env.AI_SERVICE_TOKEN;
 
   const now = Date.now();
 
@@ -82,7 +82,7 @@ async function checkAiHealth(force = false) {
 // ================= STARTUP PING =================
 function pingAiServiceOnStartup() {
   const aiServiceUrl = (process.env.AI_SERVICE_URL || '').replace(/\/$/, '');
-  const aiServiceToken = process.env.AI_SERVICE_TOKEN;
+  const aiServiceToken = process.env.AI_SERVICE_API_KEY || process.env.AI_SERVICE_TOKEN;
 
   if (process.env.NODE_ENV !== 'production') return;
 

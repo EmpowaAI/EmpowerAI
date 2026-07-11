@@ -30,6 +30,21 @@ class AIClient:
         messages.append({"role": "user", "content": prompt})
         return self.chat(messages, temperature=temperature, max_tokens=max_tokens)
 
+    def ping(self, timeout: float = 6.0) -> bool:
+        """Cheap liveness probe for Azure OpenAI: a 1-token completion that
+        validates key + endpoint + deployment without real cost. Never
+        raises — returns False on any failure."""
+        try:
+            self.client.chat.completions.create(
+                model=self.model,
+                messages=[{"role": "user", "content": "ping"}],
+                max_tokens=1,
+                timeout=timeout,
+            )
+            return True
+        except Exception:
+            return False
+
     def chat(
         self,
         messages: list,

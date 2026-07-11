@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from datetime import datetime
+import time
 import uuid
 
 from app.utils.logger import get_logger
@@ -15,6 +16,25 @@ logger = get_logger()
 
 # Paths that must stay reachable without a service token
 PUBLIC_PATHS = {"/", "/health", "/docs", "/redoc", "/openapi.json"}
+
+# Cached Azure OpenAI status so /health can report openai_status without
+# calling Azure on every poll. Refreshed at most once per TTL; always
+# non-fatal (a failing check reports "failed" but /health still returns 200,
+# so a transient Azure blip never makes Render restart the service).
+_OPENAI_HEALTH_TTL = 300.0
+_openai_health = {"status": "unknown", "checked_at": 0.0}
+
+
+def _get_openai_status() -> str:
+    now = time.monotonic()
+    if _openai_health["status"] == "unknown" or (now - _openai_health["checked_at"]) > _OPENAI_HEALTH_TTL:
+        try:
+            from app.core.aiClient import AIClient
+            _openai_health["status"] = "ok" if AIClient().ping() else "failed"
+        except Exception:
+            _openai_health["status"] = "failed"
+        _openai_health["checked_at"] = now
+    return _openai_health["status"]
 
 
 def create_app() -> FastAPI:
@@ -93,10 +113,14 @@ def create_app() -> FastAPI:
             "timestamp": datetime.now().isoformat(),
         }
 
+    # Sync `def` so the (cached, occasional) Azure ping runs in the
+    # threadpool. openai_status lets the backend and operators see whether
+    # Azure is actually reachable instead of a permanent "unknown".
     @app.get("/health")
-    async def health():
+    def health():
         return {
             "status": "healthy",
+            "openai_status": _get_openai_status(),
             "timestamp": datetime.now().isoformat(),
         }
 
