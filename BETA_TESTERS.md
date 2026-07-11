@@ -162,4 +162,4 @@ Thank you for believing in our vision and for helping shape the future of
 AI-powered employability.
 
 **— Nicolette Mashaba**
-Founder, EmpowaAI 🚀
+Co-Founder & Lead Engineer, EmpowaAI 🚀
