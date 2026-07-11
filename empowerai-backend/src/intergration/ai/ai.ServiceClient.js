@@ -6,7 +6,9 @@ const { v4: uuid } = require('uuid');
 const AI_SERVICE_URL = (process.env.AI_SERVICE_URL || 'http://localhost:8000').replace(/\/$/, '');
 const AI_SERVICE_TOKEN = process.env.AI_SERVICE_API_KEY || process.env.AI_SERVICE_TOKEN;
 
-const REQUEST_TIMEOUT = process.env.NODE_ENV === 'production' ? 90000 : 30000;
+// Must exceed the AI service's own 90s Azure timeout so the backend doesn't
+// abort a still-running GPT-5 generation before it can respond.
+const REQUEST_TIMEOUT = process.env.NODE_ENV === 'production' ? 120000 : 60000;
 const MAX_RETRIES = 3;
 const BASE_DELAY = 2000;
 

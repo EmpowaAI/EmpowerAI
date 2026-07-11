@@ -2,9 +2,10 @@ from openai import AzureOpenAI, BadRequestError
 from app.config.config import settings
 from app.core.exceptions import AIServiceError
 
-# Fail fast instead of holding Node's connection open — the backend
-# aborts at 25-45s, so anything slower than this is already lost.
-REQUEST_TIMEOUT_SECONDS = 30.0
+# GPT-5 generates large JSON completions slower than GPT-4o (~30s for a
+# 6k-token CV analysis). 90s gives headroom without hanging forever, and
+# max_retries=0 stops the SDK from silently tripling that on a timeout.
+REQUEST_TIMEOUT_SECONDS = 90.0
 
 
 class AIClient:
@@ -14,6 +15,7 @@ class AIClient:
             azure_endpoint=settings.AZURE_OPENAI_ENDPOINT,
             api_version=settings.AZURE_OPENAI_API_VERSION,
             timeout=REQUEST_TIMEOUT_SECONDS,
+            max_retries=0,
         )
         self.model = settings.AZURE_OPENAI_MODEL
 

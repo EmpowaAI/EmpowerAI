@@ -50,7 +50,7 @@ class CVAnalyzerService:
             raw = self.client.complete(
                 prompt=prompt,
                 system=self.SYSTEM_PROMPT,
-                max_tokens=8000,
+                max_tokens=6000,
             )
 
             result = extract_json(raw)
