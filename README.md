@@ -61,7 +61,10 @@ git clone https://github.com/EmpowaAI/EmpowerAI.git
 cd EmpowerAI
 ```
 
-Open your Supabase project → SQL Editor and run `empowerai-backend/schema.sql`.  
+Open your Supabase project → SQL Editor and run `empowerai-backend/schema.sql`,
+then run each file in `empowerai-backend/migrations/` (in filename order) to
+create the `interview_sessions` and `saved_opportunities` tables and apply the
+security/consent updates.  
 Note your **Project URL** and **service role key** from Settings → API.
 
 ### 2. Option A — Docker (recommended)
