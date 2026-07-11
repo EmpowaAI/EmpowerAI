@@ -1,4 +1,4 @@
-from openai import AzureOpenAI
+from openai import AzureOpenAI, BadRequestError
 from app.config.config import settings
 from app.core.exceptions import AIServiceError
 
@@ -17,6 +17,32 @@ class AIClient:
         )
         self.model = settings.AZURE_OPENAI_MODEL
 
+    def _create(self, messages, temperature=None, max_tokens=None, timeout=None):
+        """Wrapper around chat.completions.create that speaks the current
+        parameter contract:
+        - GPT-5 / o-series models require `max_completion_tokens` (not
+          `max_tokens`) — we always send the new name.
+        - Some of those models also reject any non-default `temperature`;
+          if the API complains, retry once without it.
+        """
+        kwargs = {
+            "model": self.model,
+            "messages": messages,
+            "max_completion_tokens": max_tokens or 2000,
+        }
+        if temperature is not None:
+            kwargs["temperature"] = temperature
+        if timeout is not None:
+            kwargs["timeout"] = timeout
+
+        try:
+            return self.client.chat.completions.create(**kwargs)
+        except BadRequestError as e:
+            if "temperature" in str(e).lower() and "temperature" in kwargs:
+                kwargs.pop("temperature", None)
+                return self.client.chat.completions.create(**kwargs)
+            raise
+
     def complete(
         self,
         prompt: str,
@@ -31,21 +57,20 @@ class AIClient:
         return self.chat(messages, temperature=temperature, max_tokens=max_tokens)
 
     def ping(self, timeout: float = 6.0) -> bool:
-        """Cheap liveness probe for Azure OpenAI: a 1-token completion that
-        validates key + endpoint + deployment without real cost. Never
-        raises — returns False on any failure, and logs why so Azure
-        misconfiguration is diagnosable from the service logs."""
+        """Cheap liveness probe for Azure OpenAI: a tiny completion that
+        validates key + endpoint + deployment + api-version without real
+        cost. Never raises — returns False on any failure, and logs why so
+        Azure misconfiguration is diagnosable from the service logs."""
         try:
-            self.client.chat.completions.create(
-                model=self.model,
+            self._create(
                 messages=[{"role": "user", "content": "ping"}],
-                max_tokens=1,
+                max_tokens=16,
                 timeout=timeout,
             )
             return True
         except Exception as e:
             # Surface the reason: 401=bad key, 404=deployment/endpoint wrong,
-            # DeploymentNotFound=AZURE_OPENAI_MODEL is not the deployment name.
+            # 400=unsupported param / api-version too old for the model.
             from app.utils.logger import logger
             logger.error(
                 f"AZURE_PING_FAILED | model={self.model} | "
@@ -62,8 +87,7 @@ class AIClient:
         """Multi-turn completion. `messages` is a list of
         {"role": "system"|"user"|"assistant", "content": str} dicts."""
         try:
-            response = self.client.chat.completions.create(
-                model=self.model,
+            response = self._create(
                 messages=messages,
                 temperature=temperature if temperature is not None else 0.7,
                 max_tokens=max_tokens or 2000,
