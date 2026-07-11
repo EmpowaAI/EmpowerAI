@@ -1,0 +1,45 @@
+name: 🐞 Bug Report
+description: Report a bug or unexpected behaviour in EmpowaAI
+title: "[Bug]: "
+labels: ["🐛 Bug"]
+assignees: ["NickiMash17"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve EmpowaAI! 🙏
+
+        **Before you file:** a few things are expected during Public Beta and are **not** bugs —
+        no sign-up verification email, AI features taking ~20–40s, and the first Opportunities
+        load being slower. See the [Beta Tester Guide](https://empowa.org/beta-guide.html).
+  - type: textarea
+    id: what-doing
+    attributes:
+      label: What were you trying to do?
+      placeholder: e.g. I clicked "Analyse CV" after uploading my document.
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      placeholder: e.g. The loading spinner never stopped.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+      placeholder: e.g. I expected the AI analysis to appear.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Browser & device
+      placeholder: e.g. Chrome 126 on Windows 11, or Safari on iPhone 14
+  - type: textarea
+    id: extra
+    attributes:
+      label: Screenshots or anything else
+      placeholder: Drag in a screenshot or screen recording, or add any other detail.

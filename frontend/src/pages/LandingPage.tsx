@@ -136,13 +136,13 @@ export default function LandingPage() {
     setIsSubmitting(true);
     
     // Create mailto link with form data
-    const subject = encodeURIComponent(`[EmpowAI Contact] ${contactForm.subject}`);
+    const subject = encodeURIComponent(`[EmpowaAI Contact] ${contactForm.subject}`);
     const body = encodeURIComponent(
       `Name: ${contactForm.name}\n` +
       `Email: ${contactForm.email}\n\n` +
       `Message:\n${contactForm.message}\n\n` +
       `---\n` +
-      `Sent from EmpowAI website contact form\n` +
+      `Sent from EmpowaAI website contact form\n` +
       `Date: ${new Date().toLocaleString()}`
     );
     
@@ -625,7 +625,7 @@ export default function LandingPage() {
                 Real Success Stories from Mzansi
               </h2>
               <p className="mx-auto mt-3 max-w-xl text-sm sm:text-base text-muted-foreground px-4">
-                See how EmpowAI is transforming careers across all 9 provinces.
+                See how EmpowaAI is transforming careers across all 9 provinces.
               </p>
             </div>
 
@@ -635,7 +635,7 @@ export default function LandingPage() {
                   initials: "LM",
                   name: "Lerato Mokoena",
                   loc: "Cape Town, WC",
-                  quote: "From Khayelitsha to a junior dev role. EmpowAI showed me tech skills I didn't know I had. Siyabonga!",
+                  quote: "From Khayelitsha to a junior dev role. EmpowaAI showed me tech skills I didn't know I had. Siyabonga!",
                   earn: "R12,000/mo",
                   path: "Student → Software Developer",
                 },
@@ -752,6 +752,8 @@ export default function LandingPage() {
                 <li><a href="#features" className="text-sm text-muted-foreground hover:text-primary transition-colors">Features</a></li>
                 <li><a href="#ubuntu-stories" className="text-sm text-muted-foreground hover:text-primary transition-colors">Stories</a></li>
                 <li><Link to="/demo" className="text-sm text-muted-foreground hover:text-primary transition-colors">Demo</Link></li>
+                <li><a href="/beta-guide.html" target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-primary transition-colors">📖 Beta Tester Guide</a></li>
+                <li><a href="https://github.com/EmpowaAI/EmpowerAI/issues/new?template=bug_report.yml" target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-primary transition-colors">🐞 Report a Bug</a></li>
               </ul>
             </div>
 
@@ -809,7 +811,7 @@ export default function LandingPage() {
               </span>
             </p>
             <p className="text-xs text-muted-foreground mt-2">
-              © {new Date().getFullYear()} EmpowAI · Amandla e-Ubuntu <span className="emoji">🇿🇦</span> · Built in Mzansi
+              © {new Date().getFullYear()} EmpowaAI · Amandla e-Ubuntu <span className="emoji">🇿🇦</span> · Built in Mzansi
             </p>
           </div>
         </div>
@@ -834,7 +836,7 @@ export default function LandingPage() {
         <div className="prose prose-sm dark:prose-invert max-w-none">
           <p className="text-muted-foreground mb-4">Last updated: {new Date().toLocaleDateString()}</p>
           <h3 className="text-primary font-semibold mt-4 mb-2">1. Acceptance of Terms</h3>
-          <p>By accessing or using EmpowAI, you agree to be bound by these Terms of Service.</p>
+          <p>By accessing or using EmpowaAI, you agree to be bound by these Terms of Service.</p>
           <h3 className="text-primary font-semibold mt-4 mb-2">2. User Accounts</h3>
           <p>You must be at least 18 years old to use this service. You are responsible for maintaining account security and all activities under your account.</p>
           <h3 className="text-primary font-semibold mt-4 mb-2">3. AI Services</h3>

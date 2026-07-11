@@ -1,0 +1,29 @@
+name: 💡 Feature Request
+description: Suggest a feature or improvement for EmpowaAI
+title: "[Feature]: "
+labels: ["💡 Enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        No suggestion is too small — if something makes you pause, confuses you, or feels
+        like it could work better, we'd genuinely love to hear it. 🚀
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      placeholder: e.g. It's hard to find opportunities specific to my province.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Your idea
+      placeholder: Describe what you'd like to see, and how it would help.
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else?
+      placeholder: Mockups, examples, or related ideas are welcome.

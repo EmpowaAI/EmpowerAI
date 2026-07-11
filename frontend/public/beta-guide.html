@@ -263,6 +263,31 @@
     footer { padding-bottom: 10px; }
   }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+  /* highlighted pre-flight notice */
+  .notice {
+    background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--accent) 32%, var(--line));
+    border-radius: var(--radius); padding: 22px 24px; margin: 34px 0 0;
+  }
+  .notice h2 { font: var(--display); font-weight: 800; font-size: 1.18rem; letter-spacing: -0.015em; margin: 0 0 13px; color: var(--ink); }
+  .notice ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+  .notice li { padding-left: 25px; position: relative; color: var(--ink); font-size: 0.98rem; line-height: 1.5; }
+  .notice li::before { content: ""; position: absolute; left: 3px; top: 0.55em; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+  .notice .foot { margin: 15px 0 0; font-size: 0.93rem; color: var(--ink-soft); font-weight: 600; }
+
+  /* link buttons */
+  .linkbtns { display: flex; flex-wrap: wrap; gap: 10px; margin: 6px 0 0; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    font: var(--mono); font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase;
+    text-decoration: none; padding: 11px 16px; border-radius: 10px; border: 1px solid transparent;
+  }
+  .btn.primary { background: linear-gradient(150deg, var(--accent), var(--accent-deep)); color: #fff; }
+  .btn.secondary { background: var(--surface); color: var(--ink); border-color: var(--line); }
+  .btn svg { width: 15px; height: 15px; }
+
+  .signoff .so-eyebrow { font: var(--mono); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); display: block; margin-bottom: 12px; }
 </style>
 </head>
 <body>
@@ -292,6 +317,18 @@
 </header>
 
 <main class="wrap">
+
+  <div class="notice">
+    <h2>📌 Before you report a bug</h2>
+    <ul>
+      <li>Email verification is intentionally disabled during Public Beta — your account becomes active immediately after registration.</li>
+      <li>Password reset works normally.</li>
+      <li>AI features (CV Analysis, CV Revamp, Digital Twin, Interview Coach, Simulations, etc.) may take approximately 20–40 seconds depending on demand.</li>
+      <li>The first Opportunities search may take a few seconds while jobs are fetched and matched.</li>
+      <li>Sample CVs are perfectly acceptable for testing.</li>
+    </ul>
+    <p class="foot">These are expected behaviours and should not be reported as bugs.</p>
+  </div>
 
   <section>
     <div class="sec-head">
@@ -373,9 +410,24 @@
   <section>
     <div class="sec-head">
       <span class="sec-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.2a1.9 1.9 0 0 1 3.4 0l7.8 14a1.9 1.9 0 0 1-1.7 2.8H4.2a1.9 1.9 0 0 1-1.7-2.8l7.8-14z"/><path d="M12 9v4.5"/><circle cx="12" cy="16.6" r="0.6" fill="currentColor"/></svg>
+      </span>
+      <div><span class="kicker">05 — Known limitations</span><h2>Known during Public Beta</h2></div>
+    </div>
+    <div class="callouts">
+      <div class="callout"><h4>AI can be slower at peak times</h4><p>AI responses may occasionally take longer during busy periods.</p></div>
+      <div class="callout"><h4>Job listings are live third-party data</h4><p>Opportunities depend on live third-party providers and may change throughout the day.</p></div>
+      <div class="callout"><h4>Some features are still being refined</h4><p>Parts of the platform are actively evolving based on beta feedback.</p></div>
+    </div>
+    <p style="margin-top:16px">These are known limitations and not necessarily bugs.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-icon" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7.5" y="8" width="9" height="11" rx="4.5"/><path d="M12 8V5.5M9.2 6.2 7.7 4.7M14.8 6.2l1.5-1.5M7.5 12H4m16.5 0H16.5M6 16H4m16 0h-2M7.9 19.5 6 21m10.1-1.5L18 21"/></svg>
       </span>
-      <div><span class="kicker">05 — Feedback</span><h2>Reporting bugs</h2></div>
+      <div><span class="kicker">06 — Feedback</span><h2>Reporting bugs</h2></div>
     </div>
     <p>If you hit a bug, tell us as much as you can — this template makes it easy:</p>
     <div class="template">
@@ -384,7 +436,12 @@
       <div class="row"><p class="q">What did you expect?</p><p class="eg">"I expected the AI analysis to appear."</p></div>
       <div class="row"><p class="q">Anything else?</p><p class="eg">A screenshot or recording, your browser, and your device all help.</p></div>
     </div>
-    <p class="report-links">Open bugs at <a href="https://github.com/EmpowaAI/EmpowerAI/issues">github.com/EmpowaAI/EmpowerAI/issues</a>. Found a <strong>security</strong> issue? Please don't post it publicly — email <a href="mailto:nene171408@gmail.com">nene171408@gmail.com</a>.</p>
+    <div class="linkbtns">
+      <a class="btn primary" href="https://github.com/EmpowaAI/EmpowerAI/issues/new?template=bug_report.yml" target="_blank" rel="noopener">🐞 Report a Bug</a>
+      <a class="btn secondary" href="https://github.com/EmpowaAI/EmpowerAI/security" target="_blank" rel="noopener">Security Policy</a>
+      <a class="btn secondary" href="https://github.com/EmpowaAI/EmpowerAI" target="_blank" rel="noopener">GitHub Repository</a>
+    </div>
+    <p class="report-links">If a link doesn't open, visit <a href="https://github.com/EmpowaAI/EmpowerAI/issues">github.com/EmpowaAI/EmpowerAI/issues</a>. Found a <strong>security</strong> issue? Please don't post it publicly — email <a href="mailto:nene171408@gmail.com">nene171408@gmail.com</a>.</p>
   </section>
 
   <section>
@@ -392,9 +449,10 @@
       <span class="sec-icon" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.5 1.1 1.3 1.1 2.2v.5h5v-.5c0-.9.4-1.7 1.1-2.2A6 6 0 0 0 12 3z"/><path d="M9.5 20h5M10.5 22h3"/></svg>
       </span>
-      <div><span class="kicker">06 — Ideas welcome</span><h2>Feature suggestions</h2></div>
+      <div><span class="kicker">07 — Ideas welcome</span><h2>Feature suggestions</h2></div>
     </div>
     <p>Not everything has to be a bug. We'd genuinely love to hear about features you'd like, things that feel confusing, smoother workflows, UI improvements, and any idea that would truly help job seekers.</p>
+    <p>No suggestion is too small. If something makes you pause, confuses you, or feels like it could work better, we'd genuinely love to hear about it.</p>
   </section>
 
   <section>
@@ -402,10 +460,25 @@
       <span class="sec-icon" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12.5 5 9.5a2 2 0 0 1 2.8-2.8l.7.6M16 12.5l3-3a2 2 0 0 0-2.8-2.8l-3.5 3.3a2 2 0 0 1-2.7 0"/><path d="m2.5 13 3.5 3.5a2 2 0 0 0 2.8 0l.5-.5.9.9a1.9 1.9 0 0 0 2.7 0 1.9 1.9 0 0 0 2.6 0l.3-.3a1.9 1.9 0 0 0 2.7 0l1.3-1.3"/></svg>
       </span>
-      <div><span class="kicker">07 — Partners</span><h2>Powered by our partners</h2></div>
+      <div><span class="kicker">08 — Technology Partner</span><h2>Our technology partner</h2></div>
     </div>
-    <p>EmpowerAI uses intelligent automations powered by our partner, <strong class="ink">Lindy</strong>, to help deliver parts of the platform experience. As you use the platform, you may interact with workflows or processes that are powered by Lindy behind the scenes.</p>
-    <p>If you notice anything unusual with automated interactions or workflows, please include that in your feedback as well.</p>
+    <p>EmpowaAI is proud to partner with <strong class="ink">Lindy</strong>, whose automation platform helps power a number of our internal workflows and operational processes.</p>
+    <p>This partnership enables us to focus on delivering a better experience for our users while leveraging reliable automation behind the scenes.</p>
+    <p>We sincerely appreciate Lindy's support as we continue building and improving EmpowaAI.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 8h18M8 21h8M12 18v3"/></svg>
+      </span>
+      <div><span class="kicker">09 — Browsers</span><h2>Recommended browsers</h2></div>
+    </div>
+    <div class="personas">
+      <span class="persona">Google Chrome (latest)</span>
+      <span class="persona">Microsoft Edge (latest)</span>
+      <span class="persona">Mozilla Firefox (latest)</span>
+    </div>
   </section>
 
   <section>
@@ -413,15 +486,17 @@
       <span class="sec-icon" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3.5 7 8.5 6 8.5-6"/></svg>
       </span>
-      <div><span class="kicker">08 — Contact</span><h2>Need help?</h2></div>
+      <div><span class="kicker">10 — Contact</span><h2>Need help?</h2></div>
     </div>
     <p>Questions, stuck somewhere, or just want to reach us? Email <a href="mailto:nene171408@gmail.com">nene171408@gmail.com</a> and we'll get back to you.</p>
   </section>
 
   <section>
     <div class="signoff">
-      <p class="big">You're not just testing software — you're helping build something that can change how people find work.</p>
-      <p>Every bug report. Every suggestion. Every idea. Every minute you spend testing makes EmpowaAI better. Thank you for being part of this journey — it genuinely means a lot.</p>
+      <span class="so-eyebrow">❤️ Thank you</span>
+      <p class="big">Building EmpowaAI has been an incredible journey, and we're grateful you've chosen to be part of it.</p>
+      <p>Every bug report, feature suggestion, and piece of feedback helps us build a better platform — not just for us, but for every job seeker who will use EmpowaAI in the future.</p>
+      <p>Thank you for believing in our vision and for helping shape the future of AI-powered employability.</p>
       <div class="sig">
         <span class="sig-avatar" aria-hidden="true">NM</span>
         <span>
@@ -436,7 +511,7 @@
 
 <footer class="wrap">
   <div class="fnote">EmpowaAI · Public Beta · 🇿🇦</div>
-  <div class="flinks"><a href="https://github.com/EmpowaAI/EmpowerAI">GitHub</a> &nbsp;·&nbsp; <a href="https://github.com/EmpowaAI/EmpowerAI/blob/main/SECURITY.md">Security</a> &nbsp;·&nbsp; <a href="https://github.com/EmpowaAI/EmpowerAI/issues">Report an issue</a></div>
+  <div class="flinks"><a href="https://github.com/EmpowaAI/EmpowerAI">GitHub</a> &nbsp;·&nbsp; <a href="https://github.com/EmpowaAI/EmpowerAI/security">Security</a> &nbsp;·&nbsp; <a href="https://github.com/EmpowaAI/EmpowerAI/issues">Report an issue</a></div>
 </footer>
 </body>
 </html>

@@ -297,7 +297,7 @@ export function ConsentBanner() {
       <PolicyModal isOpen={showTerms} onClose={() => setShowTerms(false)} title="Terms of Service">
         <p>Last updated: {new Date().toLocaleDateString()}</p>
         <h4 className="font-semibold text-foreground mt-4 mb-2">1. Acceptance of Terms</h4>
-        <p>By accessing or using EmpowAI, you agree to be bound by these Terms of Service.</p>
+        <p>By accessing or using EmpowaAI, you agree to be bound by these Terms of Service.</p>
         <h4 className="font-semibold text-foreground mt-4 mb-2">2. User Accounts</h4>
         <p>You must be at least 18 years old to use this service. You are responsible for maintaining account security and all activities under your account.</p>
         <h4 className="font-semibold text-foreground mt-4 mb-2">3. AI Services</h4>

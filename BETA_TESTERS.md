@@ -101,22 +101,44 @@ For **security issues**, do **not** open a public issue — email
 
 ---
 
+## 🧭 Known During Public Beta
+
+- AI responses may occasionally take longer during busy periods.
+- Job listings depend on live third-party providers and may change throughout the day.
+- Some features are still being refined based on beta feedback.
+
+These are known limitations and not necessarily bugs.
+
+---
+
 ## 💡 Feature Suggestions
 
 Not everything has to be a bug. We'd love to hear about features you'd like,
 things that feel confusing, better workflows, UI improvements, and ideas that
 would genuinely help job seekers.
 
+No suggestion is too small. If something makes you pause, confuses you, or feels
+like it could work better, we'd genuinely love to hear about it.
+
 ---
 
-## 🤝 Powered by Our Partners
+## 🤝 Our Technology Partner
 
-EmpowerAI uses intelligent automations powered by our partner, Lindy, to help
-deliver parts of the platform experience. As you use the platform, you may
-interact with workflows or processes that are powered by Lindy behind the scenes.
+EmpowaAI is proud to partner with **Lindy**, whose automation platform helps
+power a number of our internal workflows and operational processes.
 
-If you notice anything unusual with automated interactions or workflows, please
-include that in your feedback as well.
+This partnership enables us to focus on delivering a better experience for our
+users while leveraging reliable automation behind the scenes.
+
+We sincerely appreciate Lindy's support as we continue building and improving EmpowaAI.
+
+---
+
+## 🌐 Recommended Browsers
+
+- Google Chrome (latest)
+- Microsoft Edge (latest)
+- Mozilla Firefox (latest)
 
 ---
 
@@ -127,15 +149,17 @@ Questions, stuck somewhere, or just want to reach us? Email
 
 ---
 
-## ❤️ Remember
+## ❤️ Thank You
 
-You're not just testing software. You're helping build a platform that we hope
-will genuinely help people improve their careers and find better opportunities.
+Building EmpowaAI has been an incredible journey, and we're grateful you've
+chosen to be part of it.
 
-Every bug report, every suggestion, every idea, and every minute you spend
-testing helps make EmpowaAI better.
+Every bug report, feature suggestion, and piece of feedback helps us build a
+better platform — not just for us, but for every job seeker who will use
+EmpowaAI in the future.
 
-Thank you for being part of this journey.
+Thank you for believing in our vision and for helping shape the future of
+AI-powered employability.
 
 **— Nicolette Mashaba**
 Founder, EmpowaAI 🚀

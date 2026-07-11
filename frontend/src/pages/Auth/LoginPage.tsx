@@ -368,7 +368,7 @@ export default function LoginPage() {
           <div className="prose prose-sm dark:prose-invert max-w-none">
             <p className="text-muted-foreground mb-4">Last updated: {new Date().toLocaleDateString()}</p>
             <h3 className="text-primary font-semibold mt-4 mb-2">1. Acceptance of Terms</h3>
-            <p>By accessing or using EmpowAI, you agree to be bound by these Terms of Service.</p>
+            <p>By accessing or using EmpowaAI, you agree to be bound by these Terms of Service.</p>
             <h3 className="text-primary font-semibold mt-4 mb-2">2. User Accounts</h3>
             <p>You must be at least 18 years old to use this service. You are responsible for maintaining account security and all activities under your account.</p>
             <h3 className="text-primary font-semibold mt-4 mb-2">3. AI Services</h3>
@@ -478,7 +478,7 @@ export default function LoginPage() {
 
           <div className="border-t border-border/60 pt-6 text-center">
             <p className="text-xs text-muted-foreground">
-              © {new Date().getFullYear()} EmpowAI · Amandla e-Ubuntu <span className="emoji">🇿🇦</span> · Built in Mzansi
+              © {new Date().getFullYear()} EmpowaAI · Amandla e-Ubuntu <span className="emoji">🇿🇦</span> · Built in Mzansi
             </p>
           </div>
         </div>

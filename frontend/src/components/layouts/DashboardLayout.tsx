@@ -522,10 +522,24 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             {/* Dashboard Footer */}
             <footer className="border-t border-border/50 bg-background/60 backdrop-blur-sm pb-20 lg:pb-0">
               <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
+                {/* Beta Feedback Centre */}
+                <div className="border-b border-border/40 pb-4 mb-4">
+                  <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs">
+                    <span className="font-semibold text-foreground">Beta feedback</span>
+                    <a href="https://github.com/EmpowaAI/EmpowerAI/issues/new?template=bug_report.yml" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">🐞 Report a Bug</a>
+                    <a href="https://github.com/EmpowaAI/EmpowerAI/issues/new?template=feature_request.yml" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">💡 Suggest a Feature</a>
+                    <a href="https://empowa.org/beta-guide.html" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">📖 Beta Tester Guide</a>
+                    <a href="mailto:nene171408@gmail.com" className="text-muted-foreground hover:text-primary transition-colors">🔒 Report a Security Issue</a>
+                  </div>
+                  <p className="mt-2 text-center text-[11px] text-muted-foreground/70">
+                    Bug &amp; feature links open GitHub in a new tab. If they don't open, visit{" "}
+                    <a href="https://github.com/EmpowaAI/EmpowerAI/issues" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">github.com/EmpowaAI/EmpowerAI/issues</a>.
+                  </p>
+                </div>
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                   {/* Copyright */}
                   <p className="text-xs text-muted-foreground text-center sm:text-left">
-                    © {new Date().getFullYear()} EmpowAI · Amandla e-Ubuntu 🇿🇦 · Built in Mzansi
+                    © {new Date().getFullYear()} EmpowaAI · Amandla e-Ubuntu 🇿🇦 · Built in Mzansi
                   </p>
 
                   {/* Social icons */}
