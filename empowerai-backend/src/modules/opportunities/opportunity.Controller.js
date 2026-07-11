@@ -121,6 +121,11 @@ exports.getAllOpportunities = async (req, res, next) => {
             && Array.isArray(cvSkills) && cvSkills.length > 0) {
           userProfile.skills = cvSkills;
         }
+        // The CV target role (what the user explicitly entered, e.g.
+        // "ai engineer") is the strongest, most reliable career signal —
+        // put it FIRST so it drives the live Adzuna fetch and matching.
+        const cvRole = cvProfile?.analysis?.targetRole;
+        if (typeof cvRole === 'string' && cvRole.trim()) derivedCareer.unshift(cvRole.trim());
         const cvIndustry = cvProfile?.analysis?.industry;
         if (typeof cvIndustry === 'string' && cvIndustry.trim()) derivedCareer.push(cvIndustry.trim());
       } catch (e) {

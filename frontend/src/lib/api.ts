@@ -1208,6 +1208,7 @@ export const opportunitiesAPIReal = {
     type?: string;
     skills?: string;
     q?: string;
+    career?: string;
     page?: number;
     limit?: number;
     sort?: string;
@@ -1219,6 +1220,7 @@ export const opportunitiesAPIReal = {
       if (filters?.type) queryParams.append('type', filters.type);
       if (filters?.skills) queryParams.append('skills', filters.skills);
       if (filters?.q) queryParams.append('q', filters.q);
+      if (filters?.career) queryParams.append('career', filters.career);
       if (typeof filters?.page === 'number') queryParams.append('page', String(filters.page));
       if (typeof filters?.limit === 'number') queryParams.append('limit', String(filters.limit));
       if (filters?.sort) queryParams.append('sort', filters.sort);

@@ -125,9 +125,7 @@ export default function Opportunities() {
         setLoading(true)
         setError("")
         
-        // Never send careerGoals as a query param — the live server treats it as a hard
-        // MongoDB regex filter rather than a scoring hint, which can return 0 results.
-        const filters: { province?: string; type?: string; skills?: string; q?: string; page?: number; limit?: number; sort?: string; minScore?: number } = {}
+        const filters: { province?: string; type?: string; skills?: string; q?: string; career?: string; page?: number; limit?: number; sort?: string; minScore?: number } = {}
         if (category && category !== "all") {
           filters.type = category
         }
@@ -158,6 +156,27 @@ export default function Opportunities() {
 
         if (resolvedSkills.length > 0) {
           filters.skills = resolvedSkills.slice(0, 15).join(',')
+        }
+
+        // Send the user's actual target role so the server fetches curated
+        // listings for it (e.g. "AI Engineer") instead of falling back to the
+        // broad industry. The server treats career as a scoring hint + live
+        // fetch term, not a hard filter, so it never returns 0.
+        const resolvedCareer = (() => {
+          try {
+            const twin = JSON.parse(localStorage.getItem('twinData') || '{}')
+            const role = twin?.identity?.targetRole || twin?.identity?.currentRole
+            if (typeof role === 'string' && role.trim()) return role.trim()
+          } catch { /* ignore */ }
+          try {
+            const cv = JSON.parse(localStorage.getItem('cvAnalysisData') || '{}')
+            const role = cv?.targetRole || cv?.analysis?.target_role
+            if (typeof role === 'string' && role.trim()) return role.trim()
+          } catch { /* ignore */ }
+          return ''
+        })()
+        if (resolvedCareer && !debouncedSearch) {
+          filters.career = resolvedCareer
         }
 
         setFallbackNotice("")

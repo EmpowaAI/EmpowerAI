@@ -187,7 +187,10 @@ function calculateMatchScore(userProfile, opportunity) {
     const bodyRel = careerRelevance(userProfile.careerGoals, oppHaystack);
     const rel = Math.max(titleRel, bodyRel * 0.7); // a title hit is worth more
     hasCareerMatch = rel >= 0.5;
-    weights.career = Math.round(rel * 25);
+    // Weighted up to 45 so a strong role/title match (e.g. an "AI Engineer"
+    // listing for an AI-engineer user) clears the score threshold on its own,
+    // even when the job's listed skills don't overlap the user's.
+    weights.career = Math.round(rel * 45);
   }
 
   // 7. Boost signals (up to 15%)
