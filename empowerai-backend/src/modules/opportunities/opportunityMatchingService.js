@@ -18,6 +18,52 @@ const educationBoosts = require('../../config/educationBoosts');
  */
 const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+// Words that carry no career signal — dropped from tokenised matching so a
+// goal like "senior software engineer" isn't matched on "senior" alone.
+const CAREER_STOPWORDS = new Set([
+  'a', 'an', 'the', 'and', 'or', 'of', 'in', 'for', 'to', 'with', 'at', 'on',
+  'senior', 'junior', 'mid', 'lead', 'entry', 'level', 'i', 'ii', 'iii',
+  'jnr', 'snr', 'intern', 'graduate', 'trainee', 'assistant',
+]);
+
+/**
+ * Split a career term / goal into meaningful lowercase tokens.
+ * Keeps tech tokens like c++, .net, c#, node.js.
+ */
+function tokenizeTerm(term) {
+  return String(term || '')
+    .toLowerCase()
+    .split(/[^a-z0-9+#.]+/)
+    .map(t => t.replace(/^\.+|\.+$/g, ''))
+    .filter(t => t.length >= 2 && !CAREER_STOPWORDS.has(t));
+}
+
+/** True if `token` appears as a whole word in `haystack`. */
+function wordInHaystack(token, haystack) {
+  return new RegExp(`(?:^|[^a-z0-9])${escapeRegExp(token)}(?:$|[^a-z0-9])`, 'i').test(haystack);
+}
+
+/**
+ * Relevance of a set of career terms/goals to a text haystack, 0..1.
+ * Full-phrase hit scores 1; otherwise the best fraction of a term's tokens
+ * that appear as whole words in the haystack. Works for any career —
+ * technical or not — without needing a taxonomy entry.
+ */
+function careerRelevance(terms, haystack) {
+  if (!Array.isArray(terms) || terms.length === 0 || !haystack) return 0;
+  let best = 0;
+  for (const term of terms) {
+    const phrase = String(term || '').toLowerCase().trim();
+    if (!phrase) continue;
+    if (phrase.length >= 3 && haystack.includes(phrase)) return 1;
+    const tokens = tokenizeTerm(phrase);
+    if (tokens.length === 0) continue;
+    const hits = tokens.filter(tok => wordInHaystack(tok, haystack)).length;
+    best = Math.max(best, hits / tokens.length);
+  }
+  return best;
+}
+
 /**
  * Calculate match score for an opportunity
  * Returns score from 0-100
@@ -123,34 +169,33 @@ function calculateMatchScore(userProfile, opportunity) {
   }
   const hasSkillMatch = skillsMatched > 0;
 
-  // 6. Career goal alignment (bonus up to 25%)
+  // Title carries the strongest career signal, so weight it heavily.
+  const oppHaystack = [
+    opportunity.title,
+    opportunity.company,
+    opportunity.description,
+    Array.isArray(opportunity.skills) ? opportunity.skills.join(' ') : ''
+  ].join(' ').toLowerCase();
+  const oppTitle = String(opportunity.title || '').toLowerCase();
+
+  // 6. Career goal alignment (bonus up to 25%) — tokenised & proportional so
+  // "AI Engineer" matches "Machine Learning Engineer", and every career
+  // (technical or not) gets partial credit instead of all-or-nothing.
   let hasCareerMatch = false;
   if (userProfile.careerGoals && userProfile.careerGoals.length > 0) {
-    const terms = userProfile.careerGoals.map(t => t.toLowerCase());
-    const haystack = [
-      opportunity.title,
-      opportunity.company,
-      opportunity.description,
-      Array.isArray(opportunity.skills) ? opportunity.skills.join(' ') : ''
-    ].join(' ').toLowerCase();
-
-    hasCareerMatch = terms.some(term => haystack.includes(term));
-    weights.career = hasCareerMatch ? 25 : 0;
+    const titleRel = careerRelevance(userProfile.careerGoals, oppTitle);
+    const bodyRel = careerRelevance(userProfile.careerGoals, oppHaystack);
+    const rel = Math.max(titleRel, bodyRel * 0.7); // a title hit is worth more
+    hasCareerMatch = rel >= 0.5;
+    weights.career = Math.round(rel * 25);
   }
 
   // 7. Boost signals (up to 15%)
   let hasBoostMatch = false;
   if (Array.isArray(userProfile.boostSkills) && userProfile.boostSkills.length > 0) {
-    const boostTerms = userProfile.boostSkills.map(t => t.toLowerCase());
-    const haystack = [
-      opportunity.title,
-      opportunity.company,
-      opportunity.description,
-      Array.isArray(opportunity.skills) ? opportunity.skills.join(' ') : ''
-    ].join(' ').toLowerCase();
-
-    hasBoostMatch = boostTerms.some(term => haystack.includes(term));
-    weights.boost = hasBoostMatch ? 15 : 0;
+    const rel = careerRelevance(userProfile.boostSkills, oppHaystack);
+    hasBoostMatch = rel > 0;
+    weights.boost = Math.round(rel * 15);
   }
 
   // 8. Education-based boost (up to 10%)
@@ -346,5 +391,7 @@ module.exports = {
   calculateMatchScore,
   getMatchReason,
   extractUserProfile,
-  getMatchedOpportunities
+  getMatchedOpportunities,
+  careerRelevance,
+  tokenizeTerm
 };

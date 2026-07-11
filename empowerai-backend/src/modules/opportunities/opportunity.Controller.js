@@ -1,8 +1,9 @@
 const supabase = require('../../db/supabase');
 const logger = require('../../utils/logger');
-const { getMatchedOpportunities, extractUserProfile } = require('./opportunityMatchingService');
+const { getMatchedOpportunities, extractUserProfile, careerRelevance } = require('./opportunityMatchingService');
 const { getCareerTaxonomy } = require('../../services/taxonomyService');
 const cvRepository = require('../cvAnalyser/cvAnalyser.Repository');
+const twinRepository = require('../twinBuilder/twinBuilder.Repository');
 
 // Normalize a Supabase row to the shape the frontend expects (camelCase)
 function fromRow(row) {
@@ -82,7 +83,7 @@ exports.getAllOpportunities = async (req, res, next) => {
       .concat(typeof careerQuery === 'string' ? careerQuery.split(',').map(s => s.trim()) : [], userCareerGoals)
       .filter(Boolean);
     const careerExpansion = expandCareerTerms(baseCareerTerms);
-    const careerTerms = careerExpansion.terms;
+    let careerTerms = careerExpansion.terms;
 
     // ─── Sort ─────────────────────────────────────────────────────────────────
     const sortCol = sort === 'deadline' ? 'deadline' : sort === 'company' ? 'company' : 'created_at';
@@ -91,16 +92,45 @@ exports.getAllOpportunities = async (req, res, next) => {
     // ─── User profile for smart matching ─────────────────────────────────────
     const userProfile = extractUserProfile(req);
 
-    if (req.user && (!Array.isArray(userProfile.skills) || userProfile.skills.length === 0)) {
+    // Hydrate the user's real career + skills from their twin and CV so
+    // matching works even when they never typed a career filter. The twin
+    // (target/current role + industry) is the strongest signal; the CV adds
+    // extracted skills and industry. Applies to any career, technical or not.
+    if (req.user) {
+      const derivedCareer = [];
       try {
-        // Go through the repository so analysis.extractedSkills is decrypted.
-        // A raw select returns it as an encrypted string, so the old
-        // Array.isArray check silently never matched.
+        const twin = await twinRepository.findByUserId(req.user.id);
+        if (twin) {
+          [twin.identity?.currentRole, twin.identity?.targetRole, twin.identity?.industry]
+            .filter(v => typeof v === 'string' && v.trim())
+            .forEach(v => derivedCareer.push(v.trim()));
+          const core = twin.skills?.core;
+          if ((!Array.isArray(userProfile.skills) || userProfile.skills.length === 0)
+              && Array.isArray(core) && core.length > 0) {
+            userProfile.skills = core;
+          }
+        }
+      } catch (e) {
+        logger.warn('Failed to hydrate career from twin (non-fatal)', { message: e?.message });
+      }
+
+      try {
         const cvProfile = await cvRepository.findByUserId(req.user.id);
         const cvSkills = cvProfile?.analysis?.extractedSkills;
-        if (Array.isArray(cvSkills) && cvSkills.length > 0) userProfile.skills = cvSkills;
+        if ((!Array.isArray(userProfile.skills) || userProfile.skills.length === 0)
+            && Array.isArray(cvSkills) && cvSkills.length > 0) {
+          userProfile.skills = cvSkills;
+        }
+        const cvIndustry = cvProfile?.analysis?.industry;
+        if (typeof cvIndustry === 'string' && cvIndustry.trim()) derivedCareer.push(cvIndustry.trim());
       } catch (e) {
         logger.warn('Failed to hydrate skills from CV profile (non-fatal)', { message: e?.message });
+      }
+
+      // Only use derived career terms when the user didn't provide their own,
+      // so an explicit filter always wins.
+      if (baseCareerTerms.length === 0 && derivedCareer.length > 0) {
+        careerTerms = Array.from(new Set([...careerTerms, ...derivedCareer]));
       }
     }
 
@@ -143,10 +173,23 @@ exports.getAllOpportunities = async (req, res, next) => {
       });
 
       if (processedOpportunities.length === 0 && !hasSearchQuery && !province && !strictMatch) {
-        const { data: fallbackRows } = await buildQuery({ province, type, q })
-          .order(sortCol, { ascending: sortAsc })
-          .range(skip, skip + limitNum - 1);
-        processedOpportunities = (fallbackRows || []).map(fromRow);
+        // No opportunity cleared the score threshold. Rather than show random
+        // recent jobs, rank the whole active pool by how relevant it is to the
+        // user's career terms so they still see the closest available matches.
+        const rankTerms = careerTerms.length > 0 ? careerTerms : null;
+        const ranked = rankTerms
+          ? [...pool]
+              .map(opp => {
+                const title = String(opp.title || '').toLowerCase();
+                const body = [opp.title, opp.description, Array.isArray(opp.skills) ? opp.skills.join(' ') : '']
+                  .join(' ').toLowerCase();
+                const rel = Math.max(careerRelevance(rankTerms, title), careerRelevance(rankTerms, body) * 0.7);
+                return { ...opp, matchScore: Math.round(rel * 100), relevanceScore: rel };
+              })
+              .sort((a, b) => (b.relevanceScore - a.relevanceScore) ||
+                (new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()))
+          : [...pool];
+        processedOpportunities = ranked;
       }
     } else {
       const { data: rows } = await buildQuery({ province, type, q })
@@ -162,9 +205,15 @@ exports.getAllOpportunities = async (req, res, next) => {
 
     if (relevanceTerms.length > 0) {
       processedOpportunities = processedOpportunities.map(opp => {
+        const title = String(opp.title || '').toLowerCase();
         const haystack = [opp.title, opp.company, opp.description, opp.location,
           Array.isArray(opp.skills) ? opp.skills.join(' ') : ''].join(' ').toLowerCase();
-        const relevanceScore = relevanceTerms.reduce((acc, term) => acc + (haystack.includes(term.toLowerCase()) ? 1 : 0), 0);
+        // Word-boundary/token relevance (title weighted higher) rather than raw
+        // substring, so short terms like "ai" don't false-match "retail".
+        const relevanceScore = Math.max(
+          careerRelevance(relevanceTerms, title),
+          careerRelevance(relevanceTerms, haystack) * 0.7
+        );
         return { ...opp, relevanceScore };
       });
     }
