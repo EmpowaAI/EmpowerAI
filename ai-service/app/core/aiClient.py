@@ -12,7 +12,7 @@ class AIClient:
         self.client = AzureOpenAI(
             api_key=settings.AZURE_OPENAI_API_KEY,
             azure_endpoint=settings.AZURE_OPENAI_ENDPOINT,
-            api_version="2024-02-01",  # stable default, no env var needed
+            api_version=settings.AZURE_OPENAI_API_VERSION,
             timeout=REQUEST_TIMEOUT_SECONDS,
         )
         self.model = settings.AZURE_OPENAI_MODEL

@@ -14,6 +14,10 @@ class Settings(BaseSettings):
     AZURE_OPENAI_API_KEY: str
     AZURE_OPENAI_ENDPOINT: str
     AZURE_OPENAI_MODEL: str
+    # Must be recent enough for the deployed model. GPT-5-era deployments
+    # need a 2025 preview version — copy the exact api-version from your
+    # Azure AI Foundry deployment's sample code.
+    AZURE_OPENAI_API_VERSION: str = "2025-01-01-preview"
 
     # ⚠️ This should NOT be optional if you're protecting API access
     AI_SERVICE_API_KEY: str
