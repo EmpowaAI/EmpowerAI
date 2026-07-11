@@ -155,6 +155,11 @@ class SubscriptionService {
     const now = new Date();
     const periodEnd = calcPeriodEnd(now, billingCycle);
     const existing = await findByUserId(userId);
+    // Idempotency: a replayed/duplicate webhook for the same Paystack payment
+    // must not re-activate (e.g. reviving a cancelled sub with a fresh period).
+    if (existing && paymentId && existing.lastPaymentId === paymentId) {
+      return existing;
+    }
     const payload = {
       planId: plan.id, status: SUBSCRIPTION_STATUS.ACTIVE, billingCycle,
       paystackSubscriptionCode: paystackSubscriptionCode || existing?.paystackSubscriptionCode,
@@ -177,6 +182,8 @@ class SubscriptionService {
   async handleRenewalBySubscriptionCode({ subscriptionCode, paymentId, amountPaid }) {
     const sub = await findByPaystackSubCode(subscriptionCode);
     if (!sub) throw new Error(`No subscription found for Paystack code: ${subscriptionCode}`);
+    // Idempotency: skip duplicate renewal webhooks for the same payment.
+    if (paymentId && sub.lastPaymentId === paymentId) return sub;
     const planId = sub.pendingPlanId || sub.planId;
     const billingCycle = sub.pendingBillingCycle || sub.billingCycle;
     const now = new Date();

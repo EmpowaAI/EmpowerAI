@@ -67,6 +67,11 @@ class CVAnalyzerService:
                 "analysis": result,
             }
 
+        except AIServiceError:
+            # Preserve the real status (e.g. 502 upstream / 429 rate limit / 400)
+            # so the backend and user get an accurate, actionable error.
+            logger.error("CV_ANALYSIS_FAILED", extra={"role": target_role, "industry": industry})
+            raise
         except Exception as e:
             logger.error(
                 "CV_ANALYSIS_FAILED",

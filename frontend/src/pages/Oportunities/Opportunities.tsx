@@ -417,7 +417,7 @@ export default function Opportunities() {
             <p className="text-xs text-muted-foreground">Results are personalised using your CV skills and experience.</p>
           </div>
           <Link
-            to="/dashboard/cv-analysis"
+            to="/dashboard/cv-analyzer"
             className="shrink-0 inline-flex items-center justify-center px-4 py-2 text-xs sm:text-sm rounded-lg border border-border text-muted-foreground hover:text-foreground bg-card transition-colors"
           >
             Update CV
@@ -431,7 +431,7 @@ export default function Opportunities() {
           </div>
           <div className="flex gap-2">
             <Link
-              to="/dashboard/cv-analysis"
+              to="/dashboard/cv-analyzer"
               className="inline-flex items-center justify-center px-4 py-2 text-xs sm:text-sm rounded-lg border border-border text-muted-foreground hover:text-foreground bg-card transition-colors"
             >
               Upload CV

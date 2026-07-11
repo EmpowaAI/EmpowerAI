@@ -103,6 +103,7 @@ router.get(
  */
 router.get(
   '/',
+  requireAuth,
   requireSuperAdmin,
   [
     query('status').optional().isString(),

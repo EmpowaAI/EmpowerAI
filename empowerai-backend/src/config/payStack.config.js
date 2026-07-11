@@ -27,7 +27,9 @@ const verifyWebhookSignature = (rawBody, signature) => {
     .createHmac('sha512', PAYSTACK_CONFIG.secretKey)
     .update(rawBody)
     .digest('hex');
-  return hash === signature;
+  if (typeof signature !== 'string' || signature.length !== hash.length) return false;
+  // Constant-time comparison to avoid a timing side-channel on the HMAC.
+  return crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(signature));
 };
 
 /**

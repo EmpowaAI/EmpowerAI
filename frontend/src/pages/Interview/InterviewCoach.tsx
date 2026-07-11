@@ -336,13 +336,13 @@ export default function InterviewCoach() {
                   <p className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-xl">{a}</p>
                 </div>
                 <div className="space-y-4">
-                  {f.strengths.length > 0 && (
+                  {(f.strengths?.length ?? 0) > 0 && (
                     <div>
                       <h4 className="text-xs font-bold text-success mb-2 flex items-center gap-2"><CheckCircle className="h-4 w-4" /> Strengths</h4>
                       <ul className="space-y-1">{f.strengths.map((s, i) => <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground"><span className="text-success mt-0.5">•</span>{s}</li>)}</ul>
                     </div>
                   )}
-                  {f.improvements.length > 0 && (
+                  {(f.improvements?.length ?? 0) > 0 && (
                     <div>
                       <h4 className="text-xs font-bold text-secondary mb-2 flex items-center gap-2"><Zap className="h-4 w-4" /> How to Improve</h4>
                       <ul className="space-y-1">{f.improvements.map((s, i) => <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground"><span className="text-secondary mt-0.5">•</span>{s}</li>)}</ul>

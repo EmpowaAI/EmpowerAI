@@ -467,7 +467,7 @@ export default function ProfilePage() {
     }
     setPasswordSaving(true);
     try {
-      await userService.changePassword(passwordForm);
+      await userService.changePassword(passwordForm.currentPassword, passwordForm.password);
       setPasswordMsg({ type: "success", text: "Password changed successfully!" });
       setPasswordForm({ currentPassword: "", password: "", confirmPassword: "" });
       setTimeout(() => {

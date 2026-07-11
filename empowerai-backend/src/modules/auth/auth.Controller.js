@@ -11,7 +11,10 @@ exports.register = async (req, res, next) => {
       });
     }
 
-    const { name, email, password, age, province, education, skills, interests } = req.body;
+    const {
+      name, email, password, age, province, education, skills, interests,
+      consentDataProcessing, consentProfileSharing, consentAiProcessing,
+    } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ status: 'error', message: 'Name, email, and password are required' });
@@ -38,7 +41,8 @@ exports.register = async (req, res, next) => {
       return res.status(400).json({ status: 'error', message: authError.message });
     }
 
-    // Create the public profile row
+    // Create the public profile row. Persist POPIA consent so we have a
+    // compliance record of what the user agreed to at signup.
     const { error: profileError } = await supabase.from('users').upsert({
       id: authData.user.id,
       name,
@@ -49,6 +53,11 @@ exports.register = async (req, res, next) => {
       age: age || null,
       skills: skills || [],
       interests: interests || [],
+      consent_data_processing: consentDataProcessing === true,
+      consent_profile_sharing: consentProfileSharing === true,
+      consent_ai_processing: consentAiProcessing === true,
+      consent_timestamp: new Date().toISOString(),
+      consent_ip: req.ip || req.headers['x-forwarded-for'] || null,
     }, { onConflict: 'id' });
 
     if (profileError) {

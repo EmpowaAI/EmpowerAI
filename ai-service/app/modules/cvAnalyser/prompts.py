@@ -1,3 +1,6 @@
+from app.core.sanitize import sanitize_for_prompt
+
+
 def build_cv_analysis_prompt(
     cv_text: str,
     target_role: str,
@@ -18,7 +21,12 @@ def build_cv_analysis_prompt(
         else "\nNo location provided. Use South Africa as default for province projections.\n"
     )
 
-    cv_text = (cv_text or "")[:12000]
+    # Neutralise prompt-injection delivery in the CV text (control chars,
+    # fake role markers) before interpolating it into the prompt.
+    cv_text = sanitize_for_prompt(cv_text or "", max_chars=12000)
+    if job_description:
+        job_description = sanitize_for_prompt(job_description, max_chars=4000)
+        job_section = f"\nJOB DESCRIPTION PROVIDED:\n{job_description}\n"
 
     return f"""
 You are a senior recruitment consultant and ATS optimization expert with 15+ years of experience.

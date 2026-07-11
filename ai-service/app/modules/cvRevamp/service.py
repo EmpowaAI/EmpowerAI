@@ -46,10 +46,17 @@ class CVRevampService:
             system=self.SYSTEM_PROMPT,
             max_tokens=6000,
         )
-        logger.info("CV_REVAMP_RAW", extra={"raw_preview": raw[:500]})
         result = extract_json(raw)
-        logger.info("CV_REVAMP_RESULT_TYPE", extra={"type": str(type(result)), "preview": str(result)[:300]})
 
+        # Validate the model actually returned a usable revamped CV — a
+        # well-formed but empty/wrong-shaped reply must not be served as success
+        # (that produced blank downloads before).
+        revamped = result.get("revamped_cv") if isinstance(result, dict) else None
+        if not isinstance(revamped, dict) or not revamped.get("name"):
+            raise AIServiceError(
+                "CV revamp returned an incomplete result. Please try again.",
+                status_code=502,
+            )
         logger.info(
             "CV_REVAMP_COMPLETE",
             extra={

@@ -1,5 +1,7 @@
 import json
 
+from app.core.sanitize import sanitize_for_prompt
+
 
 def build_cv_revamp_prompt(
     cv_text: str,
@@ -8,7 +10,7 @@ def build_cv_revamp_prompt(
     industry: str
 ) -> str:
 
-    cv_text = (cv_text or "")[:12000]
+    cv_text = sanitize_for_prompt(cv_text or "", max_chars=12000)
 
     missing_keywords = analysis.get("missing_keywords", {})
     critical_keywords = missing_keywords.get("critical", [])

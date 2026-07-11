@@ -37,10 +37,14 @@ function buildQuery(filters) {
   if (type && type !== 'all') q_ = q_.eq('type', type);
 
   if (q && q.trim().length > 0) {
-    const term = q.trim().replace(/'/g, "''");
-    q_ = q_.or(
-      `title.ilike.%${term}%,description.ilike.%${term}%,company.ilike.%${term}%,location.ilike.%${term}%`
-    );
+    // Strip PostgREST filter metacharacters — commas/parentheses would split
+    // the .or() expression and produce a malformed 400; % and \ break ilike.
+    const term = q.trim().replace(/[,()\\%*]/g, ' ').replace(/'/g, "''").trim();
+    if (term) {
+      q_ = q_.or(
+        `title.ilike.%${term}%,description.ilike.%${term}%,company.ilike.%${term}%,location.ilike.%${term}%`
+      );
+    }
   }
 
   return q_;
