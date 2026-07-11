@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EmpowaAI — Public Beta Tester Guide</title>
+<meta name="description" content="Welcome to the EmpowaAI Public Beta. What to expect, how to test, and how to share feedback — from the EmpowaAI team.">
+<meta name="theme-color" content="#12294F">
+<meta property="og:type" content="website">
+<meta property="og:title" content="EmpowaAI — Public Beta Tester Guide">
+<meta property="og:description" content="You're part of the journey. What to expect, how to test EmpowaAI, and how to share feedback.">
+<meta property="og:site_name" content="EmpowaAI">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+  :root {
+    --ground: #FCFAF6;
+    --surface: #ffffff;
+    --surface-2: #F5F0E8;
+    --ink: #14213D;
+    --ink-soft: #46506A;
+    --ink-faint: #808AA0;
+    --line: #E7E0D4;
+    --accent: #F3701C;
+    --accent-deep: #D2560B;
+    --green: #1F8A5A;
+    --navy: #16305B;
+    --navy-deep: #0E1F3D;
+
+    --measure: 40rem;
+    --radius: 16px;
+
+    --display: 800 1em/1.05 "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --body: 400 1em/1.65 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: 600 1em/1 ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground: #0D1524;
+      --surface: #131D31;
+      --surface-2: #182541;
+      --ink: #ECE6DA;
+      --ink-soft: #B4BccD;
+      --ink-faint: #8592A8;
+      --line: #263352;
+      --accent: #FF8236;
+      --accent-deep: #FFA060;
+      --green: #35B27C;
+      --navy: #16305B;
+      --navy-deep: #0A162C;
+    }
+  }
+  :root[data-theme="light"] {
+    --ground: #FCFAF6; --surface: #ffffff; --surface-2: #F5F0E8;
+    --ink: #14213D; --ink-soft: #46506A; --ink-faint: #808AA0; --line: #E7E0D4;
+    --accent: #F3701C; --accent-deep: #D2560B; --green: #1F8A5A;
+  }
+  :root[data-theme="dark"] {
+    --ground: #0D1524; --surface: #131D31; --surface-2: #182541;
+    --ink: #ECE6DA; --ink-soft: #B4BCCD; --ink-faint: #8592A8; --line: #263352;
+    --accent: #FF8236; --accent-deep: #FFA060; --green: #35B27C;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font: var(--body);
+    font-size: 17px;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection { background: var(--accent); color: #fff; }
+
+  .wrap { max-width: var(--measure); margin: 0 auto; padding: 0 24px; }
+
+  /* ---------- HERO ---------- */
+  .hero {
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(120% 90% at 85% -10%, rgba(243,112,28,0.55) 0%, rgba(243,112,28,0) 55%),
+      linear-gradient(158deg, #1B3A6B 0%, #12294F 55%, #0E1F3D 100%);
+    color: #F4EEE3;
+    isolation: isolate;
+  }
+  .hero::after {
+    content: "";
+    position: absolute; inset: 0; z-index: -1;
+    background-image: radial-gradient(rgba(255,255,255,0.055) 1px, transparent 1.4px);
+    background-size: 22px 22px;
+    mask-image: linear-gradient(180deg, #000 0%, transparent 88%);
+  }
+  .hero-inner { max-width: var(--measure); margin: 0 auto; padding: 40px 24px 52px; }
+
+  .brand { display: flex; align-items: center; gap: 11px; margin-bottom: 44px; }
+  .brand-mark { width: 34px; height: 34px; flex: none; }
+  .brand-name { font: var(--display); font-size: 22px; letter-spacing: -0.02em; color: #fff; }
+  .brand-name .ai { color: var(--accent); }
+
+  .eyebrow {
+    font: var(--mono); font-size: 12px; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--accent);
+  }
+  .hero h1 {
+    font: var(--display); font-size: clamp(2.7rem, 8vw, 4.1rem);
+    letter-spacing: -0.035em; margin: 16px 0 0; color: #fff;
+    text-wrap: balance;
+  }
+  .hero .lede {
+    margin: 20px 0 0; max-width: 32rem;
+    font-size: 1.12rem; line-height: 1.6; color: #D7DEEC;
+  }
+  .hero .lede strong { color: #fff; font-weight: 700; }
+  .flag { margin-top: 30px; font: var(--mono); font-size: 12.5px; letter-spacing: 0.14em; color: #A9B6D0; text-transform: uppercase; }
+
+  /* ---------- SECTIONS ---------- */
+  main { padding: 8px 0 0; }
+  section { padding: 46px 0; border-bottom: 1px solid var(--line); }
+  section:last-of-type { border-bottom: 0; }
+
+  .sec-head { display: flex; align-items: center; gap: 13px; margin: 0 0 22px; }
+  .sec-icon {
+    width: 40px; height: 40px; flex: none; border-radius: 11px;
+    display: grid; place-items: center;
+    background: var(--surface-2); color: var(--accent);
+    border: 1px solid var(--line);
+  }
+  .sec-icon svg { width: 21px; height: 21px; }
+  .sec-head h2 {
+    font: var(--display); font-size: 1.62rem; letter-spacing: -0.02em;
+    margin: 0; color: var(--ink); text-wrap: balance;
+  }
+  .sec-head .kicker { font: var(--mono); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-faint); display: block; margin-bottom: 3px; }
+
+  p { margin: 0 0 16px; color: var(--ink-soft); }
+  p:last-child { margin-bottom: 0; }
+  .ink { color: var(--ink); }
+  strong { color: var(--ink); font-weight: 650; }
+  a { color: var(--accent-deep); text-decoration-thickness: 1.5px; text-underline-offset: 2px; }
+
+  h3 { font: var(--display); font-weight: 700; font-size: 1.06rem; letter-spacing: -0.01em; margin: 26px 0 8px; color: var(--ink); }
+
+  /* persona chips */
+  .personas { display: flex; flex-wrap: wrap; gap: 9px; margin: 4px 0 22px; }
+  .persona {
+    font-size: 0.92rem; color: var(--ink); background: var(--surface);
+    border: 1px solid var(--line); border-radius: 999px; padding: 7px 15px;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .persona::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex: none; }
+
+  .ask {
+    margin: 0; padding: 0; list-style: none;
+    display: grid; gap: 10px;
+  }
+  .ask li {
+    padding-left: 26px; position: relative; color: var(--ink);
+    font-size: 1.02rem;
+  }
+  .ask li::before {
+    content: ""; position: absolute; left: 4px; top: 0.62em;
+    width: 9px; height: 9px; border: 2px solid var(--accent); border-radius: 50%;
+  }
+
+  /* ---------- JOURNEY TIMELINE ---------- */
+  .journey { margin: 4px 0 0; display: grid; gap: 0; }
+  .step { position: relative; padding: 0 0 22px 58px; }
+  .step:last-child { padding-bottom: 0; }
+  .step::before {
+    content: ""; position: absolute; left: 18px; top: 6px; bottom: -6px;
+    width: 2px; background: var(--line);
+  }
+  .step:last-child::before { display: none; }
+  .step .num {
+    position: absolute; left: 0; top: 0;
+    width: 38px; height: 38px; border-radius: 50%;
+    display: grid; place-items: center;
+    font: var(--mono); font-size: 14px; color: #fff;
+    background: linear-gradient(150deg, var(--accent) 0%, var(--accent-deep) 100%);
+    box-shadow: 0 3px 10px rgba(243,112,28,0.28);
+  }
+  .step h3 { margin: 5px 0 4px; font-size: 1.08rem; }
+  .step p { margin: 0; font-size: 0.98rem; }
+
+  /* ---------- CALLOUTS ---------- */
+  .callouts { display: grid; gap: 14px; }
+  .callout {
+    background: var(--surface); border: 1px solid var(--line);
+    border-left: 4px solid var(--accent); border-radius: 12px;
+    padding: 16px 18px;
+  }
+  .callout.good { border-left-color: var(--green); }
+  .callout h4 {
+    font: var(--display); font-weight: 700; font-size: 1rem; margin: 0 0 5px;
+    color: var(--ink); letter-spacing: -0.01em;
+  }
+  .callout p { margin: 0; font-size: 0.96rem; }
+
+  /* expected badge row */
+  .expect-tag {
+    display: inline-block; font: var(--mono); font-size: 10.5px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--green);
+    background: color-mix(in srgb, var(--green) 12%, transparent);
+    padding: 3px 8px; border-radius: 6px; margin-bottom: 8px;
+  }
+
+  /* bug report template */
+  .template {
+    background: var(--surface-2); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 8px 20px; margin-top: 4px;
+  }
+  .template .row { padding: 15px 0; border-bottom: 1px dashed var(--line); }
+  .template .row:last-child { border-bottom: 0; }
+  .template .q { font: var(--display); font-weight: 700; font-size: 0.98rem; color: var(--ink); margin: 0 0 4px; }
+  .template .eg { margin: 0; font-size: 0.92rem; color: var(--ink-faint); font-style: italic; }
+
+  .report-links { margin-top: 16px; font-size: 0.96rem; }
+
+  /* ---------- SIGN-OFF ---------- */
+  .signoff {
+    background: linear-gradient(158deg, #1B3A6B 0%, #12294F 60%, #0E1F3D 100%);
+    color: #EDE7DB; border-radius: 20px; padding: 36px 30px;
+    position: relative; overflow: hidden;
+  }
+  .signoff::before {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(90% 80% at 100% 0%, rgba(243,112,28,0.4), transparent 60%);
+  }
+  .signoff > * { position: relative; }
+  .signoff p { color: #CDD5E6; }
+  .signoff .big { font: var(--display); font-weight: 800; font-size: 1.35rem; letter-spacing: -0.02em; color: #fff; margin: 0 0 14px; text-wrap: balance; }
+  .sig { margin-top: 22px; display: flex; align-items: center; gap: 14px; }
+  .sig-avatar {
+    width: 46px; height: 46px; border-radius: 50%; flex: none;
+    background: linear-gradient(150deg, var(--accent), var(--accent-deep));
+    display: grid; place-items: center; font: var(--display); font-weight: 800; color: #fff; font-size: 1.05rem;
+  }
+  .sig-name { font: var(--display); font-weight: 700; color: #fff; font-size: 1rem; }
+  .sig-role { font-size: 0.86rem; color: #A9B6D0; }
+
+  /* ---------- FOOTER ---------- */
+  footer { padding: 30px 0 60px; text-align: center; }
+  footer .fnote { font: var(--mono); font-size: 11.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-faint); }
+  footer .flinks { margin-top: 10px; font-size: 0.9rem; }
+  footer a { color: var(--ink-soft); }
+
+  :where(a, button):focus-visible { outline: 2.5px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+
+  @media (max-width: 480px) {
+    body { font-size: 16px; }
+    .step { padding-left: 50px; }
+  }
+
+  @media print {
+    :root { --ground: #fff; --surface: #fff; --surface-2: #f6f2ec; --line: #d8d2c6; --ink: #14213D; --ink-soft: #33405c; }
+    body { font-size: 11.5pt; }
+    .hero, .signoff { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    section { padding: 20px 0; break-inside: avoid; }
+    .step, .callout, .template .row, .signoff { break-inside: avoid; }
+    footer { padding-bottom: 10px; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+        <path d="M20 3l14.7 8.5v17L20 37 5.3 28.5v-17L20 3z" stroke="#F3701C" stroke-width="2.4" stroke-linejoin="round"/>
+        <path d="M20 11.5l8 4.6v9.2L20 30l-8-4.7v-9.2l8-4.6z" fill="#F3701C" opacity="0.18"/>
+        <path d="M14 24.5l6-11 6 11" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M16.4 20.2h7.2" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+      </svg>
+      <span class="brand-name">Empowa<span class="ai">AI</span></span>
+    </div>
+
+    <span class="eyebrow">Public Beta · Tester Guide</span>
+    <h1>You're part of the journey.</h1>
+    <p class="lede">
+      Welcome to the EmpowaAI Public Beta — and <strong>thank you</strong> for being here.
+      You're not just testing an app; you're helping shape a platform built to make
+      South African job seekers more employable through AI. Your feedback directly
+      influences what we improve before launch.
+    </p>
+    <div class="flag">Amandla e-Ubuntu · Built in Mzansi 🇿🇦</div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.6" fill="currentColor"/></svg>
+      </span>
+      <div><span class="kicker">01 — Mindset</span><h2>Your mission</h2></div>
+    </div>
+    <p>Use EmpowaAI <strong class="ink">as if you were genuinely looking for a job today.</strong> Don't think like a software tester — think like:</p>
+    <div class="personas">
+      <span class="persona">A student about to graduate</span>
+      <span class="persona">Someone chasing their first job</span>
+      <span class="persona">Someone improving their CV</span>
+      <span class="persona">Someone prepping for interviews</span>
+      <span class="persona">Someone hunting better opportunities</span>
+    </div>
+    <p>Use it naturally, then tell us:</p>
+    <ul class="ask">
+      <li>What felt easy?</li>
+      <li>What felt confusing?</li>
+      <li>What did you expect to happen?</li>
+      <li>What would make you come back and use EmpowaAI again?</li>
+    </ul>
+    <p style="margin-top:18px">That kind of feedback is even more valuable than finding technical bugs.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3.5a5.5 5.5 0 0 1 4.9 8L21 13.6 19.6 15l-1.5-1.5L16.6 15l-1.5-1.5-2.2 2.2A5.5 5.5 0 1 1 14 3.5z"/><circle cx="8.5" cy="15.5" r="1.4"/></svg>
+      </span>
+      <div><span class="kicker">02 — Setup</span><h2>Before you begin</h2></div>
+    </div>
+    <h3>Account registration</h3>
+    <p>During the beta your account is <strong>active immediately</strong> after sign-up.</p>
+    <div class="callout good">
+      <span class="expect-tag">Expected · not a bug</span>
+      <p><strong>You won't receive a verification email.</strong> Just register, then log in with the email and password you chose.</p>
+    </div>
+    <h3>Password reset</h3>
+    <p>Password reset <strong>does work</strong>. To test it, use an email address you can actually access.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l-5 2.5v11L9 17l6 2.5 5-2.5v-11L15 8 9 6z"/><path d="M9 6v11M15 8v11.5"/></svg>
+      </span>
+      <div><span class="kicker">03 — Walkthrough</span><h2>Recommended testing journey</h2></div>
+    </div>
+    <div class="journey">
+      <div class="step"><span class="num">1</span><h3>Register &amp; log in</h3><p>Create your account, then sign in.</p></div>
+      <div class="step"><span class="num">2</span><h3>Upload a CV</h3><p>It doesn't need to be your real CV — any sample resume is perfectly fine.</p></div>
+      <div class="step"><span class="num">3</span><h3>Run AI CV Analysis</h3><p>Review your score, feedback, and recommendations.</p></div>
+      <div class="step"><span class="num">4</span><h3>Use CV Revamp</h3><p>See whether the AI-rewritten CV is genuinely useful.</p></div>
+      <div class="step"><span class="num">5</span><h3>Build your Digital Twin, then chat</h3><p>Ask career and interview questions — do the answers feel helpful?</p></div>
+      <div class="step"><span class="num">6</span><h3>Try the Interview Coach</h3><p>Complete a session and read the feedback.</p></div>
+      <div class="step"><span class="num">7</span><h3>Browse Opportunities</h3><p>Bookmark a few, refresh the page, and confirm they stay saved.</p></div>
+      <div class="step"><span class="num">8</span><h3>Update your Profile</h3><p>Change details, save, refresh, confirm everything persists.</p></div>
+      <div class="step"><span class="num">9</span><h3>Log out &amp; back in</h3><p>Confirm your information is still there.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2"/><path d="M9 2h6M5.5 5l1.6 1.6M18.5 5l-1.6 1.6"/></svg>
+      </span>
+      <div><span class="kicker">04 — Set expectations</span><h2>Expected behaviour (not bugs)</h2></div>
+    </div>
+    <div class="callouts">
+      <div class="callout good"><h4>AI takes 20–40 seconds</h4><p>CV Analysis, CV Revamp, the Digital Twin, Interview Coach, and Simulations aren't instant. Let the request finish — it's working, not frozen.</p></div>
+      <div class="callout good"><h4>First Opportunities load is slower</h4><p>Jobs are fetched live and matched to your profile the first time, then cached. Later loads are much faster.</p></div>
+      <div class="callout good"><h4>Sample CVs are fine</h4><p>You don't need your personal CV — any sample resume works for testing.</p></div>
+      <div class="callout good"><h4>It's a beta</h4><p>You may hit minor UI quirks, small bugs, or slow AI responses. Those are exactly what we're here to find and fix.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7.5" y="8" width="9" height="11" rx="4.5"/><path d="M12 8V5.5M9.2 6.2 7.7 4.7M14.8 6.2l1.5-1.5M7.5 12H4m16.5 0H16.5M6 16H4m16 0h-2M7.9 19.5 6 21m10.1-1.5L18 21"/></svg>
+      </span>
+      <div><span class="kicker">05 — Feedback</span><h2>Reporting bugs</h2></div>
+    </div>
+    <p>If you hit a bug, tell us as much as you can — this template makes it easy:</p>
+    <div class="template">
+      <div class="row"><p class="q">What were you trying to do?</p><p class="eg">"I clicked Analyse CV after uploading my document."</p></div>
+      <div class="row"><p class="q">What happened?</p><p class="eg">"The loading spinner never stopped."</p></div>
+      <div class="row"><p class="q">What did you expect?</p><p class="eg">"I expected the AI analysis to appear."</p></div>
+      <div class="row"><p class="q">Anything else?</p><p class="eg">A screenshot or recording, your browser, and your device all help.</p></div>
+    </div>
+    <p class="report-links">Open bugs at <a href="https://github.com/EmpowaAI/EmpowerAI/issues">github.com/EmpowaAI/EmpowerAI/issues</a>. Found a <strong>security</strong> issue? Please don't post it publicly — email <a href="mailto:nicolette.mashaba@marisapeer.com">nicolette.mashaba@marisapeer.com</a>.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.5 1.1 1.3 1.1 2.2v.5h5v-.5c0-.9.4-1.7 1.1-2.2A6 6 0 0 0 12 3z"/><path d="M9.5 20h5M10.5 22h3"/></svg>
+      </span>
+      <div><span class="kicker">06 — Ideas welcome</span><h2>Feature suggestions</h2></div>
+    </div>
+    <p>Not everything has to be a bug. We'd genuinely love to hear about features you'd like, things that feel confusing, smoother workflows, UI improvements, and any idea that would truly help job seekers.</p>
+  </section>
+
+  <section>
+    <div class="signoff">
+      <p class="big">You're not just testing software — you're helping build something that can change how people find work.</p>
+      <p>Every bug report. Every suggestion. Every idea. Every minute you spend testing makes EmpowaAI better. Thank you for being part of this journey — it genuinely means a lot.</p>
+      <div class="sig">
+        <span class="sig-avatar" aria-hidden="true">NM</span>
+        <span>
+          <span class="sig-name">Nicolette Mashaba</span><br>
+          <span class="sig-role">Founder, EmpowaAI 🚀</span>
+        </span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="wrap">
+  <div class="fnote">EmpowaAI · Public Beta · 🇿🇦</div>
+  <div class="flinks"><a href="https://github.com/EmpowaAI/EmpowerAI">GitHub</a> &nbsp;·&nbsp; <a href="https://github.com/EmpowaAI/EmpowerAI/blob/main/SECURITY.md">Security</a> &nbsp;·&nbsp; <a href="https://github.com/EmpowaAI/EmpowerAI/issues">Report an issue</a></div>
+</footer>
+</body>
+</html>
