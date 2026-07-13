@@ -155,10 +155,11 @@ it. Every bug report, feature suggestion, and note you send reaches us directly
 - and makes the platform better for every job seeker who comes after you.
 
 > Building EmpowaAI has been an incredible journey, and I'm grateful you've
-> chosen to be part of it. I'm proud of what we're creating together for every
-> job seeker who will use it. Thank you for believing in our vision and for
-> helping shape the future of AI-powered employability. This is only the
-> beginning.
+> chosen to be part of it. Every part of this platform was built with one goal:
+> to help people find work, grow their skills, and walk into any opportunity
+> with confidence. What you test today shapes what thousands of job seekers will
+> rely on tomorrow. Thank you for believing in our vision and for helping shape
+> the future of AI-powered employability - this is only the beginning.
 >
 > **Nicolette Mashaba** - Co-Founder & Lead Engineer, EmpowaAI 🚀
 
@@ -170,7 +171,7 @@ it. Every bug report, feature suggestion, and note you send reaches us directly
 >
 > Together we're building more than an AI platform: we're creating
 > opportunities, restoring hope, and helping job seekers develop the skills and
-> confidence to thrive. I'm proud to be part of a team making a meaningful
-> difference in South Africa's unemployment crisis.
+> confidence to thrive. I'm proud to be part of a team making a real difference
+> in South Africa's unemployment crisis.
 >
 > **Lindy Heyns** - Co-Founder & Delivery Lead, EmpowaAI 🚀
