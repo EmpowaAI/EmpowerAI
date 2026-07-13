@@ -241,6 +241,23 @@
   .sig-name { font: var(--display); font-weight: 700; color: #fff; font-size: 1rem; }
   .sig-role { font-size: 0.86rem; color: #A9B6D0; }
 
+  /* ---------- TEAM QUOTE ---------- */
+  .teamquote {
+    margin: 22px 0 0; padding: 22px 24px;
+    background: var(--surface); border: 1px solid var(--line);
+    border-left: 4px solid var(--accent); border-radius: 14px;
+  }
+  .teamquote p { margin: 0 0 12px; font-size: 1rem; }
+  .teamquote p:last-of-type { margin-bottom: 0; }
+  .teamquote .qname { display: flex; align-items: center; gap: 12px; margin-top: 18px; }
+  .teamquote .qavatar {
+    width: 42px; height: 42px; border-radius: 50%; flex: none;
+    background: linear-gradient(150deg, var(--accent), var(--accent-deep));
+    display: grid; place-items: center; font: var(--display); font-weight: 800; color: #fff; font-size: 0.98rem;
+  }
+  .teamquote .qn { font: var(--display); font-weight: 700; color: var(--ink); font-size: 0.98rem; }
+  .teamquote .qr { font-size: 0.84rem; color: var(--ink-faint); }
+
   /* ---------- FOOTER ---------- */
   footer { padding: 30px 0 60px; text-align: center; }
   footer .fnote { font: var(--mono); font-size: 11.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-faint); }
@@ -457,8 +474,20 @@
       </span>
       <div><span class="kicker">08 - The team</span><h2>The team behind EmpowaAI</h2></div>
     </div>
-    <p>EmpowaAI is built by a small founding team of two: <strong class="ink">Nicolette Mashaba</strong> (Co-Founder &amp; Lead Engineer) and <strong class="ink">Lindy Heyns</strong> (Co-Founder &amp; Lead Project Delivery).</p>
+    <p>EmpowaAI is built by a small founding team of two: <strong class="ink">Nicolette Mashaba</strong> (Co-Founder &amp; Lead Engineer) and <strong class="ink">Lindy Heyns</strong> (Co-Founder &amp; Delivery Lead).</p>
     <p>Because it's just the two of us, your feedback reaches the people who can act on it directly - nothing gets lost in a big company in between.</p>
+
+    <div class="teamquote">
+      <p>When Nicolette shared her vision for EmpowaAI with me, I knew immediately it was something I wanted to help build. Throughout my career, what has inspired me most is empowering people, creating opportunities, and helping others unlock their potential - and this lets me bring my experience in software delivery together with exactly that mission.</p>
+      <p>Together we're building more than an AI platform: we're creating opportunities, restoring hope, and helping job seekers develop the skills and confidence they need to thrive in an ever-changing world. I'm proud to be part of a team committed to making a meaningful difference in South Africa's unemployment crisis.</p>
+      <div class="qname">
+        <span class="qavatar" aria-hidden="true">LH</span>
+        <span>
+          <span class="qn">Lindy Heyns</span><br>
+          <span class="qr">Co-Founder &amp; Delivery Lead · EmpowaAI 🚀</span>
+        </span>
+      </div>
+    </div>
   </section>
 
   <section>

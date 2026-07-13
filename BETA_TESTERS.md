@@ -125,11 +125,24 @@ like it could work better, we'd genuinely love to hear about it.
 ## 🤝 The Team Behind EmpowaAI
 
 EmpowaAI is built by a small founding team of two: **Nicolette Mashaba**
-(Co-Founder & Lead Engineer) and **Lindy Heyns** (Co-Founder & Lead Project
-Delivery).
+(Co-Founder & Lead Engineer) and **Lindy Heyns** (Co-Founder & Delivery Lead).
 
 Because it's just the two of us, your feedback reaches the people who can act
 on it directly - nothing gets lost in a big company in between.
+
+> When Nicolette shared her vision for EmpowaAI with me, I knew immediately it
+> was something I wanted to help build. Throughout my career, what has inspired
+> me most is empowering people, creating opportunities, and helping others
+> unlock their potential - and this lets me bring my experience in software
+> delivery together with exactly that mission.
+>
+> Together we're building more than an AI platform: we're creating
+> opportunities, restoring hope, and helping job seekers develop the skills and
+> confidence they need to thrive in an ever-changing world. I'm proud to be part
+> of a team committed to making a meaningful difference in South Africa's
+> unemployment crisis.
+>
+> **Lindy Heyns** - Co-Founder & Delivery Lead, EmpowaAI 🚀
 
 ---
 
