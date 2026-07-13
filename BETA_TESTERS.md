@@ -5,7 +5,7 @@
 First of all, **thank you** for agreeing to be part of this journey.
 
 EmpowaAI has been months in the making, and your participation is incredibly
-valuable. You're not just testing an application — you're helping shape a
+valuable. You're not just testing an application - you're helping shape a
 platform designed to help job seekers become more employable through AI.
 
 Your feedback will directly influence what we improve before the official launch.
@@ -40,7 +40,7 @@ That kind of feedback is even more valuable than finding technical bugs.
 ### Account registration
 
 During the Public Beta, your account becomes **active immediately** after
-signing up. You **will not receive an email verification email** — this is
+signing up. You **will not receive an email verification email** - this is
 expected behaviour and **not a bug**.
 
 1. Register
@@ -58,15 +58,15 @@ address you can access.
 To experience EmpowaAI as intended, test it in this order:
 
 1. **Register**, then **log in**.
-2. **Upload a CV** — it doesn't need to be your real CV; any sample resume is fine.
-3. **Run AI CV Analysis** — review the score, feedback, and recommendations.
-4. **Use CV Revamp** — see whether the rewritten CV is useful.
-5. **Build your AI Digital Twin**, then **chat with it** — ask career and
+2. **Upload a CV** - it doesn't need to be your real CV; any sample resume is fine.
+3. **Run AI CV Analysis** - review the score, feedback, and recommendations.
+4. **Use CV Revamp** - see whether the rewritten CV is useful.
+5. **Build your AI Digital Twin**, then **chat with it** - ask career and
    interview questions and see whether the answers feel helpful.
-6. **Try the AI Interview Coach** — complete a session and review the feedback.
-7. **Browse Opportunities** — bookmark a few, refresh the page, confirm they stay saved.
-8. **Update your Profile** — change details, save, refresh, confirm they persist.
-9. **Log out and log back in** — confirm your information is still there.
+6. **Try the AI Interview Coach** - complete a session and review the feedback.
+7. **Browse Opportunities** - bookmark a few, refresh the page, confirm they stay saved.
+8. **Update your Profile** - change details, save, refresh, confirm they persist.
+9. **Log out and log back in** - confirm your information is still there.
 
 ---
 
@@ -77,12 +77,12 @@ Interview Coach, and Simulations can take **20–40 seconds**. Please let the
 request finish.
 
 **First Opportunities load is slower.** The first time you open Opportunities it
-fetches jobs live and then caches them — later loads are much faster.
+fetches jobs live and then caches them - later loads are much faster.
 
 **You don't need your real CV.** Sample CVs are perfectly acceptable.
 
 **This is a beta.** You may occasionally see minor UI issues, small bugs, or
-slow AI responses — those are exactly what we're trying to find and improve.
+slow AI responses - those are exactly what we're trying to find and improve.
 
 ---
 
@@ -90,13 +90,13 @@ slow AI responses — those are exactly what we're trying to find and improve.
 
 Please include as much as you can:
 
-- **What were you trying to do?** — e.g. "I clicked Analyse CV after uploading my document."
-- **What happened?** — e.g. "The loading spinner never stopped."
-- **What did you expect?** — e.g. "I expected the AI analysis to appear."
+- **What were you trying to do?** - e.g. "I clicked Analyse CV after uploading my document."
+- **What happened?** - e.g. "The loading spinner never stopped."
+- **What did you expect?** - e.g. "I expected the AI analysis to appear."
 - **Extras:** screenshot or screen recording, browser, and device.
 
 Open bugs at **https://github.com/EmpowaAI/EmpowerAI/issues**.
-For **security issues**, do **not** open a public issue — email
+For **security issues**, do **not** open a public issue - email
 `nene171408@gmail.com` (see [SECURITY.md](SECURITY.md)).
 
 ---
@@ -129,7 +129,7 @@ EmpowaAI is built by a small founding team of two: **Nicolette Mashaba**
 Delivery).
 
 Because it's just the two of us, your feedback reaches the people who can act
-on it directly — nothing gets lost in a big company in between.
+on it directly - nothing gets lost in a big company in between.
 
 ---
 
@@ -154,11 +154,11 @@ Building EmpowaAI has been an incredible journey, and we're grateful you've
 chosen to be part of it.
 
 Every bug report, feature suggestion, and piece of feedback helps us build a
-better platform — not just for us, but for every job seeker who will use
+better platform - not just for us, but for every job seeker who will use
 EmpowaAI in the future.
 
 Thank you for believing in our vision and for helping shape the future of
 AI-powered employability.
 
-**— Nicolette Mashaba**
+**- Nicolette Mashaba**
 Co-Founder & Lead Engineer, EmpowaAI 🚀

@@ -179,12 +179,12 @@ export default function SignupPage() {
       <div className="absolute inset-0 panel-image-overlay" />
       <div className="absolute inset-0 panel-image-accent opacity-70" />
 
-      {/* Logo — top left, over the sky */}
+      {/* Logo - top left, over the sky */}
       <div className="relative z-10 animate-slide-up">
         <Logo variant="light" size="lg" linkTo="/" />
       </div>
 
-      {/* Text content — bottom, over the city */}
+      {/* Text content - bottom, over the city */}
       <div className="relative z-10 max-w-lg space-y-5 animate-slide-up">
         <p className="text-2xl font-semibold uppercase tracking-[0.24em] text-white drop-shadow-md">
           Create your account

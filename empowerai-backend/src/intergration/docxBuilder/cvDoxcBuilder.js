@@ -247,7 +247,7 @@ async function buildCVDocx(revampedCv) {
     children.push(sectionDivider());
     for (const lang of languages) {
       const text = lang.proficiency
-        ? `${lang.language} — ${lang.proficiency}`
+        ? `${lang.language} - ${lang.proficiency}`
         : lang.language || String(lang);
       children.push(bulletPara(text));
     }

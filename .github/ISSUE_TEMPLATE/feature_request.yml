@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        No suggestion is too small — if something makes you pause, confuses you, or feels
+        No suggestion is too small - if something makes you pause, confuses you, or feels
         like it could work better, we'd genuinely love to hear it. 🚀
   - type: textarea
     id: problem

@@ -1,7 +1,7 @@
 /**
  * UpdateUserDTO
  * Validates and sanitizes profile update requests.
- * Email and password are intentionally excluded — they have their own flows.
+ * Email and password are intentionally excluded - they have their own flows.
  *
  * Used by: PATCH /api/user/profile → userService.updateUser
  */
@@ -86,7 +86,7 @@ const validateUpdateUser = (req, res, next) => {
 };
 
 // ─────────────────────────────────────────────
-// DTO builder — only passes allowed fields to service
+// DTO builder - only passes allowed fields to service
 // ─────────────────────────────────────────────
 const toUpdateUserDTO = (body) => {
   const allowed = ['name', 'age', 'province','phone', 'education', 'skills', 'interests', 'avatar', 'about', 'summary'];

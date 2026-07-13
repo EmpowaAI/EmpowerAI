@@ -1,4 +1,4 @@
-# Environment — never commit real credentials
+# Environment - never commit real credentials
 .env
 .env.local
 .env.*.local

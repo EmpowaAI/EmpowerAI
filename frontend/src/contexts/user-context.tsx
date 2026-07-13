@@ -169,12 +169,12 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
             console.warn('Failed to hydrate user profile:', error)
           }
         } else {
-          // INITIAL_SESSION with no active session — user is logged out
+          // INITIAL_SESSION with no active session - user is logged out
           setUser(null)
         }
         setIsAuthReady(true)
       } else if (event === 'TOKEN_REFRESHED') {
-        // Token already updated in localStorage above — no re-validation needed
+        // Token already updated in localStorage above - no re-validation needed
       } else if (event === 'SIGNED_OUT') {
         localStorage.removeItem('empowerai-token')
         localStorage.removeItem('empowerai-refresh-token')

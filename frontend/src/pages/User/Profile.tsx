@@ -569,7 +569,7 @@ export default function ProfilePage() {
           <Toast msg={toast} />
         </AnimatePresence>
 
-        {/* Incomplete profile nudge — shown until key fields are filled */}
+        {/* Incomplete profile nudge - shown until key fields are filled */}
         {!isLoading && isProfileIncomplete && (
           <div className="flex items-start gap-3 rounded-xl border border-secondary/30 bg-secondary/5 p-4">
             <Sparkles className="h-5 w-5 text-secondary flex-shrink-0 mt-0.5" />

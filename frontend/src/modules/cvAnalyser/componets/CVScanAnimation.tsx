@@ -217,7 +217,7 @@ export default function CVScanAnimation({ isActive, onComplete }: CVScanAnimatio
           <div className="flex justify-between text-[10px] text-muted-foreground">
             <span>
               {done
-                ? "All checks complete — preparing results"
+                ? "All checks complete - preparing results"
                 : `${completedSteps.length} of ${SCAN_STEPS.length} checks complete`}
             </span>
             <span className="font-semibold">{pct}%</span>

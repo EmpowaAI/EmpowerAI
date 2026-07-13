@@ -1,6 +1,6 @@
 """Input sanitisation for user-supplied text that ends up inside AI prompts.
 
-This does not try to "detect" prompt injection — it neutralises the
+This does not try to "detect" prompt injection - it neutralises the
 delivery mechanisms: control characters, fake chat-role markers, and
 oversized payloads. Prompts built from this output must still place user
 text inside clearly delimited blocks.
@@ -23,7 +23,7 @@ def sanitize_for_prompt(text: str, max_chars: int = 15000) -> str:
         return ""
 
     cleaned = _CONTROL_CHARS.sub("", text)
-    # Defuse role markers rather than deleting the line — CV content like
+    # Defuse role markers rather than deleting the line - CV content like
     # "System: Administrator" stays readable but can't open a fake turn.
     cleaned = _ROLE_MARKERS.sub(lambda m: m.group(0).replace(":", " -"), cleaned)
 

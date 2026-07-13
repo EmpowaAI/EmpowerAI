@@ -102,7 +102,7 @@ exports.startInterview = async (req, res, next) => {
       });
     }
 
-    // Clamp difficulty to the DB CHECK set — the AI-echoed value is not
+    // Clamp difficulty to the DB CHECK set - the AI-echoed value is not
     // covered by the request validator and a stray value (e.g.
     // 'intermediate') would violate the interview_sessions constraint.
     const ALLOWED_DIFFICULTY = ['easy', 'medium', 'hard'];
@@ -156,7 +156,7 @@ exports.submitAnswer = async (req, res, next) => {
     if (!session) {
       return res.status(404).json({
         status: 'error',
-        message: 'Interview session not found. It may have expired — please start a new interview.',
+        message: 'Interview session not found. It may have expired - please start a new interview.',
       });
     }
 
@@ -202,7 +202,7 @@ exports.submitAnswer = async (req, res, next) => {
       });
       return res.status(503).json({
         status: 'error',
-        message: 'The interview coach could not evaluate your answer right now. Your answer was not lost — please resubmit in a minute.',
+        message: 'The interview coach could not evaluate your answer right now. Your answer was not lost - please resubmit in a minute.',
       });
     }
 

@@ -1,5 +1,5 @@
 -- ============================================================
--- EmpowerAI migration — 2026-07-11
+-- EmpowerAI migration - 2026-07-11
 -- SECURITY FIX: prevent privilege escalation via direct Supabase access
 --
 -- The "Users can update own profile" RLS policy allows a user to update
@@ -7,7 +7,7 @@
 -- user could call the Supabase REST API directly:
 --     PATCH /rest/v1/users?id=eq.<self>   { "role": "admin" }
 -- RLS passes (they own the row) and there is no column restriction, so the
--- role column — on that same row — gets set to 'admin'. The backend then
+-- role column - on that same row - gets set to 'admin'. The backend then
 -- reads role fresh from the DB and grants full admin access.
 --
 -- Fix: a BEFORE UPDATE trigger that, for any caller that is NOT the backend

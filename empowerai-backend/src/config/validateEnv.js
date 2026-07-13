@@ -1,5 +1,5 @@
 /**
- * validateEnv.js — fail fast with actionable errors when required
+ * validateEnv.js - fail fast with actionable errors when required
  * environment variables are missing. Runs before any module that
  * connects to external services.
  */
@@ -35,7 +35,7 @@ function validateEnv() {
   if (missing.length > 0) {
     /* eslint-disable no-console */
     console.error('\n══════════════════════════════════════════════════════════');
-    console.error('  STARTUP FAILED — missing required environment variables');
+    console.error('  STARTUP FAILED - missing required environment variables');
     console.error('══════════════════════════════════════════════════════════');
     for (const v of missing) {
       console.error(`\n  ✗ ${v.name}`);
@@ -49,9 +49,9 @@ function validateEnv() {
 
   const warnings = RECOMMENDED.filter((v) => !process.env[v.name]);
   for (const v of warnings) {
-    // logger not loaded yet at this point — console is intentional
+    // logger not loaded yet at this point - console is intentional
     // eslint-disable-next-line no-console
-    console.warn(`[env] ${v.name} is not set — ${v.feature} will be unavailable.`);
+    console.warn(`[env] ${v.name} is not set - ${v.feature} will be unavailable.`);
   }
 }
 

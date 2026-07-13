@@ -20,7 +20,7 @@ class FileExtractionService:
         if len(contents) > MAX_FILE_SIZE_BYTES:
             raise EmptyDocumentError("File exceeds the 5MB size limit.")
 
-        # Detect by magic bytes — more reliable than content_type
+        # Detect by magic bytes - more reliable than content_type
         # Node/multer sometimes sends PDFs as text/plain
         if contents[:4] == b'%PDF':
             return self._extract_pdf(contents)

@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install --legacy-peer-deps
 
-# Copy source — volume mount in docker-compose overrides src/ for hot reload
+# Copy source - volume mount in docker-compose overrides src/ for hot reload
 COPY . .
 
 EXPOSE 5173

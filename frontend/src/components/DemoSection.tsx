@@ -147,7 +147,7 @@ export function DemoSection() {
                     </div>
                   </div>
                   <h3 className="mt-5 font-display text-lg font-bold text-primary sm:text-xl">
-                    Drop your CV — or use ours
+                    Drop your CV - or use ours
                   </h3>
                   <p className="mt-2 max-w-sm text-sm text-muted-foreground">
                     For this demo we&apos;ll use Siyanda&apos;s CV. Tap below and watch the AI go to work.
@@ -174,7 +174,7 @@ export function DemoSection() {
                     </span>
                     <span className="inline-flex items-center gap-1">
                       <CheckCircle2 className="h-3 w-3 text-secondary" />
-                      Free forever — Mahala
+                      Free forever - Mahala
                     </span>
                   </div>
                 </div>
@@ -364,7 +364,7 @@ export function DemoSection() {
                     Siyaqala! · Let&apos;s begin
                   </span>
                   <h3 className="mt-1 font-display text-xl font-bold text-primary sm:text-2xl">
-                    {PATHS[chosen].name} — your path
+                    {PATHS[chosen].name} - your path
                   </h3>
                   <p className="mt-2 max-w-sm text-sm text-muted-foreground">
                     {PATHS[chosen].match}% match · projected{" "}

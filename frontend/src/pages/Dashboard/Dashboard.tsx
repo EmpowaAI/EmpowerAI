@@ -38,7 +38,7 @@ const Dashboard = () => {
   const [topSkills, setTopSkills] = useState<string[]>([]);
   const [liveCount, setLiveCount] = useState<number | null>(null);
 
-  // CV score + top skills — derive from stored analysis or cvData from context
+  // CV score + top skills - derive from stored analysis or cvData from context
   useEffect(() => {
     let score = Number(localStorage.getItem("cvScore")) || 0;
     if (!score) score = Number(getStoredCvAnalysis<any>()?.score) || 0;
@@ -59,7 +59,7 @@ const Dashboard = () => {
     setTopSkills(skills);
   }, [cvData]);
 
-  // Live opportunity count — single lightweight backend call
+  // Live opportunity count - single lightweight backend call
   useEffect(() => {
     let cancelled = false;
     opportunitiesAPI.getAll({ limit: 1, page: 1 })
@@ -99,17 +99,17 @@ const Dashboard = () => {
   const quietStats = [
     {
       label: "CV strength",
-      value: cvScore > 0 ? `${cvScore}%` : "—",
+      value: cvScore > 0 ? `${cvScore}%` : "-",
       note: cvScore > 0 ? "Based on your last upload" : "Analyse your CV first",
     },
     {
       label: "Readiness",
-      value: readinessScore > 0 ? `${readinessScore}%` : "—",
+      value: readinessScore > 0 ? `${readinessScore}%` : "-",
       note: readinessScore > 0 ? "Career readiness score" : "Build your twin next",
     },
     {
       label: "Live opportunities",
-      value: liveCount !== null ? liveCount.toLocaleString() : "—",
+      value: liveCount !== null ? liveCount.toLocaleString() : "-",
       note: liveCount !== null ? "Active in South Africa" : "Loading…",
     },
   ];
@@ -198,7 +198,7 @@ const Dashboard = () => {
   const nextActionDesc = !cvCompleted
     ? "This unlocks stronger guidance and makes every next recommendation more personal."
     : !twinCompleted
-    ? "Your CV is analysed — now build your twin to unlock interview coaching and matched opportunities."
+    ? "Your CV is analysed - now build your twin to unlock interview coaching and matched opportunities."
     : "Your twin is active. Browse matched jobs, learnerships, and income ideas.";
   const nextActionTo = !cvCompleted
     ? "/dashboard/cv-analyzer"
@@ -386,7 +386,7 @@ const Dashboard = () => {
             {/* ── Sidebar ── */}
             <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
 
-              {/* Profile Snapshot — gradient header */}
+              {/* Profile Snapshot - gradient header */}
               <div className="rounded-2xl overflow-hidden border border-border/60 shadow-sm">
                 <div className="relative p-4 text-white" style={{ background: 'var(--gradient-hero)' }}>
                   <div className="pointer-events-none absolute inset-0 ubuntu-pattern opacity-20" aria-hidden />
@@ -441,7 +441,7 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {/* Primary Actions — full-card links with gradient icon */}
+              {/* Primary Actions - full-card links with gradient icon */}
               <div className="space-y-2">
                 {primaryActions.map(({ icon: Icon, title, text, cta, to }) => (
                   <Link
@@ -463,7 +463,7 @@ const Dashboard = () => {
                 ))}
               </div>
 
-              {/* Footer — gradient left-border */}
+              {/* Footer - gradient left-border */}
               <div className="relative overflow-hidden rounded-2xl border border-primary/15">
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-secondary rounded-l-2xl" />
                 <div className="p-4 pl-5 bg-gradient-to-r from-primary/5 to-transparent">

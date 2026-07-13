@@ -21,7 +21,7 @@ exports.register = async (req, res, next) => {
     }
 
     // Create the auth user. We auto-confirm the email here because the
-    // admin.createUser API does NOT send a verification email — leaving it
+    // admin.createUser API does NOT send a verification email - leaving it
     // unconfirmed while the Supabase project enforces email confirmation
     // would lock every new user out of login. Auto-confirming guarantees
     // sign-in works. (To add real verification later, switch to
@@ -190,7 +190,7 @@ exports.refresh = async (req, res, next) => {
 };
 
 exports.logout = (_req, res) => {
-  // JWT is stateless — the client must discard the token.
+  // JWT is stateless - the client must discard the token.
   // No server-side action needed; this endpoint exists for client symmetry.
   res.json({ status: 'success', message: 'Logged out successfully' });
 };

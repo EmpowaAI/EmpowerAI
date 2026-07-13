@@ -6,7 +6,7 @@ title = "EmpowerAI gitleaks config"
 [allowlist]
   description = "Files that intentionally contain placeholder credential strings"
   paths = [
-    # .env.example files use dummy values — not real secrets
+    # .env.example files use dummy values - not real secrets
     '''(^|/)\.env\.example$''',
     # Docs reference key names but never real values
     '''SECURITY\.md$''',

@@ -1,7 +1,7 @@
 /**
  * cvFallback.util.js
  * Builds a basic (fallback) CV analysis when the AI service is unavailable.
- * Pure business logic — no HTTP, no DB, no Express.
+ * Pure business logic - no HTTP, no DB, no Express.
  */
 
 const { extractSkillsEnhanced } = require('./skillExtractors');
@@ -81,7 +81,7 @@ const buildFallbackAnalysis = (cvText, jobRequirementsArray) => {
   const weaknesses = !hasReadableText
     ? ['File appears to have no selectable text (scanned/image-based). Use OCR or upload DOCX/text PDF.']
     : extractedSkills.length === 0
-    ? ['No clear skills detected from the extracted text — add a dedicated skills section.']
+    ? ['No clear skills detected from the extracted text - add a dedicated skills section.']
     : [];
 
   return {

@@ -13,7 +13,7 @@ const {
   ServiceUnavailableError,
 } = require('../src/utils/errors');
 
-describe('AppError — base class', () => {
+describe('AppError - base class', () => {
   test('sets message, statusCode, status, and isOperational', () => {
     const err = new AppError('something broke', 422);
     expect(err.message).toBe('something broke');
@@ -50,7 +50,7 @@ describe('BadRequestError', () => {
     expect(err.message).toBe('Please analyse your CV first');
   });
 
-  test('is operational — routes through handleOperationalError, not handleProgrammingError', () => {
+  test('is operational - routes through handleOperationalError, not handleProgrammingError', () => {
     const err = new BadRequestError('invalid input');
     expect(err.isOperational).toBe(true);
   });
@@ -137,7 +137,7 @@ describe('ServiceUnavailableError', () => {
   });
 });
 
-describe('Operational flag — the chain that matters', () => {
+describe('Operational flag - the chain that matters', () => {
   test('all custom error classes are operational', () => {
     const operational = [
       new BadRequestError(),

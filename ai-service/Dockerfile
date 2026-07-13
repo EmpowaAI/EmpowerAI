@@ -6,7 +6,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy source — volume mount in docker-compose overrides app/ and main.py for hot reload
+# Copy source - volume mount in docker-compose overrides app/ and main.py for hot reload
 COPY . .
 
 EXPOSE 8000

@@ -80,7 +80,7 @@ export default function CVRevampSection({
         ) : (
           <div className="flex flex-col sm:flex-row items-center gap-4 w-full">
             <p className="text-sm text-muted-foreground flex-1">
-              Re-analyse your CV to unlock the revamp feature — your previous results are still shown above.
+              Re-analyse your CV to unlock the revamp feature - your previous results are still shown above.
             </p>
             <button
               onClick={onReanalyze}

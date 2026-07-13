@@ -8,7 +8,7 @@ router = APIRouter()
 twin_chat_service = TwinChatService()
 
 
-# Sync `def` — blocking OpenAI SDK call runs in the threadpool.
+# Sync `def` - blocking OpenAI SDK call runs in the threadpool.
 # ── POST /chat/twin ──
 @router.post("/twin")
 def chat_twin(payload: dict):

@@ -439,7 +439,7 @@ const OPPORTUNITIES = [
     location: 'Johannesburg, Gauteng',
     province: ['Gauteng'],
     description: '18-month graduate development programme in retail and business banking. Graduates rotate through branch banking, credit, and digital channels teams, complete structured learning modules, and are mentored by senior bankers. Top performers receive permanent placement.',
-    requirements: ['BCom / BCompt / BSc (Finance, Economics, Accounting, or related) — NQF Level 7', 'Maximum 1 year since graduation', 'Strong academic record', 'South African citizen or permanent resident'],
+    requirements: ['BCom / BCompt / BSc (Finance, Economics, Accounting, or related) - NQF Level 7', 'Maximum 1 year since graduation', 'Strong academic record', 'South African citizen or permanent resident'],
     skills: ['Banking', 'Financial Analysis', 'Credit Assessment', 'Relationship Management', 'Excel', 'Communication'],
     salary_range: { min: 18000, max: 25000 },
     deadline: daysFromNow(60),

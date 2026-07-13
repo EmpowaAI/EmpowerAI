@@ -122,7 +122,7 @@ const request = async <T>(endpoint: string, options: RequestInit = {}): Promise<
             const refreshed = await refreshAccessToken();
             if (refreshed) return _do(true);
           }
-          // Refresh failed or already retried — clear session and redirect
+          // Refresh failed or already retried - clear session and redirect
           removeToken();
           if (!window.location.pathname.includes('/login')) {
             window.location.href = '/login';

@@ -1,6 +1,6 @@
 # Code of Conduct
 
-EmpowerAI is a platform built for South African youth who face real barriers to economic participation. Everyone who contributes — through code, design, feedback, or advocacy — is expected to uphold this standard.
+EmpowerAI is a platform built for South African youth who face real barriers to economic participation. Everyone who contributes - through code, design, feedback, or advocacy - is expected to uphold this standard.
 
 ## Our pledge
 

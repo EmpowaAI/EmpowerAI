@@ -629,7 +629,7 @@ const DigitalTwin = () => {
               accent="success"
             >
               <p className="text-xs text-muted-foreground mb-3">
-                Skills your profile already suggests — focus on showing stronger proof.
+                Skills your profile already suggests - focus on showing stronger proof.
               </p>
               {twinData.coreSkills.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
@@ -665,7 +665,7 @@ const DigitalTwin = () => {
               ) : (
                 <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                   <CheckCircle className="h-3.5 w-3.5 text-green-500" />
-                  No skill gaps detected — great profile coverage!
+                  No skill gaps detected - great profile coverage!
                 </p>
               )}
             </ExpandableSection>

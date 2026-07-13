@@ -1,6 +1,6 @@
 version: 2
 updates:
-  # Frontend — React / Vite / TypeScript
+  # Frontend - React / Vite / TypeScript
   - package-ecosystem: "npm"
     directory: "/frontend"
     schedule:
@@ -12,7 +12,7 @@ updates:
         patterns:
           - "*"
 
-  # Backend — Node.js / Express
+  # Backend - Node.js / Express
   - package-ecosystem: "npm"
     directory: "/empowerai-backend"
     schedule:
@@ -24,7 +24,7 @@ updates:
         patterns:
           - "*"
 
-  # AI service — Python / FastAPI
+  # AI service - Python / FastAPI
   - package-ecosystem: "pip"
     directory: "/ai-service"
     schedule:

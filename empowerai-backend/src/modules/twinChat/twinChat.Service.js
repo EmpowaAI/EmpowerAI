@@ -24,7 +24,7 @@ function _buildCvContext(twinData) {
   return {
     source: 'twin',
 
-    // Identity — raw shape first, fall back to normalized fields
+    // Identity - raw shape first, fall back to normalized fields
     currentRole:    identity.currentRole    || profile.name     || twinData.name     || '',
     targetRole:     identity.targetRole     || profile.path     || '',
     industry:       identity.industry       || profile.industry || twinData.industry || '',
@@ -37,13 +37,13 @@ function _buildCvContext(twinData) {
     yearsExperience:  analysisLatest?.skills?.extracted?.length ?? 0,
     confidenceScore:  Math.round((twinData.evolution?.confidenceScore ?? 0.5) * 100),
 
-    // Intelligence — only available in raw shape
+    // Intelligence - only available in raw shape
     strengths:       intelligence.strengths       || [],
     weaknesses:      intelligence.weaknesses      || [],
     recommendations: intelligence.recommendations || twinData.recommendations || [],
     missingSkills,
 
-    // Skills — FastAPI reads from sections.skills
+    // Skills - FastAPI reads from sections.skills
     sections: {
       skills: coreSkills.length > 0 ? coreSkills : (profile.skills || []),
     },
@@ -112,7 +112,7 @@ async function initialiseChatSession(userId) {
   let twinData = await twinRepository.findByUserId(userId);
 
   if (!twinData) {
-    logger.info('[TwinChat] No persisted twin found — building from CV profile', { userId });
+    logger.info('[TwinChat] No persisted twin found - building from CV profile', { userId });
     twinData = await twinBuilderService.buildTwinData(userId);
   }
 

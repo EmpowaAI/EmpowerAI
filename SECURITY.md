@@ -4,7 +4,7 @@
 
 | Version | Supported |
 |---|---|
-| `main` branch | Yes — active development |
+| `main` branch | Yes - active development |
 | Previous releases | No |
 
 ## Reporting a vulnerability
@@ -28,13 +28,13 @@ We aim to acknowledge receipt within 2 business days and to issue a patch within
 ### Authentication
 
 - **Supabase Auth** manages all identity: JWT issuance, email verification, password reset, MFA (future).
-- The backend validates every protected request by calling `supabase.auth.getUser(token)` — tokens are never self-validated against a local secret.
+- The backend validates every protected request by calling `supabase.auth.getUser(token)` - tokens are never self-validated against a local secret.
 - Sessions are stateless JWTs stored client-side. The backend does not maintain session state.
 - Tokens expire according to Supabase's default TTL. Refresh tokens are managed by the Supabase client.
 
 ### Authorisation
 
-- **Row Level Security (RLS)** is enforced at the database level on all tables. The backend uses the service-role key which bypasses RLS — this is intentional and required for server-to-server operations. The service-role key must never be exposed to the client.
+- **Row Level Security (RLS)** is enforced at the database level on all tables. The backend uses the service-role key which bypasses RLS - this is intentional and required for server-to-server operations. The service-role key must never be exposed to the client.
 - Backend route-level auth:
   - `protect` middleware: validates JWT, fetches user profile from `public.users`
   - `restrictTo('admin')`: checks `users.role === 'admin'`
@@ -61,8 +61,8 @@ Encryption uses a per-field IV (12 bytes) and auth tag (16 bytes). The key is a 
 
 | Secret | Where stored |
 |---|---|
-| `SUPABASE_SERVICE_ROLE_KEY` | Render env vars — never in code or client |
-| `ENCRYPTION_KEY` | Render env vars — never in code or client |
+| `SUPABASE_SERVICE_ROLE_KEY` | Render env vars - never in code or client |
+| `ENCRYPTION_KEY` | Render env vars - never in code or client |
 | `PAYSTACK_SECRET_KEY` | Render env vars |
 | `PAYSTACK_WEBHOOK_SECRET` | Render env vars |
 | `BREVO_API_KEY` | Render env vars |
@@ -70,13 +70,13 @@ Encryption uses a per-field IV (12 bytes) and auth tag (16 bytes). The key is a 
 
 ### What the frontend can safely hold
 
-- `VITE_SUPABASE_URL` — public, identifies your project
-- `VITE_SUPABASE_ANON_KEY` — public, RLS restricts what it can access
-- `VITE_API_BASE_URL` — public
+- `VITE_SUPABASE_URL` - public, identifies your project
+- `VITE_SUPABASE_ANON_KEY` - public, RLS restricts what it can access
+- `VITE_API_BASE_URL` - public
 
 ### Known limitations
 
-1. **Frontend auth migration incomplete**: The frontend currently stores Supabase JWTs in `localStorage` under a custom key and routes them through the Express backend. This is functional but not the most direct Supabase flow. The full migration to `supabase.auth.signInWithPassword()` client-side is on the roadmap. `localStorage` tokens are accessible to JavaScript (XSS risk) — see roadmap for HttpOnly cookie migration.
+1. **Frontend auth migration incomplete**: The frontend currently stores Supabase JWTs in `localStorage` under a custom key and routes them through the Express backend. This is functional but not the most direct Supabase flow. The full migration to `supabase.auth.signInWithPassword()` client-side is on the roadmap. `localStorage` tokens are accessible to JavaScript (XSS risk) - see roadmap for HttpOnly cookie migration.
 
 2. **Taxonomy updates are in-memory only**: Admin taxonomy changes reset on Render restart. No security risk, but operational gap.
 
@@ -84,7 +84,7 @@ Encryption uses a per-field IV (12 bytes) and auth tag (16 bytes). The key is a 
 
 4. **Audit log table is stubbed**: `admin/createAuditLog` is a no-op. Admin actions are not persistently audited.
 
-5. **Scripts directory contains stale MongoDB code**: Files in `empowerai-backend/scripts/` still reference Mongoose and will fail. These are development utilities only and are not deployed — they do not affect production security, but they should not be run.
+5. **Scripts directory contains stale MongoDB code**: Files in `empowerai-backend/scripts/` still reference Mongoose and will fail. These are development utilities only and are not deployed - they do not affect production security, but they should not be run.
 
 ---
 
@@ -98,10 +98,10 @@ Encryption uses a per-field IV (12 bytes) and auth tag (16 bytes). The key is a 
 |---|---|
 | Never commit `.env` files | Only `.env.example` with placeholder values belongs in git |
 | Never hardcode keys in source | Not in config files, not in comments, not in test fixtures |
-| `SUPABASE_SERVICE_ROLE_KEY` is backend-only | It bypasses RLS — never expose it in the frontend or logs |
+| `SUPABASE_SERVICE_ROLE_KEY` is backend-only | It bypasses RLS - never expose it in the frontend or logs |
 | `DATA_ENCRYPTION_KEY` is backend-only | Expiring or losing this key means encrypted PII is unrecoverable |
 | `VITE_AZURE_OPENAI_KEY` must stay commented out | Any `VITE_` variable is bundled into the browser JS and visible to all users |
-| Rotate immediately if exposed | If you accidentally commit a secret, rotate it before the PR is merged — gitleaks records it in git history even if the commit is amended |
+| Rotate immediately if exposed | If you accidentally commit a secret, rotate it before the PR is merged - gitleaks records it in git history even if the commit is amended |
 
 ### Adding a new environment variable
 
@@ -111,7 +111,7 @@ Encryption uses a per-field IV (12 bytes) and auth tag (16 bytes). The key is a 
 
 ### If you accidentally commit a secret
 
-1. **Rotate the credential immediately** — do not just delete the file; git history preserves the value
+1. **Rotate the credential immediately** - do not just delete the file; git history preserves the value
 2. Open a private security report to [nene171408@gmail.com](mailto:nene171408@gmail.com) so we can verify no unauthorised access occurred
 3. We will force-push to remove the secret from history after rotation
 
@@ -124,7 +124,7 @@ Before submitting a PR, verify:
 - [ ] No secrets or credentials in source code or test fixtures
 - [ ] No `console.log(password)` or similar logging of sensitive values
 - [ ] User input is validated with Zod schemas before processing
-- [ ] New Supabase queries use parameterised values (Supabase JS does this by default — do not use `.rpc()` with string concatenation)
+- [ ] New Supabase queries use parameterised values (Supabase JS does this by default - do not use `.rpc()` with string concatenation)
 - [ ] New routes that serve user data are protected with `protect` middleware
 - [ ] Admin-only routes are protected with `protect` + `restrictTo('admin')`
 - [ ] Any new env vars are documented in `.env.example` with placeholder values only

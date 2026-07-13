@@ -37,7 +37,7 @@ function buildQuery(filters) {
   if (type && type !== 'all') q_ = q_.eq('type', type);
 
   if (q && q.trim().length > 0) {
-    // Strip PostgREST filter metacharacters — commas/parentheses would split
+    // Strip PostgREST filter metacharacters - commas/parentheses would split
     // the .or() expression and produce a malformed 400; % and \ break ilike.
     const term = q.trim().replace(/[,()\\%*]/g, ' ').replace(/'/g, "''").trim();
     if (term) {
@@ -126,7 +126,7 @@ exports.getAllOpportunities = async (req, res, next) => {
           userProfile.skills = cvSkills;
         }
         // The CV target role (what the user explicitly entered, e.g.
-        // "ai engineer") is the strongest, most reliable career signal —
+        // "ai engineer") is the strongest, most reliable career signal -
         // put it FIRST so it drives the live Adzuna fetch and matching.
         const cvRole = cvProfile?.analysis?.targetRole;
         if (typeof cvRole === 'string' && cvRole.trim()) derivedCareer.unshift(cvRole.trim());
@@ -164,7 +164,7 @@ exports.getAllOpportunities = async (req, res, next) => {
       // Curate the pool to the user's actual career on first page: the
       // scheduled pool is generic entry-level jobs, so a specialised profile
       // (e.g. "AI Engineer") has nothing relevant to match. Fetch live from
-      // Adzuna for the user's career terms / search, persist, then query — so
+      // Adzuna for the user's career terms / search, persist, then query - so
       // results reflect their profile/CV. Non-fatal and page-1 only to bound
       // latency and API usage.
       if (pageNum === 1 && req.user && (careerTerms.length > 0 || hasSearchQuery)) {

@@ -5,7 +5,7 @@ const { getAiQueueHealth, getAiJobStatus } = require('../intergration/queues/aiQ
 
 const router = express.Router();
 
-// Full health check — DB + AI service + memory + uptime
+// Full health check - DB + AI service + memory + uptime
 router.get('/', async (req, res) => {
   const aiServiceUrl = process.env.AI_SERVICE_URL;
 
@@ -42,7 +42,7 @@ router.get('/', async (req, res) => {
   });
 });
 
-// Liveness probe — is the process alive?
+// Liveness probe - is the process alive?
 router.get('/live', (req, res) => {
   res.status(200).json({
     status: 'OK',
@@ -51,7 +51,7 @@ router.get('/live', (req, res) => {
   });
 });
 
-// Readiness probe — is the server ready to serve traffic?
+// Readiness probe - is the server ready to serve traffic?
 router.get('/ready', async (req, res) => {
   let dbReady = true;
   try {

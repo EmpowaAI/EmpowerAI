@@ -1,7 +1,7 @@
 # 🚀 EmpowerAI - Complete Vision Blueprint
 ## The Future of SA Youth Economic Empowerment
 
-> **Mission**: Create a multi-billion dollar AI-first platform that looks, feels, and operates unlike any typical website. This is not just a tool—it's a futuristic career companion that empowers South African youth through cutting-edge AI technology.
+> **Mission**: Create a multi-billion dollar AI-first platform that looks, feels, and operates unlike any typical website. This is not just a tool-it's a futuristic career companion that empowers South African youth through cutting-edge AI technology.
 
 ---
 

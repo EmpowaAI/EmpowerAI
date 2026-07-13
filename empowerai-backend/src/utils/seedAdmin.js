@@ -14,7 +14,7 @@ const seedAdmins = async () => {
         await supabase.from('users').update({ role: 'admin' }).eq('id', user.id);
         logger.info(`Promoted existing user to admin: ${email}`);
       } else if (!user) {
-        logger.info(`Seed admin not yet registered: ${email} — will need manual promotion after signup`);
+        logger.info(`Seed admin not yet registered: ${email} - will need manual promotion after signup`);
       }
     } catch (err) {
       logger.warn(`seedAdmins: failed for ${email}`, { message: err.message });

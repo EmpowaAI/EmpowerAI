@@ -56,7 +56,7 @@ export default function Opportunities() {
   useEffect(() => {
     applicationsAPI.getSaved()
       .then((res) => setSaved(res.data?.savedIds || []))
-      .catch(() => { /* bookmarks are non-blocking — keep empty on failure */ })
+      .catch(() => { /* bookmarks are non-blocking - keep empty on failure */ })
   }, [])
 
   useEffect(() => {
@@ -387,7 +387,7 @@ export default function Opportunities() {
           Career <span className="text-gradient-ai">Opportunities</span>
         </h1>
         <p className="mt-2 text-white/75 text-sm md:text-base max-w-md">
-          Real jobs, learnerships, internships, and bursaries — updated daily.
+          Real jobs, learnerships, internships, and bursaries - updated daily.
         </p>
       </div>
     </div>

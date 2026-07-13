@@ -26,7 +26,7 @@ exports.createApplication = async (req, res, next) => {
       .single();
 
     if (error) {
-      // PostgreSQL unique violation — already tracked
+      // PostgreSQL unique violation - already tracked
       if (error.code === '23505') {
         return res.status(200).json({ status: 'success', data: { created: false } });
       }
@@ -90,8 +90,8 @@ exports.saveOpportunity = async (req, res, next) => {
       .insert({ user_id: req.user.id, opportunity_id: opportunityId });
 
     if (error) {
-      // 23505 unique violation — already saved, treat as success (idempotent)
-      // 23503 FK violation — opportunity doesn't exist
+      // 23505 unique violation - already saved, treat as success (idempotent)
+      // 23503 FK violation - opportunity doesn't exist
       if (error.code === '23503') {
         return res.status(404).json({ status: 'error', message: 'Opportunity not found' });
       }

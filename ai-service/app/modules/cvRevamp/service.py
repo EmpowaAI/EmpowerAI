@@ -10,7 +10,7 @@ class CVRevampService:
     SYSTEM_PROMPT = (
         "You are an elite CV writer and ATS optimization specialist. "
         "You rewrite CVs to be professional, keyword-rich, and compelling. "
-        "You return only valid JSON — no markdown, no explanation, no preamble. "
+        "You return only valid JSON - no markdown, no explanation, no preamble. "
         "You never fabricate experience, companies, or qualifications."
     )
 
@@ -48,7 +48,7 @@ class CVRevampService:
         )
         result = extract_json(raw)
 
-        # Validate the model actually returned a usable revamped CV — a
+        # Validate the model actually returned a usable revamped CV - a
         # well-formed but empty/wrong-shaped reply must not be served as success
         # (that produced blank downloads before).
         revamped = result.get("revamped_cv") if isinstance(result, dict) else None

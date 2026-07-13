@@ -8,7 +8,7 @@ router.post(
   '/paystack',
   express.raw({ type: 'application/json' }),
   async (req, res) => {
-    // Respond immediately — Paystack retries if no fast response
+    // Respond immediately - Paystack retries if no fast response
     res.status(200).json({ received: true });
 
     const signature = req.headers['x-paystack-signature'];

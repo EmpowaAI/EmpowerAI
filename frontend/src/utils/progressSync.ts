@@ -21,7 +21,7 @@ export async function syncProgressFromBackend(): Promise<ProgressData> {
 
   const headers = { Authorization: `Bearer ${token}` }
 
-  // Run both checks in parallel — twin existence implies CV exists too.
+  // Run both checks in parallel - twin existence implies CV exists too.
   const [twinResult, cvResult] = await Promise.allSettled([
     twinAPI.get(),
     fetch(`${API_BASE_URL}/cv/profile`, { headers }).then(r => r.json()),
@@ -39,7 +39,7 @@ export async function syncProgressFromBackend(): Promise<ProgressData> {
     cvResult.value?.data?.profile != null
 
   // Only fall back to localStorage when the API call itself failed (network error).
-  // If the call succeeded but returned no profile, that is authoritative — don't
+  // If the call succeeded but returned no profile, that is authoritative - don't
   // let stale localStorage override it.
   const cvApiCallFailed = cvResult.status === 'rejected'
   const twinApiCallFailed = twinResult.status === 'rejected'

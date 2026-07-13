@@ -24,7 +24,7 @@ function _getKey() {
       _warnedMissingKey = true;
       // eslint-disable-next-line no-console
       console.warn(
-        '[Encryption] DATA_ENCRYPTION_KEY is not set or invalid — storing data unencrypted. ' +
+        '[Encryption] DATA_ENCRYPTION_KEY is not set or invalid - storing data unencrypted. ' +
         'Set a 64-char hex key in production: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"'
       );
     }
@@ -48,7 +48,7 @@ function encryptField(value) {
 
   const key = _getKey();
   if (!key) {
-    // No key configured — store as-is (plaintext fallback)
+    // No key configured - store as-is (plaintext fallback)
     return typeof value === 'string' ? value : JSON.stringify(value);
   }
 
@@ -76,7 +76,7 @@ function decryptField(encrypted) {
   if (parts.length !== 3) return encrypted; // plaintext passthrough (pre-migration data or no-key mode)
 
   const key = _getKey();
-  if (!key) return encrypted; // key not configured — return as stored
+  if (!key) return encrypted; // key not configured - return as stored
 
   try {
     const [ivHex, authTagHex, ciphertext] = parts;
@@ -92,7 +92,7 @@ function decryptField(encrypted) {
 
     return JSON.parse(decrypted);
   } catch (err) {
-    console.warn('[Encryption] decryptField failed — returning null.', err.message);
+    console.warn('[Encryption] decryptField failed - returning null.', err.message);
     return null;
   }
 }
@@ -108,14 +108,14 @@ function encryptAnalysis(analysis) {
   if (!analysis || typeof analysis !== 'object') return analysis;
 
   return {
-    // plaintext — safe to query / aggregate
+    // plaintext - safe to query / aggregate
     score:          analysis.score,
     readinessLevel: analysis.readinessLevel,
     industry:       analysis.industry,
     analysisSource: analysis.analysisSource,
     links:          analysis.links,
 
-    // encrypted — PII / sensitive narrative content
+    // encrypted - PII / sensitive narrative content
     summary:          encryptField(analysis.summary),
     about:            encryptField(analysis.about),
     extractedSkills:  encryptField(analysis.extractedSkills),
@@ -167,7 +167,7 @@ function decryptAnalysis(analysis) {
 
 /**
  * Encrypts PII profile fields on an incoming data object before DB write.
- * Only encrypts fields that are present — safe for partial updates (PATCH).
+ * Only encrypts fields that are present - safe for partial updates (PATCH).
  *
  * Encrypted fields: phone, province, age, education, skills[], interests[]
  */
@@ -183,14 +183,14 @@ function encryptProfile(data) {
     }
   }
 
-  // Array fields — encrypt each element individually
+  // Array fields - encrypt each element individually
   for (const field of PROFILE_ARRAY_FIELDS) {
     if (result[field] !== undefined) {
       result[field] = result[field].map(encryptField);
     }
   }
 
-  // age — stored encrypted; Number is JSON-serialisable so encryptField handles it
+  // age - stored encrypted; Number is JSON-serialisable so encryptField handles it
   if (result.age !== undefined) {
     result.age = encryptField(result.age);
   }

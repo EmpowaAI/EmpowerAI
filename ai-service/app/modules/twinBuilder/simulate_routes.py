@@ -8,7 +8,7 @@ router = APIRouter()
 twin_builder_service = TwinBuilderService()
 
 
-# Sync `def` — blocking OpenAI SDK call runs in the threadpool.
+# Sync `def` - blocking OpenAI SDK call runs in the threadpool.
 # ── POST /simulate ── (root-level path, matches backend contract)
 @router.post("/simulate")
 def simulate(payload: dict):

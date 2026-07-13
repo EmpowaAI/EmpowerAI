@@ -36,7 +36,7 @@ const logger = require('../utils/logger');
 
       next();
     } catch (error) {
-      // Log field names only — request bodies can contain passwords/CV text
+      // Log field names only - request bodies can contain passwords/CV text
       logger.warn('Request validation failed', {
         source,
         fields: data && typeof data === 'object' ? Object.keys(data) : [],

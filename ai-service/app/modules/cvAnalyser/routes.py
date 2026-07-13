@@ -11,7 +11,7 @@ file_extraction_service = FileExtractionService()
 
 # Sync `def` so the blocking OpenAI SDK call runs in the threadpool instead
 # of stalling the event loop. AIServiceError (400/415/422/5xx) propagates to
-# the global handler with the correct status — do not flatten to 500.
+# the global handler with the correct status - do not flatten to 500.
 # ── POST /api/cv/text ──
 @router.post("/text")
 def analyze_text(payload: dict):

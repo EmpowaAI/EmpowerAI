@@ -8,7 +8,7 @@ router = APIRouter()
 twin_builder_service = TwinBuilderService()
 
 
-# Sync `def` — blocking OpenAI SDK call runs in the threadpool.
+# Sync `def` - blocking OpenAI SDK call runs in the threadpool.
 # ── POST /twin/generate ──
 @router.post("/generate")
 def generate_twin(payload: dict):

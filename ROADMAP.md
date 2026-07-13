@@ -15,12 +15,12 @@ Last updated: 2026-06-13.
 
 ---
 
-## Phase 1 — Foundation (complete)
+## Phase 1 - Foundation (complete)
 
 ### Infrastructure
 - [x] Monorepo: React frontend, Node/Express backend, Python FastAPI AI service
 - [x] Vercel (frontend), Render (backend + AI service)
-- [x] MongoDB removed — fully migrated to Supabase (PostgreSQL)
+- [x] MongoDB removed - fully migrated to Supabase (PostgreSQL)
 - [x] Supabase Auth replaces custom JWT + bcrypt stack
 - [x] AES-256-GCM field-level encryption for PII (CV data, user profiles)
 - [x] Helmet, CORS, rate limiting, compression
@@ -48,16 +48,16 @@ Last updated: 2026-06-13.
 
 ---
 
-## Phase 2 — Stability (current, ~2026-Q3)
+## Phase 2 - Stability (current, ~2026-Q3)
 
 These are the active priorities:
 
 ### Critical fixes
-- [ ] **Frontend auth migration**: replace `localStorage` custom-token flow with Supabase client auth (`supabase.auth.signInWithPassword`, `supabase.auth.signUp`, session management via `onAuthStateChange`). The backend bridge routes (`/api/auth/*`) currently proxy these calls — the frontend should eventually call Supabase directly for auth and the backend only for application data.
+- [ ] **Frontend auth migration**: replace `localStorage` custom-token flow with Supabase client auth (`supabase.auth.signInWithPassword`, `supabase.auth.signUp`, session management via `onAuthStateChange`). The backend bridge routes (`/api/auth/*`) currently proxy these calls - the frontend should eventually call Supabase directly for auth and the backend only for application data.
 - [ ] **Frontend `.env.local`**: ensure `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are populated and the Supabase client is used for auth
-- [ ] **Delete stale scripts**: `empowerai-backend/scripts/` contains MongoDB-era utilities (`createIndexes.js`, `backfillOpportunitySkills.js`, etc.) that will crash if run — replace with Supabase equivalents or delete
+- [ ] **Delete stale scripts**: `empowerai-backend/scripts/` contains MongoDB-era utilities (`createIndexes.js`, `backfillOpportunitySkills.js`, etc.) that will crash if run - replace with Supabase equivalents or delete
 - [ ] **`mongodb-memory-server` in devDependencies**: remove from `package.json`, replace tests with Supabase-compatible stubs
-- [ ] **`src-v2/` directory in frontend**: either promote to main or delete — it is a dead code branch currently
+- [ ] **`src-v2/` directory in frontend**: either promote to main or delete - it is a dead code branch currently
 
 ### Security hardening
 - [ ] **HttpOnly cookies for auth tokens**: move the Supabase access token from `localStorage` to a `Set-Cookie: HttpOnly; Secure; SameSite=Strict` header to eliminate XSS exposure. Requires backend `/api/auth/session` endpoint and frontend cookie read pattern.
@@ -78,10 +78,10 @@ These are the active priorities:
 
 ---
 
-## Phase 3 — Growth features (~2026-Q4)
+## Phase 3 - Growth features (~2026-Q4)
 
 ### User experience
-- [ ] **Onboarding wizard**: guided first-time setup (province, education, skills) — the raw twin creation form is the current flow
+- [ ] **Onboarding wizard**: guided first-time setup (province, education, skills) - the raw twin creation form is the current flow
 - [ ] **Mobile-first redesign**: current UI is desktop-biased; most users will be on mobile with limited data
 - [ ] **Offline capability**: cache CV analysis and twin data for users with intermittent connectivity
 - [ ] **Notification system**: email + in-app alerts for new matching opportunities, subscription renewals, interview reminders
@@ -100,13 +100,13 @@ These are the active priorities:
 - [ ] **Bursary database**: curated list of bursaries with eligibility matching
 
 ### Data
-- [ ] **Taxonomy persistence**: move career taxonomy from in-memory to a `config` table in Supabase — admin updates survive restarts
+- [ ] **Taxonomy persistence**: move career taxonomy from in-memory to a `config` table in Supabase - admin updates survive restarts
 - [ ] **Analytics dashboard**: aggregate skill demand trends, provincial opportunity density, cohort outcome tracking
 - [ ] **Opportunity quality scoring**: ML model to score relevance and quality of aggregated job postings
 
 ---
 
-## Phase 4 — Open source readiness (~2027)
+## Phase 4 - Open source readiness (~2027)
 
 - [ ] Evaluate open-source licensing model (MIT vs AGPL for commercial forks)
 - [ ] Contributor documentation: architecture decision records (ADRs), local dev Docker setup
@@ -123,10 +123,10 @@ These are the active priorities:
 
 To keep the scope manageable for a small team:
 
-- **Native mobile app** — the web app will be mobile-optimised instead
-- **Custom LLM training** — we use existing providers (Claude, Gemini, etc.) via API
-- **CV printing service** — DOCX export covers this need
-- **Payroll or HR features** — EmpowerAI is a job-seeker tool, not an employer tool (recruiter portal is limited to opportunity posting)
+- **Native mobile app** - the web app will be mobile-optimised instead
+- **Custom LLM training** - we use existing providers (Claude, Gemini, etc.) via API
+- **CV printing service** - DOCX export covers this need
+- **Payroll or HR features** - EmpowerAI is a job-seeker tool, not an employer tool (recruiter portal is limited to opportunity posting)
 
 ---
 

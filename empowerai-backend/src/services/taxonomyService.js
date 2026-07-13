@@ -1,6 +1,6 @@
 const defaultTaxonomy = require('../config/careerTaxonomy');
 
-// In-memory override — survives for the process lifetime; resets on deploy.
+// In-memory override - survives for the process lifetime; resets on deploy.
 // Admin can update via PUT /api/admin/taxonomy but changes are not persisted.
 let _override = null;
 

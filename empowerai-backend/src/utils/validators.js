@@ -81,7 +81,7 @@ const cvRevampSchema = z.object({
 
 /**
  * Digital Twin chat schema
- * ✅ FIX: was `export const` (ES module syntax) — changed to `const` to match CommonJS module.exports below
+ * ✅ FIX: was `export const` (ES module syntax) - changed to `const` to match CommonJS module.exports below
  */
 const chatTwinSchema = z.object({
   messages: z.array(

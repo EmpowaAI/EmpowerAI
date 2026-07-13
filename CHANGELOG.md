@@ -13,30 +13,30 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Issue templates (bug report, feature request) and PR template
 - Code of Conduct
 - `ai-service/.env.example`
-- `empowerai-backend/schema.sql` — full Supabase schema with tables, indexes, RLS policies, and `increment_usage` RPC function
-- `CONTRIBUTORS.md` — contributor credits and acknowledgements
-- `.github/dependabot.yml` — automated weekly dependency updates for npm (frontend + backend), pip (AI service), and GitHub Actions
-- `.github/workflows/ci.yml` — gitleaks secret-scan job runs on every push and PR, blocking merges that contain real credentials
-- `.gitleaks.toml` — allowlists `.env.example` and doc files so placeholder values don't trigger false positives
-- `SECURITY.md` — new "Credential protection for contributors" section: rules, rotate-if-exposed steps, adding-new-env-var guide
-- `docker-compose.yml` — single-command local dev (`docker compose up --build`) for all three services; Redis available via `--profile redis`
-- `Dockerfile` for backend, AI service, and frontend — hot reload in all three via source volume mounts
+- `empowerai-backend/schema.sql` - full Supabase schema with tables, indexes, RLS policies, and `increment_usage` RPC function
+- `CONTRIBUTORS.md` - contributor credits and acknowledgements
+- `.github/dependabot.yml` - automated weekly dependency updates for npm (frontend + backend), pip (AI service), and GitHub Actions
+- `.github/workflows/ci.yml` - gitleaks secret-scan job runs on every push and PR, blocking merges that contain real credentials
+- `.gitleaks.toml` - allowlists `.env.example` and doc files so placeholder values don't trigger false positives
+- `SECURITY.md` - new "Credential protection for contributors" section: rules, rotate-if-exposed steps, adding-new-env-var guide
+- `docker-compose.yml` - single-command local dev (`docker compose up --build`) for all three services; Redis available via `--profile redis`
+- `Dockerfile` for backend, AI service, and frontend - hot reload in all three via source volume mounts
 - `.dockerignore` files for all three services
 
 ### Fixed
-- `ai-service/.gitignore` — was nearly empty; now covers venv, pycache, .env variants, pytest/coverage artefacts
+- `ai-service/.gitignore` - was nearly empty; now covers venv, pycache, .env variants, pytest/coverage artefacts
 
 ### Removed
-- `frontend/src-v2/` dead code directory (App.tsx, components, hooks, pages — unused branch never promoted to main)
+- `frontend/src-v2/` dead code directory (App.tsx, components, hooks, pages - unused branch never promoted to main)
 
 ---
 
-## [0.9.0] — 2026-06-13
+## [0.9.0] - 2026-06-13
 
 ### Added
 - Token refresh mechanism: backend `POST /auth/refresh` endpoint; frontend silently refreshes expired Supabase access tokens and retries on 401
-- `CVUploadError` auth error category — shows "Session Expired" with a direct login link instead of generic "Try Again"
-- `scripts/seedOpportunities.js` — 30 South African job listings auto-seed on first server start
+- `CVUploadError` auth error category - shows "Session Expired" with a direct login link instead of generic "Try Again"
+- `scripts/seedOpportunities.js` - 30 South African job listings auto-seed on first server start
 - Skill Gap Analysis action links now use React Router `<Link>` for internal navigation instead of opening new tabs
 
 ### Fixed
@@ -46,11 +46,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
-## [0.8.0] — 2026-06-10
+## [0.8.0] - 2026-06-10
 
 ### Added
 - Open source readiness files: `LICENSE` (MIT), `CONTRIBUTING.md`, `SECURITY.md`, `ROADMAP.md`
-- `CODEOWNERS` — all PRs require human review
+- `CODEOWNERS` - all PRs require human review
 - Comprehensive `README.md` rewrite with architecture diagram and full setup guide
 - Frontend and backend `.env.example` files with inline documentation
 
@@ -59,7 +59,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
-## [0.7.0] — 2026-05-31
+## [0.7.0] - 2026-05-31
 
 ### Fixed
 - Dashboard reads live backend data for progress and opportunity count
@@ -73,7 +73,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
-## [0.1.0] — 2026-01-15
+## [0.1.0] - 2026-01-15
 
 ### Added
 - Initial platform: Digital Economic Twin, CV Analyser, CV Revamp, Opportunity Matching, Interview Coach, AI Mentor

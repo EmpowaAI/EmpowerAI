@@ -7,7 +7,7 @@
  *                                subscriptions, usages, applications
  *
  * Usage (from empowerai-backend/):
- *   Dry run (safe — no deletions):
+ *   Dry run (safe - no deletions):
  *     node scripts/cleanup-users.js
  *
  *   Actually delete:
@@ -75,7 +75,7 @@ async function main() {
   }
 
   if (!EXECUTE) {
-    console.log(`\n--- DRY RUN complete — no changes made ---`);
+    console.log(`\n--- DRY RUN complete - no changes made ---`);
     console.log(`Run with --execute to perform the deletions:\n`);
     console.log(`  node scripts/cleanup-users.js --execute\n`);
     return;
@@ -99,7 +99,7 @@ async function main() {
 
   console.log(`\n=== Done ===`);
   console.log(`Deleted: ${deleted}  |  Failed: ${failed}`);
-  if (failed > 0) console.warn('Some deletions failed — check errors above.');
+  if (failed > 0) console.warn('Some deletions failed - check errors above.');
 }
 
 main().catch(err => {

@@ -109,20 +109,20 @@ function AppRoutes() {
         <Route index element={<Dashboard />} />
         <Route path="profile" element={<Profile />} />
 
-        {/* Step 1: CV Analyzer — always accessible */}
+        {/* Step 1: CV Analyzer - always accessible */}
         <Route path="cv-analyzer" element={<CVAnalyzer />} />
 
-        {/* Step 2: Digital Twin — requires CV */}
+        {/* Step 2: Digital Twin - requires CV */}
         <Route path="twin" element={<ProtectedRoute requiredStep="cv"><TwinBuilder /></ProtectedRoute>} />
         <Route path="twin-builder" element={<ProtectedRoute requiredStep="cv"><TwinBuilder /></ProtectedRoute>} />
 
-        {/* Step 3: Interview Coach — requires Twin */}
+        {/* Step 3: Interview Coach - requires Twin */}
         <Route path="interview-coach" element={<ProtectedRoute requiredStep="twin"><InterviewCoach /></ProtectedRoute>} />
 
-        {/* Step 4: Opportunities — requires Twin */}
+        {/* Step 4: Opportunities - requires Twin */}
         <Route path="opportunities" element={<ProtectedRoute requiredStep="twin"><Opportunities /></ProtectedRoute>} />
 
-        {/* Additional features — require Twin */}
+        {/* Additional features - require Twin */}
         <Route path="simulations" element={<ProtectedRoute requiredStep="twin"><Simulations /></ProtectedRoute>} />
         <Route path="applications" element={<ProtectedRoute requiredStep="twin"><Applications /></ProtectedRoute>} />
         <Route path="chat" element={<ProtectedRoute requiredStep="twin"><Chat /></ProtectedRoute>} />

@@ -65,7 +65,7 @@ type ChatMessage = {
 // Users can also finish early by selecting the "Finish" quick option.
 const MAX_TURNS = 5;
 
-const FINISH_SIGNAL = "Finish — show me my results →";
+const FINISH_SIGNAL = "Finish - show me my results →";
 
 const DEFAULT_QUICK_QUESTIONS = [
   "What skills am I missing?",
@@ -136,7 +136,7 @@ function normalizeTwin(raw: any): TwinData | null {
       path: targetRole || "Career profile",
       industry,
       level: safeStr(raw.identity?.seniorityLevel),
-      value: incomeRange || "—",
+      value: incomeRange || "-",
       skills: coreSkills,
       empowermentScore: employabilityScore,
       marketDemand,
@@ -264,7 +264,7 @@ const TwinBuilder = () => {
     setChatMessages([{
       id: 1,
       role: "assistant",
-      text: `Your Economic Twin is loaded. I can see your ${skills.length > 0 ? `${skills.length} core skills` : "profile"}, your industry (${industry}), and your full career profile.\n\nAsk me anything — salary benchmarks, skill gaps, market demand, career paths, or what to focus on next. When you're ready, select **Finish** to see your matched opportunities.`,
+      text: `Your Economic Twin is loaded. I can see your ${skills.length > 0 ? `${skills.length} core skills` : "profile"}, your industry (${industry}), and your full career profile.\n\nAsk me anything - salary benchmarks, skill gaps, market demand, career paths, or what to focus on next. When you're ready, select **Finish** to see your matched opportunities.`,
       options: [...DEFAULT_QUICK_QUESTIONS, FINISH_SIGNAL],
     }]);
     return true;
@@ -275,7 +275,7 @@ const TwinBuilder = () => {
     setTwinError("");
 
     try {
-      // Always fetch from the API first — localStorage may be stale from a
+      // Always fetch from the API first - localStorage may be stale from a
       // previous CV upload (e.g. retail twin cached while user re-uploaded SE CV).
       const response = await twinAPI.get();
       const apiTwin = response?.data?.twin ?? null;
@@ -289,7 +289,7 @@ const TwinBuilder = () => {
       if (cvDone) {
         setChatMessages([{
           id: 1, role: "assistant",
-          text: "Building your Economic Twin from your CV analysis — this takes a moment...",
+          text: "Building your Economic Twin from your CV analysis - this takes a moment...",
           options: [],
         }]);
         try {
@@ -468,12 +468,12 @@ const TwinBuilder = () => {
     setMessage("");
   };
 
-  // Derived display values — safeStr guards against stored "undefined"/"null" strings
+  // Derived display values - safeStr guards against stored "undefined"/"null" strings
   const profile = twinData?.profile;
   const displayName = safeStr(profile?.name ?? twinData?.name, "Economic Twin Profile");
   const displayPath = safeStr(profile?.path ?? twinData?.careerPaths?.[0]?.title, "Career profile");
   const displayIndustry = safeStr(profile?.industry ?? twinData?.industry, "General");
-  const displayValue = profile?.value ?? twinData?.economy?.incomeRange ?? "—";
+  const displayValue = profile?.value ?? twinData?.economy?.incomeRange ?? "-";
   const displayScore = profile?.empowermentScore ?? twinData?.empowermentScore ?? twinData?.economy?.employabilityScore ?? 0;
   const displayMarket = profile?.marketDemand ?? (displayScore > 70 ? "High" : displayScore > 40 ? "Medium" : "Developing");
   const skills: string[] = profile?.skills ?? twinData?.skills ?? [];
@@ -550,7 +550,7 @@ const TwinBuilder = () => {
                   </div>
                 </div>
 
-                {displayValue !== "—" && (
+                {displayValue !== "-" && (
                   <div className="mt-4 rounded-lg border border-secondary/30 bg-secondary/10 px-3 py-2 text-sm font-semibold text-foreground">
                     Income potential · {displayValue}
                   </div>
@@ -569,7 +569,7 @@ const TwinBuilder = () => {
                 )}
               </section>
 
-              {/* Next actions — always visible once twin is loaded */}
+              {/* Next actions - always visible once twin is loaded */}
               {twinData && (
                 <section className="rounded-xl border border-border overflow-hidden">
                   <div className="relative overflow-hidden px-3 py-2.5 text-white" style={{ background: 'var(--gradient-hero)' }}>
@@ -795,10 +795,10 @@ const TwinBuilder = () => {
             </div>
           </div>
 
-          {/* Input area — replaced by CTA panel once chat completes */}
+          {/* Input area - replaced by CTA panel once chat completes */}
           {chatComplete ? (
             <div className="sticky bottom-0 border-t border-border bg-background px-4 py-4 sm:px-5">
-              <p className="text-xs text-center text-muted-foreground font-semibold mb-3">Session complete — what would you like to do next?</p>
+              <p className="text-xs text-center text-muted-foreground font-semibold mb-3">Session complete - what would you like to do next?</p>
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => navigate("/dashboard/opportunities")}

@@ -58,7 +58,7 @@ export function ContactWidget() {
               </span>
               <div>
                 <div className="text-sm font-semibold text-primary">Share feedback</div>
-                <div className="text-xs text-muted-foreground">Tell us what&apos;s working — and what&apos;s not.</div>
+                <div className="text-xs text-muted-foreground">Tell us what&apos;s working - and what&apos;s not.</div>
               </div>
             </a>
 

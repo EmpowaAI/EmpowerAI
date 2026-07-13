@@ -14,17 +14,17 @@
 
 ---
 
-EmpowerAI uses a Digital Economic Twin, CV analysis, interview coaching, and real-time opportunity matching to help young South Africans find work and build careers — in their own languages, from wherever they are.
+EmpowerAI uses a Digital Economic Twin, CV analysis, interview coaching, and real-time opportunity matching to help young South Africans find work and build careers - in their own languages, from wherever they are.
 
 > **🧪 Public Beta:** EmpowaAI is in open beta. If you're testing, please read the
-> **[Beta Tester Guide](BETA_TESTERS.md)** — it explains what to expect (e.g. sign-up
+> **[Beta Tester Guide](BETA_TESTERS.md)** - it explains what to expect (e.g. sign-up
 > has no email-verification step during beta) and how to report issues.
 
 ## Features
 
 | Feature | Description |
 |---|---|
-| **Digital Economic Twin** | AI model of your career potential — income projections, skill gaps, growth paths |
+| **Digital Economic Twin** | AI model of your career potential - income projections, skill gaps, growth paths |
 | **CV Analyser** | ATS score, keyword gaps, readiness level, and actionable improvements |
 | **CV Revamp** | AI rewrites your CV to pass ATS filters |
 | **Opportunity Matching** | Learnerships, internships, bursaries, and jobs matched to your skills and province |
@@ -71,7 +71,7 @@ create the `interview_sessions` and `saved_opportunities` tables and apply the
 security/consent updates.  
 Note your **Project URL** and **service role key** from Settings → API.
 
-### 2. Option A — Docker (recommended)
+### 2. Option A - Docker (recommended)
 
 The fastest way to run all three services together:
 
@@ -96,7 +96,7 @@ To also start Redis (needed for the BullMQ async queue):
 docker compose --profile redis up --build
 ```
 
-### Option B — Manual setup
+### Option B - Manual setup
 
 #### Backend
 
@@ -142,7 +142,7 @@ App starts at `http://localhost:5173`.
 | Variable | Required | Description |
 |---|---|---|
 | `SUPABASE_URL` | Yes | Supabase project URL |
-| `SUPABASE_SERVICE_ROLE_KEY` | Yes | Service-role key — **never expose client-side** |
+| `SUPABASE_SERVICE_ROLE_KEY` | Yes | Service-role key - **never expose client-side** |
 | `DATA_ENCRYPTION_KEY` | Yes | 64-char hex for AES-256-GCM encryption of PII |
 | `AI_SERVICE_URL` | Yes | FastAPI service URL |
 | `FRONTEND_URL` | Yes | Frontend URL (used in email auth redirects) |
@@ -183,7 +183,7 @@ All protected endpoints require `Authorization: Bearer <supabase-jwt>`.
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). We welcome contributors — especially developers, AI researchers, and people with lived experience of South Africa's job market.
+See [CONTRIBUTING.md](CONTRIBUTING.md). We welcome contributors - especially developers, AI researchers, and people with lived experience of South Africa's job market.
 
 ## Security
 

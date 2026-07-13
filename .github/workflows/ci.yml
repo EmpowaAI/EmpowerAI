@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # full history — gitleaks scans all commits in the push/PR
+          fetch-depth: 0  # full history - gitleaks scans all commits in the push/PR
 
       - name: Run gitleaks
         uses: gitleaks/gitleaks-action@v2
@@ -21,7 +21,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   frontend:
-    name: Frontend — type check & build
+    name: Frontend - type check & build
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -49,7 +49,7 @@ jobs:
           VITE_COMING_SOON: 'false'
 
   backend:
-    name: Backend — unit tests
+    name: Backend - unit tests
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -72,7 +72,7 @@ jobs:
           NODE_ENV: test
 
   ai-service:
-    name: AI Service — import check
+    name: AI Service - import check
     runs-on: ubuntu-latest
     defaults:
       run:

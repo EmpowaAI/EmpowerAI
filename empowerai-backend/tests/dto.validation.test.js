@@ -9,7 +9,7 @@ const runRules = async (rules, body) => {
   return validationResult(req).array();
 };
 
-describe('UpdateUserDto — express-validator', () => {
+describe('UpdateUserDto - express-validator', () => {
   test('rejects attempt to change email', async () => {
     const errors = await runRules(updateUserRules, { email: 'new@email.com' });
     expect(errors.some((e) => e.path === 'email')).toBe(true);
@@ -42,7 +42,7 @@ describe('UpdateUserDto — express-validator', () => {
   });
 });
 
-describe('toUpdateUserDTO — field allowlist', () => {
+describe('toUpdateUserDTO - field allowlist', () => {
   test('strips disallowed fields', () => {
     const dto = toUpdateUserDTO({
       name: 'Sipho',

@@ -129,7 +129,7 @@ export default function LiveInsightsFeed() {
         </div>
         <div className="flex-1">
           <h3 className="font-display font-semibold">Live SA Market Intelligence</h3>
-          <p className="text-xs text-muted-foreground">Real-time career intelligence feed — South Africa</p>
+          <p className="text-xs text-muted-foreground">Real-time career intelligence feed - South Africa</p>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="h-2 w-2 rounded-full bg-neon-green animate-pulse" />

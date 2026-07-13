@@ -161,17 +161,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   // Per-route page titles + noindex for all dashboard routes
   useEffect(() => {
     const titles: Record<string, string> = {
-      "/dashboard": "Dashboard — EmpowaAI",
-      "/dashboard/cv-analyzer": "CV Analyzer — EmpowaAI",
-      "/dashboard/twin": "Digital Twin — EmpowaAI",
-      "/dashboard/twin-builder": "Digital Twin — EmpowaAI",
-      "/dashboard/interview": "Interview Coach — EmpowaAI",
-      "/dashboard/opportunities": "Opportunities — EmpowaAI",
-      "/dashboard/chat": "AI Assistant — EmpowaAI",
-      "/dashboard/mentor": "AI Mentor — EmpowaAI",
-      "/dashboard/simulations": "Simulations — EmpowaAI",
-      "/dashboard/profile": "Profile — EmpowaAI",
-      "/dashboard/settings": "Settings — EmpowaAI",
+      "/dashboard": "Dashboard - EmpowaAI",
+      "/dashboard/cv-analyzer": "CV Analyzer - EmpowaAI",
+      "/dashboard/twin": "Digital Twin - EmpowaAI",
+      "/dashboard/twin-builder": "Digital Twin - EmpowaAI",
+      "/dashboard/interview": "Interview Coach - EmpowaAI",
+      "/dashboard/opportunities": "Opportunities - EmpowaAI",
+      "/dashboard/chat": "AI Assistant - EmpowaAI",
+      "/dashboard/mentor": "AI Mentor - EmpowaAI",
+      "/dashboard/simulations": "Simulations - EmpowaAI",
+      "/dashboard/profile": "Profile - EmpowaAI",
+      "/dashboard/settings": "Settings - EmpowaAI",
     };
     document.title = titles[pathname] ?? "EmpowaAI";
 
@@ -351,7 +351,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           aria-hidden={!mobileMenuOpen}
         />
 
-        {/* Mobile Account Sheet — navigation is in the bottom tab bar; this is for account actions only */}
+        {/* Mobile Account Sheet - navigation is in the bottom tab bar; this is for account actions only */}
         <div
           className={cn(
             "fixed inset-y-0 right-0 z-50 w-72 bg-card border-l border-border transform transition-all duration-300 ease-in-out shadow-2xl",

@@ -29,7 +29,7 @@ exports.createEconomicTwin = async (req, res, next) => {
 
 // -----------------------------------------------------------------------------
 // POST /api/twin/build-from-cv
-// Triggered after CV analysis — links CvProfile data into the twin.
+// Triggered after CV analysis - links CvProfile data into the twin.
 // -----------------------------------------------------------------------------
 
 exports.buildTwinFromCv = async (req, res, next) => {
@@ -97,7 +97,7 @@ exports.chatWithTwin = async (req, res, next) => {
     if (!twinContext) {
       return res.status(400).json({
         status:  'error',
-        message: 'twinContext is required — call /chat/init first',
+        message: 'twinContext is required - call /chat/init first',
       });
     }
 

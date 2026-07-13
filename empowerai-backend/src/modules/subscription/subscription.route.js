@@ -1,13 +1,13 @@
 /**
  * EmpowerAI - Subscriptions Router
  *
- * POST  /api/subscriptions/trial            — start trial (called during user registration)
- * GET   /api/subscriptions/user/:userId     — get a user's subscription
- * GET   /api/subscriptions                  — list all (super admin)
- * POST  /api/subscriptions/checkout         — initiate Paystack checkout
- * PATCH /api/subscriptions/:userId/plan     — upgrade/downgrade plan
- * POST  /api/subscriptions/:userId/cancel   — cancel (at period end)
- * POST  /api/subscriptions/:userId/reactivate — undo cancellation
+ * POST  /api/subscriptions/trial            - start trial (called during user registration)
+ * GET   /api/subscriptions/user/:userId     - get a user's subscription
+ * GET   /api/subscriptions                  - list all (super admin)
+ * POST  /api/subscriptions/checkout         - initiate Paystack checkout
+ * PATCH /api/subscriptions/:userId/plan     - upgrade/downgrade plan
+ * POST  /api/subscriptions/:userId/cancel   - cancel (at period end)
+ * POST  /api/subscriptions/:userId/reactivate - undo cancellation
  */
 
 const express = require('express');
@@ -126,7 +126,7 @@ router.get(
 /**
  * POST /api/subscriptions/checkout
  * Initialise a Paystack transaction for a user subscribing to or upgrading a plan.
- * Returns { authorizationUrl } — redirect the user's browser to this URL.
+ * Returns { authorizationUrl } - redirect the user's browser to this URL.
  */
 router.post(
   '/checkout',

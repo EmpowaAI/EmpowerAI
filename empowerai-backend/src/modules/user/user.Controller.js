@@ -5,7 +5,7 @@
  *   - Update user profile
  *   - Change password
  *
- * No business logic, no DTOs — fully delegates to userService.
+ * No business logic, no DTOs - fully delegates to userService.
  */
 
 const logger = require('../../utils/logger');

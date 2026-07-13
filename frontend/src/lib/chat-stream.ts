@@ -92,7 +92,7 @@ export async function streamChat({
       const errorData = await response.json().catch(() => ({}));
 
       if (response.status === 429) {
-        onError("Rate limited — please wait a moment and try again.");
+        onError("Rate limited - please wait a moment and try again.");
         onDone({ reply: "", options: [], isComplete: false, profile: null });
         return;
       }

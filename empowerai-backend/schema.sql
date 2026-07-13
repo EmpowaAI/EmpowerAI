@@ -1,5 +1,5 @@
 -- ============================================================
--- EmpowerAI — Supabase PostgreSQL Schema
+-- EmpowerAI - Supabase PostgreSQL Schema
 -- Run this in the Supabase SQL editor (Dashboard > SQL Editor)
 -- ============================================================
 

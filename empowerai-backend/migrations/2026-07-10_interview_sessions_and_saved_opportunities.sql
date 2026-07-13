@@ -1,5 +1,5 @@
 -- ============================================================
--- EmpowerAI migration — 2026-07-10
+-- EmpowerAI migration - 2026-07-10
 -- Adds: interview_sessions (persist interview coach sessions)
 --       saved_opportunities (persist user bookmarks)
 -- Run this in the Supabase SQL editor (Dashboard > SQL Editor)

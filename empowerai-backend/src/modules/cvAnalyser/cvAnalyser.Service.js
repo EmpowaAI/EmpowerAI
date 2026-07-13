@@ -246,7 +246,7 @@ async function _handleAnalysisError({ error, userId, cvText, targetRole, industr
     error.code === 'ETIMEDOUT'    ||
     !error.response;
 
-  // 400 — bad input; try Node-side extraction if file provided
+  // 400 - bad input; try Node-side extraction if file provided
   if (status === 400) {
     const detail = error.response?.data?.detail || error.response?.data?.message || '';
     const isNotCv = detail.toLowerCase().includes('invalid document format');

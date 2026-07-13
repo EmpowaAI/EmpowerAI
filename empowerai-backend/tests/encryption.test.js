@@ -22,7 +22,7 @@ const {
 
 // ── encryptField / decryptField ───────────────────────────────────────────────
 
-describe('encryptField / decryptField — round-trip', () => {
+describe('encryptField / decryptField - round-trip', () => {
   test('round-trips a plain string', () => {
     const original = 'Cape Town';
     expect(decryptField(encryptField(original))).toBe(original);
@@ -82,7 +82,7 @@ describe('encryptField / decryptField — round-trip', () => {
 
 // ── encryptProfile / decryptProfile ──────────────────────────────────────────
 
-describe('encryptProfile / decryptProfile — round-trip', () => {
+describe('encryptProfile / decryptProfile - round-trip', () => {
   const profile = {
     name: 'Zanele Mokoena',
     email: 'zanele@example.com',
@@ -109,7 +109,7 @@ describe('encryptProfile / decryptProfile — round-trip', () => {
 
   test('does not encrypt non-PII fields (name, email)', () => {
     const encrypted = encryptProfile(profile);
-    // name and email are not in the PII list — they should be unchanged
+    // name and email are not in the PII list - they should be unchanged
     expect(encrypted.name).toBe(profile.name);
     expect(encrypted.email).toBe(profile.email);
   });
@@ -125,12 +125,12 @@ describe('encryptProfile / decryptProfile — round-trip', () => {
     expect(decrypted.age).toBe(24);
   });
 
-  test('partial update (PATCH) — only present fields are encrypted', () => {
+  test('partial update (PATCH) - only present fields are encrypted', () => {
     const patch = { name: 'Sipho', skills: ['SQL'] };
     const encrypted = encryptProfile(patch);
-    // name not in PII list — unchanged
+    // name not in PII list - unchanged
     expect(encrypted.name).toBe('Sipho');
-    // skills IS in PII list — each element should be encrypted
+    // skills IS in PII list - each element should be encrypted
     expect(encrypted.skills[0]).not.toBe('SQL');
   });
 
@@ -141,7 +141,7 @@ describe('encryptProfile / decryptProfile — round-trip', () => {
 
 // ── encryptAnalysis / decryptAnalysis ─────────────────────────────────────────
 
-describe('encryptAnalysis / decryptAnalysis — round-trip', () => {
+describe('encryptAnalysis / decryptAnalysis - round-trip', () => {
   const analysis = {
     score: 72,
     readinessLevel: 'Intermediate',

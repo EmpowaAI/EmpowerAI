@@ -16,7 +16,7 @@ let viteBin;
 try {
   viteBin = path.join(path.dirname(require.resolve('vite/package.json')), 'bin', 'vite.js');
 } catch (e) {
-  process.stderr.write('run-vite: could not resolve vite — is it installed?\n');
+  process.stderr.write('run-vite: could not resolve vite - is it installed?\n');
   process.exit(1);
 }
 

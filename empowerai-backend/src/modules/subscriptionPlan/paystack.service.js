@@ -80,7 +80,7 @@ class PaystackService {
         return this._handleSubscriptionDisabled(data);
 
       default:
-        // Unhandled event types are expected — log via caller
+        // Unhandled event types are expected - log via caller
         return { event: 'unhandled', eventType };
     }
   }

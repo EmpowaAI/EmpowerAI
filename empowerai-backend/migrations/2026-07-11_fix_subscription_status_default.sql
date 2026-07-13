@@ -1,10 +1,10 @@
 -- ============================================================
--- EmpowerAI migration — 2026-07-11
+-- EmpowerAI migration - 2026-07-11
 -- Align subscriptions.status default with application constants.
 --
 -- schema.sql created the column with default 'TRIAL' (uppercase), but the
 -- backend compares status against lowercase values ('trial', 'active',
--- 'past_due', 'cancelled', 'expired' — plans.config.js SUBSCRIPTION_STATUS).
+-- 'past_due', 'cancelled', 'expired' - plans.config.js SUBSCRIPTION_STATUS).
 -- The backend always sets status explicitly today, so this is only a
 -- safeguard against any row created via the DB default (manual SQL / future
 -- code) that would otherwise read as an unrecognised status and wrongly lock

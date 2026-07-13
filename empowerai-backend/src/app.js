@@ -44,7 +44,7 @@ app.use((req, _res, next) => {
 // ─── Rate Limiting ────────────────────────────────────────────────────────────
 if (isEnabled(process.env.ENABLE_AUTH_RATE_LIMITER, true)) {
   app.use('/api/auth', authLimiter);
-  // Password recovery endpoints get the same strict limiter — they can be
+  // Password recovery endpoints get the same strict limiter - they can be
   // abused for email enumeration and mail-quota exhaustion.
   app.use('/api/account/forgot-password', authLimiter);
   app.use('/api/account/reset-password', authLimiter);
@@ -67,7 +67,7 @@ if (isEnabled(process.env.ENABLE_API_RATE_LIMITER, true)) {
   app.use('/api/subscriptions', apiLimiter);
   app.use('/api/usage', apiLimiter);
   app.use('/api/leaderboard', apiLimiter);
-  // Public endpoints that send mail / write rows — protect from spam
+  // Public endpoints that send mail / write rows - protect from spam
   app.use('/api/contact', apiLimiter);
   app.use('/api/waitlist', apiLimiter);
 }
@@ -101,7 +101,7 @@ app.use('/api/subscriptions', require('./modules/subscription/subscription.route
 app.use('/api/usage',         require('./modules/usage/usage.route'));
 app.use('/webhooks',          require('./routes/webhooks.route'));
 
-// ─── Root — Render health check + API discovery ───────────────────────────────
+// ─── Root - Render health check + API discovery ───────────────────────────────
 app.get('/', (req, res) => {
   res.status(200).json({
     status: 'ok',

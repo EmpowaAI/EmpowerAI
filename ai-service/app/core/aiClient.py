@@ -23,7 +23,7 @@ class AIClient:
         """Wrapper around chat.completions.create that speaks the current
         parameter contract:
         - GPT-5 / o-series models require `max_completion_tokens` (not
-          `max_tokens`) — we always send the new name.
+          `max_tokens`) - we always send the new name.
         - Some of those models also reject any non-default `temperature`;
           if the API complains, retry once without it.
         """
@@ -61,7 +61,7 @@ class AIClient:
     def ping(self, timeout: float = 6.0) -> bool:
         """Cheap liveness probe for Azure OpenAI: a tiny completion that
         validates key + endpoint + deployment + api-version without real
-        cost. Never raises — returns False on any failure, and logs why so
+        cost. Never raises - returns False on any failure, and logs why so
         Azure misconfiguration is diagnosable from the service logs."""
         try:
             self._create(

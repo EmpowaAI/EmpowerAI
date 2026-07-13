@@ -2,7 +2,7 @@ import type { ElementType, ReactNode } from "react";
 import { cn } from "../../lib/utils";
 
 interface PageHeaderProps {
-  /** Small uppercase label above the title — shown in secondary (orange) */
+  /** Small uppercase label above the title - shown in secondary (orange) */
   eyebrow?: string;
   title: string;
   subtitle?: string;

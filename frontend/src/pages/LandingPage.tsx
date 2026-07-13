@@ -421,7 +421,7 @@ export default function LandingPage() {
                   "transition-all duration-500 inline-block",
                   isAnimating ? "opacity-0" : "opacity-100"
                 )}>
-                  {currentUbuntuProverb.split(' ').slice(0, 3).join(' ')}... — this is what's possible.
+                  {currentUbuntuProverb.split(' ').slice(0, 3).join(' ')}... - this is what's possible.
                 </span>
               </p>
             </div>
@@ -520,9 +520,9 @@ export default function LandingPage() {
                     {[
                       { t: "Uploaded CV", d: "Analyzed in 60 seconds" },
                       { t: "Explored 5 Paths", d: "Tech, Trades, SMME, Gov, Creative" },
-                      { t: "Chose Tech Skills", d: "95% match — best fit" },
+                      { t: "Chose Tech Skills", d: "95% match - best fit" },
                       { t: "Hired in 6 weeks", d: "Junior dev, remote-friendly" },
-                      { t: "R4,500/month", d: "Up from R0 — and growing" },
+                      { t: "R4,500/month", d: "Up from R0 - and growing" },
                     ].map((step, i) => (
                       <li key={step.t} className="flex gap-3 sm:gap-4 rounded-xl border border-border/60 bg-background/70 px-3 py-2 sm:px-4 sm:py-3">
                         <div className="flex flex-col items-center">
@@ -546,7 +546,7 @@ export default function LandingPage() {
                     &quot;<span className={cn(
                       "transition-all duration-500",
                       isAnimating ? "opacity-0" : "opacity-100"
-                    )}>{currentUbuntu}</span> — this is what we're building for.&quot;
+                    )}>{currentUbuntu}</span> - this is what we're building for.&quot;
                   </p>
                   <p className="mt-2 sm:mt-3 text-[9px] sm:text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                     EmpowaAI <span className="text-secondary">·</span> Projected outcome · SA Graduate
@@ -577,7 +577,7 @@ export default function LandingPage() {
 
             <div className="mt-8 sm:mt-10 grid gap-4 sm:gap-5 md:grid-cols-3">
               {[
-                { n: "01", icon: Upload, title: "Upload Your CV", desc: "Drop your CV — or build one with us in minutes." },
+                { n: "01", icon: Upload, title: "Upload Your CV", desc: "Drop your CV - or build one with us in minutes." },
                 { n: "02", icon: Gauge, title: "Get Your Score", desc: "AI reveals your Empowerment Score and gaps." },
                 { n: "03", icon: Compass, title: "Explore Career Paths", desc: "Compare 5+ paths with real income projections." },
               ].map(({ n, icon: Icon, title, desc }) => (

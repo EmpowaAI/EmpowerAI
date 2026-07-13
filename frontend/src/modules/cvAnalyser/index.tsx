@@ -8,7 +8,7 @@ import CVAnalysisForm from './componets/CVAnalysisForm';
 import CVAnalysisResult from './componets/CVAnalysisResults';
 import CVRevampSection from './componets/CVRevampSection';
 
-// Reuse existing components — no design pattern change
+// Reuse existing components - no design pattern change
 import CVUploadError from './componets/CVUploadError';
 import CVScanAnimation from './componets/CVScanAnimation';
 import RevampedCVDisplay from './componets/RevampedCVDisplay';
@@ -74,7 +74,7 @@ export default function CVAnalyzerPage() {
         </div>
       </div>
 
-      {/* Start Over button — shown after analysis */}
+      {/* Start Over button - shown after analysis */}
       {(step === 'result' || step === 'revamped' || step === 'revamping') && (
         <div className="flex justify-end">
           <button
@@ -87,7 +87,7 @@ export default function CVAnalyzerPage() {
         </div>
       )}
 
-      {/* Error banner — step 'result' means the revamp failed, so retry the revamp */}
+      {/* Error banner - step 'result' means the revamp failed, so retry the revamp */}
       <AnimatePresence>
         {error && (
           <CVUploadError
@@ -120,7 +120,7 @@ export default function CVAnalyzerPage() {
               onTextChange={setCVText}
             />
 
-            {/* Analysis details — always show so user can fill while uploading */}
+            {/* Analysis details - always show so user can fill while uploading */}
             <div className={cn(
               "border-t border-border pt-6 transition-opacity duration-300",
               uploadReady ? "opacity-100" : "opacity-50 pointer-events-none"

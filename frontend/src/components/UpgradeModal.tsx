@@ -71,7 +71,7 @@ export function UpgradeModal({ open, onOpenChange, feature }: Props) {
           </ul>
 
           <div className="rounded-lg border border-border/70 bg-muted/40 p-3 text-[11px] text-muted-foreground">
-            <strong className="text-primary">CV Analyser stays Mahala</strong> — always free, no card needed.
+            <strong className="text-primary">CV Analyser stays Mahala</strong> - always free, no card needed.
           </div>
 
           <div className="flex flex-col-reverse gap-2 sm:flex-row">

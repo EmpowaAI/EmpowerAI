@@ -1,4 +1,4 @@
-// REMOVED: const fetch = require('node-fetch'); — Node 24 has native fetch
+// REMOVED: const fetch = require('node-fetch'); - Node 24 has native fetch
 
 // ================= CONFIG =================
 const {
@@ -63,7 +63,7 @@ const send = async (to, subject, html, text = '', replyTo = null) => {
       !EMAIL_FROM && 'EMAIL_FROM',
       !FRONTEND_URL && 'FRONTEND_URL',
     ].filter(Boolean).join(', ');
-    log('error', `Email not sent — missing env vars: ${missing}`);
+    log('error', `Email not sent - missing env vars: ${missing}`);
     throw new Error(
       `Email service is not configured (missing: ${missing}). Set these environment variables to enable outgoing email.`
     );

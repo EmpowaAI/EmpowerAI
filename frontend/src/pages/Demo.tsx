@@ -144,7 +144,7 @@ export default function Demo() {
                     Try EmpowaAI<br className="hidden sm:block" /> in 60 seconds
                   </h1>
                   <p className="mt-3 text-white/70 text-sm sm:text-base max-w-md leading-relaxed">
-                    CV Analyser · AI revamp · Digital Twin — all free. See the full flow, then sign up to unlock your real career journey.
+                    CV Analyser · AI revamp · Digital Twin - all free. See the full flow, then sign up to unlock your real career journey.
                   </p>
 
                   {/* Feature pills */}

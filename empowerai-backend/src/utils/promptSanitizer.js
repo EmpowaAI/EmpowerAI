@@ -1,5 +1,5 @@
 /**
- * promptSanitizer.js — neutralise prompt-injection delivery mechanisms in
+ * promptSanitizer.js - neutralise prompt-injection delivery mechanisms in
  * user-supplied text before it is embedded in AI prompts.
  *
  * Mirrors ai-service/app/core/sanitize.py so both tiers apply the same
@@ -17,7 +17,7 @@ function sanitizeForPrompt(text, maxChars = 15000) {
   if (!text || typeof text !== 'string') return '';
 
   let cleaned = text.replace(CONTROL_CHARS, '');
-  // Defuse rather than delete — "System: Administrator" in a CV stays
+  // Defuse rather than delete - "System: Administrator" in a CV stays
   // readable but can't masquerade as a chat role.
   cleaned = cleaned.replace(ROLE_MARKERS, (m) => m.replace(':', ' -'));
 

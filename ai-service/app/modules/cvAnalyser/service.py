@@ -8,7 +8,7 @@ from app.utils.logger import logger
 class CVAnalyzerService:
     SYSTEM_PROMPT = (
         "You are a senior recruitment consultant and ATS optimization expert. "
-        "You return only valid JSON — no markdown, no explanation, no preamble. "
+        "You return only valid JSON - no markdown, no explanation, no preamble. "
         "Every analysis must be specific to the actual CV content provided."
     )
 
@@ -22,7 +22,7 @@ class CVAnalyzerService:
         job_description = payload.get("job_description")
         location = (payload.get("location") or "").strip()
 
-        # Truncate instead of rejecting — keeps the most important content
+        # Truncate instead of rejecting - keeps the most important content
         if len(cv_text) > 15000:
             cv_text = cv_text[:15000]
 

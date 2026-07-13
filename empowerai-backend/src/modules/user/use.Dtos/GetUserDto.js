@@ -8,7 +8,7 @@
  */
 
 // ─────────────────────────────────────────────
-// DTO builder — maps a User document to a safe response shape
+// DTO builder - maps a User document to a safe response shape
 // ─────────────────────────────────────────────
 const toGetUserDTO = (user) => ({
   id:        user.id,

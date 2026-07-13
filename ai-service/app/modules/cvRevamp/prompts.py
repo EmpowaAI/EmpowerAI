@@ -29,7 +29,7 @@ def build_cv_revamp_prompt(
     return f"""You are an elite CV writer and career coach specializing in the {industry} industry.
 
 TASK
-Produce a COMPLETE, polished, ATS-optimized CV — a full document with every
+Produce a COMPLETE, polished, ATS-optimized CV - a full document with every
 section written out in full, NOT a list of corrections and NOT only the parts
 that were flagged. Rewrite the entire CV from the candidate's real content.
 
@@ -41,7 +41,7 @@ ORIGINAL CV:
 {cv_text}
 \"\"\"
 
-CONTEXT — weaknesses to fix while you rewrite (use as guidance, not output):
+CONTEXT - weaknesses to fix while you rewrite (use as guidance, not output):
 Skill gaps: {json.dumps(skill_gaps)}
 Grammar issues: {json.dumps(grammar_issues)}
 ATS issues: {json.dumps(ats_issues)}
@@ -66,11 +66,11 @@ HOW TO WRITE IT
 
 STRICT RULES
 - Do NOT invent employers, job titles, dates, degrees, or certifications.
-- Do NOT fabricate metrics — only quantify where the original supports it.
+- Do NOT fabricate metrics - only quantify where the original supports it.
 - Keep it truthful to the candidate's real background; improve wording, do not
   invent history.
 
-OUTPUT — return ONLY valid JSON in EXACTLY this shape (camelCase keys, no
+OUTPUT - return ONLY valid JSON in EXACTLY this shape (camelCase keys, no
 markdown, no commentary). Every `bullets` field MUST be a non-empty array of
 strings:
 {{
@@ -110,7 +110,7 @@ strings:
     "languages": ["Language (proficiency)"]
   }},
   "revamp_summary": "2-4 sentences describing what you improved and why it is now stronger for {target_role} roles.",
-  "plain_text_cv": "The complete revamped CV as clean plain text — every section, ready to copy or download."
+  "plain_text_cv": "The complete revamped CV as clean plain text - every section, ready to copy or download."
 }}
 
 - Omit optional sections only if the candidate genuinely has no content for them

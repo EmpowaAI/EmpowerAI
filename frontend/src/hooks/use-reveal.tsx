@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 /**
- * useReveal — IntersectionObserver hook that adds a "revealed" state once
+ * useReveal - IntersectionObserver hook that adds a "revealed" state once
  * the element enters the viewport. Respects prefers-reduced-motion by
  * resolving immediately so content is never hidden.
  */

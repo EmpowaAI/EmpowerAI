@@ -217,7 +217,7 @@ export function useCVAnalyzer() {
           : await analyzeCVText(cvText, targetRole, industry, jobDescription);
 
       // Determine the resolved cvText to persist in state:
-      //   1. Use cvText returned by the backend (file upload path — backend extracts text).
+      //   1. Use cvText returned by the backend (file upload path - backend extracts text).
       //   2. Fall back to the pasted text the user typed (text input path).
       //   3. Last resort: empty string (revamp will be blocked by backend validation).
       const resolvedCvText = response.cvText ?? cvText ?? '';

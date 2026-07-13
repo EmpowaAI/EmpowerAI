@@ -30,7 +30,7 @@ async function getLeaderboard({ period = 'all-time', limit = 50, currentUserId =
 
   // 1. Users (optionally restricted to the active window)
   // Only users who consented to profile sharing appear on a leaderboard
-  // visible to other members (POPIA — consent defaults to false).
+  // visible to other members (POPIA - consent defaults to false).
   let userQuery = supabase
     .from('users')
     .select('id, name, avatar, province, last_active_at')
@@ -79,7 +79,7 @@ async function getLeaderboard({ period = 'all-time', limit = 50, currentUserId =
     activity.set(u.user_id, (activity.get(u.user_id) || 0) + (u.count || 0));
   }
 
-  // 5. Assemble — only users with a real score participate
+  // 5. Assemble - only users with a real score participate
   const entries = users
     .map((u) => {
       const fromTwin = twinScore.get(u.id);

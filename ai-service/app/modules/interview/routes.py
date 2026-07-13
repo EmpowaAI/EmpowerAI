@@ -8,7 +8,7 @@ router = APIRouter()
 interview_service = InterviewService()
 
 
-# Sync `def` — the OpenAI SDK call inside is blocking; FastAPI runs plain
+# Sync `def` - the OpenAI SDK call inside is blocking; FastAPI runs plain
 # def handlers in a threadpool so the event loop stays free.
 # ── POST /interview/start ──
 @router.post("/start")

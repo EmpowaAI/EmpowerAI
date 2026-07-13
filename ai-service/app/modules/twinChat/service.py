@@ -30,7 +30,7 @@ class TwinChatService:
         reply = str(parsed.get("reply") or "").strip()
         if not reply:
             # A model that returned JSON without a reply is a contract
-            # violation — surface the raw text rather than empty silence.
+            # violation - surface the raw text rather than empty silence.
             reply = raw.strip()[:2000]
 
         options = parsed.get("options")

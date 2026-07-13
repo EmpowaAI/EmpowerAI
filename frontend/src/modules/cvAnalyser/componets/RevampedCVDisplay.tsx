@@ -426,7 +426,7 @@ export default function RevampedCVDisplay({ cvData }: RevampedCVDisplayProps) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Clipboard API unavailable (e.g. insecure context) — fall back to TXT download
+      // Clipboard API unavailable (e.g. insecure context) - fall back to TXT download
       downloadTXT();
     }
   };

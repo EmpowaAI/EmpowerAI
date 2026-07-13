@@ -1,8 +1,8 @@
 /**
  * EduPulse AI - Plans Router
- * GET  /api/plans                 — list all plans (public)
- * GET  /api/plans/:planId         — get single plan (public)
- * GET  /api/plans/compare         — compare all plans (public)
+ * GET  /api/plans                 - list all plans (public)
+ * GET  /api/plans/:planId         - get single plan (public)
+ * GET  /api/plans/compare         - compare all plans (public)
  */
 
 const express = require('express');

@@ -55,7 +55,7 @@ export default function CVUploadZone({
         setFileError(error);
         return;
       }
-      // File wins — switch to file mode (clears any pasted text)
+      // File wins - switch to file mode (clears any pasted text)
       onModeChange('file');
       onFileSelect(incoming);
     },
@@ -104,7 +104,7 @@ export default function CVUploadZone({
       {/* ── Upload Zone ────────────────────────────────────────────────── */}
       <AnimatePresence mode="wait">
         {file ? (
-          /* File selected — success chip */
+          /* File selected - success chip */
           <motion.div
             key="file-selected"
             initial={{ opacity: 0, scale: 0.97 }}
@@ -243,7 +243,7 @@ export default function CVUploadZone({
           <div className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-2xl bg-background/75 backdrop-blur-sm border border-dashed border-border/40">
             <FileText className="h-5 w-5 text-muted-foreground/50 mb-2" />
             <p className="text-xs text-muted-foreground text-center px-4">
-              File uploaded — remove it above to paste text instead
+              File uploaded - remove it above to paste text instead
             </p>
           </div>
         )}
@@ -252,7 +252,7 @@ export default function CVUploadZone({
           value={cvText}
           onChange={handleTextChange}
           disabled={!!file}
-          placeholder="Paste your full CV here — work experience, skills, education, and all..."
+          placeholder="Paste your full CV here - work experience, skills, education, and all..."
           rows={9}
           className={cn(
             'w-full px-4 py-3.5 rounded-2xl border-2 bg-card text-sm text-foreground placeholder:text-muted-foreground/40 resize-none focus:outline-none transition-all duration-200 font-mono leading-relaxed',
@@ -281,7 +281,7 @@ export default function CVUploadZone({
       {textTooShort && !file && (
         <p className="text-xs text-amber-500 flex items-center gap-1.5 -mt-2">
           <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-500 flex-shrink-0" />
-          Paste your full CV — at least 50 characters needed
+          Paste your full CV - at least 50 characters needed
         </p>
       )}
     </div>

@@ -16,7 +16,7 @@ router.post('/', async (req, res, next) => {
     const { error } = await supabase.from('waitlist').insert({ email });
 
     if (error) {
-      // PostgreSQL unique violation — already on waitlist
+      // PostgreSQL unique violation - already on waitlist
       if (error.code === '23505') {
         return res.status(200).json({ status: 'success', message: 'You are on the waitlist.' });
       }

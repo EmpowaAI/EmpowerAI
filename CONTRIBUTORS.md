@@ -18,11 +18,11 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for setup instructions, coding standards,
 
 EmpowerAI stands on the shoulders of:
 
-- [Supabase](https://supabase.com) — database, auth, and storage
-- [Azure OpenAI](https://azure.microsoft.com/en-us/products/ai-services/openai-service) — AI analysis and generation
-- [Paystack](https://paystack.com) — payments for South African users
-- [Adzuna](https://www.adzuna.co.za) — job listing data
-- [Vercel](https://vercel.com) and [Render](https://render.com) — hosting
+- [Supabase](https://supabase.com) - database, auth, and storage
+- [Azure OpenAI](https://azure.microsoft.com/en-us/products/ai-services/openai-service) - AI analysis and generation
+- [Paystack](https://paystack.com) - payments for South African users
+- [Adzuna](https://www.adzuna.co.za) - job listing data
+- [Vercel](https://vercel.com) and [Render](https://render.com) - hosting
 - The open source communities behind React, FastAPI, Express, and Vite
 
 ---

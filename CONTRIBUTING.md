@@ -1,6 +1,6 @@
 # Contributing to EmpowerAI
 
-Thank you for your interest in contributing to EmpowerAI. This platform exists to give South African youth real tools for economic mobility — every improvement matters.
+Thank you for your interest in contributing to EmpowerAI. This platform exists to give South African youth real tools for economic mobility - every improvement matters.
 
 EmpowerAI is currently maintained by one primary developer. Contributions are welcome from developers, AI researchers, UX designers, and people with lived experience of SA's job market.
 
@@ -25,7 +25,7 @@ Be respectful. We serve a vulnerable population (young, unemployed people). Keep
 
 Specifically:
 - No harassment or discrimination of any kind
-- Constructive criticism only — attack the problem, not the person
+- Constructive criticism only - attack the problem, not the person
 - Assume good faith until proven otherwise
 - When in doubt about a design decision, consider: "does this make it easier for a young person in Limpopo with a 2G connection to get a job?"
 
@@ -42,7 +42,7 @@ Specifically:
 ### Suggesting a feature
 
 1. Open a **Feature Request** issue
-2. Describe the problem it solves — not just the solution
+2. Describe the problem it solves - not just the solution
 3. Note if it affects a specific user group (e.g. users in rural areas, users without data, recruiters)
 
 ### Writing code
@@ -95,8 +95,8 @@ EmpowerAI/
 │
 ├── empowerai-backend/
 │   └── src/
-│       ├── modules/       Feature modules — each has Controller, Service, Repository, Route
-│       │   ├── auth/      Register, login, validate (NEW — Supabase bridge)
+│       ├── modules/       Feature modules - each has Controller, Service, Repository, Route
+│       │   ├── auth/      Register, login, validate (NEW - Supabase bridge)
 │       │   ├── account/   Password reset, email change, deletion
 │       │   ├── user/      Profile read/update
 │       │   ├── cvAnalyser/ CV upload, analysis, revamp
@@ -131,14 +131,14 @@ EmpowerAI/
 
 - **No Mongoose**. The codebase has been fully migrated to Supabase. Do not introduce Mongoose or MongoDB.
 - **Module pattern**: every feature has `Controller` → `Service` → `Repository` → `Route`. Controllers handle HTTP; Services contain business logic; Repositories handle Supabase queries.
-- **snake_case in DB, camelCase in app**: use `fromRow()` (DB → app) and `toRow()` (app → DB) helpers — see existing modules for the pattern.
+- **snake_case in DB, camelCase in app**: use `fromRow()` (DB → app) and `toRow()` (app → DB) helpers - see existing modules for the pattern.
 - **Error handling**: throw from Services/Repositories. Controllers call `next(error)`. The global errorHandler in `middleware/errorHandler.js` handles formatting.
 - **No comments explaining what the code does**. Names should be self-explanatory. Only comment the *why* when it is non-obvious.
-- **No `console.log` in production paths** — use the `logger` from `src/utils/logger.js`.
+- **No `console.log` in production paths** - use the `logger` from `src/utils/logger.js`.
 
 ### Frontend (React/TypeScript)
 
-- **Supabase client is in `src/integrations/supabase/client.ts`** — import from there.
+- **Supabase client is in `src/integrations/supabase/client.ts`** - import from there.
 - **Auth tokens**: the current token stored in `localStorage` as `empowerai-token` is a Supabase access token. Do not introduce a separate token system.
 - **API calls**: use the functions in `src/lib/api.ts`. Add new endpoints there.
 - **No `any` types** unless genuinely necessary. Add proper TypeScript types.
@@ -167,7 +167,7 @@ EmpowerAI/
    - [ ] No secrets committed
    - [ ] `.env.example` updated if new env vars added
    - [ ] `schema.sql` updated if DB schema changed
-5. PRs are reviewed by the primary maintainer (Nicolette). Response time may vary — we're a small team. Ping on the issue if no response after 5 business days.
+5. PRs are reviewed by the primary maintainer (Nicolette). Response time may vary - we're a small team. Ping on the issue if no response after 5 business days.
 
 ---
 
@@ -187,7 +187,7 @@ Look for issues tagged [`good first issue`](https://github.com/EmpowaAI/EmpowerA
 
 Current areas where we especially welcome contributions:
 
-- **Tests**: unit and integration tests are sparse — add coverage for any module
+- **Tests**: unit and integration tests are sparse - add coverage for any module
 - **Accessibility**: screen reader support, keyboard navigation, high-contrast mode
 - **Mobile responsiveness**: the platform is used on mobile in low-data environments
 - **SA language support**: translations and localisation for Zulu, Xhosa, Sotho, Afrikaans, etc.

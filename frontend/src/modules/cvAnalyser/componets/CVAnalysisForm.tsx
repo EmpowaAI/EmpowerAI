@@ -93,7 +93,7 @@ export default function CVAnalysisForm({
         <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
           <FileSearch className="h-3.5 w-3.5" />
           Job Description{' '}
-          <span className="text-muted-foreground/50 font-normal">(optional — improves match score)</span>
+          <span className="text-muted-foreground/50 font-normal">(optional - improves match score)</span>
         </label>
         <textarea
           value={values.jobDescription ?? ''}

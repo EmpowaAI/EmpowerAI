@@ -18,7 +18,7 @@ const educationBoosts = require('../../config/educationBoosts');
  */
 const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-// Words that carry no career signal — dropped from tokenised matching so a
+// Words that carry no career signal - dropped from tokenised matching so a
 // goal like "senior software engineer" isn't matched on "senior" alone.
 const CAREER_STOPWORDS = new Set([
   'a', 'an', 'the', 'and', 'or', 'of', 'in', 'for', 'to', 'with', 'at', 'on',
@@ -46,8 +46,8 @@ function wordInHaystack(token, haystack) {
 /**
  * Relevance of a set of career terms/goals to a text haystack, 0..1.
  * Full-phrase hit scores 1; otherwise the best fraction of a term's tokens
- * that appear as whole words in the haystack. Works for any career —
- * technical or not — without needing a taxonomy entry.
+ * that appear as whole words in the haystack. Works for any career -
+ * technical or not - without needing a taxonomy entry.
  */
 function careerRelevance(terms, haystack) {
   if (!Array.isArray(terms) || terms.length === 0 || !haystack) return 0;
@@ -178,7 +178,7 @@ function calculateMatchScore(userProfile, opportunity) {
   ].join(' ').toLowerCase();
   const oppTitle = String(opportunity.title || '').toLowerCase();
 
-  // 6. Career goal alignment (bonus up to 25%) — tokenised & proportional so
+  // 6. Career goal alignment (bonus up to 25%) - tokenised & proportional so
   // "AI Engineer" matches "Machine Learning Engineer", and every career
   // (technical or not) gets partial credit instead of all-or-nothing.
   let hasCareerMatch = false;

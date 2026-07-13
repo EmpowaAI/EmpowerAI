@@ -16,7 +16,7 @@ async function seedOpportunitiesIfEmpty() {
     }
   } catch (error) {
     logger.warn('Failed to auto-seed opportunities:', error.message);
-    // Non-fatal — don't block server startup
+    // Non-fatal - don't block server startup
   }
 }
 
@@ -44,7 +44,7 @@ async function startSchedulers() {
 
 async function runStartupTasks(dbConnected) {
   if (!dbConnected) {
-    logger.warn('Database not connected — skipping startup tasks');
+    logger.warn('Database not connected - skipping startup tasks');
     return;
   }
 

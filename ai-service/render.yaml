@@ -13,7 +13,7 @@ services:
         value: 3.11.9
       - key: PORT
         value: 10000
-      # All required — the app fails to boot if any are missing.
+      # All required - the app fails to boot if any are missing.
       # AZURE_OPENAI_MODEL must point at a deployment that supports the
       # completion token limits used (gpt-4o 2024-08-06+ for 8k+ output).
       - key: AZURE_OPENAI_API_KEY

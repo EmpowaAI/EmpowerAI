@@ -159,13 +159,13 @@ export default function ComingSoon() {
             onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
           />
 
-          {/* Layered overlays — using design-system gradient direction */}
+          {/* Layered overlays - using design-system gradient direction */}
           <div className="absolute inset-0 bg-gradient-to-br from-[hsl(218,64%,12%)] via-black/40 to-[hsl(22,95%,12%)] opacity-80" aria-hidden />
           <div className="pointer-events-none absolute inset-0 ai-mesh opacity-30" aria-hidden />
           <div className="pointer-events-none absolute inset-0 hero-spotlight" aria-hidden />
           <div className="pointer-events-none absolute inset-0 grain" aria-hidden />
 
-          {/* Ambient orbs — use design-system hues */}
+          {/* Ambient orbs - use design-system hues */}
           <div aria-hidden className="cs-orb-a pointer-events-none absolute top-[12%] left-[6%] h-80 w-80 rounded-full opacity-25"
             style={{ background: "radial-gradient(circle, hsl(22 95% 55%) 0%, transparent 72%)", filter: "blur(48px)" }} />
           <div aria-hidden className="cs-orb-b pointer-events-none absolute bottom-[18%] right-[5%] h-[420px] w-[420px] rounded-full opacity-18"
@@ -187,7 +187,7 @@ export default function ComingSoon() {
               </span>
             </div>
 
-            {/* Headline — Plus Jakarta Sans via font-display */}
+            {/* Headline - Plus Jakarta Sans via font-display */}
             <div className="cs-2 space-y-4">
               <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-[4.5rem] font-extrabold leading-[1.04] tracking-tight drop-shadow-sm">
                 The career coach
@@ -195,14 +195,14 @@ export default function ComingSoon() {
                 <span className="text-gradient-ai">South Africa deserves.</span>
               </h1>
               <p className="text-sm sm:text-base font-medium text-white/60 tracking-wide">
-                We're still building — sign up to be the first to know when we open.
+                We're still building - sign up to be the first to know when we open.
               </p>
             </div>
 
             {/* Subtext */}
             <p className="cs-3 text-[1.1rem] sm:text-xl text-white/72 max-w-[520px] mx-auto leading-relaxed font-normal">
               AI that analyses your CV, rewrites it, preps you for interviews,
-              and matches you to real opportunities — built for the South African
+              and matches you to real opportunities - built for the South African
               job market from the ground up.
             </p>
 
@@ -211,7 +211,7 @@ export default function ComingSoon() {
               {status === "success" ? (
                 <div className="inline-flex flex-col items-center gap-3 rounded-2xl border border-secondary/35 bg-secondary/10 backdrop-blur-md px-6 py-6 sm:px-10 sm:py-8 w-full max-w-sm mx-auto">
                   <CheckCircle2 className="h-12 w-12 text-secondary" />
-                  <p className="text-xl font-bold text-white font-display">You're in — we'll see you at launch.</p>
+                  <p className="text-xl font-bold text-white font-display">You're in - we'll see you at launch.</p>
                   <p className="text-sm text-white/65 max-w-xs">One email when we go live. No spam, ever.</p>
                 </div>
               ) : (
@@ -239,7 +239,7 @@ export default function ComingSoon() {
               )}
 
               {errorMsg && <p className="text-sm text-red-300/90">{errorMsg}</p>}
-              <p className="text-xs text-white/38">No spam. No account created. One email — when we go live.</p>
+              <p className="text-xs text-white/38">No spam. No account created. One email - when we go live.</p>
             </div>
 
             {/* Trust chips */}
@@ -259,7 +259,7 @@ export default function ComingSoon() {
           </div>
         </section>
 
-        {/* ── Mission bar — brand gradient, always intentional ──────────── */}
+        {/* ── Mission bar - brand gradient, always intentional ──────────── */}
         <section className="relative overflow-hidden py-10 px-4 bg-ai-gradient">
           {/* Inner glow bloom on the stat */}
           <div aria-hidden className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-40 w-[480px] rounded-full opacity-30"
@@ -316,7 +316,7 @@ export default function ComingSoon() {
             <Logo variant="default" size="md" linkTo="/" />
 
             <p className="text-sm text-muted-foreground text-center max-w-md">
-              Have questions before we launch? Reach out — we'd love to hear from you.
+              Have questions before we launch? Reach out - we'd love to hear from you.
             </p>
 
             <a href="mailto:info@empowa.org"

@@ -8,7 +8,7 @@ router = APIRouter()
 cv_revamp_service = CVRevampService()
 
 
-# Sync `def` so FastAPI runs this in the threadpool — the OpenAI SDK call
+# Sync `def` so FastAPI runs this in the threadpool - the OpenAI SDK call
 # inside is blocking and would otherwise stall the event loop.
 @router.post("/")
 def revamp_cv(payload: dict):
