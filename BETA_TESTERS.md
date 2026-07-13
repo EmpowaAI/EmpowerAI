@@ -128,21 +128,8 @@ EmpowaAI is built by a small founding team of two: **Nicolette Mashaba**
 (Co-Founder & Lead Engineer) and **Lindy Heyns** (Co-Founder & Delivery Lead).
 
 Because it's just the two of us, your feedback reaches the people who can act
-on it directly - nothing gets lost in a big company in between.
-
-> When Nicolette shared her vision for EmpowaAI with me, I knew immediately it
-> was something I wanted to help build. Throughout my career, what has inspired
-> me most is empowering people, creating opportunities, and helping others
-> unlock their potential - and this lets me bring my experience in software
-> delivery together with exactly that mission.
->
-> Together we're building more than an AI platform: we're creating
-> opportunities, restoring hope, and helping job seekers develop the skills and
-> confidence they need to thrive in an ever-changing world. I'm proud to be part
-> of a team committed to making a meaningful difference in South Africa's
-> unemployment crisis.
->
-> **Lindy Heyns** - Co-Founder & Delivery Lead, EmpowaAI 🚀
+on it directly - nothing gets lost in a big company in between. You'll hear from
+us both at the end of this guide.
 
 ---
 
@@ -161,17 +148,29 @@ Questions, stuck somewhere, or just want to reach us? Email
 
 ---
 
-## ❤️ Thank You
+## ❤️ From the Founders
 
-Building EmpowaAI has been an incredible journey, and we're grateful you've
-chosen to be part of it.
+Thank you for building this with us. EmpowaAI is shaped by everyone who tests
+it. Every bug report, feature suggestion, and note you send reaches us directly
+- and makes the platform better for every job seeker who comes after you.
 
-Every bug report, feature suggestion, and piece of feedback helps us build a
-better platform - not just for us, but for every job seeker who will use
-EmpowaAI in the future.
+> Building EmpowaAI has been an incredible journey, and I'm grateful you've
+> chosen to be part of it. I'm proud of what we're creating together for every
+> job seeker who will use it. Thank you for believing in our vision and for
+> helping shape the future of AI-powered employability. This is only the
+> beginning.
+>
+> **Nicolette Mashaba** - Co-Founder & Lead Engineer, EmpowaAI 🚀
 
-Thank you for believing in our vision and for helping shape the future of
-AI-powered employability.
-
-**- Nicolette Mashaba**
-Co-Founder & Lead Engineer, EmpowaAI 🚀
+> When Nicolette shared her vision for EmpowaAI with me, I knew immediately it
+> was something I wanted to help build. What has always inspired me is
+> empowering people, creating opportunities, and helping others unlock their
+> potential - and this lets me bring my experience in software delivery together
+> with exactly that mission.
+>
+> Together we're building more than an AI platform: we're creating
+> opportunities, restoring hope, and helping job seekers develop the skills and
+> confidence to thrive. I'm proud to be part of a team making a meaningful
+> difference in South Africa's unemployment crisis.
+>
+> **Lindy Heyns** - Co-Founder & Delivery Lead, EmpowaAI 🚀
