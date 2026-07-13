@@ -11,7 +11,7 @@
 
 **Do not open a public GitHub issue for security vulnerabilities.**
 
-Email security reports to: **nicolette.mashaba@marisapeer.com**
+Email security reports to: **nene171408@gmail.com**
 
 Include:
 - Description of the vulnerability
@@ -112,7 +112,7 @@ Encryption uses a per-field IV (12 bytes) and auth tag (16 bytes). The key is a 
 ### If you accidentally commit a secret
 
 1. **Rotate the credential immediately** — do not just delete the file; git history preserves the value
-2. Open a private security report to [nicolette.mashaba@marisapeer.com](mailto:nicolette.mashaba@marisapeer.com) so we can verify no unauthorised access occurred
+2. Open a private security report to [nene171408@gmail.com](mailto:nene171408@gmail.com) so we can verify no unauthorised access occurred
 3. We will force-push to remove the secret from history after rotation
 
 ---

@@ -22,7 +22,7 @@
 require('dotenv').config();
 const { createClient } = require('@supabase/supabase-js');
 
-const KEEP_EMAIL = 'nicolette.mashaba@marisapeer.com';
+const KEEP_EMAIL = 'nene171408@gmail.com';
 const EXECUTE    = process.argv.includes('--execute');
 
 // ── Supabase client ───────────────────────────────────────────────────────────

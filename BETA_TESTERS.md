@@ -122,15 +122,14 @@ like it could work better, we'd genuinely love to hear about it.
 
 ---
 
-## 🤝 Our Technology Partner
+## 🤝 The Team Behind EmpowaAI
 
-EmpowaAI is proud to partner with **Lindy**, whose automation platform helps
-power a number of our internal workflows and operational processes.
+EmpowaAI is built by a small founding team of two: **Nicolette Mashaba**
+(Co-Founder & Lead Engineer) and **Lindy Heyns** (Co-Founder & Lead Project
+Delivery).
 
-This partnership enables us to focus on delivering a better experience for our
-users while leveraging reliable automation behind the scenes.
-
-We sincerely appreciate Lindy's support as we continue building and improving EmpowaAI.
+Because it's just the two of us, your feedback reaches the people who can act
+on it directly — nothing gets lost in a big company in between.
 
 ---
 

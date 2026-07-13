@@ -23,7 +23,7 @@ We pledge to make participation in this project a harassment-free experience for
 
 ## Enforcement
 
-Instances of unacceptable behaviour may be reported to **nicolette.mashaba@marisapeer.com**. All reports will be reviewed and investigated promptly. Maintainers are obligated to maintain confidentiality for the reporter.
+Instances of unacceptable behaviour may be reported to **nene171408@gmail.com**. All reports will be reviewed and investigated promptly. Maintainers are obligated to maintain confidentiality for the reporter.
 
 Contributors who violate this code of conduct may be temporarily or permanently banned from the project.
 
