@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
-import logo from "/images/empowerLogo.jpg";
+
+// Served straight from /public — Vite copies it to the build root as-is.
+// (public assets must be referenced by URL, not `import`ed, or the path 404s.)
+const logo = "/images/empowerLogo.jpg";
 
 const AppPreloader = () => {
   const [visible, setVisible] = useState(true);
