@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 
-// Served straight from /public — Vite copies it to the build root as-is.
-// (public assets must be referenced by URL, not `import`ed, or the path 404s.)
-const logo = "/images/empowerLogo.jpg";
+// Real brand icon, served from /public (referenced by URL, not imported).
+// The old empowerLogo.jpg was a line-ending-corrupted PNG and rendered broken.
+const logo = "/images/empowa_icon.png";
 
 const AppPreloader = () => {
   const [visible, setVisible] = useState(true);
