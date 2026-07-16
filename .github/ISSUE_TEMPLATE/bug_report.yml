@@ -10,7 +10,7 @@ body:
         Thanks for helping improve EmpowaAI! 🙏
 
         **Before you file:** a few things are expected during Public Beta and are **not** bugs -
-        no sign-up verification email, AI features taking ~20–40s, and the first Opportunities
+        no sign-up verification email, AI features taking ~20 to 40s, and the first Opportunities
         load being slower. See the [Beta Tester Guide](https://empowa.org/beta-guide.html).
   - type: textarea
     id: what-doing

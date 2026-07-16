@@ -23,11 +23,11 @@ import { useReveal } from "@/hooks/use-reveal";
 type Step = 0 | 1 | 2 | 3;
 
 const PATHS = [
-  { icon: Cpu, name: "Tech Skills", match: 95, income: "R4,500 – R18,000", time: "6 wks", tone: "from-primary to-primary-glow" },
-  { icon: Hammer, name: "Skilled Trades", match: 82, income: "R3,800 – R14,000", time: "8 wks", tone: "from-secondary to-accent-orange" },
-  { icon: Store, name: "SMME / Spaza", match: 74, income: "R2,500 – R22,000", time: "12 wks", tone: "from-primary to-secondary" },
-  { icon: Briefcase, name: "Government", match: 68, income: "R5,200 – R11,000", time: "14 wks", tone: "from-primary-glow to-primary" },
-  { icon: Palette, name: "Creative Industries", match: 61, income: "R2,000 – R16,000", time: "10 wks", tone: "from-accent-orange to-secondary" },
+  { icon: Cpu, name: "Tech Skills", match: 95, income: "R4,500 to R18,000", time: "6 wks", tone: "from-primary to-primary-glow" },
+  { icon: Hammer, name: "Skilled Trades", match: 82, income: "R3,800 to R14,000", time: "8 wks", tone: "from-secondary to-accent-orange" },
+  { icon: Store, name: "SMME / Spaza", match: 74, income: "R2,500 to R22,000", time: "12 wks", tone: "from-primary to-secondary" },
+  { icon: Briefcase, name: "Government", match: 68, income: "R5,200 to R11,000", time: "14 wks", tone: "from-primary-glow to-primary" },
+  { icon: Palette, name: "Creative Industries", match: 61, income: "R2,000 to R16,000", time: "10 wks", tone: "from-accent-orange to-secondary" },
 ] as const;
 
 export function DemoSection() {

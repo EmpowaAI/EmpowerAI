@@ -68,7 +68,7 @@ export default function SkillGapAnalysis({ cvData, cvText = "" }: SkillGapAnalys
             id: `w-${next.length}`,
             type: "weak",
             title: "Add measurable achievements",
-            description: "Rewrite 2–3 bullets with numbers (e.g., customers/day, time saved, revenue, % improvement).",
+            description: "Rewrite 2 to 3 bullets with numbers (e.g., customers/day, time saved, revenue, % improvement).",
             actionLabel: "Revamp CV",
             actionLink: "/dashboard/cv-analyzer",
             category: "achievement",

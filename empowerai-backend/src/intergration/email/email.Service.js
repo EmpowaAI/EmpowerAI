@@ -30,7 +30,7 @@ const buttonStyle = `
 const footerHtml = `
   <hr style="border:none;border-top:1px solid #eee;margin:32px 0;" />
   <p style="color:#999;font-size:12px;">
-    EmpowaAI – Automated message. Do not reply.
+    EmpowaAI automated message. Do not reply.
   </p>
 `;
 
@@ -110,7 +110,7 @@ exports.sendVerification = async (email, token) => {
   const link = `${FRONTEND_URL}/verify?token=${token}`;
   await send(
     email,
-    'Verify your email – EmpowaAI',
+    'EmpowaAI: Verify your email',
     wrap(`
       <h2>Verify your account</h2>
       <p>Click the button below to verify your email address.</p>
@@ -125,7 +125,7 @@ exports.sendReset = async (email, token) => {
   const link = `${FRONTEND_URL}/reset-password?token=${token}`;
   await send(
     email,
-    'Reset your password – EmpowaAI',
+    'EmpowaAI: Reset your password',
     wrap(`
       <h2>Password Reset</h2>
       <p>Click below to reset your password. This link expires in 1 hour.</p>
@@ -140,7 +140,7 @@ exports.sendEmailChange = async (email, token) => {
   const link = `${FRONTEND_URL}/confirm-email?token=${token}`;
   await send(
     email,
-    'Confirm email change – EmpowaAI',
+    'EmpowaAI: Confirm email change',
     wrap(`
       <h2>Confirm Email Change</h2>
       <p>Click below to confirm your new email address.</p>
@@ -155,7 +155,7 @@ exports.sendAccountDeletion = async (email, token) => {
   const link = `${FRONTEND_URL}/confirm-delete?token=${token}`;
   await send(
     email,
-    'Confirm account deletion – EmpowaAI',
+    'EmpowaAI: Confirm account deletion',
     wrap(`
       <h2>Delete Account</h2>
       <p>We received a request to permanently delete your account. This cannot be undone.</p>
@@ -170,7 +170,7 @@ exports.sendAccountDeletion = async (email, token) => {
 exports.sendSubscriptionConfirmation = async (email, name, plan, renewalDate) => {
   await send(
     email,
-    `You're now on the ${plan} plan – EmpowaAI`,
+    `EmpowaAI: You're now on the ${plan} plan`,
     wrap(`
       <h2>Subscription Confirmed 🎉</h2>
       <p>Hi ${escapeHtml(name)}, your <strong>${escapeHtml(plan)}</strong> subscription is now active.</p>
@@ -192,7 +192,7 @@ exports.sendSubscriptionConfirmation = async (email, name, plan, renewalDate) =>
 exports.sendSubscriptionCancelled = async (email, name, plan, expiryDate) => {
   await send(
     email,
-    'Your subscription has been cancelled – EmpowaAI',
+    'EmpowaAI: Your subscription has been cancelled',
     wrap(`
       <h2>Subscription Cancelled</h2>
       <p>Hi ${escapeHtml(name)}, your <strong>${escapeHtml(plan)}</strong> subscription has been cancelled.</p>
@@ -206,7 +206,7 @@ exports.sendSubscriptionCancelled = async (email, name, plan, expiryDate) => {
 exports.sendSubscriptionRenewalReminder = async (email, name, plan, renewalDate, amount) => {
   await send(
     email,
-    'Your subscription renews soon – EmpowaAI',
+    'EmpowaAI: Your subscription renews soon',
     wrap(`
       <h2>Upcoming Renewal Reminder</h2>
       <p>Hi ${escapeHtml(name)}, your <strong>${escapeHtml(plan)}</strong> plan renews on <strong>${escapeHtml(renewalDate)}</strong>.</p>
@@ -219,7 +219,7 @@ exports.sendSubscriptionRenewalReminder = async (email, name, plan, renewalDate,
 exports.sendPaymentFailed = async (email, name, plan, retryDate) => {
   await send(
     email,
-    'Payment failed – action required',
+    'Payment failed, action required',
     wrap(`
       <h2>Payment Failed ⚠️</h2>
       <p>Hi ${escapeHtml(name)}, we couldn't process your payment for the <strong>${escapeHtml(plan)}</strong> plan.</p>
@@ -233,7 +233,7 @@ exports.sendPaymentFailed = async (email, name, plan, retryDate) => {
 exports.sendNewDeviceLogin = async (email, name, device, location, time) => {
   await send(
     email,
-    'New login detected – EmpowaAI',
+    'EmpowaAI: New login detected',
     wrap(`
       <h2>New Device Login Detected</h2>
       <p>Hi ${escapeHtml(name)}, we noticed a login to your account from a new device.</p>
@@ -260,7 +260,7 @@ exports.sendNewDeviceLogin = async (email, name, device, location, time) => {
 exports.sendDeviceRevoked = async (email, name, device) => {
   await send(
     email,
-    'Device removed from your account – EmpowaAI',
+    'EmpowaAI: Device removed from your account',
     wrap(`
       <h2>Device Removed</h2>
       <p>Hi ${escapeHtml(name)}, the following device was removed from your account:</p>
@@ -274,7 +274,7 @@ exports.sendDeviceRevoked = async (email, name, device) => {
 exports.sendAllSessionsRevoked = async (email, name) => {
   await send(
     email,
-    'All sessions signed out – EmpowaAI',
+    'EmpowaAI: All sessions signed out',
     wrap(`
       <h2>All Sessions Signed Out</h2>
       <p>Hi ${escapeHtml(name)}, all active sessions on your account have been terminated.</p>
@@ -325,7 +325,7 @@ exports.sendJobApplication = async (employerEmail, applicantName, jobTitle) => {
 exports.sendApplicationConfirmation = async (userEmail, jobTitle) => {
   await send(
     userEmail,
-    'Application received – EmpowaAI',
+    'EmpowaAI: Application received',
     wrap(`
       <h2>Application Sent ✅</h2>
       <p>Your application for <strong>${escapeHtml(jobTitle)}</strong> was successfully submitted.</p>

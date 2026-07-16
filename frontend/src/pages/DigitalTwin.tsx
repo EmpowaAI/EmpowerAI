@@ -45,8 +45,8 @@ const DEMAND_TO_CONFIDENCE: Record<string, string> = {
 };
 
 function formatIncomeRange(range: { min?: number; max?: number; currency?: string } | undefined): string {
-  if (!range?.min || !range?.max) return "R5,000 – R15,000 / month";
-  return `R${range.min.toLocaleString("en-ZA")} – R${range.max.toLocaleString("en-ZA")} / month`;
+  if (!range?.min || !range?.max) return "R5,000 to R15,000 / month";
+  return `R${range.min.toLocaleString("en-ZA")} to R${range.max.toLocaleString("en-ZA")} / month`;
 }
 
 function mapTwinToDisplay(raw: any): TwinData {
@@ -85,7 +85,7 @@ function mapTwinToDisplay(raw: any): TwinData {
     {
       type: "Side Income",
       title: "Monetizable skills from your profile",
-      projection: "R2,000 – R10,000 / month early potential",
+      projection: "R2,000 to R10,000 / month early potential",
       nextStep: monetizableSkills.length > 0
         ? `Package your ${monetizableSkills[0]} skills into a service offering`
         : "Package one current skill into a simple offer.",

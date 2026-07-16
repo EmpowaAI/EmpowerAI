@@ -73,7 +73,7 @@ To experience EmpowaAI as intended, test it in this order:
 ## ⏳ Things That Are Expected (Not Bugs)
 
 **AI processing isn't instant.** CV Analysis, CV Revamp, the Digital Twin,
-Interview Coach, and Simulations can take **20–40 seconds**. Please let the
+Interview Coach, and Simulations can take **20 to 40 seconds**. Please let the
 request finish.
 
 **First Opportunities load is slower.** The first time you open Opportunities it

@@ -19,7 +19,7 @@ The product is not a generic global career tool. Every feature is shaped around 
 
 ### 1. CV Analyser
 Uploads a CV (PDF or plain text), extracts the content, and runs it through Azure OpenAI to produce:
-- A readiness score (0–100)
+- A readiness score (0 to 100)
 - Missing skills and keywords
 - Strengths and weaknesses
 - Industry-specific suggestions

@@ -118,7 +118,7 @@ function normalizeTwin(raw: any): TwinData | null {
 
   const employabilityScore: number = raw.economy?.employabilityScore ?? 0;
   const incomeRange = raw.economy?.incomePotentialRange
-    ? `R${(raw.economy.incomePotentialRange.min ?? 0).toLocaleString()} – R${(raw.economy.incomePotentialRange.max ?? 0).toLocaleString()}/month`
+    ? `R${(raw.economy.incomePotentialRange.min ?? 0).toLocaleString()} to R${(raw.economy.incomePotentialRange.max ?? 0).toLocaleString()}/month`
     : undefined;
   const coreSkills: string[] = Array.isArray(raw.skills?.core) ? raw.skills.core : [];
   const industry: string = safeStr(raw.identity?.industry, "General");
